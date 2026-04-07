@@ -1,0 +1,16 @@
+timeout: 5m0s
+exit-code: 1
+ignore-unfixed: true
+severity:
+  - HIGH
+  - CRITICAL
+scanners:
+  - vuln
+  - misconfig
+skip-dirs:
+  - .git
+  - .coverage-artifacts
+  - docs
+  - security/reports
+skip-files:
+  - .gitleaks.toml

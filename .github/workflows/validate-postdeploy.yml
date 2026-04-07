@@ -1,0 +1,55 @@
+name: validate-postdeploy
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: self-hosted
+    timeout-minutes: 30
+
+    env:
+      NS: securerag-hub
+      REPORT_DIR: artifacts/validation
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd
+
+      - name: Ensure scripts are executable
+        run: |
+          chmod +x scripts/validate/smoke-tests.sh
+          chmod +x scripts/validate/security-smoke.sh
+          chmod +x scripts/validate/adversarial-tests.sh
+          chmod +x scripts/validate/e2e-functional-flow.sh
+          chmod +x scripts/validate/rag-smoke.sh
+          chmod +x scripts/validate/security-adversarial-advanced.sh
+          chmod +x scripts/validate/generate-validation-report.sh
+
+      - name: Run smoke tests
+        run: bash scripts/validate/smoke-tests.sh
+
+      - name: Run security smoke tests
+        run: bash scripts/validate/security-smoke.sh
+
+      - name: Run E2E functional validation
+        run: bash scripts/validate/e2e-functional-flow.sh
+
+      - name: Run RAG smoke validation
+        run: bash scripts/validate/rag-smoke.sh
+
+      - name: Run advanced adversarial validation
+        run: bash scripts/validate/security-adversarial-advanced.sh
+
+      - name: Generate validation summary
+        run: bash scripts/validate/generate-validation-report.sh
+
+      - name: Upload validation artifacts
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: validation-reports
+          path: artifacts/validation/
+          if-no-files-found: error

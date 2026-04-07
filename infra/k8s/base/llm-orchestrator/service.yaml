@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: llm-orchestrator
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: llm-orchestrator
+  ports:
+    - name: http
+      port: 8080
+      targetPort: http
+      protocol: TCP

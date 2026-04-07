@@ -1,0 +1,115 @@
+rules:
+  - id: python.requests-no-cert-validation
+    message: Do not disable TLS certificate verification in HTTP clients.
+    severity: ERROR
+    languages:
+      - python
+    metadata:
+      category: security
+      technology:
+        - python
+        - requests
+        - httpx
+    patterns:
+      - pattern-either:
+          - pattern: requests.$FUNC(..., verify=False, ...)
+          - pattern: httpx.$FUNC(..., verify=False, ...)
+
+  - id: python.subprocess-shell-true
+    message: Avoid shell=True with untrusted input; prefer argument arrays and explicit allowlists.
+    severity: ERROR
+    languages:
+      - python
+    metadata:
+      category: security
+      cwe:
+        - "CWE-78: Improper Neutralization of Special Elements used in an OS Command"
+    patterns:
+      - pattern-either:
+          - pattern: subprocess.run(..., shell=True, ...)
+          - pattern: subprocess.Popen(..., shell=True, ...)
+          - pattern: subprocess.call(..., shell=True, ...)
+          - pattern: subprocess.check_call(..., shell=True, ...)
+          - pattern: subprocess.check_output(..., shell=True, ...)
+
+  - id: python.yaml-load-unsafe
+    message: Use yaml.safe_load instead of yaml.load or yaml.unsafe_load on untrusted data.
+    severity: ERROR
+    languages:
+      - python
+    metadata:
+      category: security
+      cwe:
+        - "CWE-20: Improper Input Validation"
+    patterns:
+      - pattern-either:
+          - pattern: yaml.unsafe_load(...)
+          - patterns:
+              - pattern: yaml.load(...)
+              - pattern-not: yaml.load(..., Loader=yaml.SafeLoader, ...)
+              - pattern-not: yaml.load(..., Loader=SafeLoader, ...)
+
+  - id: python.jwt-verification-disabled
+    message: JWT signature verification must stay enabled.
+    severity: ERROR
+    languages:
+      - python
+    metadata:
+      category: security
+      cwe:
+        - "CWE-347: Improper Verification of Cryptographic Signature"
+    patterns:
+      - pattern-either:
+          - pattern: 'jwt.decode(..., options={"verify_signature": False}, ...)'
+          - pattern: 'jose.jwt.decode(..., options={"verify_signature": False}, ...)'
+
+  - id: python.eval-exec
+    message: Avoid eval/exec on dynamic content; use safe parsing or explicit dispatch.
+    severity: ERROR
+    languages:
+      - python
+    metadata:
+      category: security
+      cwe:
+        - "CWE-95: Improper Neutralization of Directives in Dynamically Evaluated Code"
+    pattern-either:
+      - pattern: eval(...)
+      - pattern: exec(...)
+
+  - id: python.pickle-deserialization
+    message: Avoid pickle deserialization for untrusted data.
+    severity: WARNING
+    languages:
+      - python
+    metadata:
+      category: security
+      cwe:
+        - "CWE-502: Deserialization of Untrusted Data"
+    pattern-either:
+      - pattern: pickle.load(...)
+      - pattern: pickle.loads(...)
+
+  - id: dockerfile-user-root
+    message: Container images must not run as root.
+    severity: ERROR
+    languages:
+      - dockerfile
+    metadata:
+      category: security
+      technology:
+        - docker
+    pattern: USER root
+
+  - id: dockerfile-latest-tag
+    message: Avoid mutable latest tags in base images; pin an explicit version or digest.
+    severity: WARNING
+    languages:
+      - dockerfile
+    metadata:
+      category: supply-chain
+      technology:
+        - docker
+    paths:
+      include:
+        - "**/Dockerfile"
+    pattern-regex: (?m)^FROM\s+\S+:latest(?:\s|$)

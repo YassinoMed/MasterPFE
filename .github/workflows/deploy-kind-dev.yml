@@ -1,0 +1,63 @@
+name: deploy-kind-dev
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-kind-dev
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+    timeout-minutes: 45
+
+    env:
+      CLUSTER_NAME: securerag-dev
+      REGISTRY_HOST: localhost:5001
+      IMAGE_TAG: dev
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd
+
+      - name: Ensure scripts are executable
+        run: |
+          chmod +x infra/kind/registry-config.sh
+          chmod +x scripts/deploy/create-kind.sh
+          chmod +x scripts/deploy/build-local-images.sh
+          chmod +x scripts/deploy/load-images-kind.sh
+          chmod +x scripts/deploy/deploy-kind.sh
+          chmod +x scripts/validate/smoke-tests.sh
+          chmod +x scripts/validate/security-smoke.sh
+          chmod +x scripts/validate/adversarial-tests.sh
+
+      - name: Create kind cluster
+        run: bash scripts/deploy/create-kind.sh
+
+      - name: Build and push local images
+        run: bash scripts/deploy/build-local-images.sh
+
+      - name: Load images into kind
+        run: bash scripts/deploy/load-images-kind.sh
+
+      - name: Render manifests
+        run: kubectl kustomize infra/k8s/overlays/dev >/tmp/rendered-dev.yaml
+
+      - name: Deploy to kind
+        run: bash scripts/deploy/deploy-kind.sh
+
+      - name: Run smoke tests
+        run: bash scripts/validate/smoke-tests.sh
+
+      - name: Run security smoke tests
+        run: bash scripts/validate/security-smoke.sh
+
+      - name: Run adversarial validation
+        run: bash scripts/validate/adversarial-tests.sh
