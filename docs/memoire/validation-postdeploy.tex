@@ -1,0 +1,158 @@
+\subsection{Validation post-deploiement et resultats}
+\label{sec:validation-postdeploy}
+
+Cette section presente la validation post-deploiement de la plateforme \textit{SecureRAG Hub} sur un cluster Kubernetes local fonde sur \texttt{kind}. L'objectif n'est pas uniquement de verifier que les conteneurs demarrent, mais aussi de demontrer qu'une chaine DevSecOps reproductible peut etre executee localement, que les controles de securite essentiels sont actifs, et qu'un jeu de preuves reutilisable est produit automatiquement apres deploiement.
+
+\subsubsection{Objectifs de validation}
+
+La validation post-deploiement a ete structuree autour de quatre objectifs complementaires :
+
+\begin{itemize}
+  \item verifier le demarrage du cluster local, du registre local et des workloads Kubernetes ;
+  \item confirmer l'accessibilite des microservices applicatifs et des composants techniques du RAG ;
+  \item exercer un premier niveau de validation securite sur les \textit{security contexts}, les \textit{NetworkPolicy} et la disponibilite du composant \texttt{security-auditor} ;
+  \item produire un rapport synthetique exploitable dans le memoire et en soutenance.
+\end{itemize}
+
+\subsubsection{Protocole experimental}
+
+Le premier essai reel a ete execute le 7 avril 2026 sur une machine locale \texttt{arm64}. Le protocole retenu suit une sequence simple et reproductible :
+
+\begin{enumerate}
+  \item creation du cluster \texttt{kind} et du registre local ;
+  \item construction locale des images OCI des six microservices ;
+  \item deploiement des manifests Kubernetes via Kustomize sur l'overlay \texttt{dev} ;
+  \item execution des scripts de validation post-deploiement ;
+  \item generation d'un rapport global de synthese.
+\end{enumerate}
+
+Les commandes principales utilisees sont les suivantes :
+
+\begin{verbatim}
+bash scripts/deploy/create-kind.sh
+bash scripts/deploy/build-local-images.sh
+bash scripts/deploy/deploy-kind.sh
+
+bash scripts/validate/security-smoke.sh
+bash scripts/validate/e2e-functional-flow.sh
+bash scripts/validate/rag-smoke.sh
+bash scripts/validate/security-adversarial-advanced.sh
+bash scripts/validate/generate-validation-report.sh
+\end{verbatim}
+
+Le deploiement est realise dans l'espace de noms \texttt{securerag-hub}. Les images applicatives sont construites localement puis poussees dans le registre \texttt{localhost:5001}. L'acces externe de demonstration est expose via un \texttt{NodePort} sur \texttt{localhost:8080}, ce qui permet de verifier simplement le point d'entree de la plateforme.
+
+\subsubsection{Jeu de validations mis en oeuvre}
+
+Le dispositif de validation repose sur plusieurs scripts complementaires.
+
+\paragraph{Validation de base et controles Kubernetes.}
+Le script \texttt{security-smoke.sh} controle la presence des \textit{ServiceAccount} dedies, l'activation des \textit{NetworkPolicy} et les principaux parametres de durcissement des conteneurs, en particulier \texttt{runAsNonRoot}, \texttt{readOnlyRootFilesystem} et \texttt{allowPrivilegeEscalation=false} lorsque ces contraintes sont applicables.
+
+\paragraph{Validation fonctionnelle de bout en bout.}
+Le script \texttt{e2e-functional-flow.sh} verifie l'existence des services Kubernetes, l'accessibilite des endpoints internes \texttt{/healthz} depuis un pod de validation, puis l'exposition externe du \texttt{api-gateway} via \texttt{http://localhost:8080/healthz}. Il tente enfin un appel vers un endpoint conversationnel de type \texttt{/chat}. Si cet endpoint n'est pas encore implemente, le resultat est marque \texttt{SKIP}.
+
+\paragraph{Validation RAG minimale.}
+Le script \texttt{rag-smoke.sh} verifie l'accessibilite conjointe de \texttt{llm-orchestrator}, \texttt{knowledge-hub}, \texttt{qdrant} et \texttt{ollama}. Il tente egalement un appel vers un endpoint de type \texttt{/rag/query}. Ce test permet d'identifier rapidement si la chaine RAG est techniquement exploitable.
+
+\paragraph{Validation adversariale.}
+Le script \texttt{security-adversarial-advanced.sh} verifie la disponibilite du composant \texttt{security-auditor}, detecte l'existence d'un endpoint d'analyse de type \texttt{/analyze}, puis journalise un petit corpus de prompts adversariaux representatifs : tentative d'ignorer les instructions precedentes, de reveler le prompt systeme, d'acceder a des donnees confidentielles ou de contourner des restrictions de role.
+
+\subsubsection{Mode d'interpretation des resultats}
+
+Les scripts de validation utilisent trois statuts :
+
+\begin{itemize}
+  \item \texttt{PASS} : le comportement attendu est observe ;
+  \item \texttt{FAIL} : une anomalie bloquante est detectee ;
+  \item \texttt{SKIP} : le test n'est pas applicable ou l'endpoint metier n'est pas encore implemente.
+\end{itemize}
+
+Ce choix est adapte au contexte d'une preuve de concept. Il permet de demontrer un socle DevSecOps complet sans supposer que tous les endpoints metier definitifs sont deja finalises.
+
+\subsubsection{Resultats obtenus lors du premier run reel}
+
+Le premier run reel a permis d'obtenir les observations suivantes :
+
+\begin{itemize}
+  \item le cluster \texttt{securerag-dev} a ete cree avec succes ;
+  \item le registre local \texttt{localhost:5001} a ete initialise correctement ;
+  \item les six images applicatives ont ete construites et poussees localement ;
+  \item les microservices \texttt{api-gateway}, \texttt{auth-users}, \texttt{chatbot-manager}, \texttt{llm-orchestrator}, \texttt{security-auditor} et \texttt{knowledge-hub} ont atteint l'etat \texttt{Running} ;
+  \item le composant \texttt{qdrant} a ete deploye avec succes sous forme de \texttt{StatefulSet} ;
+  \item le composant \texttt{ollama} est reste bloque a l'etat \texttt{ContainerCreating} lors du premier essai ;
+  \item l'endpoint externe \texttt{http://localhost:8080/healthz} a repondu correctement.
+\end{itemize}
+
+Le rapport synthetique genere automatiquement dans \texttt{artifacts/validation/validation-summary.md} indique le bilan suivant :
+
+\begin{center}
+\begin{tabular}{|l|c|}
+\hline
+Statut & Nombre \\
+\hline
+\texttt{PASS} & 15 \\
+\texttt{FAIL} & 1 \\
+\texttt{SKIP} & 2 \\
+\hline
+\end{tabular}
+\end{center}
+
+Le detail des principaux tests est resume ci-dessous :
+
+\begin{itemize}
+  \item \textbf{Validation fonctionnelle E2E :} succes. Les services Kubernetes existent, les endpoints internes \texttt{/healthz} sont joignables depuis un pod de validation, l'acces externe via \texttt{NodePort} fonctionne, et la racine de \texttt{api-gateway} repond ;
+  \item \textbf{Validation securite :} succes partiel. Les \textit{ServiceAccount} dedies et les \textit{NetworkPolicy} sont bien presents. Le composant \texttt{security-auditor} est joignable. L'endpoint \texttt{/analyze} n'etant pas encore implemente, le test correspondant est en \texttt{SKIP} ;
+  \item \textbf{Validation RAG :} echec. Le test \texttt{rag-smoke.sh} echoue car \texttt{ollama} n'est pas encore joignable, ce qui empeche de considerer la chaine RAG comme entierement operationnelle.
+\end{itemize}
+
+\subsubsection{Analyse technique des resultats}
+
+Le socle DevSecOps de la plateforme est donc valide sur les points suivants :
+
+\begin{itemize}
+  \item la creation du cluster local et du registre local est reproductible ;
+  \item la chaine de build locale des microservices applicatifs est fonctionnelle ;
+  \item l'overlay Kustomize \texttt{dev} deploie correctement les ressources Kubernetes ;
+  \item l'exposition externe du \texttt{api-gateway} via \texttt{NodePort} est operationnelle ;
+  \item les politiques reseau et les controles de securite minimum sont bien appliques ;
+  \item les scripts de validation produisent des artefacts exploitables automatiquement.
+\end{itemize}
+
+L'anomalie principale identifiee concerne \texttt{ollama}. L'analyse du runtime montre que le probleme n'est pas un \textit{crash} applicatif, mais un blocage au niveau du telechargement de l'image officielle. Sur l'architecture \texttt{arm64} utilisee pour ce test, l'image \texttt{ollama/ollama:0.13.5} embarque une couche de plusieurs gigaoctets, ce qui a empeche son chargement complet dans le delai retenu pour le premier run. En consequence, le pod \texttt{ollama} n'a pas atteint l'etat \texttt{Ready}, et le test RAG a echoue logiquement.
+
+Il convient egalement de noter un point de vigilance securite : le namespace applique les labels \texttt{pod-security} avec \texttt{enforce=baseline} et \texttt{audit/warn=restricted}. Dans ce cadre, \texttt{ollama} remonte un avertissement sur \texttt{runAsNonRoot}, ce qui est acceptable pour le bootstrap local, mais devra etre traite dans une iteration ulterieure si l'objectif est d'approcher plus strictement le profil \texttt{restricted}.
+
+\subsubsection{Artefacts de preuve produits}
+
+Le protocole a genere automatiquement plusieurs fichiers dans le repertoire \texttt{artifacts/validation/}, notamment :
+
+\begin{itemize}
+  \item \texttt{validation-summary.md} ;
+  \item \texttt{e2e-functional-flow.txt} ;
+  \item \texttt{rag-smoke.txt} ;
+  \item \texttt{security-adversarial.txt} ;
+  \item \texttt{k8s-get-all.txt} ;
+  \item \texttt{k8s-pods.txt} ;
+  \item \texttt{k8s-pvc.txt} ;
+  \item \texttt{k8s-networkpolicy.txt} ;
+  \item \texttt{api-gateway-describe.txt}.
+\end{itemize}
+
+Ces fichiers constituent un jeu de preuves directement reutilisable en soutenance : etat du cluster, ressources deployees, stockage persistant, politiques reseau, validation fonctionnelle, verification securite et synthese finale.
+
+\subsubsection{Interpretation pour la soutenance}
+
+Les resultats obtenus permettent de soutenir les affirmations suivantes :
+
+\begin{itemize}
+  \item la plateforme n'est pas seulement decrite ou conteneurisee ; elle est effectivement deployable localement ;
+  \item la chaine DevSecOps est operationnelle de la construction des images jusqu'a la validation post-deploiement ;
+  \item l'architecture microservices est correctement exposee et testable ;
+  \item les controles de securite Kubernetes et les tests adversariaux sont integres des le socle technique ;
+  \item l'unique point bloquant du premier run concerne la dependance LLM locale, et non le socle applicatif ou Kubernetes.
+\end{itemize}
+
+\subsubsection{Conclusion}
+
+La validation post-deploiement de \textit{SecureRAG Hub} confirme la solidite du socle DevSecOps du projet. Le premier run reel met en evidence une plateforme majoritairement fonctionnelle, securisee et correctement instrumentee pour la demonstration. Le point restant a traiter concerne l'initialisation de \texttt{ollama}, necessaire pour declarer la chaine RAG totalement operationnelle. Cette limite est clairement identifiee, documentee et circonscrite, ce qui renforce la credibilite de la demarche d'evaluation retenue.

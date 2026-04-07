@@ -1,0 +1,59 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: securerag-hub
+
+resources:
+  - namespace.yaml
+  - networkpolicy-default-deny.yaml
+  - networkpolicy-allow-dns.yaml
+  - networkpolicy-validation-ingress.yaml
+  - networkpolicy-validation-egress.yaml
+
+  - qdrant/serviceaccount.yaml
+  - qdrant/pvc.yaml
+  - qdrant/deployment.yaml
+  - qdrant/service.yaml
+  - qdrant/networkpolicy.yaml
+
+  - ollama/serviceaccount.yaml
+  - ollama/pvc.yaml
+  - ollama/deployment.yaml
+  - ollama/service.yaml
+  - ollama/networkpolicy.yaml
+
+  - api-gateway/serviceaccount.yaml
+  - api-gateway/deployment.yaml
+  - api-gateway/service.yaml
+  - api-gateway/networkpolicy.yaml
+
+  - auth-users/serviceaccount.yaml
+  - auth-users/deployment.yaml
+  - auth-users/service.yaml
+  - auth-users/networkpolicy.yaml
+
+  - chatbot-manager/serviceaccount.yaml
+  - chatbot-manager/deployment.yaml
+  - chatbot-manager/service.yaml
+  - chatbot-manager/networkpolicy.yaml
+
+  - llm-orchestrator/serviceaccount.yaml
+  - llm-orchestrator/deployment.yaml
+  - llm-orchestrator/service.yaml
+  - llm-orchestrator/networkpolicy.yaml
+
+  - security-auditor/serviceaccount.yaml
+  - security-auditor/deployment.yaml
+  - security-auditor/service.yaml
+  - security-auditor/networkpolicy.yaml
+
+  - knowledge-hub/serviceaccount.yaml
+  - knowledge-hub/deployment.yaml
+  - knowledge-hub/service.yaml
+  - knowledge-hub/networkpolicy.yaml
+
+labels:
+  - pairs:
+      app.kubernetes.io/part-of: securerag-hub
+    includeSelectors: true
+    includeTemplates: true

@@ -1,0 +1,79 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: llm-orchestrator
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: llm-orchestrator
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: llm-orchestrator
+    spec:
+      serviceAccountName: sa-llm-orchestrator
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        fsGroup: 10001
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: llm-orchestrator
+          image: ghcr.io/example/securerag-hub-llm-orchestrator:dev
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8080
+          envFrom:
+            - configMapRef:
+                name: securerag-common-config
+            - secretRef:
+                name: securerag-common-secrets
+                optional: true
+          env:
+            - name: SERVICE_NAME
+              value: llm-orchestrator
+            - name: CHATBOT_MANAGER_URL
+              value: http://chatbot-manager:8080
+            - name: AUTH_USERS_URL
+              value: http://auth-users:8080
+            - name: SECURITY_AUDITOR_URL
+              value: http://security-auditor:8080
+            - name: KNOWLEDGE_HUB_URL
+              value: http://knowledge-hub:8080
+            - name: OLLAMA_HOST
+              value: http://ollama:11434
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          resources:
+            requests:
+              cpu: 200m
+              memory: 256Mi
+            limits:
+              cpu: 600m
+              memory: 512Mi
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: tmp
+          emptyDir: {}

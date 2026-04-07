@@ -1,0 +1,33 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-validation-ingress
+  namespace: securerag-hub
+spec:
+  podSelector:
+    matchExpressions:
+      - key: app.kubernetes.io/name
+        operator: In
+        values:
+          - api-gateway
+          - auth-users
+          - chatbot-manager
+          - llm-orchestrator
+          - security-auditor
+          - knowledge-hub
+          - ollama
+          - qdrant
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              job-role: validation
+      ports:
+        - protocol: TCP
+          port: 8080
+        - protocol: TCP
+          port: 11434
+        - protocol: TCP
+          port: 6333

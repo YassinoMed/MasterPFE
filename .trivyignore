@@ -1,0 +1,4 @@
+# Add one vulnerability or misconfiguration identifier per line when a risk has
+# been explicitly accepted, for example:
+# CVE-2026-12345
+# AVD-KSV-0001
