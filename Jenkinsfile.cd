@@ -1,0 +1,210 @@
+pipeline {
+  agent any
+
+  options {
+    timestamps()
+    disableConcurrentBuilds()
+    buildDiscarder(logRotator(numToKeepStr: '20'))
+  }
+
+  parameters {
+    string(
+      name: 'REGISTRY_HOST',
+      defaultValue: 'localhost:5001',
+      description: 'Target OCI registry used for release artifacts.'
+    )
+    string(
+      name: 'IMAGE_PREFIX',
+      defaultValue: 'securerag-hub',
+      description: 'OCI image prefix used by the microservices.'
+    )
+    string(
+      name: 'SOURCE_IMAGE_TAG',
+      defaultValue: 'dev',
+      description: 'Existing signed image tag used as the release candidate.'
+    )
+    string(
+      name: 'TARGET_IMAGE_TAG',
+      defaultValue: 'release-local',
+      description: 'Promoted image tag deployed after verification.'
+    )
+    booleanParam(
+      name: 'RUN_DEPLOY_KIND',
+      defaultValue: true,
+      description: 'Deploy the verified images to the local kind cluster.'
+    )
+    booleanParam(
+      name: 'RUN_POSTDEPLOY_VALIDATION',
+      defaultValue: true,
+      description: 'Run post-deployment validation after deployment.'
+    )
+  }
+
+  environment {
+    SBOM_DIR = 'artifacts/sbom'
+    REPORT_DIR = 'artifacts/release'
+    COSIGN_YES = 'true'
+  }
+
+  stages {
+    stage('Checkout') {
+      steps {
+        checkout scm
+      }
+    }
+
+    stage('Prepare Workspace') {
+      steps {
+        sh '''
+          set -euo pipefail
+          mkdir -p "${SBOM_DIR}" "${REPORT_DIR}" artifacts/validation
+          find scripts -type f -name "*.sh" -exec chmod +x {} +
+          chmod +x infra/kind/registry-config.sh
+        '''
+      }
+    }
+
+    stage('Verify Release Candidate Signatures') {
+      steps {
+        withCredentials([
+          file(credentialsId: 'cosign-public-key', variable: 'COSIGN_PUBLIC_KEY')
+        ]) {
+          sh '''
+            set -euo pipefail
+            REGISTRY_HOST="${REGISTRY_HOST}" IMAGE_PREFIX="${IMAGE_PREFIX}" IMAGE_TAG="${SOURCE_IMAGE_TAG}" \
+            REPORT_DIR="${REPORT_DIR}" COSIGN_PUBLIC_KEY="${COSIGN_PUBLIC_KEY}" \
+            bash scripts/release/verify-signatures.sh
+          '''
+        }
+      }
+      post {
+        always {
+          archiveArtifacts allowEmptyArchive: true, artifacts: 'artifacts/release/*verify*'
+        }
+      }
+    }
+
+    stage('Promote Verified Images by Digest') {
+      steps {
+        withCredentials([
+          file(credentialsId: 'cosign-public-key', variable: 'COSIGN_PUBLIC_KEY')
+        ]) {
+          sh '''
+            set -euo pipefail
+            REGISTRY_HOST="${REGISTRY_HOST}" IMAGE_PREFIX="${IMAGE_PREFIX}" \
+            SOURCE_IMAGE_TAG="${SOURCE_IMAGE_TAG}" TARGET_IMAGE_TAG="${TARGET_IMAGE_TAG}" \
+            REPORT_DIR="${REPORT_DIR}" DIGEST_RECORD_FILE="${REPORT_DIR}/promotion-digests.txt" \
+            COSIGN_PUBLIC_KEY="${COSIGN_PUBLIC_KEY}" \
+            VERIFY_SOURCE_BEFORE_PROMOTION=false VERIFY_TARGET_AFTER_PROMOTION=true \
+            bash scripts/release/promote-by-digest.sh
+          '''
+        }
+      }
+      post {
+        always {
+          archiveArtifacts allowEmptyArchive: true, artifacts: 'artifacts/release/*promot*,artifacts/release/*digest*,artifacts/release/*verify*'
+        }
+      }
+    }
+
+    stage('Generate SBOM') {
+      steps {
+        sh '''
+          set -euo pipefail
+          REGISTRY_HOST="${REGISTRY_HOST}" IMAGE_PREFIX="${IMAGE_PREFIX}" IMAGE_TAG="${TARGET_IMAGE_TAG}" \
+          SBOM_DIR="${SBOM_DIR}" REPORT_DIR="${REPORT_DIR}" \
+          bash scripts/release/generate-sbom.sh
+        '''
+      }
+      post {
+        always {
+          archiveArtifacts allowEmptyArchive: true, artifacts: 'artifacts/sbom/**,artifacts/release/sbom-summary.txt'
+        }
+      }
+    }
+
+    stage('Record Release Evidence') {
+      steps {
+        sh '''
+          set -euo pipefail
+          REGISTRY_HOST="${REGISTRY_HOST}" IMAGE_PREFIX="${IMAGE_PREFIX}" \
+          SOURCE_IMAGE_TAG="${SOURCE_IMAGE_TAG}" TARGET_IMAGE_TAG="${TARGET_IMAGE_TAG}" \
+          REPORT_DIR="${REPORT_DIR}" SBOM_DIR="${SBOM_DIR}" \
+          DIGEST_RECORD_FILE="${REPORT_DIR}/promotion-digests.txt" \
+          bash scripts/release/record-release-evidence.sh
+        '''
+      }
+      post {
+        always {
+          archiveArtifacts allowEmptyArchive: true, artifacts: 'artifacts/release/release-evidence.md,artifacts/release/release-manifest.env'
+        }
+      }
+    }
+
+    stage('Deploy to kind') {
+      when {
+        expression { return params.RUN_DEPLOY_KIND }
+      }
+      steps {
+        withCredentials([
+          file(credentialsId: 'cosign-public-key', variable: 'COSIGN_PUBLIC_KEY')
+        ]) {
+          sh '''
+            set -euo pipefail
+            REGISTRY_HOST="${REGISTRY_HOST}" IMAGE_PREFIX="${IMAGE_PREFIX}" IMAGE_TAG="${TARGET_IMAGE_TAG}" \
+            REPORT_DIR="${REPORT_DIR}" IMAGE_DIGEST_FILE="${REPORT_DIR}/promotion-digests.txt" COSIGN_PUBLIC_KEY="${COSIGN_PUBLIC_KEY}" \
+            RUN_POSTDEPLOY_VALIDATION="false" ENSURE_KIND_CLUSTER="true" \
+            bash scripts/deploy/verify-and-deploy-kind.sh
+          '''
+        }
+      }
+    }
+
+    stage('Post-deploy Validation') {
+      when {
+        expression { return params.RUN_DEPLOY_KIND && params.RUN_POSTDEPLOY_VALIDATION }
+      }
+      steps {
+        sh '''
+          set -euo pipefail
+          export REGISTRY_HOST="${REGISTRY_HOST}"
+          export IMAGE_TAG="${TARGET_IMAGE_TAG}"
+          bash scripts/validate/smoke-tests.sh
+          bash scripts/validate/security-smoke.sh
+          bash scripts/validate/e2e-functional-flow.sh
+          bash scripts/validate/rag-smoke.sh
+          bash scripts/validate/security-adversarial-advanced.sh
+          bash scripts/validate/generate-validation-report.sh
+          bash scripts/validate/collect-runtime-evidence.sh
+        '''
+      }
+      post {
+        always {
+          archiveArtifacts allowEmptyArchive: true, artifacts: 'artifacts/validation/**'
+        }
+      }
+    }
+
+    stage('Build Support Pack') {
+      steps {
+        sh '''
+          set -euo pipefail
+          PACK_ID="jenkins-cd-${BUILD_NUMBER}-$(date -u +%Y%m%dT%H%M%SZ)" \
+          bash scripts/validate/build-support-pack.sh
+        '''
+      }
+    }
+  }
+
+  post {
+    success {
+      echo 'SecureRAG Hub CD pipeline completed successfully.'
+    }
+    failure {
+      echo 'SecureRAG Hub CD pipeline failed. Inspect release and deployment reports.'
+    }
+    always {
+      archiveArtifacts allowEmptyArchive: true, artifacts: 'artifacts/sbom/**,artifacts/release/**,artifacts/validation/**,artifacts/support-pack/**'
+    }
+  }
+}

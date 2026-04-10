@@ -1,12 +1,8 @@
-name: ci-pr
+# Deprecated: Jenkins is the authoritative CI/CD engine for SecureRAG Hub.
+name: legacy-ci-pr
 
 on:
-  pull_request:
-    branches:
-      - main
-    paths-ignore:
-      - "docs/**"
-      - "**/*.md"
+  workflow_dispatch:
 
 permissions:
   contents: read

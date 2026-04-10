@@ -1,0 +1,113 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: securerag-hub
+
+resources:
+  - ../../base
+
+configMapGenerator:
+  - name: securerag-common-config
+    envs:
+      - configmap-env.env
+
+generatorOptions:
+  disableNameSuffixHash: true
+
+images:
+  - name: ghcr.io/example/securerag-hub-portal-web
+    newName: localhost:5001/securerag-hub-portal-web
+    newTag: demo
+  - name: ghcr.io/example/securerag-hub-api-gateway
+    newName: localhost:5001/securerag-hub-api-gateway
+    newTag: demo
+  - name: ghcr.io/example/securerag-hub-auth-users
+    newName: localhost:5001/securerag-hub-auth-users
+    newTag: demo
+  - name: ghcr.io/example/securerag-hub-chatbot-manager
+    newName: localhost:5001/securerag-hub-chatbot-manager
+    newTag: demo
+  - name: ghcr.io/example/securerag-hub-llm-orchestrator
+    newName: localhost:5001/securerag-hub-llm-orchestrator
+    newTag: demo
+  - name: ghcr.io/example/securerag-hub-security-auditor
+    newName: localhost:5001/securerag-hub-security-auditor
+    newTag: demo
+  - name: ghcr.io/example/securerag-hub-knowledge-hub
+    newName: localhost:5001/securerag-hub-knowledge-hub
+    newTag: demo
+
+patches:
+  - target:
+      kind: Service
+      name: portal-web
+    patch: |-
+      - op: replace
+        path: /spec/type
+        value: NodePort
+      - op: add
+        path: /spec/ports/0/nodePort
+        value: 30081
+  - target:
+      kind: Service
+      name: api-gateway
+    patch: |-
+      - op: replace
+        path: /spec/type
+        value: NodePort
+      - op: add
+        path: /spec/ports/0/nodePort
+        value: 30080
+  - target:
+      kind: Deployment
+      name: portal-web
+    patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/imagePullPolicy
+        value: IfNotPresent
+  - target:
+      kind: Deployment
+      name: api-gateway
+    patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/imagePullPolicy
+        value: IfNotPresent
+  - target:
+      kind: Deployment
+      name: auth-users
+    patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/imagePullPolicy
+        value: IfNotPresent
+  - target:
+      kind: Deployment
+      name: chatbot-manager
+    patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/imagePullPolicy
+        value: IfNotPresent
+  - target:
+      kind: Deployment
+      name: llm-orchestrator
+    patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/imagePullPolicy
+        value: IfNotPresent
+  - target:
+      kind: Deployment
+      name: security-auditor
+    patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/imagePullPolicy
+        value: IfNotPresent
+  - target:
+      kind: Deployment
+      name: knowledge-hub
+    patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/imagePullPolicy
+        value: IfNotPresent
+  - path: patches/ollama-mock.yaml
+    target:
+      kind: Deployment
+      name: ollama

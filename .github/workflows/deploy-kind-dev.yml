@@ -1,10 +1,8 @@
-name: deploy-kind-dev
+# Deprecated: Jenkins is the authoritative CI/CD engine for SecureRAG Hub.
+name: legacy-deploy-kind-dev
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - main
 
 permissions:
   contents: read

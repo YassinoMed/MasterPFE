@@ -141,6 +141,43 @@ Le protocole a genere automatiquement plusieurs fichiers dans le repertoire \tex
 
 Ces fichiers constituent un jeu de preuves directement reutilisable en soutenance : etat du cluster, ressources deployees, stockage persistant, politiques reseau, validation fonctionnelle, verification securite et synthese finale.
 
+\subsubsection{Corrections et stabilisation apres le premier run}
+
+Le premier run reel a joue un role utile de diagnostic. Il a mis en evidence plusieurs points qui ont ensuite ete corriges pour fiabiliser l'exploitation locale.
+
+\paragraph{Stabilisation du mode reel avec Ollama.}
+Le composant \texttt{ollama}, initialement bloque a l'etat \texttt{ContainerCreating}, a fait l'objet d'une stabilisation progressive reposant sur :
+
+\begin{itemize}
+  \item un script de \textit{pre-pull} de l'image avant deploiement ;
+  \item des probes plus tolerantes ;
+  \item une documentation explicite du compromis entre mode reel et mode \texttt{demo}.
+\end{itemize}
+
+Cette correction n'efface pas le risque runtime associe a un modele local lourd, mais elle rend le comportement plus maitrisable et plus explicable.
+
+\paragraph{Activation des addons de cluster.}
+Dans un second temps, \texttt{metrics-server} et \texttt{Kyverno} ont ete installes sur le cluster local. Cette evolution a permis :
+
+\begin{itemize}
+  \item de rendre les \textit{HPA} effectivement observables, avec des valeurs CPU reelles ;
+  \item d'activer les \textit{ClusterPolicy} de securite et de verification d'images en mode \texttt{Audit}.
+\end{itemize}
+
+Autrement dit, les garde-fous qui n'etaient d'abord que versionnes dans le depot sont devenus activables et observables sur l'environnement de demonstration.
+
+\paragraph{Correction des pods de validation sous policy Cosign.}
+Une fois Kyverno actif, un point de vigilance supplementaire est apparu : les pods ephemeres de validation bases sur une image \texttt{securerag-hub-*} du registre local pouvaient etre controles par la policy de verification Cosign. Lorsque le registre local n'etait pas resolu de la meme maniere depuis le cluster, l'admission pouvait etre refusee.
+
+La correction retenue a ete d'utiliser une image publique de validation pour les pods temporaires de test, afin de separer clairement :
+
+\begin{itemize}
+  \item la verification de la sante fonctionnelle du cluster ;
+  \item la verification de la chaine de confiance des images applicatives.
+\end{itemize}
+
+Cette distinction renforce la lisibilite de la validation post-deploiement et evite de confondre un probleme de registre local avec un probleme d'accessibilite des services.
+
 \subsubsection{Interpretation pour la soutenance}
 
 Les resultats obtenus permettent de soutenir les affirmations suivantes :

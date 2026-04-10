@@ -1,0 +1,268 @@
+\subsection{Validation de la chaine release et de la supply chain}
+\label{sec:release-supply-chain-validation}
+
+Cette section decrit la validation de la couche \textit{release security} du projet \textit{SecureRAG Hub}. L'objectif n'est pas uniquement de construire et publier des images OCI, mais de garantir une chaine de confiance minimale entre l'image produite, son inventaire logiciel, sa signature cryptographique et sa verification avant promotion ou deploiement.
+
+\subsubsection{Objectifs de la campagne de tests}
+
+La campagne de tests associee aux scripts de release vise quatre objectifs principaux :
+
+\begin{itemize}
+  \item verifier la generation d'un \textit{Software Bill of Materials} pour chaque image des microservices ;
+  \item verifier la signature des images OCI avec \texttt{Cosign} en mode \textit{keyless} ou en mode \textit{key-pair} ;
+  \item verifier la validite cryptographique des signatures avant deploiement ou promotion ;
+  \item produire des artefacts lisibles et reutilisables dans une logique DevSecOps, aussi bien en local qu'en integration continue.
+\end{itemize}
+
+Les microservices concernes par cette validation sont les suivants :
+
+\begin{itemize}
+  \item \texttt{api-gateway}
+  \item \texttt{auth-users}
+  \item \texttt{chatbot-manager}
+  \item \texttt{llm-orchestrator}
+  \item \texttt{security-auditor}
+  \item \texttt{knowledge-hub}
+\end{itemize}
+
+\subsubsection{Scripts de release testes}
+
+La couche release repose sur trois scripts Bash :
+
+\begin{itemize}
+  \item \texttt{scripts/release/generate-sbom.sh}
+  \item \texttt{scripts/release/sign-images.sh}
+  \item \texttt{scripts/release/verify-signatures.sh}
+\end{itemize}
+
+Le premier script genere un SBOM CycloneDX JSON par image via \texttt{Syft}. Le deuxieme signe les images avec \texttt{Cosign}. Le troisieme verifie les signatures, soit en mode \textit{keyless}, soit a l'aide d'une cle publique.
+
+\subsubsection{Variables d'environnement et conventions}
+
+Les scripts s'appuient sur une convention de nommage commune de la forme :
+
+\begin{verbatim}
+REGISTRY_HOST/IMAGE_PREFIX-<service>:IMAGE_TAG
+\end{verbatim}
+
+Dans le projet, les valeurs par defaut retenues sont les suivantes :
+
+\begin{itemize}
+  \item \texttt{REGISTRY\_HOST=localhost:5001}
+  \item \texttt{IMAGE\_PREFIX=securerag-hub}
+  \item \texttt{IMAGE\_TAG=dev}
+  \item \texttt{SBOM\_DIR=artifacts/sbom}
+  \item \texttt{REPORT\_DIR=artifacts/release}
+\end{itemize}
+
+Ces conventions permettent d'utiliser les memes scripts en environnement local, sur un agent Jenkins \texttt{self-hosted} ou dans un pipeline CD dedie visant un registre OCI local ou distant.
+
+\subsubsection{Pre-requis de test}
+
+Les tests de cette couche supposent la disponibilite des outils suivants :
+
+\begin{itemize}
+  \item \texttt{docker}
+  \item \texttt{syft}
+  \item \texttt{cosign}
+  \item un acces au registre cible, local ou distant
+\end{itemize}
+
+Des verifications prealables simples peuvent etre executees ainsi :
+
+\begin{verbatim}
+docker --version
+syft version
+cosign version
+\end{verbatim}
+
+En mode \textit{key-pair}, il faut egalement disposer d'une cle privee \texttt{Cosign} et eventuellement d'un mot de passe associe via \texttt{COSIGN\_PASSWORD}. En mode \textit{keyless}, l'environnement CI doit pouvoir fournir un contexte OIDC valide.
+
+\subsubsection{Plan de tests recommande}
+
+La campagne de validation recommande d'executer les tests suivants dans l'ordre.
+
+\paragraph{Test 1 : generation des SBOM sur registre local.}
+Ce test verifie que les six images sont correctement detectees et inventoriees.
+
+\begin{verbatim}
+REGISTRY_HOST=localhost:5001 \
+IMAGE_PREFIX=securerag-hub \
+IMAGE_TAG=dev \
+bash scripts/release/generate-sbom.sh
+\end{verbatim}
+
+Le resultat attendu est la generation des fichiers suivants :
+
+\begin{itemize}
+  \item \texttt{artifacts/sbom/api-gateway-sbom.cdx.json}
+  \item \texttt{artifacts/sbom/auth-users-sbom.cdx.json}
+  \item \texttt{artifacts/sbom/chatbot-manager-sbom.cdx.json}
+  \item \texttt{artifacts/sbom/llm-orchestrator-sbom.cdx.json}
+  \item \texttt{artifacts/sbom/security-auditor-sbom.cdx.json}
+  \item \texttt{artifacts/sbom/knowledge-hub-sbom.cdx.json}
+  \item \texttt{artifacts/sbom/sbom-index.txt}
+  \item \texttt{artifacts/release/sbom-summary.txt}
+\end{itemize}
+
+\paragraph{Test 2 : generation des SBOM avec image manquante.}
+Ce test verifie la gestion correcte des cas non critiques.
+
+\begin{verbatim}
+REGISTRY_HOST=localhost:5001 \
+IMAGE_PREFIX=securerag-hub \
+IMAGE_TAG=does-not-exist \
+ALLOW_MISSING_IMAGES=true \
+bash scripts/release/generate-sbom.sh
+\end{verbatim}
+
+Le comportement attendu est un rapport en \texttt{SKIP} pour les images indisponibles, sans interruption brutale du script.
+
+\paragraph{Test 3 : signature en mode keyless.}
+Ce test est pertinent en pipeline CI ou sur un environnement local deja configure pour Cosign.
+
+\begin{verbatim}
+REGISTRY_HOST=localhost:5001 \
+IMAGE_PREFIX=securerag-hub \
+IMAGE_TAG=dev \
+COSIGN_YES=true \
+bash scripts/release/sign-images.sh
+\end{verbatim}
+
+Le resultat attendu est la creation d'une synthese dans \texttt{artifacts/release/sign-summary.txt} et d'un fichier de log de signature par service.
+
+\paragraph{Test 4 : signature avec paire de cles.}
+Ce test permet de valider le comportement hors OIDC.
+
+\begin{verbatim}
+REGISTRY_HOST=localhost:5001 \
+IMAGE_PREFIX=securerag-hub \
+IMAGE_TAG=dev \
+COSIGN_KEY=./cosign.key \
+COSIGN_PASSWORD='mot-de-passe' \
+COSIGN_YES=true \
+bash scripts/release/sign-images.sh
+\end{verbatim}
+
+\paragraph{Test 5 : verification keyless.}
+Ce test permet de verifier la confiance de bout en bout lorsque les images ont ete signees en CI.
+
+\begin{verbatim}
+REGISTRY_HOST=ghcr.io/YassinoMed \
+IMAGE_PREFIX=securerag-hub \
+IMAGE_TAG=main \
+GITHUB_REPOSITORY=YassinoMed/MasterPFE \
+bash scripts/release/verify-signatures.sh
+\end{verbatim}
+
+\paragraph{Test 6 : verification avec cle publique.}
+Ce test permet de verifier les signatures dans un schema a cles classiques.
+
+\begin{verbatim}
+REGISTRY_HOST=localhost:5001 \
+IMAGE_PREFIX=securerag-hub \
+IMAGE_TAG=dev \
+COSIGN_PUBLIC_KEY=./cosign.pub \
+bash scripts/release/verify-signatures.sh
+\end{verbatim}
+
+\paragraph{Test 7 : verification negative.}
+Ce test permet de s'assurer qu'une absence de signature ou une image incorrecte produit bien un echec.
+
+\begin{verbatim}
+REGISTRY_HOST=localhost:5001 \
+IMAGE_PREFIX=securerag-hub \
+IMAGE_TAG=unsigned \
+bash scripts/release/verify-signatures.sh
+\end{verbatim}
+
+Le comportement attendu est un ou plusieurs statuts \texttt{FAIL}, puis un code de sortie non nul.
+
+\subsubsection{Interpretation des statuts}
+
+Les trois scripts utilisent les statuts \texttt{PASS}, \texttt{FAIL} et \texttt{SKIP}.
+
+\begin{itemize}
+  \item \texttt{PASS} signifie que l'operation attendue a ete menee a son terme.
+  \item \texttt{FAIL} signifie qu'une condition critique n'a pas ete satisfaite, par exemple un echec de generation SBOM, une signature impossible ou une verification cryptographique invalide.
+  \item \texttt{SKIP} signifie qu'une image est absente mais que le mode d'execution autorise explicitement ce comportement via \texttt{ALLOW\_MISSING\_IMAGES=true}.
+\end{itemize}
+
+Ce choix de conception est pertinent dans une chaine DevSecOps : en mode strict, l'absence d'image doit bloquer la release ; en mode exploratoire ou de test, il peut etre utile de continuer l'execution tout en documentant clairement les artefacts manquants.
+
+\subsubsection{Artefacts produits}
+
+La campagne genere deux types d'artefacts.
+
+\paragraph{Artefacts SBOM.}
+
+\begin{itemize}
+  \item un SBOM CycloneDX JSON par image dans \texttt{artifacts/sbom/}
+  \item un index \texttt{sbom-index.txt}
+  \item une synthese \texttt{sbom-summary.txt}
+\end{itemize}
+
+\paragraph{Artefacts de signature et de verification.}
+
+\begin{itemize}
+  \item un log de signature par service dans \texttt{artifacts/release/}
+  \item une synthese globale \texttt{sign-summary.txt}
+  \item un log de verification par service
+  \item une synthese globale \texttt{verify-summary.txt}
+\end{itemize}
+
+Ces artefacts sont essentiels pour la tracabilite. Ils permettent de relier un tag d'image, un SBOM, une operation de signature et une verification de confiance dans une meme evidence technique.
+
+\subsubsection{Analyse de securite de la chaine release}
+
+La valeur de cette couche ne se limite pas a l'automatisation. Elle apporte plusieurs garanties techniques :
+
+\begin{itemize}
+  \item \textbf{inventaire logiciel :} le SBOM rend visible la composition de chaque image, ce qui facilite l'analyse de vulnerabilites et la reponse a incident ;
+  \item \textbf{integrite des artefacts :} la signature Cosign associe une preuve cryptographique a l'image publiee ;
+  \item \textbf{verification avant promotion :} la verification des signatures reduit le risque de deployer une image alteree, non signee ou publiee hors du processus de build attendu ;
+  \item \textbf{separation des responsabilites :} la construction, la signature et la verification deviennent trois etapes distinctes, donc auditables.
+\end{itemize}
+
+Dans le cadre d'un projet de type PFE Master DSIR, cette separation est pedagogiquement importante : elle montre que la securite logicielle n'est pas un simple scan de code, mais un enchainement de controles couvrant l'integralite du cycle de vie de l'artefact.
+
+\subsubsection{Limites et points d'attention}
+
+Plusieurs limites doivent etre explicitees.
+
+\begin{itemize}
+  \item Les scripts supposent que les images sont accessibles soit localement via Docker, soit via un registre consultable.
+  \item En mode keyless, la verification depend de l'identite OIDC attendue. Une mauvaise configuration de l'identite ou de l'\textit{issuer} provoquera un echec de verification meme si une signature existe.
+  \item En mode \textit{key-pair}, la protection de la cle privee devient un enjeu de securite majeur.
+  \item Les scripts verifient la signature de l'image, mais n'imposent pas encore automatiquement cette verification comme politique d'admission Kubernetes.
+\end{itemize}
+
+Autrement dit, la chaine de confiance est bien etablie au niveau \textit{release}, mais elle pourrait etre encore renforcee par une verification obligatoire a l'entree du cluster.
+
+\subsubsection{Corrections appliquees lors des essais reels}
+
+Les essais reels de la chaine \textit{release} ont egalement mis en evidence plusieurs points pratiques qui ont ete corriges.
+
+\begin{itemize}
+  \item \textbf{Absence locale de Cosign.} Les commandes \texttt{verify}, \texttt{promote} et \texttt{deploy} echouent immediatement si \texttt{Cosign} n'est pas installe. La correction a consiste a installer explicitement \texttt{Cosign} sur la machine locale puis a utiliser les scripts du depot pour preparer une paire de cles de demonstration.
+  \item \textbf{Preparation de la paire de cles locale.} En mode \textit{key-pair}, les variables \texttt{COSIGN\_KEY}, \texttt{COSIGN\_PUBLIC\_KEY} et \texttt{COSIGN\_PASSWORD} doivent etre exportees avant execution, afin d'aligner les tests locaux avec le mode Jenkins retenu pour le projet.
+  \item \textbf{Interaction entre Kyverno et les pods de validation.} Une fois Kyverno active sur le cluster, l'utilisation d'une image de validation de type \texttt{localhost:5001/securerag-hub-*} peut faire entrer ce pod dans le perimetre de verification Cosign. Si le registre local n'est pas resoluble de la meme maniere depuis le cluster, l'admission peut etre refusee. La correction retenue est d'utiliser une image publique de validation pour les pods de test ephemeres, sans desactiver la policy de verification des images applicatives.
+\end{itemize}
+
+Ces corrections ne remettent pas en cause l'architecture de la chaine de confiance. Elles montrent au contraire qu'une supply chain securisee depend autant de la qualite des scripts que de la maitrise de l'environnement local qui les execute.
+
+\subsubsection{Recommandations d'amelioration}
+
+Pour une version future plus mature, plusieurs extensions sont recommandees :
+
+\begin{itemize}
+  \item ajouter la generation et la conservation d'attestations de provenance ;
+  \item integrer la verification de signature dans le workflow de deploiement \texttt{kind} ;
+  \item imposer des politiques d'admission verifiant la presence d'une signature valide ;
+  \item publier systematiquement les artefacts SBOM et les rapports de verification dans Jenkins ;
+  \item completer la chaine avec une politique de promotion entre environnements fondee sur des artefacts verifies.
+\end{itemize}
+
+\subsubsection{Conclusion}
+
+La couche release de \textit{SecureRAG Hub} constitue une composante importante de la strategie DevSecOps globale. Les scripts de generation de SBOM, de signature et de verification permettent d'etablir une base serieuse de \textit{supply chain security} adaptee a un environnement local ou CI/CD. Ils apportent une reponse concrete aux exigences de tracabilite, d'integrite et d'auditabilite des images OCI. Dans le cadre du projet, cette couche permet donc d'illustrer de maniere convaincante la transition entre developpement, industrialisation et securisation de la livraison logicielle.

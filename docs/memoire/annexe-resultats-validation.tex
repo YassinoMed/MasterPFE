@@ -1,0 +1,193 @@
+\appendix
+\section{Annexe --- Tableaux de resultats attendus et observes}
+\label{sec:annexe-resultats-validation}
+
+Cette annexe consolide les principaux resultats obtenus sur \textit{SecureRAG Hub} lors des campagnes de validation locale. Elle est concue pour etre reutilisee telle quelle en soutenance afin de presenter, de maniere synthetique et verifiable, l'etat reel de la plateforme, les comportements attendus et les ecarts observes.
+
+\subsection{Synthese generale}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|p{3.6cm}|p{3.8cm}|p{4.0cm}|p{3.4cm}|}
+\hline
+\textbf{Categorie} & \textbf{Resultat attendu} & \textbf{Resultat observe} & \textbf{Conclusion} \\
+\hline
+Initialisation du cluster & Cluster \texttt{kind} cree et noeuds \texttt{Ready} & Cluster \texttt{securerag-dev} cree avec succes, noeuds \texttt{Ready} & Conforme \\
+\hline
+Registre local & Registre \texttt{localhost:5001} operationnel & Registre local cree et accessible & Conforme \\
+\hline
+Build des images applicatives & 6 images construites et disponibles localement & 6 images construites et poussees localement & Conforme \\
+\hline
+Deploiement Kubernetes & Tous les workloads principaux deployes & 7 composants sur 8 operationnels ; \texttt{ollama} bloque & Partiellement conforme \\
+\hline
+Validation fonctionnelle & Acces interne et externe verifies & \texttt{/healthz} interne et externe operationnels & Conforme \\
+\hline
+Validation securite & Controles de base et tests adversariaux disponibles & Controles actifs ; endpoint \texttt{/analyze} encore absent & Partiellement conforme \\
+\hline
+Validation RAG & Chaine RAG completement joignable & Echec lie a \texttt{ollama} indisponible & Non conforme \\
+\hline
+Chaine release / supply chain & Scripts SBOM, signature et verification disponibles & Scripts implementes et valides syntaxiquement & Conforme au niveau outillage \\
+\hline
+\end{tabular}
+\caption{Vue de synthese des resultats attendus et observes}
+\end{table}
+
+\subsection{Resultats du deploiement local}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|p{3.2cm}|p{4.0cm}|p{4.3cm}|p{3.3cm}|}
+\hline
+\textbf{Element} & \textbf{Attendu} & \textbf{Observe} & \textbf{Interpretation} \\
+\hline
+Cluster \texttt{kind} & Cluster cree sans erreur & Cluster \texttt{securerag-dev} operationnel & Correct \\
+\hline
+Noeuds Kubernetes & Tous les noeuds en etat \texttt{Ready} & Deux noeuds \texttt{Ready} & Correct \\
+\hline
+Namespace applicatif & Namespace \texttt{securerag-hub} disponible & Namespace cree et utilise par les workloads & Correct \\
+\hline
+Services applicatifs & Services exposes en \texttt{ClusterIP} ou \texttt{NodePort} selon le besoin & Services crees correctement ; \texttt{api-gateway} expose en \texttt{NodePort} & Correct \\
+\hline
+Persistance & PVC \texttt{qdrant} et \texttt{ollama} lies & PVC lies correctement & Correct \\
+\hline
+Exposition externe & \texttt{api-gateway} joignable depuis l'hote & \texttt{http://localhost:8080/healthz} repond & Correct \\
+\hline
+\end{tabular}
+\caption{Resultats observes sur la phase de deploiement local}
+\end{table}
+
+\subsection{Etat des composants au premier run reel}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|p{4.1cm}|p{2.4cm}|p{4.8cm}|p{2.8cm}|}
+\hline
+\textbf{Composant} & \textbf{Etat attendu} & \textbf{Etat observe} & \textbf{Statut} \\
+\hline
+\texttt{api-gateway} & \texttt{Running} & \texttt{Running} & PASS \\
+\hline
+\texttt{auth-users} & \texttt{Running} & \texttt{Running} & PASS \\
+\hline
+\texttt{chatbot-manager} & \texttt{Running} & \texttt{Running} & PASS \\
+\hline
+\texttt{llm-orchestrator} & \texttt{Running} & \texttt{Running} & PASS \\
+\hline
+\texttt{security-auditor} & \texttt{Running} & \texttt{Running} & PASS \\
+\hline
+\texttt{knowledge-hub} & \texttt{Running} & \texttt{Running} & PASS \\
+\hline
+\texttt{qdrant} & \texttt{Running} / \texttt{Ready} & \texttt{Running} & PASS \\
+\hline
+\texttt{ollama} & \texttt{Running} / \texttt{Ready} & \texttt{ContainerCreating} apres plus de 25 minutes & FAIL \\
+\hline
+\end{tabular}
+\caption{Etat des composants applicatifs et techniques au premier run reel}
+\end{table}
+
+\subsection{Resultats des validations post-deploiement}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|p{3.8cm}|p{3.6cm}|p{4.6cm}|p{2.3cm}|}
+\hline
+\textbf{Test} & \textbf{Attendu} & \textbf{Observe} & \textbf{Statut} \\
+\hline
+\texttt{security-smoke.sh} & Verification des \textit{ServiceAccount}, \textit{NetworkPolicy} et \textit{security contexts} & Controles executes avec succes ; avertissement residuel pour \texttt{ollama} & PASS \\
+\hline
+\texttt{e2e-functional-flow.sh} & Services presents, \texttt{/healthz} internes joignables, exposition externe OK & Tous les services verifies ; \texttt{/chat} non implemente & PASS / SKIP \\
+\hline
+\texttt{security-adversarial-advanced.sh} & \texttt{security-auditor} joignable ; endpoint d'analyse si implemente & \texttt{security-auditor} joignable ; \texttt{/analyze} retourne \texttt{404} & PASS / SKIP \\
+\hline
+\texttt{rag-smoke.sh} & \texttt{llm-orchestrator}, \texttt{knowledge-hub}, \texttt{qdrant}, \texttt{ollama} joignables & Echec a cause de \texttt{ollama} non joignable & FAIL \\
+\hline
+\texttt{generate-validation-report.sh} & Rapport synthetique produit & Rapport genere correctement dans \texttt{artifacts/validation/validation-summary.md} & PASS \\
+\hline
+\end{tabular}
+\caption{Resultats des scripts de validation post-deploiement}
+\end{table}
+
+\subsection{Bilan numerique des validations}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|l|c|}
+\hline
+\textbf{Indicateur} & \textbf{Valeur observee} \\
+\hline
+\texttt{PASS} & 15 \\
+\hline
+\texttt{FAIL} & 1 \\
+\hline
+\texttt{SKIP} & 2 \\
+\hline
+\end{tabular}
+\caption{Bilan numerique issu de \texttt{validation-summary.md}}
+\end{table}
+
+\subsection{Resultats attendus de la couche release et supply chain}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|p{3.9cm}|p{3.7cm}|p{4.5cm}|p{2.5cm}|}
+\hline
+\textbf{Script} & \textbf{Attendu} & \textbf{Etat observe dans le projet} & \textbf{Statut} \\
+\hline
+\texttt{generate-sbom.sh} & Generation d'un SBOM CycloneDX JSON par image & Script implemente, executable et syntaxiquement valide & Pret a tester \\
+\hline
+\texttt{sign-images.sh} & Signature Cosign de toutes les images, mode keyless ou key-pair & Script implemente, executable et syntaxiquement valide & Pret a tester \\
+\hline
+\texttt{verify-signatures.sh} & Verification des signatures Cosign avant promotion ou deploiement & Script implemente, executable et syntaxiquement valide & Pret a tester \\
+\hline
+\end{tabular}
+\caption{Etat de preparation de la couche release et supply chain}
+\end{table}
+
+\subsection{Tableau de campagne de tests release recommandee}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|p{1.2cm}|p{4.0cm}|p{4.2cm}|p{4.0cm}|}
+\hline
+\textbf{ID} & \textbf{Commande} & \textbf{Resultat attendu} & \textbf{Observation a reporter} \\
+\hline
+R1 & \texttt{bash scripts/release/generate-sbom.sh} & SBOM de chaque image genere & Completer apres execution reelle \\
+\hline
+R2 & \texttt{ALLOW\_MISSING\_IMAGES=true bash scripts/release/generate-sbom.sh} avec tag inexistant & \texttt{SKIP} propre sur images manquantes & Completer apres execution reelle \\
+\hline
+R3 & \texttt{bash scripts/release/sign-images.sh} en mode keyless & Signature des images accessibles & Completer apres execution reelle \\
+\hline
+R4 & \texttt{COSIGN\_KEY=... bash scripts/release/sign-images.sh} & Signature avec cle privee locale & Completer apres execution reelle \\
+\hline
+R5 & \texttt{bash scripts/release/verify-signatures.sh} en mode keyless & Verification reussie des signatures valides & Completer apres execution reelle \\
+\hline
+R6 & \texttt{COSIGN\_PUBLIC\_KEY=... bash scripts/release/verify-signatures.sh} & Verification reussie avec cle publique & Completer apres execution reelle \\
+\hline
+R7 & Verification sur image non signee & Echec de verification et retour non nul & Completer apres execution reelle \\
+\hline
+\end{tabular}
+\caption{Tableau de suivi pour la campagne de tests release}
+\end{table}
+
+\subsection{Ecarts principaux identifies}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|p{4.1cm}|p{5.2cm}|p{4.0cm}|}
+\hline
+\textbf{Ecart} & \textbf{Cause probable} & \textbf{Action recommandee} \\
+\hline
+\texttt{ollama} non pret au premier run & Image officielle lourde sur architecture \texttt{arm64} ; temps de telechargement eleve & Precharger l'image, utiliser un mode host, ou adapter la strategie de bootstrap \\
+\hline
+Endpoint \texttt{/chat} absent & Fonctionnalite metier non encore implementee & Completer le service metier et relancer la validation E2E \\
+\hline
+Endpoint \texttt{/analyze} absent & Fonctionnalite de securite applicative non finalisee & Implementer l'endpoint et enrichir les tests adversariaux \\
+\hline
+Verification cryptographique non encore executee en reel & Couche release recemment ajoutee & Realiser la campagne de tests R1 a R7 et archiver les preuves \\
+\hline
+\end{tabular}
+\caption{Principaux ecarts entre attendu et observe}
+\end{table}
+
+\subsection{Conclusion de l'annexe}
+
+Les tableaux precedents montrent que le socle DevSecOps de \textit{SecureRAG Hub} est largement operationnel : deploiement local reproductible, microservices majoritairement fonctionnels, exposition externe validee, controles de securite de base actifs et mecanisme de preuve deja present. L'ecart principal au moment du premier run reel concerne la dependance \texttt{ollama}, qui empeche encore de declarer la chaine RAG completement fonctionnelle. La couche release et supply chain, quant a elle, est desormais outillee et prete pour une campagne de validation complete.

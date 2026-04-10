@@ -1,0 +1,33 @@
+jenkins:
+  systemMessage: "SecureRAG Hub Jenkins - DevSecOps CI/CD reference"
+  numExecutors: 2
+  mode: NORMAL
+  scmCheckoutRetryCount: 2
+
+  securityRealm:
+    local:
+      allowsSignup: false
+      users:
+        - id: "${JENKINS_ADMIN_ID}"
+          password: "${JENKINS_ADMIN_PASSWORD}"
+
+  authorizationStrategy:
+    loggedInUsersCanDoAnything:
+      allowAnonymousRead: false
+
+  crumbIssuer:
+    standard:
+      excludeClientIPFromCrumb: false
+
+  remotingSecurity:
+    enabled: true
+
+unclassified:
+  location:
+    url: "${JENKINS_URL}"
+  timestamper:
+    allPipelines: true
+
+jobs:
+  - file: /var/jenkins_home/job_dsl/securerag-hub-ci.groovy
+  - file: /var/jenkins_home/job_dsl/securerag-hub-cd.groovy

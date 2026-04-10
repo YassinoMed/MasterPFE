@@ -1,0 +1,161 @@
+@startuml
+title SecureRAG Hub - Deployment Target Architecture
+
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam defaultFontName "IBM Plex Sans"
+skinparam packageStyle rectangle
+skinparam componentStyle rectangle
+skinparam wrapWidth 220
+
+skinparam ArrowColor #315E9C
+skinparam ArrowThickness 1.2
+
+skinparam rectangle {
+  BackgroundColor #F8FBFF
+  BorderColor #7C93B8
+  RoundCorner 16
+}
+
+skinparam node {
+  BackgroundColor #F4F7FB
+  BorderColor #7C93B8
+  RoundCorner 18
+}
+
+skinparam database {
+  BackgroundColor #F7FAFD
+  BorderColor #7C93B8
+}
+
+skinparam artifact {
+  BackgroundColor #F9FBFE
+  BorderColor #95A8C8
+}
+
+legend right
+|= Zone |= Role |
+| GitHub / DevSecOps | Build, scan, SBOM, signature, publication |
+| Machine locale / VM | Portail web Laravel, scripts de deploiement |
+| Cluster kind | Runtime applicatif SecureRAG Hub |
+endlegend
+
+actor "Utilisateur metier" as user
+actor "Administrateur" as admin
+
+cloud "GitHub / Depot source" as github {
+  folder "Monorepo SecureRAG Hub\n- services/\n- infra/\n- platform/\n- Jenkinsfile\n- Jenkinsfile.cd\n- docs/\n- scripts/" as repo
+
+  package "Chaine DevSecOps" as ci {
+    node "Jenkins CI\nlint / tests / scans" as gha
+    node "Jenkins CD\nbuild / SBOM / sign / deploy" as jcd
+    artifact "Rapports securite\nSemgrep / Gitleaks / Trivy" as reports
+    artifact "SBOM CycloneDX\nSyft" as sbom
+    artifact "Signature OCI\nCosign" as cosign
+  }
+
+  database "Registry OCI\nGHCR ou localhost:5001" as registry
+}
+
+node "Machine locale / VM de demonstration" as vm {
+  node "Portail Web Laravel\nportal-web + gateway" as portal
+
+  artifact "Kustomize overlays/dev\nManifests a valider" as manifests
+  artifact "Scripts locaux\nkind / deploy / validate" as scripts
+
+  node "Cluster Kubernetes local (kind)" as kind {
+    frame "Namespace securerag-hub" as ns {
+      node "Entree HTTP locale\nNodePort dev" as edge
+      node "Service api-gateway" as gateway_svc
+
+      frame "Pods applicatifs" as pods {
+        node "Pod api-gateway" as api_pod
+        node "Pod auth-users" as auth_pod
+        node "Pod chatbot-manager" as chatbot_pod
+        node "Pod llm-orchestrator" as llm_pod
+        node "Pod security-auditor" as sec_pod
+        node "Pod knowledge-hub" as kh_pod
+        database "Qdrant\nPVC documents / embeddings /\nattack_corpus" as qdrant
+        node "Ollama local\nLLM runtime" as ollama
+      }
+
+      frame "Controles Kubernetes" as k8s_controls {
+        artifact "ServiceAccounts\ndedies par microservice" as sa
+        artifact "NetworkPolicies" as np
+        artifact "Secrets" as secrets
+        artifact "ConfigMaps" as cm
+      }
+    }
+  }
+}
+
+repo --> gha : push / pull request
+repo --> jcd : release / promotion
+repo --> manifests : versionne\nbase + overlays/dev
+repo --> scripts : execution locale
+
+gha --> reports : scans SAST / secrets / images
+jcd --> sbom : generation inventaire
+jcd --> cosign : signature des artefacts
+jcd --> registry : publication images signees
+
+scripts --> kind : create-kind / deploy-kind
+manifests --> kind : deploiement via Kustomize
+registry --> kind : pull images
+
+user --> portal : interface web
+admin --> portal : administration / supervision
+portal --> edge : REST / JSON
+edge --> gateway_svc : routage d'entree
+gateway_svc --> api_pod : trafic applicatif
+
+api_pod --> auth_pod : authentification / RBAC
+api_pod --> chatbot_pod : selection chatbot / configuration
+api_pod --> llm_pod : requete validee
+
+chatbot_pod --> cm : lecture configuration
+auth_pod --> secrets : lecture secrets / tokens
+llm_pod --> kh_pod : demande de contexte
+kh_pod --> qdrant : retrieval contextuel
+llm_pod --> ollama : generation LLM
+sec_pod --> qdrant : scoring semantique / corpus attaque
+sec_pod --> ollama : LLM-as-judge
+
+sa ..> api_pod
+sa ..> auth_pod
+sa ..> chatbot_pod
+sa ..> llm_pod
+sa ..> sec_pod
+sa ..> kh_pod
+
+np ..> api_pod
+np ..> auth_pod
+np ..> chatbot_pod
+np ..> llm_pod
+np ..> sec_pod
+np ..> kh_pod
+
+cm ..> chatbot_pod
+cm ..> llm_pod
+cm ..> kh_pod
+secrets ..> llm_pod
+secrets ..> sec_pod
+
+note bottom of portal
+Portail Web Laravel actuellement lanceable
+en local via artisan ou Docker Compose.
+Dans la cible, il dialogue avec l'entree HTTP
+du cluster SecureRAG Hub.
+end note
+
+note bottom of gha
+Le pipeline CI reste focalise sur la qualite
+et les controles de securite continus.
+end note
+
+note bottom of jcd
+Le CD vers kind repose sur un agent Jenkins self-hosted
+ou sur des scripts locaux, afin de rester 100% local.
+end note
+
+@enduml

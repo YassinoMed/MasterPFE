@@ -19,6 +19,13 @@ else
   echo "Cluster ${CLUSTER_NAME} already exists"
 fi
 
+control_plane_node="$(kind get nodes --name "${CLUSTER_NAME}" | head -n 1)"
+portal_binding="$(docker inspect -f '{{index .HostConfig.PortBindings "30081/tcp"}}' "${control_plane_node}" 2>/dev/null || true)"
+if [[ "${portal_binding}" == "<no value>" || -z "${portal_binding}" || "${portal_binding}" == "[]" ]]; then
+  echo "Warning: cluster ${CLUSTER_NAME} was created before the portal-web host mapping (30081 -> 8081)."
+  echo "Recreate the cluster to expose portal-web on localhost:8081."
+fi
+
 for node in $(kind get nodes --name "${CLUSTER_NAME}"); do
   docker exec "${node}" mkdir -p "/etc/containerd/certs.d/localhost:${REG_PORT}"
   cat <<EOF | docker exec -i "${node}" cp /dev/stdin "/etc/containerd/certs.d/localhost:${REG_PORT}/hosts.toml"

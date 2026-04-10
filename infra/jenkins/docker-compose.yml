@@ -1,0 +1,40 @@
+services:
+  jenkins:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: securerag-jenkins
+    restart: unless-stopped
+    user: root
+    ports:
+      - "8085:8080"
+      - "50000:50000"
+    environment:
+      CASC_JENKINS_CONFIG: /var/jenkins_home/casc_configs/jenkins.yaml
+      JAVA_OPTS: "-Djenkins.install.runSetupWizard=false"
+      JENKINS_ADMIN_ID: admin
+      JENKINS_ADMIN_PASSWORD: change-me-now
+      JENKINS_URL: http://localhost:8085/
+      SECURERAG_GIT_URL: https://github.com/YassinoMed/MasterPFE.git
+      SECURERAG_GIT_BRANCH: "*/main"
+      ENABLE_LOCAL_FORWARDING: "true"
+    volumes:
+      - jenkins_home:/var/jenkins_home
+      - ./casc:/var/jenkins_home/casc_configs:ro
+      - ./jobs:/var/jenkins_home/job_dsl:ro
+      - ./init.groovy.d:/var/jenkins_home/init.groovy.d:ro
+      - ./secrets:/run/jenkins-secrets:ro
+      - ./secrets/kubeconfig:/var/jenkins_home/.kube/config:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ../../:/workspace
+    working_dir: /workspace
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:8080/login >/dev/null || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+
+volumes:
+  jenkins_home:

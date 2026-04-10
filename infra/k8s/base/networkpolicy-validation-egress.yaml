@@ -16,6 +16,7 @@ spec:
               - key: app.kubernetes.io/name
                 operator: In
                 values:
+                  - portal-web
                   - api-gateway
                   - auth-users
                   - chatbot-manager
@@ -23,6 +24,8 @@ spec:
                   - security-auditor
                   - knowledge-hub
       ports:
+        - protocol: TCP
+          port: 8000
         - protocol: TCP
           port: 8080
     - to:

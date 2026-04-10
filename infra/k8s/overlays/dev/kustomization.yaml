@@ -15,6 +15,9 @@ generatorOptions:
   disableNameSuffixHash: true
 
 images:
+  - name: ghcr.io/example/securerag-hub-portal-web
+    newName: localhost:5001/securerag-hub-portal-web
+    newTag: dev
   - name: ghcr.io/example/securerag-hub-api-gateway
     newName: localhost:5001/securerag-hub-api-gateway
     newTag: dev
@@ -35,6 +38,23 @@ images:
     newTag: dev
 
 patches:
+  - target:
+      kind: Service
+      name: portal-web
+    patch: |-
+      - op: replace
+        path: /spec/type
+        value: NodePort
+      - op: add
+        path: /spec/ports/0/nodePort
+        value: 30081
+  - target:
+      kind: Deployment
+      name: portal-web
+    patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/imagePullPolicy
+        value: Always
   - target:
       kind: Service
       name: api-gateway

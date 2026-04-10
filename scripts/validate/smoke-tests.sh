@@ -3,11 +3,12 @@
 set -euo pipefail
 
 NS="${NS:-securerag-hub}"
-VALIDATION_IMAGE="${VALIDATION_IMAGE:-localhost:5001/securerag-hub-api-gateway:dev}"
+VALIDATION_IMAGE="${VALIDATION_IMAGE:-${REGISTRY_HOST:-localhost:5001}/securerag-hub-api-gateway:${IMAGE_TAG:-dev}}"
 pod_name="curl-smoke-$(date +%s)"
 
 services=(
   ollama
+  portal-web
   api-gateway
   auth-users
   chatbot-manager
@@ -38,6 +39,7 @@ import urllib.request
 targets = [
     "http://qdrant:6333/readyz",
     "http://ollama:11434/api/tags",
+    "http://portal-web:8000/health",
 ]
 targets.extend(
     f"http://{svc}:8080/healthz"

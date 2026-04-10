@@ -13,6 +13,7 @@ services=(
   llm-orchestrator
   security-auditor
   knowledge-hub
+  portal-web
 )
 
 for service in "${services[@]}"; do

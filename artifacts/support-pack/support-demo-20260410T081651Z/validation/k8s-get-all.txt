@@ -1,0 +1,52 @@
+NAME                                    READY   STATUS    RESTARTS        AGE
+pod/api-gateway-f7755d894-7fn9l         1/1     Running   2 (7m11s ago)   33h
+pod/auth-users-846b9d78c4-hxfz2         1/1     Running   2 (7m11s ago)   33h
+pod/chatbot-manager-54df7d999-b4fhz     1/1     Running   2 (7m11s ago)   33h
+pod/knowledge-hub-6bdf546b5d-zwjd6      1/1     Running   2 (7m11s ago)   33h
+pod/llm-orchestrator-779d744c7-5wtw4    1/1     Running   2 (7m11s ago)   33h
+pod/ollama-586b47b575-v42cw             1/1     Running   2 (7m11s ago)   33h
+pod/portal-web-7fbb7f9bfb-6kbsn         1/1     Running   1 (7m11s ago)   100m
+pod/qdrant-0                            1/1     Running   2 (7m11s ago)   33h
+pod/security-auditor-5fd889bb9b-f65zr   1/1     Running   2 (7m11s ago)   33h
+
+NAME                       TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)          AGE
+service/api-gateway        NodePort    10.96.77.164    <none>        8080:30080/TCP   33h
+service/auth-users         ClusterIP   10.96.76.151    <none>        8080/TCP         33h
+service/chatbot-manager    ClusterIP   10.96.46.66     <none>        8080/TCP         33h
+service/knowledge-hub      ClusterIP   10.96.217.126   <none>        8080/TCP         33h
+service/llm-orchestrator   ClusterIP   10.96.145.25    <none>        8080/TCP         33h
+service/ollama             ClusterIP   10.96.165.91    <none>        11434/TCP        33h
+service/portal-web         NodePort    10.96.63.108    <none>        8000:30081/TCP   4h10m
+service/qdrant             ClusterIP   10.96.34.138    <none>        6333/TCP         33h
+service/security-auditor   ClusterIP   10.96.9.156     <none>        8080/TCP         33h
+
+NAME                               READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/api-gateway        1/1     1            1           33h
+deployment.apps/auth-users         1/1     1            1           33h
+deployment.apps/chatbot-manager    1/1     1            1           33h
+deployment.apps/knowledge-hub      1/1     1            1           33h
+deployment.apps/llm-orchestrator   1/1     1            1           33h
+deployment.apps/ollama             1/1     1            1           33h
+deployment.apps/portal-web         1/1     1            1           4h10m
+deployment.apps/security-auditor   1/1     1            1           33h
+
+NAME                                          DESIRED   CURRENT   READY   AGE
+replicaset.apps/api-gateway-f7755d894         1         1         1       33h
+replicaset.apps/auth-users-846b9d78c4         1         1         1       33h
+replicaset.apps/chatbot-manager-54df7d999     1         1         1       33h
+replicaset.apps/knowledge-hub-6bdf546b5d      1         1         1       33h
+replicaset.apps/llm-orchestrator-779d744c7    1         1         1       33h
+replicaset.apps/ollama-586b47b575             1         1         1       33h
+replicaset.apps/portal-web-696799d897         0         0         0       101m
+replicaset.apps/portal-web-74d5844c7d         0         0         0       103m
+replicaset.apps/portal-web-75646745d4         0         0         0       4h10m
+replicaset.apps/portal-web-7fbb7f9bfb         1         1         1       100m
+replicaset.apps/portal-web-b8f5b6684          0         0         0       102m
+replicaset.apps/security-auditor-5fd889bb9b   1         1         1       33h
+
+NAME                      READY   AGE
+statefulset.apps/qdrant   1/1     33h
+
+NAME                                              REFERENCE                TARGETS        MINPODS   MAXPODS   REPLICAS   AGE
+horizontalpodautoscaler.autoscaling/api-gateway   Deployment/api-gateway   cpu: 22%/70%   1         3         1          22m
+horizontalpodautoscaler.autoscaling/portal-web    Deployment/portal-web    cpu: 18%/70%   1         3         1          22m
