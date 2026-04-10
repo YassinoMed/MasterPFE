@@ -1,0 +1,14 @@
+NAME                       POD-SELECTOR                                                                                                                                  AGE
+allow-dns-egress           <none>                                                                                                                                        33h
+allow-validation-egress    app.kubernetes.io/part-of=securerag-hub,job-role=validation                                                                                   33h
+allow-validation-ingress   app.kubernetes.io/name in (api-gateway,auth-users,chatbot-manager,knowledge-hub,llm-orchestrator,ollama,portal-web,qdrant,security-auditor)   33h
+api-gateway-policy         app.kubernetes.io/name=api-gateway,app.kubernetes.io/part-of=securerag-hub                                                                    33h
+auth-users-policy          app.kubernetes.io/name=auth-users,app.kubernetes.io/part-of=securerag-hub                                                                     33h
+chatbot-manager-policy     app.kubernetes.io/name=chatbot-manager,app.kubernetes.io/part-of=securerag-hub                                                                33h
+default-deny-all           <none>                                                                                                                                        33h
+knowledge-hub-policy       app.kubernetes.io/name=knowledge-hub,app.kubernetes.io/part-of=securerag-hub                                                                  33h
+llm-orchestrator-policy    app.kubernetes.io/name=llm-orchestrator,app.kubernetes.io/part-of=securerag-hub                                                               33h
+ollama-policy              app.kubernetes.io/name=ollama,app.kubernetes.io/part-of=securerag-hub                                                                         33h
+portal-web-policy          app.kubernetes.io/name=portal-web,app.kubernetes.io/part-of=securerag-hub                                                                     4h10m
+qdrant-policy              app.kubernetes.io/name=qdrant,app.kubernetes.io/part-of=securerag-hub                                                                         33h
+security-auditor-policy    app.kubernetes.io/name=security-auditor,app.kubernetes.io/part-of=securerag-hub                                                               33h
