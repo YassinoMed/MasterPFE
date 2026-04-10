@@ -1,11 +1,7 @@
-name: build-sign
+# Deprecated: Jenkins is the authoritative CI/CD engine for SecureRAG Hub.
+name: legacy-build-sign
 
 on:
-  push:
-    branches:
-      - main
-    tags:
-      - "v*"
   workflow_dispatch:
 
 permissions:

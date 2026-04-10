@@ -5,7 +5,7 @@ set -euo pipefail
 NS="${NS:-securerag-hub}"
 REPORT_DIR="${REPORT_DIR:-artifacts/validation}"
 REPORT_FILE="${REPORT_DIR}/e2e-functional-flow.txt"
-VALIDATION_IMAGE="${VALIDATION_IMAGE:-localhost:5001/securerag-hub-api-gateway:dev}"
+VALIDATION_IMAGE="${VALIDATION_IMAGE:-${REGISTRY_HOST:-localhost:5001}/securerag-hub-api-gateway:${IMAGE_TAG:-dev}}"
 pod_name="e2e-functional-check-$(date +%s)"
 
 mkdir -p "${REPORT_DIR}"
@@ -16,6 +16,7 @@ fail() { echo "[FAIL] $1" | tee -a "${REPORT_FILE}"; exit 1; }
 skip() { echo "[SKIP] $1" | tee -a "${REPORT_FILE}"; }
 
 services=(
+  portal-web
   api-gateway
   auth-users
   chatbot-manager
@@ -41,6 +42,7 @@ kubectl run "${pod_name}" \
   --command -- python -c '
 import urllib.request
 for svc in [
+    "portal-web",
     "api-gateway",
     "auth-users",
     "chatbot-manager",
@@ -48,17 +50,26 @@ for svc in [
     "security-auditor",
     "knowledge-hub",
 ]:
-    with urllib.request.urlopen(f"http://{svc}:8080/healthz", timeout=5) as response:
+    target = f"http://{svc}:8080/healthz"
+    if svc == "portal-web":
+        target = "http://portal-web:8000/health"
+    with urllib.request.urlopen(target, timeout=5) as response:
         if response.status != 200:
             raise SystemExit(response.status)
 ' >/dev/null 2>&1 \
-  && pass "All internal /healthz endpoints are reachable" \
-  || fail "One or more internal /healthz endpoints are unreachable"
+  && pass "All internal health endpoints are reachable" \
+  || fail "One or more internal health endpoints are unreachable"
 
 if curl -fsS "http://localhost:8080/healthz" >/dev/null 2>&1; then
   pass "External access through NodePort works on localhost:8080"
 else
   fail "External access through NodePort failed on localhost:8080"
+fi
+
+if curl -fsS "http://localhost:8081/health" >/dev/null 2>&1; then
+  pass "Portal web is exposed on localhost:8081"
+else
+  fail "Portal web is not reachable on localhost:8081"
 fi
 
 HTTP_CODE="$(curl -s -o /tmp/api_gateway_root.out -w "%{http_code}" http://localhost:8080/ || true)"

@@ -9,6 +9,7 @@ spec:
       - key: app.kubernetes.io/name
         operator: In
         values:
+          - portal-web
           - api-gateway
           - auth-users
           - chatbot-manager
@@ -25,6 +26,8 @@ spec:
             matchLabels:
               job-role: validation
       ports:
+        - protocol: TCP
+          port: 8000
         - protocol: TCP
           port: 8080
         - protocol: TCP

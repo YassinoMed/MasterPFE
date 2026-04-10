@@ -10,6 +10,8 @@ venv/
 .coverage-artifacts/
 .trivycache/
 artifacts/validation/
+artifacts/jenkins/
 security/reports/*.json
 security/reports/*.txt
 security/reports/*.cdx.json
+security/secrets/.env.local

@@ -1,4 +1,5 @@
-name: validate-postdeploy
+# Deprecated: Jenkins is the authoritative CI/CD engine for SecureRAG Hub.
+name: legacy-validate-postdeploy
 
 on:
   workflow_dispatch:

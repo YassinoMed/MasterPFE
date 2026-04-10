@@ -1,0 +1,10 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# These policies assume Kyverno is already installed in the target cluster.
+# They are kept outside the main application base so the local dev overlay can
+# still render and deploy even when the policy engine is not present yet.
+
+resources:
+  - require-pod-security.yaml
+  - verify-cosign-images.yaml

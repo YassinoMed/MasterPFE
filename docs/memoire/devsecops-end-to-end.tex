@@ -1,0 +1,442 @@
+\subsection{Construction pas a pas de la chaine DevSecOps de SecureRAG Hub}
+\label{sec:devsecops-end-to-end}
+
+Cette section retrace, de maniere chronologique, la construction complete de la chaine DevSecOps du projet \textit{SecureRAG Hub}. L'objectif n'est pas seulement de presenter une succession d'outils, mais de montrer comment une plateforme de chatbots metiers securises a ete progressivement industrialisee, securisee, conteneurisee, deployee localement et documentee de facon reproductible.
+
+Le fil directeur retenu pour cette construction a ete le suivant :
+
+\begin{enumerate}
+  \item etablir un socle de depot et d'automatisation coherent ;
+  \item integrer les controles de qualite et de securite des les premieres iterations ;
+  \item normaliser la production des artefacts conteneurises ;
+  \item deployer la plateforme sur un cluster Kubernetes local reproductible ;
+  \item ajouter une chaine de confiance de type \textit{build, SBOM, sign, verify, promote, deploy} ;
+  \item formaliser la CI/CD autour de Jenkins ;
+  \item produire des preuves reutilisables pour la soutenance et le memoire.
+\end{enumerate}
+
+\subsubsection{Point de depart et objectifs du chantier DevSecOps}
+
+Le projet \textit{SecureRAG Hub} repose sur une architecture microservices et sur des composants heterogenes : microservices applicatifs, orchestrateur de requetes, moteur RAG, couche securite, portail Laravel, pipeline de livraison et cluster Kubernetes local. Dans un tel contexte, la partie DevSecOps devait repondre simultanement a plusieurs contraintes :
+
+\begin{itemize}
+  \item conserver une architecture lisible et defendable dans un cadre academique ;
+  \item rester executable localement sur une machine de developpement ;
+  \item apporter des controles de securite concrets sur le code, les images et le cluster ;
+  \item rendre possible une demonstration en soutenance sans dependre d'une infrastructure cloud externe.
+\end{itemize}
+
+Le premier principe de conception a donc ete de privilegier une pile locale, reproductible et observable, reposant sur :
+
+\begin{itemize}
+  \item un monorepo GitHub ;
+  \item des scripts Bash versionnes ;
+  \item Docker pour la construction des images ;
+  \item \texttt{kind} pour le cluster local ;
+  \item Kustomize pour la structuration des manifests ;
+  \item Jenkins comme reference CI/CD finale ;
+  \item Syft, Cosign, Semgrep, Gitleaks et Trivy pour les controles de securite.
+\end{itemize}
+
+\subsubsection{Etape 1 : structuration initiale du depot}
+
+La premiere etape a consiste a structurer le depot afin de separer clairement les responsabilites :
+
+\begin{itemize}
+  \item \texttt{services/} pour les microservices applicatifs ;
+  \item \texttt{infra/} pour les manifests Kubernetes, \texttt{kind} et Jenkins ;
+  \item \texttt{scripts/} pour les operations CI, release, deploy, validation et secrets ;
+  \item \texttt{security/} pour les regles et conventions de securite ;
+  \item \texttt{docs/} pour l'architecture, les runbooks et les sections memoire ;
+  \item \texttt{platform/} pour la plateforme Laravel et ses composants associes.
+\end{itemize}
+
+Cette organisation a constitue le premier jalon de la maturite DevSecOps, car elle a permis d'eviter un depot monolithique mal compartimente et d'associer rapidement chaque brique technique a un emplacement stable et documente.
+
+\subsubsection{Etape 2 : mise en place des controles CI de base}
+
+Une fois le depot structure, le chantier s'est concentre sur les verifications de qualite et de securite qui devaient etre executees regulierement.
+
+\paragraph{Tests et couverture.}
+Des scripts dedies ont ete ajoutes pour executer les tests automatisees et mesurer la couverture, avec un objectif pedagogique simple : disposer d'un premier niveau de confiance avant toute industrialisation plus lourde.
+
+\paragraph{SAST et detection de secrets.}
+Le depot a ensuite integre :
+
+\begin{itemize}
+  \item \texttt{Semgrep} pour la detection statique de patterns de code a risque ;
+  \item \texttt{Gitleaks} pour la recherche de secrets ou de traces de credentials dans le depot ;
+  \item \texttt{Trivy} pour les scans orientes fichiers et images.
+\end{itemize}
+
+Cette etape a ete importante d'un point de vue methodologique : plutot que d'ajouter la securite uniquement au moment du deploiement, le projet a choisi de l'integrer des la phase de verification continue.
+
+\subsubsection{Etape 3 : conteneurisation des microservices}
+
+La phase suivante a consiste a normaliser la construction des artefacts deployables. Chaque microservice a ete accompagne d'un \texttt{Dockerfile}, avec l'objectif de produire des images coherentes, reutilisables localement et compatibles avec une execution sur Kubernetes.
+
+Les services metiers principaux concernes sont :
+
+\begin{itemize}
+  \item \texttt{api-gateway}
+  \item \texttt{auth-users}
+  \item \texttt{chatbot-manager}
+  \item \texttt{llm-orchestrator}
+  \item \texttt{security-auditor}
+  \item \texttt{knowledge-hub}
+\end{itemize}
+
+Par la suite, le portail Laravel \texttt{portal-web} a egalement ete integre dans ce schema, afin de ne pas conserver une interface web hors du perimetre DevSecOps.
+
+\subsubsection{Etape 4 : premier socle Kubernetes avec kind et Kustomize}
+
+Le premier vrai saut d'industrialisation a ete l'introduction d'un cluster local \texttt{kind}. Ce choix a repondu a trois objectifs :
+
+\begin{itemize}
+  \item reproduire un environnement Kubernetes realiste ;
+  \item permettre un deploiement integralement local ;
+  \item maitriser le cycle complet \textit{build, push, deploy, validate} sur une machine unique.
+\end{itemize}
+
+Le deploiement a ete structure autour de Kustomize, avec une separation en \texttt{base/overlay}. La base contient les objets communs et les manifests de services ; les overlays permettent d'adapter le comportement selon le contexte, en particulier \texttt{dev} et \texttt{demo}.
+
+Les premiers composants de la couche Kubernetes ont ete :
+
+\begin{itemize}
+  \item le namespace \texttt{securerag-hub} ;
+  \item les \textit{ServiceAccount} dedies ;
+  \item les \textit{Deployment}, \textit{Service} et \textit{StatefulSet} ;
+  \item les \textit{ConfigMap} et \textit{Secret} ;
+  \item les premiers \textit{NetworkPolicy} ;
+  \item les probes \texttt{readiness}, \texttt{liveness} et ensuite \texttt{startup}.
+\end{itemize}
+
+\subsubsection{Etape 5 : durcissement minimal des workloads}
+
+Une fois le socle \texttt{kind + Kustomize} fonctionnel, l'effort a porte sur le durcissement des conteneurs et la reduction de la surface d'attaque.
+
+Les choix principaux ont ete les suivants :
+
+\begin{itemize}
+  \item \texttt{runAsNonRoot} lorsque l'image le permet ;
+  \item \texttt{allowPrivilegeEscalation=false} ;
+  \item \texttt{readOnlyRootFilesystem=true} lorsque possible ;
+  \item \texttt{capabilities.drop: [ALL]} ;
+  \item \texttt{seccompProfile: RuntimeDefault} ;
+  \item \textit{ServiceAccount} dedie par composant ;
+  \item \textit{default deny} reseau puis ouvertures minimales ciblees.
+\end{itemize}
+
+Cette etape a permis de transformer un simple deploiement de conteneurs en un premier environnement Kubernetes securise et defendable techniquement.
+
+\subsubsection{Etape 6 : gestion du registre local et execution locale complete}
+
+Pour eviter toute dependance forte a un registre externe, un registre local \texttt{localhost:5001} a ete introduit. La logique retenue a ete la suivante :
+
+\begin{enumerate}
+  \item construire localement les images OCI ;
+  \item les pousser dans un registre local ;
+  \item configurer \texttt{kind} pour les consommer ;
+  \item deployer ensuite les manifests Kubernetes.
+\end{enumerate}
+
+Cette architecture locale a un interet academique fort : elle permet de demontrer la chaine complete d'industrialisation sans infrastructure cloud, tout en restant proche d'un fonctionnement professionnel.
+
+\subsubsection{Etape 7 : scripts de deploiement et de validation}
+
+Afin de fiabiliser l'usage quotidien du projet, des scripts operationnels ont ete ajoutes :
+
+\begin{itemize}
+  \item creation du cluster et du registre ;
+  \item build des images ;
+  \item chargement des images dans \texttt{kind} ;
+  \item deploiement Kustomize ;
+  \item smoke tests ;
+  \item validations fonctionnelles, securite et RAG ;
+  \item generation de rapports post-deploiement.
+\end{itemize}
+
+Cette etape a marque le passage d'un ensemble de manifests a une veritable procedure de livraison locale.
+
+\subsubsection{Etape 8 : premiere campagne de validation post-deploiement}
+
+Une fois le runtime local deployable, plusieurs scripts de validation ont ete introduits pour couvrir :
+
+\begin{itemize}
+  \item la disponibilite des services ;
+  \item les endpoints internes \texttt{/healthz} ;
+  \item l'acces externe par \texttt{NodePort} ;
+  \item les composants RAG ;
+  \item la couche \texttt{security-auditor} ;
+  \item la production d'un rapport synthetique \texttt{PASS / FAIL / SKIP}.
+\end{itemize}
+
+Le choix du triplet \texttt{PASS}, \texttt{FAIL}, \texttt{SKIP} a ete deliberement retenu pour s'adapter a un projet en construction. Il permet de distinguer une anomalie technique reelle d'un endpoint metier non encore implemente.
+
+\subsubsection{Etape 9 : construction de la supply chain securisee}
+
+Le chantier DevSecOps a ensuite ete etendu a la \textit{supply chain security}. L'objectif n'etait plus seulement de deployer des images, mais de garantir la confiance associee a leur production.
+
+Trois briques principales ont ete introduites :
+
+\begin{itemize}
+  \item generation de SBOM CycloneDX avec \texttt{Syft} ;
+  \item signature d'images OCI avec \texttt{Cosign} ;
+  \item verification des signatures avant promotion ou deploiement.
+\end{itemize}
+
+Le projet a egalement adopte une convention de nommage d'images stable :
+
+\begin{verbatim}
+REGISTRY_HOST/IMAGE_PREFIX-<service>:IMAGE_TAG
+\end{verbatim}
+
+Cette convention a rendu possible un fonctionnement coherent des scripts de build, des scripts de release et des overlays Kubernetes.
+
+\subsubsection{Etape 10 : normalisation de la release et promotion sans reconstruction}
+
+Une fois les scripts SBOM, signature et verification disponibles, la question centrale est devenue : comment eviter un \textit{rebuild} en phase de deploiement ?
+
+La reponse apportee par le projet a ete de formaliser la boucle de confiance suivante :
+
+\begin{center}
+\texttt{build -> sbom -> sign -> verify -> promote -> deploy}
+\end{center}
+
+Concretement :
+
+\begin{itemize}
+  \item la phase de release produit un artefact image ;
+  \item le SBOM est genere pour cet artefact ;
+  \item l'image est signee ;
+  \item la signature est verifiee ;
+  \item un script de promotion cree ensuite le tag cible sans reconstruire ;
+  \item le deploiement s'appuie sur le tag ou digest promu.
+\end{itemize}
+
+Ce choix constitue une bonne pratique professionnelle majeure, car il elimine l'ambiguite entre image testee et image deployee.
+
+\subsubsection{Etape 11 : transition de GitHub Actions vers Jenkins}
+
+Le projet disposait initialement de workflows GitHub Actions. Toutefois, pour disposer d'une chaine CI/CD plus explicite, plus demonstrable localement et plus conforme a une soutenance technique, Jenkins a ete retenu comme reference finale.
+
+Cette transition a eu plusieurs consequences :
+
+\begin{itemize}
+  \item separation explicite entre \texttt{Jenkinsfile} pour la CI et \texttt{Jenkinsfile.cd} pour la CD ;
+  \item maintien des scripts shell comme coeur de la logique d'execution ;
+  \item reduction de la logique enfouie dans l'orchestrateur CI/CD ;
+  \item possibilite de rejouer les memes commandes hors Jenkins.
+\end{itemize}
+
+Cette decision a permis de conserver une approche \textit{pipeline as code} tout en rendant la demonstration plus lisible et plus autonome.
+
+\subsubsection{Etape 12 : industrialisation de Jenkins en local}
+
+L'etape suivante a consiste a faire de Jenkins un composant reellement exploitable, et non un simple \textit{Jenkinsfile} theorique. Une stack locale Jenkins a donc ete ajoutee avec :
+
+\begin{itemize}
+  \item un \texttt{docker-compose} dedie ;
+  \item une liste de plugins maitrisee ;
+  \item une configuration \textit{Configuration as Code} ;
+  \item des jobs DSL versionnes ;
+  \item une strategie de credentials locaux ;
+  \item des scripts de bootstrap et de collecte de preuves.
+\end{itemize}
+
+L'objectif etait double :
+
+\begin{itemize}
+  \item prouver que Jenkins peut etre lance localement et seeded automatiquement ;
+  \item rendre reproductible la creation des jobs \texttt{securerag-hub-ci} et \texttt{securerag-hub-cd}.
+\end{itemize}
+
+Cette etape a completement change le niveau de maturite du projet : la CI/CD n'est plus seulement definie dans le code, elle devient une infrastructure locale executable et versionnee.
+
+\subsubsection{Etape 13 : gestion des secrets}
+
+Le traitement des secrets a ete formalise a trois niveaux.
+
+\paragraph{Niveau local.}
+Des fichiers exemple et des scripts de bootstrap ont ete ajoutes pour generer les secrets necessaires au developpement local, sans les committer dans le depot.
+
+\paragraph{Niveau Jenkins.}
+Les credentials Jenkins ont ete normalises, en particulier pour :
+
+\begin{itemize}
+  \item \texttt{cosign-private-key}
+  \item \texttt{cosign-public-key}
+  \item \texttt{cosign-password}
+\end{itemize}
+
+\paragraph{Niveau Kubernetes.}
+Les manifests applicatifs s'appuient sur des \textit{Secret} references via \texttt{secretRef}, et des scripts permettent de creer les secrets de developpement du namespace \texttt{securerag-hub}.
+
+Le point important ici est la separation claire entre :
+
+\begin{itemize}
+  \item exemples et gabarits versionnes ;
+  \item credentials d'exploitation non versionnes ;
+  \item secrets injectes au runtime.
+\end{itemize}
+
+\subsubsection{Etape 14 : stabilisation du runtime local et gestion du cas Ollama}
+
+Le composant \texttt{Ollama} a constitue le point le plus sensible du runtime local. Son image lourde et son comportement plus lent au premier demarrage ont cree un risque pour une demonstration fluide.
+
+Plutot que de masquer ce probleme, le projet a adopte une strategie plus robuste :
+
+\begin{itemize}
+  \item conserver un mode \texttt{dev} avec le composant reel ;
+  \item ajouter un overlay \texttt{demo} permettant un fonctionnement fallback ;
+  \item documenter ce mode comme une strategie de demonstration, et non comme une substitution de production.
+\end{itemize}
+
+Cette approche est importante d'un point de vue professionnel : elle montre qu'un environnement de demonstration n'a pas besoin d'etre fragile pour etre techniquement honnete, a condition que les ecarts soient explicites et documentes.
+
+\subsubsection{Etape 15 : integration du portail Laravel dans le runtime Kubernetes}
+
+Initialement, le portail Laravel etait surtout demarrable localement. Dans un deuxieme temps, il a ete integre comme workload Kubernetes a part entiere, avec :
+
+\begin{itemize}
+  \item \textit{Deployment}
+  \item \textit{Service}
+  \item \textit{ServiceAccount}
+  \item \textit{NetworkPolicy}
+  \item exposition via \texttt{NodePort}
+\end{itemize}
+
+Cette integration a renforce la coherence globale du projet : la plateforme web ne reste plus en marge de la chaine DevSecOps, elle fait partie du meme socle de build, release, deploiement et validation.
+
+\subsubsection{Etape 16 : documentation d'exploitation et de soutenance}
+
+En parallele des composants techniques, un ensemble de documents a ete construit afin de rendre le projet transmissible et defendable :
+
+\begin{itemize}
+  \item architecture cible DevSecOps ;
+  \item runbook Jenkins ;
+  \item runbook \texttt{kind} ;
+  \item runbook de promotion release ;
+  \item runbook de troubleshooting ;
+  \item strategie secrets ;
+  \item matrice de controles ;
+  \item rapports LaTeX pour le memoire.
+\end{itemize}
+
+Ce travail documentaire est central dans un projet de niveau Master DSIR. Il demontre que la valeur du chantier DevSecOps ne repose pas uniquement sur l'automatisation, mais aussi sur la capacite a expliquer, transmettre, auditer et reproduire la solution.
+
+\subsubsection{Etape 17 : corrections appliquees et fiabilisation finale}
+
+La phase finale du chantier n'a pas seulement consiste a ajouter de nouveaux composants. Elle a aussi permis de corriger plusieurs problemes reels observes lors des executions locales, afin d'ameliorer la demonstrabilite du projet sans masquer les limites de l'environnement.
+
+\paragraph{Correction de l'environnement Python local.}
+Lors des premiers essais de la commande \texttt{make test}, les tests FastAPI echouaient non pas a cause du code applicatif, mais a cause d'un probleme d'architecture entre l'interpreteur Python local et certaines extensions binaires, notamment \texttt{pydantic\_core} et \texttt{coverage}. La machine de test etant en \texttt{arm64}, alors que certains paquets avaient ete installes pour \texttt{x86\_64}, la collecte des tests s'interrompait avant execution.
+
+La correction retenue a ete simple et professionnelle :
+
+\begin{itemize}
+  \item creation d'un environnement virtuel dedie au depot ;
+  \item reinstallation propre des dependances dans cet environnement ;
+  \item abandon de l'utilisation du Python global comme source de verite pour les tests.
+\end{itemize}
+
+Cette correction a permis de retablir une campagne de tests locale cohérente, avec \texttt{12/12} tests au statut \texttt{PASS} et un taux de couverture mesure a \texttt{100\%}.
+
+\paragraph{Correction de la chaine de signature locale.}
+Un second ecart a ete observe lors des essais de verification et de promotion d'images : l'outil \texttt{Cosign} etait absent de l'environnement local. Les scripts de release fonctionnaient donc correctement d'un point de vue logique, mais leur execution etait bloquee par un pre-requis non satisfait.
+
+La correction appliquee a consiste a :
+
+\begin{itemize}
+  \item installer \texttt{Cosign} localement ;
+  \item utiliser les scripts de bootstrap du depot pour generer une paire de cles locale ;
+  \item normaliser l'usage des variables \texttt{COSIGN\_KEY}, \texttt{COSIGN\_PUBLIC\_KEY} et \texttt{COSIGN\_PASSWORD}.
+\end{itemize}
+
+Cette etape est importante dans le memoire car elle montre que la securisation de la release ne depend pas seulement des scripts, mais aussi d'une hygiene explicite de l'environnement d'execution.
+
+\paragraph{Correction de l'interaction entre Kyverno et les pods de validation.}
+L'activation reelle de Kyverno a fait apparaitre un troisieme point de vigilance. Les scripts de validation post-deploiement demarraient un pod ephemere en utilisant une image \texttt{securerag-hub-*} du registre local \texttt{localhost:5001}. Cette image entrait donc dans le perimetre de la policy de verification Cosign. Or, au moment du test, le registre local n'etait pas joignable par Kyverno via \texttt{localhost} depuis le contexte du cluster, ce qui provoquait un refus d'admission.
+
+La correction retenue n'a pas ete de desactiver la policy, mais de clarifier le protocole de validation :
+
+\begin{itemize}
+  \item conserver la policy Kyverno en mode \texttt{Audit} par defaut ;
+  \item reserver le mode \texttt{Enforce} aux environnements ou la chaine de signature est effectivement stabilisee ;
+  \item utiliser une image publique de validation, par exemple \texttt{python:3.12-slim}, pour les pods ephemeres lorsque l'objectif est de tester les endpoints internes sans faire dependre ces tests d'un registre local signe.
+\end{itemize}
+
+Cette correction est pedagogiquement utile car elle distingue clairement deux objectifs differents :
+
+\begin{itemize}
+  \item verifier la securite de la chaine d'images applicatives ;
+  \item verifier la sante du cluster et des endpoints internes.
+\end{itemize}
+
+\paragraph{Activation effective des addons de demonstration.}
+La fin du chantier a egalement permis de transformer deux briques jusque-la seulement preparees en composants reellement activables sur le cluster :
+
+\begin{itemize}
+  \item \texttt{metrics-server}, afin de rendre les \textit{Horizontal Pod Autoscaler} effectivement observables ;
+  \item \texttt{Kyverno}, afin de rendre les policies d'admission applicables au cluster local.
+\end{itemize}
+
+Une fois \texttt{metrics-server} installe, les \textit{HPA} de \texttt{api-gateway} et de \texttt{portal-web} n'affichent plus \texttt{cpu: unknown}. De meme, une fois \texttt{Kyverno} installe, les \textit{ClusterPolicy} du projet sont detectees a l'etat \texttt{Ready}. Ces observations renforcent la credibilite de la plateforme : les manifests ne sont pas seulement versionnes, ils sont egalement activables et observables localement.
+
+\paragraph{Consolidation honnete de la preuve finale.}
+Enfin, la campagne de reference unique a ete renforcee pour produire un mode \texttt{dry-run}. Ce choix n'a pas pour but de simuler un succes fictif, mais de fournir un support demonstratif honnete lorsque certains pre-requis ne sont pas encore reunis, par exemple l'absence d'images deja signees dans le registre local au moment de la soutenance.
+
+La preuve finale du projet distingue donc desormais explicitement :
+
+\begin{itemize}
+  \item ce qui a ete reellement execute et observe ;
+  \item ce qui est pret a etre rejoue ;
+  \item ce qui reste conditionne par l'etat local de Docker, du registre, de \texttt{kind} ou des cles Cosign.
+\end{itemize}
+
+\subsubsection{Etat final atteint}
+
+Au terme du chantier, les elements suivants sont consideres comme finalises dans le depot :
+
+\begin{itemize}
+  \item Jenkins local ;
+  \item jobs CI/CD ;
+  \item scripts de release ;
+  \item scripts de deploiement verifie ;
+  \item documentation de type runbook ;
+  \item strategie de secrets ;
+  \item overlay \texttt{demo} ;
+  \item integration de \texttt{portal-web} dans Kubernetes.
+\end{itemize}
+
+Autrement dit, la chaine DevSecOps de \textit{SecureRAG Hub} couvre desormais :
+
+\begin{itemize}
+  \item la verification continue du code ;
+  \item la production d'artefacts OCI ;
+  \item la generation d'un SBOM ;
+  \item la signature et la verification des images ;
+  \item la promotion d'artefacts sans reconstruction ;
+  \item le deploiement sur un cluster local \texttt{kind} ;
+  \item la validation post-deploiement ;
+  \item la collecte de preuves techniques pour le memoire et la soutenance.
+\end{itemize}
+
+\subsubsection{Analyse critique de la demarche}
+
+La construction de la chaine DevSecOps de \textit{SecureRAG Hub} permet de tirer plusieurs enseignements.
+
+\paragraph{Premier enseignement : la reproductibilite est aussi importante que l'automatisation.}
+Une pile locale reproductible, basee sur scripts shell, Docker, \texttt{kind} et Jenkins, s'est revelee plus defendable pedagogiquement qu'une solution tres distribuee dependant d'equipements externes.
+
+\paragraph{Deuxieme enseignement : la securite doit etre repartie tout au long du cycle de vie.}
+Le projet n'a pas concentre la securite dans un unique scan ou dans une unique etape de deploiement. Au contraire, il a reparti les controles sur le code, les images, la signature, les manifests, le runtime et la validation finale.
+
+\paragraph{Troisieme enseignement : la documentation fait partie de la valeur DevSecOps.}
+Les runbooks, les rapports et les annexes ne sont pas un simple complement de forme. Ils constituent la preuve que la solution peut etre transmise, reprise et evaluee.
+
+\subsubsection{Conclusion generale}
+
+La partie DevSecOps de \textit{SecureRAG Hub} a ete construite de facon progressive, en partant d'un depot structure et de scripts simples, puis en evoluant vers une chaine complete integree a Jenkins, a Kubernetes local et a une logique de \textit{supply chain security}. Le projet atteint ainsi un niveau de maturite satisfaisant pour un PFE Master DSIR : il est techniquement credible, localement executable, securise de maniere concrete et suffisamment documente pour etre soutenu de facon rigoureuse.
+
+Cette progression pas a pas constitue un resultat en soi. Elle montre que l'industrialisation securisee d'une plateforme applicative ne se limite pas au choix de quelques outils ; elle releve d'une demarche d'architecture, de normalisation, de verification et de preuve, menee sur l'ensemble du cycle de vie logiciel.

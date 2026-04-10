@@ -5,7 +5,7 @@ set -euo pipefail
 NS="${NS:-securerag-hub}"
 REPORT_DIR="${REPORT_DIR:-artifacts/validation}"
 REPORT_FILE="${REPORT_DIR}/rag-smoke.txt"
-VALIDATION_IMAGE="${VALIDATION_IMAGE:-localhost:5001/securerag-hub-api-gateway:dev}"
+VALIDATION_IMAGE="${VALIDATION_IMAGE:-${REGISTRY_HOST:-localhost:5001}/securerag-hub-api-gateway:${IMAGE_TAG:-dev}}"
 probe_pod="rag-smoke-check-$(date +%s)"
 rag_pod="rag-endpoint-check-$(date +%s)"
 

@@ -1,0 +1,56 @@
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: securerag-require-pod-security
+  annotations:
+    policies.kyverno.io/title: SecureRAG Pod Security Baseline
+    policies.kyverno.io/category: Pod Security
+    policies.kyverno.io/severity: medium
+    policies.kyverno.io/subject: Pod
+    policies.kyverno.io/description: >-
+      Audits pods in the securerag-hub namespace to ensure a consistent
+      minimum security posture without breaking the local demonstration
+      environment.
+spec:
+  validationFailureAction: Audit
+  background: true
+  rules:
+    - name: require-seccomp-serviceaccount-and-resource-guards
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+              namespaces:
+                - securerag-hub
+      validate:
+        message: >-
+          Pods in securerag-hub should disable service account token
+          automounting, use RuntimeDefault seccomp, disable privilege
+          escalation, and declare CPU/memory requests and limits.
+        pattern:
+          spec:
+            automountServiceAccountToken: false
+            securityContext:
+              seccompProfile:
+                type: RuntimeDefault
+            containers:
+              - securityContext:
+                  allowPrivilegeEscalation: false
+                resources:
+                  requests:
+                    cpu: "?*"
+                    memory: "?*"
+                  limits:
+                    cpu: "?*"
+                    memory: "?*"
+            =(initContainers):
+              - securityContext:
+                  allowPrivilegeEscalation: false
+                resources:
+                  requests:
+                    cpu: "?*"
+                    memory: "?*"
+                  limits:
+                    cpu: "?*"
+                    memory: "?*"

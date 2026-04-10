@@ -5,6 +5,8 @@ namespace: securerag-hub
 
 resources:
   - namespace.yaml
+  - resourcequota.yaml
+  - limitrange.yaml
   - networkpolicy-default-deny.yaml
   - networkpolicy-allow-dns.yaml
   - networkpolicy-validation-ingress.yaml
@@ -15,6 +17,7 @@ resources:
   - qdrant/deployment.yaml
   - qdrant/service.yaml
   - qdrant/networkpolicy.yaml
+  - qdrant/pdb.yaml
 
   - ollama/serviceaccount.yaml
   - ollama/pvc.yaml
@@ -22,10 +25,19 @@ resources:
   - ollama/service.yaml
   - ollama/networkpolicy.yaml
 
+  - portal-web/serviceaccount.yaml
+  - portal-web/deployment.yaml
+  - portal-web/service.yaml
+  - portal-web/networkpolicy.yaml
+  - portal-web/pdb.yaml
+  - portal-web/hpa.yaml
+
   - api-gateway/serviceaccount.yaml
   - api-gateway/deployment.yaml
   - api-gateway/service.yaml
   - api-gateway/networkpolicy.yaml
+  - api-gateway/pdb.yaml
+  - api-gateway/hpa.yaml
 
   - auth-users/serviceaccount.yaml
   - auth-users/deployment.yaml
@@ -41,6 +53,7 @@ resources:
   - llm-orchestrator/deployment.yaml
   - llm-orchestrator/service.yaml
   - llm-orchestrator/networkpolicy.yaml
+  - llm-orchestrator/pdb.yaml
 
   - security-auditor/serviceaccount.yaml
   - security-auditor/deployment.yaml

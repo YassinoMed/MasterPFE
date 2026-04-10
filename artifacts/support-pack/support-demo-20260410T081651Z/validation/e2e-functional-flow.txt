@@ -1,0 +1,12 @@
+=== E2E functional flow validation ===
+[PASS] Service api-gateway exists
+[PASS] Service auth-users exists
+[PASS] Service chatbot-manager exists
+[PASS] Service llm-orchestrator exists
+[PASS] Service security-auditor exists
+[PASS] Service knowledge-hub exists
+[PASS] All internal /healthz endpoints are reachable
+[PASS] External access through NodePort works on localhost:8080
+[PASS] API Gateway root endpoint responds
+[SKIP] Conversation endpoint /chat not implemented yet
+E2E functional flow validation completed.

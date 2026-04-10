@@ -4,7 +4,7 @@ set -euo pipefail
 
 NS="${NS:-securerag-hub}"
 AUDITOR_URL="${AUDITOR_URL:-http://security-auditor:8080/healthz}"
-VALIDATION_IMAGE="${VALIDATION_IMAGE:-localhost:5001/securerag-hub-api-gateway:dev}"
+VALIDATION_IMAGE="${VALIDATION_IMAGE:-${REGISTRY_HOST:-localhost:5001}/securerag-hub-api-gateway:${IMAGE_TAG:-dev}}"
 pod_name="adversarial-check-$(date +%s)"
 
 echo "Basic adversarial validation bootstrap"

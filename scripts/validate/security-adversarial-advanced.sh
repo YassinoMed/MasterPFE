@@ -5,7 +5,7 @@ set -euo pipefail
 NS="${NS:-securerag-hub}"
 REPORT_DIR="${REPORT_DIR:-artifacts/validation}"
 REPORT_FILE="${REPORT_DIR}/security-adversarial.txt"
-VALIDATION_IMAGE="${VALIDATION_IMAGE:-localhost:5001/securerag-hub-api-gateway:dev}"
+VALIDATION_IMAGE="${VALIDATION_IMAGE:-${REGISTRY_HOST:-localhost:5001}/securerag-hub-api-gateway:${IMAGE_TAG:-dev}}"
 availability_pod="auditor-availability-check-$(date +%s)"
 endpoint_pod="auditor-endpoint-check-$(date +%s)"
 
