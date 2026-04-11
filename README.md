@@ -383,5 +383,5 @@ Pour assistance :
 
 ## 📄 Licence & Authorship
 
-Projet Master DSIR - SecureRAG Hub  
-2024-2026
+Projet Master DSIR - SecureRAG Hub  BY Yassino
+2026-2027
