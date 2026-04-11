@@ -141,6 +141,21 @@ pipeline {
       }
     }
 
+    stage('Collect Supply Chain Evidence') {
+      steps {
+        sh '''
+          set -euo pipefail
+          REPORT_DIR="${REPORT_DIR}" SBOM_DIR="${SBOM_DIR}" \
+          bash scripts/release/collect-supply-chain-evidence.sh
+        '''
+      }
+      post {
+        always {
+          archiveArtifacts allowEmptyArchive: true, artifacts: 'artifacts/release/supply-chain-evidence.md'
+        }
+      }
+    }
+
     stage('Deploy to kind') {
       when {
         expression { return params.RUN_DEPLOY_KIND }
@@ -189,6 +204,8 @@ pipeline {
       steps {
         sh '''
           set -euo pipefail
+          bash scripts/validate/final-proof-check.sh || true
+          bash scripts/validate/generate-final-validation-summary.sh || true
           PACK_ID="jenkins-cd-${BUILD_NUMBER}-$(date -u +%Y%m%dT%H%M%SZ)" \
           bash scripts/validate/build-support-pack.sh
         '''

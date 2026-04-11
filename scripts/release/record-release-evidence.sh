@@ -54,6 +54,7 @@ artifact_status() {
   printf '| `sign-summary.txt` | %s |\n' "$(artifact_status "${REPORT_DIR}/sign-summary.txt")"
   printf '| `sbom-summary.txt` | %s |\n' "$(artifact_status "${REPORT_DIR}/sbom-summary.txt")"
   printf '| `release-manifest.env` | %s |\n' "$(artifact_status "${MANIFEST_FILE}")"
+  printf '| `supply-chain-evidence.md` | %s |\n' "$(artifact_status "${REPORT_DIR}/supply-chain-evidence.md")"
 
   printf '\n## Digests promoted\n\n'
   if [[ -f "${DIGEST_RECORD_FILE}" ]]; then
@@ -78,6 +79,7 @@ artifact_status() {
 
   printf '\n## Notes\n\n'
   printf -- '- This document records release evidence only; runtime validation evidence is stored under `artifacts/validation/`.\n'
+  printf -- '- Consolidated supply-chain evidence is stored in `artifacts/release/supply-chain-evidence.md` when generated.\n'
   printf -- '- If promotion by digest has not run yet, tag-level evidence may exist without digest-level evidence.\n'
 } > "${EVIDENCE_FILE}"
 

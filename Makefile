@@ -13,7 +13,7 @@ DIGEST_RECORD_FILE ?= $(REPORT_DIR)/promotion-digests.txt
 OFFICIAL_SCENARIO ?= demo
 SUPPORT_PACK_ROOT ?= artifacts/support-pack
 
-.PHONY: help lint test verify promote promote-digest deploy validate demo campaign final-campaign release-evidence support-pack kyverno-install kyverno-enforce metrics-install clean
+.PHONY: help lint test verify promote promote-digest deploy validate demo campaign final-campaign release-evidence supply-chain-evidence final-proof final-summary support-pack kyverno-install kyverno-enforce metrics-install clean
 
 help: ## Show available targets
 	@awk 'BEGIN {FS = ":.*## "; print "Available targets:"} /^[a-zA-Z0-9_.-]+:.*## / {printf "  %-12s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
@@ -69,6 +69,15 @@ final-campaign: ## Run the official final campaign wrapper with support-pack gen
 release-evidence: ## Generate a consolidated release evidence document
 	@REGISTRY_HOST=$(REGISTRY_HOST) IMAGE_PREFIX=$(IMAGE_PREFIX) SOURCE_IMAGE_TAG=$(SOURCE_IMAGE_TAG) TARGET_IMAGE_TAG=$(TARGET_IMAGE_TAG) REPORT_DIR=$(REPORT_DIR) SBOM_DIR=$(SBOM_DIR) DIGEST_RECORD_FILE=$(DIGEST_RECORD_FILE) \
 		bash scripts/release/record-release-evidence.sh
+
+supply-chain-evidence: ## Consolidate SBOM, signature, verification and promotion evidence
+	@REPORT_DIR=$(REPORT_DIR) SBOM_DIR=$(SBOM_DIR) bash scripts/release/collect-supply-chain-evidence.sh
+
+final-proof: ## Run the final non-destructive soutenance proof checks
+	@bash scripts/validate/final-proof-check.sh
+
+final-summary: ## Generate the final soutenance validation summary
+	@bash scripts/validate/generate-final-validation-summary.sh
 
 support-pack: ## Build a support pack from current release, validation and Jenkins artefacts
 	@SUPPORT_PACK_ROOT=$(SUPPORT_PACK_ROOT) bash scripts/validate/build-support-pack.sh

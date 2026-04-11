@@ -279,11 +279,30 @@ make demo IMAGE_TAG=dev
 make campaign SOURCE_IMAGE_TAG=dev TARGET_IMAGE_TAG=release-local
 make final-campaign OFFICIAL_SCENARIO=demo CAMPAIGN_MODE=dry-run
 make release-evidence
+make supply-chain-evidence
+make final-proof
+make final-summary
 make support-pack
 make kyverno-install
 make kyverno-enforce
 make metrics-install
 ```
+
+## Campagne finale officielle
+
+Le scenario officiel de soutenance est `demo`.
+
+Commandes utiles :
+
+```bash
+OFFICIAL_SCENARIO=demo CAMPAIGN_MODE=dry-run make final-campaign
+make final-proof
+make final-summary
+make supply-chain-evidence
+make support-pack
+```
+
+Le mode `dry-run` prepare les preuves sans forcer la verification Cosign, la promotion ou le redeploiement. Le mode `execute` doit etre lance uniquement lorsque Docker, kind, kubectl, Cosign, Syft, les cles et le registre local sont disponibles et stabilises.
 
 ## Runbooks utiles
 
@@ -295,6 +314,7 @@ make metrics-install
 - [Environment freeze](/Users/mohamedyassine/Desktop/PFE/Master/docs/runbooks/environment-freeze.md)
 - [Troubleshooting](/Users/mohamedyassine/Desktop/PFE/Master/docs/runbooks/troubleshooting.md)
 - [Final proof](/Users/mohamedyassine/Desktop/PFE/Master/docs/runbooks/final-proof.md)
+- [Jenkins cloud fallback](/Users/mohamedyassine/Desktop/PFE/Master/docs/runbooks/jenkins-cloud-fallback.md)
 - [Kyverno install](/Users/mohamedyassine/Desktop/PFE/Master/docs/runbooks/kyverno-install.md)
 - [Metrics Server](/Users/mohamedyassine/Desktop/PFE/Master/docs/runbooks/metrics-server.md)
 - [Jenkins recovery](/Users/mohamedyassine/Desktop/PFE/Master/docs/runbooks/jenkins-recovery.md)
