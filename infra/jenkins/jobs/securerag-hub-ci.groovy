@@ -17,6 +17,7 @@ pipelineJob('securerag-hub-ci') {
         }
     }
     triggers {
+        githubPush()
         scm('H/5 * * * *')
     }
     logRotator {

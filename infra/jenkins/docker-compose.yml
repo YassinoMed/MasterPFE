@@ -14,7 +14,7 @@ services:
       JAVA_OPTS: "-Djenkins.install.runSetupWizard=false"
       JENKINS_ADMIN_ID: admin
       JENKINS_ADMIN_PASSWORD: change-me-now
-      JENKINS_URL: http://localhost:8085/
+      JENKINS_URL: ${JENKINS_URL:-http://localhost:8085/}
       SECURERAG_GIT_URL: https://github.com/YassinoMed/MasterPFE.git
       SECURERAG_GIT_BRANCH: "*/main"
       ENABLE_LOCAL_FORWARDING: "true"
