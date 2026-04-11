@@ -13,7 +13,7 @@ DIGEST_RECORD_FILE ?= $(REPORT_DIR)/promotion-digests.txt
 OFFICIAL_SCENARIO ?= demo
 SUPPORT_PACK_ROOT ?= artifacts/support-pack
 
-.PHONY: help lint test verify promote promote-digest deploy validate demo campaign final-campaign release-evidence supply-chain-evidence final-proof final-summary support-pack kyverno-install kyverno-enforce metrics-install clean
+.PHONY: help lint test verify promote promote-digest deploy validate demo campaign final-campaign release-evidence supply-chain-evidence supply-chain-execute jenkins-webhook-proof cluster-security-proof final-proof final-summary support-pack kyverno-install kyverno-enforce metrics-install clean
 
 help: ## Show available targets
 	@awk 'BEGIN {FS = ":.*## "; print "Available targets:"} /^[a-zA-Z0-9_.-]+:.*## / {printf "  %-12s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
@@ -72,6 +72,16 @@ release-evidence: ## Generate a consolidated release evidence document
 
 supply-chain-evidence: ## Consolidate SBOM, signature, verification and promotion evidence
 	@REPORT_DIR=$(REPORT_DIR) SBOM_DIR=$(SBOM_DIR) bash scripts/release/collect-supply-chain-evidence.sh
+
+supply-chain-execute: ## Sign, verify, promote by digest, generate SBOMs and record evidence
+	@REGISTRY_HOST=$(REGISTRY_HOST) IMAGE_PREFIX=$(IMAGE_PREFIX) SOURCE_IMAGE_TAG=$(SOURCE_IMAGE_TAG) TARGET_IMAGE_TAG=$(TARGET_IMAGE_TAG) REPORT_DIR=$(REPORT_DIR) SBOM_DIR=$(SBOM_DIR) DIGEST_RECORD_FILE=$(DIGEST_RECORD_FILE) \
+		bash scripts/release/run-supply-chain-execute.sh
+
+jenkins-webhook-proof: ## Validate Jenkins GitHub webhook reachability and CI trigger readiness
+	@bash scripts/jenkins/validate-github-webhook.sh
+
+cluster-security-proof: ## Collect metrics-server, HPA and Kyverno runtime evidence
+	@bash scripts/validate/validate-cluster-security-addons.sh
 
 final-proof: ## Run the final non-destructive soutenance proof checks
 	@bash scripts/validate/final-proof-check.sh
