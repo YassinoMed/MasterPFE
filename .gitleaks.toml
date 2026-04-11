@@ -8,8 +8,10 @@ description = "Allow generated reports, documentation samples, and test fixtures
 paths = [
   '''(^|/)\.coverage-artifacts/''',
   '''(^|/)docs/''',
+  '''(^|/)infra/jenkins/secrets/''',
   '''(^|/)security/reports/''',
   '''(^|/)security/adversarial/''',
+  '''(^|/)security/secrets/\.env\.local$''',
   '''(^|/)tests/fixtures/''',
   '''(^|/)tests/security/fixtures/'''
 ]
