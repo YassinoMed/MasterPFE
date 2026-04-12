@@ -57,9 +57,11 @@ fi
 
 bash scripts/release/record-release-evidence.sh || true
 bash scripts/validate/final-proof-check.sh || true
+bash scripts/validate/run-devsecops-final-proof.sh || true
 bash scripts/validate/generate-final-validation-summary.sh || true
 bash scripts/validate/validate-cluster-security-addons.sh || true
 bash scripts/release/collect-supply-chain-evidence.sh || true
+bash scripts/validate/generate-devsecops-readiness-report.sh || true
 PACK_ID="support-${OFFICIAL_SCENARIO}-$(date -u '+%Y%m%dT%H%M%SZ')" \
   SUPPORT_PACK_ROOT="${SUPPORT_PACK_ROOT}" \
   bash scripts/validate/build-support-pack.sh || true

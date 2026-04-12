@@ -1,0 +1,80 @@
+\section{Alignement final DevSecOps}
+
+\subsection{Position de reference}
+
+Le scenario officiel de soutenance de \textit{SecureRAG Hub} est le mode
+\texttt{demo}. Jenkins reste l'autorite CI/CD officielle du projet, tandis que
+GitHub Actions est conserve comme historique technique. Cette decision evite de
+presenter deux chaines concurrentes et clarifie le perimetre de demonstration.
+
+\subsection{Elements validates}
+
+Les elements suivants sont consideres comme validates dans l'etat courant du
+projet :
+
+\begin{itemize}
+  \item execution des tests applicatifs de demonstration ;
+  \item couverture de tests ;
+  \item linting Python avec Ruff ;
+  \item analyse Semgrep ;
+  \item detection de secrets avec Gitleaks ;
+  \item scan filesystem avec Trivy ;
+  \item deploiement local sur \texttt{kind} ;
+  \item overlay Kubernetes \texttt{demo} ;
+  \item Jenkins local Docker ;
+  \item campagne CD \texttt{demo} en mode \texttt{dry-run} ;
+  \item generation d'un support pack de soutenance.
+\end{itemize}
+
+\subsection{Elements prets mais dependants de l'environnement}
+
+Les composants suivants sont implementes et scriptes, mais leur validation
+complete depend de l'environnement d'execution :
+
+\begin{itemize}
+  \item declenchement Jenkins par webhook GitHub ;
+  \item generation de SBOM par \texttt{Syft} ;
+  \item signature et verification d'images par \texttt{Cosign} ;
+  \item promotion par digest sans reconstruction ;
+  \item deploiement verifie en mode \texttt{execute} ;
+  \item activation de \texttt{metrics-server} ;
+  \item observation effective des \textit{HorizontalPodAutoscaler} ;
+  \item installation de \texttt{Kyverno} ;
+  \item passage progressif des policies de \texttt{Audit} vers \texttt{Enforce}.
+\end{itemize}
+
+Ces points ne doivent pas etre presentes comme executes si les artefacts de
+preuve correspondants ne sont pas disponibles. Ils doivent etre presentes comme
+prets a etre rejoues, avec dependances explicites.
+
+\subsection{Preuves a conserver}
+
+Les preuves finales attendues sont les suivantes :
+
+\begin{itemize}
+  \item \texttt{artifacts/jenkins/github-webhook-validation.md} ;
+  \item \texttt{artifacts/release/supply-chain-execute-summary.md} ;
+  \item \texttt{artifacts/release/sign-summary.txt} ;
+  \item \texttt{artifacts/release/verify-summary.txt} ;
+  \item \texttt{artifacts/release/promotion-by-digest-summary.txt} ;
+  \item \texttt{artifacts/release/promotion-digests.txt} ;
+  \item \texttt{artifacts/sbom/sbom-index.txt} ;
+  \item \texttt{artifacts/validation/cluster-security-addons.md} ;
+  \item \texttt{artifacts/final/final-validation-summary.md} ;
+  \item \texttt{artifacts/support-pack/*.tar.gz}.
+\end{itemize}
+
+\subsection{Formulation recommandee pour la soutenance}
+
+La formulation recommandee est la suivante :
+
+\begin{quote}
+Le socle DevSecOps, Kubernetes et demonstration \texttt{demo} est operationnel
+et valide. La supply chain avancee est structuree et executable, mais sa preuve
+complete depend de la disponibilite locale de Docker, du registre OCI, des cles
+Cosign, de Syft et des images signees. Les addons de securite cluster
+\texttt{metrics-server} et \texttt{Kyverno} sont installables et observables via
+des scripts dedies, avec un passage prudent de \texttt{Audit} vers
+\texttt{Enforce}.
+\end{quote}
+

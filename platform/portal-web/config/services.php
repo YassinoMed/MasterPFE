@@ -35,4 +35,35 @@ return [
         ],
     ],
 
+    'secure_rag' => [
+        /*
+        |--------------------------------------------------------------------------
+        | Portal backend mode
+        |--------------------------------------------------------------------------
+        |
+        | auto: try the Laravel business services, then fallback to demo data.
+        | api: require the Laravel business services to answer.
+        | mock: keep the Blade portal fully local and deterministic.
+        |
+        */
+        'mode' => env('SECURERAG_PORTAL_BACKEND_MODE', 'auto'),
+        'timeout' => (float) env('SECURERAG_PORTAL_BACKEND_TIMEOUT', 0.4),
+
+        'auth_users' => [
+            'base_url' => env('AUTH_USERS_BASE_URL', 'http://auth-users-service'),
+        ],
+
+        'chatbot_manager' => [
+            'base_url' => env('CHATBOT_MANAGER_BASE_URL', 'http://chatbot-manager-service'),
+        ],
+
+        'conversation' => [
+            'base_url' => env('CONVERSATION_BASE_URL', 'http://conversation-service'),
+        ],
+
+        'audit_security' => [
+            'base_url' => env('AUDIT_SECURITY_BASE_URL', 'http://audit-security-service'),
+        ],
+    ],
+
 ];

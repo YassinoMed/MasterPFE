@@ -1,0 +1,2 @@
+NAME                  REQUEST                                                                                                                                     LIMIT                                            AGE
+securerag-hub-quota   persistentvolumeclaims: 2/10, pods: 9/30, requests.cpu: 1250m/3, requests.memory: 1920Mi/3Gi, requests.storage: 25Gi/40Gi, services: 9/20   limits.cpu: 4400m/8, limits.memory: 5888Mi/8Gi   22m

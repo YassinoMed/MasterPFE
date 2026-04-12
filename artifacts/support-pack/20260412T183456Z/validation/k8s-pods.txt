@@ -1,0 +1,10 @@
+NAME                                READY   STATUS    RESTARTS        AGE    IP            NODE                   NOMINATED NODE   READINESS GATES
+api-gateway-f7755d894-7fn9l         1/1     Running   2 (7m11s ago)   33h    10.244.1.2    securerag-dev-worker   <none>           <none>
+auth-users-846b9d78c4-hxfz2         1/1     Running   2 (7m11s ago)   33h    10.244.1.4    securerag-dev-worker   <none>           <none>
+chatbot-manager-54df7d999-b4fhz     1/1     Running   2 (7m11s ago)   33h    10.244.1.10   securerag-dev-worker   <none>           <none>
+knowledge-hub-6bdf546b5d-zwjd6      1/1     Running   2 (7m11s ago)   33h    10.244.1.3    securerag-dev-worker   <none>           <none>
+llm-orchestrator-779d744c7-5wtw4    1/1     Running   2 (7m11s ago)   33h    10.244.1.7    securerag-dev-worker   <none>           <none>
+ollama-586b47b575-v42cw             1/1     Running   2 (7m11s ago)   33h    10.244.1.9    securerag-dev-worker   <none>           <none>
+portal-web-7fbb7f9bfb-6kbsn         1/1     Running   1 (7m11s ago)   100m   10.244.1.6    securerag-dev-worker   <none>           <none>
+qdrant-0                            1/1     Running   2 (7m11s ago)   33h    10.244.1.8    securerag-dev-worker   <none>           <none>
+security-auditor-5fd889bb9b-f65zr   1/1     Running   2 (7m11s ago)   33h    10.244.1.5    securerag-dev-worker   <none>           <none>

@@ -1,0 +1,6 @@
+=== RAG smoke validation ===
+[PASS] deployment/llm-orchestrator exists
+[PASS] deployment/knowledge-hub exists
+[PASS] deployment/ollama exists
+[PASS] statefulset/qdrant exists
+[FAIL] RAG dependencies are not fully reachable

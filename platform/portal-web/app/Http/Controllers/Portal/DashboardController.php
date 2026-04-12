@@ -3,12 +3,17 @@
 namespace App\Http\Controllers\Portal;
 
 use App\Http\Controllers\Controller;
+use App\Services\PortalBackendClient;
 use App\Support\DemoPortalData;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
 
 class DashboardController extends Controller
 {
+    public function __construct(private readonly PortalBackendClient $backends)
+    {
+    }
+
     public function user(): View
     {
         return $this->page('user', 'Portail utilisateur', DemoPortalData::userDashboard());
@@ -21,32 +26,44 @@ class DashboardController extends Controller
 
     public function users(): View
     {
-        return $this->page('users', 'Gestion utilisateurs', ['users' => DemoPortalData::users()]);
+        return $this->page('users', 'Gestion utilisateurs', [
+            'users' => $this->backends->users(),
+            'source' => $this->backends->source('auth_users'),
+        ]);
     }
 
     public function roles(): View
     {
-        return $this->page('roles', 'Roles et permissions', ['roles' => DemoPortalData::roles()]);
+        return $this->page('roles', 'Roles et permissions', [
+            'roles' => $this->backends->roles(),
+            'source' => $this->backends->source('auth_users'),
+        ]);
     }
 
     public function chatbots(): View
     {
-        return $this->page('chatbots', 'Gestion chatbots', ['chatbots' => DemoPortalData::chatbots()]);
+        return $this->page('chatbots', 'Gestion chatbots', [
+            'chatbots' => $this->backends->chatbots(),
+            'source' => $this->backends->source('chatbot_manager'),
+        ]);
     }
 
     public function chat(): View
     {
-        return $this->page('chat', 'Conversation demo', DemoPortalData::conversation());
+        return $this->page('chat', 'Conversation demo', $this->backends->conversation());
     }
 
     public function history(): View
     {
-        return $this->page('history', 'Historique conversations', ['history' => DemoPortalData::conversationHistory()]);
+        return $this->page('history', 'Historique conversations', [
+            'history' => $this->backends->conversationHistory(),
+            'source' => $this->backends->source('conversation'),
+        ]);
     }
 
     public function security(): View
     {
-        return $this->page('security', 'Supervision securite', DemoPortalData::securityIncidents());
+        return $this->page('security', 'Supervision securite', $this->backends->securityIncidents());
     }
 
     public function devsecops(): View
@@ -66,32 +83,44 @@ class DashboardController extends Controller
 
     public function apiChatbots(): JsonResponse
     {
-        return response()->json(['chatbots' => DemoPortalData::chatbots()]);
+        return response()->json([
+            'chatbots' => $this->backends->chatbots(),
+            'source' => $this->backends->source('chatbot_manager'),
+        ]);
     }
 
     public function apiUsers(): JsonResponse
     {
-        return response()->json(['users' => DemoPortalData::users()]);
+        return response()->json([
+            'users' => $this->backends->users(),
+            'source' => $this->backends->source('auth_users'),
+        ]);
     }
 
     public function apiRoles(): JsonResponse
     {
-        return response()->json(['roles' => DemoPortalData::roles()]);
+        return response()->json([
+            'roles' => $this->backends->roles(),
+            'source' => $this->backends->source('auth_users'),
+        ]);
     }
 
     public function apiConversation(): JsonResponse
     {
-        return response()->json(DemoPortalData::conversation());
+        return response()->json($this->backends->conversation());
     }
 
     public function apiHistory(): JsonResponse
     {
-        return response()->json(['history' => DemoPortalData::conversationHistory()]);
+        return response()->json([
+            'history' => $this->backends->conversationHistory(),
+            'source' => $this->backends->source('conversation'),
+        ]);
     }
 
     public function apiSecurity(): JsonResponse
     {
-        return response()->json(DemoPortalData::securityIncidents());
+        return response()->json($this->backends->securityIncidents());
     }
 
     public function apiDevSecOps(): JsonResponse
