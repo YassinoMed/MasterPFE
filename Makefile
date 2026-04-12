@@ -13,7 +13,7 @@ DIGEST_RECORD_FILE ?= $(REPORT_DIR)/promotion-digests.txt
 OFFICIAL_SCENARIO ?= demo
 SUPPORT_PACK_ROOT ?= artifacts/support-pack
 
-.PHONY: help lint test verify promote promote-digest deploy validate demo campaign final-campaign release-evidence supply-chain-evidence supply-chain-execute jenkins-webhook-proof cluster-security-proof final-proof final-summary support-pack kyverno-install kyverno-enforce metrics-install clean
+.PHONY: help lint test laravel-test verify promote promote-digest deploy validate demo campaign final-campaign release-evidence supply-chain-evidence supply-chain-execute jenkins-webhook-proof jenkins-ci-push-proof cluster-security-proof devsecops-final-proof devsecops-readiness final-proof final-summary support-pack kyverno-install kyverno-enforce metrics-install clean
 
 help: ## Show available targets
 	@awk 'BEGIN {FS = ":.*## "; print "Available targets:"} /^[a-zA-Z0-9_.-]+:.*## / {printf "  %-12s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
@@ -28,6 +28,12 @@ lint: ## Validate shell scripts, Jenkins config, and Kustomize renders
 test: ## Run automated tests and coverage collection
 	@bash scripts/ci/run-tests.sh
 	@bash scripts/ci/collect-coverage.sh
+
+laravel-test: ## Run Blade portal and Laravel business microservice tests
+	@for app in platform/portal-web services-laravel/auth-users-service services-laravel/chatbot-manager-service services-laravel/conversation-service services-laravel/audit-security-service; do \
+		echo "[INFO] Testing $$app"; \
+		(cd "$$app" && php artisan test); \
+	done
 
 verify: ## Verify image signatures for IMAGE_TAG
 	@REGISTRY_HOST=$(REGISTRY_HOST) IMAGE_PREFIX=$(IMAGE_PREFIX) IMAGE_TAG=$(IMAGE_TAG) REPORT_DIR=$(REPORT_DIR) \
@@ -80,8 +86,17 @@ supply-chain-execute: ## Sign, verify, promote by digest, generate SBOMs and rec
 jenkins-webhook-proof: ## Validate Jenkins GitHub webhook reachability and CI trigger readiness
 	@bash scripts/jenkins/validate-github-webhook.sh
 
+jenkins-ci-push-proof: ## Verify Jenkins consumed the latest pushed Git commit
+	@bash scripts/jenkins/verify-ci-push-trigger.sh
+
 cluster-security-proof: ## Collect metrics-server, HPA and Kyverno runtime evidence
 	@bash scripts/validate/validate-cluster-security-addons.sh
+
+devsecops-final-proof: ## Run the non-destructive final DevSecOps proof orchestrator
+	@bash scripts/validate/run-devsecops-final-proof.sh
+
+devsecops-readiness: ## Generate a factual DevSecOps readiness report for soutenance
+	@bash scripts/validate/generate-devsecops-readiness-report.sh
 
 final-proof: ## Run the final non-destructive soutenance proof checks
 	@bash scripts/validate/final-proof-check.sh

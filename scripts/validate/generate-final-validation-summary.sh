@@ -150,6 +150,7 @@ cat > "${OUT}" <<EOF
 | \`artifacts/final/final-proof-check.txt\` | $(status_from_file artifacts/final/final-proof-check.txt) |
 | \`artifacts/release/release-evidence.md\` | $(status_from_file artifacts/release/release-evidence.md) |
 | \`artifacts/release/supply-chain-evidence.md\` | $(status_from_file artifacts/release/supply-chain-evidence.md) |
+| \`artifacts/final/devsecops-readiness-report.md\` | $(status_from_file artifacts/final/devsecops-readiness-report.md) |
 | Latest support pack | ${latest_support_pack:-missing} |
 
 ## 5. Honest limits

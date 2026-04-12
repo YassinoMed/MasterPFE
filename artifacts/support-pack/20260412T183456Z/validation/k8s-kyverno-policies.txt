@@ -1,0 +1,3 @@
+NAME                             ADMISSION   BACKGROUND   READY   AGE   MESSAGE
+securerag-require-pod-security   true        true         True    10s   Ready
+securerag-verify-cosign-images   true        false        True    10s   Ready

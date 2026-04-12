@@ -1,0 +1,5 @@
+NAME                   MIN AVAILABLE   MAX UNAVAILABLE   ALLOWED DISRUPTIONS   AGE
+api-gateway-pdb        1               N/A               0                     22m
+llm-orchestrator-pdb   1               N/A               0                     22m
+portal-web-pdb         1               N/A               0                     22m
+qdrant-pdb             1               N/A               0                     22m

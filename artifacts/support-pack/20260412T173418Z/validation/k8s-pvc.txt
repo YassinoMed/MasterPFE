@@ -1,0 +1,3 @@
+NAME             STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS   VOLUMEATTRIBUTESCLASS   AGE
+ollama-models    Bound    pvc-393c88f9-07d5-4423-bc1e-a2eb0279eafd   20Gi       RWO            standard       <unset>                 33h
+qdrant-storage   Bound    pvc-ebda7fe3-8dd6-4cae-aff7-807db30911c7   5Gi        RWO            standard       <unset>                 33h

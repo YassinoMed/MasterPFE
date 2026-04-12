@@ -417,7 +417,7 @@
                             <h2>Annuaire utilisateurs</h2>
                             <p class="muted">Gestion demonstrative des comptes, roles et equipes. Aucun secret ni identifiant reel.</p>
                         </div>
-                        <span class="pill">RBAC mock</span>
+                        <span class="pill">{{ $data['source']['label'] ?? 'RBAC mock' }}</span>
                     </div>
                     <div class="actions">
                         <input class="search js-table-filter" data-target="users-table" type="search" placeholder="Filtrer par nom, role ou equipe">
@@ -460,7 +460,7 @@
                 </section>
                 <article class="card">
                     <h2>Creation de role demo</h2>
-                    <p class="muted">Formulaire non persistant pour soutenir le parcours RBAC sans exposer de backend incomplet.</p>
+                    <p class="muted">Formulaire demonstratif : la consultation est connectee au service auth-users quand il est disponible, les mutations restent prudentes cote portail.</p>
                     <form class="mock-form js-mock-form">
                         <label>Nom du role
                             <input name="role" value="compliance_viewer">
@@ -489,7 +489,7 @@
                             <h2>Catalogue chatbots</h2>
                             <p class="muted">Configuration metier mockee. Le mode IA reel reste hors perimetre demo.</p>
                         </div>
-                        <span class="pill">mock adapters</span>
+                        <span class="pill">{{ $data['source']['label'] ?? 'mock adapters' }}</span>
                     </div>
                     <div class="actions">
                         <input class="search js-table-filter" data-target="chatbots-table" type="search" placeholder="Filtrer par domaine, proprietaire ou statut">
@@ -543,7 +543,7 @@
                             <h2>Historique des conversations</h2>
                             <p class="muted">Traçabilite demo des conversations et statuts de controle.</p>
                         </div>
-                        <span class="pill">audit-ready</span>
+                        <span class="pill">{{ $data['source']['label'] ?? 'audit-ready' }}</span>
                     </div>
                     <div class="actions">
                         <input class="search js-table-filter" data-target="history-table" type="search" placeholder="Filtrer par utilisateur, chatbot ou statut">
@@ -579,7 +579,12 @@
                     @endforeach
                 </section>
                 <article class="card">
-                    <h2>Incidents securite</h2>
+                    <div class="topbar">
+                        <div>
+                            <h2>Incidents securite</h2>
+                            <p class="muted">Source: {{ $data['source']['label'] ?? 'mock local' }}</p>
+                        </div>
+                    </div>
                     <table class="table">
                         <thead><tr><th>ID</th><th>Type</th><th>Service</th><th>Statut</th></tr></thead>
                         <tbody>

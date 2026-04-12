@@ -29,26 +29,33 @@ require_command() {
   command -v "$1" >/dev/null 2>&1 || fail "Missing required command: $1"
 }
 
-curl_auth_args() {
-  if [[ -n "${JENKINS_USER:-}" && -n "${JENKINS_TOKEN:-}" ]]; then
-    printf '%s\n' "-u" "${JENKINS_USER}:${JENKINS_TOKEN}"
-  fi
-}
-
 http_code() {
   local method="$1"
   local url="$2"
   shift 2
 
-  # shellcheck disable=SC2207
-  local auth_args=($(curl_auth_args))
+  local -a auth_args=()
+  if [[ -n "${JENKINS_USER:-}" && -n "${JENKINS_TOKEN:-}" ]]; then
+    auth_args=(-u "${JENKINS_USER}:${JENKINS_TOKEN}")
+  fi
 
-  curl -k -sS -o /tmp/securerag-webhook-check-body.txt \
-    -w '%{http_code}' \
-    -X "${method}" \
-    "${auth_args[@]}" \
-    "$@" \
-    "${url}" || printf '000'
+  local code
+  if ((${#auth_args[@]} > 0)); then
+    code="$(curl -k -sS -o /tmp/securerag-webhook-check-body.txt \
+      -w '%{http_code}' \
+      -X "${method}" \
+      "${auth_args[@]}" \
+      "$@" \
+      "${url}" || true)"
+  else
+    code="$(curl -k -sS -o /tmp/securerag-webhook-check-body.txt \
+      -w '%{http_code}' \
+      -X "${method}" \
+      "$@" \
+      "${url}" || true)"
+  fi
+
+  printf '%s' "${code:-000}"
 }
 
 status_label() {
