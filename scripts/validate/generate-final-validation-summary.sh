@@ -86,6 +86,11 @@ fi
 semgrep_results="$(json_count security/reports/semgrep.json semgrep_results)"
 gitleaks_results="$(json_count security/reports/gitleaks.json gitleaks_results)"
 trivy_results="$(json_count security/reports/trivy-fs.json trivy_vulnerabilities)"
+release_attestation_status="$(status_from_file artifacts/release/release-attestation.json)"
+observability_snapshot_status="$(status_from_file artifacts/observability/observability-snapshot.md)"
+portal_service_status="$(status_from_file artifacts/application/portal-service-connectivity.md)"
+global_project_status="$(status_from_file artifacts/final/global-project-status.md)"
+missing_phases_status="$(status_from_file artifacts/final/missing-phases-closure.md)"
 
 jenkins_status="partial"
 cluster_status="partial"
@@ -108,7 +113,14 @@ if command -v curl >/dev/null 2>&1 && curl -fsS "${PORTAL_HEALTH_URL}" >/dev/nul
   portal_status="ok"
 fi
 
-latest_support_pack="$(find artifacts/support-pack -maxdepth 1 -type f -name '*.tar.gz' 2>/dev/null | sort | tail -n 1 || true)"
+latest_support_pack="$(python3 - <<'PY'
+from pathlib import Path
+
+root = Path("artifacts/support-pack")
+packs = sorted(root.glob("*.tar.gz"), key=lambda path: path.stat().st_mtime, reverse=True) if root.exists() else []
+print(packs[0] if packs else "")
+PY
+)"
 
 cat > "${OUT}" <<EOF
 # Final Validation Summary - SecureRAG Hub
@@ -150,6 +162,11 @@ cat > "${OUT}" <<EOF
 | \`artifacts/final/final-proof-check.txt\` | $(status_from_file artifacts/final/final-proof-check.txt) |
 | \`artifacts/release/release-evidence.md\` | $(status_from_file artifacts/release/release-evidence.md) |
 | \`artifacts/release/supply-chain-evidence.md\` | $(status_from_file artifacts/release/supply-chain-evidence.md) |
+| \`artifacts/release/release-attestation.json\` | ${release_attestation_status} |
+| \`artifacts/observability/observability-snapshot.md\` | ${observability_snapshot_status} |
+| \`artifacts/application/portal-service-connectivity.md\` | ${portal_service_status} |
+| \`artifacts/final/global-project-status.md\` | ${global_project_status} |
+| \`artifacts/final/missing-phases-closure.md\` | ${missing_phases_status} |
 | \`artifacts/final/devsecops-readiness-report.md\` | $(status_from_file artifacts/final/devsecops-readiness-report.md) |
 | Latest support pack | ${latest_support_pack:-missing} |
 

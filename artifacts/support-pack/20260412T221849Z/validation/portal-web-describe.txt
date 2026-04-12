@@ -1,0 +1,75 @@
+Name:                   portal-web
+Namespace:              securerag-hub
+CreationTimestamp:      Wed, 08 Apr 2026 15:34:56 +0100
+Labels:                 app.kubernetes.io/part-of=securerag-hub
+Annotations:            deployment.kubernetes.io/revision: 5
+Selector:               app.kubernetes.io/name=portal-web,app.kubernetes.io/part-of=securerag-hub
+Replicas:               1 desired | 1 updated | 1 total | 1 available | 0 unavailable
+StrategyType:           RollingUpdate
+MinReadySeconds:        0
+RollingUpdateStrategy:  25% max unavailable, 25% max surge
+Pod Template:
+  Labels:           app.kubernetes.io/name=portal-web
+                    app.kubernetes.io/part-of=securerag-hub
+  Annotations:      kubectl.kubernetes.io/restartedAt: 2026-04-08T18:05:14+01:00
+  Service Account:  sa-portal-web
+  Containers:
+   portal-web:
+    Image:      localhost:5001/securerag-hub-portal-web:dev
+    Port:       8000/TCP (http)
+    Host Port:  0/TCP (http)
+    Limits:
+      cpu:     400m
+      memory:  512Mi
+    Requests:
+      cpu:      100m
+      memory:   128Mi
+    Liveness:   http-get http://:http/health delay=30s timeout=3s period=20s #success=1 #failure=3
+    Readiness:  http-get http://:http/health delay=10s timeout=3s period=10s #success=1 #failure=6
+    Startup:    http-get http://:http/health delay=5s timeout=3s period=5s #success=1 #failure=18
+    Environment Variables from:
+      securerag-common-config   ConfigMap  Optional: false
+      securerag-common-secrets  Secret     Optional: true
+    Environment:
+      APP_ENV:          production
+      APP_DEBUG:        false
+      APP_URL:          http://portal-web:8000
+      DB_CONNECTION:    sqlite
+      DB_DATABASE:      /var/www/html/database/database.sqlite
+      SESSION_DRIVER:   file
+      CACHE_STORE:      file
+      LOG_CHANNEL:      stderr
+      CREATE_DOTENV:    false
+      API_GATEWAY_URL:  http://api-gateway:8080
+    Mounts:
+      /tmp from tmp (rw)
+      /var/www/html/bootstrap/cache from app-cache (rw)
+      /var/www/html/database from app-database (rw)
+      /var/www/html/storage from app-storage (rw)
+  Volumes:
+   app-storage:
+    Type:       EmptyDir (a temporary directory that shares a pod's lifetime)
+    Medium:     
+    SizeLimit:  <unset>
+   app-database:
+    Type:       EmptyDir (a temporary directory that shares a pod's lifetime)
+    Medium:     
+    SizeLimit:  <unset>
+   app-cache:
+    Type:       EmptyDir (a temporary directory that shares a pod's lifetime)
+    Medium:     
+    SizeLimit:  <unset>
+   tmp:
+    Type:          EmptyDir (a temporary directory that shares a pod's lifetime)
+    Medium:        
+    SizeLimit:     <unset>
+  Node-Selectors:  <none>
+  Tolerations:     <none>
+Conditions:
+  Type           Status  Reason
+  ----           ------  ------
+  Available      True    MinimumReplicasAvailable
+  Progressing    True    NewReplicaSetAvailable
+OldReplicaSets:  portal-web-75646745d4 (0/0 replicas created), portal-web-74d5844c7d (0/0 replicas created), portal-web-b8f5b6684 (0/0 replicas created), portal-web-696799d897 (0/0 replicas created)
+NewReplicaSet:   portal-web-7fbb7f9bfb (1/1 replicas created)
+Events:          <none>

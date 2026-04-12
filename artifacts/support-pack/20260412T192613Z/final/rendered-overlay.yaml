@@ -1,0 +1,1730 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  labels:
+    app.kubernetes.io/part-of: securerag-hub
+    pod-security.kubernetes.io/audit: restricted
+    pod-security.kubernetes.io/enforce: baseline
+    pod-security.kubernetes.io/warn: restricted
+  name: securerag-hub
+---
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  labels:
+    app.kubernetes.io/part-of: securerag-hub
+  name: securerag-hub-quota
+  namespace: securerag-hub
+spec:
+  hard:
+    limits.cpu: "8"
+    limits.memory: 8Gi
+    persistentvolumeclaims: "10"
+    pods: "30"
+    requests.cpu: "3"
+    requests.memory: 3Gi
+    requests.storage: 40Gi
+    services: "20"
+---
+apiVersion: v1
+automountServiceAccountToken: false
+kind: ServiceAccount
+metadata:
+  labels:
+    app.kubernetes.io/part-of: securerag-hub
+  name: sa-api-gateway
+  namespace: securerag-hub
+---
+apiVersion: v1
+automountServiceAccountToken: false
+kind: ServiceAccount
+metadata:
+  labels:
+    app.kubernetes.io/part-of: securerag-hub
+  name: sa-auth-users
+  namespace: securerag-hub
+---
+apiVersion: v1
+automountServiceAccountToken: false
+kind: ServiceAccount
+metadata:
+  labels:
+    app.kubernetes.io/part-of: securerag-hub
+  name: sa-chatbot-manager
+  namespace: securerag-hub
+---
+apiVersion: v1
+automountServiceAccountToken: false
+kind: ServiceAccount
+metadata:
+  labels:
+    app.kubernetes.io/part-of: securerag-hub
+  name: sa-knowledge-hub
+  namespace: securerag-hub
+---
+apiVersion: v1
+automountServiceAccountToken: false
+kind: ServiceAccount
+metadata:
+  labels:
+    app.kubernetes.io/part-of: securerag-hub
+  name: sa-llm-orchestrator
+  namespace: securerag-hub
+---
+apiVersion: v1
+automountServiceAccountToken: false
+kind: ServiceAccount
+metadata:
+  labels:
+    app.kubernetes.io/part-of: securerag-hub
+  name: sa-ollama
+  namespace: securerag-hub
+---
+apiVersion: v1
+automountServiceAccountToken: false
+kind: ServiceAccount
+metadata:
+  labels:
+    app.kubernetes.io/part-of: securerag-hub
+  name: sa-portal-web
+  namespace: securerag-hub
+---
+apiVersion: v1
+automountServiceAccountToken: false
+kind: ServiceAccount
+metadata:
+  labels:
+    app.kubernetes.io/part-of: securerag-hub
+  name: sa-qdrant
+  namespace: securerag-hub
+---
+apiVersion: v1
+automountServiceAccountToken: false
+kind: ServiceAccount
+metadata:
+  labels:
+    app.kubernetes.io/part-of: securerag-hub
+  name: sa-security-auditor
+  namespace: securerag-hub
+---
+apiVersion: v1
+data:
+  APP_ENV: demo
+  LOG_LEVEL: INFO
+  OLLAMA_MODEL_GENERATION: mock-ollama
+  OLLAMA_MODEL_SECURITY: mock-ollama
+  QDRANT_COLLECTION_ATTACKS: attack_corpus
+  QDRANT_COLLECTION_DOCUMENTS: documents
+  REQUEST_TIMEOUT_SECONDS: "10"
+kind: ConfigMap
+metadata:
+  name: securerag-common-config
+  namespace: securerag-hub
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app.kubernetes.io/part-of: securerag-hub
+  name: api-gateway
+  namespace: securerag-hub
+spec:
+  ports:
+  - name: http
+    nodePort: 30080
+    port: 8080
+    protocol: TCP
+    targetPort: http
+  selector:
+    app.kubernetes.io/name: api-gateway
+    app.kubernetes.io/part-of: securerag-hub
+  type: NodePort
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app.kubernetes.io/part-of: securerag-hub
+  name: auth-users
+  namespace: securerag-hub
+spec:
+  ports:
+  - name: http
+    port: 8080
+    protocol: TCP
+    targetPort: http
+  selector:
+    app.kubernetes.io/name: auth-users
+    app.kubernetes.io/part-of: securerag-hub
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app.kubernetes.io/part-of: securerag-hub
+  name: chatbot-manager
+  namespace: securerag-hub
+spec:
+  ports:
+  - name: http
+    port: 8080
+    protocol: TCP
+    targetPort: http
+  selector:
+    app.kubernetes.io/name: chatbot-manager
+    app.kubernetes.io/part-of: securerag-hub
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app.kubernetes.io/part-of: securerag-hub
+  name: knowledge-hub
+  namespace: securerag-hub
+spec:
+  ports:
+  - name: http
+    port: 8080
+    protocol: TCP
+    targetPort: http
+  selector:
+    app.kubernetes.io/name: knowledge-hub
+    app.kubernetes.io/part-of: securerag-hub
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app.kubernetes.io/part-of: securerag-hub
+  name: llm-orchestrator
+  namespace: securerag-hub
+spec:
+  ports:
+  - name: http
+    port: 8080
+    protocol: TCP
+    targetPort: http
+  selector:
+    app.kubernetes.io/name: llm-orchestrator
+    app.kubernetes.io/part-of: securerag-hub
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app.kubernetes.io/part-of: securerag-hub
+  name: ollama
+  namespace: securerag-hub
+spec:
+  ports:
+  - name: http
+    port: 11434
+    protocol: TCP
+    targetPort: http
+  selector:
+    app.kubernetes.io/name: ollama
+    app.kubernetes.io/part-of: securerag-hub
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app.kubernetes.io/part-of: securerag-hub
+  name: portal-web
+  namespace: securerag-hub
+spec:
+  ports:
+  - name: http
+    nodePort: 30081
+    port: 8000
+    protocol: TCP
+    targetPort: http
+  selector:
+    app.kubernetes.io/name: portal-web
+    app.kubernetes.io/part-of: securerag-hub
+  type: NodePort
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app.kubernetes.io/part-of: securerag-hub
+  name: qdrant
+  namespace: securerag-hub
+spec:
+  ports:
+  - name: http
+    port: 6333
+    protocol: TCP
+    targetPort: http
+  selector:
+    app.kubernetes.io/name: qdrant
+    app.kubernetes.io/part-of: securerag-hub
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app.kubernetes.io/part-of: securerag-hub
+  name: security-auditor
+  namespace: securerag-hub
+spec:
+  ports:
+  - name: http
+    port: 8080
+    protocol: TCP
+    targetPort: http
+  selector:
+    app.kubernetes.io/name: security-auditor
+    app.kubernetes.io/part-of: securerag-hub
+  type: ClusterIP
+---
+apiVersion: v1
+kind: LimitRange
+metadata:
+  labels:
+    app.kubernetes.io/part-of: securerag-hub
+  name: securerag-hub-defaults
+  namespace: securerag-hub
+spec:
+  limits:
+  - default:
+      cpu: 500m
+      memory: 512Mi
+    defaultRequest:
+      cpu: 100m
+      memory: 128Mi
+    max:
+      cpu: "2"
+      memory: 2Gi
+    min:
+      cpu: 50m
+      memory: 64Mi
+    type: Container
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  labels:
+    app.kubernetes.io/part-of: securerag-hub
+  name: ollama-models
+  namespace: securerag-hub
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 20Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  labels:
+    app.kubernetes.io/part-of: securerag-hub
+  name: qdrant-storage
+  namespace: securerag-hub
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app.kubernetes.io/part-of: securerag-hub
+  name: api-gateway
+  namespace: securerag-hub
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: api-gateway
+      app.kubernetes.io/part-of: securerag-hub
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: api-gateway
+        app.kubernetes.io/part-of: securerag-hub
+    spec:
+      automountServiceAccountToken: false
+      containers:
+      - env:
+        - name: SERVICE_NAME
+          value: api-gateway
+        - name: AUTH_USERS_URL
+          value: http://auth-users:8080
+        - name: CHATBOT_MANAGER_URL
+          value: http://chatbot-manager:8080
+        - name: LLM_ORCHESTRATOR_URL
+          value: http://llm-orchestrator:8080
+        - name: SECURITY_AUDITOR_URL
+          value: http://security-auditor:8080
+        envFrom:
+        - configMapRef:
+            name: securerag-common-config
+        - secretRef:
+            name: securerag-common-secrets
+            optional: true
+        image: localhost:5001/securerag-hub-api-gateway:demo
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: http
+          initialDelaySeconds: 15
+          periodSeconds: 20
+        name: api-gateway
+        ports:
+        - containerPort: 8080
+          name: http
+        readinessProbe:
+          httpGet:
+            path: /healthz
+            port: http
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        resources:
+          limits:
+            cpu: 300m
+            memory: 256Mi
+          requests:
+            cpu: 100m
+            memory: 128Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          readOnlyRootFilesystem: true
+        volumeMounts:
+        - mountPath: /tmp
+          name: tmp
+      securityContext:
+        fsGroup: 10001
+        runAsGroup: 10001
+        runAsNonRoot: true
+        runAsUser: 10001
+        seccompProfile:
+          type: RuntimeDefault
+      serviceAccountName: sa-api-gateway
+      volumes:
+      - emptyDir: {}
+        name: tmp
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app.kubernetes.io/part-of: securerag-hub
+  name: auth-users
+  namespace: securerag-hub
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: auth-users
+      app.kubernetes.io/part-of: securerag-hub
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: auth-users
+        app.kubernetes.io/part-of: securerag-hub
+    spec:
+      automountServiceAccountToken: false
+      containers:
+      - env:
+        - name: SERVICE_NAME
+          value: auth-users
+        envFrom:
+        - configMapRef:
+            name: securerag-common-config
+        - secretRef:
+            name: securerag-common-secrets
+            optional: true
+        image: localhost:5001/securerag-hub-auth-users:demo
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: http
+          initialDelaySeconds: 15
+          periodSeconds: 20
+        name: auth-users
+        ports:
+        - containerPort: 8080
+          name: http
+        readinessProbe:
+          httpGet:
+            path: /healthz
+            port: http
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        resources:
+          limits:
+            cpu: 300m
+            memory: 256Mi
+          requests:
+            cpu: 100m
+            memory: 128Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          readOnlyRootFilesystem: true
+        volumeMounts:
+        - mountPath: /tmp
+          name: tmp
+      securityContext:
+        fsGroup: 10001
+        runAsGroup: 10001
+        runAsNonRoot: true
+        runAsUser: 10001
+        seccompProfile:
+          type: RuntimeDefault
+      serviceAccountName: sa-auth-users
+      volumes:
+      - emptyDir: {}
+        name: tmp
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app.kubernetes.io/part-of: securerag-hub
+  name: chatbot-manager
+  namespace: securerag-hub
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: chatbot-manager
+      app.kubernetes.io/part-of: securerag-hub
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: chatbot-manager
+        app.kubernetes.io/part-of: securerag-hub
+    spec:
+      automountServiceAccountToken: false
+      containers:
+      - env:
+        - name: SERVICE_NAME
+          value: chatbot-manager
+        - name: AUTH_USERS_URL
+          value: http://auth-users:8080
+        envFrom:
+        - configMapRef:
+            name: securerag-common-config
+        - secretRef:
+            name: securerag-common-secrets
+            optional: true
+        image: localhost:5001/securerag-hub-chatbot-manager:demo
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: http
+          initialDelaySeconds: 15
+          periodSeconds: 20
+        name: chatbot-manager
+        ports:
+        - containerPort: 8080
+          name: http
+        readinessProbe:
+          httpGet:
+            path: /healthz
+            port: http
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        resources:
+          limits:
+            cpu: 300m
+            memory: 256Mi
+          requests:
+            cpu: 100m
+            memory: 128Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          readOnlyRootFilesystem: true
+        volumeMounts:
+        - mountPath: /tmp
+          name: tmp
+      securityContext:
+        fsGroup: 10001
+        runAsGroup: 10001
+        runAsNonRoot: true
+        runAsUser: 10001
+        seccompProfile:
+          type: RuntimeDefault
+      serviceAccountName: sa-chatbot-manager
+      volumes:
+      - emptyDir: {}
+        name: tmp
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app.kubernetes.io/part-of: securerag-hub
+  name: knowledge-hub
+  namespace: securerag-hub
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: knowledge-hub
+      app.kubernetes.io/part-of: securerag-hub
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: knowledge-hub
+        app.kubernetes.io/part-of: securerag-hub
+    spec:
+      automountServiceAccountToken: false
+      containers:
+      - env:
+        - name: SERVICE_NAME
+          value: knowledge-hub
+        - name: QDRANT_URL
+          value: http://qdrant:6333
+        envFrom:
+        - configMapRef:
+            name: securerag-common-config
+        - secretRef:
+            name: securerag-common-secrets
+            optional: true
+        image: localhost:5001/securerag-hub-knowledge-hub:demo
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: http
+          initialDelaySeconds: 15
+          periodSeconds: 20
+        name: knowledge-hub
+        ports:
+        - containerPort: 8080
+          name: http
+        readinessProbe:
+          httpGet:
+            path: /healthz
+            port: http
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        resources:
+          limits:
+            cpu: 400m
+            memory: 512Mi
+          requests:
+            cpu: 100m
+            memory: 128Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          readOnlyRootFilesystem: true
+        volumeMounts:
+        - mountPath: /tmp
+          name: tmp
+      securityContext:
+        fsGroup: 10001
+        runAsGroup: 10001
+        runAsNonRoot: true
+        runAsUser: 10001
+        seccompProfile:
+          type: RuntimeDefault
+      serviceAccountName: sa-knowledge-hub
+      volumes:
+      - emptyDir: {}
+        name: tmp
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app.kubernetes.io/part-of: securerag-hub
+  name: llm-orchestrator
+  namespace: securerag-hub
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: llm-orchestrator
+      app.kubernetes.io/part-of: securerag-hub
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: llm-orchestrator
+        app.kubernetes.io/part-of: securerag-hub
+    spec:
+      automountServiceAccountToken: false
+      containers:
+      - env:
+        - name: SERVICE_NAME
+          value: llm-orchestrator
+        - name: CHATBOT_MANAGER_URL
+          value: http://chatbot-manager:8080
+        - name: AUTH_USERS_URL
+          value: http://auth-users:8080
+        - name: SECURITY_AUDITOR_URL
+          value: http://security-auditor:8080
+        - name: KNOWLEDGE_HUB_URL
+          value: http://knowledge-hub:8080
+        - name: OLLAMA_HOST
+          value: http://ollama:11434
+        envFrom:
+        - configMapRef:
+            name: securerag-common-config
+        - secretRef:
+            name: securerag-common-secrets
+            optional: true
+        image: localhost:5001/securerag-hub-llm-orchestrator:demo
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: http
+          initialDelaySeconds: 15
+          periodSeconds: 20
+        name: llm-orchestrator
+        ports:
+        - containerPort: 8080
+          name: http
+        readinessProbe:
+          httpGet:
+            path: /healthz
+            port: http
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        resources:
+          limits:
+            cpu: 600m
+            memory: 512Mi
+          requests:
+            cpu: 200m
+            memory: 256Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          readOnlyRootFilesystem: true
+        volumeMounts:
+        - mountPath: /tmp
+          name: tmp
+      securityContext:
+        fsGroup: 10001
+        runAsGroup: 10001
+        runAsNonRoot: true
+        runAsUser: 10001
+        seccompProfile:
+          type: RuntimeDefault
+      serviceAccountName: sa-llm-orchestrator
+      volumes:
+      - emptyDir: {}
+        name: tmp
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app.kubernetes.io/part-of: securerag-hub
+  name: ollama
+  namespace: securerag-hub
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: ollama
+      app.kubernetes.io/part-of: securerag-hub
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: ollama
+        app.kubernetes.io/part-of: securerag-hub
+    spec:
+      automountServiceAccountToken: false
+      containers:
+      - args:
+        - |
+          cat >/tmp/mock_ollama.py <<'PY'
+          import json
+          from http.server import BaseHTTPRequestHandler, HTTPServer
+
+          class Handler(BaseHTTPRequestHandler):
+              def _write(self, status, payload):
+                  body = json.dumps(payload).encode()
+                  self.send_response(status)
+                  self.send_header("Content-Type", "application/json")
+                  self.send_header("Content-Length", str(len(body)))
+                  self.end_headers()
+                  self.wfile.write(body)
+
+              def do_GET(self):
+                  if self.path == "/api/tags":
+                      self._write(200, {"models": [{"name": "mock-ollama:latest"}]})
+                  else:
+                      self._write(404, {"error": "not found"})
+
+              def do_POST(self):
+                  if self.path in {"/api/generate", "/api/chat"}:
+                      self._write(200, {"model": "mock-ollama", "response": "Mock response", "done": True})
+                  else:
+                      self._write(404, {"error": "not found"})
+
+              def log_message(self, fmt, *args):
+                  return
+
+          HTTPServer(("0.0.0.0", 11434), Handler).serve_forever()
+          PY
+          exec python /tmp/mock_ollama.py
+        command:
+        - sh
+        - -c
+        env:
+        - name: OLLAMA_HOST
+          value: 0.0.0.0:11434
+        image: python:3.12-alpine
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /api/tags
+            port: http
+          initialDelaySeconds: 30
+          periodSeconds: 30
+          timeoutSeconds: 3
+        name: ollama
+        ports:
+        - containerPort: 11434
+          name: http
+        readinessProbe:
+          failureThreshold: 6
+          httpGet:
+            path: /api/tags
+            port: http
+          initialDelaySeconds: 10
+          periodSeconds: 15
+          timeoutSeconds: 3
+        resources:
+          limits:
+            cpu: 200m
+            memory: 128Mi
+          requests:
+            cpu: 50m
+            memory: 64Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+        startupProbe:
+          failureThreshold: 30
+          httpGet:
+            path: /api/tags
+            port: http
+          initialDelaySeconds: 15
+          periodSeconds: 10
+          timeoutSeconds: 3
+        volumeMounts:
+        - mountPath: /tmp
+          name: tmp
+        - mountPath: /root/.ollama
+          name: ollama-models
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
+      serviceAccountName: sa-ollama
+      volumes:
+      - name: ollama-models
+        persistentVolumeClaim:
+          claimName: ollama-models
+      - emptyDir: {}
+        name: tmp
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app.kubernetes.io/part-of: securerag-hub
+  name: portal-web
+  namespace: securerag-hub
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: portal-web
+      app.kubernetes.io/part-of: securerag-hub
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: portal-web
+        app.kubernetes.io/part-of: securerag-hub
+    spec:
+      automountServiceAccountToken: false
+      containers:
+      - env:
+        - name: APP_ENV
+          value: production
+        - name: APP_DEBUG
+          value: "false"
+        - name: APP_URL
+          value: http://portal-web:8000
+        - name: DB_CONNECTION
+          value: sqlite
+        - name: DB_DATABASE
+          value: /var/www/html/database/database.sqlite
+        - name: SESSION_DRIVER
+          value: file
+        - name: CACHE_STORE
+          value: file
+        - name: LOG_CHANNEL
+          value: stderr
+        - name: CREATE_DOTENV
+          value: "false"
+        - name: API_GATEWAY_URL
+          value: http://api-gateway:8080
+        envFrom:
+        - configMapRef:
+            name: securerag-common-config
+        - secretRef:
+            name: securerag-common-secrets
+            optional: true
+        image: localhost:5001/securerag-hub-portal-web:demo
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /health
+            port: http
+          initialDelaySeconds: 30
+          periodSeconds: 20
+          timeoutSeconds: 3
+        name: portal-web
+        ports:
+        - containerPort: 8000
+          name: http
+        readinessProbe:
+          failureThreshold: 6
+          httpGet:
+            path: /health
+            port: http
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 3
+        resources:
+          limits:
+            cpu: 400m
+            memory: 512Mi
+          requests:
+            cpu: 100m
+            memory: 128Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+        startupProbe:
+          failureThreshold: 18
+          httpGet:
+            path: /health
+            port: http
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          timeoutSeconds: 3
+        volumeMounts:
+        - mountPath: /var/www/html/storage
+          name: app-storage
+        - mountPath: /var/www/html/database
+          name: app-database
+        - mountPath: /var/www/html/bootstrap/cache
+          name: app-cache
+        - mountPath: /tmp
+          name: tmp
+      securityContext:
+        fsGroup: 33
+        runAsGroup: 33
+        runAsNonRoot: true
+        runAsUser: 33
+        seccompProfile:
+          type: RuntimeDefault
+      serviceAccountName: sa-portal-web
+      volumes:
+      - emptyDir: {}
+        name: app-storage
+      - emptyDir: {}
+        name: app-database
+      - emptyDir: {}
+        name: app-cache
+      - emptyDir: {}
+        name: tmp
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app.kubernetes.io/part-of: securerag-hub
+  name: security-auditor
+  namespace: securerag-hub
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: security-auditor
+      app.kubernetes.io/part-of: securerag-hub
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: security-auditor
+        app.kubernetes.io/part-of: securerag-hub
+    spec:
+      automountServiceAccountToken: false
+      containers:
+      - env:
+        - name: SERVICE_NAME
+          value: security-auditor
+        - name: KNOWLEDGE_HUB_URL
+          value: http://knowledge-hub:8080
+        - name: OLLAMA_HOST
+          value: http://ollama:11434
+        envFrom:
+        - configMapRef:
+            name: securerag-common-config
+        - secretRef:
+            name: securerag-common-secrets
+            optional: true
+        image: localhost:5001/securerag-hub-security-auditor:demo
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: http
+          initialDelaySeconds: 15
+          periodSeconds: 20
+        name: security-auditor
+        ports:
+        - containerPort: 8080
+          name: http
+        readinessProbe:
+          httpGet:
+            path: /healthz
+            port: http
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        resources:
+          limits:
+            cpu: 600m
+            memory: 512Mi
+          requests:
+            cpu: 200m
+            memory: 256Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          readOnlyRootFilesystem: true
+        volumeMounts:
+        - mountPath: /tmp
+          name: tmp
+      securityContext:
+        fsGroup: 10001
+        runAsGroup: 10001
+        runAsNonRoot: true
+        runAsUser: 10001
+        seccompProfile:
+          type: RuntimeDefault
+      serviceAccountName: sa-security-auditor
+      volumes:
+      - emptyDir: {}
+        name: tmp
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  labels:
+    app.kubernetes.io/part-of: securerag-hub
+  name: qdrant
+  namespace: securerag-hub
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: qdrant
+      app.kubernetes.io/part-of: securerag-hub
+  serviceName: qdrant
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: qdrant
+        app.kubernetes.io/part-of: securerag-hub
+    spec:
+      automountServiceAccountToken: false
+      containers:
+      - image: qdrant/qdrant:v1.16.3-unprivileged
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: http
+          initialDelaySeconds: 20
+          periodSeconds: 20
+        name: qdrant
+        ports:
+        - containerPort: 6333
+          name: http
+        readinessProbe:
+          httpGet:
+            path: /readyz
+            port: http
+          initialDelaySeconds: 10
+          periodSeconds: 10
+        resources:
+          limits:
+            cpu: 500m
+            memory: 1Gi
+          requests:
+            cpu: 100m
+            memory: 256Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+        volumeMounts:
+        - mountPath: /qdrant/storage
+          name: qdrant-storage
+      securityContext:
+        fsGroup: 1000
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      serviceAccountName: sa-qdrant
+      volumes:
+      - name: qdrant-storage
+        persistentVolumeClaim:
+          claimName: qdrant-storage
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  labels:
+    app.kubernetes.io/part-of: securerag-hub
+  name: api-gateway-pdb
+  namespace: securerag-hub
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: api-gateway
+      app.kubernetes.io/part-of: securerag-hub
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  labels:
+    app.kubernetes.io/part-of: securerag-hub
+  name: llm-orchestrator-pdb
+  namespace: securerag-hub
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: llm-orchestrator
+      app.kubernetes.io/part-of: securerag-hub
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  labels:
+    app.kubernetes.io/part-of: securerag-hub
+  name: portal-web-pdb
+  namespace: securerag-hub
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: portal-web
+      app.kubernetes.io/part-of: securerag-hub
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  labels:
+    app.kubernetes.io/part-of: securerag-hub
+  name: qdrant-pdb
+  namespace: securerag-hub
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: qdrant
+      app.kubernetes.io/part-of: securerag-hub
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  labels:
+    app.kubernetes.io/part-of: securerag-hub
+  name: api-gateway
+  namespace: securerag-hub
+spec:
+  maxReplicas: 3
+  metrics:
+  - resource:
+      name: cpu
+      target:
+        averageUtilization: 70
+        type: Utilization
+    type: Resource
+  minReplicas: 1
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: api-gateway
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  labels:
+    app.kubernetes.io/part-of: securerag-hub
+  name: portal-web
+  namespace: securerag-hub
+spec:
+  maxReplicas: 3
+  metrics:
+  - resource:
+      name: cpu
+      target:
+        averageUtilization: 70
+        type: Utilization
+    type: Resource
+  minReplicas: 1
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: portal-web
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  labels:
+    app.kubernetes.io/part-of: securerag-hub
+  name: allow-dns-egress
+  namespace: securerag-hub
+spec:
+  egress:
+  - ports:
+    - port: 53
+      protocol: UDP
+    - port: 53
+      protocol: TCP
+    to:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: kube-system
+  podSelector: {}
+  policyTypes:
+  - Egress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  labels:
+    app.kubernetes.io/part-of: securerag-hub
+  name: allow-validation-egress
+  namespace: securerag-hub
+spec:
+  egress:
+  - ports:
+    - port: 8000
+      protocol: TCP
+    - port: 8080
+      protocol: TCP
+    to:
+    - podSelector:
+        matchExpressions:
+        - key: app.kubernetes.io/name
+          operator: In
+          values:
+          - portal-web
+          - api-gateway
+          - auth-users
+          - chatbot-manager
+          - llm-orchestrator
+          - security-auditor
+          - knowledge-hub
+  - ports:
+    - port: 11434
+      protocol: TCP
+    to:
+    - podSelector:
+        matchLabels:
+          app.kubernetes.io/name: ollama
+          app.kubernetes.io/part-of: securerag-hub
+  - ports:
+    - port: 6333
+      protocol: TCP
+    to:
+    - podSelector:
+        matchLabels:
+          app.kubernetes.io/name: qdrant
+          app.kubernetes.io/part-of: securerag-hub
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/part-of: securerag-hub
+      job-role: validation
+  policyTypes:
+  - Egress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  labels:
+    app.kubernetes.io/part-of: securerag-hub
+  name: allow-validation-ingress
+  namespace: securerag-hub
+spec:
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app.kubernetes.io/part-of: securerag-hub
+          job-role: validation
+    ports:
+    - port: 8000
+      protocol: TCP
+    - port: 8080
+      protocol: TCP
+    - port: 11434
+      protocol: TCP
+    - port: 6333
+      protocol: TCP
+  podSelector:
+    matchExpressions:
+    - key: app.kubernetes.io/name
+      operator: In
+      values:
+      - portal-web
+      - api-gateway
+      - auth-users
+      - chatbot-manager
+      - llm-orchestrator
+      - security-auditor
+      - knowledge-hub
+      - ollama
+      - qdrant
+  policyTypes:
+  - Ingress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  labels:
+    app.kubernetes.io/part-of: securerag-hub
+  name: api-gateway-policy
+  namespace: securerag-hub
+spec:
+  egress:
+  - ports:
+    - port: 8080
+      protocol: TCP
+    to:
+    - podSelector:
+        matchLabels:
+          app.kubernetes.io/name: auth-users
+          app.kubernetes.io/part-of: securerag-hub
+  - ports:
+    - port: 8080
+      protocol: TCP
+    to:
+    - podSelector:
+        matchLabels:
+          app.kubernetes.io/name: chatbot-manager
+          app.kubernetes.io/part-of: securerag-hub
+  - ports:
+    - port: 8080
+      protocol: TCP
+    to:
+    - podSelector:
+        matchLabels:
+          app.kubernetes.io/name: llm-orchestrator
+          app.kubernetes.io/part-of: securerag-hub
+  - ports:
+    - port: 8080
+      protocol: TCP
+    to:
+    - podSelector:
+        matchLabels:
+          app.kubernetes.io/name: security-auditor
+          app.kubernetes.io/part-of: securerag-hub
+  ingress:
+  - ports:
+    - port: 8080
+      protocol: TCP
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: api-gateway
+      app.kubernetes.io/part-of: securerag-hub
+  policyTypes:
+  - Ingress
+  - Egress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  labels:
+    app.kubernetes.io/part-of: securerag-hub
+  name: auth-users-policy
+  namespace: securerag-hub
+spec:
+  egress: []
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app.kubernetes.io/name: api-gateway
+          app.kubernetes.io/part-of: securerag-hub
+    ports:
+    - port: 8080
+      protocol: TCP
+  - from:
+    - podSelector:
+        matchLabels:
+          app.kubernetes.io/name: llm-orchestrator
+          app.kubernetes.io/part-of: securerag-hub
+    ports:
+    - port: 8080
+      protocol: TCP
+  - from:
+    - podSelector:
+        matchLabels:
+          app.kubernetes.io/name: chatbot-manager
+          app.kubernetes.io/part-of: securerag-hub
+    ports:
+    - port: 8080
+      protocol: TCP
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: auth-users
+      app.kubernetes.io/part-of: securerag-hub
+  policyTypes:
+  - Ingress
+  - Egress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  labels:
+    app.kubernetes.io/part-of: securerag-hub
+  name: chatbot-manager-policy
+  namespace: securerag-hub
+spec:
+  egress:
+  - ports:
+    - port: 8080
+      protocol: TCP
+    to:
+    - podSelector:
+        matchLabels:
+          app.kubernetes.io/name: auth-users
+          app.kubernetes.io/part-of: securerag-hub
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app.kubernetes.io/name: api-gateway
+          app.kubernetes.io/part-of: securerag-hub
+    ports:
+    - port: 8080
+      protocol: TCP
+  - from:
+    - podSelector:
+        matchLabels:
+          app.kubernetes.io/name: llm-orchestrator
+          app.kubernetes.io/part-of: securerag-hub
+    ports:
+    - port: 8080
+      protocol: TCP
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: chatbot-manager
+      app.kubernetes.io/part-of: securerag-hub
+  policyTypes:
+  - Ingress
+  - Egress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  labels:
+    app.kubernetes.io/part-of: securerag-hub
+  name: default-deny-all
+  namespace: securerag-hub
+spec:
+  podSelector: {}
+  policyTypes:
+  - Ingress
+  - Egress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  labels:
+    app.kubernetes.io/part-of: securerag-hub
+  name: knowledge-hub-policy
+  namespace: securerag-hub
+spec:
+  egress:
+  - ports:
+    - port: 6333
+      protocol: TCP
+    to:
+    - podSelector:
+        matchLabels:
+          app.kubernetes.io/name: qdrant
+          app.kubernetes.io/part-of: securerag-hub
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app.kubernetes.io/name: llm-orchestrator
+          app.kubernetes.io/part-of: securerag-hub
+    ports:
+    - port: 8080
+      protocol: TCP
+  - from:
+    - podSelector:
+        matchLabels:
+          app.kubernetes.io/name: security-auditor
+          app.kubernetes.io/part-of: securerag-hub
+    ports:
+    - port: 8080
+      protocol: TCP
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: knowledge-hub
+      app.kubernetes.io/part-of: securerag-hub
+  policyTypes:
+  - Ingress
+  - Egress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  labels:
+    app.kubernetes.io/part-of: securerag-hub
+  name: llm-orchestrator-policy
+  namespace: securerag-hub
+spec:
+  egress:
+  - ports:
+    - port: 8080
+      protocol: TCP
+    to:
+    - podSelector:
+        matchLabels:
+          app.kubernetes.io/name: chatbot-manager
+          app.kubernetes.io/part-of: securerag-hub
+  - ports:
+    - port: 8080
+      protocol: TCP
+    to:
+    - podSelector:
+        matchLabels:
+          app.kubernetes.io/name: auth-users
+          app.kubernetes.io/part-of: securerag-hub
+  - ports:
+    - port: 8080
+      protocol: TCP
+    to:
+    - podSelector:
+        matchLabels:
+          app.kubernetes.io/name: security-auditor
+          app.kubernetes.io/part-of: securerag-hub
+  - ports:
+    - port: 8080
+      protocol: TCP
+    to:
+    - podSelector:
+        matchLabels:
+          app.kubernetes.io/name: knowledge-hub
+          app.kubernetes.io/part-of: securerag-hub
+  - ports:
+    - port: 11434
+      protocol: TCP
+    to:
+    - podSelector:
+        matchLabels:
+          app.kubernetes.io/name: ollama
+          app.kubernetes.io/part-of: securerag-hub
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app.kubernetes.io/name: api-gateway
+          app.kubernetes.io/part-of: securerag-hub
+    ports:
+    - port: 8080
+      protocol: TCP
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: llm-orchestrator
+      app.kubernetes.io/part-of: securerag-hub
+  policyTypes:
+  - Ingress
+  - Egress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  labels:
+    app.kubernetes.io/part-of: securerag-hub
+  name: ollama-policy
+  namespace: securerag-hub
+spec:
+  egress: []
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app.kubernetes.io/name: llm-orchestrator
+          app.kubernetes.io/part-of: securerag-hub
+    ports:
+    - port: 11434
+      protocol: TCP
+  - from:
+    - podSelector:
+        matchLabels:
+          app.kubernetes.io/name: security-auditor
+          app.kubernetes.io/part-of: securerag-hub
+    ports:
+    - port: 11434
+      protocol: TCP
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: ollama
+      app.kubernetes.io/part-of: securerag-hub
+  policyTypes:
+  - Ingress
+  - Egress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  labels:
+    app.kubernetes.io/part-of: securerag-hub
+  name: portal-web-policy
+  namespace: securerag-hub
+spec:
+  egress:
+  - ports:
+    - port: 8080
+      protocol: TCP
+    to:
+    - podSelector:
+        matchLabels:
+          app.kubernetes.io/name: api-gateway
+          app.kubernetes.io/part-of: securerag-hub
+  ingress:
+  - ports:
+    - port: 8000
+      protocol: TCP
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: portal-web
+      app.kubernetes.io/part-of: securerag-hub
+  policyTypes:
+  - Ingress
+  - Egress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  labels:
+    app.kubernetes.io/part-of: securerag-hub
+  name: qdrant-policy
+  namespace: securerag-hub
+spec:
+  egress: []
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app.kubernetes.io/name: knowledge-hub
+          app.kubernetes.io/part-of: securerag-hub
+    ports:
+    - port: 6333
+      protocol: TCP
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: qdrant
+      app.kubernetes.io/part-of: securerag-hub
+  policyTypes:
+  - Ingress
+  - Egress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  labels:
+    app.kubernetes.io/part-of: securerag-hub
+  name: security-auditor-policy
+  namespace: securerag-hub
+spec:
+  egress:
+  - ports:
+    - port: 8080
+      protocol: TCP
+    to:
+    - podSelector:
+        matchLabels:
+          app.kubernetes.io/name: knowledge-hub
+          app.kubernetes.io/part-of: securerag-hub
+  - ports:
+    - port: 11434
+      protocol: TCP
+    to:
+    - podSelector:
+        matchLabels:
+          app.kubernetes.io/name: ollama
+          app.kubernetes.io/part-of: securerag-hub
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app.kubernetes.io/name: api-gateway
+          app.kubernetes.io/part-of: securerag-hub
+    ports:
+    - port: 8080
+      protocol: TCP
+  - from:
+    - podSelector:
+        matchLabels:
+          app.kubernetes.io/name: llm-orchestrator
+          app.kubernetes.io/part-of: securerag-hub
+    ports:
+    - port: 8080
+      protocol: TCP
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: security-auditor
+      app.kubernetes.io/part-of: securerag-hub
+  policyTypes:
+  - Ingress
+  - Egress

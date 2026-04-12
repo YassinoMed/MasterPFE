@@ -91,6 +91,7 @@ else
 fi
 
 run_step "Supply chain evidence consolidation" "READ_ONLY" bash scripts/release/collect-supply-chain-evidence.sh
+run_step "Release attestation" "READ_ONLY" bash scripts/release/generate-release-attestation.sh
 
 if is_true "${RUN_SUPPLY_CHAIN_EXECUTE}"; then
   run_step "Supply chain execute" "MUTATING_RELEASE" bash scripts/release/run-supply-chain-execute.sh
@@ -111,10 +112,14 @@ fi
 
 if is_true "${RUN_CLUSTER_SECURITY_PROOF}"; then
   run_step "Cluster security addon proof" "READ_ONLY" bash scripts/validate/validate-cluster-security-addons.sh
+  run_step "Observability snapshot" "READ_ONLY" bash scripts/validate/generate-observability-snapshot.sh
 else
   skip_step "Cluster security addon proof" "Disabled by RUN_CLUSTER_SECURITY_PROOF=false"
+  skip_step "Observability snapshot" "Disabled by RUN_CLUSTER_SECURITY_PROOF=false"
 fi
 
+run_step "Portal service connectivity" "READ_ONLY" bash scripts/validate/validate-portal-service-connectivity.sh
+run_step "Global project status" "READ_ONLY" bash scripts/validate/generate-global-project-status.sh
 run_step "Final validation summary" "READ_ONLY" bash scripts/validate/generate-final-validation-summary.sh
 run_step "DevSecOps readiness report" "READ_ONLY" bash scripts/validate/generate-devsecops-readiness-report.sh
 

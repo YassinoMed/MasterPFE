@@ -1,0 +1,178 @@
+openapi: 3.0.3
+info:
+  title: SecureRAG Hub Chatbot Manager Service API
+  version: 1.0.0
+  description: Business catalogue and governance API for SecureRAG Hub chatbots.
+servers:
+  - url: http://127.0.0.1:8092/api/v1
+paths:
+  /health:
+    get:
+      summary: Health check
+      responses:
+        "200": { description: Service is healthy }
+  /business-domains:
+    get:
+      summary: List business domains
+      responses:
+        "200": { description: Domain catalogue }
+    post:
+      summary: Create business domain
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/BusinessDomainInput" }
+      responses:
+        "201": { description: Domain created }
+  /sensitivity-levels:
+    get:
+      summary: List sensitivity levels
+      responses:
+        "200": { description: Sensitivity catalogue }
+    post:
+      summary: Create sensitivity level
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/SensitivityLevelInput" }
+      responses:
+        "201": { description: Sensitivity level created }
+  /chatbots:
+    get:
+      summary: List chatbots
+      responses:
+        "200": { description: Chatbot catalogue }
+    post:
+      summary: Create chatbot
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ChatbotInput" }
+      responses:
+        "201": { description: Chatbot created }
+  /chatbots/{chatbot}:
+    get:
+      summary: Get chatbot
+      parameters:
+        - $ref: "#/components/parameters/ChatbotUuid"
+      responses:
+        "200": { description: Chatbot detail }
+    put:
+      summary: Update chatbot
+      parameters:
+        - $ref: "#/components/parameters/ChatbotUuid"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ChatbotInput" }
+      responses:
+        "200": { description: Chatbot updated }
+  /chatbots/{chatbot}/status:
+    patch:
+      summary: Update chatbot status
+      parameters:
+        - $ref: "#/components/parameters/ChatbotUuid"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [status, is_active]
+              properties:
+                status:
+                  type: string
+                  enum: [draft, active, disabled, archived]
+                is_active: { type: boolean }
+      responses:
+        "200": { description: Status updated }
+  /chatbots/{chatbot}/roles:
+    get:
+      summary: List allowed role slugs
+      parameters:
+        - $ref: "#/components/parameters/ChatbotUuid"
+      responses:
+        "200": { description: Role access list }
+    put:
+      summary: Replace allowed role slugs
+      parameters:
+        - $ref: "#/components/parameters/ChatbotUuid"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [roles]
+              properties:
+                roles:
+                  type: array
+                  items: { type: string }
+      responses:
+        "200": { description: Roles synchronized }
+  /chatbots/{chatbot}/prompt-configs:
+    get:
+      summary: List prompt configurations
+      parameters:
+        - $ref: "#/components/parameters/ChatbotUuid"
+      responses:
+        "200": { description: Prompt versions }
+    post:
+      summary: Add prompt configuration
+      parameters:
+        - $ref: "#/components/parameters/ChatbotUuid"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [version, system_prompt]
+              properties:
+                version: { type: string }
+                system_prompt: { type: string }
+                is_current: { type: boolean }
+                change_note: { type: string }
+      responses:
+        "201": { description: Prompt version created }
+components:
+  parameters:
+    ChatbotUuid:
+      in: path
+      name: chatbot
+      required: true
+      schema: { type: string, format: uuid }
+  schemas:
+    BusinessDomainInput:
+      type: object
+      required: [name, slug]
+      properties:
+        name: { type: string }
+        slug: { type: string }
+        description: { type: string }
+        status: { type: string }
+    SensitivityLevelInput:
+      type: object
+      required: [name, slug, rank]
+      properties:
+        name: { type: string }
+        slug: { type: string }
+        rank: { type: integer }
+        description: { type: string }
+    ChatbotInput:
+      type: object
+      required: [name, slug, business_domain_id, sensitivity_level_id]
+      properties:
+        name: { type: string }
+        slug: { type: string }
+        description: { type: string }
+        business_domain_id: { type: integer }
+        sensitivity_level_id: { type: integer }
+        status: { type: string }
+        visibility: { type: string }
+        security_profile: { type: string }
+        settings: { type: object }

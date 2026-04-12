@@ -13,7 +13,7 @@ DIGEST_RECORD_FILE ?= $(REPORT_DIR)/promotion-digests.txt
 OFFICIAL_SCENARIO ?= demo
 SUPPORT_PACK_ROOT ?= artifacts/support-pack
 
-.PHONY: help lint test laravel-test verify promote promote-digest deploy validate demo campaign final-campaign release-evidence supply-chain-evidence supply-chain-execute jenkins-webhook-proof jenkins-ci-push-proof cluster-security-proof devsecops-final-proof devsecops-readiness final-proof final-summary support-pack kyverno-install kyverno-enforce metrics-install clean
+.PHONY: help lint test laravel-test verify promote promote-digest deploy validate demo campaign final-campaign release-evidence release-attestation supply-chain-evidence supply-chain-execute observability-snapshot portal-service-proof global-project-status close-missing-phases jenkins-webhook-proof jenkins-ci-push-proof cluster-security-proof devsecops-final-proof devsecops-readiness final-proof final-summary support-pack kyverno-install kyverno-enforce metrics-install clean
 
 help: ## Show available targets
 	@awk 'BEGIN {FS = ":.*## "; print "Available targets:"} /^[a-zA-Z0-9_.-]+:.*## / {printf "  %-12s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
@@ -76,12 +76,28 @@ release-evidence: ## Generate a consolidated release evidence document
 	@REGISTRY_HOST=$(REGISTRY_HOST) IMAGE_PREFIX=$(IMAGE_PREFIX) SOURCE_IMAGE_TAG=$(SOURCE_IMAGE_TAG) TARGET_IMAGE_TAG=$(TARGET_IMAGE_TAG) REPORT_DIR=$(REPORT_DIR) SBOM_DIR=$(SBOM_DIR) DIGEST_RECORD_FILE=$(DIGEST_RECORD_FILE) \
 		bash scripts/release/record-release-evidence.sh
 
+release-attestation: ## Generate a local release attestation from available evidence
+	@REGISTRY_HOST=$(REGISTRY_HOST) IMAGE_PREFIX=$(IMAGE_PREFIX) SOURCE_IMAGE_TAG=$(SOURCE_IMAGE_TAG) TARGET_IMAGE_TAG=$(TARGET_IMAGE_TAG) REPORT_DIR=$(REPORT_DIR) SBOM_DIR=$(SBOM_DIR) DIGEST_RECORD_FILE=$(DIGEST_RECORD_FILE) \
+		bash scripts/release/generate-release-attestation.sh
+
 supply-chain-evidence: ## Consolidate SBOM, signature, verification and promotion evidence
 	@REPORT_DIR=$(REPORT_DIR) SBOM_DIR=$(SBOM_DIR) bash scripts/release/collect-supply-chain-evidence.sh
 
 supply-chain-execute: ## Sign, verify, promote by digest, generate SBOMs and record evidence
 	@REGISTRY_HOST=$(REGISTRY_HOST) IMAGE_PREFIX=$(IMAGE_PREFIX) SOURCE_IMAGE_TAG=$(SOURCE_IMAGE_TAG) TARGET_IMAGE_TAG=$(TARGET_IMAGE_TAG) REPORT_DIR=$(REPORT_DIR) SBOM_DIR=$(SBOM_DIR) DIGEST_RECORD_FILE=$(DIGEST_RECORD_FILE) \
 		bash scripts/release/run-supply-chain-execute.sh
+
+observability-snapshot: ## Generate a read-only Kubernetes, Kyverno, HPA and Jenkins observability snapshot
+	@bash scripts/validate/generate-observability-snapshot.sh
+
+portal-service-proof: ## Validate Blade portal connectivity to Laravel business services
+	@bash scripts/validate/validate-portal-service-connectivity.sh
+
+global-project-status: ## Generate a factual global project status report
+	@bash scripts/validate/generate-global-project-status.sh
+
+close-missing-phases: ## Close remaining environment-dependent phases with safe defaults
+	@bash scripts/validate/run-missing-phases-closure.sh
 
 jenkins-webhook-proof: ## Validate Jenkins GitHub webhook reachability and CI trigger readiness
 	@bash scripts/jenkins/validate-github-webhook.sh
