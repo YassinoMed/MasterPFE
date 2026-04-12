@@ -33,6 +33,29 @@ capture() {
 
 require_command kubectl
 
+if ! kubectl version --request-timeout=3s >/dev/null 2>&1; then
+  {
+    printf '# Cluster Security Addons Validation\n\n'
+    printf -- '- Generated at: `%s`\n' "$(date -u '+%Y-%m-%dT%H:%M:%SZ')"
+    printf -- '- Namespace: `%s`\n\n' "${NS}"
+    printf '| Component | Status | Evidence |\n'
+    printf '|---|---:|---|\n'
+    printf '| Kubernetes API | PARTIAL | API server unreachable from this environment |\n'
+    printf '| metrics-server | PARTIAL | Cannot validate without a reachable cluster |\n'
+    printf '| HPA | PARTIAL | Cannot validate without a reachable cluster |\n'
+    printf '| Kyverno | PARTIAL | Cannot validate without a reachable cluster |\n\n'
+    printf '## Diagnostic\n\n'
+    printf '```text\n'
+    printf 'kubectl is installed, but the Kubernetes API is not reachable.\n'
+    printf 'Context: %s\n' "$(kubectl config current-context 2>/dev/null || printf 'unavailable')"
+    printf 'Action: start kind or export a valid kubeconfig, then rerun make cluster-security-proof.\n'
+    printf '```\n'
+  } > "${OUT_FILE}"
+
+  warn "Kubernetes API is not reachable. Partial addon report written to ${OUT_FILE}"
+  exit 0
+fi
+
 {
   printf '# Cluster Security Addons Validation\n\n'
   printf -- '- Generated at: `%s`\n' "$(date -u '+%Y-%m-%dT%H:%M:%SZ')"

@@ -1,0 +1,53 @@
+Name:                   api-gateway
+Namespace:              securerag-hub
+CreationTimestamp:      Tue, 07 Apr 2026 10:35:55 +0100
+Labels:                 app.kubernetes.io/part-of=securerag-hub
+Annotations:            deployment.kubernetes.io/revision: 1
+Selector:               app.kubernetes.io/name=api-gateway,app.kubernetes.io/part-of=securerag-hub
+Replicas:               1 desired | 1 updated | 1 total | 1 available | 0 unavailable
+StrategyType:           RollingUpdate
+MinReadySeconds:        0
+RollingUpdateStrategy:  25% max unavailable, 25% max surge
+Pod Template:
+  Labels:           app.kubernetes.io/name=api-gateway
+                    app.kubernetes.io/part-of=securerag-hub
+  Service Account:  sa-api-gateway
+  Containers:
+   api-gateway:
+    Image:      localhost:5001/securerag-hub-api-gateway:dev
+    Port:       8080/TCP (http)
+    Host Port:  0/TCP (http)
+    Limits:
+      cpu:     300m
+      memory:  256Mi
+    Requests:
+      cpu:      100m
+      memory:   128Mi
+    Liveness:   http-get http://:http/healthz delay=15s timeout=1s period=20s #success=1 #failure=3
+    Readiness:  http-get http://:http/healthz delay=5s timeout=1s period=10s #success=1 #failure=3
+    Environment Variables from:
+      securerag-common-config   ConfigMap  Optional: false
+      securerag-common-secrets  Secret     Optional: true
+    Environment:
+      SERVICE_NAME:          api-gateway
+      AUTH_USERS_URL:        http://auth-users:8080
+      CHATBOT_MANAGER_URL:   http://chatbot-manager:8080
+      LLM_ORCHESTRATOR_URL:  http://llm-orchestrator:8080
+      SECURITY_AUDITOR_URL:  http://security-auditor:8080
+    Mounts:
+      /tmp from tmp (rw)
+  Volumes:
+   tmp:
+    Type:          EmptyDir (a temporary directory that shares a pod's lifetime)
+    Medium:        
+    SizeLimit:     <unset>
+  Node-Selectors:  <none>
+  Tolerations:     <none>
+Conditions:
+  Type           Status  Reason
+  ----           ------  ------
+  Progressing    True    NewReplicaSetAvailable
+  Available      True    MinimumReplicasAvailable
+OldReplicaSets:  <none>
+NewReplicaSet:   api-gateway-f7755d894 (1/1 replicas created)
+Events:          <none>

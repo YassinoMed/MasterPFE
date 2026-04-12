@@ -37,8 +37,13 @@
 | `artifacts/final/final-proof-check.txt` | missing |
 | `artifacts/release/release-evidence.md` | present |
 | `artifacts/release/supply-chain-evidence.md` | present |
+| `artifacts/release/release-attestation.json` | present |
+| `artifacts/observability/observability-snapshot.md` | present |
+| `artifacts/application/portal-service-connectivity.md` | present |
+| `artifacts/final/global-project-status.md` | present |
+| `artifacts/final/missing-phases-closure.md` | present |
 | `artifacts/final/devsecops-readiness-report.md` | present |
-| Latest support pack | artifacts/support-pack/support-demo-20260410T122601Z.tar.gz |
+| Latest support pack | artifacts/support-pack/20260412T221950Z.tar.gz |
 
 ## 5. Honest limits
 

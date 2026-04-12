@@ -37,6 +37,8 @@ cat > "${OUT_FILE}" <<EOF
 
 - $(status_file "${OUT_DIR}/release-evidence.md")
 - $(status_file "${OUT_DIR}/release-manifest.env")
+- $(status_file "${OUT_DIR}/release-attestation.md")
+- $(status_file "${OUT_DIR}/release-attestation.json")
 
 ## 2. Verification and signature evidence
 

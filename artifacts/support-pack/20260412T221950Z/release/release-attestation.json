@@ -1,0 +1,60 @@
+{
+  "schema": "securerag.devsecops.release-attestation.v1",
+  "generated_at": "2026-04-12T22:18:49.158220Z",
+  "project": "SecureRAG Hub",
+  "official_scenario": "demo",
+  "git": {
+    "commit": "3ad99fe1bebdd5f5edd1bebe0e6d3b5f25d7a025",
+    "branch": "main",
+    "dirty": true
+  },
+  "release": {
+    "registry": "localhost:5001",
+    "image_prefix": "securerag-hub",
+    "source_tag": "dev",
+    "target_tag": "release-local",
+    "promotion_strategy": "digest-first",
+    "deploy_without_rebuild": true
+  },
+  "digests": [],
+  "sboms": [],
+  "evidence": [
+    {
+      "path": "artifacts/release/sign-summary.txt",
+      "status": "ABSENT"
+    },
+    {
+      "path": "artifacts/release/verify-summary.txt",
+      "status": "ABSENT"
+    },
+    {
+      "path": "artifacts/release/promotion-by-digest-summary.txt",
+      "status": "ABSENT"
+    },
+    {
+      "path": "artifacts/release/promotion-digests.txt",
+      "status": "ABSENT"
+    },
+    {
+      "path": "artifacts/release/sbom-summary.txt",
+      "status": "ABSENT"
+    },
+    {
+      "path": "artifacts/release/release-evidence.md",
+      "status": "OK",
+      "sha256": "e467bccc70b00df421b9a847f901b2461e0a4ac81f466890b72cf3abc702830d",
+      "size_bytes": 919
+    },
+    {
+      "path": "artifacts/release/supply-chain-evidence.md",
+      "status": "OK",
+      "sha256": "cf1509401a2a3fa211d966d15c5deffa6e14609ca5e3485dc7af41c9b988a244",
+      "size_bytes": 1304
+    }
+  ],
+  "interpretation": {
+    "OK": "Artefact present and hashable in this workspace.",
+    "ABSENT": "Artefact not produced yet; execute the relevant gated step.",
+    "dirty_git": "True means the attestation captures a local working tree state, not a clean commit."
+  }
+}
