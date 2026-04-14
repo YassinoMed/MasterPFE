@@ -105,6 +105,19 @@ rules:
         - /infra/jenkins/Dockerfile
     pattern: USER root
 
+  - id: dockerfile-recursive-copy-dot
+    message: Avoid recursive `COPY . .`; copy only required application paths and keep sensitive files out of the image context.
+    severity: ERROR
+    languages:
+      - dockerfile
+    metadata:
+      category: supply-chain
+      technology:
+        - docker
+      cwe:
+        - "CWE-200: Exposure of Sensitive Information to an Unauthorized Actor"
+    pattern: COPY . .
+
   - id: php.laravel-form-request-authorize-true
     message: FormRequest authorization must call a policy, middleware-backed helper, or service token guard instead of returning true.
     severity: ERROR
