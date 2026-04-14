@@ -36,12 +36,14 @@ artifacts/final/devsecops-final-proof.md
 Après un vrai `git push`, utiliser :
 
 ```bash
-JENKINS_URL=http://141.95.135.130:8085 \
+JENKINS_URL=https://jenkins.example.invalid \
 JENKINS_USER=admin \
 JENKINS_TOKEN=<jenkins-api-token> \
 RUN_CI_PUSH_PROOF=true \
 make devsecops-final-proof
 ```
+
+Pour un laboratoire local sans TLS, `http://localhost:8085` reste acceptable. Pour un serveur cloud final ou assimilé production, Jenkins doit passer par un reverse proxy HTTPS avant d’être présenté comme accès public.
 
 Artefacts attendus :
 
