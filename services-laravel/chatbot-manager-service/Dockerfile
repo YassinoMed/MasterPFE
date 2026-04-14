@@ -12,17 +12,33 @@ RUN apt-get update \
 
 COPY --from=composer-bin /usr/bin/composer /usr/bin/composer
 
+RUN groupadd --gid 10001 app \
+    && useradd --uid 10001 --gid 10001 --create-home --shell /usr/sbin/nologin app
+
 WORKDIR /var/www/html
 
 COPY composer.json composer.lock ./
 RUN composer install --no-interaction --prefer-dist --optimize-autoloader --no-scripts
 
-COPY . .
+COPY --chown=app:app app ./app
+COPY --chown=app:app artisan ./
+COPY --chown=app:app bootstrap ./bootstrap
+COPY --chown=app:app config ./config
+COPY --chown=app:app database ./database
+COPY --chown=app:app docker ./docker
+COPY --chown=app:app public ./public
+COPY --chown=app:app resources ./resources
+COPY --chown=app:app routes ./routes
+COPY --chown=app:app .env.example ./
 
 RUN composer dump-autoload --optimize && php artisan package:discover --ansi
 
-RUN chmod +x docker/entrypoint.sh
+RUN mkdir -p database storage/app storage/framework/cache storage/framework/sessions storage/framework/views storage/logs bootstrap/cache \
+    && chown -R app:app /var/www/html \
+    && chmod +x docker/entrypoint.sh
 
 EXPOSE 8000
+
+USER 10001:10001
 
 ENTRYPOINT ["docker/entrypoint.sh"]

@@ -1,7 +1,7 @@
 # Security Posture Report — SecureRAG Hub
 
-- Generated at UTC: `2026-04-14T23:38:08Z`
-- Git commit: `ea2440c357444b99b40c8334381b61455d9a752b`
+- Generated at UTC: `2026-04-14T23:48:03Z`
+- Git commit: `83f8f97ec1d974c0ca658cda9e955621861203e8`
 - Kubernetes namespace: `securerag-hub`
 
 ## 1. Security controls status
