@@ -1,0 +1,2 @@
+[INFO] Waiting up to 300s for Jenkins job securerag-hub-ci to expose commit 80549b817e83
+scripts/jenkins/verify-ci-push-trigger.sh: line 54: auth_args[@]: unbound variable

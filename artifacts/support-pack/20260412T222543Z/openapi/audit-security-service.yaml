@@ -1,0 +1,136 @@
+openapi: 3.0.3
+info:
+  title: SecureRAG Hub Audit Security Service API
+  version: 1.0.0
+  description: Security incidents, audit logs and compliance evidence API.
+servers:
+  - url: http://127.0.0.1:8094/api/v1
+paths:
+  /health:
+    get:
+      summary: Health check
+      responses:
+        "200": { description: Service is healthy }
+  /incidents:
+    get:
+      summary: List security incidents
+      parameters:
+        - in: query
+          name: severity
+          schema: { type: string }
+        - in: query
+          name: status
+          schema: { type: string }
+      responses:
+        "200": { description: Incident list }
+    post:
+      summary: Create security incident
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/SecurityIncidentInput" }
+      responses:
+        "201": { description: Incident created }
+  /incidents/{incident}:
+    get:
+      summary: Get security incident
+      parameters:
+        - $ref: "#/components/parameters/IncidentUuid"
+      responses:
+        "200": { description: Incident detail }
+  /incidents/{incident}/status:
+    patch:
+      summary: Update incident status
+      parameters:
+        - $ref: "#/components/parameters/IncidentUuid"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [status]
+              properties:
+                status:
+                  type: string
+                  enum: [open, triaged, mitigated, closed]
+                resolved_at: { type: string, format: date-time }
+      responses:
+        "200": { description: Incident updated }
+  /audit-logs:
+    get:
+      summary: List audit logs
+      responses:
+        "200": { description: Audit logs }
+    post:
+      summary: Record audit log
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AuditLogInput" }
+      responses:
+        "201": { description: Audit log recorded }
+  /compliance-evidence:
+    get:
+      summary: List compliance evidence
+      responses:
+        "200": { description: Evidence list }
+    post:
+      summary: Record compliance evidence
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ComplianceEvidenceInput" }
+      responses:
+        "201": { description: Evidence recorded }
+components:
+  parameters:
+    IncidentUuid:
+      in: path
+      name: incident
+      required: true
+      schema: { type: string, format: uuid }
+  schemas:
+    SecurityIncidentInput:
+      type: object
+      required: [title, severity, source]
+      properties:
+        title: { type: string }
+        severity:
+          type: string
+          enum: [low, medium, high, critical]
+        status:
+          type: string
+          enum: [open, triaged, mitigated, closed]
+        source: { type: string }
+        description: { type: string }
+        detected_at: { type: string, format: date-time }
+        metadata: { type: object }
+    AuditLogInput:
+      type: object
+      required: [actor_reference, action, resource_type]
+      properties:
+        actor_type: { type: string }
+        actor_reference: { type: string }
+        action: { type: string }
+        resource_type: { type: string }
+        resource_id: { type: string }
+        outcome:
+          type: string
+          enum: [success, failure, blocked]
+        metadata: { type: object }
+    ComplianceEvidenceInput:
+      type: object
+      required: [control_id, title, status]
+      properties:
+        control_id: { type: string }
+        title: { type: string }
+        status:
+          type: string
+          enum: [pass, warn, fail, not_applicable]
+        evidence_uri: { type: string }
+        summary: { type: string }
+        metadata: { type: object }

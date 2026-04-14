@@ -1,0 +1,2 @@
+curl: (7) Failed to connect to localhost port 8085 after 0 ms: Couldn't connect to server
+[ERROR] Jenkins is not reachable at http://localhost:8085

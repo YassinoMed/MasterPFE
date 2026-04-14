@@ -1,0 +1,2 @@
+[INFO] Installing metrics-server from infra/k8s/addons/metrics-server
+error: error validating "infra/k8s/addons/metrics-server": error validating data: failed to download openapi: Get "https://127.0.0.1:6443/openapi/v2?timeout=32s": dial tcp 127.0.0.1:6443: connect: connection refused; if you choose to ignore these errors, turn validation off with --validate=false

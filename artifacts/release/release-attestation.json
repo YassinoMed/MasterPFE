@@ -1,10 +1,18 @@
 {
   "schema": "securerag.devsecops.release-attestation.v1",
+<<<<<<< HEAD
   "generated_at": "2026-04-12T22:48:11.666186Z",
   "project": "SecureRAG Hub",
   "official_scenario": "demo",
   "git": {
     "commit": "09b4c07aead711dc91baf789ccfcf653f9a65516",
+=======
+  "generated_at": "2026-04-12T22:25:50.108119Z",
+  "project": "SecureRAG Hub",
+  "official_scenario": "demo",
+  "git": {
+    "commit": "80549b817e83e8283452538de818f722a96daa0d",
+>>>>>>> 5af92bc (securité)
     "branch": "main",
     "dirty": true
   },

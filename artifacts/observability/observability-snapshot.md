@@ -1,6 +1,10 @@
 # Observability Snapshot - SecureRAG Hub
 
+<<<<<<< HEAD
 - Generated at: `2026-04-12T22:48:10Z`
+=======
+- Generated at: `2026-04-12T22:25:48Z`
+>>>>>>> 5af92bc (securité)
 - Namespace: `securerag-hub`
 - Jenkins URL: `http://localhost:8085`
 

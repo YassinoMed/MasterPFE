@@ -1,7 +1,12 @@
 # Global Project Status - SecureRAG Hub
 
+<<<<<<< HEAD
 - Generated at: `2026-04-12T22:48:13Z`
 - Git commit: `09b4c07aead711dc91baf789ccfcf653f9a65516`
+=======
+- Generated at: `2026-04-12T22:25:54Z`
+- Git commit: `80549b817e83e8283452538de818f722a96daa0d`
+>>>>>>> 5af92bc (securité)
 - Git branch: `main`
 - Official scenario: `demo`
 
@@ -44,7 +49,11 @@
 | Supply chain evidence | PREUVE_PRÉSENTE |
 | Observability snapshot | PREUVE_PRÉSENTE |
 | Portal-service connectivity | PREUVE_PRÉSENTE |
+<<<<<<< HEAD
 | Latest support pack | artifacts/support-pack/20260412T224812Z.tar.gz |
+=======
+| Latest support pack | artifacts/support-pack/20260412T222547Z.tar.gz |
+>>>>>>> 5af92bc (securité)
 
 ## 5. Honest remaining dependencies
 
