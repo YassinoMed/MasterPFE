@@ -1,7 +1,12 @@
 # Release Attestation - SecureRAG Hub
 
+<<<<<<< HEAD
 - Generated at: `2026-04-12T22:48:11.666186Z`
 - Git commit: `09b4c07aead711dc91baf789ccfcf653f9a65516`
+=======
+- Generated at: `2026-04-12T22:25:50.108119Z`
+- Git commit: `80549b817e83e8283452538de818f722a96daa0d`
+>>>>>>> 5af92bc (securité)
 - Git branch: `main`
 - Working tree dirty: `true`
 - Registry: `localhost:5001`

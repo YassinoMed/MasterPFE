@@ -1,0 +1,54 @@
+\section{Artefacts DevSecOps finaux à citer}
+
+Cette section recense les artefacts finaux utilisés pour justifier l'état réel
+de la plateforme \textit{SecureRAG Hub}. Elle permet de distinguer les éléments
+déjà validés des éléments prêts à être exécutés mais dépendants de
+l'environnement.
+
+\subsection{Preuves de synthèse}
+
+\begin{itemize}
+  \item \texttt{artifacts/final/final-validation-summary.md} : résumé final de
+  validation du scénario officiel \texttt{demo}.
+  \item \texttt{artifacts/final/global-project-status.md} : état global du
+  projet, incluant gouvernance, applicatif, OpenAPI et preuves DevSecOps.
+  \item \texttt{artifacts/final/missing-phases-closure.md} : matrice des phases
+  restantes, avec statut \texttt{OK}, \texttt{PARTIEL} ou \texttt{SKIPPED}.
+\end{itemize}
+
+\subsection{Preuves applicatives}
+
+\begin{itemize}
+  \item \texttt{artifacts/application/portal-service-connectivity.md} : preuve
+  de connectivité entre le portail Laravel Blade et les microservices métier.
+  \item \texttt{docs/openapi/*.yaml} : contrats API des microservices Laravel.
+\end{itemize}
+
+\subsection{Preuves supply chain}
+
+\begin{itemize}
+  \item \texttt{artifacts/release/supply-chain-evidence.md} : synthèse SBOM,
+  signature, vérification et promotion.
+  \item \texttt{artifacts/release/release-attestation.md} : attestation locale
+  de release et chaîne de custody.
+  \item \texttt{artifacts/release/promotion-digests.txt} : digests d'images
+  lorsque la promotion complète est exécutée.
+\end{itemize}
+
+\subsection{Preuves Kubernetes et exploitation}
+
+\begin{itemize}
+  \item \texttt{artifacts/observability/observability-snapshot.md} : capture
+  non destructive de l'état runtime.
+  \item \texttt{artifacts/validation/cluster-security-addons.md} : état de
+  \texttt{metrics-server}, HPA et Kyverno.
+  \item \texttt{docs/runbooks/sre-incident-response.md} : procédures SRE et
+  modes dégradés.
+\end{itemize}
+
+\subsection{Limites à annoncer}
+
+Les preuves Jenkins webhook, SBOM Syft, signatures Cosign, promotion par digest,
+metrics-server et Kyverno dépendent de l'environnement d'exécution. Elles ne
+doivent être présentées comme réellement exécutées que lorsque les artefacts
+datés correspondants existent dans le support pack final.

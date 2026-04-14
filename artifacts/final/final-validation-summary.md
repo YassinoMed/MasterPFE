@@ -43,7 +43,11 @@
 | `artifacts/final/global-project-status.md` | present |
 | `artifacts/final/missing-phases-closure.md` | present |
 | `artifacts/final/devsecops-readiness-report.md` | present |
+<<<<<<< HEAD
 | Latest support pack | artifacts/support-pack/20260412T224812Z.tar.gz |
+=======
+| Latest support pack | artifacts/support-pack/20260412T222555Z.tar.gz |
+>>>>>>> 5af92bc (securité)
 
 ## 5. Honest limits
 

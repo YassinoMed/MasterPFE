@@ -1,0 +1,10 @@
+NAME                                CPU(cores)   MEMORY(bytes)   
+api-gateway-f7755d894-7fn9l         22m          38Mi            
+auth-users-846b9d78c4-hxfz2         8m           36Mi            
+chatbot-manager-54df7d999-b4fhz     9m           37Mi            
+knowledge-hub-6bdf546b5d-zwjd6      9m           39Mi            
+llm-orchestrator-779d744c7-5wtw4    22m          37Mi            
+ollama-586b47b575-v42cw             1m           31Mi            
+portal-web-7fbb7f9bfb-6kbsn         16m          61Mi            
+qdrant-0                            5m           72Mi            
+security-auditor-5fd889bb9b-f65zr   6m           37Mi            
