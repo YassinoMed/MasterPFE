@@ -17,9 +17,11 @@ The already validated baseline remains:
 Run:
 
 ```bash
-JENKINS_URL=http://141.95.135.130:8085 \
+JENKINS_URL=https://jenkins.example.invalid \
 bash scripts/jenkins/validate-github-webhook.sh
 ```
+
+Utiliser `http://localhost:8085` uniquement pour un Jenkins local de démonstration. Un Jenkins exposé sur un serveur cloud doit être publié derrière HTTPS.
 
 Expected evidence:
 
@@ -152,4 +154,3 @@ Expected evidence:
 - `artifacts/release/supply-chain-evidence.md`
 - `artifacts/validation/cluster-security-addons.md`
 - `artifacts/support-pack/*.tar.gz`
-

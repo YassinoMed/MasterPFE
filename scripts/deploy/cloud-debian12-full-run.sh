@@ -3,11 +3,17 @@ set -euo pipefail
 
 cd "$(dirname "$0")/../.."
 
-PUBLIC_HOST="${PUBLIC_HOST:-141.95.135.130}"
+PUBLIC_HOST="${PUBLIC_HOST:-secure-rag.example.invalid}"
+PUBLIC_SCHEME="${PUBLIC_SCHEME:-https}"
 REGISTRY_HOST="${REGISTRY_HOST:-localhost:5001}"
 IMAGE_TAG="${IMAGE_TAG:-demo}"
 IMAGE_PREFIX="${IMAGE_PREFIX:-securerag-hub}"
 KUSTOMIZE_OVERLAY="${KUSTOMIZE_OVERLAY:-infra/k8s/overlays/demo}"
+
+if [ "${PUBLIC_SCHEME}" != "https" ]; then
+  echo "[WARN] PUBLIC_SCHEME=${PUBLIC_SCHEME} is acceptable only for local/demo validation."
+  echo "[WARN] Public or production-like exposure must be protected by HTTPS."
+fi
 
 echo "[INFO] Repair Docker forwarding"
 sudo /sbin/sysctl -w net.ipv4.ip_forward=1
@@ -57,6 +63,6 @@ echo "[INFO] Final campaign dry-run"
 OFFICIAL_SCENARIO=demo CAMPAIGN_MODE=dry-run make final-campaign
 
 echo "[INFO] URLs"
-echo "API Gateway: http://${PUBLIC_HOST}:8080/healthz"
-echo "Portal Web:  http://${PUBLIC_HOST}:8081/health"
-echo "Jenkins:     http://${PUBLIC_HOST}:8085"
+echo "API Gateway: ${PUBLIC_SCHEME}://${PUBLIC_HOST}:8080/healthz"
+echo "Portal Web:  ${PUBLIC_SCHEME}://${PUBLIC_HOST}:8081/health"
+echo "Jenkins:     ${PUBLIC_SCHEME}://${PUBLIC_HOST}:8085"

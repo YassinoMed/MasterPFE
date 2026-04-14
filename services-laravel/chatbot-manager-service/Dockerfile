@@ -20,22 +20,31 @@ WORKDIR /var/www/html
 COPY composer.json composer.lock ./
 RUN composer install --no-interaction --prefer-dist --optimize-autoloader --no-scripts
 
-COPY --chown=app:app app ./app
-COPY --chown=app:app artisan ./
-COPY --chown=app:app bootstrap ./bootstrap
-COPY --chown=app:app config ./config
-COPY --chown=app:app database ./database
-COPY --chown=app:app docker ./docker
-COPY --chown=app:app public ./public
-COPY --chown=app:app resources ./resources
-COPY --chown=app:app routes ./routes
-COPY --chown=app:app .env.example ./
+COPY app ./app
+COPY artisan ./
+COPY bootstrap ./bootstrap
+COPY config ./config
+COPY database ./database
+COPY docker ./docker
+COPY public ./public
+COPY resources ./resources
+COPY routes ./routes
+COPY .env.example ./
 
 RUN composer dump-autoload --optimize && php artisan package:discover --ansi
 
-RUN mkdir -p database storage/app storage/framework/cache storage/framework/sessions storage/framework/views storage/logs bootstrap/cache \
-    && chown -R app:app /var/www/html \
-    && chmod +x docker/entrypoint.sh
+ENV CREATE_DOTENV=false \
+    SECURERAG_RUNTIME_ROOT=/tmp/securerag-runtime \
+    DB_DATABASE=/tmp/securerag-runtime/database/database.sqlite \
+    LARAVEL_STORAGE_PATH=/tmp/securerag-runtime/storage \
+    VIEW_COMPILED_PATH=/tmp/securerag-runtime/storage/framework/views \
+    APP_SERVICES_CACHE=/tmp/securerag-runtime/bootstrap-cache/services.php \
+    APP_PACKAGES_CACHE=/tmp/securerag-runtime/bootstrap-cache/packages.php \
+    APP_CONFIG_CACHE=/tmp/securerag-runtime/bootstrap-cache/config.php \
+    APP_ROUTES_CACHE=/tmp/securerag-runtime/bootstrap-cache/routes-v7.php \
+    APP_EVENTS_CACHE=/tmp/securerag-runtime/bootstrap-cache/events.php
+
+RUN chmod +x docker/entrypoint.sh
 
 EXPOSE 8000
 
