@@ -17,20 +17,19 @@ final class SensitiveDataRedactor
      * @param  mixed  $value
      * @return mixed
      */
-    public static function sanitizeForAudit(mixed $value, string $path = ''): mixed
+    public static function sanitizeMetadata(mixed $value): mixed
     {
         if (is_array($value)) {
             $sanitized = [];
             foreach ($value as $key => $nestedValue) {
                 $keyString = (string) $key;
-                $childPath = $path === '' ? $keyString : "{$path}.{$keyString}";
                 if (self::looksSensitiveKey($keyString)) {
                     $sanitized[$key] = self::redactedPayload($nestedValue);
 
                     continue;
                 }
 
-                $sanitized[$key] = self::sanitizeForAudit($nestedValue, $childPath);
+                $sanitized[$key] = self::sanitizeMetadata($nestedValue);
             }
 
             return $sanitized;
