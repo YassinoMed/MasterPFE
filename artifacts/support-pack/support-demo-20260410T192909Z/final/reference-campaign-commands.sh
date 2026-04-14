@@ -1,0 +1,7 @@
+REGISTRY_HOST=localhost:5001
+IMAGE_PREFIX=securerag-hub
+SOURCE_IMAGE_TAG=demo
+TARGET_IMAGE_TAG=release-local
+KUSTOMIZE_OVERLAY=infra/k8s/overlays/demo
+CAMPAIGN_MODE=dry-run
+PROMOTION_STRATEGY=digest

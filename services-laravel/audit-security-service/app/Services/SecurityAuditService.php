@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\AuditLog;
 use App\Models\ComplianceEvidence;
 use App\Models\SecurityIncident;
+use App\Support\SensitiveDataRedactor;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class SecurityAuditService
@@ -21,6 +22,8 @@ class SecurityAuditService
 
     public function createIncident(array $data): SecurityIncident
     {
+        $data['metadata'] = SensitiveDataRedactor::sanitizeForAudit($data['metadata'] ?? []);
+
         return SecurityIncident::query()->create($data + [
             'status' => SecurityIncident::STATUS_OPEN,
             'detected_at' => now(),
@@ -48,6 +51,8 @@ class SecurityAuditService
 
     public function createAuditLog(array $data): AuditLog
     {
+        $data['metadata'] = SensitiveDataRedactor::sanitizeForAudit($data['metadata'] ?? []);
+
         return AuditLog::query()->create($data + [
             'actor_type' => 'user',
             'outcome' => 'success',
@@ -66,6 +71,8 @@ class SecurityAuditService
 
     public function createEvidence(array $data): ComplianceEvidence
     {
+        $data['metadata'] = SensitiveDataRedactor::sanitizeForAudit($data['metadata'] ?? []);
+
         return ComplianceEvidence::query()->create($data + [
             'collected_at' => now(),
         ]);

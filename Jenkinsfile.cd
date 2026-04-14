@@ -123,6 +123,23 @@ pipeline {
       }
     }
 
+    stage('Assert Mandatory Supply Chain Evidence') {
+      steps {
+        sh '''
+          set -euo pipefail
+          REPORT_DIR="${REPORT_DIR}" SBOM_DIR="${SBOM_DIR}" \
+          DIGEST_RECORD_FILE="${REPORT_DIR}/promotion-digests.txt" \
+          REQUIRE_SUPPLY_CHAIN_EVIDENCE="true" \
+          bash scripts/release/assert-supply-chain-evidence.sh
+        '''
+      }
+      post {
+        always {
+          archiveArtifacts allowEmptyArchive: true, artifacts: 'artifacts/release/supply-chain-gate-report.md'
+        }
+      }
+    }
+
     stage('Record Release Evidence') {
       steps {
         sh '''

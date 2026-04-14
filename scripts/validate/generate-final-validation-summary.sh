@@ -162,6 +162,7 @@ cat > "${OUT}" <<EOF
 | \`artifacts/final/final-proof-check.txt\` | $(status_from_file artifacts/final/final-proof-check.txt) |
 | \`artifacts/release/release-evidence.md\` | $(status_from_file artifacts/release/release-evidence.md) |
 | \`artifacts/release/supply-chain-evidence.md\` | $(status_from_file artifacts/release/supply-chain-evidence.md) |
+| \`artifacts/release/supply-chain-gate-report.md\` | $(status_from_file artifacts/release/supply-chain-gate-report.md) |
 | \`artifacts/release/release-attestation.json\` | ${release_attestation_status} |
 | \`artifacts/observability/observability-snapshot.md\` | ${observability_snapshot_status} |
 | \`artifacts/application/portal-service-connectivity.md\` | ${portal_service_status} |

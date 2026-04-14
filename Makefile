@@ -13,7 +13,7 @@ DIGEST_RECORD_FILE ?= $(REPORT_DIR)/promotion-digests.txt
 OFFICIAL_SCENARIO ?= demo
 SUPPORT_PACK_ROOT ?= artifacts/support-pack
 
-.PHONY: help lint test laravel-test verify promote promote-digest deploy validate demo campaign final-campaign release-evidence release-attestation supply-chain-evidence supply-chain-execute observability-snapshot portal-service-proof global-project-status close-missing-phases jenkins-webhook-proof jenkins-ci-push-proof cluster-security-proof devsecops-final-proof devsecops-readiness final-proof final-summary support-pack kyverno-install kyverno-enforce metrics-install clean
+.PHONY: help lint test laravel-test verify promote promote-digest deploy validate demo campaign final-campaign release-evidence release-attestation supply-chain-evidence supply-chain-execute observability-snapshot portal-service-proof global-project-status close-missing-phases jenkins-webhook-proof jenkins-ci-push-proof cluster-security-proof refresh-cluster-security-proof devsecops-final-proof devsecops-readiness final-proof final-summary support-pack kyverno-install kyverno-enforce metrics-install clean
 
 help: ## Show available targets
 	@awk 'BEGIN {FS = ":.*## "; print "Available targets:"} /^[a-zA-Z0-9_.-]+:.*## / {printf "  %-12s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
@@ -107,6 +107,9 @@ jenkins-ci-push-proof: ## Verify Jenkins consumed the latest pushed Git commit
 
 cluster-security-proof: ## Collect metrics-server, HPA and Kyverno runtime evidence
 	@bash scripts/validate/validate-cluster-security-addons.sh
+
+refresh-cluster-security-proof: ## Install metrics-server/Kyverno (Audit) and archive fresh runtime security proof
+	@bash scripts/validate/refresh-cluster-security-proof.sh
 
 devsecops-final-proof: ## Run the non-destructive final DevSecOps proof orchestrator
 	@bash scripts/validate/run-devsecops-final-proof.sh

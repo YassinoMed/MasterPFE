@@ -1,147 +1,30 @@
-# Jenkins GitHub Webhook Runbook - SecureRAG Hub
+# Configuration Webhook GitHub → Jenkins (Mode Local/Demo)
 
-## Objective
+## Objectif
+Activer le déclenchement automatique de la pipeline `securerag-hub-ci` lors d'un `git push`, finalisant ainsi l'automatisation CI/CD (P1).
 
-Trigger the official Jenkins CI job automatically when code is pushed to GitHub.
-
-## Official CI job
-
-- Jenkins job: `securerag-hub-ci`
-- Pipeline file: `Jenkinsfile`
-- Repository: `https://github.com/YassinoMed/MasterPFE.git`
-- Branch: `main`
-
-## Jenkins trigger strategy
-
-The CI job uses two triggers:
-
-- GitHub push webhook for immediate builds.
-- SCM polling every 5 minutes as a cloud fallback.
-
-This keeps the CI automated even if the GitHub webhook cannot reach the Jenkins container during a demo.
-
-## Jenkins URL
-
-Set the Jenkins public URL in `infra/jenkins/docker-compose.yml`:
-
-```yaml
-JENKINS_URL: http://141.95.135.130:8085/
-```
-
-Then restart Jenkins:
-
+## Étape 1 : Exposer Jenkins (Si GitHub est sur le cloud)
+Comme Jenkins tourne localement (`localhost:8085`), GitHub ne peut pas l'atteindre directement.
+Exposez-le temporairement :
 ```bash
-cd /opt/MasterPFE
-docker compose -f infra/jenkins/docker-compose.yml up -d --build
-bash scripts/jenkins/wait-for-jenkins.sh
+# Lancer ngrok sur le port Jenkins
+ngrok http 8085
+# Noter l'URL publique générée (ex: https://abc-123.eu.ngrok.io)
 ```
 
-## GitHub webhook configuration
+## Étape 2 : Configuration côté Jenkins
+1. Aller dans **Manage Jenkins > Plugins**.
+2. Vérifier que le plugin "GitHub Integration Plugin" est installé et actif.
+3. Aller dans le job **securerag-hub-ci > Configure**.
+4. Dans l'onglet **Build Triggers**, cocher : `GitHub hook trigger for GITScm polling`.
+5. Sauvegarder.
 
-In GitHub:
+## Étape 3 : Configuration côté GitHub (Repository)
+1. Dans le dépôt GitHub : **Settings > Webhooks > Add webhook**.
+2. **Payload URL** : `https://<votre-url-ngrok>.ngrok.io/github-webhook/` *(⚠️ le "/" final est obligatoire)*.
+3. **Content type** : `application/json`.
+4. **Events** : Essayer juste "Just the push event".
+5. Cliquez sur **Add webhook**.
 
-1. Open the repository settings.
-2. Go to `Webhooks`.
-3. Click `Add webhook`.
-4. Use this payload URL:
-
-```text
-http://141.95.135.130:8085/github-webhook/
-```
-
-5. Set `Content type` to:
-
-```text
-application/json
-```
-
-6. Select:
-
-```text
-Just the push event
-```
-
-7. Save the webhook.
-
-## Cloud firewall
-
-The Jenkins web port must be reachable from GitHub:
-
-```bash
-sudo ss -lntp | grep 8085
-curl -I http://141.95.135.130:8085/login
-```
-
-Expected result:
-
-```text
-HTTP/1.1 200 OK
-```
-
-or:
-
-```text
-HTTP/1.1 403 Forbidden
-```
-
-Both prove that Jenkins is reachable. A browser login page is expected for normal users.
-
-## Test the automation
-
-Push a small commit:
-
-```bash
-cd /opt/MasterPFE
-git pull origin main
-git status
-git commit --allow-empty -m "ci: test Jenkins webhook"
-git push origin main
-```
-
-Expected result:
-
-- GitHub webhook delivery returns `200`.
-- Jenkins starts `securerag-hub-ci`.
-- The CI pipeline runs tests, coverage, Semgrep, Gitleaks and Trivy.
-
-## Prove that Jenkins consumed the pushed commit
-
-After the push, generate a factual Jenkins proof:
-
-```bash
-JENKINS_URL=http://141.95.135.130:8085 \
-JENKINS_USER=admin \
-JENKINS_TOKEN=<jenkins-api-token> \
-make jenkins-ci-push-proof
-```
-
-Expected evidence:
-
-```text
-artifacts/jenkins/ci-push-trigger-proof.md
-artifacts/jenkins/ci-push-last-build.json
-```
-
-The proof is considered complete only if the report contains:
-
-```text
-Expected commit in Jenkins last build | OK
-```
-
-If Jenkins returns `403`, create an API token from the Jenkins user profile and rerun the command with `JENKINS_USER` and `JENKINS_TOKEN`.
-
-## If the webhook fails
-
-If GitHub cannot reach Jenkins:
-
-- keep the SCM polling fallback enabled;
-- Jenkins will still run within about 5 minutes;
-- use the `/workspace` fallback pipeline only for cloud demos with unstable GitHub checkout.
-
-Useful diagnostic commands:
-
-```bash
-docker logs securerag-jenkins --tail=100
-docker exec securerag-jenkins git ls-remote https://github.com/YassinoMed/MasterPFE.git
-curl -I http://141.95.135.130:8085/login
-```
+## Étape 4 : Preuve locale de fonctionnement (Sans Ngrok)
+Pour simuler le webhook localement et obtenir l'évidence de trigger, utilisez le script `scripts/ci/trigger-github-webhook.sh`.

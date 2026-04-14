@@ -3,14 +3,17 @@
 namespace App\Http\Requests;
 
 use App\Services\ChatbotGovernanceService;
+use App\Http\Requests\Concerns\AuthorizesServiceRequest;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
 class UpdateChatbotRolesRequest extends FormRequest
 {
+    use AuthorizesServiceRequest;
+
     public function authorize(): bool
     {
-        return true;
+        return $this->authorizeServiceRequest();
     }
 
     public function rules(): array
