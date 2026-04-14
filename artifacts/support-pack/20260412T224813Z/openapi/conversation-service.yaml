@@ -1,0 +1,114 @@
+openapi: 3.0.3
+info:
+  title: SecureRAG Hub Conversation Service API
+  version: 1.0.0
+  description: Persistent conversation and message API with deterministic demo assistant replies.
+servers:
+  - url: http://127.0.0.1:8093/api/v1
+paths:
+  /health:
+    get:
+      summary: Health check
+      responses:
+        "200": { description: Service is healthy }
+  /conversations:
+    get:
+      summary: List conversations
+      parameters:
+        - in: query
+          name: user_reference
+          schema: { type: string }
+        - in: query
+          name: chatbot_slug
+          schema: { type: string }
+        - in: query
+          name: status
+          schema: { type: string }
+      responses:
+        "200": { description: Conversation history }
+    post:
+      summary: Create conversation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ConversationInput" }
+      responses:
+        "201": { description: Conversation created }
+  /conversations/{conversation}:
+    get:
+      summary: Get conversation with messages
+      parameters:
+        - $ref: "#/components/parameters/ConversationUuid"
+      responses:
+        "200": { description: Conversation detail }
+  /conversations/{conversation}/status:
+    patch:
+      summary: Update conversation status
+      parameters:
+        - $ref: "#/components/parameters/ConversationUuid"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [status]
+              properties:
+                status:
+                  type: string
+                  enum: [open, closed, archived]
+      responses:
+        "200": { description: Status updated }
+  /conversations/{conversation}/messages:
+    get:
+      summary: List messages
+      parameters:
+        - $ref: "#/components/parameters/ConversationUuid"
+      responses:
+        "200": { description: Messages }
+    post:
+      summary: Add message
+      parameters:
+        - $ref: "#/components/parameters/ConversationUuid"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/MessageInput" }
+      responses:
+        "201": { description: Message created }
+components:
+  parameters:
+    ConversationUuid:
+      in: path
+      name: conversation
+      required: true
+      schema: { type: string, format: uuid }
+  schemas:
+    ConversationInput:
+      type: object
+      required: [chatbot_slug, chatbot_name, user_reference, title]
+      properties:
+        chatbot_slug: { type: string }
+        chatbot_name: { type: string }
+        domain_slug: { type: string }
+        user_reference: { type: string }
+        user_role: { type: string }
+        title: { type: string }
+        sensitivity: { type: string }
+        metadata: { type: object }
+        initial_message: { type: string }
+    MessageInput:
+      type: object
+      required: [body]
+      properties:
+        sender:
+          type: string
+          enum: [user, assistant, system]
+        body: { type: string }
+        citations:
+          type: array
+          items: { type: object }
+        safety_flags: { type: object }
+        generate_mock_answer: { type: boolean }

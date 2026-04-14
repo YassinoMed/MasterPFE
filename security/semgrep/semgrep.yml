@@ -102,7 +102,7 @@ rules:
         - infra/jenkins/Dockerfile uses root only during image build and switches back to USER jenkins for runtime.
     paths:
       exclude:
-        - /infra/jenkins/Dockerfile
+        - infra/jenkins/Dockerfile
     pattern: USER root
 
   - id: dockerfile-latest-tag

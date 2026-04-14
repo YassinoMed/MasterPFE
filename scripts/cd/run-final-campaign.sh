@@ -56,6 +56,13 @@ if ! bash scripts/validate/run-reference-campaign.sh; then
 fi
 
 bash scripts/release/record-release-evidence.sh || true
+if [[ "${CAMPAIGN_MODE}" == "execute" ]]; then
+  if ! REPORT_DIR="${REPORT_DIR}" SBOM_DIR="artifacts/sbom" DIGEST_RECORD_FILE="${DIGEST_RECORD_FILE}" \
+    REQUIRE_SUPPLY_CHAIN_EVIDENCE="${REQUIRE_SUPPLY_CHAIN_EVIDENCE:-true}" \
+    bash scripts/release/assert-supply-chain-evidence.sh; then
+    status=1
+  fi
+fi
 bash scripts/validate/final-proof-check.sh || true
 bash scripts/validate/run-devsecops-final-proof.sh || true
 bash scripts/validate/generate-final-validation-summary.sh || true

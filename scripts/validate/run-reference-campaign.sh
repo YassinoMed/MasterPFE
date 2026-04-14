@@ -141,6 +141,12 @@ else
 fi
 printf '- promote images without rebuild: OK\n' >> "${SUMMARY_FILE}"
 
+info "Step 2.5/5 - assert mandatory supply-chain evidence gate"
+REPORT_DIR="${REPORT_DIR}" SBOM_DIR="artifacts/sbom" DIGEST_RECORD_FILE="${DIGEST_RECORD_FILE}" \
+  REQUIRE_SUPPLY_CHAIN_EVIDENCE="${REQUIRE_SUPPLY_CHAIN_EVIDENCE:-true}" \
+  bash scripts/release/assert-supply-chain-evidence.sh
+printf '- mandatory supply-chain evidence gate: OK\n' >> "${SUMMARY_FILE}"
+
 info "Step 3/5 - deploy verified promoted images"
 REGISTRY_HOST="${REGISTRY_HOST}" IMAGE_PREFIX="${IMAGE_PREFIX}" IMAGE_TAG="${TARGET_IMAGE_TAG}" \
   KUSTOMIZE_OVERLAY="${KUSTOMIZE_OVERLAY}" REPORT_DIR="${REPORT_DIR}" \
@@ -180,6 +186,8 @@ printf '- runtime evidence collection: OK\n' >> "${SUMMARY_FILE}"
   printf '- `artifacts/release/promotion-summary.txt`\n'
   printf '- `artifacts/release/promotion-by-digest-summary.txt`\n'
   printf '- `artifacts/release/promotion-digests.txt`\n'
+  printf '- `artifacts/release/supply-chain-gate-report.md`\n'
+  printf '- `artifacts/sbom/sbom-index.txt`\n'
   printf '- `artifacts/validation/validation-summary.md`\n'
   printf '- `artifacts/validation/k8s-get-all.txt`\n'
   printf '- `artifacts/validation/k8s-pods.txt`\n'

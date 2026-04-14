@@ -1,0 +1,7 @@
+registry=localhost:5001
+image_prefix=securerag-hub
+source_tag=dev
+target_tag=release-local
+overlay=infra/k8s/overlays/demo
+mode_label=demo
+promotion_strategy=digest

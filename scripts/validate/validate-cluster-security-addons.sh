@@ -83,20 +83,25 @@ fi
 printf '| HPA | %s | %s |\n' "${hpa_status}" "${hpa_detail}" >> "${OUT_FILE}"
 
 if kubectl get crd clusterpolicies.kyverno.io >/dev/null 2>&1; then
-  kyverno_status="OK"
-  kyverno_detail="Kyverno CRD detected"
+  if kubectl wait --for=condition=Ready pod --all -n kyverno --timeout=10s >/dev/null 2>&1; then
+    kyverno_status="OK"
+    kyverno_detail="Kyverno CRD detected and controller pods are Ready"
+  else
+    kyverno_status="PARTIAL"
+    kyverno_detail="Kyverno CRD detected but controller pods are not Ready"
+  fi
 else
   kyverno_status="PARTIAL"
   kyverno_detail="Kyverno CRD not detected"
 fi
 printf '| Kyverno | %s | %s |\n' "${kyverno_status}" "${kyverno_detail}" >> "${OUT_FILE}"
 
-if kubectl get clusterpolicy >/dev/null 2>&1; then
+if policy_rows="$(kubectl get clusterpolicy --no-headers 2>/dev/null || true)" && [[ -n "${policy_rows}" ]]; then
   policy_status="OK"
-  policy_detail="ClusterPolicy resources can be listed"
+  policy_detail="ClusterPolicy resources are present"
 else
   policy_status="PARTIAL"
-  policy_detail="ClusterPolicy resources unavailable or Kyverno not installed"
+  policy_detail="ClusterPolicy resources unavailable or not applied yet"
 fi
 printf '| Kyverno policies | %s | %s |\n' "${policy_status}" "${policy_detail}" >> "${OUT_FILE}"
 

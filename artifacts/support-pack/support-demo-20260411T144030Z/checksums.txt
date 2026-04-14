@@ -1,0 +1,16 @@
+4945dfca4249bf20a66271f1b0b37e1e3d0ad94f4fb1c86fdd67adde2e7a4973  ./README.md
+bd048fdd1133909bf67741b3fab0de1e1d4e53ba3257d1182ac4e22f5d81eff9  ./docs/demo-checklist.md
+8be165ce36ed34db1b927f9401ed857c850ea74ed5135cd4fd982f113f0267d4  ./docs/environment-freeze.md
+4005a97a1f67391054d9c26e499c6b1ece230c9eaa15775c232bad7d511056af  ./docs/final-campaign.md
+b711edae7584992f1266dff0c048bbd29e0941104ac6951e3a090e9dcd0bc225  ./docs/policy-matrix.md
+d868571911e256c38c73071b8a28870c52ae0356964a9f32de8d72141de47854  ./final/cluster-context.txt
+104672f593ca9ceb5aa159c88cc4933472a57ea1f5b8649036b3e8778c83a150  ./final/final-campaign-profile.env
+506b008d077a0ed66d25059008001e32eaca046d3c3327405269413a504fad6a  ./final/image-selection.txt
+12fa81a7bb9fa098bbe1a152a24a140066829985a06ac13defdf099e109e02fa  ./final/reference-campaign-commands.sh
+1511d3216dabcb3f58b1b8badb0091df5fab591f1137dc70cd8d93e88e3e1c17  ./final/reference-campaign-summary.md
+dbf7d701d9cdf64113b17846e655a462092c35b825e5a084996de392d2188f64  ./final/rendered-overlay.yaml
+8949eab30d08d94987424cc5847c05e29a46fd4a27219fcc600636b9b846262a  ./manifest.txt
+b7df31393608de4eaecbbe2c9999379a4373e506c2a4ebf695ac08cede080451  ./project/README.md
+05cca05e3492682622cc8b022e35a9848ea8e0943cc95d73bdd5c8a83b191068  ./release/promotion-summary.txt
+79c0bd19be7edff6058aa8096d97a5400dfb0e5eb097e2af8bed917525bf359d  ./release/release-evidence.md
+f53ac0f7168058e1f57277b208012bf6b45a51be1185cad82297397d4267e77d  ./release/release-manifest.env

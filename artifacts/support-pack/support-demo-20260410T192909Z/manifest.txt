@@ -1,0 +1,16 @@
+artifacts/support-pack/support-demo-20260410T192909Z/README.md
+artifacts/support-pack/support-demo-20260410T192909Z/docs/demo-checklist.md
+artifacts/support-pack/support-demo-20260410T192909Z/docs/environment-freeze.md
+artifacts/support-pack/support-demo-20260410T192909Z/docs/final-campaign.md
+artifacts/support-pack/support-demo-20260410T192909Z/docs/policy-matrix.md
+artifacts/support-pack/support-demo-20260410T192909Z/final/cluster-context.txt
+artifacts/support-pack/support-demo-20260410T192909Z/final/final-campaign-profile.env
+artifacts/support-pack/support-demo-20260410T192909Z/final/image-selection.txt
+artifacts/support-pack/support-demo-20260410T192909Z/final/reference-campaign-commands.sh
+artifacts/support-pack/support-demo-20260410T192909Z/final/reference-campaign-summary.md
+artifacts/support-pack/support-demo-20260410T192909Z/final/rendered-overlay.yaml
+artifacts/support-pack/support-demo-20260410T192909Z/manifest.txt
+artifacts/support-pack/support-demo-20260410T192909Z/project/README.md
+artifacts/support-pack/support-demo-20260410T192909Z/release/promotion-summary.txt
+artifacts/support-pack/support-demo-20260410T192909Z/release/release-evidence.md
+artifacts/support-pack/support-demo-20260410T192909Z/release/release-manifest.env

@@ -3,14 +3,17 @@
 namespace App\Http\Requests;
 
 use App\Models\SecurityIncident;
+use App\Http\Requests\Concerns\AuthorizesServiceRequest;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
 class StoreSecurityIncidentRequest extends FormRequest
 {
+    use AuthorizesServiceRequest;
+
     public function authorize(): bool
     {
-        return true;
+        return $this->authorizeServiceRequest();
     }
 
     public function rules(): array

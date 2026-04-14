@@ -6,6 +6,7 @@ NS="${NS:-securerag-hub}"
 JENKINS_URL="${JENKINS_URL:-http://localhost:8085/login}"
 API_GATEWAY_HEALTH_URL="${API_GATEWAY_HEALTH_URL:-http://localhost:8080/healthz}"
 PORTAL_HEALTH_URL="${PORTAL_HEALTH_URL:-http://localhost:8081/health}"
+REQUIRE_SUPPLY_CHAIN_EVIDENCE="${REQUIRE_SUPPLY_CHAIN_EVIDENCE:-true}"
 
 FINAL_DIR="${FINAL_DIR:-artifacts/final}"
 RELEASE_DIR="${RELEASE_DIR:-artifacts/release}"
@@ -123,6 +124,34 @@ if [[ -f "${RELEASE_DIR}/release-evidence.md" ]]; then
   pass "Release evidence is present"
 else
   warn "Release evidence is missing"
+fi
+
+if [[ "${REQUIRE_SUPPLY_CHAIN_EVIDENCE}" =~ ^(1|true|TRUE|yes|YES|on|ON)$ ]]; then
+  if [[ -s "${RELEASE_DIR}/sign-summary.txt" ]]; then
+    pass "Mandatory evidence present: sign-summary.txt"
+  else
+    fail "Mandatory evidence missing: sign-summary.txt"
+  fi
+
+  if [[ -s "${RELEASE_DIR}/verify-summary.txt" ]]; then
+    pass "Mandatory evidence present: verify-summary.txt"
+  else
+    fail "Mandatory evidence missing: verify-summary.txt"
+  fi
+
+  if [[ -s "${RELEASE_DIR}/promotion-digests.txt" ]]; then
+    pass "Mandatory evidence present: promotion-digests.txt"
+  else
+    fail "Mandatory evidence missing: promotion-digests.txt"
+  fi
+
+  if [[ -s "artifacts/sbom/sbom-index.txt" ]]; then
+    pass "Mandatory evidence present: sbom-index.txt"
+  else
+    fail "Mandatory evidence missing: sbom-index.txt"
+  fi
+else
+  warn "Mandatory supply-chain evidence check is disabled"
 fi
 
 latest_support_pack="$(find "${SUPPORT_DIR}" -maxdepth 1 -type f -name '*.tar.gz' 2>/dev/null | sort | tail -n 1 || true)"
