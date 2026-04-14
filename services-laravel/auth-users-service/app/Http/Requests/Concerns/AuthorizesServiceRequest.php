@@ -6,7 +6,11 @@ trait AuthorizesServiceRequest
 {
     protected function authorizeServiceRequest(): bool
     {
-        if (app()->environment(['local', 'testing']) && env('SECURERAG_AUTHZ_ALLOW_LOCAL', true)) {
+        if (app()->environment('testing') && $this->authzFlag('SECURERAG_AUTHZ_ALLOW_TESTING', true)) {
+            return true;
+        }
+
+        if (app()->environment('local') && $this->authzFlag('SECURERAG_AUTHZ_ALLOW_LOCAL', false)) {
             return true;
         }
 
@@ -23,5 +27,16 @@ trait AuthorizesServiceRequest
         $bearerToken = (string) $this->bearerToken();
 
         return $bearerToken !== '' && hash_equals($sharedToken, $bearerToken);
+    }
+
+    private function authzFlag(string $name, bool $default): bool
+    {
+        $value = $_SERVER[$name] ?? $_ENV[$name] ?? getenv($name);
+
+        if ($value === false || $value === null) {
+            $value = env($name, $default);
+        }
+
+        return filter_var($value, FILTER_VALIDATE_BOOL);
     }
 }

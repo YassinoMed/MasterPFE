@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Conversation;
 use App\Models\Message;
+use App\Support\SensitiveDataRedactor;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Arr;
 
@@ -23,6 +24,10 @@ class ConversationService
     public function create(array $data): Conversation
     {
         $initialMessage = Arr::pull($data, 'initial_message');
+        if (array_key_exists('metadata', $data)) {
+            $data['metadata'] = SensitiveDataRedactor::sanitizeMetadata($data['metadata'] ?? []);
+        }
+
         $conversation = Conversation::query()->create($data + [
             'status' => Conversation::STATUS_OPEN,
             'sensitivity' => 'medium',
@@ -44,8 +49,8 @@ class ConversationService
         $message = $conversation->messages()->create([
             'sender' => $data['sender'] ?? Message::SENDER_USER,
             'body' => $data['body'],
-            'citations' => $data['citations'] ?? [],
-            'safety_flags' => $data['safety_flags'] ?? [],
+            'citations' => SensitiveDataRedactor::sanitizeMetadata($data['citations'] ?? []),
+            'safety_flags' => SensitiveDataRedactor::sanitizeMetadata($data['safety_flags'] ?? []),
         ]);
 
         if (($data['generate_mock_answer'] ?? true) && $message->sender === Message::SENDER_USER) {

@@ -102,8 +102,90 @@ rules:
         - infra/jenkins/Dockerfile uses root only during image build and switches back to USER jenkins for runtime.
     paths:
       exclude:
-        - infra/jenkins/Dockerfile
+        - /infra/jenkins/Dockerfile
     pattern: USER root
+
+  - id: php.laravel-form-request-authorize-true
+    message: FormRequest authorization must call a policy, middleware-backed helper, or service token guard instead of returning true.
+    severity: ERROR
+    languages:
+      - php
+    metadata:
+      category: security
+      technology:
+        - php
+        - laravel
+      cwe:
+        - "CWE-862: Missing Authorization"
+    patterns:
+      - pattern: |
+          public function authorize(): bool
+          {
+              return true;
+          }
+
+  - id: php.laravel-authz-local-default-open
+    message: Local authorization bypass flags must default to false; use an explicit opt-in only for isolated demos.
+    severity: ERROR
+    languages:
+      - php
+    metadata:
+      category: security
+      technology:
+        - php
+        - laravel
+      cwe:
+        - "CWE-276: Incorrect Default Permissions"
+    pattern-either:
+      - pattern: env('SECURERAG_AUTHZ_ALLOW_LOCAL', true)
+      - pattern: env("SECURERAG_AUTHZ_ALLOW_LOCAL", true)
+
+  - id: php.laravel-policy-return-true
+    message: Laravel policies must not allow sensitive actions with unconditional return true; use an explicit role, owner or permission check.
+    severity: ERROR
+    languages:
+      - php
+    metadata:
+      category: security
+      technology:
+        - php
+        - laravel
+      cwe:
+        - "CWE-863: Incorrect Authorization"
+    paths:
+      include:
+        - "/services-laravel/**/app/Policies/*.php"
+    patterns:
+      - pattern: |
+          public function $METHOD(...)
+          {
+              return true;
+          }
+      - metavariable-regex:
+          metavariable: $METHOD
+          regex: "^(create|update|delete|manage|changeStatus|restore|forceDelete)$"
+
+  - id: php.laravel-log-raw-request-payload
+    message: Do not log raw request payloads; redact sensitive fields before writing application logs or audit metadata.
+    severity: ERROR
+    languages:
+      - php
+    metadata:
+      category: security
+      technology:
+        - php
+        - laravel
+      cwe:
+        - "CWE-532: Insertion of Sensitive Information into Log File"
+    patterns:
+      - pattern-either:
+          - pattern: Log::$LEVEL(..., $REQUEST->all(), ...)
+          - pattern: Log::$LEVEL(..., $REQUEST->input(), ...)
+          - pattern: logger(..., $REQUEST->all(), ...)
+          - pattern: logger(..., $REQUEST->input(), ...)
+      - metavariable-regex:
+          metavariable: $REQUEST
+          regex: .*(request|Request).*
 
   - id: dockerfile-latest-tag
     message: Avoid mutable latest tags in base images; pin an explicit version or digest.

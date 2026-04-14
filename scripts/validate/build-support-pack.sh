@@ -38,6 +38,7 @@ copy_tree_if_present "artifacts/final" "final"
 copy_tree_if_present "artifacts/jenkins" "jenkins"
 copy_tree_if_present "artifacts/observability" "observability"
 copy_tree_if_present "artifacts/application" "application"
+copy_tree_if_present "artifacts/security" "security"
 copy_tree_if_present "docs/openapi" "openapi"
 
 copy_file_if_present "README.md" "project/README.md"
@@ -59,6 +60,8 @@ copy_file_if_present "docs/runbooks/soutenance-devsecops-script.md" "docs/souten
 copy_file_if_present "docs/security/policy-matrix.md" "docs/policy-matrix.md"
 copy_file_if_present "docs/security/control-matrix.md" "docs/control-matrix.md"
 copy_file_if_present "docs/security/secrets-management-hardening.md" "docs/secrets-management-hardening.md"
+copy_file_if_present "docs/security/security-status-source-of-truth.md" "docs/security-status-source-of-truth.md"
+copy_file_if_present "docs/security/k8s-laravel-service-integration-status.md" "docs/k8s-laravel-service-integration-status.md"
 copy_file_if_present "docs/devsecops/expert-evolution-roadmap.md" "docs/expert-evolution-roadmap.md"
 copy_file_if_present "docs/memoire/devsecops-final-alignment.tex" "memoire/devsecops-final-alignment.tex"
 copy_file_if_present "docs/memoire/chapitre-1-etude-prealable.tex" "memoire/chapitre-1-etude-prealable.tex"
@@ -74,7 +77,7 @@ copy_file_if_present "docs/soutenance/demo-5-7-minutes-expert.md" "soutenance/de
   printf -- '- Git commit: `%s`\n' "$(git rev-parse HEAD 2>/dev/null || printf 'unknown')"
   printf -- '- Cluster context: `%s`\n\n' "$(kubectl config current-context 2>/dev/null || printf 'unavailable')"
   printf '## Included folders\n\n'
-  for folder in release sbom validation final jenkins docs project; do
+  for folder in release sbom validation final jenkins observability application security openapi docs project; do
     if [[ -e "${PACK_DIR}/${folder}" ]]; then
       printf -- '- `%s/`\n' "${folder}"
     fi

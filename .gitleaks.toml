@@ -7,11 +7,10 @@ useDefault = true
 description = "Allow generated reports, documentation samples, and test fixtures with fake credentials."
 paths = [
   '''(^|/)\.coverage-artifacts/''',
-  '''(^|/)docs/''',
-  '''(^|/)infra/jenkins/secrets/''',
+  '''(^|/)infra/jenkins/secrets/(README\.md|\.gitkeep|[^/]+\.example)$''',
   '''(^|/)security/reports/''',
   '''(^|/)security/adversarial/''',
-  '''(^|/)security/secrets/\.env\.local$''',
+  '''(^|/)security/secrets/\.env\.example$''',
   '''(^|/)tests/fixtures/''',
   '''(^|/)tests/security/fixtures/'''
 ]

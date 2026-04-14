@@ -1,36 +1,23 @@
-# Release Attestation - SecureRAG Hub
+# Release Attestation — SecureRAG Hub
 
-<<<<<<< HEAD
-- Generated at: `2026-04-12T22:48:11.666186Z`
-- Git commit: `09b4c07aead711dc91baf789ccfcf653f9a65516`
-=======
-- Generated at: `2026-04-12T22:25:50.108119Z`
-- Git commit: `80549b817e83e8283452538de818f722a96daa0d`
->>>>>>> 5af92bc (securité)
-- Git branch: `main`
-- Working tree dirty: `true`
-- Registry: `localhost:5001`
-- Source tag: `dev`
-- Target tag: `release-local`
+- Generated at UTC: `2026-04-14T23:35:21Z`
+- Git commit: `ea2440c357444b99b40c8334381b61455d9a752b`
+- Status: `PARTIAL_READY_TO_PROVE`
+- Strict mode: `false`
 
-## Chain of custody status
+## Evidence status
 
-- Digest records: `0`
-- SBOM artefacts: `0`
-- Evidence files present: `2/7`
+| Control | Status | Evidence |
+|---|---|---|
+| Cosign sign | `MISSING` | `artifacts/release/sign-summary.txt` |
+| Cosign verify | `MISSING` | `artifacts/release/verify-summary.txt` |
+| Digest promotion | `MISSING` | `artifacts/release/promotion-by-digest-summary.txt` |
+| Digest record | `MISSING` | `artifacts/release/promotion-digests.txt` |
+| SBOM generation | `MISSING` | `artifacts/release/sbom-summary.txt` |
+| SBOM files | `0` | `artifacts/sbom` |
+| Release evidence | `PRESENT` | `artifacts/release/release-evidence.md` |
+| Supply chain evidence | `PRESENT` | `artifacts/release/supply-chain-evidence.md` |
 
-## Evidence files
+## Honest reading
 
-- ABSENT `artifacts/release/sign-summary.txt`
-- ABSENT `artifacts/release/verify-summary.txt`
-- ABSENT `artifacts/release/promotion-by-digest-summary.txt`
-- ABSENT `artifacts/release/promotion-digests.txt`
-- ABSENT `artifacts/release/sbom-summary.txt`
-- OK `artifacts/release/release-evidence.md` sha256=`79c0bd19be7edff6058aa8096d97a5400dfb0e5eb097e2af8bed917525bf359d`
-- OK `artifacts/release/supply-chain-evidence.md` sha256=`b86d5de1c8121d7d55c85246d468e3a78f6bde54da4e3e956bf8121911fd71dc`
-
-## Soutenance interpretation
-
-- This attestation is generated locally and is safe to archive.
-- A complete expert-level release also requires real SBOM, Cosign sign/verify and digest promotion artefacts.
-- If the working tree is dirty, present this as local evidence, not as an immutable released commit.
+The release chain is not fully proven yet. Missing or unproven evidence must be produced by `make supply-chain-execute` on an environment with Docker, registry access, Syft, Cosign and valid Cosign keys.

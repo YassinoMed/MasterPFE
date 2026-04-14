@@ -1,68 +1,52 @@
 {
-  "schema": "securerag.devsecops.release-attestation.v1",
-<<<<<<< HEAD
-  "generated_at": "2026-04-12T22:48:11.666186Z",
-  "project": "SecureRAG Hub",
-  "official_scenario": "demo",
-  "git": {
-    "commit": "09b4c07aead711dc91baf789ccfcf653f9a65516",
-=======
-  "generated_at": "2026-04-12T22:25:50.108119Z",
-  "project": "SecureRAG Hub",
-  "official_scenario": "demo",
-  "git": {
-    "commit": "80549b817e83e8283452538de818f722a96daa0d",
->>>>>>> 5af92bc (securité)
-    "branch": "main",
-    "dirty": true
+  "generated_at": "2026-04-14T23:35:21Z",
+  "git_commit": "ea2440c357444b99b40c8334381b61455d9a752b",
+  "attestation_type": "SecureRAG Hub release evidence attestation",
+  "status": "PARTIAL_READY_TO_PROVE",
+  "strict_mode": false,
+  "claims": {
+    "sbom_generated": false,
+    "cosign_signed": false,
+    "cosign_verified": false,
+    "digest_promoted": false,
+    "no_rebuild_deploy_ready": false
   },
-  "release": {
-    "registry": "localhost:5001",
-    "image_prefix": "securerag-hub",
-    "source_tag": "dev",
-    "target_tag": "release-local",
-    "promotion_strategy": "digest-first",
-    "deploy_without_rebuild": true
-  },
-  "digests": [],
-  "sboms": [],
-  "evidence": [
-    {
+  "evidence": {
+    "sign_summary": {
       "path": "artifacts/release/sign-summary.txt",
-      "status": "ABSENT"
+      "status": "MISSING",
+      "sha256": "missing"
     },
-    {
+    "verify_summary": {
       "path": "artifacts/release/verify-summary.txt",
-      "status": "ABSENT"
+      "status": "MISSING",
+      "sha256": "missing"
     },
-    {
+    "promotion_summary": {
       "path": "artifacts/release/promotion-by-digest-summary.txt",
-      "status": "ABSENT"
+      "status": "MISSING",
+      "sha256": "missing"
     },
-    {
+    "promotion_digests": {
       "path": "artifacts/release/promotion-digests.txt",
-      "status": "ABSENT"
+      "status": "MISSING",
+      "sha256": "missing"
     },
-    {
+    "sbom_summary": {
       "path": "artifacts/release/sbom-summary.txt",
-      "status": "ABSENT"
+      "status": "MISSING",
+      "sha256": "missing"
     },
-    {
+    "sbom_count": 0,
+    "release_evidence": {
       "path": "artifacts/release/release-evidence.md",
-      "status": "OK",
-      "sha256": "79c0bd19be7edff6058aa8096d97a5400dfb0e5eb097e2af8bed917525bf359d",
-      "size_bytes": 919
+      "status": "PRESENT",
+      "sha256": "79c0bd19be7edff6058aa8096d97a5400dfb0e5eb097e2af8bed917525bf359d"
     },
-    {
+    "supply_chain_evidence": {
       "path": "artifacts/release/supply-chain-evidence.md",
-      "status": "OK",
-      "sha256": "b86d5de1c8121d7d55c85246d468e3a78f6bde54da4e3e956bf8121911fd71dc",
-      "size_bytes": 1287
+      "status": "PRESENT",
+      "sha256": "b86d5de1c8121d7d55c85246d468e3a78f6bde54da4e3e956bf8121911fd71dc"
     }
-  ],
-  "interpretation": {
-    "OK": "Artefact present and hashable in this workspace.",
-    "ABSENT": "Artefact not produced yet; execute the relevant gated step.",
-    "dirty_git": "True means the attestation captures a local working tree state, not a clean commit."
   }
 }

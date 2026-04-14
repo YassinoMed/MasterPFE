@@ -11,6 +11,7 @@ resources:
   - networkpolicy-allow-dns.yaml
   - networkpolicy-validation-ingress.yaml
   - networkpolicy-validation-egress.yaml
+  - rbac-runtime-readonly.yaml
 
   - qdrant/serviceaccount.yaml
   - qdrant/pvc.yaml
