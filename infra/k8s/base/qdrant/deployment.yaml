@@ -47,9 +47,11 @@ spec:
             requests:
               cpu: 100m
               memory: 256Mi
+              ephemeral-storage: 512Mi
             limits:
               cpu: 500m
               memory: 1Gi
+              ephemeral-storage: 2Gi
           volumeMounts:
             - name: qdrant-storage
               mountPath: /qdrant/storage

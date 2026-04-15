@@ -35,6 +35,8 @@ rg -n "http://" infra scripts platform services-laravel docs/openapi README.md -
 
 Chaque occurrence doit être classée comme locale, registre kind, documentation OpenAPI locale, ou corrigée vers HTTPS. Dans les manifests Kubernetes applicatifs, les URLs internes ne doivent pas être écrites en clair sous forme `value: http://...`; elles doivent passer par `$(INTERNAL_SERVICE_SCHEME)://service:port` et rester limitées aux Services internes autorisés.
 
+Les fichiers sous `artifacts/**`, les `support-pack` historiques et les rendus `rendered-overlay.yaml` sont des preuves générées et peuvent contenir l'état d'anciens déploiements. Ils sont exclus de l'analyse Sonar officielle par `sonar-project.properties`; une nouvelle preuve doit être régénérée après correction plutôt que de considérer ces snapshots comme manifests sources.
+
 ## Formulation soutenance
 La formulation défendable est :
 
