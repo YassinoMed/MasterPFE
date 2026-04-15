@@ -7,15 +7,9 @@ set -euo pipefail
 # registry. The script can verify the source tag before promotion and the
 # target tag after promotion.
 
-DEFAULT_SERVICES=(
-  api-gateway
-  auth-users
-  chatbot-manager
-  llm-orchestrator
-  security-auditor
-  knowledge-hub
-  portal-web
-)
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=scripts/release/lib/common.sh
+source "${SCRIPT_DIR}/lib/common.sh"
 
 REGISTRY_HOST="${REGISTRY_HOST:-localhost:5001}"
 IMAGE_PREFIX="${IMAGE_PREFIX:-securerag-hub}"
@@ -27,42 +21,13 @@ VERIFY_TARGET_AFTER_PROMOTION="${VERIFY_TARGET_AFTER_PROMOTION:-true}"
 ALLOW_MISSING_IMAGES="${ALLOW_MISSING_IMAGES:-false}"
 FAIL_FAST="${FAIL_FAST:-false}"
 
-if [[ -n "${SERVICES:-}" ]]; then
-  # shellcheck disable=SC2206
-  SERVICES_ARRAY=(${SERVICES//,/ })
-else
-  SERVICES_ARRAY=("${DEFAULT_SERVICES[@]}")
-fi
+init_services_array
 
 SUMMARY_FILE="${REPORT_DIR}/promotion-summary.txt"
 
 pass_count=0
 fail_count=0
 skip_count=0
-
-info() { printf '[INFO] %s\n' "$*"; }
-warn() { printf '[WARN] %s\n' "$*" >&2; }
-error() { printf '[ERROR] %s\n' "$*" >&2; }
-
-is_true() {
-  case "${1:-}" in
-    1|true|TRUE|yes|YES|y|Y|on|ON) return 0 ;;
-    *) return 1 ;;
-  esac
-}
-
-require_command() {
-  if ! command -v "$1" >/dev/null 2>&1; then
-    error "Missing required command: $1"
-    exit 2
-  fi
-}
-
-build_image_ref() {
-  local service="$1"
-  local tag="$2"
-  printf '%s/%s-%s:%s' "${REGISTRY_HOST%/}" "${IMAGE_PREFIX}" "${service}" "${tag}"
-}
 
 record_result() {
   local status="$1"
@@ -75,15 +40,6 @@ record_result() {
   printf '%-6s | %-18s | %-64s | %-64s | %-40s | %s\n' \
     "${status}" "${service}" "${source_ref}" "${target_ref}" "${artifact}" "${detail}" \
     | tee -a "${SUMMARY_FILE}"
-}
-
-handle_failure() {
-  local message="$1"
-
-  if is_true "${FAIL_FAST}"; then
-    error "${message}"
-    exit 1
-  fi
 }
 
 promote_with_buildx() {

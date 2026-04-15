@@ -2,6 +2,10 @@
 
 set -euo pipefail
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=scripts/release/lib/common.sh
+source "${SCRIPT_DIR}/lib/common.sh"
+
 REPORT_DIR="${REPORT_DIR:-artifacts/release}"
 SBOM_DIR="${SBOM_DIR:-artifacts/sbom}"
 DIGEST_RECORD_FILE="${DIGEST_RECORD_FILE:-${REPORT_DIR}/promotion-digests.txt}"
@@ -9,54 +13,9 @@ ASSERT_REPORT_FILE="${ASSERT_REPORT_FILE:-${REPORT_DIR}/supply-chain-gate-report
 REQUIRE_SUPPLY_CHAIN_EVIDENCE="${REQUIRE_SUPPLY_CHAIN_EVIDENCE:-true}"
 REQUIRE_RELEASE_ATTESTATION="${REQUIRE_RELEASE_ATTESTATION:-true}"
 
-DEFAULT_SERVICES=(
-  api-gateway
-  auth-users
-  chatbot-manager
-  llm-orchestrator
-  security-auditor
-  knowledge-hub
-  portal-web
-)
-
-if [[ -n "${SERVICES:-}" ]]; then
-  # shellcheck disable=SC2206
-  SERVICES_ARRAY=(${SERVICES//,/ })
-else
-  SERVICES_ARRAY=("${DEFAULT_SERVICES[@]}")
-fi
+init_services_array
 
 EXPECTED_COUNT="${EXPECTED_SERVICE_COUNT:-${#SERVICES_ARRAY[@]}}"
-
-info() { printf '[INFO] %s\n' "$*"; }
-warn() { printf '[WARN] %s\n' "$*" >&2; }
-error() { printf '[ERROR] %s\n' "$*" >&2; }
-
-is_true() {
-  case "${1:-}" in
-    1|true|TRUE|yes|YES|y|Y|on|ON) return 0 ;;
-    *) return 1 ;;
-  esac
-}
-
-require_command() {
-  if ! command -v "$1" >/dev/null 2>&1; then
-    error "Missing required command: $1"
-    exit 2
-  fi
-}
-
-file_sha256() {
-  local target_file="$1"
-
-  if command -v sha256sum >/dev/null 2>&1; then
-    sha256sum "${target_file}" | awk '{print $1}'
-  elif command -v shasum >/dev/null 2>&1; then
-    shasum -a 256 "${target_file}" | awk '{print $1}'
-  else
-    printf 'unavailable'
-  fi
-}
 
 status_count() {
   local file="$1"

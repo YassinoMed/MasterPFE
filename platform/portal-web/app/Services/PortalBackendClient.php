@@ -199,35 +199,25 @@ class PortalBackendClient
             return $fallback;
         }
 
-        try {
-            $response = Http::acceptJson()
-                ->timeout($this->timeout())
-                ->connectTimeout($this->timeout())
-                ->get($this->endpoint($service, $path));
+        $items = $this->requestData($service, $path);
+        if ($items !== null) {
+            $this->markSource($service, 'api', 'API metier', 'Donnees chargees depuis le microservice Laravel.');
 
-            if ($response->successful()) {
-                $items = $this->extractData($response);
-                $this->markSource($service, 'api', 'API metier', 'Donnees chargees depuis le microservice Laravel.');
-
-                return collect($items)
-                    ->map(fn (array $item): array => $normalizer($item))
-                    ->values()
-                    ->all();
-            }
-
-            $this->markSource($service, 'mock', 'fallback mock', sprintf('API indisponible: HTTP %s.', $response->status()));
-        } catch (Throwable $exception) {
-            if ($this->mode() === 'api') {
-                throw $exception;
-            }
-
-            $this->markSource($service, 'mock', 'fallback mock', 'API indisponible: '.$exception->getMessage());
+            return collect($items)
+                ->map(fn (array $item): array => $normalizer($item))
+                ->values()
+                ->all();
         }
 
         return $fallback;
     }
 
     private function requestData(string $service, string $path): ?array
+    {
+        return $this->fetchBackendData($service, $path);
+    }
+
+    private function fetchBackendData(string $service, string $path): ?array
     {
         try {
             $response = Http::acceptJson()

@@ -6,15 +6,9 @@ set -euo pipefail
 # The target tag is created from the exact digest resolved for the source tag,
 # and a digest evidence file is produced for downstream deployment and audit.
 
-DEFAULT_SERVICES=(
-  api-gateway
-  auth-users
-  chatbot-manager
-  llm-orchestrator
-  security-auditor
-  knowledge-hub
-  portal-web
-)
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=scripts/release/lib/common.sh
+source "${SCRIPT_DIR}/lib/common.sh"
 
 REGISTRY_HOST="${REGISTRY_HOST:-localhost:5001}"
 IMAGE_PREFIX="${IMAGE_PREFIX:-securerag-hub}"
@@ -27,42 +21,13 @@ VERIFY_TARGET_AFTER_PROMOTION="${VERIFY_TARGET_AFTER_PROMOTION:-true}"
 ALLOW_MISSING_IMAGES="${ALLOW_MISSING_IMAGES:-false}"
 FAIL_FAST="${FAIL_FAST:-false}"
 
-if [[ -n "${SERVICES:-}" ]]; then
-  # shellcheck disable=SC2206
-  SERVICES_ARRAY=(${SERVICES//,/ })
-else
-  SERVICES_ARRAY=("${DEFAULT_SERVICES[@]}")
-fi
+init_services_array
 
 SUMMARY_FILE="${REPORT_DIR}/promotion-by-digest-summary.txt"
 
 pass_count=0
 fail_count=0
 skip_count=0
-
-info() { printf '[INFO] %s\n' "$*"; }
-warn() { printf '[WARN] %s\n' "$*" >&2; }
-error() { printf '[ERROR] %s\n' "$*" >&2; }
-
-is_true() {
-  case "${1:-}" in
-    1|true|TRUE|yes|YES|y|Y|on|ON) return 0 ;;
-    *) return 1 ;;
-  esac
-}
-
-require_command() {
-  if ! command -v "$1" >/dev/null 2>&1; then
-    error "Missing required command: $1"
-    exit 2
-  fi
-}
-
-build_image_ref() {
-  local service="$1"
-  local tag="$2"
-  printf '%s/%s-%s:%s' "${REGISTRY_HOST%/}" "${IMAGE_PREFIX}" "${service}" "${tag}"
-}
 
 record_result() {
   local status="$1"
@@ -76,80 +41,6 @@ record_result() {
   printf '%-6s | %-18s | %-64s | %-64s | %-71s | %-40s | %s\n' \
     "${status}" "${service}" "${source_ref}" "${target_ref}" "${digest}" "${artifact}" "${detail}" \
     | tee -a "${SUMMARY_FILE}"
-}
-
-handle_failure() {
-  local message="$1"
-
-  if is_true "${FAIL_FAST}"; then
-    error "${message}"
-    exit 1
-  fi
-}
-
-resolve_digest_with_python() {
-  local json_file="$1"
-
-  python3 - "${json_file}" <<'PY'
-import json
-import re
-import sys
-
-digest_re = re.compile(r"^sha256:[0-9a-f]{64}$")
-
-def is_digest(value):
-    return isinstance(value, str) and digest_re.match(value) is not None
-
-def pick_digest(obj):
-    if isinstance(obj, dict):
-        for field in ("Descriptor", "descriptor", "Manifest", "manifest"):
-            nested = obj.get(field)
-            if isinstance(nested, dict):
-                for key in ("digest", "Digest"):
-                    value = nested.get(key)
-                    if is_digest(value):
-                        return value
-        for key in ("digest", "Digest"):
-            value = obj.get(key)
-            if is_digest(value):
-                return value
-        for value in obj.values():
-            found = pick_digest(value)
-            if found:
-                return found
-    elif isinstance(obj, list):
-        for item in obj:
-            found = pick_digest(item)
-            if found:
-                return found
-    return None
-
-with open(sys.argv[1], "r", encoding="utf-8") as handle:
-    payload = json.load(handle)
-
-digest = pick_digest(payload)
-if not digest:
-    raise SystemExit(1)
-
-print(digest)
-PY
-}
-
-resolve_digest() {
-  local image_ref="$1"
-  local inspect_file
-
-  inspect_file="$(mktemp)"
-  trap 'rm -f "${inspect_file}"' RETURN
-
-  if docker manifest inspect --verbose "${image_ref}" > "${inspect_file}" 2>/dev/null; then
-    if digest="$(resolve_digest_with_python "${inspect_file}" 2>/dev/null)"; then
-      printf '%s\n' "${digest}"
-      return 0
-    fi
-  fi
-
-  return 1
 }
 
 promote_exact_digest() {

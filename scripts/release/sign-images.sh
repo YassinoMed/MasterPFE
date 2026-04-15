@@ -14,15 +14,9 @@ set -euo pipefail
 # - By default the script keeps going service by service and aggregates errors.
 #   Set FAIL_FAST=true to stop on the first critical failure.
 
-DEFAULT_SERVICES=(
-  api-gateway
-  auth-users
-  chatbot-manager
-  llm-orchestrator
-  security-auditor
-  knowledge-hub
-  portal-web
-)
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=scripts/release/lib/common.sh
+source "${SCRIPT_DIR}/lib/common.sh"
 
 REGISTRY_HOST="${REGISTRY_HOST:-localhost:5001}"
 IMAGE_TAG="${IMAGE_TAG:-dev}"
@@ -33,130 +27,13 @@ FAIL_FAST="${FAIL_FAST:-false}"
 COSIGN_YES="${COSIGN_YES:-true}"
 COSIGN_EXPERIMENTAL="${COSIGN_EXPERIMENTAL:-}"
 
-if [[ -n "${SERVICES:-}" ]]; then
-  # shellcheck disable=SC2206
-  SERVICES_ARRAY=(${SERVICES//,/ })
-else
-  SERVICES_ARRAY=("${DEFAULT_SERVICES[@]}")
-fi
+init_services_array
 
 SUMMARY_FILE="${REPORT_DIR}/sign-summary.txt"
 
 pass_count=0
 fail_count=0
 skip_count=0
-
-info() { printf '[INFO] %s\n' "$*"; }
-warn() { printf '[WARN] %s\n' "$*" >&2; }
-error() { printf '[ERROR] %s\n' "$*" >&2; }
-
-is_true() {
-  case "${1:-}" in
-    1|true|TRUE|yes|YES|y|Y|on|ON) return 0 ;;
-    *) return 1 ;;
-  esac
-}
-
-require_command() {
-  if ! command -v "$1" >/dev/null 2>&1; then
-    error "Missing required command: $1"
-    exit 2
-  fi
-}
-
-build_image_ref() {
-  local service="$1"
-  local registry="${REGISTRY_HOST%/}"
-
-  if [[ -n "${registry}" ]]; then
-    printf '%s/%s-%s:%s' "${registry}" "${IMAGE_PREFIX}" "${service}" "${IMAGE_TAG}"
-  else
-    printf '%s-%s:%s' "${IMAGE_PREFIX}" "${service}" "${IMAGE_TAG}"
-  fi
-}
-
-image_reachable_in_registry() {
-  local image_ref="$1"
-
-  if command -v docker >/dev/null 2>&1 && docker manifest inspect "${image_ref}" >/dev/null 2>&1; then
-    return 0
-  fi
-
-  if cosign triangulate "${image_ref}" >/dev/null 2>&1; then
-    return 0
-  fi
-
-  return 1
-}
-
-resolve_digest_with_python() {
-  local json_file="$1"
-
-  python3 - "${json_file}" <<'PY'
-import json
-import re
-import sys
-
-digest_re = re.compile(r"^sha256:[0-9a-f]{64}$")
-
-def pick_digest(obj):
-    if isinstance(obj, dict):
-        for field in ("Descriptor", "descriptor", "Manifest", "manifest"):
-            nested = obj.get(field)
-            if isinstance(nested, dict):
-                value = nested.get("digest") or nested.get("Digest")
-                if isinstance(value, str) and digest_re.match(value):
-                    return value
-        value = obj.get("digest") or obj.get("Digest")
-        if isinstance(value, str) and digest_re.match(value):
-            return value
-        for nested in obj.values():
-            found = pick_digest(nested)
-            if found:
-                return found
-    if isinstance(obj, list):
-        for nested in obj:
-            found = pick_digest(nested)
-            if found:
-                return found
-    return None
-
-with open(sys.argv[1], encoding="utf-8") as handle:
-    payload = json.load(handle)
-
-digest = pick_digest(payload)
-if not digest:
-    raise SystemExit(1)
-
-print(digest)
-PY
-}
-
-resolve_digest() {
-  local image_ref="$1"
-  local inspect_file
-
-  if ! command -v docker >/dev/null 2>&1; then
-    return 1
-  fi
-
-  inspect_file="$(mktemp)"
-  trap 'rm -f "${inspect_file}"' RETURN
-
-  if docker manifest inspect --verbose "${image_ref}" > "${inspect_file}" 2>/dev/null; then
-    resolve_digest_with_python "${inspect_file}" 2>/dev/null
-    return $?
-  fi
-
-  return 1
-}
-
-digest_ref_for() {
-  local image_ref="$1"
-  local digest="$2"
-
-  printf '%s@%s' "${image_ref%:*}" "${digest}"
-}
 
 record_result() {
   local status="$1"
@@ -169,15 +46,6 @@ record_result() {
   printf '%-6s | %-18s | %-64s | %-10s | %-40s | %s\n' \
     "${status}" "${service}" "${image_ref}" "${mode}" "${artifact}" "${detail}" \
     | tee -a "${SUMMARY_FILE}"
-}
-
-handle_failure() {
-  local message="$1"
-
-  if is_true "${FAIL_FAST}"; then
-    error "${message}"
-    exit 1
-  fi
 }
 
 require_command cosign
