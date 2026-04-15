@@ -8,6 +8,25 @@ NS="${NS:-securerag-hub}"
 REPORT_DIR="${REPORT_DIR:-artifacts/release}"
 SBOM_DIR="${SBOM_DIR:-artifacts/sbom}"
 
+DEFAULT_SERVICES=(
+  api-gateway
+  auth-users
+  chatbot-manager
+  llm-orchestrator
+  security-auditor
+  knowledge-hub
+  portal-web
+)
+
+if [[ -n "${SERVICES:-}" ]]; then
+  # shellcheck disable=SC2206
+  SERVICES_ARRAY=(${SERVICES//,/ })
+else
+  SERVICES_ARRAY=("${DEFAULT_SERVICES[@]}")
+fi
+
+EXPECTED_COUNT="${EXPECTED_SERVICE_COUNT:-${#SERVICES_ARRAY[@]}}"
+
 mkdir -p "${OUT_DIR}"
 
 status_file() {
@@ -17,6 +36,73 @@ status_file() {
   else
     printf 'PARTIEL'
   fi
+}
+
+status_count() {
+  local path="$1"
+  local status="$2"
+  local count
+
+  count="$(grep -Ec "^[[:space:]]*${status}[[:space:]]*[|]" "${path}" 2>/dev/null || true)"
+  printf '%s' "${count:-0}"
+}
+
+summary_state() {
+  local path="$1"
+
+  if [[ ! -s "${path}" ]]; then
+    printf 'PARTIEL'
+    return 0
+  fi
+
+  local pass_count fail_count skip_count
+  pass_count="$(status_count "${path}" "PASS")"
+  fail_count="$(status_count "${path}" "FAIL")"
+  skip_count="$(status_count "${path}" "SKIP")"
+
+  if [[ "${pass_count}" == "${EXPECTED_COUNT}" && "${fail_count}" == "0" && "${skip_count}" == "0" ]]; then
+    printf 'TERMINÉ'
+  else
+    printf 'PARTIEL'
+  fi
+}
+
+digest_state() {
+  local path="$1"
+
+  if [[ ! -s "${path}" ]]; then
+    printf 'PARTIEL'
+    return 0
+  fi
+
+  local record_count invalid_count
+  record_count="$(grep -Ev '^[[:space:]]*(#|$)' "${path}" | wc -l | tr -d ' ')"
+  invalid_count="$(grep -Ev '^[[:space:]]*(#|$)' "${path}" | awk -F'|' '$4 !~ /^sha256:[0-9a-f]{64}$/ {bad++} END {print bad+0}')"
+
+  if [[ "${record_count}" == "${EXPECTED_COUNT}" && "${invalid_count}" == "0" ]]; then
+    printf 'TERMINÉ'
+  else
+    printf 'PARTIEL'
+  fi
+}
+
+attestation_state() {
+  local path="$1"
+
+  if [[ ! -s "${path}" ]]; then
+    printf 'PARTIEL'
+    return 0
+  fi
+
+  python3 - "${path}" <<'PY' 2>/dev/null || { printf 'PARTIEL'; exit 0; }
+import json
+import sys
+
+with open(sys.argv[1], encoding="utf-8") as handle:
+    payload = json.load(handle)
+
+print("TERMINÉ" if payload.get("status") == "COMPLETE_PROVEN" else "PARTIEL")
+PY
 }
 
 runtime_status() {
@@ -80,19 +166,19 @@ trivy_vulns="$(count_json_results "security/reports/trivy-fs.json" "trivy-vulns"
   printf '| Semgrep SAST | `%s` | `security/reports/semgrep.json`, findings=%s |\n' "$(status_file "security/reports/semgrep.json")" "${semgrep_findings}"
   printf '| Gitleaks secret scan | `%s` | `security/reports/gitleaks.json`, findings=%s |\n' "$(status_file "security/reports/gitleaks.json")" "${gitleaks_findings}"
   printf '| Trivy filesystem scan | `%s` | `security/reports/trivy-fs.json`, vulnerabilities=%s |\n' "$(status_file "security/reports/trivy-fs.json")" "${trivy_vulns}"
-  printf '| SBOM Syft | `%s` | `%s`, sbom_count=%s |\n' "$(status_file "${REPORT_DIR}/sbom-summary.txt")" "${REPORT_DIR}/sbom-summary.txt" "${sbom_count}"
-  printf '| Cosign sign | `%s` | `%s` |\n' "$(status_file "${REPORT_DIR}/sign-summary.txt")" "${REPORT_DIR}/sign-summary.txt"
-  printf '| Cosign verify | `%s` | `%s` |\n' "$(status_file "${REPORT_DIR}/verify-summary.txt")" "${REPORT_DIR}/verify-summary.txt"
-  printf '| Digest promotion | `%s` | `%s` |\n' "$(status_file "${REPORT_DIR}/promotion-digests.txt")" "${REPORT_DIR}/promotion-digests.txt"
-  printf '| Release attestation | `%s` | `%s` |\n' "$(status_file "${REPORT_DIR}/release-attestation.json")" "${REPORT_DIR}/release-attestation.json"
+  printf '| SBOM Syft | `%s` | `%s`, sbom_count=%s, expected=%s |\n' "$(summary_state "${REPORT_DIR}/sbom-summary.txt")" "${REPORT_DIR}/sbom-summary.txt" "${sbom_count}" "${EXPECTED_COUNT}"
+  printf '| Cosign sign | `%s` | `%s` |\n' "$(summary_state "${REPORT_DIR}/sign-summary.txt")" "${REPORT_DIR}/sign-summary.txt"
+  printf '| Cosign verify | `%s` | `%s` |\n' "$(summary_state "${REPORT_DIR}/verify-summary.txt")" "${REPORT_DIR}/verify-summary.txt"
+  printf '| Digest promotion | `%s` | `%s` |\n' "$(digest_state "${REPORT_DIR}/promotion-digests.txt")" "${REPORT_DIR}/promotion-digests.txt"
+  printf '| Release attestation | `%s` | `%s` |\n' "$(attestation_state "${REPORT_DIR}/release-attestation.json")" "${REPORT_DIR}/release-attestation.json"
   printf '| Metrics Server runtime | `%s` | `kubectl top pods -n %s` |\n' "$(runtime_status "kubectl top pods -n ${NS}")" "${NS}"
   printf '| Kyverno runtime | `%s` | `kubectl get clusterpolicies` |\n' "$(runtime_status "kubectl get clusterpolicies")"
   printf '| Kyverno reports | `%s` | `kubectl get policyreports -A` |\n' "$(runtime_status "kubectl get policyreports -A")"
   printf '| Application workloads | `%s` | `kubectl get pods -n %s` |\n\n' "$(runtime_status "kubectl get pods -n ${NS}")" "${NS}"
 
   printf '## 2. Honest interpretation\n\n'
-  printf -- '- `TERMINÉ` means the evidence file exists locally or the runtime command succeeds in the current environment.\n'
-  printf -- '- `PARTIEL` means the control is scripted/configured but the expected evidence file is not present yet.\n'
+  printf -- '- `TERMINÉ` means all expected evidence rows are proven, or the runtime command succeeds in the current environment.\n'
+  printf -- '- `PARTIEL` means the control is scripted/configured but the expected evidence is missing, incomplete, failed, skipped or partial.\n'
   printf -- '- `DÉPENDANT_DE_L_ENVIRONNEMENT` means the control needs an active Docker/kind/Kubernetes/Jenkins/Cosign/Syft/Kyverno runtime.\n\n'
 
   printf '## 3. Security-ready reading\n\n'

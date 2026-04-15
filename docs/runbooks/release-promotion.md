@@ -10,10 +10,11 @@ La chaîne de confiance suit cette logique :
 2. push dans le registre OCI
 3. signature Cosign
 4. vérification de la signature sur le tag source
-5. promotion vers un nouveau tag sans rebuild
-6. traçage du digest promu par service
-6. vérification de la signature sur le tag promu
-7. déploiement uniquement du tag promu
+5. promotion par digest vers un nouveau tag sans rebuild
+6. vérification que le digest cible correspond au digest source
+7. génération des SBOM CycloneDX sur les images promues
+8. attestation et gate obligatoire des preuves release
+9. déploiement uniquement du tag promu
 
 Cette approche évite les dérives classiques où la CD reconstruit une image différente de celle qui a été testée et signée.
 
@@ -21,7 +22,10 @@ Cette approche évite les dérives classiques où la CD reconstruit une image di
 - `scripts/release/verify-signatures.sh`
 - `scripts/release/promote-verified-images.sh`
 - `scripts/release/promote-by-digest.sh`
+- `scripts/release/generate-sbom.sh`
 - `scripts/release/record-release-evidence.sh`
+- `scripts/release/generate-release-attestation.sh`
+- `scripts/release/assert-supply-chain-evidence.sh`
 - `scripts/deploy/verify-and-deploy-kind.sh`
 
 ## Variables principales
@@ -62,12 +66,17 @@ bash scripts/deploy/verify-and-deploy-kind.sh
 ```
 
 ## Résultats attendus
-- `artifacts/release/promotion-summary.txt`
 - `artifacts/release/promotion-by-digest-summary.txt`
 - `artifacts/release/promotion-digests.txt`
 - `artifacts/release/release-evidence.md`
+- `artifacts/release/release-attestation.json`
+- `artifacts/release/supply-chain-evidence.md`
+- `artifacts/release/supply-chain-gate-report.md`
+- `artifacts/release/sign-summary.txt`
 - `artifacts/release/verify-summary.txt`
-- `artifacts/sbom/*`
+- `artifacts/release/sbom-summary.txt`
+- `artifacts/sbom/sbom-index.txt`
+- `artifacts/sbom/*-sbom.cdx.json`
 - `artifacts/validation/validation-summary.md`
 
 ## Intégration Jenkins CD
@@ -80,6 +89,7 @@ Le pipeline CD ne doit pas reconstruire les images.
 
 ## Points d’attention sécurité
 - ne jamais promouvoir un tag non vérifié
+- ne jamais déclarer une release validée si `assert-supply-chain-evidence.sh` échoue
 - conserver les rapports de vérification et de promotion comme preuves de la chaîne de confiance
 - privilégier la vérification par clé publique Cosign dans Jenkins pour une démo stable et reproductible
 - si la registry change de dépôt et pas seulement de tag, revalider soigneusement le comportement de vérification car les références Cosign dépendent du digest et du repository

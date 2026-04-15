@@ -43,7 +43,8 @@ if [[ -d "${SBOM_DIR}" ]]; then
 fi
 
 # Keep attestation factual and non-blocking unless STRICT_RELEASE_ATTESTATION is set by the caller.
-bash scripts/release/generate-release-attestation.sh
+REPORT_DIR="${REPORT_DIR}" SBOM_DIR="${SBOM_DIR}" SERVICES="${SERVICES:-}" EXPECTED_SERVICE_COUNT="${EXPECTED_SERVICE_COUNT:-}" \
+  bash scripts/release/generate-release-attestation.sh
 
 {
   printf '# Supply Chain Evidence — SecureRAG Hub\n\n'

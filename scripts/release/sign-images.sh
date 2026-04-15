@@ -89,6 +89,75 @@ image_reachable_in_registry() {
   return 1
 }
 
+resolve_digest_with_python() {
+  local json_file="$1"
+
+  python3 - "${json_file}" <<'PY'
+import json
+import re
+import sys
+
+digest_re = re.compile(r"^sha256:[0-9a-f]{64}$")
+
+def pick_digest(obj):
+    if isinstance(obj, dict):
+        for field in ("Descriptor", "descriptor", "Manifest", "manifest"):
+            nested = obj.get(field)
+            if isinstance(nested, dict):
+                value = nested.get("digest") or nested.get("Digest")
+                if isinstance(value, str) and digest_re.match(value):
+                    return value
+        value = obj.get("digest") or obj.get("Digest")
+        if isinstance(value, str) and digest_re.match(value):
+            return value
+        for nested in obj.values():
+            found = pick_digest(nested)
+            if found:
+                return found
+    if isinstance(obj, list):
+        for nested in obj:
+            found = pick_digest(nested)
+            if found:
+                return found
+    return None
+
+with open(sys.argv[1], encoding="utf-8") as handle:
+    payload = json.load(handle)
+
+digest = pick_digest(payload)
+if not digest:
+    raise SystemExit(1)
+
+print(digest)
+PY
+}
+
+resolve_digest() {
+  local image_ref="$1"
+  local inspect_file
+
+  if ! command -v docker >/dev/null 2>&1; then
+    return 1
+  fi
+
+  inspect_file="$(mktemp)"
+  trap 'rm -f "${inspect_file}"' RETURN
+
+  if docker manifest inspect --verbose "${image_ref}" > "${inspect_file}" 2>/dev/null; then
+    resolve_digest_with_python "${inspect_file}" 2>/dev/null
+    return $?
+  fi
+
+  return 1
+}
+
+digest_ref_for() {
+  local image_ref="$1"
+  local digest="$2"
+
+  printf '%s@%s' "${image_ref%:*}" "${digest}"
+}
+
 record_result() {
   local status="$1"
   local service="$2"
@@ -112,6 +181,7 @@ handle_failure() {
 }
 
 require_command cosign
+require_command python3
 mkdir -p "${REPORT_DIR}"
 
 if [[ -n "${COSIGN_EXPERIMENTAL}" ]]; then
@@ -139,6 +209,7 @@ fi
 {
   printf '# SecureRAG Hub image signing summary\n'
   printf '# Generated at: %s\n' "$(date -u '+%Y-%m-%dT%H:%M:%SZ')"
+  printf '# Cosign version: %s\n' "$(cosign version 2>/dev/null | head -n 1 || printf 'unavailable')"
   printf '# Mode: %s\n' "${mode}"
   printf '%-6s | %-18s | %-64s | %-10s | %-40s | %s\n' \
     "STATUS" "SERVICE" "IMAGE" "MODE" "ARTIFACT" "DETAIL"
@@ -168,13 +239,20 @@ for service in "${SERVICES_ARRAY[@]}"; do
     continue
   fi
 
-  if cosign "${sign_args[@]}" "${image_ref}" > "${log_file}" 2>&1; then
+  sign_ref="${image_ref}"
+  sign_detail="signature created for tag; digest unavailable"
+  if digest="$(resolve_digest "${image_ref}")"; then
+    sign_ref="$(digest_ref_for "${image_ref}" "${digest}")"
+    sign_detail="signature created for digest ${digest}"
+  fi
+
+  if cosign "${sign_args[@]}" "${sign_ref}" > "${log_file}" 2>&1; then
     pass_count=$((pass_count + 1))
-    record_result "PASS" "${service}" "${image_ref}" "${mode}" "${log_file}" "signature created"
-    info "${service}: signature created"
+    record_result "PASS" "${service}" "${sign_ref}" "${mode}" "${log_file}" "${sign_detail}"
+    info "${service}: ${sign_detail}"
   else
     fail_count=$((fail_count + 1))
-    record_result "FAIL" "${service}" "${image_ref}" "${mode}" "${log_file}" "cosign sign failed"
+    record_result "FAIL" "${service}" "${sign_ref}" "${mode}" "${log_file}" "cosign sign failed"
     handle_failure "${service}: signing failed, inspect ${log_file}"
   fi
 done

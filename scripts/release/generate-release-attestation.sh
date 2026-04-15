@@ -16,6 +16,25 @@ OUT_JSON="${OUT_JSON:-${REPORT_DIR}/release-attestation.json}"
 OUT_MD="${OUT_MD:-${REPORT_DIR}/release-attestation.md}"
 STRICT_RELEASE_ATTESTATION="${STRICT_RELEASE_ATTESTATION:-false}"
 
+DEFAULT_SERVICES=(
+  api-gateway
+  auth-users
+  chatbot-manager
+  llm-orchestrator
+  security-auditor
+  knowledge-hub
+  portal-web
+)
+
+if [[ -n "${SERVICES:-}" ]]; then
+  # shellcheck disable=SC2206
+  SERVICES_ARRAY=(${SERVICES//,/ })
+else
+  SERVICES_ARRAY=("${DEFAULT_SERVICES[@]}")
+fi
+
+EXPECTED_COUNT="${EXPECTED_SERVICE_COUNT:-${#SERVICES_ARRAY[@]}}"
+
 mkdir -p "${REPORT_DIR}"
 
 info() { printf '[INFO] %s\n' "$*"; }
@@ -60,6 +79,15 @@ artifact_has_fail() {
   [[ -s "${target_file}" ]] && grep -Eq '(^|[[:space:]])FAIL([[:space:]]|[|]|$)' "${target_file}"
 }
 
+status_count() {
+  local target_file="$1"
+  local status="$2"
+  local count
+
+  count="$(grep -Ec "^[[:space:]]*${status}[[:space:]]*[|]" "${target_file}" 2>/dev/null || true)"
+  printf '%s' "${count:-0}"
+}
+
 json_bool() {
   if [[ "$1" == "true" ]]; then
     printf 'true'
@@ -95,11 +123,67 @@ status_for() {
   printf 'PRESENT_UNPROVEN'
 }
 
-SIGN_STATUS="$(status_for "${REPORT_DIR}/sign-summary.txt" true)"
-VERIFY_STATUS="$(status_for "${REPORT_DIR}/verify-summary.txt" true)"
-PROMOTION_STATUS="$(status_for "${REPORT_DIR}/promotion-by-digest-summary.txt" true)"
-SBOM_STATUS="$(status_for "${REPORT_DIR}/sbom-summary.txt" true)"
-DIGEST_STATUS="$(status_for "${REPORT_DIR}/promotion-digests.txt" false)"
+summary_status_for() {
+  local target_file="$1"
+
+  if ! artifact_present "${target_file}"; then
+    printf 'MISSING'
+    return 0
+  fi
+
+  local pass_count fail_count skip_count
+  pass_count="$(status_count "${target_file}" "PASS")"
+  fail_count="$(status_count "${target_file}" "FAIL")"
+  skip_count="$(status_count "${target_file}" "SKIP")"
+
+  if [[ "${fail_count}" != "0" ]]; then
+    printf 'FAILED'
+    return 0
+  fi
+
+  if [[ "${skip_count}" != "0" ]]; then
+    printf 'SKIPPED'
+    return 0
+  fi
+
+  if [[ "${pass_count}" == "${EXPECTED_COUNT}" ]]; then
+    printf 'PROVEN'
+    return 0
+  fi
+
+  if [[ "${pass_count}" != "0" ]]; then
+    printf 'PARTIAL'
+    return 0
+  fi
+
+  printf 'PRESENT_UNPROVEN'
+}
+
+digest_status_for() {
+  local target_file="$1"
+
+  if ! artifact_present "${target_file}"; then
+    printf 'MISSING'
+    return 0
+  fi
+
+  local record_count invalid_count
+  record_count="$(grep -Ev '^[[:space:]]*(#|$)' "${target_file}" | wc -l | tr -d ' ')"
+  invalid_count="$(grep -Ev '^[[:space:]]*(#|$)' "${target_file}" | awk -F'|' '$4 !~ /^sha256:[0-9a-f]{64}$/ {bad++} END {print bad+0}')"
+
+  if [[ "${record_count}" == "${EXPECTED_COUNT}" && "${invalid_count}" == "0" ]]; then
+    printf 'PROVEN'
+    return 0
+  fi
+
+  printf 'PRESENT_UNPROVEN'
+}
+
+SIGN_STATUS="$(summary_status_for "${REPORT_DIR}/sign-summary.txt")"
+VERIFY_STATUS="$(summary_status_for "${REPORT_DIR}/verify-summary.txt")"
+PROMOTION_STATUS="$(summary_status_for "${REPORT_DIR}/promotion-by-digest-summary.txt")"
+SBOM_STATUS="$(summary_status_for "${REPORT_DIR}/sbom-summary.txt")"
+DIGEST_STATUS="$(digest_status_for "${REPORT_DIR}/promotion-digests.txt")"
 RELEASE_EVIDENCE_STATUS="$(status_for "${REPORT_DIR}/release-evidence.md" false)"
 SUPPLY_EVIDENCE_STATUS="$(status_for "${REPORT_DIR}/supply-chain-evidence.md" false)"
 
@@ -115,7 +199,7 @@ for status in "${SIGN_STATUS}" "${VERIFY_STATUS}" "${PROMOTION_STATUS}" "${SBOM_
   fi
 done
 
-if [[ "${DIGEST_STATUS}" == "MISSING" || "${SBOM_COUNT}" == "0" ]]; then
+if [[ "${DIGEST_STATUS}" != "PROVEN" || "${SBOM_COUNT}" != "${EXPECTED_COUNT}" ]]; then
   COMPLETE=false
 fi
 
@@ -133,28 +217,38 @@ cat > "${OUT_JSON}" <<EOF
   "git_commit": "${GIT_COMMIT}",
   "attestation_type": "SecureRAG Hub release evidence attestation",
   "status": "${ATTESTATION_STATUS}",
+  "expected_service_count": ${EXPECTED_COUNT},
   "strict_mode": $(json_bool "${STRICT_RELEASE_ATTESTATION}"),
   "claims": {
     "sbom_generated": $(json_bool "$([[ "${SBOM_STATUS}" == "PROVEN" ]] && echo true || echo false)"),
     "cosign_signed": $(json_bool "$([[ "${SIGN_STATUS}" == "PROVEN" ]] && echo true || echo false)"),
     "cosign_verified": $(json_bool "$([[ "${VERIFY_STATUS}" == "PROVEN" ]] && echo true || echo false)"),
-    "digest_promoted": $(json_bool "$([[ "${PROMOTION_STATUS}" == "PROVEN" && "${DIGEST_STATUS}" != "MISSING" ]] && echo true || echo false)"),
-    "no_rebuild_deploy_ready": $(json_bool "$([[ "${PROMOTION_STATUS}" == "PROVEN" && "${DIGEST_STATUS}" != "MISSING" ]] && echo true || echo false)")
+    "digest_promoted": $(json_bool "$([[ "${PROMOTION_STATUS}" == "PROVEN" && "${DIGEST_STATUS}" == "PROVEN" ]] && echo true || echo false)"),
+    "no_rebuild_deploy_ready": $(json_bool "$([[ "${PROMOTION_STATUS}" == "PROVEN" && "${DIGEST_STATUS}" == "PROVEN" ]] && echo true || echo false)")
   },
   "evidence": {
     "sign_summary": {
       "path": "${REPORT_DIR}/sign-summary.txt",
       "status": "${SIGN_STATUS}",
+      "pass": $(status_count "${REPORT_DIR}/sign-summary.txt" "PASS"),
+      "fail": $(status_count "${REPORT_DIR}/sign-summary.txt" "FAIL"),
+      "skip": $(status_count "${REPORT_DIR}/sign-summary.txt" "SKIP"),
       "sha256": "$(file_sha256 "${REPORT_DIR}/sign-summary.txt")"
     },
     "verify_summary": {
       "path": "${REPORT_DIR}/verify-summary.txt",
       "status": "${VERIFY_STATUS}",
+      "pass": $(status_count "${REPORT_DIR}/verify-summary.txt" "PASS"),
+      "fail": $(status_count "${REPORT_DIR}/verify-summary.txt" "FAIL"),
+      "skip": $(status_count "${REPORT_DIR}/verify-summary.txt" "SKIP"),
       "sha256": "$(file_sha256 "${REPORT_DIR}/verify-summary.txt")"
     },
     "promotion_summary": {
       "path": "${REPORT_DIR}/promotion-by-digest-summary.txt",
       "status": "${PROMOTION_STATUS}",
+      "pass": $(status_count "${REPORT_DIR}/promotion-by-digest-summary.txt" "PASS"),
+      "fail": $(status_count "${REPORT_DIR}/promotion-by-digest-summary.txt" "FAIL"),
+      "skip": $(status_count "${REPORT_DIR}/promotion-by-digest-summary.txt" "SKIP"),
       "sha256": "$(file_sha256 "${REPORT_DIR}/promotion-by-digest-summary.txt")"
     },
     "promotion_digests": {
@@ -165,6 +259,9 @@ cat > "${OUT_JSON}" <<EOF
     "sbom_summary": {
       "path": "${REPORT_DIR}/sbom-summary.txt",
       "status": "${SBOM_STATUS}",
+      "pass": $(status_count "${REPORT_DIR}/sbom-summary.txt" "PASS"),
+      "fail": $(status_count "${REPORT_DIR}/sbom-summary.txt" "FAIL"),
+      "skip": $(status_count "${REPORT_DIR}/sbom-summary.txt" "SKIP"),
       "sha256": "$(file_sha256 "${REPORT_DIR}/sbom-summary.txt")"
     },
     "sbom_count": ${SBOM_COUNT},
@@ -186,6 +283,7 @@ EOF
   printf '# Release Attestation — SecureRAG Hub\n\n'
   printf -- '- Generated at UTC: `%s`\n' "${TIMESTAMP}"
   printf -- '- Git commit: `%s`\n' "${GIT_COMMIT}"
+  printf -- '- Expected services: `%s`\n' "${EXPECTED_COUNT}"
   printf -- '- Status: `%s`\n' "${ATTESTATION_STATUS}"
   printf -- '- Strict mode: `%s`\n\n' "${STRICT_RELEASE_ATTESTATION}"
 
@@ -203,9 +301,9 @@ EOF
 
   printf '## Honest reading\n\n'
   if [[ "${COMPLETE}" == "true" ]]; then
-    printf 'The release chain is complete for the available evidence: SBOM, signing, verification, digest promotion and no-rebuild promotion evidence are present.\n'
+    printf 'The release chain is complete for the expected service set: SBOM, signing, verification, digest promotion and no-rebuild promotion evidence are all proven without FAIL or SKIP rows.\n'
   else
-    printf 'The release chain is not fully proven yet. Missing or unproven evidence must be produced by `make supply-chain-execute` on an environment with Docker, registry access, Syft, Cosign and valid Cosign keys.\n'
+    printf 'The release chain is not fully proven yet. Missing, partial, failed or skipped evidence must be regenerated by `make supply-chain-execute` on an environment with Docker, registry access, Syft, Cosign and valid Cosign keys.\n'
   fi
 } > "${OUT_MD}"
 

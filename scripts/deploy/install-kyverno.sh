@@ -4,6 +4,8 @@ set -euo pipefail
 
 KYVERNO_ADDON_PATH="${KYVERNO_ADDON_PATH:-infra/k8s/addons/kyverno}"
 KYVERNO_POLICY_MODE="${KYVERNO_POLICY_MODE:-audit}"
+KYVERNO_AUDIT_POLICY_PATH="${KYVERNO_AUDIT_POLICY_PATH:-infra/k8s/policies/kyverno}"
+KYVERNO_ENFORCE_POLICY_PATH="${KYVERNO_ENFORCE_POLICY_PATH:-infra/k8s/policies/kyverno-enforce}"
 APPLY_POLICIES="${APPLY_POLICIES:-true}"
 KYVERNO_WAIT_TIMEOUT="${KYVERNO_WAIT_TIMEOUT:-300s}"
 
@@ -39,15 +41,23 @@ if ! kubectl get crd clusterpolicies.kyverno.io >/dev/null 2>&1; then
 fi
 
 if is_true "${APPLY_POLICIES}"; then
-  policy_path="infra/k8s/policies/kyverno"
+  policy_path="${KYVERNO_AUDIT_POLICY_PATH}"
   if [[ "${KYVERNO_POLICY_MODE}" == "enforce" ]]; then
-    policy_path="infra/k8s/policies/kyverno/overlays/enforce"
+    policy_path="${KYVERNO_ENFORCE_POLICY_PATH}"
+    warn "Kyverno Enforce mode is mutating admission behavior. Use only after Audit reports are clean and signed image evidence is current."
   fi
 
+  info "Rendering Kyverno policies from ${policy_path}"
+  kubectl kustomize "${policy_path}" >/dev/null
+
+  info "Server-side dry-run for Kyverno policies from ${policy_path}"
+  kubectl apply --server-side --dry-run=server -k "${policy_path}" >/dev/null
+
   info "Applying Kyverno policies from ${policy_path}"
-  kubectl apply -k "${policy_path}"
+  kubectl apply --server-side --force-conflicts -k "${policy_path}"
 fi
 
 info "Kyverno installation completed"
 kubectl get pods -n kyverno
 kubectl get clusterpolicy
+kubectl get policyreport,clusterpolicyreport -A || warn "Kyverno policy reports are not available yet; rerun make cluster-security-proof after workloads are reconciled."

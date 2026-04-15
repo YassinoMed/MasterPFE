@@ -109,6 +109,21 @@ run_syft() {
   fi
 }
 
+validate_sbom_file() {
+  local target_file="$1"
+
+  python3 - "${target_file}" <<'PY'
+import json
+import sys
+
+with open(sys.argv[1], encoding="utf-8") as handle:
+    payload = json.load(handle)
+
+if payload.get("bomFormat") != "CycloneDX":
+    raise SystemExit("SBOM is not a CycloneDX document")
+PY
+}
+
 file_sha256() {
   local target_file="$1"
 
@@ -135,11 +150,13 @@ record_result() {
 }
 
 require_command syft
+require_command python3
 mkdir -p "${SBOM_DIR}" "${REPORT_DIR}"
 
 {
   printf '# SecureRAG Hub SBOM summary\n'
   printf '# Generated at: %s\n' "$(date -u '+%Y-%m-%dT%H:%M:%SZ')"
+  printf '# Syft version: %s\n' "$(syft version 2>/dev/null | head -n 1 || printf 'unavailable')"
   printf '%-6s | %-18s | %-64s | %-8s | %-40s | %s\n' \
     "STATUS" "SERVICE" "IMAGE" "SOURCE" "ARTIFACT" "DETAIL"
 } > "${SUMMARY_FILE}"
@@ -174,7 +191,7 @@ for service in "${SERVICES_ARRAY[@]}"; do
 
   source_kind="${source_ref%%:*}"
 
-  if run_syft "${source_ref}" "${sbom_file}" "${log_file}"; then
+  if run_syft "${source_ref}" "${sbom_file}" "${log_file}" && validate_sbom_file "${sbom_file}" >> "${log_file}" 2>&1; then
     checksum="$(file_sha256 "${sbom_file}")"
     pass_count=$((pass_count + 1))
     printf '%s|%s|%s|%s|%s\n' \
@@ -183,8 +200,9 @@ for service in "${SERVICES_ARRAY[@]}"; do
     info "${service}: SBOM written to ${sbom_file}"
   else
     fail_count=$((fail_count + 1))
-    record_result "FAIL" "${service}" "${image_ref}" "${source_kind}" "${log_file}" "Syft failed, inspect log file"
-    error "${service}: unable to generate SBOM, see ${log_file}"
+    rm -f "${sbom_file}"
+    record_result "FAIL" "${service}" "${image_ref}" "${source_kind}" "${log_file}" "Syft failed or produced an invalid CycloneDX SBOM"
+    error "${service}: unable to generate a valid SBOM, see ${log_file}"
   fi
 done
 

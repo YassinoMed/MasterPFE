@@ -24,18 +24,22 @@ Le premier est acceptable pour une demonstration locale uniquement. Il ne doit p
 bash scripts/deploy/install-metrics-server.sh
 ```
 
+Le script rend le manifeste avec Kustomize, execute un dry-run server-side, applique l'addon, attend le deployment puis attend l'APIService `v1beta1.metrics.k8s.io`.
+
 ## Verification
 ```bash
 kubectl get apiservice v1beta1.metrics.k8s.io
 kubectl top nodes
 kubectl top pods -n securerag-hub
 kubectl get hpa -n securerag-hub
+bash scripts/validate/validate-cluster-security-addons.sh
 ```
 
 ## Resultat attendu
 - `kubectl top nodes` repond
 - `kubectl top pods -n securerag-hub` repond
 - les `HPA` ne restent plus avec `cpu: <unknown>`
+- `artifacts/validation/cluster-security-addons.md` classe metrics-server/HPA en `TERMINÉ`
 
 ## Limites
 - `metrics-server` sert a l'autoscaling CPU/memoire, pas a une supervision complete

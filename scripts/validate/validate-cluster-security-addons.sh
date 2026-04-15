@@ -40,10 +40,10 @@ if ! kubectl version --request-timeout=3s >/dev/null 2>&1; then
     printf -- '- Namespace: `%s`\n\n' "${NS}"
     printf '| Component | Status | Evidence |\n'
     printf '|---|---:|---|\n'
-    printf '| Kubernetes API | PARTIAL | API server unreachable from this environment |\n'
-    printf '| metrics-server | PARTIAL | Cannot validate without a reachable cluster |\n'
-    printf '| HPA | PARTIAL | Cannot validate without a reachable cluster |\n'
-    printf '| Kyverno | PARTIAL | Cannot validate without a reachable cluster |\n\n'
+    printf '| Kubernetes API | DÉPENDANT_DE_L_ENVIRONNEMENT | API server unreachable from this environment |\n'
+    printf '| metrics-server | DÉPENDANT_DE_L_ENVIRONNEMENT | Cannot validate without a reachable cluster |\n'
+    printf '| HPA | DÉPENDANT_DE_L_ENVIRONNEMENT | Cannot validate without a reachable cluster |\n'
+    printf '| Kyverno | DÉPENDANT_DE_L_ENVIRONNEMENT | Cannot validate without a reachable cluster |\n\n'
     printf '## Diagnostic\n\n'
     printf '```text\n'
     printf 'kubectl is installed, but the Kubernetes API is not reachable.\n'
@@ -64,46 +64,66 @@ fi
   printf '|---|---:|---|\n'
 } > "${OUT_FILE}"
 
-if kubectl get apiservice v1beta1.metrics.k8s.io >/dev/null 2>&1; then
-  metrics_status="OK"
-  metrics_detail="Metrics APIService exists"
+if kubectl get apiservice v1beta1.metrics.k8s.io >/dev/null 2>&1 \
+  && kubectl wait --for=condition=Available apiservice/v1beta1.metrics.k8s.io --timeout=20s >/dev/null 2>&1 \
+  && kubectl top nodes >/dev/null 2>&1 \
+  && kubectl top pods -n "${NS}" >/dev/null 2>&1; then
+  metrics_status="TERMINÉ"
+  metrics_detail="Metrics APIService is Available and kubectl top works for nodes and namespace pods"
+elif kubectl get apiservice v1beta1.metrics.k8s.io >/dev/null 2>&1; then
+  metrics_status="PARTIEL"
+  metrics_detail="Metrics APIService exists, but resource metrics are not fully queryable yet"
 else
-  metrics_status="PARTIAL"
+  metrics_status="DÉPENDANT_DE_L_ENVIRONNEMENT"
   metrics_detail="Metrics APIService not detected"
 fi
 printf '| metrics-server | %s | %s |\n' "${metrics_status}" "${metrics_detail}" >> "${OUT_FILE}"
 
-if kubectl get hpa -n "${NS}" >/dev/null 2>&1; then
-  hpa_status="OK"
-  hpa_detail="HPA objects are present"
+if hpa_rows="$(kubectl get hpa -n "${NS}" --no-headers 2>/dev/null || true)" && [[ -n "${hpa_rows}" ]]; then
+  if [[ "${metrics_status}" == "TERMINÉ" ]]; then
+    hpa_status="TERMINÉ"
+    hpa_detail="HPA objects are present and metrics-server is usable"
+  else
+    hpa_status="PARTIEL"
+    hpa_detail="HPA objects are present, but metrics-server is not fully proven"
+  fi
 else
-  hpa_status="PARTIAL"
+  hpa_status="PARTIEL"
   hpa_detail="No HPA objects returned for namespace"
 fi
 printf '| HPA | %s | %s |\n' "${hpa_status}" "${hpa_detail}" >> "${OUT_FILE}"
 
 if kubectl get crd clusterpolicies.kyverno.io >/dev/null 2>&1; then
   if kubectl wait --for=condition=Ready pod --all -n kyverno --timeout=10s >/dev/null 2>&1; then
-    kyverno_status="OK"
+    kyverno_status="TERMINÉ"
     kyverno_detail="Kyverno CRD detected and controller pods are Ready"
   else
-    kyverno_status="PARTIAL"
+    kyverno_status="PARTIEL"
     kyverno_detail="Kyverno CRD detected but controller pods are not Ready"
   fi
 else
-  kyverno_status="PARTIAL"
+  kyverno_status="DÉPENDANT_DE_L_ENVIRONNEMENT"
   kyverno_detail="Kyverno CRD not detected"
 fi
 printf '| Kyverno | %s | %s |\n' "${kyverno_status}" "${kyverno_detail}" >> "${OUT_FILE}"
 
 if policy_rows="$(kubectl get clusterpolicy --no-headers 2>/dev/null || true)" && [[ -n "${policy_rows}" ]]; then
-  policy_status="OK"
+  policy_status="TERMINÉ"
   policy_detail="ClusterPolicy resources are present"
 else
-  policy_status="PARTIAL"
+  policy_status="PARTIEL"
   policy_detail="ClusterPolicy resources unavailable or not applied yet"
 fi
 printf '| Kyverno policies | %s | %s |\n' "${policy_status}" "${policy_detail}" >> "${OUT_FILE}"
+
+if report_rows="$(kubectl get policyreport,clusterpolicyreport -A --no-headers 2>/dev/null || true)" && [[ -n "${report_rows}" ]]; then
+  report_status="TERMINÉ"
+  report_detail="PolicyReport or ClusterPolicyReport resources are present"
+else
+  report_status="PARTIEL"
+  report_detail="No Kyverno policy reports returned yet"
+fi
+printf '| Kyverno reports | %s | %s |\n' "${report_status}" "${report_detail}" >> "${OUT_FILE}"
 
 capture "Kubernetes context" kubectl config current-context
 capture "Metrics APIService" kubectl get apiservice v1beta1.metrics.k8s.io -o wide
@@ -117,6 +137,6 @@ capture "Kyverno policy reports" kubectl get policyreport,clusterpolicyreport -A
 
 info "Cluster security addon validation written to ${OUT_FILE}"
 
-if [[ "${metrics_status}" != "OK" || "${kyverno_status}" != "OK" ]]; then
+if [[ "${metrics_status}" != "TERMINÉ" || "${kyverno_status}" != "TERMINÉ" ]]; then
   warn "Some addons are still environment-dependent. Inspect ${OUT_FILE}"
 fi
