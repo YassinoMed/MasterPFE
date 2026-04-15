@@ -118,6 +118,26 @@ rules:
         - "CWE-200: Exposure of Sensitive Information to an Unauthorized Actor"
     pattern: COPY . .
 
+  - id: kubernetes-cleartext-env-value
+    message: Kubernetes manifests must not hardcode literal http:// environment values; use scoped internal scheme expansion with NetworkPolicy justification or HTTPS for public endpoints.
+    severity: ERROR
+    languages:
+      - yaml
+    metadata:
+      category: network-security
+      technology:
+        - kubernetes
+      cwe:
+        - "CWE-319: Cleartext Transmission of Sensitive Information"
+    paths:
+      include:
+        - "/infra/k8s/**/*.yaml"
+        - "/infra/k8s/**/*.yml"
+    patterns:
+      - pattern: |
+          - name: $ENV
+            value: http://$HOST
+
   - id: php.laravel-form-request-authorize-true
     message: FormRequest authorization must call a policy, middleware-backed helper, or service token guard instead of returning true.
     severity: ERROR

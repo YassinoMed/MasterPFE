@@ -18,12 +18,13 @@ SUPPORT_PACK_ROOT ?= artifacts/support-pack
 help: ## Show available targets
 	@awk 'BEGIN {FS = ":.*## "; print "Available targets:"} /^[a-zA-Z0-9_.-]+:.*## / {printf "  %-12s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
-lint: ## Validate shell scripts, Jenkins config, and Kustomize renders
+lint: ## Validate shell scripts, Jenkins config, Kustomize renders and security scopes
 	@bash -n scripts/ci/*.sh scripts/cd/*.sh scripts/deploy/*.sh scripts/release/*.sh scripts/secrets/*.sh scripts/validate/*.sh scripts/jenkins/*.sh
 	@docker compose -f infra/jenkins/docker-compose.yml config >/dev/null
 	@kubectl kustomize infra/k8s/overlays/dev >/dev/null
 	@kubectl kustomize infra/k8s/overlays/demo >/dev/null
 	@kubectl kustomize infra/k8s/policies/kyverno >/dev/null
+	@bash scripts/validate/validate-k8s-cleartext-scope.sh >/dev/null
 
 test: ## Run automated tests and coverage collection
 	@bash scripts/ci/run-tests.sh
@@ -98,6 +99,9 @@ global-project-status: ## Generate a factual global project status report
 
 security-posture: ## Generate a factual security posture report
 	@bash scripts/validate/generate-security-posture-report.sh
+
+k8s-cleartext-scope: ## Validate that Kubernetes HTTP is restricted to internal scoped demo traffic
+	@bash scripts/validate/validate-k8s-cleartext-scope.sh
 
 close-missing-phases: ## Close remaining environment-dependent phases with safe defaults
 	@bash scripts/validate/run-missing-phases-closure.sh

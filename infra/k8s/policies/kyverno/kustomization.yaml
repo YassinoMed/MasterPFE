@@ -6,5 +6,6 @@ kind: Kustomization
 # still render and deploy even when the policy engine is not present yet.
 
 resources:
+  - audit-cleartext-env-values.yaml
   - require-pod-security.yaml
   - verify-cosign-images.yaml
