@@ -19,14 +19,21 @@ require_command() {
 
 require_command kubectl
 
+info "Rendering metrics-server addon from ${METRICS_SERVER_ADDON_PATH}"
+kubectl kustomize "${METRICS_SERVER_ADDON_PATH}" >/dev/null
+
+info "Server-side dry-run for metrics-server addon"
+kubectl apply --server-side --dry-run=server -k "${METRICS_SERVER_ADDON_PATH}" >/dev/null
+
 info "Installing metrics-server from ${METRICS_SERVER_ADDON_PATH}"
-kubectl apply -k "${METRICS_SERVER_ADDON_PATH}"
+kubectl apply --server-side --force-conflicts -k "${METRICS_SERVER_ADDON_PATH}"
 
 info "Waiting for metrics-server deployment"
 kubectl wait --for=condition=Available deployment/metrics-server -n kube-system --timeout="${METRICS_SERVER_WAIT_TIMEOUT}"
 
 info "Checking Metrics API availability"
 kubectl get apiservice v1beta1.metrics.k8s.io
+kubectl wait --for=condition=Available apiservice/v1beta1.metrics.k8s.io --timeout="${METRICS_SERVER_WAIT_TIMEOUT}"
 
 if kubectl top nodes >/dev/null 2>&1; then
   info "kubectl top nodes is available"

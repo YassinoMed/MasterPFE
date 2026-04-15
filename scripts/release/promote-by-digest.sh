@@ -225,9 +225,23 @@ for service in "${SERVICES_ARRAY[@]}"; do
   fi
 
   if promote_exact_digest "${source_ref}" "${target_ref}" "${digest}" > "${log_file}" 2>&1; then
+    if ! target_digest="$(resolve_digest "${target_ref}")"; then
+      fail_count=$((fail_count + 1))
+      record_result "FAIL" "${service}" "${source_ref}" "${target_ref}" "${digest}" "${log_file}" "target digest could not be resolved after promotion"
+      handle_failure "${service}: target digest could not be resolved after promotion"
+      continue
+    fi
+
+    if [[ "${target_digest}" != "${digest}" ]]; then
+      fail_count=$((fail_count + 1))
+      record_result "FAIL" "${service}" "${source_ref}" "${target_ref}" "${digest}" "${log_file}" "target digest mismatch: ${target_digest}"
+      handle_failure "${service}: target digest mismatch after promotion"
+      continue
+    fi
+
     printf '%s|%s|%s|%s\n' "${service}" "${source_ref}" "${target_ref}" "${digest}" >> "${DIGEST_RECORD_FILE}"
     pass_count=$((pass_count + 1))
-    record_result "PASS" "${service}" "${source_ref}" "${target_ref}" "${digest}" "${log_file}" "image promoted by digest without rebuild"
+    record_result "PASS" "${service}" "${source_ref}" "${target_ref}" "${digest}" "${log_file}" "image promoted by digest without rebuild; target digest matched"
   else
     fail_count=$((fail_count + 1))
     record_result "FAIL" "${service}" "${source_ref}" "${target_ref}" "${digest}" "${log_file}" "digest promotion failed"

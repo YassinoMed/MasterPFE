@@ -11,6 +11,7 @@ Rendre Kyverno installable de maniere reproductible sur le cluster local de demo
 ## Fichiers utilises
 - `infra/k8s/addons/kyverno/kustomization.yaml`
 - `infra/k8s/policies/kyverno/kustomization.yaml`
+- `infra/k8s/policies/kyverno-enforce/kustomization.yaml`
 - `infra/k8s/policies/kyverno/overlays/enforce/kustomization.yaml`
 - `scripts/deploy/install-kyverno.sh`
 
@@ -23,6 +24,8 @@ Cela :
 - installe Kyverno dans le namespace `kyverno`
 - attend les deployments Kyverno
 - verifie la presence du CRD `clusterpolicies.kyverno.io`
+- rend les policies avec Kustomize
+- execute un dry-run server-side
 - applique les policies SecureRAG en mode `Audit`
 
 ## Installation avec policies Enforce
@@ -30,13 +33,15 @@ Cela :
 KYVERNO_POLICY_MODE=enforce bash scripts/deploy/install-kyverno.sh
 ```
 
-Cette variante bascule uniquement la policy de verification Cosign en `Enforce`.
+Cette variante utilise l'overlay `infra/k8s/policies/kyverno-enforce` et bascule les policies de securite Pod et de verification Cosign en `Enforce`. Elle est volontairement separee du mode `Audit`.
 
 ## Verification post-install
 ```bash
 kubectl get pods -n kyverno
 kubectl get crd clusterpolicies.kyverno.io
 kubectl get clusterpolicy
+kubectl get policyreport,clusterpolicyreport -A
+bash scripts/validate/validate-cluster-security-addons.sh
 ```
 
 ## Strategie Audit -> Enforce
@@ -65,3 +70,4 @@ Mode recommande seulement si :
 - commencer en `Audit`
 - valider la campagne `verify -> promote -> deploy -> validate`
 - passer ensuite a `Enforce` sur un cluster de demonstration stabilise
+- conserver `artifacts/validation/cluster-security-addons.md` comme preuve runtime

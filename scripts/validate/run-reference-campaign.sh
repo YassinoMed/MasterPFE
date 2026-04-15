@@ -141,6 +141,21 @@ else
 fi
 printf '- promote images without rebuild: OK\n' >> "${SUMMARY_FILE}"
 
+info "Step 2.3/5 - generate SBOMs for promoted images"
+REGISTRY_HOST="${REGISTRY_HOST}" IMAGE_PREFIX="${IMAGE_PREFIX}" IMAGE_TAG="${TARGET_IMAGE_TAG}" \
+  REPORT_DIR="${REPORT_DIR}" SBOM_DIR="artifacts/sbom" \
+  bash scripts/release/generate-sbom.sh
+printf '- generate promoted-image SBOMs: OK\n' >> "${SUMMARY_FILE}"
+
+info "Step 2.4/5 - record release attestation and evidence"
+REGISTRY_HOST="${REGISTRY_HOST}" IMAGE_PREFIX="${IMAGE_PREFIX}" \
+  SOURCE_IMAGE_TAG="${SOURCE_IMAGE_TAG}" TARGET_IMAGE_TAG="${TARGET_IMAGE_TAG}" \
+  REPORT_DIR="${REPORT_DIR}" SBOM_DIR="artifacts/sbom" DIGEST_RECORD_FILE="${DIGEST_RECORD_FILE}" \
+  bash scripts/release/record-release-evidence.sh
+REPORT_DIR="${REPORT_DIR}" SBOM_DIR="artifacts/sbom" \
+  bash scripts/release/collect-supply-chain-evidence.sh
+printf '- record release attestation and evidence: OK\n' >> "${SUMMARY_FILE}"
+
 info "Step 2.5/5 - assert mandatory supply-chain evidence gate"
 REPORT_DIR="${REPORT_DIR}" SBOM_DIR="artifacts/sbom" DIGEST_RECORD_FILE="${DIGEST_RECORD_FILE}" \
   REQUIRE_SUPPLY_CHAIN_EVIDENCE="${REQUIRE_SUPPLY_CHAIN_EVIDENCE:-true}" \
@@ -186,6 +201,10 @@ printf '- runtime evidence collection: OK\n' >> "${SUMMARY_FILE}"
   printf '- `artifacts/release/promotion-summary.txt`\n'
   printf '- `artifacts/release/promotion-by-digest-summary.txt`\n'
   printf '- `artifacts/release/promotion-digests.txt`\n'
+  printf '- `artifacts/release/sbom-summary.txt`\n'
+  printf '- `artifacts/release/release-evidence.md`\n'
+  printf '- `artifacts/release/release-attestation.json`\n'
+  printf '- `artifacts/release/supply-chain-evidence.md`\n'
   printf '- `artifacts/release/supply-chain-gate-report.md`\n'
   printf '- `artifacts/sbom/sbom-index.txt`\n'
   printf '- `artifacts/validation/validation-summary.md`\n'

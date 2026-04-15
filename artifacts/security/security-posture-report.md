@@ -1,7 +1,7 @@
 # Security Posture Report — SecureRAG Hub
 
-- Generated at UTC: `2026-04-15T00:09:08Z`
-- Git commit: `17dfc2c41ec994ce938f556224371e54f9213948`
+- Generated at UTC: `2026-04-15T04:33:01Z`
+- Git commit: `8e7380154c29755e1487d6c346e2a06457304959`
 - Kubernetes namespace: `securerag-hub`
 
 ## 1. Security controls status
@@ -11,11 +11,11 @@
 | Semgrep SAST | `TERMINÉ` | `security/reports/semgrep.json`, findings=0 |
 | Gitleaks secret scan | `PARTIEL` | `security/reports/gitleaks.json`, findings=n/a |
 | Trivy filesystem scan | `PARTIEL` | `security/reports/trivy-fs.json`, vulnerabilities=n/a |
-| SBOM Syft | `PARTIEL` | `artifacts/release/sbom-summary.txt`, sbom_count=0 |
+| SBOM Syft | `PARTIEL` | `artifacts/release/sbom-summary.txt`, sbom_count=0, expected=7 |
 | Cosign sign | `PARTIEL` | `artifacts/release/sign-summary.txt` |
 | Cosign verify | `PARTIEL` | `artifacts/release/verify-summary.txt` |
 | Digest promotion | `PARTIEL` | `artifacts/release/promotion-digests.txt` |
-| Release attestation | `TERMINÉ` | `artifacts/release/release-attestation.json` |
+| Release attestation | `PARTIEL` | `artifacts/release/release-attestation.json` |
 | Metrics Server runtime | `DÉPENDANT_DE_L_ENVIRONNEMENT` | `kubectl top pods -n securerag-hub` |
 | Kyverno runtime | `DÉPENDANT_DE_L_ENVIRONNEMENT` | `kubectl get clusterpolicies` |
 | Kyverno reports | `DÉPENDANT_DE_L_ENVIRONNEMENT` | `kubectl get policyreports -A` |
@@ -23,8 +23,8 @@
 
 ## 2. Honest interpretation
 
-- `TERMINÉ` means the evidence file exists locally or the runtime command succeeds in the current environment.
-- `PARTIEL` means the control is scripted/configured but the expected evidence file is not present yet.
+- `TERMINÉ` means all expected evidence rows are proven, or the runtime command succeeds in the current environment.
+- `PARTIEL` means the control is scripted/configured but the expected evidence is missing, incomplete, failed, skipped or partial.
 - `DÉPENDANT_DE_L_ENVIRONNEMENT` means the control needs an active Docker/kind/Kubernetes/Jenkins/Cosign/Syft/Kyverno runtime.
 
 ## 3. Security-ready reading

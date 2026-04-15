@@ -127,28 +127,11 @@ else
 fi
 
 if [[ "${REQUIRE_SUPPLY_CHAIN_EVIDENCE}" =~ ^(1|true|TRUE|yes|YES|on|ON)$ ]]; then
-  if [[ -s "${RELEASE_DIR}/sign-summary.txt" ]]; then
-    pass "Mandatory evidence present: sign-summary.txt"
+  if REPORT_DIR="${RELEASE_DIR}" SBOM_DIR="artifacts/sbom" DIGEST_RECORD_FILE="${RELEASE_DIR}/promotion-digests.txt" \
+    bash scripts/release/assert-supply-chain-evidence.sh >> "${REPORT_FILE}" 2>&1; then
+    pass "Mandatory supply-chain evidence gate passed"
   else
-    fail "Mandatory evidence missing: sign-summary.txt"
-  fi
-
-  if [[ -s "${RELEASE_DIR}/verify-summary.txt" ]]; then
-    pass "Mandatory evidence present: verify-summary.txt"
-  else
-    fail "Mandatory evidence missing: verify-summary.txt"
-  fi
-
-  if [[ -s "${RELEASE_DIR}/promotion-digests.txt" ]]; then
-    pass "Mandatory evidence present: promotion-digests.txt"
-  else
-    fail "Mandatory evidence missing: promotion-digests.txt"
-  fi
-
-  if [[ -s "artifacts/sbom/sbom-index.txt" ]]; then
-    pass "Mandatory evidence present: sbom-index.txt"
-  else
-    fail "Mandatory evidence missing: sbom-index.txt"
+    fail "Mandatory supply-chain evidence gate failed"
   fi
 else
   warn "Mandatory supply-chain evidence check is disabled"

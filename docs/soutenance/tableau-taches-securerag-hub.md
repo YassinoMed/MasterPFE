@@ -1,6 +1,6 @@
 # Tableau Des Tâches SecureRAG Hub
 
-Ce tableau distingue l'état fonctionnel réel du projet après consolidation applicative et DevSecOps. Il ne présente comme terminé que les éléments créés, testés ou déjà validés. Les éléments qui ne relèvent plus d'un manque de code sont classés en `DÉPEND_ENV` ou `PRÊT_NON_EXÉCUTÉ` lorsque leur validation dépend d'un environnement actif.
+Ce tableau distingue l'état fonctionnel réel du projet après consolidation applicative et DevSecOps. Il ne présente comme terminé que les éléments créés, testés ou déjà validés. Les éléments qui ne relèvent plus d'un manque de code sont classés en `DÉPENDANT_DE_L_ENVIRONNEMENT` ou `PRÊT_NON_EXÉCUTÉ` lorsque leur validation dépend d'un environnement actif.
 
 | Bloc | Tâche | État | Priorité | Action restante |
 |---|---|---:|---:|---|
@@ -27,18 +27,18 @@ Ce tableau distingue l'état fonctionnel réel du projet après consolidation ap
 | OpenAPI | `chatbot-manager-service.yaml` | TERMINÉ | P3 | Ajouter exemples si demandé |
 | OpenAPI | `conversation-service.yaml` | TERMINÉ | P3 | Ajouter exemples si demandé |
 | OpenAPI | `audit-security-service.yaml` | TERMINÉ | P3 | Ajouter exemples si demandé |
-| Jenkins | Webhook GitHub vers Jenkins | DÉPEND_ENV | P1 | Revalider avec Jenkins actif et URL publique |
-| Jenkins | CI automatique au push GitHub | DÉPEND_ENV | P1 | Faire un `git push`, vérifier build Jenkins, archiver preuve |
-| Jenkins | Accès SCM GitHub depuis conteneur Jenkins | DÉPEND_ENV | P1 | Vérifier egress réseau ou utiliser fallback `/workspace` |
+| Jenkins | Webhook GitHub vers Jenkins | DÉPENDANT_DE_L_ENVIRONNEMENT | P1 | Revalider avec Jenkins actif et URL publique |
+| Jenkins | CI automatique au push GitHub | DÉPENDANT_DE_L_ENVIRONNEMENT | P1 | Faire un `git push`, vérifier build Jenkins, archiver preuve |
+| Jenkins | Accès SCM GitHub depuis conteneur Jenkins | DÉPENDANT_DE_L_ENVIRONNEMENT | P1 | Vérifier egress réseau ou utiliser fallback `/workspace` |
 | Preuves runtime | Orchestration des phases manquées | TERMINÉ | P1 | Rejouer `make close-missing-phases` sur l'environnement final |
 | Supply chain | SBOM Syft | PRÊT_NON_EXÉCUTÉ | P3 | Exécuter avec images et Syft disponibles |
 | Supply chain | Signature Cosign | PRÊT_NON_EXÉCUTÉ | P3 | Fournir clés Cosign et signer images |
 | Supply chain | Vérification Cosign | PRÊT_NON_EXÉCUTÉ | P3 | Vérifier signatures avant promotion |
 | Supply chain | Promotion par digest | PRÊT_NON_EXÉCUTÉ | P3 | Promouvoir images validées par digest |
 | CD | Déploiement sans rebuild | PRÊT_NON_EXÉCUTÉ | P3 | Rejouer `CAMPAIGN_MODE=execute` si environnement prêt |
-| Kubernetes sécurité | metrics-server | DÉPEND_ENV | P3 | Installer et valider Metrics API |
-| Kubernetes sécurité | HPA exploitable | DÉPEND_ENV | P3 | Valider après metrics-server |
-| Kubernetes sécurité | Kyverno Audit | DÉPEND_ENV | P3 | Installer Kyverno et appliquer policies Audit |
+| Kubernetes sécurité | metrics-server | DÉPENDANT_DE_L_ENVIRONNEMENT | P3 | Installer et valider Metrics API |
+| Kubernetes sécurité | HPA exploitable | DÉPENDANT_DE_L_ENVIRONNEMENT | P3 | Valider après metrics-server |
+| Kubernetes sécurité | Kyverno Audit | DÉPENDANT_DE_L_ENVIRONNEMENT | P3 | Installer Kyverno et appliquer policies Audit |
 | Kubernetes sécurité | Kyverno Enforce | PRÊT_NON_EXÉCUTÉ | P3 | Activer uniquement après signatures prouvées |
 | Mémoire | Chapitre 1 et références bibliographiques | TERMINÉ | P2 | Adapter au gabarit final LaTeX |
 | Soutenance | Démo 5-7 minutes | TERMINÉ | P1 | Répéter avec environnement final |
@@ -48,7 +48,7 @@ Ce tableau distingue l'état fonctionnel réel du projet après consolidation ap
 ## Synthèse Par État
 
 - TERMINÉ : socle demo, portail Blade connecté avec fallback, quatre services Laravel métier, tests Laravel, contrats OpenAPI, preuves non destructives, chapitre 1 référencé, orchestration des phases manquées.
-- DÉPEND_ENV : Jenkins webhook réel, CI push réelle, metrics-server, HPA, Kyverno Audit.
+- DÉPENDANT_DE_L_ENVIRONNEMENT : Jenkins webhook réel, CI push réelle, metrics-server, HPA, Kyverno Audit.
 - PRÊT_NON_EXÉCUTÉ : supply chain execute, Cosign, SBOM, promotion digest, Kyverno Enforce.
 - DÉPENDANT DE L'ENVIRONNEMENT : Jenkins actif, accès GitHub depuis conteneur, registry et images locales, clés Cosign, cluster kind disponible.
 

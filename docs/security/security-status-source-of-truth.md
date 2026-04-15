@@ -10,18 +10,29 @@ Ce document sert de source de vérité sécurité pour éviter les écarts entre
 - `PRÊT_NON_EXÉCUTÉ` : le contrôle est prêt à être exécuté mais n’a pas encore été rejoué dans l’environnement final.
 
 ## Contrôles à ne pas surdéclarer
-- SBOM Syft : terminé seulement si `artifacts/release/sbom-summary.txt` et les fichiers `artifacts/sbom/*-sbom.cdx.json` existent.
-- Cosign sign : terminé seulement si `artifacts/release/sign-summary.txt` contient des lignes `PASS`.
-- Cosign verify : terminé seulement si `artifacts/release/verify-summary.txt` contient des lignes `PASS`.
-- Promotion digest : terminée seulement si `artifacts/release/promotion-digests.txt` existe et référence les digests promus.
-- Kyverno Audit : terminé seulement si `kubectl get clusterpolicies` et `kubectl get policyreports -A` répondent sur le cluster cible.
-- metrics-server/HPA : terminé seulement si `kubectl top pods -n securerag-hub` fonctionne.
+- SBOM Syft : `TERMINÉ` seulement si `artifacts/release/sbom-summary.txt` contient une ligne `PASS` par service attendu, sans `FAIL` ni `SKIP`, et si `artifacts/sbom/sbom-index.txt` référence des SBOM CycloneDX valides.
+- Cosign sign : `TERMINÉ` seulement si `artifacts/release/sign-summary.txt` contient une ligne `PASS` par service attendu, sans `FAIL` ni `SKIP`.
+- Cosign verify : `TERMINÉ` seulement si `artifacts/release/verify-summary.txt` contient une ligne `PASS` par service attendu, sans `FAIL` ni `SKIP`.
+- Promotion digest : `TERMINÉ` seulement si `artifacts/release/promotion-by-digest-summary.txt` est entièrement en `PASS` et si `artifacts/release/promotion-digests.txt` référence un digest `sha256:` valide par service.
+- Attestation release : `TERMINÉ` seulement si `artifacts/release/release-attestation.json` annonce `COMPLETE_PROVEN`.
+- Gate supply chain : `TERMINÉ` seulement si `scripts/release/assert-supply-chain-evidence.sh` réussit.
+- Kyverno Audit : `TERMINÉ` seulement si `kubectl get clusterpolicies` et `kubectl get policyreport,clusterpolicyreport -A` répondent sur le cluster cible.
+- metrics-server/HPA : `TERMINÉ` seulement si `kubectl top nodes`, `kubectl top pods -n securerag-hub` et `kubectl get hpa -n securerag-hub` fonctionnent.
+- `conversation-service` et `audit-security-service` : ne pas les déclarer workloads Kubernetes officiels tant qu’ils ne sont pas listés dans `infra/k8s/base/kustomization.yaml` avec Deployment, Service, NetworkPolicy et preuve runtime.
 
 ## Commande de synthèse
 ```bash
 make security-posture
 sed -n '1,220p' artifacts/security/security-posture-report.md
 ```
+
+## Gate release obligatoire
+```bash
+make supply-chain-execute
+bash scripts/release/assert-supply-chain-evidence.sh
+```
+
+Cette validation dépend explicitement de Docker, d’un registry joignable, de Syft, de Cosign et des clés ou identités de signature attendues.
 
 ## Lecture soutenance
 La bonne formulation est :

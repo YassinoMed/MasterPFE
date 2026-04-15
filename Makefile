@@ -24,6 +24,8 @@ lint: ## Validate shell scripts, Jenkins config, Kustomize renders and security 
 	@kubectl kustomize infra/k8s/overlays/dev >/dev/null
 	@kubectl kustomize infra/k8s/overlays/demo >/dev/null
 	@kubectl kustomize infra/k8s/policies/kyverno >/dev/null
+	@kubectl kustomize infra/k8s/policies/kyverno-enforce >/dev/null
+	@kubectl kustomize infra/k8s/policies/kyverno/overlays/enforce >/dev/null
 	@bash scripts/validate/validate-k8s-cleartext-scope.sh >/dev/null
 
 test: ## Run automated tests and coverage collection

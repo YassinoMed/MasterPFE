@@ -130,6 +130,10 @@ REGISTRY_HOST="${REGISTRY_HOST}" IMAGE_PREFIX="${IMAGE_PREFIX}" \
 REPORT_DIR="${REPORT_DIR}" SBOM_DIR="${SBOM_DIR}" \
   bash scripts/release/collect-supply-chain-evidence.sh
 
+info "Asserting mandatory supply-chain release evidence"
+REPORT_DIR="${REPORT_DIR}" SBOM_DIR="${SBOM_DIR}" DIGEST_RECORD_FILE="${DIGEST_RECORD_FILE}" \
+  bash scripts/release/assert-supply-chain-evidence.sh
+
 {
   printf '\n## Executed steps\n\n'
   printf -- '- sign source images: OK\n'
@@ -138,6 +142,7 @@ REPORT_DIR="${REPORT_DIR}" SBOM_DIR="${SBOM_DIR}" \
   printf -- '- verify promoted images: OK\n'
   printf -- '- generate SBOMs: OK\n'
   printf -- '- record release evidence: OK\n\n'
+  printf -- '- mandatory supply-chain evidence gate: OK\n\n'
   printf '## Produced evidence\n\n'
   printf -- '- `%s/sign-summary.txt`\n' "${REPORT_DIR}"
   printf -- '- `%s/verify-summary.txt`\n' "${REPORT_DIR}"
@@ -146,6 +151,7 @@ REPORT_DIR="${REPORT_DIR}" SBOM_DIR="${SBOM_DIR}" \
   printf -- '- `%s/sbom-summary.txt`\n' "${REPORT_DIR}"
   printf -- '- `%s/release-evidence.md`\n' "${REPORT_DIR}"
   printf -- '- `%s/supply-chain-evidence.md`\n' "${REPORT_DIR}"
+  printf -- '- `%s/supply-chain-gate-report.md`\n' "${REPORT_DIR}"
   printf -- '- `%s/sbom-index.txt`\n' "${SBOM_DIR}"
 } >> "${SUMMARY_FILE}"
 
