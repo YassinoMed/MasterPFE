@@ -2,47 +2,12 @@
 
 namespace Tests\Feature;
 
+use SecureRag\LaravelSecurity\Testing\ServiceAuthorizationTestAssertions;
 use Tests\TestCase;
 
 class AuthorizationSecurityTest extends TestCase
 {
-    protected function tearDown(): void
-    {
-        $this->setAuthzTestingBypass('true');
-        $this->setSharedApiToken('');
+    use ServiceAuthorizationTestAssertions;
 
-        parent::tearDown();
-    }
-
-    public function test_mutating_incident_endpoint_requires_authorization_when_testing_bypass_is_disabled(): void
-    {
-        $this->setAuthzTestingBypass('false');
-
-        $this->postJson('/api/v1/incidents', [])
-            ->assertForbidden();
-    }
-
-    public function test_mutating_incident_endpoint_accepts_configured_service_token(): void
-    {
-        $this->setAuthzTestingBypass('false');
-        $this->setSharedApiToken('test-service-token');
-
-        $this->withHeader('X-SecureRAG-Service-Token', 'test-service-token')
-            ->postJson('/api/v1/incidents', [])
-            ->assertUnprocessable();
-    }
-
-    private function setAuthzTestingBypass(string $value): void
-    {
-        $_ENV['SECURERAG_AUTHZ_ALLOW_TESTING'] = $value;
-        $_SERVER['SECURERAG_AUTHZ_ALLOW_TESTING'] = $value;
-        putenv("SECURERAG_AUTHZ_ALLOW_TESTING={$value}");
-    }
-
-    private function setSharedApiToken(string $value): void
-    {
-        $_ENV['SECURERAG_SHARED_API_TOKEN'] = $value;
-        $_SERVER['SECURERAG_SHARED_API_TOKEN'] = $value;
-        putenv("SECURERAG_SHARED_API_TOKEN={$value}");
-    }
+    protected function mutatingEndpoint(): string { return '/api/v1/incidents'; }
 }
