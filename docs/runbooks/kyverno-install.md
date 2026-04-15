@@ -12,7 +12,6 @@ Rendre Kyverno installable de maniere reproductible sur le cluster local de demo
 - `infra/k8s/addons/kyverno/kustomization.yaml`
 - `infra/k8s/policies/kyverno/kustomization.yaml`
 - `infra/k8s/policies/kyverno-enforce/kustomization.yaml`
-- `infra/k8s/policies/kyverno/overlays/enforce/kustomization.yaml`
 - `scripts/deploy/install-kyverno.sh`
 
 ## Installation en mode Audit

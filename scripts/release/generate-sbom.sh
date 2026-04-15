@@ -10,15 +10,9 @@ set -euo pipefail
 # - Continue service by service to produce the largest useful result set possible.
 # - Exit non-zero if at least one image could not be processed.
 
-DEFAULT_SERVICES=(
-  api-gateway
-  auth-users
-  chatbot-manager
-  llm-orchestrator
-  security-auditor
-  knowledge-hub
-  portal-web
-)
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=scripts/release/lib/common.sh
+source "${SCRIPT_DIR}/lib/common.sh"
 
 REGISTRY_HOST="${REGISTRY_HOST:-localhost:5001}"
 IMAGE_TAG="${IMAGE_TAG:-dev}"
@@ -28,12 +22,7 @@ REPORT_DIR="${REPORT_DIR:-artifacts/release}"
 SYFT_FORMAT="${SYFT_FORMAT:-cyclonedx-json}"
 ALLOW_MISSING_IMAGES="${ALLOW_MISSING_IMAGES:-false}"
 
-if [[ -n "${SERVICES:-}" ]]; then
-  # shellcheck disable=SC2206
-  SERVICES_ARRAY=(${SERVICES//,/ })
-else
-  SERVICES_ARRAY=("${DEFAULT_SERVICES[@]}")
-fi
+init_services_array
 
 SUMMARY_FILE="${REPORT_DIR}/sbom-summary.txt"
 INDEX_FILE="${SBOM_DIR}/sbom-index.txt"
@@ -41,35 +30,6 @@ INDEX_FILE="${SBOM_DIR}/sbom-index.txt"
 pass_count=0
 fail_count=0
 skip_count=0
-
-info() { printf '[INFO] %s\n' "$*"; }
-warn() { printf '[WARN] %s\n' "$*" >&2; }
-error() { printf '[ERROR] %s\n' "$*" >&2; }
-
-is_true() {
-  case "${1:-}" in
-    1|true|TRUE|yes|YES|y|Y|on|ON) return 0 ;;
-    *) return 1 ;;
-  esac
-}
-
-require_command() {
-  if ! command -v "$1" >/dev/null 2>&1; then
-    error "Missing required command: $1"
-    exit 2
-  fi
-}
-
-build_image_ref() {
-  local service="$1"
-  local registry="${REGISTRY_HOST%/}"
-
-  if [[ -n "${registry}" ]]; then
-    printf '%s/%s-%s:%s' "${registry}" "${IMAGE_PREFIX}" "${service}" "${IMAGE_TAG}"
-  else
-    printf '%s-%s:%s' "${IMAGE_PREFIX}" "${service}" "${IMAGE_TAG}"
-  fi
-}
 
 detect_source_ref() {
   local image_ref="$1"
@@ -122,18 +82,6 @@ with open(sys.argv[1], encoding="utf-8") as handle:
 if payload.get("bomFormat") != "CycloneDX":
     raise SystemExit("SBOM is not a CycloneDX document")
 PY
-}
-
-file_sha256() {
-  local target_file="$1"
-
-  if command -v sha256sum >/dev/null 2>&1; then
-    sha256sum "${target_file}" | awk '{print $1}'
-  elif command -v shasum >/dev/null 2>&1; then
-    shasum -a 256 "${target_file}" | awk '{print $1}'
-  else
-    printf 'unavailable'
-  fi
 }
 
 record_result() {

@@ -21,7 +21,7 @@
 | Kubernetes | PodDisruptionBudget | manifests `*/pdb.yaml` sur composants critiques | TERMINÉ |
 | Kubernetes | HorizontalPodAutoscaler | manifests `*/hpa.yaml`; exploitation dépend de `metrics-server` runtime | DÉPENDANT_DE_L_ENVIRONNEMENT |
 | Kubernetes | Admission policy (Audit) | `infra/k8s/policies/kyverno/*`; preuve via `cluster-security-addons.md` | DÉPENDANT_DE_L_ENVIRONNEMENT |
-| Kubernetes | Admission policy (Enforce) | overlays `infra/k8s/policies/kyverno-enforce` et `infra/k8s/policies/kyverno/overlays/enforce` | PRÊT_NON_EXÉCUTÉ |
+| Kubernetes | Admission policy (Enforce) | overlay unique `infra/k8s/policies/kyverno-enforce` | PRÊT_NON_EXÉCUTÉ |
 | Secrets | Jenkins credentials | runbook Jenkins | PARTIEL |
 | Secrets | Kubernetes secrets | `secretRef` + script local à utiliser | PARTIEL |
 | Validation | Smoke tests | `scripts/validate/*.sh` | TERMINÉ |
