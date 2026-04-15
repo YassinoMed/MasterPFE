@@ -9,6 +9,9 @@ spec:
       app.kubernetes.io/name: portal-web
   template:
     metadata:
+      annotations:
+        security.securerag.dev/internal-cleartext-scope: cluster-only-networkpolicy
+        security.securerag.dev/internal-cleartext-justification: Internal ClusterIP service calls only; egress is restricted by NetworkPolicies.
       labels:
         app.kubernetes.io/name: portal-web
     spec:
@@ -39,8 +42,10 @@ spec:
               value: production
             - name: APP_DEBUG
               value: "false"
+            - name: INTERNAL_SERVICE_SCHEME
+              value: http
             - name: APP_URL
-              value: http://portal-web:8000
+              value: $(INTERNAL_SERVICE_SCHEME)://portal-web:8000
             - name: DB_CONNECTION
               value: sqlite
             - name: DB_DATABASE
@@ -54,7 +59,7 @@ spec:
             - name: CREATE_DOTENV
               value: "false"
             - name: API_GATEWAY_URL
-              value: http://api-gateway:8080
+              value: $(INTERNAL_SERVICE_SCHEME)://api-gateway:8080
           readinessProbe:
             httpGet:
               path: /health

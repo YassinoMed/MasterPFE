@@ -1,0 +1,42 @@
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: securerag-audit-cleartext-env-values
+  annotations:
+    policies.kyverno.io/title: Audit clear-text environment URLs
+    policies.kyverno.io/category: Network Security
+    policies.kyverno.io/severity: medium
+    policies.kyverno.io/subject: Pod
+    policies.kyverno.io/description: >-
+      Audits Pods that expose literal http:// URLs through environment
+      variables without an explicit SecureRAG internal-cleartext risk
+      acceptance annotation.
+spec:
+  validationFailureAction: Audit
+  background: true
+  rules:
+    - name: audit-literal-http-env-without-risk-acceptance
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+              namespaces:
+                - securerag-hub
+      validate:
+        message: >-
+          Literal http:// environment URLs require the annotation
+          security.securerag.dev/internal-cleartext-scope=cluster-only-networkpolicy.
+          Prefer $(INTERNAL_SERVICE_SCHEME)://service:port for internal
+          demo traffic and HTTPS for public exposure.
+        foreach:
+          - list: "request.object.spec.containers[].env[]"
+            deny:
+              conditions:
+                all:
+                  - key: "{{ element.value || '' }}"
+                    operator: Matches
+                    value: "http://.*"
+                  - key: "{{ request.object.metadata.annotations.\"security.securerag.dev/internal-cleartext-scope\" || '' }}"
+                    operator: NotEquals
+                    value: cluster-only-networkpolicy

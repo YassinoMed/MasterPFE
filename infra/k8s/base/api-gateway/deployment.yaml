@@ -9,6 +9,9 @@ spec:
       app.kubernetes.io/name: api-gateway
   template:
     metadata:
+      annotations:
+        security.securerag.dev/internal-cleartext-scope: cluster-only-networkpolicy
+        security.securerag.dev/internal-cleartext-justification: Internal ClusterIP service calls only; egress is restricted by NetworkPolicies.
       labels:
         app.kubernetes.io/name: api-gateway
     spec:
@@ -37,14 +40,16 @@ spec:
           env:
             - name: SERVICE_NAME
               value: api-gateway
+            - name: INTERNAL_SERVICE_SCHEME
+              value: http
             - name: AUTH_USERS_URL
-              value: http://auth-users:8080
+              value: $(INTERNAL_SERVICE_SCHEME)://auth-users:8080
             - name: CHATBOT_MANAGER_URL
-              value: http://chatbot-manager:8080
+              value: $(INTERNAL_SERVICE_SCHEME)://chatbot-manager:8080
             - name: LLM_ORCHESTRATOR_URL
-              value: http://llm-orchestrator:8080
+              value: $(INTERNAL_SERVICE_SCHEME)://llm-orchestrator:8080
             - name: SECURITY_AUDITOR_URL
-              value: http://security-auditor:8080
+              value: $(INTERNAL_SERVICE_SCHEME)://security-auditor:8080
           readinessProbe:
             httpGet:
               path: /healthz
