@@ -8,12 +8,16 @@ spec:
       defaultRequest:
         cpu: 100m
         memory: 128Mi
+        ephemeral-storage: 128Mi
       default:
         cpu: 500m
         memory: 512Mi
+        ephemeral-storage: 512Mi
       min:
         cpu: 50m
         memory: 64Mi
+        ephemeral-storage: 64Mi
       max:
         cpu: "2"
         memory: 2Gi
+        ephemeral-storage: 4Gi

@@ -16,7 +16,8 @@
 | Kubernetes | NetworkPolicies | `infra/k8s/base/networkpolicy-*.yaml` | TERMINÉ |
 | Kubernetes | SecurityContext minimal | manifests `Deployment` / `StatefulSet` | TERMINÉ |
 | Kubernetes | ResourceQuota | `infra/k8s/base/resourcequota.yaml` | TERMINÉ |
-| Kubernetes | LimitRange | `infra/k8s/base/limitrange.yaml` | TERMINÉ |
+| Kubernetes | LimitRange | `infra/k8s/base/limitrange.yaml` avec defaults CPU, mémoire et `ephemeral-storage` | TERMINÉ |
+| Kubernetes | Resource guards | `scripts/validate/validate-k8s-resource-guards.sh` contrôle les overlays `dev` et `demo` | TERMINÉ |
 | Kubernetes | PodDisruptionBudget | manifests `*/pdb.yaml` sur composants critiques | TERMINÉ |
 | Kubernetes | HorizontalPodAutoscaler | manifests `*/hpa.yaml`; exploitation dépend de `metrics-server` runtime | DÉPENDANT_DE_L_ENVIRONNEMENT |
 | Kubernetes | Admission policy (Audit) | `infra/k8s/policies/kyverno/*`; preuve via `cluster-security-addons.md` | DÉPENDANT_DE_L_ENVIRONNEMENT |

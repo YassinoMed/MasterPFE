@@ -15,7 +15,7 @@ Rendre lisible la posture de securite actuelle du cluster local et la trajectoir
 | Controle | Etat | Prerequis | Impact | Risque si absent |
 |---|---|---|---|---|
 | `ResourceQuota` | actif | namespace applique | Evite la surconsommation grossiere en demo locale | pression forte sur la machine locale |
-| `LimitRange` | actif | namespace applique | Donne des defaults CPU / memoire cohérents | incoherence des workloads |
+| `LimitRange` | actif | namespace applique | Donne des defaults CPU / memoire / `ephemeral-storage` cohérents | incoherence des workloads et risque d'eviction non maitrise |
 | `PodDisruptionBudget` | actif sur workloads critiques | replicas et workloads cibles | Protege les composants critiques des disruptions volontaires | interruption plus brutale des composants |
 | `HPA` | actif | `metrics-server` installe | Rend la charge observable et l'autoscaling demonstrable | HPA presents mais non exploitables |
 

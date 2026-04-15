@@ -27,7 +27,8 @@ spec:
         message: >-
           Pods in securerag-hub should disable service account token
           automounting, use RuntimeDefault seccomp, disable privilege
-          escalation, and declare CPU/memory requests and limits.
+          escalation, and declare CPU, memory, and ephemeral-storage requests
+          and limits.
         pattern:
           spec:
             automountServiceAccountToken: false
@@ -41,9 +42,11 @@ spec:
                   requests:
                     cpu: "?*"
                     memory: "?*"
+                    ephemeral-storage: "?*"
                   limits:
                     cpu: "?*"
                     memory: "?*"
+                    ephemeral-storage: "?*"
             =(initContainers):
               - securityContext:
                   allowPrivilegeEscalation: false
@@ -51,6 +54,8 @@ spec:
                   requests:
                     cpu: "?*"
                     memory: "?*"
+                    ephemeral-storage: "?*"
                   limits:
                     cpu: "?*"
                     memory: "?*"
+                    ephemeral-storage: "?*"

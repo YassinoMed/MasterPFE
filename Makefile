@@ -13,7 +13,7 @@ DIGEST_RECORD_FILE ?= $(REPORT_DIR)/promotion-digests.txt
 OFFICIAL_SCENARIO ?= demo
 SUPPORT_PACK_ROOT ?= artifacts/support-pack
 
-.PHONY: help lint test laravel-test verify promote promote-digest deploy validate demo campaign final-campaign release-evidence release-attestation supply-chain-evidence supply-chain-execute observability-snapshot portal-service-proof global-project-status security-posture close-missing-phases jenkins-webhook-proof jenkins-ci-push-proof cluster-security-proof refresh-cluster-security-proof devsecops-final-proof devsecops-readiness final-proof final-summary support-pack kyverno-install kyverno-enforce metrics-install clean
+.PHONY: help lint test laravel-test verify promote promote-digest deploy validate demo campaign final-campaign release-evidence release-attestation supply-chain-evidence supply-chain-execute observability-snapshot portal-service-proof global-project-status security-posture k8s-resource-guards close-missing-phases jenkins-webhook-proof jenkins-ci-push-proof cluster-security-proof refresh-cluster-security-proof devsecops-final-proof devsecops-readiness final-proof final-summary support-pack kyverno-install kyverno-enforce metrics-install clean
 
 help: ## Show available targets
 	@awk 'BEGIN {FS = ":.*## "; print "Available targets:"} /^[a-zA-Z0-9_.-]+:.*## / {printf "  %-12s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
@@ -27,6 +27,7 @@ lint: ## Validate shell scripts, Jenkins config, Kustomize renders and security 
 	@kubectl kustomize infra/k8s/policies/kyverno-enforce >/dev/null
 	@kubectl kustomize infra/k8s/policies/kyverno/overlays/enforce >/dev/null
 	@bash scripts/validate/validate-k8s-cleartext-scope.sh >/dev/null
+	@bash scripts/validate/validate-k8s-resource-guards.sh >/dev/null
 
 test: ## Run automated tests and coverage collection
 	@bash scripts/ci/run-tests.sh
@@ -104,6 +105,9 @@ security-posture: ## Generate a factual security posture report
 
 k8s-cleartext-scope: ## Validate that Kubernetes HTTP is restricted to internal scoped demo traffic
 	@bash scripts/validate/validate-k8s-cleartext-scope.sh
+
+k8s-resource-guards: ## Validate Kubernetes CPU, memory and ephemeral-storage guards
+	@bash scripts/validate/validate-k8s-resource-guards.sh
 
 close-missing-phases: ## Close remaining environment-dependent phases with safe defaults
 	@bash scripts/validate/run-missing-phases-closure.sh
