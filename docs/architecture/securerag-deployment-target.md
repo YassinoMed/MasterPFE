@@ -8,8 +8,9 @@ Il aligne :
 - la chaine DevSecOps Jenkins separee en CI et CD
 - le registre d'images OCI
 - le cluster local `kind`
-- les microservices Python du socle RAG/securite
-- le portail User/Admin en Laravel
+- le portail User/Admin Laravel
+- les microservices Laravel métier et sécurité
+- les anciens dossiers Python/RAG conservés hors périmètre officiel tant que leurs sources applicatives sont absentes
 
 ## Diagramme source
 
@@ -20,9 +21,9 @@ Il aligne :
 - la CI/CD reste separee du runtime local
 - les images sont scannees, inventoriees et signees avant promotion
 - le deploiement local vers `kind` se fait via `Kustomize` et scripts `scripts/deploy/*`
-- l'entree HTTP du cluster est separee du `Service api-gateway`
+- l'entree HTTP de démonstration est portée par le `Service portal-web`
 - le portail Laravel est explicite dans l'architecture
-- les integrations IA restent consommees via les services `llm-orchestrator`, `security-auditor` et `knowledge-hub`
+- les services Laravel `conversation-service` et `audit-security-service` remplacent le périmètre runtime legacy pour la démonstration officielle
 
 ## Lecture du diagramme
 
@@ -51,32 +52,29 @@ Le portail web consomme l'entree HTTP du cluster et centralise l'experience util
 
 Le cluster `kind` heberge le namespace `securerag-hub` et les workloads SecureRAG Hub :
 
-- `api-gateway`
 - `auth-users`
 - `chatbot-manager`
-- `llm-orchestrator`
-- `security-auditor`
-- `knowledge-hub`
-- `qdrant`
-- `ollama`
+- `conversation-service`
+- `audit-security-service`
+- `portal-web`
 
 Le diagramme distingue volontairement :
 
-- l'entree HTTP locale exposee en `NodePort` pour l'environnement `dev`
-- le `Service api-gateway`
-- le `Pod api-gateway`
+- l'entree HTTP locale exposee en `NodePort` pour les environnements `dev` et `demo`
+- le `Service portal-web`
+- les pods Laravel métier internes
 
 Cette separation est plus juste qu'un bloc unique `Ingress / API Gateway Service`.
 
 ## Positionnement du portail Laravel
 
-Le portail Laravel est actuellement bootstrappe en local dans `platform/portal-web`.
-Il n'est pas encore deploye dans `kind`, mais il fait deja partie de l'architecture cible de la plateforme.
+Le portail Laravel est actuellement intégré au déploiement `kind` officiel via `infra/k8s/base/portal-web`.
 
 Cela permet de presenter une architecture realiste :
 
 - backend securise et distribue dans Kubernetes
 - interface User/Admin separee, maintenable et extensible
+- preuve de déploiement à produire par `scripts/validate/collect-runtime-evidence.sh` lorsque le cluster est actif
 
 ## Mode de deploiement retenu
 

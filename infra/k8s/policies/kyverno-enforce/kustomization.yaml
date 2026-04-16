@@ -12,6 +12,15 @@ patches:
       group: kyverno.io
       version: v1
       kind: ClusterPolicy
+      name: securerag-audit-cleartext-env-values
+    patch: |-
+      - op: replace
+        path: /spec/validationFailureAction
+        value: Enforce
+  - target:
+      group: kyverno.io
+      version: v1
+      kind: ClusterPolicy
       name: securerag-require-pod-security
     patch: |-
       - op: replace
@@ -22,6 +31,42 @@ patches:
       version: v1
       kind: ClusterPolicy
       name: securerag-verify-cosign-images
+    patch: |-
+      - op: replace
+        path: /spec/validationFailureAction
+        value: Enforce
+  - target:
+      group: kyverno.io
+      version: v1
+      kind: ClusterPolicy
+      name: securerag-restrict-image-references
+    patch: |-
+      - op: replace
+        path: /spec/validationFailureAction
+        value: Enforce
+  - target:
+      group: kyverno.io
+      version: v1
+      kind: ClusterPolicy
+      name: securerag-restrict-volume-types
+    patch: |-
+      - op: replace
+        path: /spec/validationFailureAction
+        value: Enforce
+  - target:
+      group: kyverno.io
+      version: v1
+      kind: ClusterPolicy
+      name: securerag-require-workload-controls
+    patch: |-
+      - op: replace
+        path: /spec/validationFailureAction
+        value: Enforce
+  - target:
+      group: kyverno.io
+      version: v1
+      kind: ClusterPolicy
+      name: securerag-restrict-service-exposure
     patch: |-
       - op: replace
         path: /spec/validationFailureAction

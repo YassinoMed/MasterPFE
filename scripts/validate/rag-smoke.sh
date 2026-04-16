@@ -5,9 +5,11 @@ set -euo pipefail
 NS="${NS:-securerag-hub}"
 REPORT_DIR="${REPORT_DIR:-artifacts/validation}"
 REPORT_FILE="${REPORT_DIR}/rag-smoke.txt"
-VALIDATION_IMAGE="${VALIDATION_IMAGE:-${REGISTRY_HOST:-localhost:5001}/securerag-hub-api-gateway:${IMAGE_TAG:-dev}}"
-probe_pod="rag-smoke-check-$(date +%s)"
-rag_pod="rag-endpoint-check-$(date +%s)"
+ENABLE_LEGACY_RAG_VALIDATION="${ENABLE_LEGACY_RAG_VALIDATION:-false}"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# shellcheck source=scripts/validate/lib/k8s-validation-pod.sh
+source "${SCRIPT_DIR}/lib/k8s-validation-pod.sh"
 
 mkdir -p "${REPORT_DIR}"
 : > "${REPORT_FILE}"
@@ -17,6 +19,13 @@ fail() { echo "[FAIL] $1" | tee -a "${REPORT_FILE}"; exit 1; }
 skip() { echo "[SKIP] $1" | tee -a "${REPORT_FILE}"; }
 
 echo "=== RAG smoke validation ===" | tee -a "${REPORT_FILE}"
+
+if [ "${ENABLE_LEGACY_RAG_VALIDATION}" != "true" ]; then
+  skip "PRÊT_NON_EXÉCUTÉ: legacy RAG runtime is excluded from the official Laravel Kubernetes runtime because Python sources under services/ are absent"
+  skip "Set ENABLE_LEGACY_RAG_VALIDATION=true only in an environment where llm-orchestrator, knowledge-hub, qdrant and ollama are intentionally restored"
+  echo "RAG smoke validation completed with documented exclusion." | tee -a "${REPORT_FILE}"
+  exit 0
+fi
 
 for obj in \
   "deployment/llm-orchestrator" \
@@ -30,21 +39,21 @@ for obj in \
   fi
 done
 
+VALIDATION_IMAGE="${VALIDATION_IMAGE:-curlimages/curl:8.11.1}"
+probe_pod="rag-smoke-check-$(date +%s)"
+rag_pod="rag-endpoint-check-$(date +%s)"
+
 kubectl run "${probe_pod}" \
   --rm -i --attach=true --restart=Never -n "${NS}" \
   --labels=app.kubernetes.io/part-of=securerag-hub,job-role=validation \
   --image="${VALIDATION_IMAGE}" \
-  --command -- python -c '
-import urllib.request
-for target in [
-    "http://llm-orchestrator:8080/healthz",
-    "http://knowledge-hub:8080/healthz",
-    "http://qdrant:6333/healthz",
-    "http://ollama:11434/api/tags",
-]:
-    with urllib.request.urlopen(target, timeout=5) as response:
-        if response.status != 200:
-            raise SystemExit(response.status)
+  --override-type=strategic \
+  --overrides="$(validation_pod_overrides "${probe_pod}")" \
+  --command -- sh -ec '
+curl -fsS --max-time 5 http://llm-orchestrator:8080/healthz >/dev/null
+curl -fsS --max-time 5 http://knowledge-hub:8080/healthz >/dev/null
+curl -fsS --max-time 5 http://qdrant:6333/healthz >/dev/null
+curl -fsS --max-time 5 http://ollama:11434/api/tags >/dev/null
 ' >/dev/null 2>&1 \
   && pass "RAG dependencies are reachable inside the cluster" \
   || fail "RAG dependencies are not fully reachable"
@@ -53,23 +62,9 @@ RAG_HTTP_CODE="$(kubectl run "${rag_pod}" \
   --rm -i --attach=true --restart=Never -n "${NS}" \
   --labels=app.kubernetes.io/part-of=securerag-hub,job-role=validation \
   --image="${VALIDATION_IMAGE}" \
-  --command -- python -c '
-import json
-import urllib.error
-import urllib.request
-
-request = urllib.request.Request(
-    "http://llm-orchestrator:8080/rag/query",
-    data=json.dumps({"query": "Politique de congé ?"}).encode(),
-    headers={"Content-Type": "application/json"},
-    method="POST",
-)
-try:
-    with urllib.request.urlopen(request, timeout=5) as response:
-        print(response.status)
-except urllib.error.HTTPError as exc:
-    print(exc.code)
-' 2>/dev/null || true)"
+  --override-type=strategic \
+  --overrides="$(validation_pod_overrides "${rag_pod}")" \
+  --command -- sh -ec 'curl -sS -o /dev/null -w "%{http_code}" --max-time 5 -H "Content-Type: application/json" -X POST http://llm-orchestrator:8080/rag/query -d "{\"query\":\"Politique de congé ?\"}"' 2>/dev/null || true)"
 
 case "${RAG_HTTP_CODE}" in
   200|201)

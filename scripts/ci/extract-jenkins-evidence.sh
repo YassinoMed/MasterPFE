@@ -7,10 +7,17 @@ set -euo pipefail
 JENKINS_URL="${1:-http://localhost:8085}"
 JOB_NAME="securerag-hub-ci"
 USER="${JENKINS_USER:-admin}"
-TOKEN="${JENKINS_TOKEN:-change-me-now}" # A remplacer par un API Token Jenkins
+TOKEN="${JENKINS_TOKEN:-}"
 EVIDENCE_FILE="artifacts/release/jenkins-runtime-evidence.json"
 
 mkdir -p artifacts/release
+
+if [[ -z "${TOKEN}" ]]; then
+  echo "[WARN] JENKINS_TOKEN is not set. Runtime Jenkins evidence remains PRÊT_NON_EXÉCUTÉ."
+  echo '{ "status": "PRÊT_NON_EXÉCUTÉ", "reason": "JENKINS_TOKEN missing" }' > "${EVIDENCE_FILE}"
+  exit 0
+fi
+
 echo "[INFO] Récupération de l'évidence du pipeline ${JOB_NAME}..."
 
 # Appel API REST Jenkins pour récupérer les infos du dernier Build complété

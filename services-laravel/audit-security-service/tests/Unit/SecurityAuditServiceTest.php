@@ -2,6 +2,7 @@
 
 namespace Tests\Unit;
 
+use App\Models\AuditLog;
 use App\Models\SecurityIncident;
 use App\Services\SecurityAuditService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -54,5 +55,32 @@ class SecurityAuditServiceTest extends TestCase
         $this->assertSame(hash('sha256', $rawPrompt), $metadata['raw_prompt']['sha256']);
         $this->assertArrayNotHasKey('value', $metadata['raw_prompt']);
         $this->assertSame(true, $metadata['prompt_context']['system_prompt']['redacted']);
+    }
+
+    public function test_audit_log_integrity_hash_chain_is_created(): void
+    {
+        $service = app(SecurityAuditService::class);
+
+        $first = $service->createAuditLog([
+            'actor_reference' => 'demo-user',
+            'action' => 'users.view',
+            'resource_type' => 'user',
+            'resource_id' => 'user-1',
+        ])->fresh();
+
+        $second = $service->createAuditLog([
+            'actor_reference' => 'security-admin',
+            'action' => 'users.disable',
+            'resource_type' => 'user',
+            'resource_id' => 'user-1',
+            'outcome' => 'blocked',
+        ])->fresh();
+
+        $this->assertNull($first->previous_hash);
+        $this->assertMatchesRegularExpression('/^[a-f0-9]{64}$/', $first->integrity_hash);
+        $this->assertSame($first->integrity_hash, $second->previous_hash);
+        $this->assertMatchesRegularExpression('/^[a-f0-9]{64}$/', $second->integrity_hash);
+        $this->assertSame($first->integrity_hash, AuditLog::calculateIntegrityHash($first));
+        $this->assertSame($second->integrity_hash, AuditLog::calculateIntegrityHash($second));
     }
 }

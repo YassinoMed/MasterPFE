@@ -6,6 +6,7 @@ JENKINS_SECRETS_DIR="${JENKINS_SECRETS_DIR:-infra/jenkins/secrets}"
 COSIGN_PASSWORD_FILE="${COSIGN_PASSWORD_FILE:-${JENKINS_SECRETS_DIR}/cosign.password}"
 COSIGN_PRIVATE_KEY="${COSIGN_PRIVATE_KEY:-${JENKINS_SECRETS_DIR}/cosign.key}"
 COSIGN_PUBLIC_KEY="${COSIGN_PUBLIC_KEY:-${JENKINS_SECRETS_DIR}/cosign.pub}"
+JENKINS_ADMIN_PASSWORD_FILE="${JENKINS_ADMIN_PASSWORD_FILE:-${JENKINS_SECRETS_DIR}/jenkins-admin-password}"
 COSIGN_PASSWORD_VALUE="${COSIGN_PASSWORD_VALUE:-}"
 COSIGN_IMAGE="${COSIGN_IMAGE:-gcr.io/projectsigstore/cosign:v2.5.3}"
 
@@ -13,6 +14,17 @@ info() { printf '[INFO] %s\n' "$*"; }
 error() { printf '[ERROR] %s\n' "$*" >&2; }
 
 mkdir -p "${JENKINS_SECRETS_DIR}"
+umask 077
+
+if [[ ! -f "${JENKINS_ADMIN_PASSWORD_FILE}" ]]; then
+  python3 - <<'PY' > "${JENKINS_ADMIN_PASSWORD_FILE}"
+import secrets
+print(secrets.token_urlsafe(48))
+PY
+  info "Generated local Jenkins admin password file at ${JENKINS_ADMIN_PASSWORD_FILE}"
+fi
+
+chmod 600 "${JENKINS_ADMIN_PASSWORD_FILE}"
 
 if [[ -z "${COSIGN_PASSWORD_VALUE}" ]]; then
   if [[ -f "${COSIGN_PASSWORD_FILE}" ]]; then

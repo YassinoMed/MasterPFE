@@ -2,7 +2,7 @@
 
 ## 1. Contexte
 
-- Généré le : `2026-04-12T19:26:12Z`
+- Généré le : `2026-04-16T20:28:49Z`
 - Scénario officiel : `demo`
 - Autorité CI/CD officielle : Jenkins
 - Namespace Kubernetes : `securerag-hub`
@@ -13,7 +13,6 @@
 | Composant | État | Preuve observée |
 |---|---:|---|
 | Jenkins | PARTIEL | `http://localhost:8085/login` |
-| API Gateway | PARTIEL | `http://localhost:8080/healthz` |
 | Portal Web | PARTIEL | `http://localhost:8081/health` |
 | Namespace Kubernetes | PARTIEL | `kubectl get ns securerag-hub` |
 | Pods applicatifs | PARTIEL | `kubectl get pods -n securerag-hub` |
@@ -36,7 +35,7 @@
 | Evidence supply chain | OK | `artifacts/release/supply-chain-evidence.md` |
 | Addons sécurité cluster | PARTIEL | `artifacts/validation/cluster-security-addons.md` |
 | Résumé final | OK | `artifacts/final/final-validation-summary.md` |
-| Support pack | OK | `artifacts/support-pack/20260412T191118Z.tar.gz` |
+| Support pack | OK | `artifacts/support-pack/support-demo-20260416T202515Z.tar.gz` |
 
 ## 4. Lecture soutenance
 
@@ -55,4 +54,4 @@
 
 ## 6. Conclusion
 
-Le socle DevSecOps/Kubernetes/demo est considéré comme établi. Les blocs avancés Jenkins webhook, supply chain execute, metrics-server et Kyverno doivent être présentés comme complets uniquement lorsque les artefacts listés ci-dessus sont présents et datés.
+Le socle DevSecOps/Kubernetes/demo Laravel est considéré comme établi. Les blocs avancés Jenkins webhook, supply chain execute, metrics-server et Kyverno doivent être présentés comme complets uniquement lorsque les artefacts listés ci-dessus sont présents et datés.

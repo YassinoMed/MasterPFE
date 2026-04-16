@@ -6,7 +6,7 @@ OUT="${OUT:-${ARTIFACT_DIR}/k8s-cleartext-scope.md}"
 
 mkdir -p "${ARTIFACT_DIR}"
 
-allowed_hosts="api-gateway auth-users chatbot-manager knowledge-hub llm-orchestrator ollama portal-web qdrant security-auditor"
+allowed_hosts="auth-users chatbot-manager conversation-service audit-security-service portal-web"
 overlays=(
   "infra/k8s/overlays/dev"
   "infra/k8s/overlays/demo"

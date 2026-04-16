@@ -44,5 +44,5 @@ Les workflows GitHub Actions encore présents dans le dépôt doivent être cons
 - policies Kyverno optionnelles pour l'admission et la verification d'images signees
 
 ## Runtime de démonstration
-- mode standard : runtime complet avec `Qdrant` et `Ollama`
-- mode démonstration : fallback documenté si `Ollama` est trop lourd ou instable
+- mode officiel actuel : runtime Laravel-first avec `portal-web`, `auth-users`, `chatbot-manager`, `conversation-service` et `audit-security-service`
+- mode legacy RAG/Ollama : exclu de la build/deploy officielle tant que les sources Python manquantes ne sont pas restaurées et revalidées

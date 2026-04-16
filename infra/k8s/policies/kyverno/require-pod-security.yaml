@@ -27,17 +27,28 @@ spec:
         message: >-
           Pods in securerag-hub should disable service account token
           automounting, use RuntimeDefault seccomp, disable privilege
-          escalation, and declare CPU, memory, and ephemeral-storage requests
-          and limits.
+          escalation, run as non-root, drop all Linux capabilities, use a
+          read-only root filesystem, avoid host namespaces, and declare CPU,
+          memory, and ephemeral-storage requests and limits.
         pattern:
           spec:
+            =(hostNetwork): false
+            =(hostPID): false
+            =(hostIPC): false
             automountServiceAccountToken: false
+            serviceAccountName: "?*"
             securityContext:
+              runAsNonRoot: true
               seccompProfile:
                 type: RuntimeDefault
             containers:
               - securityContext:
+                  =(privileged): false
                   allowPrivilegeEscalation: false
+                  readOnlyRootFilesystem: true
+                  capabilities:
+                    drop:
+                      - ALL
                 resources:
                   requests:
                     cpu: "?*"
@@ -47,9 +58,30 @@ spec:
                     cpu: "?*"
                     memory: "?*"
                     ephemeral-storage: "?*"
+    - name: disallow-default-service-account
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+              namespaces:
+                - securerag-hub
+      validate:
+        message: Pods must use an explicit least-privilege ServiceAccount, never the default ServiceAccount.
+        deny:
+          conditions:
+            any:
+              - key: "{{ request.object.spec.serviceAccountName || 'default' }}"
+                operator: Equals
+                value: default
             =(initContainers):
               - securityContext:
+                  =(privileged): false
                   allowPrivilegeEscalation: false
+                  readOnlyRootFilesystem: true
+                  capabilities:
+                    drop:
+                      - ALL
                 resources:
                   requests:
                     cpu: "?*"

@@ -8,16 +8,15 @@ Le scenario officiel recommande pour la soutenance est :
 
 - **mode** : `demo`
 - **overlay** : `infra/k8s/overlays/demo`
-- **validation image** : `python:3.12-slim`
+- **validation image** : `curlimages/curl:8.11.1`
 - **promotion strategy** : `digest`
 
-Le mode reel avec `Ollama` ne doit etre utilise que si l'image a deja ete prechargee et si la machine dispose de ressources suffisantes.
+Le runtime officiel est Laravel-first. Le mode legacy RAG/Ollama n'est pas un scénario de soutenance tant que les sources Python ne sont pas restaurées.
 
 ## Checklist go / no-go
 
 ### Preflight machine
 - [ ] Docker Desktop est demarre et `docker info` repond.
-- [ ] Le shell actif utilise le bon environnement Python local si des tests Python sont lances.
 - [ ] Les binaires `kubectl`, `kind`, `cosign`, `syft`, `trivy` et `semgrep` sont disponibles si la campagne complete est visee.
 
 ### Cluster et registre
@@ -37,9 +36,8 @@ Le mode reel avec `Ollama` ne doit etre utilise que si l'image a deja ete precha
 - [ ] `COSIGN_PUBLIC_KEY` pointe vers une cle valide.
 
 ### Scenario de soutenance
-- [ ] Le scenario choisi est annonce explicitement : `demo` ou `real`.
-- [ ] Si `real`, l'image `Ollama` a ete prechargee.
-- [ ] Si `demo`, il est annonce que le moteur LLM local est remplace par un mock HTTP stable.
+- [ ] Le scenario choisi est annonce explicitement : `demo`.
+- [ ] Il est annoncé que le runtime officiel déploie les services Laravel réellement présents.
 
 ## Commandes de verification rapide
 
@@ -71,4 +69,4 @@ Ne pas lancer une campagne `execute` si l'un des points suivants est observe :
 - le registre local ne repond pas ;
 - `COSIGN_PUBLIC_KEY` est absent alors qu'une verification est attendue ;
 - le cluster n'est pas joignable ;
-- le mode reel `Ollama` est selectionne sans prechargement prealable.
+- un scénario legacy RAG/Ollama est sélectionné sans restauration explicite des sources et preuves.

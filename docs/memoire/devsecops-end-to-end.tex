@@ -78,15 +78,14 @@ La phase suivante a consiste a normaliser la construction des artefacts deployab
 Les services metiers principaux concernes sont :
 
 \begin{itemize}
-  \item \texttt{api-gateway}
   \item \texttt{auth-users}
   \item \texttt{chatbot-manager}
-  \item \texttt{llm-orchestrator}
-  \item \texttt{security-auditor}
-  \item \texttt{knowledge-hub}
+  \item \texttt{conversation-service}
+  \item \texttt{audit-security-service}
+  \item \texttt{portal-web}
 \end{itemize}
 
-Par la suite, le portail Laravel \texttt{portal-web} a egalement ete integre dans ce schema, afin de ne pas conserver une interface web hors du perimetre DevSecOps.
+Les anciens dossiers Python/RAG sous \texttt{services/} sont conserves comme historique technique, mais exclus de la chaine officielle tant que leurs sources applicatives ne sont pas restaurees.
 
 \subsubsection{Etape 4 : premier socle Kubernetes avec kind et Kustomize}
 
@@ -381,7 +380,7 @@ La fin du chantier a egalement permis de transformer deux briques jusque-la seul
   \item \texttt{Kyverno}, afin de rendre les policies d'admission applicables au cluster local.
 \end{itemize}
 
-Une fois \texttt{metrics-server} installe, les \textit{HPA} de \texttt{api-gateway} et de \texttt{portal-web} n'affichent plus \texttt{cpu: unknown}. De meme, une fois \texttt{Kyverno} installe, les \textit{ClusterPolicy} du projet sont detectees a l'etat \texttt{Ready}. Ces observations renforcent la credibilite de la plateforme : les manifests ne sont pas seulement versionnes, ils sont egalement activables et observables localement.
+Une fois \texttt{metrics-server} installe, le \textit{HPA} de \texttt{portal-web} doit etre observable avec des valeurs CPU reelles. De meme, une fois \texttt{Kyverno} installe, les \textit{ClusterPolicy} du projet doivent etre detectees a l'etat \texttt{Ready}. Sans les sorties \texttt{kubectl top}, \texttt{kubectl get hpa}, \texttt{kubectl get clusterpolicy} et \texttt{kubectl get policyreport -A}, ces controles restent \texttt{DEPENDANT\_DE\_L\_ENVIRONNEMENT}.
 
 \paragraph{Consolidation honnete de la preuve finale.}
 Enfin, la campagne de reference unique a ete renforcee pour produire un mode \texttt{dry-run}. Ce choix n'a pas pour but de simuler un succes fictif, mais de fournir un support demonstratif honnete lorsque certains pre-requis ne sont pas encore reunis, par exemple l'absence d'images deja signees dans le registre local au moment de la soutenance.

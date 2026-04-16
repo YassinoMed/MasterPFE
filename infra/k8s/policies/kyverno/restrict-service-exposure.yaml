@@ -1,0 +1,42 @@
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: securerag-restrict-service-exposure
+  annotations:
+    policies.kyverno.io/title: Restrict SecureRAG service exposure
+    policies.kyverno.io/category: Network Security
+    policies.kyverno.io/severity: high
+    policies.kyverno.io/subject: Service
+    policies.kyverno.io/description: >-
+      Prevents accidental public service exposure. The local demo may expose
+      only portal-web through NodePort; all business services must remain
+      ClusterIP.
+spec:
+  validationFailureAction: Audit
+  background: true
+  rules:
+    - name: allow-nodeport-only-for-portal-web
+      match:
+        any:
+          - resources:
+              kinds:
+                - Service
+              namespaces:
+                - securerag-hub
+      validate:
+        message: Only portal-web may use NodePort in the local demo overlay; LoadBalancer is forbidden.
+        deny:
+          conditions:
+            any:
+              - key: "{{ request.object.spec.type || 'ClusterIP' }}"
+                operator: Equals
+                value: LoadBalancer
+              - key: "{{ request.object.spec.type || 'ClusterIP' }}:{{ request.object.metadata.name }}"
+                operator: NotIn
+                value:
+                  - ClusterIP:portal-web
+                  - NodePort:portal-web
+                  - ClusterIP:auth-users
+                  - ClusterIP:chatbot-manager
+                  - ClusterIP:conversation-service
+                  - ClusterIP:audit-security-service

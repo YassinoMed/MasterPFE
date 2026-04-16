@@ -10,14 +10,10 @@ spec:
         operator: In
         values:
           - portal-web
-          - api-gateway
           - auth-users
           - chatbot-manager
-          - llm-orchestrator
-          - security-auditor
-          - knowledge-hub
-          - ollama
-          - qdrant
+          - conversation-service
+          - audit-security-service
   policyTypes:
     - Ingress
   ingress:
@@ -28,9 +24,3 @@ spec:
       ports:
         - protocol: TCP
           port: 8000
-        - protocol: TCP
-          port: 8080
-        - protocol: TCP
-          port: 11434
-        - protocol: TCP
-          port: 6333

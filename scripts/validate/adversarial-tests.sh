@@ -3,18 +3,18 @@
 set -euo pipefail
 
 NS="${NS:-securerag-hub}"
-AUDITOR_URL="${AUDITOR_URL:-http://security-auditor:8080/healthz}"
-VALIDATION_IMAGE="${VALIDATION_IMAGE:-${REGISTRY_HOST:-localhost:5001}/securerag-hub-api-gateway:${IMAGE_TAG:-dev}}"
+AUDITOR_URL="${AUDITOR_URL:-http://audit-security-service:8000/health}"
+VALIDATION_IMAGE="${VALIDATION_IMAGE:-curlimages/curl:8.11.1}"
 pod_name="adversarial-check-$(date +%s)"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# shellcheck source=scripts/validate/lib/k8s-validation-pod.sh
+source "${SCRIPT_DIR}/lib/k8s-validation-pod.sh"
 
 echo "Basic adversarial validation bootstrap"
 kubectl run "${pod_name}" --rm -i --attach=true --restart=Never -n "${NS}" \
   --labels=app.kubernetes.io/part-of=securerag-hub,job-role=validation \
   --image="${VALIDATION_IMAGE}" \
-  --command -- python -c "
-import urllib.request
-with urllib.request.urlopen('${AUDITOR_URL}', timeout=5) as response:
-    if response.status != 200:
-        raise SystemExit(response.status)
-print('Security-Auditor basic availability OK')
-"
+  --override-type=strategic \
+  --overrides="$(validation_pod_overrides "${pod_name}")" \
+  --command -- sh -ec "curl -fsS --max-time 5 '${AUDITOR_URL}' >/dev/null && echo 'Audit Security service basic availability OK'"

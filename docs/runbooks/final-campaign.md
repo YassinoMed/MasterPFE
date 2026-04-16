@@ -34,7 +34,8 @@ Le scenario officiel de demonstration est :
 
 - `OFFICIAL_SCENARIO=demo`
 - `PROMOTION_STRATEGY=digest`
-- `VALIDATION_IMAGE=python:3.12-slim`
+- `VALIDATION_IMAGE=curlimages/curl:8.11.1`
+- runtime officiel : `portal-web`, `auth-users`, `chatbot-manager`, `conversation-service`, `audit-security-service`
 
 ## Commande recommandee
 
@@ -51,18 +52,9 @@ COSIGN_PUBLIC_KEY=/absolute/path/to/cosign.pub \
 bash scripts/cd/run-final-campaign.sh
 ```
 
-## Scenario reel avec Ollama
+## Scénario legacy RAG/Ollama
 
-Le scenario reel reste disponible :
-
-```bash
-OFFICIAL_SCENARIO=real CAMPAIGN_MODE=execute \
-PREPULL_REAL_OLLAMA=true \
-COSIGN_PUBLIC_KEY=/absolute/path/to/cosign.pub \
-bash scripts/cd/run-final-campaign.sh
-```
-
-Il ne doit etre retenu que si la machine locale est connue comme stable.
+Le scénario `real/Ollama` est exclu de la campagne officielle actuelle car les sources Python applicatives sous `services/` sont absentes. Toute réactivation doit être traitée comme une évolution distincte avec sources restaurées, manifests et preuves runtime.
 
 ## Artefacts produits
 

@@ -65,18 +65,15 @@ node "Machine locale / VM de demonstration" as vm {
 
   node "Cluster Kubernetes local (kind)" as kind {
     frame "Namespace securerag-hub" as ns {
-      node "Entree HTTP locale\nNodePort dev" as edge
-      node "Service api-gateway" as gateway_svc
+      node "Entree HTTP locale\nNodePort portal-web" as edge
+      node "Service portal-web" as portal_svc
 
       frame "Pods applicatifs" as pods {
-        node "Pod api-gateway" as api_pod
+        node "Pod portal-web" as portal_pod
         node "Pod auth-users" as auth_pod
         node "Pod chatbot-manager" as chatbot_pod
-        node "Pod llm-orchestrator" as llm_pod
-        node "Pod security-auditor" as sec_pod
-        node "Pod knowledge-hub" as kh_pod
-        database "Qdrant\nPVC documents / embeddings /\nattack_corpus" as qdrant
-        node "Ollama local\nLLM runtime" as ollama
+        node "Pod conversation-service" as conversation_pod
+        node "Pod audit-security-service" as audit_pod
       }
 
       frame "Controles Kubernetes" as k8s_controls {
@@ -105,47 +102,43 @@ registry --> kind : pull images
 
 user --> portal : interface web
 admin --> portal : administration / supervision
-portal --> edge : REST / JSON
-edge --> gateway_svc : routage d'entree
-gateway_svc --> api_pod : trafic applicatif
+portal --> edge : HTTP local demo
+edge --> portal_svc : routage d'entree
+portal_svc --> portal_pod : trafic web
 
-api_pod --> auth_pod : authentification / RBAC
-api_pod --> chatbot_pod : selection chatbot / configuration
-api_pod --> llm_pod : requete validee
+portal_pod --> auth_pod : authentification / RBAC
+portal_pod --> chatbot_pod : catalogue / configuration
+portal_pod --> conversation_pod : historique / conversations
+portal_pod --> audit_pod : audit / evenements securite
 
 chatbot_pod --> cm : lecture configuration
 auth_pod --> secrets : lecture secrets / tokens
-llm_pod --> kh_pod : demande de contexte
-kh_pod --> qdrant : retrieval contextuel
-llm_pod --> ollama : generation LLM
-sec_pod --> qdrant : scoring semantique / corpus attaque
-sec_pod --> ollama : LLM-as-judge
+conversation_pod --> secrets : lecture secrets / tokens
+audit_pod --> secrets : lecture secrets / tokens
 
-sa ..> api_pod
+sa ..> portal_pod
 sa ..> auth_pod
 sa ..> chatbot_pod
-sa ..> llm_pod
-sa ..> sec_pod
-sa ..> kh_pod
+sa ..> conversation_pod
+sa ..> audit_pod
 
-np ..> api_pod
+np ..> portal_pod
 np ..> auth_pod
 np ..> chatbot_pod
-np ..> llm_pod
-np ..> sec_pod
-np ..> kh_pod
+np ..> conversation_pod
+np ..> audit_pod
 
 cm ..> chatbot_pod
-cm ..> llm_pod
-cm ..> kh_pod
-secrets ..> llm_pod
-secrets ..> sec_pod
+cm ..> conversation_pod
+cm ..> audit_pod
+secrets ..> conversation_pod
+secrets ..> audit_pod
 
 note bottom of portal
-Portail Web Laravel actuellement lanceable
-en local via artisan ou Docker Compose.
-Dans la cible, il dialogue avec l'entree HTTP
-du cluster SecureRAG Hub.
+Portail Web Laravel integre au runtime kind
+officiel. Les anciens composants Python/RAG
+sont hors perimetre de deploiement tant que
+leurs sources applicatives sont absentes.
 end note
 
 note bottom of gha

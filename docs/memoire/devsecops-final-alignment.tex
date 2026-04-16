@@ -7,24 +7,24 @@ Le scenario officiel de soutenance de \textit{SecureRAG Hub} est le mode
 GitHub Actions est conserve comme historique technique. Cette decision evite de
 presenter deux chaines concurrentes et clarifie le perimetre de demonstration.
 
-\subsection{Elements validates}
+\subsection{Elements validates localement}
 
 Les elements suivants sont consideres comme validates dans l'etat courant du
 projet :
 
 \begin{itemize}
-  \item execution des tests applicatifs de demonstration ;
-  \item couverture de tests ;
-  \item linting Python avec Ruff ;
-  \item analyse Semgrep ;
-  \item detection de secrets avec Gitleaks ;
-  \item scan filesystem avec Trivy ;
-  \item deploiement local sur \texttt{kind} ;
-  \item overlay Kubernetes \texttt{demo} ;
+  \item execution des tests applicatifs Laravel ;
+  \item rendu Kustomize des overlays \texttt{dev} et \texttt{demo} ;
+  \item controles statiques Kubernetes : cleartext scope, ressources et manifests Kyverno ;
+  \item audit des dependances Composer/npm lorsque les outils sont disponibles ;
   \item Jenkins local Docker ;
   \item campagne CD \texttt{demo} en mode \texttt{dry-run} ;
   \item generation d'un support pack de soutenance.
 \end{itemize}
+
+La couverture, les scans Semgrep/Gitleaks/Trivy et le deploiement kind complet
+ne doivent etre declares \texttt{TERMINE} que si leurs rapports d'execution
+sont presents dans les artefacts correspondants.
 
 \subsection{Elements prets mais dependants de l'environnement}
 
@@ -70,11 +70,9 @@ La formulation recommandee est la suivante :
 
 \begin{quote}
 Le socle DevSecOps, Kubernetes et demonstration \texttt{demo} est operationnel
-et valide. La supply chain avancee est structuree et executable, mais sa preuve
-complete depend de la disponibilite locale de Docker, du registre OCI, des cles
-Cosign, de Syft et des images signees. Les addons de securite cluster
-\texttt{metrics-server} et \texttt{Kyverno} sont installables et observables via
-des scripts dedies, avec un passage prudent de \texttt{Audit} vers
-\texttt{Enforce}.
+au niveau code, manifests et scripts. La preuve runtime complete reste
+dependante de l'environnement : Docker accessible, cluster \texttt{kind},
+registre OCI, cles Cosign, Syft, images signees, \texttt{metrics-server} et
+\texttt{Kyverno}. Aucun resultat Jenkins, Cosign ou Kubernetes n'est declare
+valide sans artefact d'execution.
 \end{quote}
-

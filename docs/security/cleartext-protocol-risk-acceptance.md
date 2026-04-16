@@ -16,7 +16,7 @@ Les URL `http://` sont tolérées uniquement dans les cas suivants :
 ## Cas acceptés dans le dépôt
 | Cas | Exemple | Justification | Condition |
 |---|---|---|---|
-| Service interne Kubernetes | `$(INTERNAL_SERVICE_SCHEME)://api-gateway:8080` | Trafic interne au namespace, non exposé directement | NetworkPolicies actives et annotation `security.securerag.dev/internal-cleartext-scope` |
+| Service interne Kubernetes | `$(INTERNAL_SERVICE_SCHEME)://auth-users:8000` | Trafic interne au namespace, non exposé directement | NetworkPolicies actives et annotation `security.securerag.dev/internal-cleartext-scope` |
 | Health check local | `http://localhost:8085/login` | Validation locale Jenkins | Ne pas présenter comme TLS production |
 | Registre local kind | `http://securerag-registry:5000` | kind supporte couramment un registre local HTTP isolé | Réseau Docker local uniquement |
 | OpenAPI local | `http://127.0.0.1:8091/api/v1` | Documentation de test local | Ajouter serveur HTTPS si exposition publique |
@@ -34,6 +34,13 @@ rg -n "http://" infra scripts platform services-laravel docs/openapi README.md -
 ```
 
 Chaque occurrence doit être classée comme locale, registre kind, documentation OpenAPI locale, ou corrigée vers HTTPS. Dans les manifests Kubernetes applicatifs, les URLs internes ne doivent pas être écrites en clair sous forme `value: http://...`; elles doivent passer par `$(INTERNAL_SERVICE_SCHEME)://service:port` et rester limitées aux Services internes autorisés.
+
+Hôtes internes autorisés par `scripts/validate/validate-k8s-cleartext-scope.sh` :
+- `portal-web`
+- `auth-users`
+- `chatbot-manager`
+- `conversation-service`
+- `audit-security-service`
 
 Les fichiers sous `artifacts/**`, les `support-pack` historiques et les rendus `rendered-overlay.yaml` sont des preuves générées et peuvent contenir l'état d'anciens déploiements. Ils sont exclus de l'analyse Sonar officielle par `sonar-project.properties`; une nouvelle preuve doit être régénérée après correction plutôt que de considérer ces snapshots comme manifests sources.
 

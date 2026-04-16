@@ -2,7 +2,8 @@
 
 | Domaine | Contrôle | Implémentation actuelle | État |
 |---|---|---|---|
-| CI | Lint et tests | `scripts/ci/run-tests.sh`, `scripts/ci/collect-coverage.sh` | TERMINÉ |
+| CI | Tests Laravel | `scripts/ci/run-tests.sh`, rapports `.coverage-artifacts/junit-*.xml` | TERMINÉ |
+| CI | Audit dépendances | `scripts/ci/audit-dependencies.sh`, Composer audit, npm audit si lockfile présent | TERMINÉ |
 | CI | SAST | `security/semgrep/semgrep.yml`, `sonar-project.properties` | PRÊT_NON_EXÉCUTÉ |
 | CI | Détection de secrets | `.gitleaks.toml` | TERMINÉ |
 | CI | Scan filesystem | `security/trivy/trivy.yaml` | TERMINÉ |
@@ -18,11 +19,14 @@
 | Kubernetes | ResourceQuota | `infra/k8s/base/resourcequota.yaml` | TERMINÉ |
 | Kubernetes | LimitRange | `infra/k8s/base/limitrange.yaml` avec defaults CPU, mémoire et `ephemeral-storage` | TERMINÉ |
 | Kubernetes | Resource guards | `scripts/validate/validate-k8s-resource-guards.sh` contrôle les overlays `dev` et `demo` | TERMINÉ |
+| Kubernetes | Ultra hardening statique | `scripts/validate/validate-k8s-ultra-hardening.sh` contrôle PSA restricted, ServiceAccounts, probes, PDB, NetworkPolicies, hostPath, images et Kyverno | TERMINÉ |
 | Kubernetes | PodDisruptionBudget | manifests `*/pdb.yaml` sur composants critiques | TERMINÉ |
 | Kubernetes | HorizontalPodAutoscaler | manifests `*/hpa.yaml`; exploitation dépend de `metrics-server` runtime | DÉPENDANT_DE_L_ENVIRONNEMENT |
 | Kubernetes | Admission policy (Audit) | `infra/k8s/policies/kyverno/*`; preuve via `cluster-security-addons.md` | DÉPENDANT_DE_L_ENVIRONNEMENT |
 | Kubernetes | Admission policy (Enforce) | overlay unique `infra/k8s/policies/kyverno-enforce` | PRÊT_NON_EXÉCUTÉ |
-| Secrets | Jenkins credentials | runbook Jenkins | PARTIEL |
-| Secrets | Kubernetes secrets | `secretRef` + script local à utiliser | PARTIEL |
+| Secrets | Jenkins credentials | `scripts/jenkins/bootstrap-local-credentials.sh`, `JENKINS_ADMIN_PASSWORD_FILE` | TERMINÉ |
+| Secrets | Kubernetes secrets | `scripts/secrets/bootstrap-local-secrets.sh`, `scripts/secrets/create-dev-secrets.sh` | TERMINÉ |
+| Runtime | Laravel workloads officiels | `portal-web`, `auth-users`, `chatbot-manager`, `conversation-service`, `audit-security-service` | TERMINÉ |
+| Runtime | Services Python legacy | Exclus du build/deploy officiel car sources absentes | PARTIEL |
 | Validation | Smoke tests | `scripts/validate/*.sh` | TERMINÉ |
 | Validation | Rapport final | `scripts/validate/generate-validation-report.sh` | TERMINÉ |

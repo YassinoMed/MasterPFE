@@ -54,11 +54,13 @@ capture "${REPORT_DIR}/k8s-metrics-apiservice.txt" \
 capture "${REPORT_DIR}/k8s-pods.txt" \
   kubectl get pods -n "${NS}" -o wide
 
-capture "${REPORT_DIR}/api-gateway-describe.txt" \
-  kubectl describe deploy api-gateway -n "${NS}"
-
 capture "${REPORT_DIR}/portal-web-describe.txt" \
   kubectl describe deploy portal-web -n "${NS}"
+
+for deployment in auth-users chatbot-manager conversation-service audit-security-service; do
+  capture "${REPORT_DIR}/${deployment}-describe.txt" \
+    kubectl describe deploy "${deployment}" -n "${NS}"
+done
 
 capture "${REPORT_DIR}/k8s-events.txt" \
   kubectl get events -n "${NS}" --sort-by=.lastTimestamp

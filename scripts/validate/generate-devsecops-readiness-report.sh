@@ -14,7 +14,6 @@ set -euo pipefail
 NS="${NS:-securerag-hub}"
 OUT="${OUT:-artifacts/final/devsecops-readiness-report.md}"
 JENKINS_URL="${JENKINS_URL:-http://localhost:8085}"
-API_GATEWAY_HEALTH_URL="${API_GATEWAY_HEALTH_URL:-http://localhost:8080/healthz}"
 PORTAL_HEALTH_URL="${PORTAL_HEALTH_URL:-http://localhost:8081/health}"
 
 mkdir -p "$(dirname "${OUT}")"
@@ -168,7 +167,6 @@ cat > "${OUT}" <<EOF
 | Composant | État | Preuve observée |
 |---|---:|---|
 | Jenkins | $(http_status "${JENKINS_URL%/}/login") | \`${JENKINS_URL%/}/login\` |
-| API Gateway | $(http_status "${API_GATEWAY_HEALTH_URL}") | \`${API_GATEWAY_HEALTH_URL}\` |
 | Portal Web | $(http_status "${PORTAL_HEALTH_URL}") | \`${PORTAL_HEALTH_URL}\` |
 | Namespace Kubernetes | $(kubectl_status get ns "${NS}") | \`kubectl get ns ${NS}\` |
 | Pods applicatifs | $(kubectl_status get pods -n "${NS}") | \`kubectl get pods -n ${NS}\` |
@@ -210,7 +208,7 @@ cat > "${OUT}" <<EOF
 
 ## 6. Conclusion
 
-Le socle DevSecOps/Kubernetes/demo est considéré comme établi. Les blocs avancés Jenkins webhook, supply chain execute, metrics-server et Kyverno doivent être présentés comme complets uniquement lorsque les artefacts listés ci-dessus sont présents et datés.
+Le socle DevSecOps/Kubernetes/demo Laravel est considéré comme établi. Les blocs avancés Jenkins webhook, supply chain execute, metrics-server et Kyverno doivent être présentés comme complets uniquement lorsque les artefacts listés ci-dessus sont présents et datés.
 EOF
 
 printf 'DevSecOps readiness report written to %s\n' "${OUT}"

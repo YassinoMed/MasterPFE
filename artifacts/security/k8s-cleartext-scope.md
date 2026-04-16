@@ -4,7 +4,7 @@
 |---|---|
 | Statut global | TERMINÉ |
 | Overlays contrôlés | infra/k8s/overlays/dev infra/k8s/overlays/demo |
-| Hôtes internes autorisés | api-gateway auth-users chatbot-manager knowledge-hub llm-orchestrator ollama portal-web qdrant security-auditor |
+| Hôtes internes autorisés | auth-users chatbot-manager conversation-service audit-security-service portal-web |
 
 ## Règle appliquée
 

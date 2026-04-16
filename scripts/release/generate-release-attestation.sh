@@ -17,12 +17,10 @@ OUT_MD="${OUT_MD:-${REPORT_DIR}/release-attestation.md}"
 STRICT_RELEASE_ATTESTATION="${STRICT_RELEASE_ATTESTATION:-false}"
 
 DEFAULT_SERVICES=(
-  api-gateway
   auth-users
   chatbot-manager
-  llm-orchestrator
-  security-auditor
-  knowledge-hub
+  conversation-service
+  audit-security-service
   portal-web
 )
 
@@ -284,6 +282,7 @@ EOF
   printf -- '- Generated at UTC: `%s`\n' "${TIMESTAMP}"
   printf -- '- Git commit: `%s`\n' "${GIT_COMMIT}"
   printf -- '- Expected services: `%s`\n' "${EXPECTED_COUNT}"
+  printf -- '- Expected service names: `%s`\n' "${SERVICES_ARRAY[*]}"
   printf -- '- Status: `%s`\n' "${ATTESTATION_STATUS}"
   printf -- '- Strict mode: `%s`\n\n' "${STRICT_RELEASE_ATTESTATION}"
 

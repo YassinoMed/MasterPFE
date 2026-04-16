@@ -1,6 +1,6 @@
 # SecureRAG Hub DevSecOps Final Proof
 
-- Generated at: `2026-04-12T19:26:09Z`
+- Generated at: `2026-04-16T20:25:14Z`
 - Official scenario: `demo`
 - Default behavior: non-destructive evidence collection
 - Strict mode: `false`

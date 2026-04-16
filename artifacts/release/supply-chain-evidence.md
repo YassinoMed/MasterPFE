@@ -1,7 +1,7 @@
 # Supply Chain Evidence — SecureRAG Hub
 
-- Generated at UTC: `2026-04-14T23:35:21Z`
-- Git commit: `ea2440c357444b99b40c8334381b61455d9a752b`
+- Generated at UTC: `2026-04-16T20:25:15Z`
+- Git commit: `2679220e2bd1aafb82f7181ea42a4ecd4f32720c`
 
 ## Evidence inventory
 

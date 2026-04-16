@@ -1,1 +1,4 @@
-Supply chain evidence written to artifacts/release/supply-chain-evidence.md
+[INFO] Release attestation written to artifacts/release/release-attestation.json and artifacts/release/release-attestation.md
+[WARN] Release attestation is partial; supply-chain execute evidence is incomplete.
+[INFO] Supply-chain evidence pack written to artifacts/secure-supply-chain-pack-20260416T202514Z.tar.gz
+[INFO] Supply-chain evidence written to artifacts/release/supply-chain-evidence.md

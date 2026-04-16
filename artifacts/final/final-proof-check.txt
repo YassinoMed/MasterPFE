@@ -1,0 +1,39 @@
+=== SecureRAG Hub - Final Proof Check ===
+timestamp_utc=2026-04-16T20:25:11Z
+namespace=securerag-hub
+
+[PASS] Command available: docker
+[PASS] Command available: kubectl
+[PASS] Command available: curl
+[FAIL] Docker is installed but not accessible
+[PASS] kubectl context is kind-securerag-dev
+[FAIL] Namespace securerag-hub is not reachable
+[FAIL] Kubernetes API does not respond for namespace securerag-hub
+[WARN] Portal Web health is not reachable at http://localhost:8081/health
+[WARN] Jenkins is not reachable at http://localhost:8085/login
+[PASS] Reference campaign summary is present
+[PASS] Final validation summary is present
+[PASS] Release evidence is present
+attestation status is 'PARTIAL_READY_TO_PROVE', expected COMPLETE_PROVEN
+[ERROR] Mandatory supply-chain evidence is incomplete or unproven. See artifacts/release/supply-chain-gate-report.md
+[FAIL] Mandatory supply-chain evidence gate failed
+[PASS] Support pack found: artifacts/support-pack/support-demo-20260411T144030Z.tar.gz
+
+=== Kubernetes quick view ===
+E0416 21:25:14.015418   54974 memcache.go:265] "Unhandled Error" err="couldn't get current server API group list: Get \"https://127.0.0.1:6443/api?timeout=32s\": dial tcp 127.0.0.1:6443: connect: connection refused"
+E0416 21:25:14.027111   54974 memcache.go:265] "Unhandled Error" err="couldn't get current server API group list: Get \"https://127.0.0.1:6443/api?timeout=32s\": dial tcp 127.0.0.1:6443: connect: connection refused"
+E0416 21:25:14.027610   54974 memcache.go:265] "Unhandled Error" err="couldn't get current server API group list: Get \"https://127.0.0.1:6443/api?timeout=32s\": dial tcp 127.0.0.1:6443: connect: connection refused"
+E0416 21:25:14.028629   54974 memcache.go:265] "Unhandled Error" err="couldn't get current server API group list: Get \"https://127.0.0.1:6443/api?timeout=32s\": dial tcp 127.0.0.1:6443: connect: connection refused"
+E0416 21:25:14.028970   54974 memcache.go:265] "Unhandled Error" err="couldn't get current server API group list: Get \"https://127.0.0.1:6443/api?timeout=32s\": dial tcp 127.0.0.1:6443: connect: connection refused"
+E0416 21:25:14.029933   54974 memcache.go:265] "Unhandled Error" err="couldn't get current server API group list: Get \"https://127.0.0.1:6443/api?timeout=32s\": dial tcp 127.0.0.1:6443: connect: connection refused"
+E0416 21:25:14.030354   54974 memcache.go:265] "Unhandled Error" err="couldn't get current server API group list: Get \"https://127.0.0.1:6443/api?timeout=32s\": dial tcp 127.0.0.1:6443: connect: connection refused"
+E0416 21:25:14.031204   54974 memcache.go:265] "Unhandled Error" err="couldn't get current server API group list: Get \"https://127.0.0.1:6443/api?timeout=32s\": dial tcp 127.0.0.1:6443: connect: connection refused"
+E0416 21:25:14.031635   54974 memcache.go:265] "Unhandled Error" err="couldn't get current server API group list: Get \"https://127.0.0.1:6443/api?timeout=32s\": dial tcp 127.0.0.1:6443: connect: connection refused"
+The connection to the server 127.0.0.1:6443 was refused - did you specify the right host or port?
+[WARN] Unable to print Kubernetes quick view
+
+=== Final proof check summary ===
+pass=8
+warn=3
+fail=4
+report=artifacts/final/final-proof-check.txt

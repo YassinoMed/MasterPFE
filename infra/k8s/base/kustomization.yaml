@@ -12,19 +12,7 @@ resources:
   - networkpolicy-validation-ingress.yaml
   - networkpolicy-validation-egress.yaml
   - rbac-runtime-readonly.yaml
-
-  - qdrant/serviceaccount.yaml
-  - qdrant/pvc.yaml
-  - qdrant/deployment.yaml
-  - qdrant/service.yaml
-  - qdrant/networkpolicy.yaml
-  - qdrant/pdb.yaml
-
-  - ollama/serviceaccount.yaml
-  - ollama/pvc.yaml
-  - ollama/deployment.yaml
-  - ollama/service.yaml
-  - ollama/networkpolicy.yaml
+  - validation/serviceaccount.yaml
 
   - portal-web/serviceaccount.yaml
   - portal-web/deployment.yaml
@@ -33,38 +21,29 @@ resources:
   - portal-web/pdb.yaml
   - portal-web/hpa.yaml
 
-  - api-gateway/serviceaccount.yaml
-  - api-gateway/deployment.yaml
-  - api-gateway/service.yaml
-  - api-gateway/networkpolicy.yaml
-  - api-gateway/pdb.yaml
-  - api-gateway/hpa.yaml
-
   - auth-users/serviceaccount.yaml
   - auth-users/deployment.yaml
   - auth-users/service.yaml
   - auth-users/networkpolicy.yaml
+  - auth-users/pdb.yaml
 
   - chatbot-manager/serviceaccount.yaml
   - chatbot-manager/deployment.yaml
   - chatbot-manager/service.yaml
   - chatbot-manager/networkpolicy.yaml
+  - chatbot-manager/pdb.yaml
 
-  - llm-orchestrator/serviceaccount.yaml
-  - llm-orchestrator/deployment.yaml
-  - llm-orchestrator/service.yaml
-  - llm-orchestrator/networkpolicy.yaml
-  - llm-orchestrator/pdb.yaml
+  - conversation-service/serviceaccount.yaml
+  - conversation-service/deployment.yaml
+  - conversation-service/service.yaml
+  - conversation-service/networkpolicy.yaml
+  - conversation-service/pdb.yaml
 
-  - security-auditor/serviceaccount.yaml
-  - security-auditor/deployment.yaml
-  - security-auditor/service.yaml
-  - security-auditor/networkpolicy.yaml
-
-  - knowledge-hub/serviceaccount.yaml
-  - knowledge-hub/deployment.yaml
-  - knowledge-hub/service.yaml
-  - knowledge-hub/networkpolicy.yaml
+  - audit-security-service/serviceaccount.yaml
+  - audit-security-service/deployment.yaml
+  - audit-security-service/service.yaml
+  - audit-security-service/networkpolicy.yaml
+  - audit-security-service/pdb.yaml
 
 labels:
   - pairs:

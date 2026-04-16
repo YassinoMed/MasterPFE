@@ -4,12 +4,10 @@
 # sourced by Bash scripts, not executed directly.
 
 DEFAULT_SERVICES=(
-  api-gateway
   auth-users
   chatbot-manager
-  llm-orchestrator
-  security-auditor
-  knowledge-hub
+  conversation-service
+  audit-security-service
   portal-web
 )
 

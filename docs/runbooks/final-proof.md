@@ -9,7 +9,7 @@ Ce document ne pretend pas qu'un run a ete execute si aucune preuve n'existe. Il
 
 - les preuves deja presentes dans le depot ;
 - les commandes exactes a rejouer pour constituer une preuve complete de soutenance ;
-- les ecarts entre mode `dev` reel et mode `demo`.
+- les ecarts entre preuves préparées et preuves runtime réellement exécutées.
 
 ## Preuves deja presentes dans le depot
 
@@ -49,6 +49,7 @@ Les artefacts rafraichis associes sont :
 - `artifacts/validation/k8s-hpa.txt`
 - `artifacts/validation/k8s-resourcequota.txt`
 - `artifacts/validation/k8s-limitrange.txt`
+- `artifacts/security/k8s-ultra-hardening.md`
 - `artifacts/validation/portal-web-describe.txt`
 
 ## Extensions de cluster preparees
@@ -60,15 +61,19 @@ Le depot permet maintenant d'activer explicitement :
 
 Ces composants ne sont pas couplés de force a l'overlay principal. Ils peuvent donc etre installes seulement si l'environnement local le permet.
 
-### Etat observe sur le cluster courant
+### État à ne pas surdéclarer
 
-Lors de la consolidation finale du depot :
+Ne déclarer `metrics-server`, `kubectl top`, les HPA runtime ou Kyverno comme `TERMINÉ` que si les commandes suivantes répondent dans le cluster cible :
 
-- `metrics-server` a ete installe avec succes ;
-- `kubectl top nodes` et `kubectl top pods -n securerag-hub` repondent ;
-- les `HPA` de `api-gateway` et `portal-web` exposent des valeurs CPU reelles ;
-- `Kyverno` a ete installe avec succes ;
-- les policies `securerag-require-pod-security` et `securerag-verify-cosign-images` sont presentes et `Ready` en mode `Audit`.
+```bash
+kubectl top nodes
+kubectl top pods -n securerag-hub
+kubectl get hpa -n securerag-hub
+kubectl get clusterpolicy
+kubectl get policyreport,clusterpolicyreport -A
+```
+
+Sans ces sorties archivées, l’état est `DÉPENDANT_DE_L_ENVIRONNEMENT`.
 
 ## Campagne de reference a rejouer
 
@@ -157,7 +162,6 @@ bash scripts/deploy/verify-and-deploy-kind.sh
 bash scripts/validate/smoke-tests.sh
 bash scripts/validate/security-smoke.sh
 bash scripts/validate/e2e-functional-flow.sh
-bash scripts/validate/rag-smoke.sh
 bash scripts/validate/security-adversarial-advanced.sh
 bash scripts/validate/generate-validation-report.sh
 bash scripts/validate/collect-runtime-evidence.sh
@@ -165,7 +169,7 @@ bash scripts/validate/collect-runtime-evidence.sh
 
 ## Variante demo
 
-Utiliser cette variante si `Ollama` est trop lourd ou instable sur la machine locale :
+Utiliser cette variante pour la soutenance :
 
 ```bash
 REGISTRY_HOST=localhost:5001 \
@@ -176,27 +180,13 @@ bash scripts/deploy/deploy-kind.sh
 ```
 
 Dans ce mode :
-- le reste de la plateforme reste deployee normalement ;
-- `Ollama` est remplace par un mock HTTP ;
-- la demonstration fonctionnelle et la validation de la chaine applicative restent possibles ;
-- il faut annoncer explicitement en soutenance que le moteur LLM local est simule pour raisons de stabilite runtime.
+- le runtime officiel Laravel est déployé ;
+- les services legacy Python/RAG restent exclus ;
+- la validation de la chaîne applicative et sécurité reste possible.
 
-## Variante reelle avec Ollama
+## Variante legacy RAG/Ollama
 
-Le mode `dev` garde le composant `Ollama` reel. Il est plus fidele au runtime cible mais depend fortement :
-
-- de la connectivite reseau ;
-- du telechargement de l'image ;
-- de la capacite memoire locale ;
-- du temps de premier demarrage.
-
-Ce mode est preferable si la machine locale est suffisamment stable et que l'image `ollama/ollama` est deja disponible.
-
-Avant un deploiement en mode reel, il est recommande d'executer :
-
-```bash
-bash scripts/deploy/prepull-ollama.sh
-```
+Le scénario legacy RAG/Ollama n'est pas un scénario officiel tant que les sources Python applicatives ne sont pas restaurées. `scripts/validate/rag-smoke.sh` documente cette exclusion et sort en succès avec un statut `PRÊT_NON_EXÉCUTÉ` sauf si `ENABLE_LEGACY_RAG_VALIDATION=true` est explicitement fourni dans un environnement restauré.
 
 ## Artefacts a conserver pour la soutenance
 
@@ -224,12 +214,11 @@ bash scripts/deploy/prepull-ollama.sh
 
 ## Ce qui depend de l'environnement
 
-- la stabilite complete d'un run `Ollama` reel
 - l'execution d'un vrai job Jenkins CD complet si Docker Desktop ou le cluster local ne sont pas disponibles au moment du run
 - la presence effective d'images deja signees dans la registry locale au moment du lancement de la campagne complete
 
 Au moment de la consolidation finale :
 
-- le cluster local dispose bien du CRD `clusterpolicies.kyverno.io` ;
-- `metrics-server` est disponible ;
-- la campagne unifiee a ete produite en `dry-run` pour ne pas pretendre a une promotion reelle sans revalidation explicite des images signees presentes dans la registry locale.
+- la campagne unifiée peut être produite en `dry-run` pour ne pas prétendre à une promotion réelle sans revalidation explicite des images signées présentes dans la registry locale ;
+- Kyverno et metrics-server restent `DÉPENDANT_DE_L_ENVIRONNEMENT` tant que les preuves runtime ci-dessus ne sont pas archivées.
+- le durcissement K8s statique peut être déclaré `TERMINÉ` uniquement si `bash scripts/validate/validate-k8s-ultra-hardening.sh` passe sur les overlays `dev`, `demo`, `kyverno` et `kyverno-enforce`.

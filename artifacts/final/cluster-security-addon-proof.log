@@ -1,2 +1,1 @@
-[INFO] Cluster security addon validation written to artifacts/validation/cluster-security-addons.md
-[WARN] Some addons are still environment-dependent. Inspect artifacts/validation/cluster-security-addons.md
+[WARN] Kubernetes API is not reachable. Partial addon report written to artifacts/validation/cluster-security-addons.md

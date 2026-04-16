@@ -1,10 +1,6 @@
 # Portal / Service Connectivity Proof - SecureRAG Hub
 
-<<<<<<< HEAD
-- Generated at: `2026-04-12T22:48:10Z`
-=======
-- Generated at: `2026-04-12T22:25:48Z`
->>>>>>> 5af92bc (securité)
+- Generated at: `2026-04-16T20:25:14Z`
 - Portal backend mode: `auto`
 - Timeout: `2s`
 
@@ -12,11 +8,7 @@
 
 | Component | URL | Status |
 |---|---|---:|
-<<<<<<< HEAD
-| Portal health | `http://localhost:8081/health` | OK |
-=======
 | Portal health | `http://localhost:8081/health` | PARTIEL_UNREACHABLE |
->>>>>>> 5af92bc (securité)
 | auth-users-service | `http://localhost:8091/api/v1/health` | PARTIEL_UNREACHABLE |
 | chatbot-manager-service | `http://localhost:8092/api/v1/health` | PARTIEL_UNREACHABLE |
 | conversation-service | `http://localhost:8093/api/v1/health` | PARTIEL_UNREACHABLE |
@@ -26,21 +18,12 @@
 
 | Page | URL | Status |
 |---|---|---:|
-<<<<<<< HEAD
-| Admin users | `http://localhost:8081/admin/users` | PARTIEL_HTTP_404 |
-| Admin roles | `http://localhost:8081/admin/roles` | PARTIEL_HTTP_404 |
-| Chatbots | `http://localhost:8081/chatbots` | PARTIEL_HTTP_404 |
-| Chat | `http://localhost:8081/chat` | PARTIEL_HTTP_404 |
-| History | `http://localhost:8081/history` | PARTIEL_HTTP_404 |
-| Security | `http://localhost:8081/security` | PARTIEL_HTTP_404 |
-=======
 | Admin users | `http://localhost:8081/admin/users` | PARTIEL_UNREACHABLE |
 | Admin roles | `http://localhost:8081/admin/roles` | PARTIEL_UNREACHABLE |
 | Chatbots | `http://localhost:8081/chatbots` | PARTIEL_UNREACHABLE |
 | Chat | `http://localhost:8081/chat` | PARTIEL_UNREACHABLE |
 | History | `http://localhost:8081/history` | PARTIEL_UNREACHABLE |
 | Security | `http://localhost:8081/security` | PARTIEL_UNREACHABLE |
->>>>>>> 5af92bc (securité)
 
 ## 3. Portal integration files
 

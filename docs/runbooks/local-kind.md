@@ -13,7 +13,6 @@ Pour une campagne officielle de soutenance, completer ce runbook avec :
 - Docker opérationnel
 - `kind`
 - `kubectl`
-- `python3`
 - `cosign` si la chaîne de vérification est utilisée localement
 
 ## Étape 1 — Créer le cluster et le registre local
@@ -42,12 +41,7 @@ REGISTRY_HOST=localhost:5001 IMAGE_TAG=dev bash scripts/deploy/build-local-image
 docker images | grep securerag-hub
 ```
 
-Si le mode reel avec `Ollama` est vise, precharger d'abord l'image :
-```bash
-bash scripts/deploy/prepull-ollama.sh
-```
-
-Cette etape limite les risques de `ImagePullBackOff` ou de delai excessif au premier deploiement.
+Le build officiel cible uniquement les composants Laravel listés dans `scripts/deploy/build-local-images.sh`.
 
 ## Étape 4 — Déployer sur l’overlay `dev`
 ```bash
@@ -60,7 +54,6 @@ bash scripts/deploy/deploy-kind.sh
 bash scripts/validate/smoke-tests.sh
 bash scripts/validate/security-smoke.sh
 bash scripts/validate/e2e-functional-flow.sh
-bash scripts/validate/rag-smoke.sh
 bash scripts/validate/security-adversarial-advanced.sh
 bash scripts/validate/generate-validation-report.sh
 bash scripts/validate/collect-runtime-evidence.sh
@@ -68,14 +61,14 @@ cat artifacts/validation/validation-summary.md
 ```
 
 ## Mode `demo`
-Si `Ollama` est trop lourd sur la machine locale, utiliser l’overlay `demo` :
+Pour la soutenance, utiliser l’overlay `demo` :
 ```bash
 REGISTRY_HOST=localhost:5001 IMAGE_PREFIX=securerag-hub IMAGE_TAG=demo \
 KUSTOMIZE_OVERLAY=infra/k8s/overlays/demo \
 bash scripts/deploy/deploy-kind.sh
 ```
 
-Cet overlay remplace `Ollama` par un mock HTTP léger qui répond sur `/api/tags`, `/api/chat` et `/api/generate`.
+Cet overlay déploie le même périmètre Laravel officiel avec `imagePullPolicy: IfNotPresent`.
 
 ## Vérifications utiles
 ```bash
@@ -83,8 +76,8 @@ kubectl get all -n securerag-hub
 kubectl get pvc -n securerag-hub
 kubectl get networkpolicy -n securerag-hub
 kubectl get pods -n securerag-hub -o wide
-curl http://localhost:8080/healthz
 curl http://localhost:8081/health
+bash scripts/validate/validate-k8s-ultra-hardening.sh
 ```
 
 ## Addons optionnels du cluster
@@ -116,7 +109,9 @@ kubectl get all -n securerag-hub > artifacts/validation/k8s-get-all.txt
 kubectl get pvc -n securerag-hub > artifacts/validation/k8s-pvc.txt
 kubectl get networkpolicy -n securerag-hub > artifacts/validation/k8s-networkpolicy.txt
 kubectl get pods -n securerag-hub -o wide > artifacts/validation/k8s-pods.txt
-kubectl describe deploy api-gateway -n securerag-hub > artifacts/validation/api-gateway-describe.txt
+kubectl describe deploy portal-web -n securerag-hub > artifacts/validation/portal-web-describe.txt
+kubectl describe deploy conversation-service -n securerag-hub > artifacts/validation/conversation-service-describe.txt
+kubectl describe deploy audit-security-service -n securerag-hub > artifacts/validation/audit-security-service-describe.txt
 ```
 
 ## Points d’attention sécurité
@@ -124,3 +119,4 @@ kubectl describe deploy api-gateway -n securerag-hub > artifacts/validation/api-
 - conserver les `securityContext` non root et `readOnlyRootFilesystem` là où ils sont déjà compatibles
 - exécuter `verify-and-deploy-kind.sh` pour une démo orientée supply chain, pas seulement `deploy-kind.sh`
 - les policies Kyverno sont livrées séparément dans `infra/k8s/policies/kyverno` et nécessitent un moteur Kyverno installé dans le cluster
+- le namespace est en Pod Security Admission `restricted`; les pods de validation utilisent `sa-validation` et des overrides de sécurité compatibles avec ce niveau

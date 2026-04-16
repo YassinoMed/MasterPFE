@@ -13,17 +13,10 @@ spec:
     - from:
         - podSelector:
             matchLabels:
-              app.kubernetes.io/name: api-gateway
+              app.kubernetes.io/name: portal-web
       ports:
         - protocol: TCP
-          port: 8080
-    - from:
-        - podSelector:
-            matchLabels:
-              app.kubernetes.io/name: llm-orchestrator
-      ports:
-        - protocol: TCP
-          port: 8080
+          port: 8000
   egress:
     - to:
         - podSelector:
@@ -31,4 +24,4 @@ spec:
               app.kubernetes.io/name: auth-users
       ports:
         - protocol: TCP
-          port: 8080
+          port: 8000
