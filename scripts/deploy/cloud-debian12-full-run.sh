@@ -26,21 +26,8 @@ bash scripts/secrets/bootstrap-local-secrets.sh
 bash scripts/secrets/create-dev-secrets.sh
 
 echo "[INFO] Build images with host network"
-for component in \
-  services/api-gateway \
-  services/auth-users \
-  services/chatbot-manager \
-  services/llm-orchestrator \
-  services/security-auditor \
-  services/knowledge-hub \
-  platform/portal-web
-do
-  name="$(basename "$component")"
-  image="${REGISTRY_HOST}/${IMAGE_PREFIX}-${name}:${IMAGE_TAG}"
-  echo "[INFO] Building ${image}"
-  docker build --network host -t "${image}" -f "${component}/Dockerfile" "${component}"
-  docker push "${image}"
-done
+REGISTRY_HOST="${REGISTRY_HOST}" IMAGE_PREFIX="${IMAGE_PREFIX}" IMAGE_TAG="${IMAGE_TAG}" \
+  bash scripts/deploy/build-local-images.sh
 
 echo "[INFO] Deploy demo"
 REGISTRY_HOST="${REGISTRY_HOST}" IMAGE_PREFIX="${IMAGE_PREFIX}" IMAGE_TAG="${IMAGE_TAG}" \
@@ -63,6 +50,5 @@ echo "[INFO] Final campaign dry-run"
 OFFICIAL_SCENARIO=demo CAMPAIGN_MODE=dry-run make final-campaign
 
 echo "[INFO] URLs"
-echo "API Gateway: ${PUBLIC_SCHEME}://${PUBLIC_HOST}:8080/healthz"
 echo "Portal Web:  ${PUBLIC_SCHEME}://${PUBLIC_HOST}:8081/health"
 echo "Jenkins:     ${PUBLIC_SCHEME}://${PUBLIC_HOST}:8085"

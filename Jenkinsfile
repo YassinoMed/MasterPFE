@@ -11,6 +11,7 @@ pipeline {
     SEMGREP_VERSION = '1.156.0'
     COVERAGE_MIN = '70'
     GITLEAKS_IMAGE = 'ghcr.io/gitleaks/gitleaks:v8.30.1@sha256:c00b6bd0aeb3071cbcb79009cb16a60dd9e0a7c60e2be9ab65d25e6bc8abbb7f'
+    LARAVEL_APPS = 'platform/portal-web services-laravel/auth-users-service services-laravel/chatbot-manager-service services-laravel/conversation-service services-laravel/audit-security-service'
   }
 
   stages {
@@ -35,15 +36,19 @@ pipeline {
         sh '''
           set -euo pipefail
 
-          python3 -m pip install --upgrade pip
-          python3 -m pip install pytest pytest-cov ruff "semgrep==${SEMGREP_VERSION}"
+          python3 -m venv .tools/semgrep-venv
+          . .tools/semgrep-venv/bin/activate
+          python -m pip install --upgrade pip
+          python -m pip install "semgrep==${SEMGREP_VERSION}"
 
-          if [ -f services/shared/requirements.txt ]; then
-            python3 -m pip install -r services/shared/requirements.txt
-          fi
-
-          find services -maxdepth 2 -name requirements.txt -not -path "*/shared/*" -print0 | \
-            xargs -0 -r -n1 python3 -m pip install -r
+          for app in ${LARAVEL_APPS}; do
+            echo "[INFO] Installing Composer dependencies for ${app}"
+            (cd "${app}" && composer install --no-interaction --prefer-dist --no-progress)
+            if [ -f "${app}/package-lock.json" ]; then
+              echo "[INFO] Installing npm dependencies for ${app}"
+              (cd "${app}" && npm ci --ignore-scripts)
+            fi
+          done
         '''
       }
     }
@@ -53,19 +58,13 @@ pipeline {
         sh '''
           set -euo pipefail
 
-          if find services -type f -name "*.py" | grep -q .; then
-            ruff check services tests
-          else
-            echo "No Python files found yet."
-          fi
-
           bash scripts/ci/run-tests.sh
           bash scripts/ci/collect-coverage.sh
         '''
       }
       post {
         always {
-          junit allowEmptyResults: true, testResults: '.coverage-artifacts/junit.xml'
+          junit allowEmptyResults: true, testResults: '.coverage-artifacts/junit-*.xml'
           archiveArtifacts allowEmptyArchive: true, artifacts: '.coverage-artifacts/**'
         }
       }
@@ -76,11 +75,15 @@ pipeline {
         sh '''
           set -euo pipefail
 
+          . .tools/semgrep-venv/bin/activate
+
           semgrep scan \
             --config security/semgrep/semgrep.yml \
             --json \
             --output security/reports/semgrep.json \
             --error
+
+          bash scripts/ci/audit-dependencies.sh
 
           docker run --rm \
             -v "$PWD:/repo" \

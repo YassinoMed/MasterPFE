@@ -18,23 +18,17 @@ images:
   - name: ghcr.io/example/securerag-hub-portal-web
     newName: localhost:5001/securerag-hub-portal-web
     newTag: dev
-  - name: ghcr.io/example/securerag-hub-api-gateway
-    newName: localhost:5001/securerag-hub-api-gateway
-    newTag: dev
   - name: ghcr.io/example/securerag-hub-auth-users
     newName: localhost:5001/securerag-hub-auth-users
     newTag: dev
   - name: ghcr.io/example/securerag-hub-chatbot-manager
     newName: localhost:5001/securerag-hub-chatbot-manager
     newTag: dev
-  - name: ghcr.io/example/securerag-hub-llm-orchestrator
-    newName: localhost:5001/securerag-hub-llm-orchestrator
+  - name: ghcr.io/example/securerag-hub-conversation-service
+    newName: localhost:5001/securerag-hub-conversation-service
     newTag: dev
-  - name: ghcr.io/example/securerag-hub-security-auditor
-    newName: localhost:5001/securerag-hub-security-auditor
-    newTag: dev
-  - name: ghcr.io/example/securerag-hub-knowledge-hub
-    newName: localhost:5001/securerag-hub-knowledge-hub
+  - name: ghcr.io/example/securerag-hub-audit-security-service
+    newName: localhost:5001/securerag-hub-audit-security-service
     newTag: dev
 
 patches:
@@ -56,23 +50,6 @@ patches:
         path: /spec/template/spec/containers/0/imagePullPolicy
         value: Always
   - target:
-      kind: Service
-      name: api-gateway
-    patch: |-
-      - op: replace
-        path: /spec/type
-        value: NodePort
-      - op: add
-        path: /spec/ports/0/nodePort
-        value: 30080
-  - target:
-      kind: Deployment
-      name: api-gateway
-    patch: |-
-      - op: replace
-        path: /spec/template/spec/containers/0/imagePullPolicy
-        value: Always
-  - target:
       kind: Deployment
       name: auth-users
     patch: |-
@@ -88,21 +65,14 @@ patches:
         value: Always
   - target:
       kind: Deployment
-      name: llm-orchestrator
+      name: conversation-service
     patch: |-
       - op: replace
         path: /spec/template/spec/containers/0/imagePullPolicy
         value: Always
   - target:
       kind: Deployment
-      name: security-auditor
-    patch: |-
-      - op: replace
-        path: /spec/template/spec/containers/0/imagePullPolicy
-        value: Always
-  - target:
-      kind: Deployment
-      name: knowledge-hub
+      name: audit-security-service
     patch: |-
       - op: replace
         path: /spec/template/spec/containers/0/imagePullPolicy

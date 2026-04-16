@@ -31,16 +31,14 @@ Ce dépôt contient l'intégralité du système : microservices, portail web, in
 
 ### Composants applicatifs
 ```bash
-📦 api-gateway              - Routage centralisé des requêtes
-📦 auth-users              - Authentification et gestion profils
-📦 chatbot-manager         - Orchestration des chatbots
-📦 llm-orchestrator        - Coordination LLM/RAG
-📦 security-auditor        - Audit et conformité
-📦 knowledge-hub           - Base de connaissances vectorielle
-📦 portal-web              - Interface utilisateur Laravel
-📦 qdrant                  - Stockage vectoriel
-📦 ollama                  - Runtime LLM local
+📦 portal-web              - Interface Laravel utilisateur/admin/sécurité
+📦 auth-users              - Service Laravel utilisateurs, rôles, permissions
+📦 chatbot-manager         - Service Laravel catalogue et gouvernance chatbots
+📦 conversation-service    - Service Laravel conversations et messages
+📦 audit-security-service  - Service Laravel audit, incidents, conformité
 ```
+
+Les dossiers Python legacy sous `services/` ne sont plus dans la build/deploy officielle car les sources applicatives `.py` sont absentes. Ils ne doivent pas être cités comme runtime validé.
 
 ### Stack technologique
 
@@ -81,7 +79,8 @@ build → sbom → sign → verify → promote → deploy → validate
 
 ```bash
 MasterPFE/
-├── services/              # Microservices applicatifs
+├── services-laravel/      # Services Laravel officiels
+├── services/              # Runtime Python legacy exclu de la build officielle
 ├── platform/              # Portail Laravel et couche app
 ├── infra/
 │   ├── kind/              # Cluster Kubernetes local
@@ -146,7 +145,7 @@ bash scripts/validate/generate-validation-report.sh
 ## 🎭 Modes de déploiement
 
 ### Mode DÉMO (Recommandé pour soutenance)
-Remplace Ollama par un mock HTTP léger pour stabilité maximale.
+Déploie le runtime Laravel officiel via l’overlay `demo`.
 
 ```bash
 REGISTRY_HOST=localhost:5001 IMAGE_PREFIX=securerag-hub IMAGE_TAG=dev \
@@ -154,33 +153,20 @@ KUSTOMIZE_OVERLAY=infra/k8s/overlays/demo \
 bash scripts/deploy/deploy-kind.sh
 ```
 
-**Avantages** ✅
-- Déploiement fiable et rapide
-- Consommation mémoire réduite
-- Idéal pour démonstration courte
+**Avantages**
+- périmètre cohérent avec les sources réellement présentes ;
+- déploiement fiable et rapide ;
+- validation sécurité Kubernetes reproductible.
 
-**Cas d'usage**
-- Machine locale limitée en RAM
-- Téléchargement lent d'ollama/ollama
-- Stabilité prioritaire pour présentation
-
-### Mode DEV (Expérimental avec Ollama)
-Runtime LLM authentique et complet.
+### Mode DEV
+Déploie le même périmètre Laravel avec tags `dev` et `imagePullPolicy: Always`.
 
 ```bash
 REGISTRY_HOST=localhost:5001 IMAGE_PREFIX=securerag-hub IMAGE_TAG=dev \
 bash scripts/deploy/deploy-kind.sh
 ```
 
-**Avantages** ✅
-- Runtime fidèle à production
-- Chaîne RAG complète
-
-**Limitations** ⚠️
-- Premier démarrage lent
-- Image volumineuse (~10GB)
-- Dépendance aux ressources locales
-- Plus fragile pour soutenance
+Le scénario legacy RAG/Ollama n’est pas officiel tant que les sources Python correspondantes ne sont pas restaurées.
 
 ---
 
@@ -197,7 +183,7 @@ bash scripts/jenkins/wait-for-jenkins.sh
 ### Accès
 - **URL** : http://localhost:8085
 - **Utilisateur** : `admin`
-- **Mot de passe** : `change-me-now`
+- **Mot de passe** : lire `infra/jenkins/secrets/jenkins-admin-password` après `bash scripts/jenkins/bootstrap-local-credentials.sh`
 
 ### Jobs disponibles
 - `securerag-hub-ci` - Pipeline d'intégration
@@ -209,27 +195,28 @@ bash scripts/jenkins/wait-for-jenkins.sh
 
 ### 📦 Base (`infra/k8s/base/`)
 Ressources essentielles :
-- Namespaces, Services, Deployments, StatefulSets
+- Namespace, Services, Deployments
 - Network Policies (sécurité réseau)
 - Resource Quotas et Limits
 - Pod Disruption Budgets (PDB)
-- Horizontal Pod Autoscaler (HPA)
+- Horizontal Pod Autoscaler (HPA) pour `portal-web`
 
 ### 🎯 Overlay `dev`
 Configuration pour runtime local :
 - Images locales `localhost:5001`
 - NodePort pour accès externe
-- Ollama réel (optionnel)
+- Pull policy `Always`
 
 ### 🎭 Overlay `demo`
 Configuration pour démonstration :
 - Images locales `localhost:5001`
-- Mock Ollama HTTP
-- Consommation mémoire optimisée
+- Runtime Laravel officiel
+- Pull policy `IfNotPresent`
 
 ### 🛡️ Policies Kyverno (`infra/k8s/policies/`)
 Sécurité d'admission :
 - Audit des configurations Pod
+- Audit des registres/images et interdiction `latest`
 - Vérification signatures Cosign des images
 - Enforcement optionnel
 
@@ -243,7 +230,7 @@ Sécurité d'admission :
 | `security/secrets/.env.example` | Modèles de secrets |
 | `scripts/secrets/bootstrap-local-secrets.sh` | Génération locale |
 | `scripts/secrets/create-dev-secrets.sh` | Injection K8s |
-| `docs/runbooks/jenkins-setup.md` | Credentials Jenkins |
+| `scripts/jenkins/bootstrap-local-credentials.sh` | Credentials Jenkins/Cosign locaux |
 
 ### Pipeline de sécurité
 ```bash
@@ -265,7 +252,7 @@ Le `Makefile` fournit une interface unifiée :
 ```bash
 make help                               # Afficher l'aide
 make lint                               # Linting du code
-make test                               # Tests unitaires
+make test                               # Tests Laravel et collecte éventuelle couverture
 make verify IMAGE_TAG=dev               # Vérification SBOM/Cosign
 make promote SOURCE=dev TARGET=release  # Promotion images
 make deploy IMAGE_TAG=release           # Déploiement K8s
@@ -278,6 +265,8 @@ make final-proof                        # Preuve finale complète
 make final-summary                      # Résumé exécutif
 make support-pack                       # Package de support
 make kyverno-install                    # Installation Kyverno
+make k8s-ultra-hardening                # Validation PSA restricted / RBAC / NetworkPolicy / probes
+make metrics-install                    # Installation metrics-server
 ```
 
 ---
@@ -354,7 +343,7 @@ La promotion vers CD n'est autorisée que si :
 |-----------|--------|-----------|
 | Kyverno fourni mais non installé | Policies d'audit en read-only | Voir `docs/runbooks/kyverno-install.md` |
 | HPA requiert metrics-server | Pas d'auto-scaling sans addon | Installer `infra/k8s/addons/metrics-server/` |
-| Mode DEV + Ollama fragile | Risque de timeout déploiement | Préférer mode DÉMO pour soutenance |
+| Runtime Python legacy absent | Build/deploy non prouvable pour `services/` | Runtime officiel Laravel sous `services-laravel/` |
 | Preuve Jenkins complète locale | Requiert Docker/kind/Cosign | Runner préconfiguré ou pré-test en dev |
 | Déploiement par digest tracé | Requiert promotion préalable | Vérifier output promotion avant deploy |
 

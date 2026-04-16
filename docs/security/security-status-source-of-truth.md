@@ -17,8 +17,11 @@ Ce document sert de source de vérité sécurité pour éviter les écarts entre
 - Attestation release : `TERMINÉ` seulement si `artifacts/release/release-attestation.json` annonce `COMPLETE_PROVEN`.
 - Gate supply chain : `TERMINÉ` seulement si `scripts/release/assert-supply-chain-evidence.sh` réussit.
 - Kyverno Audit : `TERMINÉ` seulement si `kubectl get clusterpolicies` et `kubectl get policyreport,clusterpolicyreport -A` répondent sur le cluster cible.
+- K8s ultra hardening statique : `TERMINÉ` si `bash scripts/validate/validate-k8s-ultra-hardening.sh` passe et génère `artifacts/security/k8s-ultra-hardening.md`.
 - metrics-server/HPA : `TERMINÉ` seulement si `kubectl top nodes`, `kubectl top pods -n securerag-hub` et `kubectl get hpa -n securerag-hub` fonctionnent.
-- `conversation-service` et `audit-security-service` : ne pas les déclarer workloads Kubernetes officiels tant qu’ils ne sont pas listés dans `infra/k8s/base/kustomization.yaml` avec Deployment, Service, NetworkPolicy et preuve runtime.
+- Workloads Kubernetes officiels : `portal-web`, `auth-users`, `chatbot-manager`, `conversation-service`, `audit-security-service`.
+- `conversation-service` et `audit-security-service` : `TERMINÉ` côté manifests/rendu Kustomize ; `DÉPENDANT_DE_L_ENVIRONNEMENT` pour la preuve de pods `Ready` et logs runtime.
+- Runtime legacy Python sous `services/` : `PARTIEL` et exclu de la build/deploy officielle tant que les sources applicatives `.py` ne sont pas restaurées.
 
 ## Commande de synthèse
 ```bash

@@ -1,7 +1,7 @@
 # Security Posture Report — SecureRAG Hub
 
-- Generated at UTC: `2026-04-15T04:33:01Z`
-- Git commit: `8e7380154c29755e1487d6c346e2a06457304959`
+- Generated at UTC: `2026-04-16T20:46:49Z`
+- Git commit: `2679220e2bd1aafb82f7181ea42a4ecd4f32720c`
 - Kubernetes namespace: `securerag-hub`
 
 ## 1. Security controls status
@@ -11,11 +11,12 @@
 | Semgrep SAST | `TERMINÉ` | `security/reports/semgrep.json`, findings=0 |
 | Gitleaks secret scan | `PARTIEL` | `security/reports/gitleaks.json`, findings=n/a |
 | Trivy filesystem scan | `PARTIEL` | `security/reports/trivy-fs.json`, vulnerabilities=n/a |
-| SBOM Syft | `PARTIEL` | `artifacts/release/sbom-summary.txt`, sbom_count=0, expected=7 |
+| SBOM Syft | `PARTIEL` | `artifacts/release/sbom-summary.txt`, sbom_count=0, expected=5 |
 | Cosign sign | `PARTIEL` | `artifacts/release/sign-summary.txt` |
 | Cosign verify | `PARTIEL` | `artifacts/release/verify-summary.txt` |
 | Digest promotion | `PARTIEL` | `artifacts/release/promotion-digests.txt` |
 | Release attestation | `PARTIEL` | `artifacts/release/release-attestation.json` |
+| Kubernetes ultra hardening static | `TERMINÉ` | `artifacts/security/k8s-ultra-hardening.md` |
 | Metrics Server runtime | `DÉPENDANT_DE_L_ENVIRONNEMENT` | `kubectl top pods -n securerag-hub` |
 | Kyverno runtime | `DÉPENDANT_DE_L_ENVIRONNEMENT` | `kubectl get clusterpolicies` |
 | Kyverno reports | `DÉPENDANT_DE_L_ENVIRONNEMENT` | `kubectl get policyreports -A` |
@@ -29,4 +30,4 @@
 
 ## 3. Security-ready reading
 
-SecureRAG Hub is security-ready for a defended demo when SAST, secret scanning, filesystem scanning, Laravel authorization tests, Kubernetes render checks, and final proof scripts pass. It becomes supply-chain-ready only after SBOM, Cosign signing, Cosign verification and digest promotion evidence are regenerated in the target environment.
+SecureRAG Hub is security-ready for a defended Laravel demo when SAST, secret scanning, filesystem scanning, Laravel authorization tests, Kubernetes render checks, and final proof scripts pass. It becomes supply-chain-ready only after SBOM, Cosign signing, Cosign verification and digest promotion evidence are regenerated in the target environment for the official service set.

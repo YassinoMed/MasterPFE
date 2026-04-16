@@ -23,10 +23,10 @@ flowchart LR
   C --> C5["Artefacts CD"]
 
   C3 --> D["Cluster kind"]
-  D --> D1["Microservices"]
+  D --> D1["Services Laravel"]
   D --> D2["portal-web"]
-  D --> D3["Qdrant"]
-  D --> D4["Ollama ou mock demo"]
+  D --> D3["NetworkPolicies"]
+  D --> D4["Kyverno audit ready"]
 ```
 
 ## 2. Pipeline CI Jenkins
@@ -80,15 +80,11 @@ flowchart LR
   A["Docker local"] --> B["Registre local localhost:5001"]
   B --> C["Cluster kind"]
   C --> D["Overlay dev ou demo"]
-  D --> E["api-gateway"]
+  D --> E["portal-web"]
   D --> F["auth-users"]
   D --> G["chatbot-manager"]
-  D --> H["llm-orchestrator"]
-  D --> I["security-auditor"]
-  D --> J["knowledge-hub"]
-  D --> K["portal-web"]
-  D --> L["qdrant"]
-  D --> M["ollama ou mock"]
+  D --> H["conversation-service"]
+  D --> I["audit-security-service"]
 ```
 
 ## 6. Securite du cluster
@@ -145,21 +141,22 @@ flowchart TD
   D --> D3["secretRef dans les workloads"]
 ```
 
-## 9. Runtime demo vs reel
+## 9. Runtime officiel vs legacy
 
 ```mermaid
 flowchart LR
-  A["Choix runtime"] --> B["Mode dev reel"]
-  A --> C["Mode demo"]
+  A["Choix runtime"] --> B["Officiel Laravel-first"]
+  A --> C["Legacy RAG/Ollama"]
 
-  B --> B1["Ollama reel"]
-  B --> B2["prepull-ollama.sh"]
-  B --> B3["Probes plus tolerantes"]
-  B --> B4["Plus fidele mais plus lourd"]
+  B --> B1["portal-web"]
+  B --> B2["auth-users"]
+  B --> B3["chatbot-manager"]
+  B --> B4["conversation-service"]
+  B --> B5["audit-security-service"]
 
-  C --> C1["Overlay demo"]
-  C --> C2["Mock HTTP Ollama"]
-  C --> C3["Demo plus stable"]
+  C --> C1["Sources Python absentes"]
+  C --> C2["Build/deploy officiel exclu"]
+  C --> C3["Revalidation requise avant retour"]
 ```
 
 ## 10. Validation et preuves
@@ -169,7 +166,7 @@ flowchart TD
   A["make validate"] --> B["smoke-tests.sh"]
   A --> C["security-smoke.sh"]
   A --> D["e2e-functional-flow.sh"]
-  A --> E["rag-smoke.sh"]
+  A --> E["rag-smoke.sh legacy opt-in"]
   A --> F["security-adversarial-advanced.sh"]
   A --> G["generate-validation-report.sh"]
   A --> H["collect-runtime-evidence.sh"]

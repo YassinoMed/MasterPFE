@@ -45,6 +45,8 @@ class AuditLogController extends Controller
             'ip_address' => $log->ip_address,
             'metadata' => $log->metadata ?? [],
             'occurred_at' => $log->occurred_at?->toISOString(),
+            'previous_hash' => $log->previous_hash,
+            'integrity_hash' => $log->integrity_hash,
         ];
     }
 }

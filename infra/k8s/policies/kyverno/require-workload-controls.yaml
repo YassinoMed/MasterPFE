@@ -1,0 +1,50 @@
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: securerag-require-workload-controls
+  annotations:
+    policies.kyverno.io/title: Require SecureRAG workload controls
+    policies.kyverno.io/category: Availability, Pod Security
+    policies.kyverno.io/severity: medium
+    policies.kyverno.io/subject: Deployment
+    policies.kyverno.io/description: >-
+      Audits official SecureRAG Deployments for probes and a bounded rolling
+      update strategy so hardening does not silently remove runtime safety
+      controls.
+spec:
+  validationFailureAction: Audit
+  background: true
+  rules:
+    - name: require-container-health-probes
+      match:
+        any:
+          - resources:
+              kinds:
+                - Deployment
+              namespaces:
+                - securerag-hub
+      validate:
+        message: Every SecureRAG deployment container must declare readiness, liveness and startup probes.
+        pattern:
+          spec:
+            template:
+              spec:
+                containers:
+                  - readinessProbe: "?*"
+                    livenessProbe: "?*"
+                    startupProbe: "?*"
+    - name: require-pod-template-service-account-token-disabled
+      match:
+        any:
+          - resources:
+              kinds:
+                - Deployment
+              namespaces:
+                - securerag-hub
+      validate:
+        message: Deployment pod templates must disable automatic ServiceAccount token mounting.
+        pattern:
+          spec:
+            template:
+              spec:
+                automountServiceAccountToken: false

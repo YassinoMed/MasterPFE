@@ -62,11 +62,8 @@ PY
 overlay_path="${temp_root}/k8s/${OVERLAY_RELATIVE_PATH}"
 
 kubectl apply -k "${overlay_path}"
-kubectl rollout status statefulset/qdrant -n securerag-hub --timeout=300s
-kubectl rollout status deployment/ollama -n securerag-hub --timeout=300s
-kubectl rollout status deployment/api-gateway -n securerag-hub --timeout=180s
+kubectl rollout status deployment/portal-web -n securerag-hub --timeout=180s
 kubectl rollout status deployment/auth-users -n securerag-hub --timeout=180s
 kubectl rollout status deployment/chatbot-manager -n securerag-hub --timeout=180s
-kubectl rollout status deployment/llm-orchestrator -n securerag-hub --timeout=180s
-kubectl rollout status deployment/security-auditor -n securerag-hub --timeout=180s
-kubectl rollout status deployment/knowledge-hub -n securerag-hub --timeout=180s
+kubectl rollout status deployment/conversation-service -n securerag-hub --timeout=180s
+kubectl rollout status deployment/audit-security-service -n securerag-hub --timeout=180s

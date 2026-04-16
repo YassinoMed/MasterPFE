@@ -4,7 +4,6 @@ set -euo pipefail
 
 NS="${NS:-securerag-hub}"
 JENKINS_URL="${JENKINS_URL:-http://localhost:8085/login}"
-API_GATEWAY_HEALTH_URL="${API_GATEWAY_HEALTH_URL:-http://localhost:8080/healthz}"
 PORTAL_HEALTH_URL="${PORTAL_HEALTH_URL:-http://localhost:8081/health}"
 REQUIRE_SUPPLY_CHAIN_EVIDENCE="${REQUIRE_SUPPLY_CHAIN_EVIDENCE:-true}"
 
@@ -89,12 +88,6 @@ if command -v kubectl >/dev/null 2>&1; then
 fi
 
 if command -v curl >/dev/null 2>&1; then
-  if curl -fsS "${API_GATEWAY_HEALTH_URL}" >/dev/null 2>&1; then
-    pass "API Gateway health is reachable"
-  else
-    warn "API Gateway health is not reachable at ${API_GATEWAY_HEALTH_URL}"
-  fi
-
   if curl -fsS "${PORTAL_HEALTH_URL}" >/dev/null 2>&1; then
     pass "Portal Web health is reachable"
   else

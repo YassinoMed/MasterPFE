@@ -1,0 +1,31 @@
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: securerag-restrict-volume-types
+  annotations:
+    policies.kyverno.io/title: Restrict SecureRAG volume types
+    policies.kyverno.io/category: Pod Security
+    policies.kyverno.io/severity: high
+    policies.kyverno.io/subject: Pod
+    policies.kyverno.io/description: >-
+      Forbids hostPath volumes in the SecureRAG namespace. The official runtime
+      may use emptyDir for Laravel writable paths, but must not mount host
+      filesystem paths into application Pods.
+spec:
+  validationFailureAction: Audit
+  background: true
+  rules:
+    - name: disallow-hostpath-volumes
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+              namespaces:
+                - securerag-hub
+      validate:
+        message: hostPath volumes are forbidden in SecureRAG runtime Pods.
+        pattern:
+          spec:
+            =(volumes):
+              - X(hostPath): "null"

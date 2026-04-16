@@ -7,12 +7,10 @@ REGISTRY_HOST="${REGISTRY_HOST:-localhost:5001}"
 IMAGE_TAG="${IMAGE_TAG:-dev}"
 
 services=(
-  api-gateway
   auth-users
   chatbot-manager
-  llm-orchestrator
-  security-auditor
-  knowledge-hub
+  conversation-service
+  audit-security-service
   portal-web
 )
 

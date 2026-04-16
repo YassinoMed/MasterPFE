@@ -3,42 +3,32 @@
 set -euo pipefail
 
 mkdir -p .coverage-artifacts
+rm -f .coverage-artifacts/junit-*.xml .coverage-artifacts/junit.xml .coverage-artifacts/coverage.xml .coverage-artifacts/coverage-summary.txt
 
-if ! command -v pytest >/dev/null 2>&1; then
-  echo "pytest is required but not installed." >&2
-  exit 1
-fi
+apps=(
+  platform/portal-web
+  services-laravel/auth-users-service
+  services-laravel/chatbot-manager-service
+  services-laravel/conversation-service
+  services-laravel/audit-security-service
+)
 
-discovered_tests=()
+summary=".coverage-artifacts/laravel-test-summary.txt"
+: > "${summary}"
 
-while IFS= read -r test_file; do
-  discovered_tests+=("${test_file}")
-done < <(find services tests -type f \( -name "test_*.py" -o -name "*_test.py" \) 2>/dev/null | sort)
+for app in "${apps[@]}"; do
+  if [[ ! -f "${app}/artisan" ]]; then
+    echo "[FAIL] Missing Laravel artisan entrypoint: ${app}" | tee -a "${summary}"
+    exit 1
+  fi
 
-if ((${#discovered_tests[@]} == 0)); then
-  echo "No Python tests discovered yet." | tee .coverage-artifacts/no-tests.txt
-  exit 0
-fi
+  report_name="$(printf '%s' "${app}" | tr '/-' '__')"
+  echo "[INFO] Running Laravel tests for ${app}" | tee -a "${summary}"
+  (
+    cd "${app}"
+    php artisan config:clear --ansi
+    php artisan test --log-junit "../../.coverage-artifacts/junit-${report_name}.xml"
+  )
+done
 
-test_roots=()
-
-if [ -d services ]; then
-  test_roots+=("services")
-fi
-
-if [ -d tests ]; then
-  test_roots+=("tests")
-fi
-
-if pytest --help 2>/dev/null | grep -q -- "--cov"; then
-  pytest "${test_roots[@]}" \
-    --cov=services \
-    --cov-branch \
-    --cov-report=term-missing \
-    --cov-report=xml:.coverage-artifacts/coverage.xml \
-    --junitxml=.coverage-artifacts/junit.xml
-else
-  echo "pytest-cov is not installed; running tests without coverage instrumentation."
-  pytest "${test_roots[@]}" \
-    --junitxml=.coverage-artifacts/junit.xml
-fi
+echo "[INFO] Laravel test suite completed" | tee -a "${summary}"

@@ -1,10 +1,10 @@
 # SecureRAG Hub Reference Campaign
 
-- Timestamp (UTC): 2026-04-11T14:40:30Z
+- Timestamp (UTC): 2026-04-16T20:25:11Z
 - Registry: `localhost:5001`
 - Image prefix: `securerag-hub`
-- Source tag: `dev`
-- Target tag: `release-local`
+- Source tag: `demo`
+- Target tag: `demo-release`
 - Overlay: `infra/k8s/overlays/demo`
 - Mode label: `demo`
 

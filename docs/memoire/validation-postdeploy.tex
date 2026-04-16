@@ -9,10 +9,12 @@ La validation post-deploiement a ete structuree autour de quatre objectifs compl
 
 \begin{itemize}
   \item verifier le demarrage du cluster local, du registre local et des workloads Kubernetes ;
-  \item confirmer l'accessibilite des microservices applicatifs et des composants techniques du RAG ;
-  \item exercer un premier niveau de validation securite sur les \textit{security contexts}, les \textit{NetworkPolicy} et la disponibilite du composant \texttt{security-auditor} ;
+  \item confirmer l'accessibilite des workloads Laravel officiels ;
+  \item exercer un premier niveau de validation securite sur les \textit{security contexts}, les \textit{NetworkPolicy} et la disponibilite du composant \texttt{audit-security-service} ;
   \item produire un rapport synthetique exploitable dans le memoire et en soutenance.
 \end{itemize}
+
+Mise a jour du perimetre : la validation officielle actuelle porte sur \texttt{portal-web}, \texttt{auth-users}, \texttt{chatbot-manager}, \texttt{conversation-service} et \texttt{audit-security-service}. Les anciens composants Python/RAG et Ollama sont conserves comme historique technique, mais exclus de la build/deploy officielle tant que leurs sources applicatives ne sont pas restaurees.
 
 \subsubsection{Protocole experimental}
 
@@ -20,7 +22,7 @@ Le premier essai reel a ete execute le 7 avril 2026 sur une machine locale \text
 
 \begin{enumerate}
   \item creation du cluster \texttt{kind} et du registre local ;
-  \item construction locale des images OCI des six microservices ;
+  \item construction locale des images OCI des cinq workloads officiels ;
   \item deploiement des manifests Kubernetes via Kustomize sur l'overlay \texttt{dev} ;
   \item execution des scripts de validation post-deploiement ;
   \item generation d'un rapport global de synthese.
@@ -33,14 +35,14 @@ bash scripts/deploy/create-kind.sh
 bash scripts/deploy/build-local-images.sh
 bash scripts/deploy/deploy-kind.sh
 
+bash scripts/validate/smoke-tests.sh
 bash scripts/validate/security-smoke.sh
 bash scripts/validate/e2e-functional-flow.sh
-bash scripts/validate/rag-smoke.sh
 bash scripts/validate/security-adversarial-advanced.sh
 bash scripts/validate/generate-validation-report.sh
 \end{verbatim}
 
-Le deploiement est realise dans l'espace de noms \texttt{securerag-hub}. Les images applicatives sont construites localement puis poussees dans le registre \texttt{localhost:5001}. L'acces externe de demonstration est expose via un \texttt{NodePort} sur \texttt{localhost:8080}, ce qui permet de verifier simplement le point d'entree de la plateforme.
+Le deploiement est realise dans l'espace de noms \texttt{securerag-hub}. Les images applicatives sont construites localement puis poussees dans le registre \texttt{localhost:5001}. L'acces externe de demonstration est expose via le \texttt{NodePort} du portail sur \texttt{http://localhost:8081/health}.
 
 \subsubsection{Jeu de validations mis en oeuvre}
 
@@ -50,13 +52,13 @@ Le dispositif de validation repose sur plusieurs scripts complementaires.
 Le script \texttt{security-smoke.sh} controle la presence des \textit{ServiceAccount} dedies, l'activation des \textit{NetworkPolicy} et les principaux parametres de durcissement des conteneurs, en particulier \texttt{runAsNonRoot}, \texttt{readOnlyRootFilesystem} et \texttt{allowPrivilegeEscalation=false} lorsque ces contraintes sont applicables.
 
 \paragraph{Validation fonctionnelle de bout en bout.}
-Le script \texttt{e2e-functional-flow.sh} verifie l'existence des services Kubernetes, l'accessibilite des endpoints internes \texttt{/healthz} depuis un pod de validation, puis l'exposition externe du \texttt{api-gateway} via \texttt{http://localhost:8080/healthz}. Il tente enfin un appel vers un endpoint conversationnel de type \texttt{/chat}. Si cet endpoint n'est pas encore implemente, le resultat est marque \texttt{SKIP}.
+Le script \texttt{e2e-functional-flow.sh} verifie l'existence des services Kubernetes officiels, l'accessibilite des endpoints internes \texttt{/health} depuis un pod de validation, puis l'exposition externe du portail via \texttt{http://localhost:8081/health}.
 
-\paragraph{Validation RAG minimale.}
-Le script \texttt{rag-smoke.sh} verifie l'accessibilite conjointe de \texttt{llm-orchestrator}, \texttt{knowledge-hub}, \texttt{qdrant} et \texttt{ollama}. Il tente egalement un appel vers un endpoint de type \texttt{/rag/query}. Ce test permet d'identifier rapidement si la chaine RAG est techniquement exploitable.
+\paragraph{Validation RAG legacy.}
+Le script \texttt{rag-smoke.sh} ne fait plus partie de la validation officielle par defaut. Il retourne un statut \texttt{PRET\_NON\_EXECUTE} sauf activation explicite du perimetre legacy, car les sources Python correspondantes ne sont plus presentes.
 
 \paragraph{Validation adversariale.}
-Le script \texttt{security-adversarial-advanced.sh} verifie la disponibilite du composant \texttt{security-auditor}, detecte l'existence d'un endpoint d'analyse de type \texttt{/analyze}, puis journalise un petit corpus de prompts adversariaux representatifs : tentative d'ignorer les instructions precedentes, de reveler le prompt systeme, d'acceder a des donnees confidentielles ou de contourner des restrictions de role.
+Le script \texttt{security-adversarial-advanced.sh} verifie la disponibilite du composant \texttt{audit-security-service} et controle que l'endpoint d'audit refuse les appels non autorises.
 
 \subsubsection{Mode d'interpretation des resultats}
 
@@ -72,12 +74,12 @@ Ce choix est adapte au contexte d'une preuve de concept. Il permet de demontrer 
 
 \subsubsection{Resultats obtenus lors du premier run reel}
 
-Le premier run reel a permis d'obtenir les observations suivantes :
+Le premier run reel historique a permis d'obtenir les observations suivantes. Ces observations ne representent plus le perimetre officiel actuel, mais expliquent pourquoi la trajectoire a ete recentree sur le runtime Laravel-first :
 
 \begin{itemize}
   \item le cluster \texttt{securerag-dev} a ete cree avec succes ;
   \item le registre local \texttt{localhost:5001} a ete initialise correctement ;
-  \item les six images applicatives ont ete construites et poussees localement ;
+  \item les anciennes images applicatives ont ete construites et poussees localement ;
   \item les microservices \texttt{api-gateway}, \texttt{auth-users}, \texttt{chatbot-manager}, \texttt{llm-orchestrator}, \texttt{security-auditor} et \texttt{knowledge-hub} ont atteint l'etat \texttt{Running} ;
   \item le composant \texttt{qdrant} a ete deploye avec succes sous forme de \texttt{StatefulSet} ;
   \item le composant \texttt{ollama} est reste bloque a l'etat \texttt{ContainerCreating} lors du premier essai ;
@@ -108,18 +110,18 @@ Le detail des principaux tests est resume ci-dessous :
 
 \subsubsection{Analyse technique des resultats}
 
-Le socle DevSecOps de la plateforme est donc valide sur les points suivants :
+Le socle DevSecOps de la plateforme est donc valide historiquement sur les points suivants, et doit etre revalide sur le perimetre Laravel-first avec les commandes courantes :
 
 \begin{itemize}
   \item la creation du cluster local et du registre local est reproductible ;
   \item la chaine de build locale des microservices applicatifs est fonctionnelle ;
   \item l'overlay Kustomize \texttt{dev} deploie correctement les ressources Kubernetes ;
-  \item l'exposition externe du \texttt{api-gateway} via \texttt{NodePort} est operationnelle ;
+  \item l'exposition externe via \texttt{NodePort} est operationnelle dans le scenario teste ;
   \item les politiques reseau et les controles de securite minimum sont bien appliques ;
   \item les scripts de validation produisent des artefacts exploitables automatiquement.
 \end{itemize}
 
-L'anomalie principale identifiee concerne \texttt{ollama}. L'analyse du runtime montre que le probleme n'est pas un \textit{crash} applicatif, mais un blocage au niveau du telechargement de l'image officielle. Sur l'architecture \texttt{arm64} utilisee pour ce test, l'image \texttt{ollama/ollama:0.13.5} embarque une couche de plusieurs gigaoctets, ce qui a empeche son chargement complet dans le delai retenu pour le premier run. En consequence, le pod \texttt{ollama} n'a pas atteint l'etat \texttt{Ready}, et le test RAG a echoue logiquement.
+L'anomalie principale identifiee historiquement concernait \texttt{ollama}. Cette anomalie n'est plus un bloqueur du scenario officiel, car le perimetre legacy RAG/Ollama est exclu de la build/deploy officielle tant que ses sources et preuves ne sont pas restaurees.
 
 Il convient egalement de noter un point de vigilance securite : le namespace applique les labels \texttt{pod-security} avec \texttt{enforce=baseline} et \texttt{audit/warn=restricted}. Dans ce cadre, \texttt{ollama} remonte un avertissement sur \texttt{runAsNonRoot}, ce qui est acceptable pour le bootstrap local, mais devra etre traite dans une iteration ulterieure si l'objectif est d'approcher plus strictement le profil \texttt{restricted}.
 
@@ -136,7 +138,11 @@ Le protocole a genere automatiquement plusieurs fichiers dans le repertoire \tex
   \item \texttt{k8s-pods.txt} ;
   \item \texttt{k8s-pvc.txt} ;
   \item \texttt{k8s-networkpolicy.txt} ;
-  \item \texttt{api-gateway-describe.txt}.
+  \item \texttt{portal-web-describe.txt} ;
+  \item \texttt{auth-users-describe.txt} ;
+  \item \texttt{chatbot-manager-describe.txt} ;
+  \item \texttt{conversation-service-describe.txt} ;
+  \item \texttt{audit-security-service-describe.txt}.
 \end{itemize}
 
 Ces fichiers constituent un jeu de preuves directement reutilisable en soutenance : etat du cluster, ressources deployees, stockage persistant, politiques reseau, validation fonctionnelle, verification securite et synthese finale.
@@ -145,26 +151,20 @@ Ces fichiers constituent un jeu de preuves directement reutilisable en soutenanc
 
 Le premier run reel a joue un role utile de diagnostic. Il a mis en evidence plusieurs points qui ont ensuite ete corriges pour fiabiliser l'exploitation locale.
 
-\paragraph{Stabilisation du mode reel avec Ollama.}
-Le composant \texttt{ollama}, initialement bloque a l'etat \texttt{ContainerCreating}, a fait l'objet d'une stabilisation progressive reposant sur :
-
-\begin{itemize}
-  \item un script de \textit{pre-pull} de l'image avant deploiement ;
-  \item des probes plus tolerantes ;
-  \item une documentation explicite du compromis entre mode reel et mode \texttt{demo}.
-\end{itemize}
-
-Cette correction n'efface pas le risque runtime associe a un modele local lourd, mais elle rend le comportement plus maitrisable et plus explicable.
+\paragraph{Rationalisation du runtime officiel.}
+La correction principale a consiste a retirer les composants Python/RAG non exploitables de la build/deploy officielle et a integrer les services Laravel réellement presents : \texttt{conversation-service} et \texttt{audit-security-service}.
 
 \paragraph{Activation des addons de cluster.}
-Dans un second temps, \texttt{metrics-server} et \texttt{Kyverno} ont ete installes sur le cluster local. Cette evolution a permis :
+Dans un second temps, \texttt{metrics-server} et \texttt{Kyverno} sont prepares par manifests et runbooks, mais leur validation reste dependante d'un cluster actif. Une preuve ne doit etre declaree \texttt{TERMINEE} qu'apres execution de :
 
-\begin{itemize}
-  \item de rendre les \textit{HPA} effectivement observables, avec des valeurs CPU reelles ;
-  \item d'activer les \textit{ClusterPolicy} de securite et de verification d'images en mode \texttt{Audit}.
-\end{itemize}
+\begin{verbatim}
+kubectl top pods -n securerag-hub
+kubectl get hpa -n securerag-hub
+kubectl get clusterpolicy
+kubectl get policyreport -A
+\end{verbatim}
 
-Autrement dit, les garde-fous qui n'etaient d'abord que versionnes dans le depot sont devenus activables et observables sur l'environnement de demonstration.
+Sans ces commandes et leurs sorties archivees, le statut correct reste \texttt{DEPENDANT\_DE\_L\_ENVIRONNEMENT}.
 
 \paragraph{Correction des pods de validation sous policy Cosign.}
 Une fois Kyverno actif, un point de vigilance supplementaire est apparu : les pods ephemeres de validation bases sur une image \texttt{securerag-hub-*} du registre local pouvaient etre controles par la policy de verification Cosign. Lorsque le registre local n'etait pas resolu de la meme maniere depuis le cluster, l'admission pouvait etre refusee.
@@ -185,11 +185,11 @@ Les resultats obtenus permettent de soutenir les affirmations suivantes :
 \begin{itemize}
   \item la plateforme n'est pas seulement decrite ou conteneurisee ; elle est effectivement deployable localement ;
   \item la chaine DevSecOps est operationnelle de la construction des images jusqu'a la validation post-deploiement ;
-  \item l'architecture microservices est correctement exposee et testable ;
+  \item l'architecture microservices Laravel est correctement exposee et testable ;
   \item les controles de securite Kubernetes et les tests adversariaux sont integres des le socle technique ;
-  \item l'unique point bloquant du premier run concerne la dependance LLM locale, et non le socle applicatif ou Kubernetes.
+  \item les points restant a prouver concernent l'environnement runtime : cluster actif, metrics-server, Kyverno, registry, Syft et Cosign.
 \end{itemize}
 
 \subsubsection{Conclusion}
 
-La validation post-deploiement de \textit{SecureRAG Hub} confirme la solidite du socle DevSecOps du projet. Le premier run reel met en evidence une plateforme majoritairement fonctionnelle, securisee et correctement instrumentee pour la demonstration. Le point restant a traiter concerne l'initialisation de \texttt{ollama}, necessaire pour declarer la chaine RAG totalement operationnelle. Cette limite est clairement identifiee, documentee et circonscrite, ce qui renforce la credibilite de la demarche d'evaluation retenue.
+La validation post-deploiement de \textit{SecureRAG Hub} confirme la solidite du socle DevSecOps du projet, a condition de distinguer strictement les preuves deja executees des preuves dependantes de l'environnement. Le runtime officiel est desormais Laravel-first ; la chaine legacy RAG/Ollama reste hors perimetre officiel tant qu'elle n'est pas restauree et revalidee.

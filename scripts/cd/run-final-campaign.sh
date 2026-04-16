@@ -14,15 +14,12 @@ case "${OFFICIAL_SCENARIO}" in
     export KUSTOMIZE_OVERLAY="${KUSTOMIZE_OVERLAY:-infra/k8s/overlays/demo}"
     export SOURCE_IMAGE_TAG="${SOURCE_IMAGE_TAG:-demo}"
     export TARGET_IMAGE_TAG="${TARGET_IMAGE_TAG:-demo-release}"
-    export VALIDATION_IMAGE="${VALIDATION_IMAGE:-python:3.12-slim}"
+    export VALIDATION_IMAGE="${VALIDATION_IMAGE:-curlimages/curl:8.11.1}"
     export PREPULL_REAL_OLLAMA="false"
     ;;
   real|ollama-real)
-    export KUSTOMIZE_OVERLAY="${KUSTOMIZE_OVERLAY:-infra/k8s/overlays/dev}"
-    export SOURCE_IMAGE_TAG="${SOURCE_IMAGE_TAG:-dev}"
-    export TARGET_IMAGE_TAG="${TARGET_IMAGE_TAG:-release-local}"
-    export VALIDATION_IMAGE="${VALIDATION_IMAGE:-python:3.12-slim}"
-    export PREPULL_REAL_OLLAMA="${PREPULL_REAL_OLLAMA:-true}"
+    error "The legacy real/Ollama scenario is excluded from the official runtime because Python service sources under services/ are absent. Use OFFICIAL_SCENARIO=demo."
+    exit 2
     ;;
   *)
     error "Unsupported OFFICIAL_SCENARIO: ${OFFICIAL_SCENARIO}. Expected demo or real."

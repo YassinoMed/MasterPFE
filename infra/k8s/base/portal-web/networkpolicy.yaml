@@ -16,8 +16,14 @@ spec:
   egress:
     - to:
         - podSelector:
-            matchLabels:
-              app.kubernetes.io/name: api-gateway
+            matchExpressions:
+              - key: app.kubernetes.io/name
+                operator: In
+                values:
+                  - auth-users
+                  - chatbot-manager
+                  - conversation-service
+                  - audit-security-service
       ports:
         - protocol: TCP
-          port: 8080
+          port: 8000

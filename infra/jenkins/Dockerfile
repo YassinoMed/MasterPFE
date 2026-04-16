@@ -16,9 +16,20 @@ RUN apt-get update && \
       docker.io \
       git \
       jq \
+      composer \
+      nodejs \
+      npm \
+      php-cli \
+      php-curl \
+      php-intl \
+      php-mbstring \
+      php-sqlite3 \
+      php-xml \
+      php-zip \
       python3 \
       python3-pip \
       python3-venv \
+      ruby \
       socat \
       unzip && \
     rm -rf /var/lib/apt/lists/*

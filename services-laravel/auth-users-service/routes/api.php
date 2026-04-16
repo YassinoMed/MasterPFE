@@ -9,10 +9,12 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('v1')->group(function (): void {
     Route::get('/health', HealthController::class);
 
-    Route::apiResource('users', UserController::class)->except(['destroy']);
-    Route::patch('/users/{user}/status', [UserController::class, 'status']);
-    Route::post('/users/{user}/roles', [UserController::class, 'roles']);
+    Route::middleware('throttle:120,1')->group(function (): void {
+        Route::apiResource('users', UserController::class)->except(['destroy']);
+        Route::patch('/users/{user}/status', [UserController::class, 'status']);
+        Route::post('/users/{user}/roles', [UserController::class, 'roles']);
 
-    Route::apiResource('roles', RoleController::class)->except(['destroy']);
-    Route::get('/permissions', PermissionController::class);
+        Route::apiResource('roles', RoleController::class)->except(['destroy']);
+        Route::get('/permissions', PermissionController::class);
+    });
 });

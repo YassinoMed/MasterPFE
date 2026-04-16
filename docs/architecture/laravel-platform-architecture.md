@@ -13,11 +13,11 @@ Those concerns are integrated through contracts, adapters, and mocked REST endpo
 - `conversation-service`: conversations, messages, AI integration adapters, response metadata
 - `audit-security-service`: audit logs, security events, blocked responses, admin action trail
 - `portal-web`: Laravel + Inertia + Vue 3 User/Admin UI and API client orchestration
-- `gateway`: reverse proxy and entrypoint routing layer
+- `gateway`: optional local reverse proxy layer; not part of the current official Kubernetes runtime
 
 ## Key decisions
 
-- Keep the existing Python/AI mock services under `services/` untouched.
+- Keep legacy Python/AI directories under `services/` as historical material only; they are excluded from the official build/deploy path while their application sources are absent.
 - Build the Laravel platform under `platform/` to avoid coupling platform concerns to AI services.
 - Use one codebase per business capability instead of a disguised monolith.
 - Use REST JSON between services with explicit service clients and versioned APIs.
@@ -37,23 +37,22 @@ Those concerns are integrated through contracts, adapters, and mocked REST endpo
 
 ## Deployment integration
 
-- The Laravel platform is not isolated from the SecureRAG Hub runtime.
-- `portal-web` is the User/Admin web surface and calls the cluster entrypoint exposed by the SecureRAG Hub deployment.
-- In the current local setup, this entrypoint is represented by the development HTTP exposure of the cluster.
-- The deployment target is documented in `docs/architecture/securerag-deployment-target.puml`.
-- This target view explicitly separates:
+- The Laravel platform is now the official local Kubernetes runtime.
+- `portal-web` is the User/Admin web surface and calls the Laravel services exposed inside the cluster.
+- In the current local setup, the external demonstration entrypoint is the `portal-web` NodePort.
+- The current deployment target separates:
   - the web portal
-  - the cluster HTTP entrypoint
-  - the `api-gateway` service
-  - the application pods
+  - the Laravel business services
+  - the security/audit service
+  - the Kubernetes guardrails
   - the DevSecOps supply chain
 
 ## Deployment note
 
-- The local Kubernetes deployment remains under `infra/` and `services/`.
+- The local Kubernetes deployment remains under `infra/` and uses sources from `platform/` and `services-laravel/`.
 - The Laravel platform remains under `platform/`.
 - This repository therefore models both:
-  - the secured chatbot runtime
+  - the secured Laravel chatbot administration/runtime surface
   - the User/Admin application surface around it
 
 ## Next implementation sequence

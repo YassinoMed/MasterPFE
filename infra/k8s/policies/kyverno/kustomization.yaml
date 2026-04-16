@@ -8,4 +8,8 @@ kind: Kustomization
 resources:
   - audit-cleartext-env-values.yaml
   - require-pod-security.yaml
+  - require-workload-controls.yaml
+  - restrict-image-references.yaml
+  - restrict-service-exposure.yaml
+  - restrict-volume-types.yaml
   - verify-cosign-images.yaml

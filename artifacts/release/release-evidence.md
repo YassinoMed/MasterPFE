@@ -1,10 +1,10 @@
 # SecureRAG Hub Release Evidence
 
-- Generated at (UTC): `2026-04-11T14:40:30Z`
+- Generated at (UTC): `2026-04-16T20:25:11Z`
 - Registry: `localhost:5001`
 - Image prefix: `securerag-hub`
-- Source tag: `dev`
-- Target tag: `release-local`
+- Source tag: `demo`
+- Target tag: `demo-release`
 
 ## Release artefacts
 
@@ -17,6 +17,7 @@
 | `sign-summary.txt` | missing |
 | `sbom-summary.txt` | missing |
 | `release-manifest.env` | present |
+| `supply-chain-evidence.md` | present |
 
 ## Digests promoted
 
@@ -29,4 +30,5 @@ No SBOM files detected in `artifacts/sbom`.
 ## Notes
 
 - This document records release evidence only; runtime validation evidence is stored under `artifacts/validation/`.
+- Consolidated supply-chain evidence is stored in `artifacts/release/supply-chain-evidence.md` when generated.
 - If promotion by digest has not run yet, tag-level evidence may exist without digest-level evidence.

@@ -1,52 +1,34 @@
 # Secrets Strategy — SecureRAG Hub
 
 ## Objectif
-Définir une stratégie simple, claire et soutenable pour la gestion des secrets dans SecureRAG Hub, en distinguant trois contextes :
-- local développeur
-- Jenkins
-- Kubernetes
+Définir une stratégie réaliste et démontrable pour trois périmètres séparés :
+- secrets applicatifs Kubernetes ;
+- credentials Jenkins/Cosign ;
+- fichiers locaux développeur.
 
-## Principes
-- aucun secret réel ne doit être committé dans le dépôt
-- les fichiers exemple ne contiennent que des placeholders
-- les secrets Jenkins et Kubernetes doivent être créés hors Git
-- les secrets de démonstration doivent être explicitement marqués comme non productifs
+## Principe de séparation
+| Périmètre | Stockage local | Injection | État |
+|---|---|---|---:|
+| Kubernetes apps | `security/secrets/.env.local` ignoré par Git | `scripts/secrets/create-dev-secrets.sh` vers `securerag-common-secrets` | TERMINÉ |
+| Jenkins admin | `infra/jenkins/secrets/jenkins-admin-password` ignoré par Git | `JENKINS_ADMIN_PASSWORD_FILE` dans Docker Compose | TERMINÉ |
+| Cosign Jenkins | `infra/jenkins/secrets/cosign.*` ignoré par Git | Jenkins Credentials bootstrap | TERMINÉ |
 
-## Local développeur
-- utiliser `security/secrets/.env.example` comme modèle
-- créer un fichier local non versionné à partir de ce modèle
-- ne jamais y stocker de clé Cosign de production
+Le mot de passe admin Jenkins n’est pas injecté dans le Secret applicatif Kubernetes.
 
-## Jenkins
-### Credentials attendus
-- `cosign-private-key` : Secret file
-- `cosign-public-key` : Secret file
-- `cosign-password` : Secret text
+## Bootstrap local
+```bash
+bash scripts/secrets/bootstrap-local-secrets.sh
+bash scripts/secrets/create-dev-secrets.sh
+bash scripts/jenkins/bootstrap-local-credentials.sh
+```
 
-### Règles
-- créer les credentials directement dans Jenkins
-- ne jamais monter les clés depuis le dépôt
-- limiter les permissions d’accès à ces credentials aux seuls jobs concernés
+`create-dev-secrets.sh` refuse les placeholders, les secrets faibles et un `APP_KEY` Laravel invalide.
 
-## Kubernetes
-### Secrets recommandés
-- `securerag-common-secrets`
-- secrets applicatifs dédiés si un service a des besoins spécifiques
+## Rotation
+- `SECURERAG_SHARED_API_TOKEN` : à régénérer après fuite ou changement de périmètre service-to-service.
+- `APP_KEY` : rotation destructive pour données chiffrées Laravel ; à planifier.
+- Cosign keypair : rotation après exposition ou changement d’autorité release.
+- Jenkins admin password/API token : rotation après soutenance, publication temporaire ou changement de collaborateur.
 
-### Règles
-- créer les secrets via `kubectl create secret` ou un script local contrôlé
-- ne pas committer les manifestes contenant des valeurs sensibles
-- conserver des manifestes d’exemple ou des commandes de création, pas les secrets réels
-
-## Conventions
-- variables d’environnement en majuscules
-- séparation claire entre `ConfigMap` non sensible et `Secret` sensible
-- suffixe `-example` ou `.example` pour tout fichier de démonstration
-
-## Amélioration possible
-En environnement plus avancé, remplacer la gestion locale par :
-- Vault
-- External Secrets Operator
-- Sealed Secrets
-
-Pour le périmètre PFE, la stratégie locale + Jenkins credentials + Kubernetes secrets est suffisante si elle est bien documentée et démontrée.
+## Options futures
+Pour une pré-production, utiliser SOPS/age, Sealed Secrets ou External Secrets Operator. Non activé par défaut pour ne pas complexifier la démonstration kind locale.

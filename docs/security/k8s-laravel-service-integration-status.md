@@ -1,39 +1,58 @@
 # Kubernetes Integration Status — Laravel Business Services
 
 ## Objectif
-Clarifier l’état réel d’intégration Kubernetes des services Laravel métier afin d’éviter toute surdéclaration dans les preuves sécurité et la soutenance.
+Clarifier l’état réel du runtime Kubernetes officiel afin d’éviter toute surdéclaration dans les preuves sécurité, la soutenance et les scripts de release.
 
-## État réel
-Le déploiement Kubernetes `demo` officiel expose les workloads de démonstration nécessaires à la soutenance DevSecOps :
+## État officiel actuel
+Le runtime Kubernetes officiel `dev`/`demo` est Laravel-first et correspond aux composants réellement buildables dans le dépôt.
+
+| Workload | Chemin source | Manifests K8s | État |
+|---|---|---|---:|
+| `portal-web` | `platform/portal-web` | `infra/k8s/base/portal-web/*` | TERMINÉ |
+| `auth-users` | `services-laravel/auth-users-service` | `infra/k8s/base/auth-users/*` | TERMINÉ |
+| `chatbot-manager` | `services-laravel/chatbot-manager-service` | `infra/k8s/base/chatbot-manager/*` | TERMINÉ |
+| `conversation-service` | `services-laravel/conversation-service` | `infra/k8s/base/conversation-service/*` | TERMINÉ |
+| `audit-security-service` | `services-laravel/audit-security-service` | `infra/k8s/base/audit-security-service/*` | TERMINÉ |
+
+Chaque workload officiel possède `Deployment`, `Service`, `ServiceAccount`, probes, `resources` CPU/mémoire/`ephemeral-storage`, `PodDisruptionBudget`, `NetworkPolicy` et `securityContext` durci.
+
+Le namespace est rendu avec Pod Security Admission `restricted` en `enforce`, `audit` et `warn`. Les pods de validation éphémères utilisent désormais un ServiceAccount dédié `sa-validation`, sans token monté automatiquement, avec `runAsNonRoot`, `seccomp RuntimeDefault`, `allowPrivilegeEscalation=false`, `readOnlyRootFilesystem=true`, `capabilities.drop=["ALL"]` et des ressources bornées.
+
+## Périmètre legacy exclu
+Les dossiers sous `services/` sont conservés comme historique mais ne sont plus build/deploy officiels :
 
 - `api-gateway`
 - `auth-users`
 - `chatbot-manager`
-- `knowledge-hub`
 - `llm-orchestrator`
 - `security-auditor`
-- `portal-web`
-- `qdrant`
-- `ollama`
+- `knowledge-hub`
 
-Les microservices Laravel métier existent dans le dépôt et disposent de tests, APIs et contrats, mais ils ne doivent être déclarés comme workloads Kubernetes runtime que lorsqu’un manifest explicite est ajouté et validé dans `infra/k8s`.
+Cause : les sources applicatives Python `.py` ne sont plus présentes. Un Dockerfile/requirements sans sources exploitables ne doit pas être présenté comme workload runtime validé.
 
-## Lecture sécurité
-- Les contrôles Kubernetes runtime actuels protègent le socle `demo` officiel.
-- Les contrôles applicatifs Laravel sont validés par tests locaux et par configuration des microservices.
-- L’intégration Kubernetes des microservices Laravel doit être traitée comme une extension contrôlée, avec manifests, NetworkPolicies, probes, secrets et preuves runtime dédiées.
+Les composants `qdrant` et `ollama` ne sont plus dans `infra/k8s/base/kustomization.yaml`. Toute réintégration doit être une évolution explicite avec manifests, NetworkPolicies et preuves runtime dédiées.
 
-## Preuves à fournir avant déclaration runtime
-Avant de déclarer `conversation-service` ou `audit-security-service` comme déployés officiellement dans Kubernetes, il faut archiver :
-
+## Validation non destructive
 ```bash
-kubectl kustomize infra/k8s/overlays/demo
-kubectl get deploy,svc,networkpolicy,pdb,hpa -n securerag-hub
-kubectl get pods -n securerag-hub
-kubectl logs -n securerag-hub deploy/<service-name> --tail=80
+kubectl kustomize infra/k8s/overlays/dev >/tmp/securerag-dev.yaml
+kubectl kustomize infra/k8s/overlays/demo >/tmp/securerag-demo.yaml
+bash scripts/validate/validate-k8s-cleartext-scope.sh
+bash scripts/validate/validate-k8s-resource-guards.sh
+bash scripts/validate/validate-k8s-ultra-hardening.sh
 ```
 
-## Formulation recommandée
-La formulation défendable est :
+## Validation runtime si cluster actif
+```bash
+kubectl get deploy,svc,networkpolicy,pdb,hpa -n securerag-hub
+kubectl get pods -n securerag-hub -o wide
+kubectl logs -n securerag-hub deploy/conversation-service --tail=80
+kubectl logs -n securerag-hub deploy/audit-security-service --tail=80
+bash scripts/validate/smoke-tests.sh
+bash scripts/validate/security-smoke.sh
+bash scripts/validate/e2e-functional-flow.sh
+```
 
-> Le mode `demo` Kubernetes est stable et validé sur les workloads officiels. Les microservices Laravel métier sont prêts côté code/API/tests et peuvent être intégrés au cluster via une phase d’industrialisation Kubernetes dédiée.
+## Lecture sécurité
+- `TERMINÉ` : manifests et validations de rendu sont présents.
+- `DÉPENDANT_DE_L_ENVIRONNEMENT` : preuve de pods `Ready`, logs runtime, HPA metrics, Kyverno reports.
+- `PRÊT_NON_EXÉCUTÉ` : promotion digest, signatures Cosign et preuves cluster si Docker/kind/registry/Cosign/Kyverno/metrics-server ne sont pas actifs.

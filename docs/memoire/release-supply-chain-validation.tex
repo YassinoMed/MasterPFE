@@ -17,13 +17,14 @@ La campagne de tests associee aux scripts de release vise quatre objectifs princ
 Les microservices concernes par cette validation sont les suivants :
 
 \begin{itemize}
-  \item \texttt{api-gateway}
   \item \texttt{auth-users}
   \item \texttt{chatbot-manager}
-  \item \texttt{llm-orchestrator}
-  \item \texttt{security-auditor}
-  \item \texttt{knowledge-hub}
+  \item \texttt{conversation-service}
+  \item \texttt{audit-security-service}
+  \item \texttt{portal-web}
 \end{itemize}
+
+Les anciens composants Python/RAG ne sont plus inclus dans la chaine officielle tant que leurs sources applicatives absentes ne sont pas restaurees et revalidees.
 
 \subsubsection{Scripts de release testes}
 
@@ -83,7 +84,7 @@ En mode \textit{key-pair}, il faut egalement disposer d'une cle privee \texttt{C
 La campagne de validation recommande d'executer les tests suivants dans l'ordre.
 
 \paragraph{Test 1 : generation des SBOM sur registre local.}
-Ce test verifie que les six images sont correctement detectees et inventoriees.
+Ce test verifie que les cinq images officielles sont correctement detectees et inventoriees.
 
 \begin{verbatim}
 REGISTRY_HOST=localhost:5001 \
@@ -95,12 +96,11 @@ bash scripts/release/generate-sbom.sh
 Le resultat attendu est la generation des fichiers suivants :
 
 \begin{itemize}
-  \item \texttt{artifacts/sbom/api-gateway-sbom.cdx.json}
   \item \texttt{artifacts/sbom/auth-users-sbom.cdx.json}
   \item \texttt{artifacts/sbom/chatbot-manager-sbom.cdx.json}
-  \item \texttt{artifacts/sbom/llm-orchestrator-sbom.cdx.json}
-  \item \texttt{artifacts/sbom/security-auditor-sbom.cdx.json}
-  \item \texttt{artifacts/sbom/knowledge-hub-sbom.cdx.json}
+  \item \texttt{artifacts/sbom/conversation-service-sbom.cdx.json}
+  \item \texttt{artifacts/sbom/audit-security-service-sbom.cdx.json}
+  \item \texttt{artifacts/sbom/portal-web-sbom.cdx.json}
   \item \texttt{artifacts/sbom/sbom-index.txt}
   \item \texttt{artifacts/release/sbom-summary.txt}
 \end{itemize}

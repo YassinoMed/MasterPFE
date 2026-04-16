@@ -1,9 +1,9 @@
 # Supply Chain Mandatory Evidence Gate
 
-- Generated at: `2026-04-15T04:33:01Z`
+- Generated at: `2026-04-16T20:25:13Z`
 - REQUIRE_SUPPLY_CHAIN_EVIDENCE: `true`
-- Expected services: `7`
-- Services: `api-gateway auth-users chatbot-manager llm-orchestrator security-auditor knowledge-hub portal-web`
+- Expected services: `5`
+- Services: `auth-users chatbot-manager conversation-service audit-security-service portal-web`
 
 | Required evidence | Status | Detail |
 |---|---:|---|

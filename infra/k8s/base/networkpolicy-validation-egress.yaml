@@ -17,28 +17,10 @@ spec:
                 operator: In
                 values:
                   - portal-web
-                  - api-gateway
                   - auth-users
                   - chatbot-manager
-                  - llm-orchestrator
-                  - security-auditor
-                  - knowledge-hub
+                  - conversation-service
+                  - audit-security-service
       ports:
         - protocol: TCP
           port: 8000
-        - protocol: TCP
-          port: 8080
-    - to:
-        - podSelector:
-            matchLabels:
-              app.kubernetes.io/name: ollama
-      ports:
-        - protocol: TCP
-          port: 11434
-    - to:
-        - podSelector:
-            matchLabels:
-              app.kubernetes.io/name: qdrant
-      ports:
-        - protocol: TCP
-          port: 6333

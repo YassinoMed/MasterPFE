@@ -1,0 +1,99 @@
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: securerag-restrict-image-references
+  annotations:
+    policies.kyverno.io/title: Restrict SecureRAG image references
+    policies.kyverno.io/category: Software Supply Chain Security
+    policies.kyverno.io/severity: high
+    policies.kyverno.io/subject: Pod
+    policies.kyverno.io/description: >-
+      Audits Pods that use mutable latest tags or images outside the trusted
+      registries required by the official SecureRAG Laravel runtime. Validation
+      Pods are limited to the pinned curlimages/curl helper image family.
+spec:
+  validationFailureAction: Audit
+  background: true
+  rules:
+    - name: disallow-latest-tags
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+              namespaces:
+                - securerag-hub
+      validate:
+        message: Mutable latest tags are not accepted for SecureRAG runtime Pods.
+        foreach:
+          - list: "request.object.spec.containers[]"
+            deny:
+              conditions:
+                any:
+                  - key: "{{ element.image || '' }}"
+                    operator: Matches
+                    value: ".*:latest$"
+          - list: "request.object.spec.initContainers[] || []"
+            deny:
+              conditions:
+                any:
+                  - key: "{{ element.image || '' }}"
+                    operator: Matches
+                    value: ".*:latest$"
+    - name: restrict-registries
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+              namespaces:
+                - securerag-hub
+              selector:
+                matchExpressions:
+                  - key: job-role
+                    operator: DoesNotExist
+      validate:
+        message: Runtime images must come from localhost:5001 or ghcr.io.
+        foreach:
+          - list: "request.object.spec.containers[]"
+            deny:
+              conditions:
+                all:
+                  - key: "{{ element.image || '' }}"
+                    operator: NotMatches
+                    value: "^(localhost:5001/|ghcr.io/).*"
+          - list: "request.object.spec.initContainers[] || []"
+            deny:
+              conditions:
+                all:
+                  - key: "{{ element.image || '' }}"
+                    operator: NotMatches
+                    value: "^(localhost:5001/|ghcr.io/).*"
+    - name: restrict-validation-helper-image
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+              namespaces:
+                - securerag-hub
+              selector:
+                matchLabels:
+                  job-role: validation
+      validate:
+        message: Validation Pods may only use the pinned curlimages/curl helper family.
+        foreach:
+          - list: "request.object.spec.containers[]"
+            deny:
+              conditions:
+                any:
+                  - key: "{{ element.image || '' }}"
+                    operator: NotMatches
+                    value: "^curlimages/curl:[0-9][A-Za-z0-9._-]*$"
+          - list: "request.object.spec.initContainers[] || []"
+            deny:
+              conditions:
+                any:
+                  - key: "{{ element.image || '' }}"
+                    operator: NotMatches
+                    value: "^curlimages/curl:[0-9][A-Za-z0-9._-]*$"

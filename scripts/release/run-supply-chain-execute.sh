@@ -38,12 +38,10 @@ image_ref() {
 }
 
 services=(
-  api-gateway
   auth-users
   chatbot-manager
-  llm-orchestrator
-  security-auditor
-  knowledge-hub
+  conversation-service
+  audit-security-service
   portal-web
 )
 

@@ -9,12 +9,10 @@ REPORT_DIR="${REPORT_DIR:-artifacts/release}"
 SBOM_DIR="${SBOM_DIR:-artifacts/sbom}"
 
 DEFAULT_SERVICES=(
-  api-gateway
   auth-users
   chatbot-manager
-  llm-orchestrator
-  security-auditor
-  knowledge-hub
+  conversation-service
+  audit-security-service
   portal-web
 )
 
@@ -114,6 +112,17 @@ runtime_status() {
   fi
 }
 
+markdown_global_status() {
+  local path="$1"
+  local expected="$2"
+
+  if [[ -s "${path}" ]] && grep -Fq "${expected}" "${path}"; then
+    printf 'TERMINÉ'
+  else
+    printf 'PARTIEL'
+  fi
+}
+
 count_json_results() {
   local path="$1"
   local expression="$2"
@@ -171,6 +180,7 @@ trivy_vulns="$(count_json_results "security/reports/trivy-fs.json" "trivy-vulns"
   printf '| Cosign verify | `%s` | `%s` |\n' "$(summary_state "${REPORT_DIR}/verify-summary.txt")" "${REPORT_DIR}/verify-summary.txt"
   printf '| Digest promotion | `%s` | `%s` |\n' "$(digest_state "${REPORT_DIR}/promotion-digests.txt")" "${REPORT_DIR}/promotion-digests.txt"
   printf '| Release attestation | `%s` | `%s` |\n' "$(attestation_state "${REPORT_DIR}/release-attestation.json")" "${REPORT_DIR}/release-attestation.json"
+  printf '| Kubernetes ultra hardening static | `%s` | `artifacts/security/k8s-ultra-hardening.md` |\n' "$(markdown_global_status "artifacts/security/k8s-ultra-hardening.md" "Statut global: TERMINÉ")"
   printf '| Metrics Server runtime | `%s` | `kubectl top pods -n %s` |\n' "$(runtime_status "kubectl top pods -n ${NS}")" "${NS}"
   printf '| Kyverno runtime | `%s` | `kubectl get clusterpolicies` |\n' "$(runtime_status "kubectl get clusterpolicies")"
   printf '| Kyverno reports | `%s` | `kubectl get policyreports -A` |\n' "$(runtime_status "kubectl get policyreports -A")"
@@ -182,7 +192,7 @@ trivy_vulns="$(count_json_results "security/reports/trivy-fs.json" "trivy-vulns"
   printf -- '- `DÉPENDANT_DE_L_ENVIRONNEMENT` means the control needs an active Docker/kind/Kubernetes/Jenkins/Cosign/Syft/Kyverno runtime.\n\n'
 
   printf '## 3. Security-ready reading\n\n'
-  printf 'SecureRAG Hub is security-ready for a defended demo when SAST, secret scanning, filesystem scanning, Laravel authorization tests, Kubernetes render checks, and final proof scripts pass. It becomes supply-chain-ready only after SBOM, Cosign signing, Cosign verification and digest promotion evidence are regenerated in the target environment.\n'
+  printf 'SecureRAG Hub is security-ready for a defended Laravel demo when SAST, secret scanning, filesystem scanning, Laravel authorization tests, Kubernetes render checks, and final proof scripts pass. It becomes supply-chain-ready only after SBOM, Cosign signing, Cosign verification and digest promotion evidence are regenerated in the target environment for the official service set.\n'
 } > "${OUT_FILE}"
 
 printf '[INFO] Security posture report written to %s\n' "${OUT_FILE}"

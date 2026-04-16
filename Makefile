@@ -19,7 +19,7 @@ help: ## Show available targets
 	@awk 'BEGIN {FS = ":.*## "; print "Available targets:"} /^[a-zA-Z0-9_.-]+:.*## / {printf "  %-12s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
 lint: ## Validate shell scripts, Jenkins config, Kustomize renders and security scopes
-	@bash -n scripts/ci/*.sh scripts/cd/*.sh scripts/deploy/*.sh scripts/release/*.sh scripts/release/lib/*.sh scripts/secrets/*.sh scripts/validate/*.sh scripts/jenkins/*.sh
+	@bash -n scripts/ci/*.sh scripts/cd/*.sh scripts/deploy/*.sh scripts/release/*.sh scripts/release/lib/*.sh scripts/secrets/*.sh scripts/validate/*.sh scripts/validate/lib/*.sh scripts/jenkins/*.sh
 	@docker compose -f infra/jenkins/docker-compose.yml config >/dev/null
 	@kubectl kustomize infra/k8s/overlays/dev >/dev/null
 	@kubectl kustomize infra/k8s/overlays/demo >/dev/null
@@ -27,6 +27,7 @@ lint: ## Validate shell scripts, Jenkins config, Kustomize renders and security 
 	@kubectl kustomize infra/k8s/policies/kyverno-enforce >/dev/null
 	@bash scripts/validate/validate-k8s-cleartext-scope.sh >/dev/null
 	@bash scripts/validate/validate-k8s-resource-guards.sh >/dev/null
+	@bash scripts/validate/validate-k8s-ultra-hardening.sh >/dev/null
 
 test: ## Run automated tests and coverage collection
 	@bash scripts/ci/run-tests.sh
@@ -63,7 +64,7 @@ validate: ## Run post-deployment validation and collect runtime evidence
 	@bash scripts/validate/generate-validation-report.sh
 	@bash scripts/validate/collect-runtime-evidence.sh
 
-demo: ## Deploy the demo overlay with the Ollama mock fallback
+demo: ## Deploy the Laravel demo overlay
 	@REGISTRY_HOST=$(REGISTRY_HOST) IMAGE_PREFIX=$(IMAGE_PREFIX) IMAGE_TAG=$(IMAGE_TAG) KUSTOMIZE_OVERLAY=infra/k8s/overlays/demo \
 		bash scripts/deploy/deploy-kind.sh
 
@@ -107,6 +108,9 @@ k8s-cleartext-scope: ## Validate that Kubernetes HTTP is restricted to internal 
 
 k8s-resource-guards: ## Validate Kubernetes CPU, memory and ephemeral-storage guards
 	@bash scripts/validate/validate-k8s-resource-guards.sh
+
+k8s-ultra-hardening: ## Validate Kubernetes restricted Pod Security, policies, probes, RBAC and exposure
+	@bash scripts/validate/validate-k8s-ultra-hardening.sh
 
 close-missing-phases: ## Close remaining environment-dependent phases with safe defaults
 	@bash scripts/validate/run-missing-phases-closure.sh

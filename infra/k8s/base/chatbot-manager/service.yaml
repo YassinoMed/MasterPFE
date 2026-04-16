@@ -8,6 +8,6 @@ spec:
     app.kubernetes.io/name: chatbot-manager
   ports:
     - name: http
-      port: 8080
+      port: 8000
       targetPort: http
       protocol: TCP

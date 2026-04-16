@@ -5,7 +5,6 @@ set -euo pipefail
 NS="${NS:-securerag-hub}"
 OUT="${OUT:-artifacts/final/final-validation-summary.md}"
 JENKINS_URL="${JENKINS_URL:-http://localhost:8085/login}"
-API_GATEWAY_HEALTH_URL="${API_GATEWAY_HEALTH_URL:-http://localhost:8080/healthz}"
 PORTAL_HEALTH_URL="${PORTAL_HEALTH_URL:-http://localhost:8081/health}"
 
 mkdir -p "$(dirname "${OUT}")"
@@ -53,19 +52,24 @@ PY
 ci_tests="unknown"
 coverage="unknown"
 
-if [[ -f ".coverage-artifacts/junit.xml" ]]; then
+if compgen -G ".coverage-artifacts/junit-*.xml" >/dev/null; then
   ci_tests="$(python3 - <<'PY'
 import xml.etree.ElementTree as ET
+from pathlib import Path
 
-root = ET.parse(".coverage-artifacts/junit.xml").getroot()
-tests = root.attrib.get("tests")
-if tests is None:
-    tests = str(len(root.findall(".//testcase")))
-failures = root.attrib.get("failures", "0")
-errors = root.attrib.get("errors", "0")
-print(f"{tests} tests, failures={failures}, errors={errors}")
+tests = 0
+failures = 0
+errors = 0
+for report in Path(".coverage-artifacts").glob("junit-*.xml"):
+    root = ET.parse(report).getroot()
+    tests += int(root.attrib.get("tests") or len(root.findall(".//testcase")))
+    failures += int(root.attrib.get("failures", "0"))
+    errors += int(root.attrib.get("errors", "0"))
+print(f"{tests} Laravel tests, failures={failures}, errors={errors}")
 PY
 )"
+elif [[ -f ".coverage-artifacts/junit.xml" ]]; then
+  ci_tests="legacy junit.xml present; regenerate with scripts/ci/run-tests.sh"
 fi
 
 if [[ -f ".coverage-artifacts/coverage-summary.txt" ]]; then
@@ -94,7 +98,6 @@ missing_phases_status="$(status_from_file artifacts/final/missing-phases-closure
 
 jenkins_status="partial"
 cluster_status="partial"
-api_gateway_status="partial"
 portal_status="partial"
 
 if command -v curl >/dev/null 2>&1 && curl -fsS "${JENKINS_URL}" >/dev/null 2>&1; then
@@ -103,10 +106,6 @@ fi
 
 if command -v kubectl >/dev/null 2>&1 && kubectl get ns "${NS}" >/dev/null 2>&1 && kubectl get pods -n "${NS}" >/dev/null 2>&1; then
   cluster_status="ok"
-fi
-
-if command -v curl >/dev/null 2>&1 && curl -fsS "${API_GATEWAY_HEALTH_URL}" >/dev/null 2>&1; then
-  api_gateway_status="ok"
 fi
 
 if command -v curl >/dev/null 2>&1 && curl -fsS "${PORTAL_HEALTH_URL}" >/dev/null 2>&1; then
@@ -138,7 +137,7 @@ cat > "${OUT}" <<EOF
 
 | Gate | Result |
 |---|---|
-| Ruff / lint | See Jenkins or shell output |
+| Static checks | See Jenkins or shell output |
 | Tests | ${ci_tests} |
 | Coverage | ${coverage} |
 | Semgrep findings | ${semgrep_results} |
@@ -151,7 +150,6 @@ cat > "${OUT}" <<EOF
 |---|---|
 | Jenkins reachable | ${jenkins_status} |
 | Kubernetes namespace | ${cluster_status} |
-| API Gateway health | ${api_gateway_status} |
 | Portal Web health | ${portal_status} |
 
 ## 4. Evidence files
@@ -173,14 +171,15 @@ cat > "${OUT}" <<EOF
 
 ## 5. Honest limits
 
-- The official soutenance scenario is \`demo\`; \`real/Ollama\` remains an optional extension.
+- The official soutenance scenario is \`demo\` with Laravel workloads: \`portal-web\`, \`auth-users\`, \`chatbot-manager\`, \`conversation-service\`, \`audit-security-service\`.
+- The legacy Python/RAG runtime is excluded from the official Kubernetes base until source code is intentionally restored.
 - Full \`execute\` mode depends on Docker, kind, kubectl, Cosign keys and registry availability.
 - Kyverno policies are repository-ready, but admission proof depends on an installed Kyverno controller.
 - HPA objects exist, while live CPU metrics depend on metrics-server availability.
 
 ## 6. Conclusion
 
-SecureRAG Hub is demonstrable in the official \`demo\` mode with Jenkins as the CI/CD authority, a validated Kubernetes runtime, archived evidence, and an explicit distinction between dry-run preparation and environment-dependent execute mode.
+SecureRAG Hub is demonstrable in the official \`demo\` mode with Jenkins as the CI/CD authority, a Laravel-first Kubernetes runtime, archived evidence, and an explicit distinction between dry-run preparation and environment-dependent execute mode.
 EOF
 
 printf 'Final validation summary written to %s\n' "${OUT}"

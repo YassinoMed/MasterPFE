@@ -9,6 +9,9 @@ spec:
       app.kubernetes.io/name: auth-users
   template:
     metadata:
+      annotations:
+        security.securerag.dev/internal-cleartext-scope: cluster-only-networkpolicy
+        security.securerag.dev/internal-cleartext-justification: Internal ClusterIP service calls only; egress is restricted by NetworkPolicies.
       labels:
         app.kubernetes.io/name: auth-users
     spec:
@@ -27,7 +30,7 @@ spec:
           imagePullPolicy: IfNotPresent
           ports:
             - name: http
-              containerPort: 8080
+              containerPort: 8000
           envFrom:
             - configMapRef:
                 name: securerag-common-config
@@ -36,19 +39,51 @@ spec:
                 optional: true
           env:
             - name: SERVICE_NAME
-              value: auth-users
+              value: auth-users-service
+            - name: INTERNAL_SERVICE_SCHEME
+              value: http
+            - name: APP_ENV
+              value: production
+            - name: APP_DEBUG
+              value: "false"
+            - name: APP_URL
+              value: $(INTERNAL_SERVICE_SCHEME)://auth-users:8000
+            - name: DB_CONNECTION
+              value: sqlite
+            - name: DB_DATABASE
+              value: /tmp/securerag-runtime/database/database.sqlite
+            - name: SESSION_DRIVER
+              value: file
+            - name: CACHE_STORE
+              value: file
+            - name: QUEUE_CONNECTION
+              value: sync
+            - name: LOG_CHANNEL
+              value: stderr
+            - name: CREATE_DOTENV
+              value: "false"
+            - name: SECURERAG_AUTHZ_ALLOW_LOCAL
+              value: "false"
           readinessProbe:
             httpGet:
-              path: /healthz
+              path: /health
               port: http
             initialDelaySeconds: 5
             periodSeconds: 10
           livenessProbe:
             httpGet:
-              path: /healthz
+              path: /health
               port: http
             initialDelaySeconds: 15
             periodSeconds: 20
+          startupProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 18
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true

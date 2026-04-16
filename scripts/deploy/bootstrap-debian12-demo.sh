@@ -159,8 +159,6 @@ run_demo_stack() {
   IMAGE_TAG="${IMAGE_TAG}" bash scripts/validate/smoke-tests.sh
 
   log "Checking demo endpoints"
-  curl -fsS "http://127.0.0.1:8080/healthz"
-  echo
   curl -fsS "http://127.0.0.1:8081/health"
   echo
 }
@@ -186,7 +184,6 @@ main() {
   run_optional_final_campaign
 
   log "SecureRAG Hub demo environment is ready"
-  log "API Gateway: http://127.0.0.1:8080/healthz"
   log "Portal Web: http://127.0.0.1:8081/health"
   log "Jenkins can be started later with: docker compose -f infra/jenkins/docker-compose.yml up --build -d"
 }

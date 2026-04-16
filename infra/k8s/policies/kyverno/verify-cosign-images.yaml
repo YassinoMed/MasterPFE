@@ -9,8 +9,8 @@ metadata:
     policies.kyverno.io/subject: Pod
     policies.kyverno.io/description: >-
       Verifies SecureRAG application images signed with Cosign. The rule is
-      intentionally scoped to project-owned images so third-party images such
-      as Ollama and Qdrant do not block the local platform bootstrap.
+      intentionally scoped to project-owned images used by the official
+      Laravel runtime.
 spec:
   validationFailureAction: Audit
   background: false

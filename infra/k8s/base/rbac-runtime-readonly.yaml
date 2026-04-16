@@ -45,10 +45,10 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
-  name: securerag-runtime-readonly-security-auditor
+  name: securerag-runtime-readonly-audit-security-service
 subjects:
   - kind: ServiceAccount
-    name: sa-security-auditor
+    name: sa-audit-security-service
     namespace: securerag-hub
 roleRef:
   apiGroup: rbac.authorization.k8s.io
