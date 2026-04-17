@@ -17,19 +17,20 @@ RUN groupadd --gid 10001 app \
 
 WORKDIR /var/www/html
 
-COPY composer.json composer.lock ./
+COPY services-laravel/audit-security-service/composer.json services-laravel/audit-security-service/composer.lock ./
+COPY services-laravel/shared-security /var/www/shared-security
 RUN composer install --no-interaction --prefer-dist --optimize-autoloader --no-scripts
 
-COPY app ./app
-COPY artisan ./
-COPY bootstrap ./bootstrap
-COPY config ./config
-COPY database ./database
-COPY docker ./docker
-COPY public ./public
-COPY resources ./resources
-COPY routes ./routes
-COPY .env.example ./
+COPY services-laravel/audit-security-service/app ./app
+COPY services-laravel/audit-security-service/artisan ./
+COPY services-laravel/audit-security-service/bootstrap ./bootstrap
+COPY services-laravel/audit-security-service/config ./config
+COPY services-laravel/audit-security-service/database ./database
+COPY services-laravel/audit-security-service/docker ./docker
+COPY services-laravel/audit-security-service/public ./public
+COPY services-laravel/audit-security-service/resources ./resources
+COPY services-laravel/audit-security-service/routes ./routes
+COPY services-laravel/audit-security-service/.env.example ./
 
 RUN composer dump-autoload --optimize && php artisan package:discover --ansi
 

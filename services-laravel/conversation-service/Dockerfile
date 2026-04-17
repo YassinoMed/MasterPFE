@@ -17,19 +17,20 @@ RUN groupadd --gid 10001 app \
 
 WORKDIR /var/www/html
 
-COPY composer.json composer.lock ./
+COPY services-laravel/conversation-service/composer.json services-laravel/conversation-service/composer.lock ./
+COPY services-laravel/shared-security /var/www/shared-security
 RUN composer install --no-interaction --prefer-dist --optimize-autoloader --no-scripts
 
-COPY app ./app
-COPY artisan ./
-COPY bootstrap ./bootstrap
-COPY config ./config
-COPY database ./database
-COPY docker ./docker
-COPY public ./public
-COPY resources ./resources
-COPY routes ./routes
-COPY .env.example ./
+COPY services-laravel/conversation-service/app ./app
+COPY services-laravel/conversation-service/artisan ./
+COPY services-laravel/conversation-service/bootstrap ./bootstrap
+COPY services-laravel/conversation-service/config ./config
+COPY services-laravel/conversation-service/database ./database
+COPY services-laravel/conversation-service/docker ./docker
+COPY services-laravel/conversation-service/public ./public
+COPY services-laravel/conversation-service/resources ./resources
+COPY services-laravel/conversation-service/routes ./routes
+COPY services-laravel/conversation-service/.env.example ./
 
 RUN composer dump-autoload --optimize && php artisan package:discover --ansi
 
