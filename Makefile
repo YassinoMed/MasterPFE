@@ -28,6 +28,7 @@ lint: ## Validate shell scripts, Jenkins config, Kustomize renders and security 
 	@bash scripts/validate/validate-k8s-cleartext-scope.sh >/dev/null
 	@bash scripts/validate/validate-k8s-resource-guards.sh >/dev/null
 	@bash scripts/validate/validate-k8s-ultra-hardening.sh >/dev/null
+	@bash scripts/ci/validate-sonar-cpd-scope.sh >/dev/null
 
 test: ## Run automated tests and coverage collection
 	@bash scripts/ci/run-tests.sh
