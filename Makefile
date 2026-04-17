@@ -13,7 +13,7 @@ DIGEST_RECORD_FILE ?= $(REPORT_DIR)/promotion-digests.txt
 OFFICIAL_SCENARIO ?= demo
 SUPPORT_PACK_ROOT ?= artifacts/support-pack
 
-.PHONY: help lint test laravel-test sonar-analysis kyverno-policy-check image-scan sbom-attest verify promote promote-digest deploy validate demo campaign final-campaign release-evidence release-attestation supply-chain-evidence supply-chain-execute observability-snapshot portal-service-proof global-project-status security-posture k8s-resource-guards close-missing-phases jenkins-webhook-proof jenkins-ci-push-proof cluster-security-proof refresh-cluster-security-proof devsecops-final-proof devsecops-readiness final-proof final-summary support-pack kyverno-install kyverno-enforce metrics-install clean
+.PHONY: help lint test laravel-test sonar-analysis kyverno-policy-check image-scan sbom-attest verify promote promote-digest deploy validate demo production-ha production-runtime-evidence campaign final-campaign release-evidence release-attestation supply-chain-evidence supply-chain-execute observability-snapshot portal-service-proof global-project-status security-posture k8s-resource-guards close-missing-phases jenkins-webhook-proof jenkins-ci-push-proof cluster-security-proof refresh-cluster-security-proof devsecops-final-proof devsecops-readiness final-proof final-summary support-pack kyverno-install kyverno-enforce metrics-install clean
 
 help: ## Show available targets
 	@awk 'BEGIN {FS = ":.*## "; print "Available targets:"} /^[a-zA-Z0-9_.-]+:.*## / {printf "  %-12s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
@@ -23,11 +23,13 @@ lint: ## Validate shell scripts, Jenkins config, Kustomize renders and security 
 	@docker compose -f infra/jenkins/docker-compose.yml config >/dev/null
 	@kubectl kustomize infra/k8s/overlays/dev >/dev/null
 	@kubectl kustomize infra/k8s/overlays/demo >/dev/null
+	@kubectl kustomize infra/k8s/overlays/production >/dev/null
 	@kubectl kustomize infra/k8s/policies/kyverno >/dev/null
 	@kubectl kustomize infra/k8s/policies/kyverno-enforce >/dev/null
 	@bash scripts/validate/validate-k8s-cleartext-scope.sh >/dev/null
 	@bash scripts/validate/validate-k8s-resource-guards.sh >/dev/null
 	@bash scripts/validate/validate-k8s-ultra-hardening.sh >/dev/null
+	@bash scripts/validate/validate-production-ha.sh >/dev/null
 	@bash scripts/ci/validate-sonar-cpd-scope.sh >/dev/null
 
 test: ## Run automated tests and coverage collection
@@ -82,6 +84,12 @@ validate: ## Run post-deployment validation and collect runtime evidence
 demo: ## Deploy the Laravel demo overlay
 	@REGISTRY_HOST=$(REGISTRY_HOST) IMAGE_PREFIX=$(IMAGE_PREFIX) IMAGE_TAG=$(IMAGE_TAG) KUSTOMIZE_OVERLAY=infra/k8s/overlays/demo \
 		bash scripts/deploy/deploy-kind.sh
+
+production-ha: ## Validate the production overlay HA controls without mutating the cluster
+	@bash scripts/validate/validate-production-ha.sh
+
+production-runtime-evidence: ## Collect read-only runtime evidence for production HA and HPA
+	@bash scripts/validate/collect-production-runtime-evidence.sh
 
 campaign: ## Run the full reference campaign verify -> promote -> deploy -> validate
 	@REGISTRY_HOST=$(REGISTRY_HOST) IMAGE_PREFIX=$(IMAGE_PREFIX) SOURCE_IMAGE_TAG=$(SOURCE_IMAGE_TAG) TARGET_IMAGE_TAG=$(TARGET_IMAGE_TAG) KUSTOMIZE_OVERLAY=$(KUSTOMIZE_OVERLAY) REPORT_DIR=$(REPORT_DIR) DIGEST_RECORD_FILE=$(DIGEST_RECORD_FILE) \

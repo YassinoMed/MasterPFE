@@ -269,6 +269,129 @@
 | `kyverno-policies` | Kyverno policy securerag-restrict-service-exposure rendered | TERMINÉ | `ClusterPolicy present` |
 | `kyverno-policies` | Kyverno policy securerag-restrict-volume-types rendered | TERMINÉ | `ClusterPolicy present` |
 | `kyverno-policies` | Kyverno policy securerag-verify-cosign-images rendered | TERMINÉ | `ClusterPolicy present` |
+| `production` | Pod Security Admission enforce restricted | TERMINÉ | `namespace label enforce=restricted` |
+| `production` | Pod Security Admission audit restricted | TERMINÉ | `namespace label audit=restricted` |
+| `production` | Pod Security Admission warn restricted | TERMINÉ | `namespace label warn=restricted` |
+| `production` | ServiceAccount sa-portal-web token automount disabled | TERMINÉ | `automountServiceAccountToken=false` |
+| `production` | ServiceAccount sa-auth-users token automount disabled | TERMINÉ | `automountServiceAccountToken=false` |
+| `production` | ServiceAccount sa-chatbot-manager token automount disabled | TERMINÉ | `automountServiceAccountToken=false` |
+| `production` | ServiceAccount sa-conversation-service token automount disabled | TERMINÉ | `automountServiceAccountToken=false` |
+| `production` | ServiceAccount sa-audit-security-service token automount disabled | TERMINÉ | `automountServiceAccountToken=false` |
+| `production` | ServiceAccount sa-validation token automount disabled | TERMINÉ | `automountServiceAccountToken=false` |
+| `production` | Deployment portal-web rendered | TERMINÉ | `Deployment present` |
+| `production` | portal-web explicit non-default ServiceAccount | TERMINÉ | `sa-portal-web` |
+| `production` | portal-web token automount disabled | TERMINÉ | `automountServiceAccountToken=false` |
+| `production` | portal-web pod runs as non-root | TERMINÉ | `runAsNonRoot=true` |
+| `production` | portal-web RuntimeDefault seccomp | TERMINÉ | `seccompProfile=RuntimeDefault` |
+| `production` | portal-web hostNetwork disabled | TERMINÉ | `hostNetwork=false/absent` |
+| `production` | portal-web hostPID disabled | TERMINÉ | `hostPID=false/absent` |
+| `production` | portal-web hostIPC disabled | TERMINÉ | `hostIPC=false/absent` |
+| `production` | portal-web no hostPath volume | TERMINÉ | `hostPath absent` |
+| `production` | portal-web/portal-web privilege escalation disabled | TERMINÉ | `allowPrivilegeEscalation=false` |
+| `production` | portal-web/portal-web read-only root filesystem | TERMINÉ | `readOnlyRootFilesystem=true` |
+| `production` | portal-web/portal-web drops all capabilities | TERMINÉ | `capabilities.drop includes ALL` |
+| `production` | portal-web/portal-web cpu request and limit | TERMINÉ | `requests/limits cpu` |
+| `production` | portal-web/portal-web memory request and limit | TERMINÉ | `requests/limits memory` |
+| `production` | portal-web/portal-web ephemeral-storage request and limit | TERMINÉ | `requests/limits ephemeral-storage` |
+| `production` | portal-web/portal-web readinessProbe | TERMINÉ | `readinessProbe present` |
+| `production` | portal-web/portal-web livenessProbe | TERMINÉ | `livenessProbe present` |
+| `production` | portal-web/portal-web startupProbe | TERMINÉ | `startupProbe present` |
+| `production` | portal-web/portal-web image not latest | TERMINÉ | `localhost:5001/securerag-hub-portal-web:production` |
+| `production` | Deployment auth-users rendered | TERMINÉ | `Deployment present` |
+| `production` | auth-users explicit non-default ServiceAccount | TERMINÉ | `sa-auth-users` |
+| `production` | auth-users token automount disabled | TERMINÉ | `automountServiceAccountToken=false` |
+| `production` | auth-users pod runs as non-root | TERMINÉ | `runAsNonRoot=true` |
+| `production` | auth-users RuntimeDefault seccomp | TERMINÉ | `seccompProfile=RuntimeDefault` |
+| `production` | auth-users hostNetwork disabled | TERMINÉ | `hostNetwork=false/absent` |
+| `production` | auth-users hostPID disabled | TERMINÉ | `hostPID=false/absent` |
+| `production` | auth-users hostIPC disabled | TERMINÉ | `hostIPC=false/absent` |
+| `production` | auth-users no hostPath volume | TERMINÉ | `hostPath absent` |
+| `production` | auth-users/auth-users privilege escalation disabled | TERMINÉ | `allowPrivilegeEscalation=false` |
+| `production` | auth-users/auth-users read-only root filesystem | TERMINÉ | `readOnlyRootFilesystem=true` |
+| `production` | auth-users/auth-users drops all capabilities | TERMINÉ | `capabilities.drop includes ALL` |
+| `production` | auth-users/auth-users cpu request and limit | TERMINÉ | `requests/limits cpu` |
+| `production` | auth-users/auth-users memory request and limit | TERMINÉ | `requests/limits memory` |
+| `production` | auth-users/auth-users ephemeral-storage request and limit | TERMINÉ | `requests/limits ephemeral-storage` |
+| `production` | auth-users/auth-users readinessProbe | TERMINÉ | `readinessProbe present` |
+| `production` | auth-users/auth-users livenessProbe | TERMINÉ | `livenessProbe present` |
+| `production` | auth-users/auth-users startupProbe | TERMINÉ | `startupProbe present` |
+| `production` | auth-users/auth-users image not latest | TERMINÉ | `localhost:5001/securerag-hub-auth-users:production` |
+| `production` | Deployment chatbot-manager rendered | TERMINÉ | `Deployment present` |
+| `production` | chatbot-manager explicit non-default ServiceAccount | TERMINÉ | `sa-chatbot-manager` |
+| `production` | chatbot-manager token automount disabled | TERMINÉ | `automountServiceAccountToken=false` |
+| `production` | chatbot-manager pod runs as non-root | TERMINÉ | `runAsNonRoot=true` |
+| `production` | chatbot-manager RuntimeDefault seccomp | TERMINÉ | `seccompProfile=RuntimeDefault` |
+| `production` | chatbot-manager hostNetwork disabled | TERMINÉ | `hostNetwork=false/absent` |
+| `production` | chatbot-manager hostPID disabled | TERMINÉ | `hostPID=false/absent` |
+| `production` | chatbot-manager hostIPC disabled | TERMINÉ | `hostIPC=false/absent` |
+| `production` | chatbot-manager no hostPath volume | TERMINÉ | `hostPath absent` |
+| `production` | chatbot-manager/chatbot-manager privilege escalation disabled | TERMINÉ | `allowPrivilegeEscalation=false` |
+| `production` | chatbot-manager/chatbot-manager read-only root filesystem | TERMINÉ | `readOnlyRootFilesystem=true` |
+| `production` | chatbot-manager/chatbot-manager drops all capabilities | TERMINÉ | `capabilities.drop includes ALL` |
+| `production` | chatbot-manager/chatbot-manager cpu request and limit | TERMINÉ | `requests/limits cpu` |
+| `production` | chatbot-manager/chatbot-manager memory request and limit | TERMINÉ | `requests/limits memory` |
+| `production` | chatbot-manager/chatbot-manager ephemeral-storage request and limit | TERMINÉ | `requests/limits ephemeral-storage` |
+| `production` | chatbot-manager/chatbot-manager readinessProbe | TERMINÉ | `readinessProbe present` |
+| `production` | chatbot-manager/chatbot-manager livenessProbe | TERMINÉ | `livenessProbe present` |
+| `production` | chatbot-manager/chatbot-manager startupProbe | TERMINÉ | `startupProbe present` |
+| `production` | chatbot-manager/chatbot-manager image not latest | TERMINÉ | `localhost:5001/securerag-hub-chatbot-manager:production` |
+| `production` | Deployment conversation-service rendered | TERMINÉ | `Deployment present` |
+| `production` | conversation-service explicit non-default ServiceAccount | TERMINÉ | `sa-conversation-service` |
+| `production` | conversation-service token automount disabled | TERMINÉ | `automountServiceAccountToken=false` |
+| `production` | conversation-service pod runs as non-root | TERMINÉ | `runAsNonRoot=true` |
+| `production` | conversation-service RuntimeDefault seccomp | TERMINÉ | `seccompProfile=RuntimeDefault` |
+| `production` | conversation-service hostNetwork disabled | TERMINÉ | `hostNetwork=false/absent` |
+| `production` | conversation-service hostPID disabled | TERMINÉ | `hostPID=false/absent` |
+| `production` | conversation-service hostIPC disabled | TERMINÉ | `hostIPC=false/absent` |
+| `production` | conversation-service no hostPath volume | TERMINÉ | `hostPath absent` |
+| `production` | conversation-service/conversation-service privilege escalation disabled | TERMINÉ | `allowPrivilegeEscalation=false` |
+| `production` | conversation-service/conversation-service read-only root filesystem | TERMINÉ | `readOnlyRootFilesystem=true` |
+| `production` | conversation-service/conversation-service drops all capabilities | TERMINÉ | `capabilities.drop includes ALL` |
+| `production` | conversation-service/conversation-service cpu request and limit | TERMINÉ | `requests/limits cpu` |
+| `production` | conversation-service/conversation-service memory request and limit | TERMINÉ | `requests/limits memory` |
+| `production` | conversation-service/conversation-service ephemeral-storage request and limit | TERMINÉ | `requests/limits ephemeral-storage` |
+| `production` | conversation-service/conversation-service readinessProbe | TERMINÉ | `readinessProbe present` |
+| `production` | conversation-service/conversation-service livenessProbe | TERMINÉ | `livenessProbe present` |
+| `production` | conversation-service/conversation-service startupProbe | TERMINÉ | `startupProbe present` |
+| `production` | conversation-service/conversation-service image not latest | TERMINÉ | `localhost:5001/securerag-hub-conversation-service:production` |
+| `production` | Deployment audit-security-service rendered | TERMINÉ | `Deployment present` |
+| `production` | audit-security-service explicit non-default ServiceAccount | TERMINÉ | `sa-audit-security-service` |
+| `production` | audit-security-service token automount disabled | TERMINÉ | `automountServiceAccountToken=false` |
+| `production` | audit-security-service pod runs as non-root | TERMINÉ | `runAsNonRoot=true` |
+| `production` | audit-security-service RuntimeDefault seccomp | TERMINÉ | `seccompProfile=RuntimeDefault` |
+| `production` | audit-security-service hostNetwork disabled | TERMINÉ | `hostNetwork=false/absent` |
+| `production` | audit-security-service hostPID disabled | TERMINÉ | `hostPID=false/absent` |
+| `production` | audit-security-service hostIPC disabled | TERMINÉ | `hostIPC=false/absent` |
+| `production` | audit-security-service no hostPath volume | TERMINÉ | `hostPath absent` |
+| `production` | audit-security-service/audit-security-service privilege escalation disabled | TERMINÉ | `allowPrivilegeEscalation=false` |
+| `production` | audit-security-service/audit-security-service read-only root filesystem | TERMINÉ | `readOnlyRootFilesystem=true` |
+| `production` | audit-security-service/audit-security-service drops all capabilities | TERMINÉ | `capabilities.drop includes ALL` |
+| `production` | audit-security-service/audit-security-service cpu request and limit | TERMINÉ | `requests/limits cpu` |
+| `production` | audit-security-service/audit-security-service memory request and limit | TERMINÉ | `requests/limits memory` |
+| `production` | audit-security-service/audit-security-service ephemeral-storage request and limit | TERMINÉ | `requests/limits ephemeral-storage` |
+| `production` | audit-security-service/audit-security-service readinessProbe | TERMINÉ | `readinessProbe present` |
+| `production` | audit-security-service/audit-security-service livenessProbe | TERMINÉ | `livenessProbe present` |
+| `production` | audit-security-service/audit-security-service startupProbe | TERMINÉ | `startupProbe present` |
+| `production` | audit-security-service/audit-security-service image not latest | TERMINÉ | `localhost:5001/securerag-hub-audit-security-service:production` |
+| `production` | Service audit-security-service exposure restricted | TERMINÉ | `type=ClusterIP` |
+| `production` | Service auth-users exposure restricted | TERMINÉ | `type=ClusterIP` |
+| `production` | Service chatbot-manager exposure restricted | TERMINÉ | `type=ClusterIP` |
+| `production` | Service conversation-service exposure restricted | TERMINÉ | `type=ClusterIP` |
+| `production` | Service portal-web exposure restricted | TERMINÉ | `type=ClusterIP` |
+| `production` | PDB for portal-web | TERMINÉ | `PodDisruptionBudget present` |
+| `production` | PDB for auth-users | TERMINÉ | `PodDisruptionBudget present` |
+| `production` | PDB for chatbot-manager | TERMINÉ | `PodDisruptionBudget present` |
+| `production` | PDB for conversation-service | TERMINÉ | `PodDisruptionBudget present` |
+| `production` | PDB for audit-security-service | TERMINÉ | `PodDisruptionBudget present` |
+| `production` | NetworkPolicy default-deny-all | TERMINÉ | `NetworkPolicy present` |
+| `production` | NetworkPolicy allow-dns-egress | TERMINÉ | `NetworkPolicy present` |
+| `production` | NetworkPolicy allow-validation-ingress | TERMINÉ | `NetworkPolicy present` |
+| `production` | NetworkPolicy allow-validation-egress | TERMINÉ | `NetworkPolicy present` |
+| `production` | NetworkPolicy selects portal-web | TERMINÉ | `podSelector covers portal-web` |
+| `production` | NetworkPolicy selects auth-users | TERMINÉ | `podSelector covers auth-users` |
+| `production` | NetworkPolicy selects chatbot-manager | TERMINÉ | `podSelector covers chatbot-manager` |
+| `production` | NetworkPolicy selects conversation-service | TERMINÉ | `podSelector covers conversation-service` |
+| `production` | NetworkPolicy selects audit-security-service | TERMINÉ | `podSelector covers audit-security-service` |
 
 ## Interpretation
 

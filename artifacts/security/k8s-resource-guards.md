@@ -3,7 +3,7 @@
 | Contrôle | Résultat |
 |---|---|
 | Statut global | TERMINÉ |
-| Overlays contrôlés | infra/k8s/overlays/dev infra/k8s/overlays/demo |
+| Overlays contrôlés | infra/k8s/overlays/dev infra/k8s/overlays/demo infra/k8s/overlays/production |
 | Contrôle container | resources.requests.ephemeral-storage et resources.limits.ephemeral-storage requis |
 | Contrôle namespace | LimitRange avec defaults ephemeral-storage requis |
 

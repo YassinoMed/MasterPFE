@@ -213,6 +213,13 @@ Configuration pour démonstration :
 - Runtime Laravel officiel
 - Pull policy `IfNotPresent`
 
+### 🏭 Overlay `production`
+Configuration production-like sans casser le mode démo :
+- replicas HA pour les cinq services Laravel officiels ;
+- PDB cohérents, rolling updates `maxUnavailable=0`, anti-affinity et topology spread ;
+- HPA CPU/mémoire pour tous les services officiels ;
+- validation non destructive via `make production-ha`.
+
 ### 🛡️ Policies Kyverno (`infra/k8s/policies/`)
 Sécurité d'admission :
 - Audit des configurations Pod
@@ -259,6 +266,7 @@ make sonar-analysis                     # Sonar si SONAR_HOST_URL/SONAR_TOKEN so
 make kyverno-policy-check               # Validation Kyverno hors cluster si CLI disponible
 make image-scan IMAGE_TAG=dev           # Scan Trivy des images candidates
 make sbom-attest TARGET_IMAGE_TAG=release-local # Attestation Cosign des SBOM
+make production-ha                      # Validation statique HA de l'overlay production
 make verify IMAGE_TAG=dev               # Vérification SBOM/Cosign
 make promote SOURCE=dev TARGET=release  # Promotion images
 make deploy IMAGE_TAG=release           # Déploiement K8s
@@ -309,6 +317,8 @@ make support-pack
 | [jenkins-setup.md](./docs/runbooks/jenkins-setup.md) | Configuration Jenkins locale |
 | [local-kind.md](./docs/runbooks/local-kind.md) | Cluster Kubernetes kind |
 | [release-promotion.md](./docs/runbooks/release-promotion.md) | Promotion d'images |
+| [production-ha.md](./docs/runbooks/production-ha.md) | Overlay production et haute disponibilité |
+| [production-readiness-roadmap.md](./docs/runbooks/production-readiness-roadmap.md) | Trajectoire production, HA et exploitation |
 | [final-campaign.md](./docs/runbooks/final-campaign.md) | Campagne finale |
 | [demo-checklist.md](./docs/runbooks/demo-checklist.md) | Checklist de démo |
 | [troubleshooting.md](./docs/runbooks/troubleshooting.md) | Résolution problèmes |

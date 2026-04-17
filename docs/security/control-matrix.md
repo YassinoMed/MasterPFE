@@ -22,8 +22,9 @@
 | Kubernetes | SecurityContext minimal | manifests `Deployment` / `StatefulSet` | TERMINÉ |
 | Kubernetes | ResourceQuota | `infra/k8s/base/resourcequota.yaml` | TERMINÉ |
 | Kubernetes | LimitRange | `infra/k8s/base/limitrange.yaml` avec defaults CPU, mémoire et `ephemeral-storage` | TERMINÉ |
-| Kubernetes | Resource guards | `scripts/validate/validate-k8s-resource-guards.sh` contrôle les overlays `dev` et `demo` | TERMINÉ |
+| Kubernetes | Resource guards | `scripts/validate/validate-k8s-resource-guards.sh` contrôle les overlays `dev`, `demo` et `production` | TERMINÉ |
 | Kubernetes | Ultra hardening statique | `scripts/validate/validate-k8s-ultra-hardening.sh` contrôle PSA restricted, ServiceAccounts, probes, PDB, NetworkPolicies, hostPath, images et Kyverno | TERMINÉ |
+| Kubernetes | Overlay production HA | `infra/k8s/overlays/production`, `scripts/validate/validate-production-ha.sh` | TERMINÉ statique |
 | Kubernetes | Validation Kyverno hors cluster | `scripts/ci/validate-kyverno-policies.sh`, `kyverno apply` si le CLI est disponible | PRÊT_NON_EXÉCUTÉ |
 | Kubernetes | PodDisruptionBudget | manifests `*/pdb.yaml` sur composants critiques | TERMINÉ |
 | Kubernetes | HorizontalPodAutoscaler | manifests `*/hpa.yaml`; exploitation dépend de `metrics-server` runtime | DÉPENDANT_DE_L_ENVIRONNEMENT |
