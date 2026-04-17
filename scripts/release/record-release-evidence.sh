@@ -47,12 +47,14 @@ artifact_status() {
   printf '## Release artefacts\n\n'
   printf '| Artefact | Statut |\n'
   printf '|---|---|\n'
+  printf '| `image-scan-summary.txt` | %s |\n' "$(artifact_status "${REPORT_DIR}/image-scan-summary.txt")"
   printf '| `verify-summary.txt` | %s |\n' "$(artifact_status "${REPORT_DIR}/verify-summary.txt")"
   printf '| `promotion-summary.txt` | %s |\n' "$(artifact_status "${REPORT_DIR}/promotion-summary.txt")"
   printf '| `promotion-by-digest-summary.txt` | %s |\n' "$(artifact_status "${REPORT_DIR}/promotion-by-digest-summary.txt")"
   printf '| `promotion-digests.txt` | %s |\n' "$(artifact_status "${DIGEST_RECORD_FILE}")"
   printf '| `sign-summary.txt` | %s |\n' "$(artifact_status "${REPORT_DIR}/sign-summary.txt")"
   printf '| `sbom-summary.txt` | %s |\n' "$(artifact_status "${REPORT_DIR}/sbom-summary.txt")"
+  printf '| `attest-summary.txt` | %s |\n' "$(artifact_status "${REPORT_DIR}/attest-summary.txt")"
   printf '| `release-manifest.env` | %s |\n' "$(artifact_status "${MANIFEST_FILE}")"
   printf '| `supply-chain-evidence.md` | %s |\n' "$(artifact_status "${REPORT_DIR}/supply-chain-evidence.md")"
 
@@ -80,7 +82,7 @@ artifact_status() {
   printf '\n## Notes\n\n'
   printf -- '- This document records release evidence only; runtime validation evidence is stored under `artifacts/validation/`.\n'
   printf -- '- Consolidated supply-chain evidence is stored in `artifacts/release/supply-chain-evidence.md` when generated.\n'
-  printf -- '- If promotion by digest has not run yet, tag-level evidence may exist without digest-level evidence.\n'
+  printf -- '- If image scanning, SBOM attestation or promotion by digest has not run yet, tag-level evidence may exist without complete release evidence.\n'
 } > "${EVIDENCE_FILE}"
 
 info "Release evidence written to ${EVIDENCE_FILE}"

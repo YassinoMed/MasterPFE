@@ -64,6 +64,22 @@ pipeline {
       }
     }
 
+    stage('CD_IMAGE_SCAN - Scan Release Candidate Images') {
+      steps {
+        sh '''
+          set -euo pipefail
+          REGISTRY_HOST="${REGISTRY_HOST}" IMAGE_PREFIX="${IMAGE_PREFIX}" IMAGE_TAG="${SOURCE_IMAGE_TAG}" \
+          REPORT_DIR="${REPORT_DIR}" IMAGE_SCAN_DIR="security/reports" \
+          bash scripts/release/scan-images.sh
+        '''
+      }
+      post {
+        always {
+          archiveArtifacts allowEmptyArchive: true, artifacts: 'artifacts/release/image-scan-summary.txt,artifacts/release/*-image-scan.log,security/reports/trivy-image-*.json'
+        }
+      }
+    }
+
     stage('Verify Release Candidate Signatures') {
       steps {
         withCredentials([
@@ -119,6 +135,27 @@ pipeline {
       post {
         always {
           archiveArtifacts allowEmptyArchive: true, artifacts: 'artifacts/sbom/**,artifacts/release/sbom-summary.txt'
+        }
+      }
+    }
+
+    stage('Attest SBOMs') {
+      steps {
+        withCredentials([
+          file(credentialsId: 'cosign-private-key', variable: 'COSIGN_KEY'),
+          string(credentialsId: 'cosign-password', variable: 'COSIGN_PASSWORD')
+        ]) {
+          sh '''
+            set -euo pipefail
+            REGISTRY_HOST="${REGISTRY_HOST}" IMAGE_PREFIX="${IMAGE_PREFIX}" IMAGE_TAG="${TARGET_IMAGE_TAG}" \
+            SBOM_DIR="${SBOM_DIR}" REPORT_DIR="${REPORT_DIR}" COSIGN_KEY="${COSIGN_KEY}" \
+            bash scripts/release/attest-sboms.sh
+          '''
+        }
+      }
+      post {
+        always {
+          archiveArtifacts allowEmptyArchive: true, artifacts: 'artifacts/release/attest-summary.txt,artifacts/release/*-attest.log'
         }
       }
     }

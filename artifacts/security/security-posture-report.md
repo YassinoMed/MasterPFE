@@ -1,7 +1,7 @@
 # Security Posture Report — SecureRAG Hub
 
-- Generated at UTC: `2026-04-16T20:46:49Z`
-- Git commit: `2679220e2bd1aafb82f7181ea42a4ecd4f32720c`
+- Generated at UTC: `2026-04-17T05:16:40Z`
+- Git commit: `9b0878f0dd8923415026a96a33b9aad98f24cdc4`
 - Kubernetes namespace: `securerag-hub`
 
 ## 1. Security controls status
@@ -9,14 +9,19 @@
 | Control | State | Evidence |
 |---|---|---|
 | Semgrep SAST | `TERMINÉ` | `security/reports/semgrep.json`, findings=0 |
+| Sonar CPD scope | `TERMINÉ` | `artifacts/security/sonar-cpd-scope.md` |
+| Sonar Quality Gate | `PRÊT_NON_EXÉCUTÉ` | `security/reports/sonar-analysis.md` |
 | Gitleaks secret scan | `PARTIEL` | `security/reports/gitleaks.json`, findings=n/a |
 | Trivy filesystem scan | `PARTIEL` | `security/reports/trivy-fs.json`, vulnerabilities=n/a |
+| Trivy image scan | `PARTIEL` | `artifacts/release/image-scan-summary.txt` |
 | SBOM Syft | `PARTIEL` | `artifacts/release/sbom-summary.txt`, sbom_count=0, expected=5 |
+| SBOM Cosign attestation | `PARTIEL` | `artifacts/release/attest-summary.txt` |
 | Cosign sign | `PARTIEL` | `artifacts/release/sign-summary.txt` |
 | Cosign verify | `PARTIEL` | `artifacts/release/verify-summary.txt` |
 | Digest promotion | `PARTIEL` | `artifacts/release/promotion-digests.txt` |
 | Release attestation | `PARTIEL` | `artifacts/release/release-attestation.json` |
 | Kubernetes ultra hardening static | `TERMINÉ` | `artifacts/security/k8s-ultra-hardening.md` |
+| Kyverno policy CLI validation | `PRÊT_NON_EXÉCUTÉ` | `artifacts/security/kyverno-policy-validation.md` |
 | Metrics Server runtime | `DÉPENDANT_DE_L_ENVIRONNEMENT` | `kubectl top pods -n securerag-hub` |
 | Kyverno runtime | `DÉPENDANT_DE_L_ENVIRONNEMENT` | `kubectl get clusterpolicies` |
 | Kyverno reports | `DÉPENDANT_DE_L_ENVIRONNEMENT` | `kubectl get policyreports -A` |
@@ -30,4 +35,4 @@
 
 ## 3. Security-ready reading
 
-SecureRAG Hub is security-ready for a defended Laravel demo when SAST, secret scanning, filesystem scanning, Laravel authorization tests, Kubernetes render checks, and final proof scripts pass. It becomes supply-chain-ready only after SBOM, Cosign signing, Cosign verification and digest promotion evidence are regenerated in the target environment for the official service set.
+SecureRAG Hub is security-ready for a defended Laravel demo when SAST, Sonar scope validation, secret scanning, filesystem scanning, Laravel authorization tests, Kubernetes render checks, and final proof scripts pass. It becomes supply-chain-ready only after Trivy image scanning, SBOM generation, SBOM attestation, Cosign signing, Cosign verification and digest promotion evidence are regenerated in the target environment for the official service set.

@@ -13,7 +13,7 @@ DIGEST_RECORD_FILE ?= $(REPORT_DIR)/promotion-digests.txt
 OFFICIAL_SCENARIO ?= demo
 SUPPORT_PACK_ROOT ?= artifacts/support-pack
 
-.PHONY: help lint test laravel-test verify promote promote-digest deploy validate demo campaign final-campaign release-evidence release-attestation supply-chain-evidence supply-chain-execute observability-snapshot portal-service-proof global-project-status security-posture k8s-resource-guards close-missing-phases jenkins-webhook-proof jenkins-ci-push-proof cluster-security-proof refresh-cluster-security-proof devsecops-final-proof devsecops-readiness final-proof final-summary support-pack kyverno-install kyverno-enforce metrics-install clean
+.PHONY: help lint test laravel-test sonar-analysis kyverno-policy-check image-scan sbom-attest verify promote promote-digest deploy validate demo campaign final-campaign release-evidence release-attestation supply-chain-evidence supply-chain-execute observability-snapshot portal-service-proof global-project-status security-posture k8s-resource-guards close-missing-phases jenkins-webhook-proof jenkins-ci-push-proof cluster-security-proof refresh-cluster-security-proof devsecops-final-proof devsecops-readiness final-proof final-summary support-pack kyverno-install kyverno-enforce metrics-install clean
 
 help: ## Show available targets
 	@awk 'BEGIN {FS = ":.*## "; print "Available targets:"} /^[a-zA-Z0-9_.-]+:.*## / {printf "  %-12s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
@@ -39,6 +39,20 @@ laravel-test: ## Run Blade portal and Laravel business microservice tests
 		echo "[INFO] Testing $$app"; \
 		(cd "$$app" && php artisan test); \
 	done
+
+sonar-analysis: ## Run Sonar analysis and quality gate when SONAR_HOST_URL/SONAR_TOKEN are configured
+	@bash scripts/ci/run-sonar-analysis.sh
+
+kyverno-policy-check: ## Validate Kyverno policies against rendered Kubernetes resources without requiring a cluster
+	@bash scripts/ci/validate-kyverno-policies.sh
+
+image-scan: ## Scan official release candidate images with Trivy before signing
+	@REGISTRY_HOST=$(REGISTRY_HOST) IMAGE_PREFIX=$(IMAGE_PREFIX) IMAGE_TAG=$(IMAGE_TAG) REPORT_DIR=$(REPORT_DIR) \
+		bash scripts/release/scan-images.sh
+
+sbom-attest: ## Attach generated CycloneDX SBOMs to images using Cosign attest
+	@REGISTRY_HOST=$(REGISTRY_HOST) IMAGE_PREFIX=$(IMAGE_PREFIX) IMAGE_TAG=$(TARGET_IMAGE_TAG) REPORT_DIR=$(REPORT_DIR) SBOM_DIR=$(SBOM_DIR) \
+		bash scripts/release/attest-sboms.sh
 
 verify: ## Verify image signatures for IMAGE_TAG
 	@REGISTRY_HOST=$(REGISTRY_HOST) IMAGE_PREFIX=$(IMAGE_PREFIX) IMAGE_TAG=$(IMAGE_TAG) REPORT_DIR=$(REPORT_DIR) \

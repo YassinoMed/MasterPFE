@@ -30,7 +30,7 @@ docker compose ps
 ## Accès
 - URL Jenkins : `http://localhost:8085`
 - utilisateur initial : `admin`
-- mot de passe initial : `change-me-now`
+- mot de passe initial : lire `infra/jenkins/secrets/jenkins-admin-password` après exécution de `bash scripts/jenkins/bootstrap-local-credentials.sh`
 
 ## Post-installation immédiate
 1. Se connecter à Jenkins.
@@ -56,6 +56,19 @@ et crée/actualise automatiquement les credentials :
 - `cosign-private-key`
 - `cosign-public-key`
 - `cosign-password`
+- `sonar-token` si `infra/jenkins/secrets/sonar-token` existe
+
+Le token Sonar n'est pas généré automatiquement. Pour activer le gate Sonar dans Jenkins :
+
+```bash
+SONAR_TOKEN_VALUE='<token-sonar-reel>' bash scripts/jenkins/bootstrap-local-credentials.sh
+```
+
+Puis lancer le job CI avec :
+- `RUN_SONAR=true`
+- `SONAR_HOST_URL=https://sonarcloud.io` ou l'URL SonarQube locale
+
+Sans credential `sonar-token`, le mode `RUN_SONAR=true` échoue volontairement. Avec `RUN_SONAR=false`, le pipeline produit seulement une preuve `PRÊT_NON_EXÉCUTÉ`.
 
 Le fichier `infra/jenkins/secrets/kubeconfig` est monté dans le conteneur Jenkins pour permettre à `kubectl` d’accéder au cluster `kind`.
 
@@ -75,15 +88,21 @@ Cela permet de conserver les mêmes valeurs de `REGISTRY_HOST` et les mêmes scr
 ### `securerag-hub-ci`
 - checkout
 - lint/tests/couverture
+- audit de dépendances
 - Semgrep
 - Gitleaks
 - Trivy filesystem
+- validation K8s statique et Kyverno hors cluster si le CLI est disponible
+- Sonar Quality Gate seulement si `RUN_SONAR=true`
 - archivage des rapports
 
 ### `securerag-hub-cd`
+- scan Trivy des images candidates
 - vérification des signatures du tag source
 - promotion sans rebuild vers un tag cible
 - génération SBOM sur le tag promu
+- attestation Cosign des SBOM
+- gate obligatoire des preuves release
 - vérification avant déploiement
 - déploiement sur `kind`
 - validations post-déploiement

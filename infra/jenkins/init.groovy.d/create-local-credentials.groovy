@@ -33,6 +33,7 @@ def upsertCredential = { credential, id ->
 def privateKeyPath = secretsDir.resolve('cosign.key')
 def publicKeyPath = secretsDir.resolve('cosign.pub')
 def passwordPath = secretsDir.resolve('cosign.password')
+def sonarTokenPath = secretsDir.resolve('sonar-token')
 
 if (Files.exists(privateKeyPath)) {
     upsertCredential(
@@ -69,6 +70,18 @@ if (Files.exists(passwordPath)) {
             Secret.fromString(Files.readString(passwordPath).trim())
         ),
         'cosign-password'
+    )
+}
+
+if (Files.exists(sonarTokenPath)) {
+    upsertCredential(
+        new StringCredentialsImpl(
+            CredentialsScope.GLOBAL,
+            'sonar-token',
+            'SecureRAG Hub SonarQube or SonarCloud token',
+            Secret.fromString(Files.readString(sonarTokenPath).trim())
+        ),
+        'sonar-token'
     )
 }
 

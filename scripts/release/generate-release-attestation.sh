@@ -177,10 +177,12 @@ digest_status_for() {
   printf 'PRESENT_UNPROVEN'
 }
 
+IMAGE_SCAN_STATUS="$(summary_status_for "${REPORT_DIR}/image-scan-summary.txt")"
 SIGN_STATUS="$(summary_status_for "${REPORT_DIR}/sign-summary.txt")"
 VERIFY_STATUS="$(summary_status_for "${REPORT_DIR}/verify-summary.txt")"
 PROMOTION_STATUS="$(summary_status_for "${REPORT_DIR}/promotion-by-digest-summary.txt")"
 SBOM_STATUS="$(summary_status_for "${REPORT_DIR}/sbom-summary.txt")"
+ATTEST_STATUS="$(summary_status_for "${REPORT_DIR}/attest-summary.txt")"
 DIGEST_STATUS="$(digest_status_for "${REPORT_DIR}/promotion-digests.txt")"
 RELEASE_EVIDENCE_STATUS="$(status_for "${REPORT_DIR}/release-evidence.md" false)"
 SUPPLY_EVIDENCE_STATUS="$(status_for "${REPORT_DIR}/supply-chain-evidence.md" false)"
@@ -191,7 +193,7 @@ if [[ -d "${SBOM_DIR}" ]]; then
 fi
 
 COMPLETE=true
-for status in "${SIGN_STATUS}" "${VERIFY_STATUS}" "${PROMOTION_STATUS}" "${SBOM_STATUS}"; do
+for status in "${IMAGE_SCAN_STATUS}" "${SIGN_STATUS}" "${VERIFY_STATUS}" "${PROMOTION_STATUS}" "${SBOM_STATUS}" "${ATTEST_STATUS}"; do
   if [[ "${status}" != "PROVEN" ]]; then
     COMPLETE=false
   fi
@@ -218,13 +220,23 @@ cat > "${OUT_JSON}" <<EOF
   "expected_service_count": ${EXPECTED_COUNT},
   "strict_mode": $(json_bool "${STRICT_RELEASE_ATTESTATION}"),
   "claims": {
+    "image_scan_passed": $(json_bool "$([[ "${IMAGE_SCAN_STATUS}" == "PROVEN" ]] && echo true || echo false)"),
     "sbom_generated": $(json_bool "$([[ "${SBOM_STATUS}" == "PROVEN" ]] && echo true || echo false)"),
+    "sbom_attested": $(json_bool "$([[ "${ATTEST_STATUS}" == "PROVEN" ]] && echo true || echo false)"),
     "cosign_signed": $(json_bool "$([[ "${SIGN_STATUS}" == "PROVEN" ]] && echo true || echo false)"),
     "cosign_verified": $(json_bool "$([[ "${VERIFY_STATUS}" == "PROVEN" ]] && echo true || echo false)"),
     "digest_promoted": $(json_bool "$([[ "${PROMOTION_STATUS}" == "PROVEN" && "${DIGEST_STATUS}" == "PROVEN" ]] && echo true || echo false)"),
     "no_rebuild_deploy_ready": $(json_bool "$([[ "${PROMOTION_STATUS}" == "PROVEN" && "${DIGEST_STATUS}" == "PROVEN" ]] && echo true || echo false)")
   },
   "evidence": {
+    "image_scan_summary": {
+      "path": "${REPORT_DIR}/image-scan-summary.txt",
+      "status": "${IMAGE_SCAN_STATUS}",
+      "pass": $(status_count "${REPORT_DIR}/image-scan-summary.txt" "PASS"),
+      "fail": $(status_count "${REPORT_DIR}/image-scan-summary.txt" "FAIL"),
+      "skip": $(status_count "${REPORT_DIR}/image-scan-summary.txt" "SKIP"),
+      "sha256": "$(file_sha256 "${REPORT_DIR}/image-scan-summary.txt")"
+    },
     "sign_summary": {
       "path": "${REPORT_DIR}/sign-summary.txt",
       "status": "${SIGN_STATUS}",
@@ -262,6 +274,14 @@ cat > "${OUT_JSON}" <<EOF
       "skip": $(status_count "${REPORT_DIR}/sbom-summary.txt" "SKIP"),
       "sha256": "$(file_sha256 "${REPORT_DIR}/sbom-summary.txt")"
     },
+    "attest_summary": {
+      "path": "${REPORT_DIR}/attest-summary.txt",
+      "status": "${ATTEST_STATUS}",
+      "pass": $(status_count "${REPORT_DIR}/attest-summary.txt" "PASS"),
+      "fail": $(status_count "${REPORT_DIR}/attest-summary.txt" "FAIL"),
+      "skip": $(status_count "${REPORT_DIR}/attest-summary.txt" "SKIP"),
+      "sha256": "$(file_sha256 "${REPORT_DIR}/attest-summary.txt")"
+    },
     "sbom_count": ${SBOM_COUNT},
     "release_evidence": {
       "path": "${REPORT_DIR}/release-evidence.md",
@@ -289,20 +309,22 @@ EOF
   printf '## Evidence status\n\n'
   printf '| Control | Status | Evidence |\n'
   printf '|---|---|---|\n'
+  printf '| Trivy image scan | `%s` | `%s` |\n' "${IMAGE_SCAN_STATUS}" "${REPORT_DIR}/image-scan-summary.txt"
   printf '| Cosign sign | `%s` | `%s` |\n' "${SIGN_STATUS}" "${REPORT_DIR}/sign-summary.txt"
   printf '| Cosign verify | `%s` | `%s` |\n' "${VERIFY_STATUS}" "${REPORT_DIR}/verify-summary.txt"
   printf '| Digest promotion | `%s` | `%s` |\n' "${PROMOTION_STATUS}" "${REPORT_DIR}/promotion-by-digest-summary.txt"
   printf '| Digest record | `%s` | `%s` |\n' "${DIGEST_STATUS}" "${REPORT_DIR}/promotion-digests.txt"
   printf '| SBOM generation | `%s` | `%s` |\n' "${SBOM_STATUS}" "${REPORT_DIR}/sbom-summary.txt"
+  printf '| SBOM attestation | `%s` | `%s` |\n' "${ATTEST_STATUS}" "${REPORT_DIR}/attest-summary.txt"
   printf '| SBOM files | `%s` | `%s` |\n' "${SBOM_COUNT}" "${SBOM_DIR}"
   printf '| Release evidence | `%s` | `%s` |\n' "${RELEASE_EVIDENCE_STATUS}" "${REPORT_DIR}/release-evidence.md"
   printf '| Supply chain evidence | `%s` | `%s` |\n\n' "${SUPPLY_EVIDENCE_STATUS}" "${REPORT_DIR}/supply-chain-evidence.md"
 
   printf '## Honest reading\n\n'
   if [[ "${COMPLETE}" == "true" ]]; then
-    printf 'The release chain is complete for the expected service set: SBOM, signing, verification, digest promotion and no-rebuild promotion evidence are all proven without FAIL or SKIP rows.\n'
+    printf 'The release chain is complete for the expected service set: image scan, SBOM, SBOM attestation, signing, verification, digest promotion and no-rebuild promotion evidence are all proven without FAIL or SKIP rows.\n'
   else
-    printf 'The release chain is not fully proven yet. Missing, partial, failed or skipped evidence must be regenerated by `make supply-chain-execute` on an environment with Docker, registry access, Syft, Cosign and valid Cosign keys.\n'
+    printf 'The release chain is not fully proven yet. Missing, partial, failed or skipped evidence must be regenerated by `make supply-chain-execute` on an environment with Docker, registry access, Trivy, Syft, Cosign and valid Cosign keys.\n'
   fi
 } > "${OUT_MD}"
 

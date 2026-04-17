@@ -1,18 +1,28 @@
 {
-  "generated_at": "2026-04-16T20:28:43Z",
-  "git_commit": "2679220e2bd1aafb82f7181ea42a4ecd4f32720c",
+  "generated_at": "2026-04-17T05:16:40Z",
+  "git_commit": "9b0878f0dd8923415026a96a33b9aad98f24cdc4",
   "attestation_type": "SecureRAG Hub release evidence attestation",
   "status": "PARTIAL_READY_TO_PROVE",
   "expected_service_count": 5,
   "strict_mode": false,
   "claims": {
+    "image_scan_passed": false,
     "sbom_generated": false,
+    "sbom_attested": false,
     "cosign_signed": false,
     "cosign_verified": false,
     "digest_promoted": false,
     "no_rebuild_deploy_ready": false
   },
   "evidence": {
+    "image_scan_summary": {
+      "path": "artifacts/release/image-scan-summary.txt",
+      "status": "MISSING",
+      "pass": 0,
+      "fail": 0,
+      "skip": 0,
+      "sha256": "missing"
+    },
     "sign_summary": {
       "path": "artifacts/release/sign-summary.txt",
       "status": "MISSING",
@@ -50,16 +60,24 @@
       "skip": 0,
       "sha256": "missing"
     },
+    "attest_summary": {
+      "path": "artifacts/release/attest-summary.txt",
+      "status": "MISSING",
+      "pass": 0,
+      "fail": 0,
+      "skip": 0,
+      "sha256": "missing"
+    },
     "sbom_count": 0,
     "release_evidence": {
       "path": "artifacts/release/release-evidence.md",
       "status": "PRESENT",
-      "sha256": "d8f6ba617feab1ef23fc7a18353aa7de4cd8acb2a75a3d39ed7788da5cedf84a"
+      "sha256": "ca72574c0b9656d5790d8713a52fd2aa062ed98b704d884458846c5f8ca7d141"
     },
     "supply_chain_evidence": {
       "path": "artifacts/release/supply-chain-evidence.md",
       "status": "PRESENT",
-      "sha256": "d5c07d5d95848c3d5251f039ec1084f4111ef795d3559d791cf486d9d7f2c1c0"
+      "sha256": "ddab7b7c79a5a7d1372b991dfc720b2a118e6144688f6e36c55893463c4d85d8"
     }
   }
 }

@@ -7,6 +7,24 @@ pipeline {
     buildDiscarder(logRotator(numToKeepStr: '20'))
   }
 
+  parameters {
+    booleanParam(
+      name: 'RUN_SONAR',
+      defaultValue: false,
+      description: 'Run Sonar analysis and block the build on the Sonar quality gate. Requires SONAR_HOST_URL and SONAR_TOKEN in the Jenkins environment.'
+    )
+    string(
+      name: 'SONAR_HOST_URL',
+      defaultValue: '',
+      description: 'SonarQube/SonarCloud URL. Required only when RUN_SONAR=true.'
+    )
+    booleanParam(
+      name: 'REQUIRE_KYVERNO_CLI',
+      defaultValue: false,
+      description: 'Fail CI if the Kyverno CLI is missing instead of recording a ready-not-executed policy validation.'
+    )
+  }
+
   environment {
     SEMGREP_VERSION = '1.156.0'
     COVERAGE_MIN = '70'
@@ -26,7 +44,7 @@ pipeline {
         sh '''
           set -euo pipefail
           mkdir -p security/reports .coverage-artifacts
-          chmod +x scripts/ci/*.sh scripts/validate/*.sh
+          find scripts -type f -name "*.sh" -exec chmod +x {} +
         '''
       }
     }
@@ -53,11 +71,12 @@ pipeline {
       }
     }
 
-    stage('Lint and Tests') {
+    stage('CI_SECURITY_STATIC - Lint and Tests') {
       steps {
         sh '''
           set -euo pipefail
 
+          make lint
           bash scripts/ci/run-tests.sh
           bash scripts/ci/collect-coverage.sh
         '''
@@ -70,7 +89,22 @@ pipeline {
       }
     }
 
-    stage('Security Scans') {
+    stage('CI_DEPENDENCIES - Dependency Audit') {
+      steps {
+        sh '''
+          set -euo pipefail
+
+          bash scripts/ci/audit-dependencies.sh
+        '''
+      }
+      post {
+        always {
+          archiveArtifacts allowEmptyArchive: true, artifacts: 'security/reports/dependency-audit-summary.md,security/reports/composer-audit-*.json,security/reports/npm-audit-*.json'
+        }
+      }
+    }
+
+    stage('CI_SECURITY_STATIC - SAST and Secret Scans') {
       steps {
         sh '''
           set -euo pipefail
@@ -82,8 +116,6 @@ pipeline {
             --json \
             --output security/reports/semgrep.json \
             --error
-
-          bash scripts/ci/audit-dependencies.sh
 
           docker run --rm \
             -v "$PWD:/repo" \
@@ -105,6 +137,68 @@ pipeline {
       post {
         always {
           archiveArtifacts allowEmptyArchive: true, artifacts: 'security/reports/**'
+        }
+      }
+    }
+
+    stage('CI_K8S_POLICY - Kubernetes Policy Checks') {
+      steps {
+        sh '''
+          set -euo pipefail
+
+          bash scripts/validate/validate-k8s-ultra-hardening.sh
+          REQUIRE_KYVERNO_CLI="${REQUIRE_KYVERNO_CLI:-false}" \
+            bash scripts/ci/validate-kyverno-policies.sh
+        '''
+      }
+      post {
+        always {
+          archiveArtifacts allowEmptyArchive: true, artifacts: 'artifacts/security/k8s-ultra-hardening.md,artifacts/security/kyverno-policy-validation.md,artifacts/security/kyverno-apply.log'
+        }
+      }
+    }
+
+    stage('CI_SONAR_SCOPE_READY') {
+      when {
+        expression { return !params.RUN_SONAR }
+      }
+      steps {
+        sh '''
+          set -euo pipefail
+
+          REQUIRE_SONAR="false" \
+          SONAR_HOST_URL="${SONAR_HOST_URL:-}" \
+          bash scripts/ci/run-sonar-analysis.sh
+        '''
+      }
+      post {
+        always {
+          archiveArtifacts allowEmptyArchive: true, artifacts: 'security/reports/sonar-*.md,security/reports/sonar-*.json,security/reports/sonar-scanner.log,artifacts/security/sonar-cpd-scope.md'
+        }
+      }
+    }
+
+    stage('CI_SONAR_QUALITY_GATE') {
+      when {
+        expression { return params.RUN_SONAR }
+      }
+      steps {
+        withCredentials([
+          string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')
+        ]) {
+          sh '''
+            set -euo pipefail
+
+            REQUIRE_SONAR="true" \
+            SONAR_HOST_URL="${SONAR_HOST_URL:-}" \
+            SONAR_TOKEN="${SONAR_TOKEN}" \
+            bash scripts/ci/run-sonar-analysis.sh
+          '''
+        }
+      }
+      post {
+        always {
+          archiveArtifacts allowEmptyArchive: true, artifacts: 'security/reports/sonar-*.md,security/reports/sonar-*.json,security/reports/sonar-scanner.log,artifacts/security/sonar-cpd-scope.md'
         }
       }
     }

@@ -8,6 +8,7 @@ ARG KIND_VERSION=v0.29.0
 ARG COSIGN_VERSION=v2.5.3
 ARG SYFT_VERSION=v1.42.3
 ARG TRIVY_VERSION=0.69.3
+ARG SONAR_SCANNER_VERSION=5.0.1.3006
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
@@ -61,7 +62,12 @@ RUN set -eux; \
       "https://github.com/aquasecurity/trivy/releases/download/v${TRIVY_VERSION}/trivy_${TRIVY_VERSION}_Linux-${TRIVY_ARCH}.tar.gz"; \
     tar -xzf /tmp/trivy.tar.gz -C /tmp trivy; \
     install -m 0755 /tmp/trivy /usr/local/bin/trivy; \
-    rm -f /tmp/trivy.tar.gz /tmp/trivy
+    rm -f /tmp/trivy.tar.gz /tmp/trivy; \
+    curl -fsSLo /tmp/sonar-scanner.zip \
+      "https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-${SONAR_SCANNER_VERSION}-linux.zip"; \
+    unzip -q /tmp/sonar-scanner.zip -d /opt; \
+    ln -sf "/opt/sonar-scanner-${SONAR_SCANNER_VERSION}-linux/bin/sonar-scanner" /usr/local/bin/sonar-scanner; \
+    rm -f /tmp/sonar-scanner.zip
 
 ENV PIP_DISABLE_PIP_VERSION_CHECK=1
 
