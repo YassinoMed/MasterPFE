@@ -7,16 +7,16 @@ Définir une trajectoire crédible de gestion des secrets pour passer d'un mode 
 ## État actuel
 
 - Aucun vrai secret ne doit être versionné.
-- Les secrets applicatifs Kubernetes, Jenkins admin et Cosign sont séparés.
+- Les secrets applicatifs Kubernetes, Jenkins admin, Cosign et Sonar sont séparés.
 - Gitleaks permet de détecter les fuites accidentelles.
 - Les valeurs de démonstration doivent rester des placeholders.
 
 ## Règles immédiates
 
-- Ne jamais commiter de kubeconfig réel, clé Cosign privée ou token Jenkins.
+- Ne jamais commiter de kubeconfig réel, clé Cosign privée, token Jenkins ou token Sonar.
 - Utiliser `.env.example` pour documenter les variables, jamais pour stocker des secrets.
 - Générer le mot de passe admin Jenkins avec `scripts/jenkins/bootstrap-local-credentials.sh`.
-- Stocker les credentials Jenkins/Cosign dans `infra/jenkins/secrets/`, dossier local ignoré par Git, puis les injecter dans Jenkins Credentials.
+- Stocker les credentials Jenkins/Cosign/Sonar dans `infra/jenkins/secrets/`, dossier local ignoré par Git, puis les injecter dans Jenkins Credentials.
 - Générer `security/secrets/.env.local` avec `scripts/secrets/bootstrap-local-secrets.sh`; ne pas utiliser `.env.example` directement.
 - Régénérer et révoquer tout secret accidentellement exposé.
 
@@ -54,6 +54,7 @@ Coût : plus lourd pour une démo locale, dépendances supplémentaires, risque 
 ## Politique de rotation
 
 - Tokens Jenkins : rotation après soutenance ou changement de collaborateur.
+- Token Sonar : rotation après soutenance, fuite suspectée ou changement de projet Sonar.
 - Clés Cosign : rotation en cas d'exposition ou changement de release authority.
 - Kubeconfig : régénération après recréation du cluster kind.
 - Webhook secrets GitHub : rotation après test public ou fuite suspectée.

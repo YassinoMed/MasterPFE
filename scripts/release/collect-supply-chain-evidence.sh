@@ -54,11 +54,13 @@ REPORT_DIR="${REPORT_DIR}" SBOM_DIR="${SBOM_DIR}" SERVICES="${SERVICES:-}" EXPEC
   printf '## Evidence inventory\n\n'
   printf '| Evidence | Status |\n'
   printf '|---|---|\n'
+  printf '| `image-scan-summary.txt` | %s |\n' "$(pass_fail_summary "${REPORT_DIR}/image-scan-summary.txt")"
   printf '| `sign-summary.txt` | %s |\n' "$(pass_fail_summary "${REPORT_DIR}/sign-summary.txt")"
   printf '| `verify-summary.txt` | %s |\n' "$(pass_fail_summary "${REPORT_DIR}/verify-summary.txt")"
   printf '| `promotion-by-digest-summary.txt` | %s |\n' "$(pass_fail_summary "${REPORT_DIR}/promotion-by-digest-summary.txt")"
   printf '| `promotion-digests.txt` | %s |\n' "$(status_file "${REPORT_DIR}/promotion-digests.txt")"
   printf '| `sbom-summary.txt` | %s |\n' "$(pass_fail_summary "${REPORT_DIR}/sbom-summary.txt")"
+  printf '| `attest-summary.txt` | %s |\n' "$(pass_fail_summary "${REPORT_DIR}/attest-summary.txt")"
   printf '| `release-evidence.md` | %s |\n' "$(status_file "${REPORT_DIR}/release-evidence.md")"
   printf '| `release-attestation.json` | %s |\n' "$(status_file "${REPORT_DIR}/release-attestation.json")"
   printf '| SBOM files | %s |\n\n' "${sbom_count}"
@@ -75,7 +77,7 @@ REPORT_DIR="${REPORT_DIR}" SBOM_DIR="${SBOM_DIR}" SERVICES="${SERVICES:-}" EXPEC
   printf '\n## Honest reading\n\n'
   printf -- '- `present` means the artefact exists locally.\n'
   printf -- '- `PASS` means a script recorded a successful control for at least one image.\n'
-  printf -- '- A full release proof requires SBOM, Cosign sign, Cosign verify, digest promotion and attestation generated from the same execution context.\n'
+  printf -- '- A full release proof requires Trivy image scanning, SBOM generation, SBOM attestation, Cosign sign, Cosign verify, digest promotion and release attestation generated from the same execution context.\n'
 } > "${OUT_FILE}"
 
 if [[ "${GENERATE_PACK}" == "true" ]]; then

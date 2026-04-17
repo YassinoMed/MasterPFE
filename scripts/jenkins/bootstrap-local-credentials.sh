@@ -7,7 +7,9 @@ COSIGN_PASSWORD_FILE="${COSIGN_PASSWORD_FILE:-${JENKINS_SECRETS_DIR}/cosign.pass
 COSIGN_PRIVATE_KEY="${COSIGN_PRIVATE_KEY:-${JENKINS_SECRETS_DIR}/cosign.key}"
 COSIGN_PUBLIC_KEY="${COSIGN_PUBLIC_KEY:-${JENKINS_SECRETS_DIR}/cosign.pub}"
 JENKINS_ADMIN_PASSWORD_FILE="${JENKINS_ADMIN_PASSWORD_FILE:-${JENKINS_SECRETS_DIR}/jenkins-admin-password}"
+SONAR_TOKEN_FILE="${SONAR_TOKEN_FILE:-${JENKINS_SECRETS_DIR}/sonar-token}"
 COSIGN_PASSWORD_VALUE="${COSIGN_PASSWORD_VALUE:-}"
+SONAR_TOKEN_VALUE="${SONAR_TOKEN_VALUE:-}"
 COSIGN_IMAGE="${COSIGN_IMAGE:-gcr.io/projectsigstore/cosign:v2.5.3}"
 
 info() { printf '[INFO] %s\n' "$*"; }
@@ -25,6 +27,15 @@ PY
 fi
 
 chmod 600 "${JENKINS_ADMIN_PASSWORD_FILE}"
+
+if [[ -n "${SONAR_TOKEN_VALUE}" ]]; then
+  printf '%s\n' "${SONAR_TOKEN_VALUE}" > "${SONAR_TOKEN_FILE}"
+  info "Wrote local Sonar token material to ${SONAR_TOKEN_FILE}"
+fi
+
+if [[ -f "${SONAR_TOKEN_FILE}" ]]; then
+  chmod 600 "${SONAR_TOKEN_FILE}"
+fi
 
 if [[ -z "${COSIGN_PASSWORD_VALUE}" ]]; then
   if [[ -f "${COSIGN_PASSWORD_FILE}" ]]; then

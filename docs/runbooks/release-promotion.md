@@ -8,21 +8,25 @@ La chaîne de confiance suit cette logique :
 
 1. build initial de l’image
 2. push dans le registre OCI
-3. signature Cosign
-4. vérification de la signature sur le tag source
-5. promotion par digest vers un nouveau tag sans rebuild
-6. vérification que le digest cible correspond au digest source
-7. génération des SBOM CycloneDX sur les images promues
-8. attestation et gate obligatoire des preuves release
-9. déploiement uniquement du tag promu
+3. scan Trivy des images candidates
+4. signature Cosign
+5. vérification de la signature sur le tag source
+6. promotion par digest vers un nouveau tag sans rebuild
+7. vérification que le digest cible correspond au digest source
+8. génération des SBOM CycloneDX sur les images promues
+9. attestation Cosign des SBOM
+10. attestation et gate obligatoire des preuves release
+11. déploiement uniquement du tag promu
 
 Cette approche évite les dérives classiques où la CD reconstruit une image différente de celle qui a été testée et signée.
 
 ## Scripts utilisés
+- `scripts/release/scan-images.sh`
 - `scripts/release/verify-signatures.sh`
 - `scripts/release/promote-verified-images.sh`
 - `scripts/release/promote-by-digest.sh`
 - `scripts/release/generate-sbom.sh`
+- `scripts/release/attest-sboms.sh`
 - `scripts/release/record-release-evidence.sh`
 - `scripts/release/generate-release-attestation.sh`
 - `scripts/release/assert-supply-chain-evidence.sh`
@@ -66,6 +70,8 @@ bash scripts/deploy/verify-and-deploy-kind.sh
 ```
 
 ## Résultats attendus
+- `artifacts/release/image-scan-summary.txt`
+- `security/reports/trivy-image-*.json`
 - `artifacts/release/promotion-by-digest-summary.txt`
 - `artifacts/release/promotion-digests.txt`
 - `artifacts/release/release-evidence.md`
@@ -75,6 +81,7 @@ bash scripts/deploy/verify-and-deploy-kind.sh
 - `artifacts/release/sign-summary.txt`
 - `artifacts/release/verify-summary.txt`
 - `artifacts/release/sbom-summary.txt`
+- `artifacts/release/attest-summary.txt`
 - `artifacts/sbom/sbom-index.txt`
 - `artifacts/sbom/*-sbom.cdx.json`
 - `artifacts/validation/validation-summary.md`
@@ -88,8 +95,10 @@ Le pipeline CD utilise :
 Le pipeline CD ne doit pas reconstruire les images.
 
 ## Points d’attention sécurité
+- ne jamais signer une image dont le scan critique Trivy a échoué
 - ne jamais promouvoir un tag non vérifié
 - ne jamais déclarer une release validée si `assert-supply-chain-evidence.sh` échoue
+- ne jamais déclarer les SBOM attestés si `attest-summary.txt` ne contient pas une ligne `PASS` par service officiel
 - conserver les rapports de vérification et de promotion comme preuves de la chaîne de confiance
 - privilégier la vérification par clé publique Cosign dans Jenkins pour une démo stable et reproductible
 - si la registry change de dépôt et pas seulement de tag, revalider soigneusement le comportement de vérification car les références Cosign dépendent du digest et du repository

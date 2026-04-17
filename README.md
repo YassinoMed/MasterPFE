@@ -58,17 +58,17 @@ Les dossiers Python legacy sous `services/` ne sont plus dans la build/deploy of
 
 ### ✓ Phase CI (Intégration)
 ```bash
-checkout → lint/test → couverture → Semgrep → Gitleaks → Trivy → archivage rapports
+checkout → lint/test → couverture → dependency audit → Semgrep → Gitleaks → Trivy FS → Kyverno static policy check → Sonar optionnel → archivage rapports
 ```
 
 ### ✓ Phase CD (Déploiement)
 ```bash
-vérification tag → promotion → SBOM → signature → vérification → déploiement → validation
+scan images → signature → vérification tag → promotion digest → SBOM → attestation SBOM → gate preuves → déploiement → validation
 ```
 
 ### 🔗 Chaîne de confiance
 ```bash
-build → sbom → sign → verify → promote → deploy → validate
+build → image scan → sign → verify → promote by digest → sbom → sbom attest → evidence gate → deploy → validate
 ```
 
 **Principe clé** : Aucune reconstruction d'image au déploiement.
@@ -235,10 +235,12 @@ Sécurité d'admission :
 ### Pipeline de sécurité
 ```bash
 scripts/release/generate-sbom.sh          # Génération SBOM
+scripts/release/scan-images.sh            # Scan Trivy des images candidates
 scripts/release/sign-images.sh            # Signature des images
 scripts/release/verify-signatures.sh      # Vérification Cosign
 scripts/release/promote-verified-images.sh    # Promotion
 scripts/release/promote-by-digest.sh      # Promotion par digest
+scripts/release/attest-sboms.sh           # Attestation Cosign des SBOM
 scripts/release/record-release-evidence.sh    # Traçabilité
 scripts/deploy/verify-and-deploy-kind.sh  # Déploiement sécurisé
 ```
@@ -253,6 +255,10 @@ Le `Makefile` fournit une interface unifiée :
 make help                               # Afficher l'aide
 make lint                               # Linting du code
 make test                               # Tests Laravel et collecte éventuelle couverture
+make sonar-analysis                     # Sonar si SONAR_HOST_URL/SONAR_TOKEN sont fournis
+make kyverno-policy-check               # Validation Kyverno hors cluster si CLI disponible
+make image-scan IMAGE_TAG=dev           # Scan Trivy des images candidates
+make sbom-attest TARGET_IMAGE_TAG=release-local # Attestation Cosign des SBOM
 make verify IMAGE_TAG=dev               # Vérification SBOM/Cosign
 make promote SOURCE=dev TARGET=release  # Promotion images
 make deploy IMAGE_TAG=release           # Déploiement K8s
@@ -309,6 +315,7 @@ make support-pack
 | [final-proof.md](./docs/runbooks/final-proof.md) | Génération de preuves |
 | [kyverno-install.md](./docs/runbooks/kyverno-install.md) | Installation Kyverno |
 | [policy-matrix.md](./docs/security/policy-matrix.md) | Matrice de sécurité |
+| [devsecops-hardening-applied.md](./docs/security/devsecops-hardening-applied.md) | Renforcements DevSecOps appliqués |
 
 ---
 
@@ -329,10 +336,13 @@ make support-pack
 
 La promotion vers CD n'est autorisée que si :
 - ✅ Tests applicatifs : **PASS**
-- ✅ Scans critiques (SAST) : **RESOLVED**
+- ✅ Scans critiques (SAST, secrets, dépendances, Trivy FS) : **PASS**
+- ✅ Validation Sonar CPD : **PASS**
 - ✅ Images : présentes dans registre cible
+- ✅ Trivy image scan : **PASS**
 - ✅ Cosign : vérification signatures réussie
 - ✅ Promotion : digest produit et tracé
+- ✅ SBOM : générés et attestés
 - ✅ Checklist démo : **GREEN**
 
 ---

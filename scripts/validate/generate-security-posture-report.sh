@@ -123,6 +123,23 @@ markdown_global_status() {
   fi
 }
 
+declared_status() {
+  local path="$1"
+
+  if [[ ! -s "${path}" ]]; then
+    printf 'PARTIEL'
+    return 0
+  fi
+
+  local declared
+  declared="$(grep -E 'Status: `|Statut global: ' "${path}" | head -n 1 | sed -E 's/.*Status: `([^`]+)`.*/\1/; s/.*Statut global: ([^.`]+).*/\1/' || true)"
+  if [[ -n "${declared}" ]]; then
+    printf '%s' "${declared}"
+  else
+    status_file "${path}"
+  fi
+}
+
 count_json_results() {
   local path="$1"
   local expression="$2"
@@ -173,14 +190,19 @@ trivy_vulns="$(count_json_results "security/reports/trivy-fs.json" "trivy-vulns"
   printf '| Control | State | Evidence |\n'
   printf '|---|---|---|\n'
   printf '| Semgrep SAST | `%s` | `security/reports/semgrep.json`, findings=%s |\n' "$(status_file "security/reports/semgrep.json")" "${semgrep_findings}"
+  printf '| Sonar CPD scope | `%s` | `artifacts/security/sonar-cpd-scope.md` |\n' "$(markdown_global_status "artifacts/security/sonar-cpd-scope.md" "Statut global: TERMINÉ")"
+  printf '| Sonar Quality Gate | `%s` | `security/reports/sonar-analysis.md` |\n' "$(declared_status "security/reports/sonar-analysis.md")"
   printf '| Gitleaks secret scan | `%s` | `security/reports/gitleaks.json`, findings=%s |\n' "$(status_file "security/reports/gitleaks.json")" "${gitleaks_findings}"
   printf '| Trivy filesystem scan | `%s` | `security/reports/trivy-fs.json`, vulnerabilities=%s |\n' "$(status_file "security/reports/trivy-fs.json")" "${trivy_vulns}"
+  printf '| Trivy image scan | `%s` | `%s` |\n' "$(summary_state "${REPORT_DIR}/image-scan-summary.txt")" "${REPORT_DIR}/image-scan-summary.txt"
   printf '| SBOM Syft | `%s` | `%s`, sbom_count=%s, expected=%s |\n' "$(summary_state "${REPORT_DIR}/sbom-summary.txt")" "${REPORT_DIR}/sbom-summary.txt" "${sbom_count}" "${EXPECTED_COUNT}"
+  printf '| SBOM Cosign attestation | `%s` | `%s` |\n' "$(summary_state "${REPORT_DIR}/attest-summary.txt")" "${REPORT_DIR}/attest-summary.txt"
   printf '| Cosign sign | `%s` | `%s` |\n' "$(summary_state "${REPORT_DIR}/sign-summary.txt")" "${REPORT_DIR}/sign-summary.txt"
   printf '| Cosign verify | `%s` | `%s` |\n' "$(summary_state "${REPORT_DIR}/verify-summary.txt")" "${REPORT_DIR}/verify-summary.txt"
   printf '| Digest promotion | `%s` | `%s` |\n' "$(digest_state "${REPORT_DIR}/promotion-digests.txt")" "${REPORT_DIR}/promotion-digests.txt"
   printf '| Release attestation | `%s` | `%s` |\n' "$(attestation_state "${REPORT_DIR}/release-attestation.json")" "${REPORT_DIR}/release-attestation.json"
   printf '| Kubernetes ultra hardening static | `%s` | `artifacts/security/k8s-ultra-hardening.md` |\n' "$(markdown_global_status "artifacts/security/k8s-ultra-hardening.md" "Statut global: TERMINÉ")"
+  printf '| Kyverno policy CLI validation | `%s` | `artifacts/security/kyverno-policy-validation.md` |\n' "$(declared_status "artifacts/security/kyverno-policy-validation.md")"
   printf '| Metrics Server runtime | `%s` | `kubectl top pods -n %s` |\n' "$(runtime_status "kubectl top pods -n ${NS}")" "${NS}"
   printf '| Kyverno runtime | `%s` | `kubectl get clusterpolicies` |\n' "$(runtime_status "kubectl get clusterpolicies")"
   printf '| Kyverno reports | `%s` | `kubectl get policyreports -A` |\n' "$(runtime_status "kubectl get policyreports -A")"
@@ -192,7 +214,7 @@ trivy_vulns="$(count_json_results "security/reports/trivy-fs.json" "trivy-vulns"
   printf -- '- `DÉPENDANT_DE_L_ENVIRONNEMENT` means the control needs an active Docker/kind/Kubernetes/Jenkins/Cosign/Syft/Kyverno runtime.\n\n'
 
   printf '## 3. Security-ready reading\n\n'
-  printf 'SecureRAG Hub is security-ready for a defended Laravel demo when SAST, secret scanning, filesystem scanning, Laravel authorization tests, Kubernetes render checks, and final proof scripts pass. It becomes supply-chain-ready only after SBOM, Cosign signing, Cosign verification and digest promotion evidence are regenerated in the target environment for the official service set.\n'
+  printf 'SecureRAG Hub is security-ready for a defended Laravel demo when SAST, Sonar scope validation, secret scanning, filesystem scanning, Laravel authorization tests, Kubernetes render checks, and final proof scripts pass. It becomes supply-chain-ready only after Trivy image scanning, SBOM generation, SBOM attestation, Cosign signing, Cosign verification and digest promotion evidence are regenerated in the target environment for the official service set.\n'
 } > "${OUT_FILE}"
 
 printf '[INFO] Security posture report written to %s\n' "${OUT_FILE}"

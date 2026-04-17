@@ -191,10 +191,13 @@ Le scénario legacy RAG/Ollama n'est pas un scénario officiel tant que les sour
 ## Artefacts a conserver pour la soutenance
 
 - `artifacts/release/verify-summary.txt`
+- `artifacts/release/image-scan-summary.txt`
 - `artifacts/release/promotion-summary.txt`
 - `artifacts/release/promotion-by-digest-summary.txt`
 - `artifacts/release/promotion-digests.txt`
 - `artifacts/release/release-evidence.md`
+- `artifacts/release/attest-summary.txt`
+- `artifacts/release/release-attestation.json`
 - `artifacts/sbom/*`
 - `artifacts/validation/validation-summary.md`
 - `artifacts/validation/k8s-get-all.txt`

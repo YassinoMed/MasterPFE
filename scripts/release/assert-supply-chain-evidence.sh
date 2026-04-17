@@ -149,7 +149,9 @@ if payload.get("status") != "COMPLETE_PROVEN":
 
 claims = payload.get("claims", {})
 required_claims = [
+    "image_scan_passed",
     "sbom_generated",
+    "sbom_attested",
     "cosign_signed",
     "cosign_verified",
     "digest_promoted",
@@ -188,11 +190,13 @@ fi
 
 failure=0
 
+assert_summary_all_pass "${REPORT_DIR}/image-scan-summary.txt" "Trivy image scan summary" || failure=1
 assert_summary_all_pass "${REPORT_DIR}/sign-summary.txt" "Cosign sign summary" || failure=1
 assert_summary_all_pass "${REPORT_DIR}/verify-summary.txt" "Cosign verify summary" || failure=1
 assert_summary_all_pass "${REPORT_DIR}/promotion-by-digest-summary.txt" "Digest promotion summary" || failure=1
 assert_digest_records || failure=1
 assert_summary_all_pass "${REPORT_DIR}/sbom-summary.txt" "SBOM generation summary" || failure=1
+assert_summary_all_pass "${REPORT_DIR}/attest-summary.txt" "Cosign SBOM attestation summary" || failure=1
 assert_sbom_index || failure=1
 assert_release_attestation || failure=1
 
