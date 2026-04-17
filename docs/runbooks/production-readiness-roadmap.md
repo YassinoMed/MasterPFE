@@ -89,7 +89,10 @@ Etat : `DÉPENDANT_DE_L_ENVIRONNEMENT`.
 - `infra/k8s/overlays/production/kustomization.yaml`
 - `scripts/validate/validate-production-ha.sh`
 - `scripts/validate/collect-production-runtime-evidence.sh`
+- `scripts/validate/run-production-readiness-campaign.sh`
+- `scripts/validate/validate-production-data-resilience.sh`
 - `docs/runbooks/production-ha.md`
+- `docs/runbooks/data-resilience.md`
 - `artifacts/security/production-ha-readiness.md`
 
 ## 5. Validation
@@ -108,6 +111,7 @@ Runtime lecture seule :
 
 ```bash
 make production-runtime-evidence
+make production-readiness-campaign
 ```
 
 Runtime mutatif :

@@ -13,7 +13,7 @@ DIGEST_RECORD_FILE ?= $(REPORT_DIR)/promotion-digests.txt
 OFFICIAL_SCENARIO ?= demo
 SUPPORT_PACK_ROOT ?= artifacts/support-pack
 
-.PHONY: help lint test laravel-test sonar-analysis kyverno-policy-check image-scan sbom-attest verify promote promote-digest deploy validate demo production-ha production-runtime-evidence campaign final-campaign release-evidence release-attestation supply-chain-evidence supply-chain-execute observability-snapshot portal-service-proof global-project-status security-posture k8s-resource-guards close-missing-phases jenkins-webhook-proof jenkins-ci-push-proof cluster-security-proof refresh-cluster-security-proof devsecops-final-proof devsecops-readiness final-proof final-summary support-pack kyverno-install kyverno-enforce metrics-install clean
+.PHONY: help lint test laravel-test sonar-analysis kyverno-policy-check image-scan sbom-attest verify promote promote-digest deploy validate demo production-ha production-runtime-evidence production-data-resilience production-readiness-campaign campaign final-campaign release-evidence release-attestation supply-chain-evidence supply-chain-execute observability-snapshot portal-service-proof global-project-status security-posture k8s-resource-guards close-missing-phases jenkins-webhook-proof jenkins-ci-push-proof cluster-security-proof refresh-cluster-security-proof devsecops-final-proof devsecops-readiness final-proof final-summary support-pack kyverno-install kyverno-enforce metrics-install clean
 
 help: ## Show available targets
 	@awk 'BEGIN {FS = ":.*## "; print "Available targets:"} /^[a-zA-Z0-9_.-]+:.*## / {printf "  %-12s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
@@ -30,6 +30,7 @@ lint: ## Validate shell scripts, Jenkins config, Kustomize renders and security 
 	@bash scripts/validate/validate-k8s-resource-guards.sh >/dev/null
 	@bash scripts/validate/validate-k8s-ultra-hardening.sh >/dev/null
 	@bash scripts/validate/validate-production-ha.sh >/dev/null
+	@bash scripts/validate/validate-production-data-resilience.sh >/dev/null
 	@bash scripts/ci/validate-sonar-cpd-scope.sh >/dev/null
 
 test: ## Run automated tests and coverage collection
@@ -90,6 +91,12 @@ production-ha: ## Validate the production overlay HA controls without mutating t
 
 production-runtime-evidence: ## Collect read-only runtime evidence for production HA and HPA
 	@bash scripts/validate/collect-production-runtime-evidence.sh
+
+production-data-resilience: ## Validate production data resilience readiness
+	@bash scripts/validate/validate-production-data-resilience.sh
+
+production-readiness-campaign: ## Run the production readiness campaign, read-only by default
+	@bash scripts/validate/run-production-readiness-campaign.sh
 
 campaign: ## Run the full reference campaign verify -> promote -> deploy -> validate
 	@REGISTRY_HOST=$(REGISTRY_HOST) IMAGE_PREFIX=$(IMAGE_PREFIX) SOURCE_IMAGE_TAG=$(SOURCE_IMAGE_TAG) TARGET_IMAGE_TAG=$(TARGET_IMAGE_TAG) KUSTOMIZE_OVERLAY=$(KUSTOMIZE_OVERLAY) REPORT_DIR=$(REPORT_DIR) DIGEST_RECORD_FILE=$(DIGEST_RECORD_FILE) \

@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-04-17T05:16:40Z",
-  "git_commit": "9b0878f0dd8923415026a96a33b9aad98f24cdc4",
+  "generated_at": "2026-04-17T06:27:12Z",
+  "git_commit": "b1ec122075c41373de28d9ff708d9254deabb733",
   "attestation_type": "SecureRAG Hub release evidence attestation",
   "status": "PARTIAL_READY_TO_PROVE",
   "expected_service_count": 5,
@@ -77,7 +77,7 @@
     "supply_chain_evidence": {
       "path": "artifacts/release/supply-chain-evidence.md",
       "status": "PRESENT",
-      "sha256": "ddab7b7c79a5a7d1372b991dfc720b2a118e6144688f6e36c55893463c4d85d8"
+      "sha256": "a8e53fd08e4d22039c5f721acd1756134697fd6396bad3934f2759678d593a99"
     }
   }
 }

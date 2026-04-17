@@ -132,7 +132,7 @@ declared_status() {
   fi
 
   local declared
-  declared="$(grep -E 'Status: `|Statut global: ' "${path}" | head -n 1 | sed -E 's/.*Status: `([^`]+)`.*/\1/; s/.*Statut global: ([^.`]+).*/\1/' || true)"
+  declared="$(grep -E 'Status: `|Statut global: ' "${path}" | head -n 1 | sed -E 's/.*Status: `([^`]+)`.*/\1/; s/.*Statut global: `([^`]+)`.*/\1/; s/.*Statut global: ([^.`]+).*/\1/' || true)"
   if [[ -n "${declared}" ]]; then
     printf '%s' "${declared}"
   else
@@ -223,6 +223,8 @@ trivy_vulns="$(count_json_results "security/reports/trivy-fs.json" "trivy-vulns"
   printf '| Kubernetes ultra hardening static | `%s` | `artifacts/security/k8s-ultra-hardening.md` |\n' "$(markdown_global_status "artifacts/security/k8s-ultra-hardening.md" "Statut global: TERMINÉ")"
   printf '| Kubernetes production HA static | `%s` | `artifacts/security/production-ha-readiness.md` |\n' "$(markdown_global_status "artifacts/security/production-ha-readiness.md" "Statut global: TERMINÉ")"
   printf '| Production runtime evidence | `%s` | `artifacts/validation/production-runtime-evidence.md` |\n' "$(table_worst_status "artifacts/validation/production-runtime-evidence.md")"
+  printf '| Production data resilience | `%s` | `artifacts/security/production-data-resilience.md` |\n' "$(declared_status "artifacts/security/production-data-resilience.md")"
+  printf '| Production readiness campaign | `%s` | `artifacts/final/production-readiness-final.md` |\n' "$(table_worst_status "artifacts/final/production-readiness-final.md")"
   printf '| Kyverno policy CLI validation | `%s` | `artifacts/security/kyverno-policy-validation.md` |\n' "$(declared_status "artifacts/security/kyverno-policy-validation.md")"
   printf '| Metrics Server runtime | `%s` | `kubectl top pods -n %s` |\n' "$(runtime_status "kubectl top pods -n ${NS}")" "${NS}"
   printf '| Kyverno runtime | `%s` | `kubectl get clusterpolicies` |\n' "$(runtime_status "kubectl get clusterpolicies")"

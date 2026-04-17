@@ -53,6 +53,7 @@ copy_file_if_present "docs/runbooks/jenkins-cloud-fallback.md" "docs/jenkins-clo
 copy_file_if_present "docs/runbooks/release-promotion.md" "docs/release-promotion.md"
 copy_file_if_present "docs/runbooks/production-ha.md" "docs/production-ha.md"
 copy_file_if_present "docs/runbooks/production-readiness-roadmap.md" "docs/production-readiness-roadmap.md"
+copy_file_if_present "docs/runbooks/data-resilience.md" "docs/data-resilience.md"
 copy_file_if_present "docs/runbooks/metrics-server.md" "docs/metrics-server.md"
 copy_file_if_present "docs/runbooks/kyverno-install.md" "docs/kyverno-install.md"
 copy_file_if_present "docs/runbooks/observability-modernization.md" "docs/observability-modernization.md"

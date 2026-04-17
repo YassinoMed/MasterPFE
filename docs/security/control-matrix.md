@@ -25,6 +25,7 @@
 | Kubernetes | Resource guards | `scripts/validate/validate-k8s-resource-guards.sh` contrôle les overlays `dev`, `demo` et `production` | TERMINÉ |
 | Kubernetes | Ultra hardening statique | `scripts/validate/validate-k8s-ultra-hardening.sh` contrôle PSA restricted, ServiceAccounts, probes, PDB, NetworkPolicies, hostPath, images et Kyverno | TERMINÉ |
 | Kubernetes | Overlay production HA | `infra/k8s/overlays/production`, `scripts/validate/validate-production-ha.sh` | TERMINÉ statique |
+| Kubernetes | Preuves runtime production | `scripts/validate/collect-production-runtime-evidence.sh`, `artifacts/validation/production-runtime-evidence.md` | DÉPENDANT_DE_L_ENVIRONNEMENT |
 | Kubernetes | Validation Kyverno hors cluster | `scripts/ci/validate-kyverno-policies.sh`, `kyverno apply` si le CLI est disponible | PRÊT_NON_EXÉCUTÉ |
 | Kubernetes | PodDisruptionBudget | manifests `*/pdb.yaml` sur composants critiques | TERMINÉ |
 | Kubernetes | HorizontalPodAutoscaler | manifests `*/hpa.yaml`; exploitation dépend de `metrics-server` runtime | DÉPENDANT_DE_L_ENVIRONNEMENT |
@@ -34,5 +35,6 @@
 | Secrets | Kubernetes secrets | `scripts/secrets/bootstrap-local-secrets.sh`, `scripts/secrets/create-dev-secrets.sh` | TERMINÉ |
 | Runtime | Laravel workloads officiels | `portal-web`, `auth-users`, `chatbot-manager`, `conversation-service`, `audit-security-service` | TERMINÉ |
 | Runtime | Services Python legacy | Exclus du build/deploy officiel car sources absentes | PARTIEL |
+| Résilience données | Readiness DB externe / backup / restore | `scripts/validate/validate-production-data-resilience.sh`, `docs/runbooks/data-resilience.md` | PARTIEL |
 | Validation | Smoke tests | `scripts/validate/*.sh` | TERMINÉ |
 | Validation | Rapport final | `scripts/validate/generate-validation-report.sh` | TERMINÉ |

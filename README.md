@@ -267,6 +267,9 @@ make kyverno-policy-check               # Validation Kyverno hors cluster si CLI
 make image-scan IMAGE_TAG=dev           # Scan Trivy des images candidates
 make sbom-attest TARGET_IMAGE_TAG=release-local # Attestation Cosign des SBOM
 make production-ha                      # Validation statique HA de l'overlay production
+make production-runtime-evidence        # Preuves runtime production en lecture seule
+make production-data-resilience         # Readiness données / backup / restore
+make production-readiness-campaign      # Campagne production globale, lecture seule par défaut
 make verify IMAGE_TAG=dev               # Vérification SBOM/Cosign
 make promote SOURCE=dev TARGET=release  # Promotion images
 make deploy IMAGE_TAG=release           # Déploiement K8s
@@ -319,6 +322,7 @@ make support-pack
 | [release-promotion.md](./docs/runbooks/release-promotion.md) | Promotion d'images |
 | [production-ha.md](./docs/runbooks/production-ha.md) | Overlay production et haute disponibilité |
 | [production-readiness-roadmap.md](./docs/runbooks/production-readiness-roadmap.md) | Trajectoire production, HA et exploitation |
+| [data-resilience.md](./docs/runbooks/data-resilience.md) | Stratégie données, backup et restore |
 | [final-campaign.md](./docs/runbooks/final-campaign.md) | Campagne finale |
 | [demo-checklist.md](./docs/runbooks/demo-checklist.md) | Checklist de démo |
 | [troubleshooting.md](./docs/runbooks/troubleshooting.md) | Résolution problèmes |
