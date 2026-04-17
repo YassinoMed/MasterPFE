@@ -23,6 +23,7 @@ Ce document sert de source de vérité sécurité pour éviter les écarts entre
 - Validation Kyverno hors cluster : `TERMINÉ` seulement si `bash scripts/ci/validate-kyverno-policies.sh` exécute réellement `kyverno apply` avec le CLI Kyverno présent. Sans CLI Kyverno, l’état attendu est `PRÊT_NON_EXÉCUTÉ`, pas `TERMINÉ`.
 - Kyverno Audit : `TERMINÉ` seulement si `kubectl get clusterpolicies` et `kubectl get policyreport,clusterpolicyreport -A` répondent sur le cluster cible.
 - K8s ultra hardening statique : `TERMINÉ` si `bash scripts/validate/validate-k8s-ultra-hardening.sh` passe et génère `artifacts/security/k8s-ultra-hardening.md`.
+- Overlay production HA : `TERMINÉ` seulement si `bash scripts/validate/validate-production-ha.sh` passe et génère `artifacts/security/production-ha-readiness.md`. Cela reste une preuve statique, pas une preuve de tolérance réelle à la perte d'un nœud.
 - metrics-server/HPA : `TERMINÉ` seulement si `kubectl top nodes`, `kubectl top pods -n securerag-hub` et `kubectl get hpa -n securerag-hub` fonctionnent.
 - Workloads Kubernetes officiels : `portal-web`, `auth-users`, `chatbot-manager`, `conversation-service`, `audit-security-service`.
 - `conversation-service` et `audit-security-service` : `TERMINÉ` côté manifests/rendu Kustomize ; `DÉPENDANT_DE_L_ENVIRONNEMENT` pour la preuve de pods `Ready` et logs runtime.

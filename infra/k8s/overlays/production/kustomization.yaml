@@ -1,0 +1,46 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: securerag-hub
+
+resources:
+  - ../../base
+  - hpa-auth-users.yaml
+  - hpa-chatbot-manager.yaml
+  - hpa-conversation-service.yaml
+  - hpa-audit-security-service.yaml
+
+configMapGenerator:
+  - name: securerag-common-config
+    envs:
+      - configmap-env.env
+
+generatorOptions:
+  disableNameSuffixHash: true
+
+images:
+  - name: ghcr.io/example/securerag-hub-portal-web
+    newName: localhost:5001/securerag-hub-portal-web
+    newTag: production
+  - name: ghcr.io/example/securerag-hub-auth-users
+    newName: localhost:5001/securerag-hub-auth-users
+    newTag: production
+  - name: ghcr.io/example/securerag-hub-chatbot-manager
+    newName: localhost:5001/securerag-hub-chatbot-manager
+    newTag: production
+  - name: ghcr.io/example/securerag-hub-conversation-service
+    newName: localhost:5001/securerag-hub-conversation-service
+    newTag: production
+  - name: ghcr.io/example/securerag-hub-audit-security-service
+    newName: localhost:5001/securerag-hub-audit-security-service
+    newTag: production
+
+patches:
+  - path: patches/portal-web-ha.yaml
+  - path: patches/auth-users-ha.yaml
+  - path: patches/chatbot-manager-ha.yaml
+  - path: patches/conversation-service-ha.yaml
+  - path: patches/audit-security-service-ha.yaml
+  - path: patches/pdb-production.yaml
+  - path: patches/resourcequota-production.yaml
+  - path: patches/portal-web-hpa-production.yaml

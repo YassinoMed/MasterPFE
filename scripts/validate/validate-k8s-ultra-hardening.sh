@@ -7,6 +7,7 @@ REPORT_FILE="${REPORT_DIR}/k8s-ultra-hardening.md"
 OVERLAYS=(
   "infra/k8s/overlays/dev"
   "infra/k8s/overlays/demo"
+  "infra/k8s/overlays/production"
 )
 POLICY_OVERLAYS=(
   "infra/k8s/policies/kyverno"

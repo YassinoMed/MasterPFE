@@ -16,6 +16,8 @@ Le runtime Kubernetes officiel `dev`/`demo` est Laravel-first et correspond aux 
 
 Chaque workload officiel possède `Deployment`, `Service`, `ServiceAccount`, probes, `resources` CPU/mémoire/`ephemeral-storage`, `PodDisruptionBudget`, `NetworkPolicy` et `securityContext` durci.
 
+Un overlay `production` est maintenant disponible sous `infra/k8s/overlays/production`. Il conserve le périmètre Laravel officiel et ajoute une posture HA statique : replicas `>=2`, `portal-web` à `3`, PDB adaptés, rolling update `maxUnavailable=0`, anti-affinity, topology spread et HPA CPU/mémoire pour tous les services officiels. Le mode `demo` reste inchangé.
+
 Le namespace est rendu avec Pod Security Admission `restricted` en `enforce`, `audit` et `warn`. Les pods de validation éphémères utilisent désormais un ServiceAccount dédié `sa-validation`, sans token monté automatiquement, avec `runAsNonRoot`, `seccomp RuntimeDefault`, `allowPrivilegeEscalation=false`, `readOnlyRootFilesystem=true`, `capabilities.drop=["ALL"]` et des ressources bornées.
 
 ## Périmètre legacy exclu

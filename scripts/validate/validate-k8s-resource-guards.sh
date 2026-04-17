@@ -9,6 +9,7 @@ mkdir -p "${ARTIFACT_DIR}"
 overlays=(
   "infra/k8s/overlays/dev"
   "infra/k8s/overlays/demo"
+  "infra/k8s/overlays/production"
 )
 
 status="TERMINÉ"
