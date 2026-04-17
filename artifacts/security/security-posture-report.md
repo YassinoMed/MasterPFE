@@ -1,7 +1,7 @@
 # Security Posture Report — SecureRAG Hub
 
-- Generated at UTC: `2026-04-17T06:18:31Z`
-- Git commit: `7a030e6bf014787eabf6b4d5415713629f9aa019`
+- Generated at UTC: `2026-04-17T06:28:09Z`
+- Git commit: `b1ec122075c41373de28d9ff708d9254deabb733`
 - Kubernetes namespace: `securerag-hub`
 
 ## 1. Security controls status
@@ -23,6 +23,8 @@
 | Kubernetes ultra hardening static | `TERMINÉ` | `artifacts/security/k8s-ultra-hardening.md` |
 | Kubernetes production HA static | `TERMINÉ` | `artifacts/security/production-ha-readiness.md` |
 | Production runtime evidence | `DÉPENDANT_DE_L_ENVIRONNEMENT` | `artifacts/validation/production-runtime-evidence.md` |
+| Production data resilience | `PARTIEL` | `artifacts/security/production-data-resilience.md` |
+| Production readiness campaign | `DÉPENDANT_DE_L_ENVIRONNEMENT` | `artifacts/final/production-readiness-final.md` |
 | Kyverno policy CLI validation | `PRÊT_NON_EXÉCUTÉ` | `artifacts/security/kyverno-policy-validation.md` |
 | Metrics Server runtime | `DÉPENDANT_DE_L_ENVIRONNEMENT` | `kubectl top pods -n securerag-hub` |
 | Kyverno runtime | `DÉPENDANT_DE_L_ENVIRONNEMENT` | `kubectl get clusterpolicies` |
