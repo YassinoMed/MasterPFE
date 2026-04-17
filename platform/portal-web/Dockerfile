@@ -17,19 +17,20 @@ RUN groupadd --gid 10001 app \
 
 WORKDIR /var/www/html
 
-COPY composer.json composer.lock ./
+COPY platform/portal-web/composer.json platform/portal-web/composer.lock ./
+COPY services-laravel/shared-security /var/services-laravel/shared-security
 RUN composer install --no-interaction --prefer-dist --optimize-autoloader --no-scripts
 
-COPY app ./app
-COPY artisan ./
-COPY bootstrap ./bootstrap
-COPY config ./config
-COPY database ./database
-COPY docker ./docker
-COPY public ./public
-COPY resources ./resources
-COPY routes ./routes
-COPY .env.example ./
+COPY platform/portal-web/app ./app
+COPY platform/portal-web/artisan ./
+COPY platform/portal-web/bootstrap ./bootstrap
+COPY platform/portal-web/config ./config
+COPY platform/portal-web/database ./database
+COPY platform/portal-web/docker ./docker
+COPY platform/portal-web/public ./public
+COPY platform/portal-web/resources ./resources
+COPY platform/portal-web/routes ./routes
+COPY platform/portal-web/.env.example ./
 
 RUN composer dump-autoload --optimize && php artisan package:discover --ansi
 

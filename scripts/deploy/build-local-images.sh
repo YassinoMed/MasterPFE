@@ -6,6 +6,7 @@ REGISTRY_HOST="${REGISTRY_HOST:-localhost:5001}"
 IMAGE_TAG="${IMAGE_TAG:-dev}"
 IMAGE_PREFIX="${IMAGE_PREFIX:-securerag-hub}"
 ALLOW_MISSING_COMPONENTS="${ALLOW_MISSING_COMPONENTS:-false}"
+REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
 
 DEFAULT_COMPONENTS=(
   auth-users=services-laravel/auth-users-service
@@ -37,7 +38,7 @@ for component in "${COMPONENT_ARRAY[@]}"; do
 
   if [ -f "${dockerfile}" ]; then
     echo "Building ${image}"
-    docker build -t "${image}" -f "${dockerfile}" "${context}"
+    docker build -t "${image}" -f "${dockerfile}" "${REPO_ROOT}"
     docker push "${image}"
   else
     if [[ "${ALLOW_MISSING_COMPONENTS}" == "true" ]]; then
