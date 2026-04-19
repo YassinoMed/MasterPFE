@@ -70,6 +70,35 @@ bash scripts/deploy/deploy-kind.sh
 
 Cet overlay déploie le même périmètre Laravel officiel avec `imagePullPolicy: IfNotPresent`.
 
+## Mode `production` propre
+
+Pour une campagne production-like, utiliser un cluster separe du cluster demo :
+
+```bash
+bash scripts/deploy/recreate-production-kind.sh
+```
+
+Si le cluster `securerag-prod` existe deja, la recreation supprime son runtime local et doit etre confirmee :
+
+```bash
+CONFIRM_DESTROY=YES bash scripts/deploy/recreate-production-kind.sh
+```
+
+Deployer ensuite l'overlay production :
+
+```bash
+REGISTRY_HOST=localhost:5001 IMAGE_PREFIX=securerag-hub IMAGE_TAG=production \
+KUSTOMIZE_OVERLAY=infra/k8s/overlays/production \
+bash scripts/deploy/deploy-kind.sh
+```
+
+Le portail production est expose officiellement par `Service/portal-web` en `NodePort` `30081`, mappe vers `http://localhost:8081/health` par `infra/kind/kind-production.yaml`.
+
+```bash
+curl -fsS http://localhost:8081/health
+make production-cluster-clean-proof
+```
+
 ## Vérifications utiles
 ```bash
 kubectl get all -n securerag-hub

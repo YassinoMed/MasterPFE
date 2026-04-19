@@ -377,7 +377,7 @@
 | `production` | Service auth-users exposure restricted | TERMINÉ | `type=ClusterIP` |
 | `production` | Service chatbot-manager exposure restricted | TERMINÉ | `type=ClusterIP` |
 | `production` | Service conversation-service exposure restricted | TERMINÉ | `type=ClusterIP` |
-| `production` | Service portal-web exposure restricted | TERMINÉ | `type=ClusterIP` |
+| `production` | Service portal-web exposure restricted | TERMINÉ | `type=NodePort` |
 | `production` | PDB for portal-web | TERMINÉ | `PodDisruptionBudget present` |
 | `production` | PDB for auth-users | TERMINÉ | `PodDisruptionBudget present` |
 | `production` | PDB for chatbot-manager | TERMINÉ | `PodDisruptionBudget present` |

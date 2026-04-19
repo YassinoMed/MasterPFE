@@ -1,0 +1,43 @@
+\documentclass[12pt,a4paper]{report}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+
+\usepackage{graphicx}
+\usepackage{array}
+\usepackage{fancyhdr}
+\usepackage{hyperref}
+
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,shapes.geometric,fit,backgrounds}
+
+% Configuration des en-têtes et pieds de page
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[R]{\thepage}
+\fancyhead[L]{\leftmark}
+
+\begin{document}
+
+\title{\textbf{Projet de Fin d'Études} \\ Master DSIR \\ \vspace{0.5cm} \Large SecureRAG Hub : Plateforme de chatbots métiers sécurisés et approche DevSecOps}
+\author{Mohamed Yassine}
+\date{\today}
+
+\maketitle
+
+\tableofcontents
+
+\include{chapitre-1-etude-prealable}
+
+\chapter{Architecture et Déploiement DevSecOps}
+\input{devsecops-final-alignment}
+\input{devsecops-diagrammes-pas-a-pas}
+\input{devsecops-end-to-end}
+\input{release-supply-chain-validation}
+\input{validation-postdeploy}
+\input{artefacts-devsecops-a-citer}
+
+\include{annexe-resultats-validation}
+
+\end{document}

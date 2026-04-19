@@ -28,14 +28,46 @@ Sont exclus de ce runbook :
 | Topology spread | contrainte par service sur `kubernetes.io/hostname` | TERMINÉ |
 | PDB | `portal-web minAvailable=2`, autres `minAvailable=1` | TERMINÉ |
 | HPA | HPA CPU+memoire pour les 5 services officiels | TERMINÉ statique |
+| Exposition portail | `Service/portal-web` en `NodePort` `30081` dans l'overlay production | TERMINÉ statique |
+| Cluster propre | validation officielle sans workloads legacy | PRÊT_NON_EXÉCUTÉ |
 | metrics-server | addon et script d'installation existants | DÉPENDANT_DE_L_ENVIRONNEMENT |
 | Preuve runtime HA | `validate-cluster-security-addons.sh`, `kubectl get hpa`, `kubectl top` | DÉPENDANT_DE_L_ENVIRONNEMENT |
+
+## Cluster production propre
+
+Pour une campagne production-like, utiliser un cluster separe du mode demo :
+
+```bash
+bash scripts/deploy/recreate-production-kind.sh
+```
+
+Si le cluster `securerag-prod` existe deja, la recreation est destructive et doit etre confirmee explicitement :
+
+```bash
+CONFIRM_DESTROY=YES bash scripts/deploy/recreate-production-kind.sh
+```
+
+Le nettoyage des anciens workloads runtime se fait en deux temps :
+
+```bash
+make production-cleanup-plan
+CONFIRM_CLEANUP=YES make production-cleanup
+```
+
+La preuve attendue est generee par :
+
+```bash
+make production-cluster-clean-proof
+```
+
+Voir aussi `docs/runbooks/production-cluster-clean.md`.
 
 ## Validation non destructive
 
 ```bash
 kubectl kustomize infra/k8s/overlays/production >/tmp/securerag-production.yaml
 bash scripts/validate/validate-production-ha.sh
+bash scripts/validate/validate-production-cluster-clean.sh
 bash scripts/validate/validate-k8s-resource-guards.sh
 bash scripts/validate/validate-k8s-ultra-hardening.sh
 make production-runtime-evidence
@@ -44,6 +76,7 @@ make production-ha
 
 Preuves attendues :
 - `artifacts/security/production-ha-readiness.md`
+- `artifacts/validation/production-cluster-clean.md`
 - `artifacts/security/k8s-resource-guards.md`
 - `artifacts/security/k8s-ultra-hardening.md`
 - `artifacts/validation/production-runtime-evidence.md`
@@ -79,13 +112,26 @@ Action mutative : installe ou met a jour `metrics-server`.
 bash scripts/deploy/install-metrics-server.sh
 kubectl get hpa -n securerag-hub
 kubectl top pods -n securerag-hub
+bash scripts/validate/validate-hpa-runtime.sh
 bash scripts/validate/validate-cluster-security-addons.sh
 bash scripts/validate/collect-production-runtime-evidence.sh
 ```
 
 Resultat attendu :
 - les HPA affichent des valeurs CPU/memoire au lieu de `<unknown>` ;
+- `hpa-runtime-report.md` classe chaque HPA officiel en `TERMINÉ` ;
 - `cluster-security-addons.md` classe `metrics-server` et `HPA` en `TERMINÉ`.
+
+## Exposition officielle du portail
+
+L'overlay production rend `portal-web` en `NodePort` `30081`. Avec le cluster `infra/kind/kind-production.yaml`, le mapping host attendu est `localhost:8081`.
+
+```bash
+kubectl get svc portal-web -n securerag-hub -o wide
+curl -fsS http://localhost:8081/health
+```
+
+Cette exposition remplace les conteneurs de forward ad hoc. Si `localhost:8081` ne repond pas, verifier d'abord le type de Service puis les mappings kind avant d'ajouter un contournement.
 
 ## Test de resilience
 

@@ -218,6 +218,8 @@ Configuration production-like sans casser le mode démo :
 - replicas HA pour les cinq services Laravel officiels ;
 - PDB cohérents, rolling updates `maxUnavailable=0`, anti-affinity et topology spread ;
 - HPA CPU/mémoire pour tous les services officiels ;
+- exposition officielle du portail via `Service/portal-web` en `NodePort` `30081` ;
+- validation du périmètre production propre via `make production-cluster-clean-proof` ;
 - validation non destructive via `make production-ha`.
 
 ### 🛡️ Policies Kyverno (`infra/k8s/policies/`)
@@ -268,6 +270,8 @@ make image-scan IMAGE_TAG=dev           # Scan Trivy des images candidates
 make sbom-attest TARGET_IMAGE_TAG=release-local # Attestation Cosign des SBOM
 make production-ha                      # Validation statique HA de l'overlay production
 make production-runtime-evidence        # Preuves runtime production en lecture seule
+make hpa-runtime-proof                  # Rapport read-only metrics-server/HPA
+make refresh-hpa-runtime-proof          # Installe/répare metrics-server puis prouve HPA
 make production-data-resilience         # Readiness données / backup / restore
 make production-readiness-campaign      # Campagne production globale, lecture seule par défaut
 make verify IMAGE_TAG=dev               # Vérification SBOM/Cosign
@@ -284,6 +288,10 @@ make support-pack                       # Package de support
 make kyverno-install                    # Installation Kyverno
 make k8s-ultra-hardening                # Validation PSA restricted / RBAC / NetworkPolicy / probes
 make metrics-install                    # Installation metrics-server
+make production-cluster                 # Cluster kind production-like, garde destructif
+make production-cleanup-plan            # Inventaire legacy sans suppression
+CONFIRM_CLEANUP=YES make production-cleanup # Nettoyage legacy runtime, mutatif
+make production-cluster-clean-proof     # Preuve production-only runtime et exposition portail
 ```
 
 ---
@@ -319,6 +327,7 @@ make support-pack
 |---------|-------|
 | [jenkins-setup.md](./docs/runbooks/jenkins-setup.md) | Configuration Jenkins locale |
 | [local-kind.md](./docs/runbooks/local-kind.md) | Cluster Kubernetes kind |
+| [production-cluster-clean.md](./docs/runbooks/production-cluster-clean.md) | Cluster production propre et sans legacy runtime |
 | [release-promotion.md](./docs/runbooks/release-promotion.md) | Promotion d'images |
 | [production-ha.md](./docs/runbooks/production-ha.md) | Overlay production et haute disponibilité |
 | [production-readiness-roadmap.md](./docs/runbooks/production-readiness-roadmap.md) | Trajectoire production, HA et exploitation |

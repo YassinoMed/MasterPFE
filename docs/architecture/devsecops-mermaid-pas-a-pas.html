@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>SecureRAG Hub - Diagrammes DevSecOps</title>
+  <style>
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+  <link rel="stylesheet" href="/var/folders/vx/rt_qqp8d4kg47d8s_7_vs99m0000gn/T/tmp.GbqIg1prXa/mermaid-print.css" />
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">SecureRAG Hub - Diagrammes DevSecOps</h1>
+</header>
+<h1 id="securerag-hub-diagrammes-mermaid-pas-à-pas-devsecops">SecureRAG
+Hub — Diagrammes Mermaid pas à pas DevSecOps</h1>
+<p>Ce document fournit des diagrammes Mermaid prêts à copier dans le
+mémoire, la soutenance ou la documentation technique. Le périmètre est
+strictement DevSecOps, Kubernetes, sécurité, supply chain,
+observabilité, résilience et preuves.</p>
+<h2 id="vue-globale-devsecops">1. Vue globale DevSecOps</h2>
+<pre class="mermaid"><code>flowchart LR
+  A[&quot;Développeur / Git&quot;] --&gt; B[&quot;Jenkins CI&quot;]
+  B --&gt; C[&quot;Contrôles qualité et sécurité&quot;]
+  C --&gt; D[&quot;Build images OCI&quot;]
+  D --&gt; E[&quot;Supply chain&quot;]
+  E --&gt; F[&quot;Promotion par digest&quot;]
+  F --&gt; G[&quot;Jenkins CD&quot;]
+  G --&gt; H[&quot;Kubernetes production-like&quot;]
+  H --&gt; I[&quot;Preuves runtime&quot;]
+  I --&gt; J[&quot;Support pack final&quot;]</code></pre>
+<h2 id="gouvernance-du-dépôt">2. Gouvernance du dépôt</h2>
+<pre class="mermaid"><code>flowchart TD
+  A[&quot;Monorepo SecureRAG Hub&quot;] --&gt; B[&quot;platform/portal-web&quot;]
+  A --&gt; C[&quot;services-laravel/*&quot;]
+  A --&gt; D[&quot;infra/k8s + kind + jenkins&quot;]
+  A --&gt; E[&quot;scripts/ci release deploy validate&quot;]
+  A --&gt; F[&quot;security/&quot;]
+  A --&gt; G[&quot;docs/&quot;]
+  A --&gt; H[&quot;artifacts/&quot;]
+
+  D --&gt; I[&quot;Manifests versionnés&quot;]
+  E --&gt; J[&quot;Automatisation reproductible&quot;]
+  F --&gt; K[&quot;Règles sécurité&quot;]
+  G --&gt; L[&quot;Runbooks et mémoire&quot;]
+  H --&gt; M[&quot;Preuves archivées&quot;]</code></pre>
+<h2 id="déclenchement-ci-jenkins">3. Déclenchement CI Jenkins</h2>
+<pre class="mermaid"><code>sequenceDiagram
+  participant Dev as Développeur
+  participant Git as Dépôt Git
+  participant Jenkins as Jenkins CI
+  participant Artifacts as Artefacts CI
+
+  Dev-&gt;&gt;Git: push / merge request
+  Git-&gt;&gt;Jenkins: webhook ou déclenchement manuel
+  Jenkins-&gt;&gt;Git: checkout
+  Jenkins-&gt;&gt;Jenkins: lint, tests, scans
+  Jenkins-&gt;&gt;Artifacts: archive rapports</code></pre>
+<h2 id="pipeline-ci-qualité">4. Pipeline CI qualité</h2>
+<pre class="mermaid"><code>flowchart LR
+  A[&quot;Checkout&quot;] --&gt; B[&quot;make lint&quot;]
+  B --&gt; C[&quot;Tests Laravel&quot;]
+  C --&gt; D[&quot;Couverture&quot;]
+  D --&gt; E[&quot;Audit dépendances&quot;]
+  E --&gt; F{&quot;Quality Gate CI&quot;}
+  F --&gt;|OK| G[&quot;Artefacts CI archivés&quot;]
+  F --&gt;|KO| H[&quot;Pipeline bloqué&quot;]</code></pre>
+<h2 id="contrôles-sécurité-code">5. Contrôles sécurité code</h2>
+<pre class="mermaid"><code>flowchart TD
+  A[&quot;Code source&quot;] --&gt; B[&quot;Semgrep SAST&quot;]
+  A --&gt; C[&quot;Gitleaks secrets&quot;]
+  A --&gt; D[&quot;Trivy filesystem&quot;]
+  A --&gt; E[&quot;Composer audit&quot;]
+  A --&gt; F[&quot;npm audit si lockfile&quot;]
+  A --&gt; G[&quot;Sonar optionnel&quot;]
+
+  B --&gt; H{&quot;Gate sécurité&quot;}
+  C --&gt; H
+  D --&gt; H
+  E --&gt; H
+  F --&gt; H
+  G --&gt; H
+
+  H --&gt;|PASS| I[&quot;CI continue&quot;]
+  H --&gt;|FAIL| J[&quot;Correction requise&quot;]</code></pre>
+<h2 id="validation-statique-kubernetes">6. Validation statique
+Kubernetes</h2>
+<pre class="mermaid"><code>flowchart LR
+  A[&quot;Manifests Kustomize&quot;] --&gt; B[&quot;Render dev&quot;]
+  A --&gt; C[&quot;Render demo&quot;]
+  A --&gt; D[&quot;Render production&quot;]
+  B --&gt; E[&quot;Resource guards&quot;]
+  C --&gt; E
+  D --&gt; E
+  E --&gt; F[&quot;Ultra hardening&quot;]
+  F --&gt; G[&quot;Rapports sécurité statiques&quot;]</code></pre>
+<h2 id="construction-des-images-oci">7. Construction des images OCI</h2>
+<pre class="mermaid"><code>flowchart LR
+  A[&quot;Sources Laravel officielles&quot;] --&gt; B[&quot;Dockerfiles production&quot;]
+  B --&gt; C[&quot;docker build&quot;]
+  C --&gt; D[&quot;Tag image&quot;]
+  D --&gt; E[&quot;Push localhost:5001&quot;]
+  E --&gt; F[&quot;Image candidate&quot;]</code></pre>
+<h2 id="scan-image-trivy">8. Scan image Trivy</h2>
+<pre class="mermaid"><code>flowchart TD
+  A[&quot;Image candidate&quot;] --&gt; B[&quot;Trivy image scan&quot;]
+  B --&gt; C{&quot;Vulnérabilité critique ?&quot;}
+  C --&gt;|Non| D[&quot;Scan PASS&quot;]
+  C --&gt;|Oui| E[&quot;Release bloquée&quot;]
+  D --&gt; F[&quot;image-scan-summary.txt&quot;]
+  E --&gt; G[&quot;Correction image ou dépendance&quot;]</code></pre>
+<h2 id="génération-sbom-syft">9. Génération SBOM Syft</h2>
+<pre class="mermaid"><code>flowchart LR
+  A[&quot;Image candidate&quot;] --&gt; B[&quot;Syft&quot;]
+  B --&gt; C[&quot;SBOM CycloneDX&quot;]
+  C --&gt; D[&quot;artifacts/sbom&quot;]
+  D --&gt; E[&quot;sbom-index.txt&quot;]
+  E --&gt; F[&quot;Preuve de composition logicielle&quot;]</code></pre>
+<h2 id="signature-cosign">10. Signature Cosign</h2>
+<pre class="mermaid"><code>flowchart LR
+  A[&quot;Image scannée&quot;] --&gt; B[&quot;Clé Cosign ou identité keyless&quot;]
+  B --&gt; C[&quot;cosign sign&quot;]
+  C --&gt; D[&quot;Signature OCI&quot;]
+  D --&gt; E[&quot;sign-summary.txt&quot;]</code></pre>
+<h2 id="vérification-cosign">11. Vérification Cosign</h2>
+<pre class="mermaid"><code>flowchart TD
+  A[&quot;Image signée&quot;] --&gt; B[&quot;cosign verify&quot;]
+  B --&gt; C{&quot;Signature valide ?&quot;}
+  C --&gt;|Oui| D[&quot;Image vérifiée&quot;]
+  C --&gt;|Non| E[&quot;Release bloquée&quot;]
+  D --&gt; F[&quot;verify-summary.txt&quot;]
+  E --&gt; G[&quot;Investigation supply chain&quot;]</code></pre>
+<h2 id="promotion-par-digest">12. Promotion par digest</h2>
+<pre class="mermaid"><code>flowchart LR
+  A[&quot;Image vérifiée&quot;] --&gt; B[&quot;Résolution digest&quot;]
+  B --&gt; C[&quot;Promotion tag cible&quot;]
+  C --&gt; D[&quot;promotion-digests.txt&quot;]
+  D --&gt; E[&quot;Artefact immuable&quot;]
+  E --&gt; F[&quot;Déploiement no-rebuild&quot;]</code></pre>
+<h2 id="gate-release-obligatoire">13. Gate release obligatoire</h2>
+<pre class="mermaid"><code>flowchart TD
+  A[&quot;Preuves release&quot;] --&gt; B[&quot;Trivy présent&quot;]
+  A --&gt; C[&quot;SBOM présent&quot;]
+  A --&gt; D[&quot;Signature présente&quot;]
+  A --&gt; E[&quot;Verify présent&quot;]
+  A --&gt; F[&quot;Digest présent&quot;]
+  B --&gt; G{&quot;Evidence gate&quot;}
+  C --&gt; G
+  D --&gt; G
+  E --&gt; G
+  F --&gt; G
+  G --&gt;|Complet| H[&quot;Release autorisée&quot;]
+  G --&gt;|Manquant| I[&quot;Release bloquée&quot;]</code></pre>
+<h2 id="déploiement-cd-sans-rebuild">14. Déploiement CD sans
+rebuild</h2>
+<pre class="mermaid"><code>flowchart LR
+  A[&quot;Digest promu&quot;] --&gt; B[&quot;Jenkins CD&quot;]
+  B --&gt; C[&quot;Verify pre-deploy&quot;]
+  C --&gt; D[&quot;Kustomize production&quot;]
+  D --&gt; E[&quot;kubectl apply&quot;]
+  E --&gt; F[&quot;Rollout status&quot;]
+  F --&gt; G[&quot;Smoke tests&quot;]
+  G --&gt; H[&quot;Runtime evidence&quot;]</code></pre>
+<h2 id="architecture-kubernetes-production-like">15. Architecture
+Kubernetes production-like</h2>
+<pre class="mermaid"><code>flowchart TD
+  A[&quot;Namespace securerag-hub&quot;] --&gt; B[&quot;portal-web replicas 3&quot;]
+  A --&gt; C[&quot;auth-users replicas 2&quot;]
+  A --&gt; D[&quot;chatbot-manager replicas 2&quot;]
+  A --&gt; E[&quot;conversation-service replicas 2&quot;]
+  A --&gt; F[&quot;audit-security-service replicas 2&quot;]
+
+  A --&gt; G[&quot;NetworkPolicies&quot;]
+  A --&gt; H[&quot;PDB&quot;]
+  A --&gt; I[&quot;HPA&quot;]
+  A --&gt; J[&quot;ResourceQuota / LimitRange&quot;]
+  A --&gt; K[&quot;Pod Security restricted&quot;]
+
+  B --&gt; L[&quot;NodePort 30081&quot;]</code></pre>
+<h2 id="durcissement-kubernetes">16. Durcissement Kubernetes</h2>
+<pre class="mermaid"><code>flowchart TD
+  A[&quot;Deployment&quot;] --&gt; B[&quot;ServiceAccount dédié&quot;]
+  A --&gt; C[&quot;runAsNonRoot&quot;]
+  A --&gt; D[&quot;allowPrivilegeEscalation false&quot;]
+  A --&gt; E[&quot;readOnlyRootFilesystem true&quot;]
+  A --&gt; F[&quot;seccomp RuntimeDefault&quot;]
+  A --&gt; G[&quot;drop ALL capabilities&quot;]
+  A --&gt; H[&quot;requests / limits&quot;]
+  A --&gt; I[&quot;readiness / liveness / startup probes&quot;]</code></pre>
+<h2 id="séparation-production-legacy">17. Séparation production /
+legacy</h2>
+<pre class="mermaid"><code>flowchart TD
+  A[&quot;Runtime Kubernetes&quot;] --&gt; B[&quot;Overlay production officiel&quot;]
+  A --&gt; C[&quot;Legacy exclu&quot;]
+
+  B --&gt; D[&quot;5 workloads Laravel officiels&quot;]
+  B --&gt; E[&quot;Validation cluster clean&quot;]
+  B --&gt; F[&quot;NodePort portail officiel&quot;]
+
+  C --&gt; G[&quot;Pas de kustomization legacy déployable&quot;]
+  C --&gt; H[&quot;Cleanup contrôlé&quot;]
+  C --&gt; I[&quot;Preuves honnêtes&quot;]</code></pre>
+<h2 id="metrics-server-et-hpa-runtime">18. metrics-server et HPA
+runtime</h2>
+<pre class="mermaid"><code>flowchart LR
+  A[&quot;Cluster actif&quot;] --&gt; B[&quot;metrics-server installé&quot;]
+  B --&gt; C[&quot;APIService Available&quot;]
+  C --&gt; D[&quot;kubectl top nodes&quot;]
+  C --&gt; E[&quot;kubectl top pods&quot;]
+  D --&gt; F[&quot;HPA targets&quot;]
+  E --&gt; F
+  F --&gt; G{&quot;&lt;unknown&gt; absent ?&quot;}
+  G --&gt;|Oui| H[&quot;HPA runtime TERMINÉ&quot;]
+  G --&gt;|Non| I[&quot;HPA PARTIEL&quot;]
+  H --&gt; J[&quot;hpa-runtime-report.md&quot;]</code></pre>
+<h2 id="kyverno-audit">19. Kyverno Audit</h2>
+<pre class="mermaid"><code>flowchart TD
+  A[&quot;Cluster Kubernetes&quot;] --&gt; B[&quot;Installer Kyverno&quot;]
+  B --&gt; C[&quot;CRDs Kyverno&quot;]
+  C --&gt; D[&quot;Pods Kyverno Ready&quot;]
+  D --&gt; E[&quot;Apply policies Audit&quot;]
+  E --&gt; F[&quot;ClusterPolicies&quot;]
+  F --&gt; G[&quot;PolicyReports&quot;]
+  G --&gt; H[&quot;Rapport Kyverno runtime&quot;]</code></pre>
+<h2 id="préparation-kyverno-enforce">20. Préparation Kyverno
+Enforce</h2>
+<pre class="mermaid"><code>flowchart TD
+  A[&quot;PolicyReports Audit&quot;] --&gt; B{&quot;Violations corrigées ?&quot;}
+  B --&gt;|Non| C[&quot;Rester en Audit&quot;]
+  B --&gt;|Oui| D{&quot;Supply chain signée ?&quot;}
+  D --&gt;|Non| E[&quot;Enforce interdit&quot;]
+  D --&gt;|Oui| F[&quot;Test Enforce prudent&quot;]
+  F --&gt; G[&quot;Rollback possible&quot;]</code></pre>
+<h2 id="secrets-management">21. Secrets management</h2>
+<pre class="mermaid"><code>flowchart TD
+  A[&quot;Secrets strategy&quot;] --&gt; B[&quot;Aucun secret réel dans Git&quot;]
+  A --&gt; C[&quot;Bootstrap local&quot;]
+  A --&gt; D[&quot;Credentials Jenkins&quot;]
+  A --&gt; E[&quot;Secrets Kubernetes&quot;]
+  A --&gt; F[&quot;Rotation documentée&quot;]
+
+  B --&gt; G[&quot;.env.example uniquement&quot;]
+  C --&gt; H[&quot;scripts/secrets&quot;]
+  D --&gt; I[&quot;infra/jenkins/secrets local&quot;]
+  E --&gt; J[&quot;secretRef workloads&quot;]</code></pre>
+<h2 id="db-externe-backup-et-restore">22. DB externe, backup et
+restore</h2>
+<pre class="mermaid"><code>flowchart LR
+  A[&quot;Workloads Laravel&quot;] --&gt; B[&quot;DB externe PostgreSQL&quot;]
+  B --&gt; C[&quot;Backup&quot;]
+  C --&gt; D[&quot;Archive backup&quot;]
+  D --&gt; E[&quot;Restore test&quot;]
+  E --&gt; F{&quot;Restore OK ?&quot;}
+  F --&gt;|Oui| G[&quot;Preuve résilience données&quot;]
+  F --&gt;|Non| H[&quot;Runbook incident&quot;]</code></pre>
+<h2 id="observabilité-runtime">23. Observabilité runtime</h2>
+<pre class="mermaid"><code>flowchart TD
+  A[&quot;Cluster runtime&quot;] --&gt; B[&quot;Deployments / Pods / Services&quot;]
+  A --&gt; C[&quot;PDB / HPA&quot;]
+  A --&gt; D[&quot;Events Kubernetes&quot;]
+  A --&gt; E[&quot;Logs applicatifs&quot;]
+  A --&gt; F[&quot;kubectl top&quot;]
+  A --&gt; G[&quot;Kyverno PolicyReports&quot;]
+
+  B --&gt; H[&quot;observability-snapshot.md&quot;]
+  C --&gt; H
+  D --&gt; H
+  E --&gt; H
+  F --&gt; H
+  G --&gt; H</code></pre>
+<h2 id="support-pack-final">24. Support pack final</h2>
+<pre class="mermaid"><code>flowchart LR
+  A[&quot;Artefacts CI&quot;] --&gt; F[&quot;Support pack&quot;]
+  B[&quot;Artefacts release&quot;] --&gt; F
+  C[&quot;Artefacts Kubernetes&quot;] --&gt; F
+  D[&quot;Artefacts sécurité&quot;] --&gt; F
+  E[&quot;Runbooks&quot;] --&gt; F
+  F --&gt; G[&quot;Archive finale&quot;]
+  G --&gt; H[&quot;Mémoire / Soutenance&quot;]</code></pre>
+<h2 id="tableau-détat-final">25. Tableau d’état final</h2>
+<pre class="mermaid"><code>flowchart TD
+  A[&quot;Collecte preuves&quot;] --&gt; B[&quot;TERMINÉ&quot;]
+  A --&gt; C[&quot;PARTIEL&quot;]
+  A --&gt; D[&quot;PRÊT_NON_EXÉCUTÉ&quot;]
+  A --&gt; E[&quot;DÉPENDANT_DE_L_ENVIRONNEMENT&quot;]
+
+  B --&gt; F[&quot;Contrôle prouvé&quot;]
+  C --&gt; G[&quot;Contrôle incomplet&quot;]
+  D --&gt; H[&quot;Scripts prêts mais non lancés&quot;]
+  E --&gt; I[&quot;Dépend de Docker/kind/registry/outils&quot;]
+
+  F --&gt; J[&quot;Tableau final global&quot;]
+  G --&gt; J
+  H --&gt; J
+  I --&gt; J</code></pre>
+<h2 id="chaîne-complète-de-preuves">26. Chaîne complète de preuves</h2>
+<pre class="mermaid"><code>flowchart LR
+  A[&quot;CI reports&quot;] --&gt; B[&quot;Security reports&quot;]
+  B --&gt; C[&quot;Image scan&quot;]
+  C --&gt; D[&quot;SBOM&quot;]
+  D --&gt; E[&quot;Signature&quot;]
+  E --&gt; F[&quot;Verify&quot;]
+  F --&gt; G[&quot;Digest promotion&quot;]
+  G --&gt; H[&quot;Deploy evidence&quot;]
+  H --&gt; I[&quot;Runtime evidence&quot;]
+  I --&gt; J[&quot;Support pack&quot;]</code></pre>
+<script type="module">
+import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs";
+
+document.querySelectorAll("pre > code.language-mermaid, pre > code.mermaid, pre.mermaid > code").forEach((code) => {
+  const div = document.createElement("div");
+  div.className = "mermaid";
+  div.textContent = code.textContent;
+  const pre = code.closest("pre");
+  pre.replaceWith(div);
+});
+
+mermaid.initialize({
+  startOnLoad: false,
+  securityLevel: "loose",
+  flowchart: {
+    htmlLabels: true,
+    curve: "basis"
+  },
+  sequence: {
+    mirrorActors: false
+  },
+  theme: "default"
+});
+
+await mermaid.run({ querySelector: ".mermaid" });
+document.body.setAttribute("data-mermaid-rendered", "true");
+</script>
+</body>
+</html>

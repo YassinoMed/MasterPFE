@@ -28,7 +28,7 @@
 | Kubernetes | Preuves runtime production | `scripts/validate/collect-production-runtime-evidence.sh`, `artifacts/validation/production-runtime-evidence.md` | DÉPENDANT_DE_L_ENVIRONNEMENT |
 | Kubernetes | Validation Kyverno hors cluster | `scripts/ci/validate-kyverno-policies.sh`, `kyverno apply` si le CLI est disponible | PRÊT_NON_EXÉCUTÉ |
 | Kubernetes | PodDisruptionBudget | manifests `*/pdb.yaml` sur composants critiques | TERMINÉ |
-| Kubernetes | HorizontalPodAutoscaler | manifests `*/hpa.yaml`; exploitation dépend de `metrics-server` runtime | DÉPENDANT_DE_L_ENVIRONNEMENT |
+| Kubernetes | HorizontalPodAutoscaler | manifests `*/hpa.yaml`, `scripts/validate/validate-hpa-runtime.sh`, preuve `artifacts/validation/hpa-runtime-report.md` | DÉPENDANT_DE_L_ENVIRONNEMENT |
 | Kubernetes | Admission policy (Audit) | `infra/k8s/policies/kyverno/*`; preuve via `cluster-security-addons.md` | DÉPENDANT_DE_L_ENVIRONNEMENT |
 | Kubernetes | Admission policy (Enforce) | overlay unique `infra/k8s/policies/kyverno-enforce` | PRÊT_NON_EXÉCUTÉ |
 | Secrets | Jenkins credentials | `scripts/jenkins/bootstrap-local-credentials.sh`, `JENKINS_ADMIN_PASSWORD_FILE` | TERMINÉ |
