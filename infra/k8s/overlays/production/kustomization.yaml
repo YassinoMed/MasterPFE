@@ -44,3 +44,4 @@ patches:
   - path: patches/pdb-production.yaml
   - path: patches/resourcequota-production.yaml
   - path: patches/portal-web-hpa-production.yaml
+  - path: patches/portal-web-service-nodeport.yaml

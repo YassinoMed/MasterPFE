@@ -13,9 +13,37 @@ patches:
       name: metrics-server
       namespace: kube-system
     patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/args
+        value:
+          - --cert-dir=/tmp
+          - --secure-port=10250
+          - --kubelet-preferred-address-types=InternalIP,Hostname,InternalDNS
+          - --kubelet-use-node-status-port
+          - --metric-resolution=15s
+          - --kubelet-insecure-tls
       - op: add
-        path: /spec/template/spec/containers/0/args/-
-        value: --kubelet-insecure-tls
+        path: /spec/template/spec/containers/0/resources
+        value:
+          requests:
+            cpu: 100m
+            memory: 200Mi
+            ephemeral-storage: 64Mi
+          limits:
+            cpu: 250m
+            memory: 300Mi
+            ephemeral-storage: 256Mi
       - op: add
-        path: /spec/template/spec/containers/0/args/-
-        value: --kubelet-preferred-address-types=InternalIP,Hostname,InternalDNS,ExternalDNS,ExternalIP
+        path: /spec/template/spec/securityContext
+        value:
+          runAsNonRoot: true
+          seccompProfile:
+            type: RuntimeDefault
+      - op: add
+        path: /spec/template/spec/containers/0/securityContext
+        value:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+              - ALL

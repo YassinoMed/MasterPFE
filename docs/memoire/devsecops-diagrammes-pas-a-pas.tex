@@ -1,0 +1,702 @@
+% Section LaTeX a inclure dans le memoire avec :
+% \input{docs/memoire/devsecops-diagrammes-pas-a-pas}
+%
+% Packages requis dans le preambule du document principal :
+% \usepackage{tikz}
+% \usepackage{graphicx}
+% \usepackage{array}
+% \usetikzlibrary{arrows.meta,positioning,shapes.geometric,fit,backgrounds}
+
+\section{Description complete de la partie DevSecOps}
+\label{sec:devsecops-diagrammes-pas-a-pas}
+
+Cette section presente la partie DevSecOps de \textit{SecureRAG Hub} sous la
+forme d'un enchainement de pas techniques. L'objectif est de montrer comment le
+projet passe d'un code applicatif Laravel versionne a une plateforme
+production-like deployee sur Kubernetes, securisee, auditee et documentee par
+des preuves.
+
+Le perimetre de cette description est volontairement limite a la chaine
+DevSecOps, a Kubernetes, a la supply chain, aux controles de securite, a
+l'observabilite, aux preuves runtime et a la documentation. Les composants
+metiers hors DevSecOps ne sont pas detailles ici.
+
+\subsection{Creation progressive du socle DevSecOps}
+\label{subsec:creation-socle-devsecops}
+
+La creation de la partie DevSecOps n'a pas ete abordee comme un simple ajout
+d'outils autour du projet. Elle a ete construite comme un systeme complet de
+livraison, de securisation et de preuve. La demarche a consiste a partir du
+besoin de soutenance et d'exploitation locale, puis a transformer ce besoin en
+une chaine technique reproductible.
+
+Le principe directeur a ete le suivant : chaque automatisation ajoutee au
+projet devait produire soit un artefact deployable, soit un rapport de
+validation, soit une preuve exploitable dans le memoire. Cette regle a permis
+d'eviter une accumulation d'outils non relies entre eux.
+
+\subsubsection{Objectifs initiaux de creation}
+
+Les objectifs initiaux de la creation DevSecOps etaient les suivants :
+
+\begin{itemize}
+  \item disposer d'un depot organise et lisible ;
+  \item automatiser les tests et les controles de securite ;
+  \item construire des images OCI de maniere reproductible ;
+  \item deployer localement sur Kubernetes sans infrastructure cloud ;
+  \item separer les environnements \texttt{dev}, \texttt{demo} et
+  \texttt{production} ;
+  \item produire des preuves techniques reutilisables dans la soutenance ;
+  \item distinguer honnetement les controles termines des controles dependants
+  de l'environnement.
+\end{itemize}
+
+\subsubsection{Construction par couches}
+
+La creation s'est faite par couches successives. Chaque couche ajoute un niveau
+de maturite supplementaire sans remettre en cause les couches precedentes.
+
+\begin{figure}[htbp]
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tikzpicture}[node distance=9mm and 8mm]
+  \node[srStep] (repo) {Couche 1\\Depot et structure};
+  \node[srStep, right=of repo] (ci) {Couche 2\\CI et tests};
+  \node[srSec, right=of ci] (security) {Couche 3\\Scans securite};
+  \node[srStep, right=of security] (images) {Couche 4\\Images OCI};
+  \node[srRuntime, right=of images] (k8s) {Couche 5\\Kubernetes};
+  \node[srSec, right=of k8s] (supply) {Couche 6\\Supply chain};
+  \node[srProof, right=of supply] (proofs) {Couche 7\\Preuves};
+
+  \draw[srArrow] (repo) -- (ci);
+  \draw[srArrow] (ci) -- (security);
+  \draw[srArrow] (security) -- (images);
+  \draw[srArrow] (images) -- (k8s);
+  \draw[srArrow] (k8s) -- (supply);
+  \draw[srArrow] (supply) -- (proofs);
+\end{tikzpicture}}
+\caption{Creation progressive du socle DevSecOps par couches}
+\label{fig:creation-devsecops-couches}
+\end{figure}
+
+La premiere couche a consiste a stabiliser l'organisation du depot. Les
+dossiers \texttt{scripts/}, \texttt{infra/}, \texttt{docs/}, \texttt{security/},
+\texttt{platform/} et \texttt{services-laravel/} donnent une responsabilite
+claire a chaque partie. Cette separation est importante car elle rend possible
+l'automatisation sans melanger code applicatif, infrastructure, runbooks et
+preuves.
+
+La deuxieme couche a introduit les scripts de CI. L'objectif etait d'obtenir un
+premier signal de qualite avant de construire les images. Les controles de base
+sont regroupes dans \texttt{scripts/ci/} et exposes dans le \texttt{Makefile}.
+Cette couche verifie notamment les tests, les audits de dependances, les
+regles Sonar et les validations statiques.
+
+La troisieme couche a ajoute les controles de securite. Les outils comme
+\texttt{Semgrep}, \texttt{Gitleaks} et \texttt{Trivy} permettent de detecter
+des erreurs avant la phase de deploiement. Le choix methodologique est de
+placer la securite le plus tot possible dans la chaine, afin d'eviter que les
+faiblesses ne soient decouvertes uniquement en runtime.
+
+La quatrieme couche a porte sur la construction des images. Les Dockerfiles et
+les scripts de build ont ete alignes sur le runtime Laravel officiel. Les
+anciens composants legacy sans sources applicatives exploitables ne sont pas
+presentes comme build officiel. Ce point est essentiel pour garder une chaine
+de preuve honnete.
+
+La cinquieme couche a introduit Kubernetes avec \texttt{kind} et Kustomize. Le
+choix de \texttt{kind} permet de simuler localement un environnement
+Kubernetes, tandis que Kustomize permet de separer la base commune des overlays
+\texttt{dev}, \texttt{demo} et \texttt{production}.
+
+La sixieme couche a ajoute la supply chain : generation de SBOM, scan d'image,
+signature Cosign, verification, promotion par digest et deploiement sans
+reconstruction. Cette couche transforme le projet d'un simple deploiement local
+vers une logique de confiance sur les artefacts.
+
+La septieme couche a formalise la preuve. Les scripts de validation et les
+support packs produisent des fichiers sous \texttt{artifacts/}. Ces fichiers
+servent a justifier l'etat reel du projet et evitent de declarer un controle
+comme termine sans execution correspondante.
+
+\subsubsection{Decisions de conception DevSecOps}
+
+Plusieurs decisions structurantes ont ete prises pendant la creation :
+
+\begin{itemize}
+  \item \textbf{Jenkins comme autorite CI/CD} : Jenkins est retenu comme chaine
+  officielle pour eviter une double source de verite avec GitHub Actions.
+  \item \textbf{Kustomize plutot que manifests dupliques} : la base Kubernetes
+  est commune et les differences sont portees par des overlays.
+  \item \textbf{Registre local} : \texttt{localhost:5001} permet de demontrer
+  la chaine complete sans dependance cloud.
+  \item \textbf{Promotion sans rebuild} : une image validee ne doit pas etre
+  reconstruite au moment du deploiement.
+  \item \textbf{Preuves avant affirmation} : un controle est declare termine
+  uniquement si un rapport ou une sortie runtime le prouve.
+  \item \textbf{Separation legacy/officiel} : le runtime officiel ne contient
+  que les composants Laravel reellement buildables et deployables.
+\end{itemize}
+
+\subsubsection{Artefacts crees pendant la construction}
+
+\begin{center}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{|p{38mm}|p{65mm}|p{42mm}|}
+\hline
+\textbf{Famille} & \textbf{Role dans la creation DevSecOps} & \textbf{Exemples} \\
+\hline
+Scripts CI & Executer tests, audits et validations statiques & \texttt{scripts/ci/} \\
+\hline
+Scripts release & Produire SBOM, signatures, verification et promotion & \texttt{scripts/release/} \\
+\hline
+Scripts deploy & Creer le cluster, construire les images et deployer & \texttt{scripts/deploy/} \\
+\hline
+Scripts validate & Collecter les preuves runtime et les rapports & \texttt{scripts/validate/} \\
+\hline
+Infrastructure & Decrire Jenkins, kind et Kubernetes & \texttt{infra/} \\
+\hline
+Documentation & Expliquer l'exploitation et les limites reelles & \texttt{docs/runbooks/} \\
+\hline
+Preuves & Archiver les resultats et statuts reels & \texttt{artifacts/} \\
+\hline
+\end{tabular}
+\end{center}
+
+\subsubsection{Enchainement de creation operationnelle}
+
+L'enchainement operationnel de creation peut etre resume ainsi :
+
+\begin{enumerate}
+  \item creation de l'arborescence technique du depot ;
+  \item ajout du \texttt{Makefile} comme interface de commandes ;
+  \item ajout des scripts CI pour tester et verifier ;
+  \item ajout des Dockerfiles et scripts de build ;
+  \item ajout du cluster local \texttt{kind} et du registre local ;
+  \item creation des manifests Kubernetes de base ;
+  \item creation des overlays \texttt{dev}, \texttt{demo} et
+  \texttt{production} ;
+  \item ajout des NetworkPolicies, PDB, quotas, limites et probes ;
+  \item ajout de la supply chain avec SBOM, signatures et promotion ;
+  \item ajout des scripts de validation et de support pack ;
+  \item alignement de la documentation avec l'etat reel.
+\end{enumerate}
+
+Cette creation progressive donne au projet une trajectoire claire : partir d'un
+demonstrateur local stable, puis evoluer vers une plateforme production-like
+avec controles de securite, haute disponibilite statique, preuves runtime et
+release evidence.
+
+\subsection{Legende des diagrammes}
+
+\tikzset{
+  srStep/.style={
+    rectangle,
+    rounded corners=2pt,
+    draw=black,
+    thick,
+    align=center,
+    minimum height=8mm,
+    text width=31mm,
+    fill=gray!10
+  },
+  srGate/.style={
+    diamond,
+    draw=black,
+    thick,
+    align=center,
+    aspect=2,
+    text width=24mm,
+    fill=yellow!15
+  },
+  srSec/.style={
+    rectangle,
+    rounded corners=2pt,
+    draw=black,
+    thick,
+    align=center,
+    minimum height=8mm,
+    text width=32mm,
+    fill=red!10
+  },
+  srProof/.style={
+    rectangle,
+    rounded corners=2pt,
+    draw=black,
+    thick,
+    align=center,
+    minimum height=8mm,
+    text width=35mm,
+    fill=green!10
+  },
+  srRuntime/.style={
+    rectangle,
+    rounded corners=2pt,
+    draw=black,
+    thick,
+    align=center,
+    minimum height=8mm,
+    text width=34mm,
+    fill=blue!8
+  },
+  srArrow/.style={-{Latex[length=2mm]}, thick}
+}
+
+Dans les figures suivantes, les blocs gris representent les etapes techniques,
+les blocs rouges les controles de securite, les losanges les gates bloquants,
+les blocs bleus les elements runtime Kubernetes et les blocs verts les preuves
+archivees.
+
+\subsection{Vue globale de la chaine DevSecOps}
+
+La chaine globale suit une logique progressive : le code est valide en CI, les
+images sont construites et securisees, la release est promue par digest, le
+deploiement Kubernetes est applique sans reconstruction, puis les preuves
+runtime et release sont collectees.
+
+\begin{figure}[htbp]
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tikzpicture}[node distance=12mm and 10mm]
+  \node[srStep] (git) {Depot Git\\monorepo};
+  \node[srStep, right=of git] (ci) {Jenkins CI\\qualite et securite};
+  \node[srSec, right=of ci] (scan) {SAST, secrets,\\dependances};
+  \node[srStep, right=of scan] (build) {Build images\\OCI};
+  \node[srSec, right=of build] (supply) {SBOM, signature,\\verification};
+  \node[srGate, right=of supply] (gate) {Release\\gate};
+  \node[srRuntime, right=of gate] (k8s) {Kubernetes\\production};
+  \node[srProof, right=of k8s] (proof) {Preuves\\runtime et release};
+
+  \draw[srArrow] (git) -- (ci);
+  \draw[srArrow] (ci) -- (scan);
+  \draw[srArrow] (scan) -- (build);
+  \draw[srArrow] (build) -- (supply);
+  \draw[srArrow] (supply) -- (gate);
+  \draw[srArrow] (gate) -- (k8s);
+  \draw[srArrow] (k8s) -- (proof);
+\end{tikzpicture}}
+\caption{Vue globale de la chaine DevSecOps de SecureRAG Hub}
+\label{fig:devsecops-global}
+\end{figure}
+
+\subsection{Pas 1 : gouvernance du depot et source de verite}
+
+Le premier pas DevSecOps consiste a rendre le depot lisible et gouvernable. Les
+sources applicatives, les scripts, l'infrastructure, les runbooks et les
+preuves sont separes dans des dossiers dedies. Jenkins est conserve comme
+autorite CI/CD officielle, tandis que GitHub Actions reste un heritage
+technique non prioritaire.
+
+\begin{figure}[htbp]
+\centering
+\resizebox{0.95\textwidth}{!}{%
+\begin{tikzpicture}[node distance=10mm and 12mm]
+  \node[srStep] (repo) {Monorepo\\SecureRAG Hub};
+  \node[srStep, below left=of repo] (app) {platform/\\services-laravel/};
+  \node[srStep, below=of repo] (infra) {infra/\\k8s, kind, jenkins};
+  \node[srStep, below right=of repo] (scripts) {scripts/\\ci, release, deploy};
+  \node[srStep, right=of scripts] (docs) {docs/\\runbooks, memoire};
+  \node[srProof, right=of repo] (truth) {Source de verite\\Jenkins + docs};
+
+  \draw[srArrow] (repo) -- (app);
+  \draw[srArrow] (repo) -- (infra);
+  \draw[srArrow] (repo) -- (scripts);
+  \draw[srArrow] (repo) -- (docs);
+  \draw[srArrow] (repo) -- (truth);
+\end{tikzpicture}}
+\caption{Organisation du depot et source de verite DevSecOps}
+\label{fig:devsecops-repo}
+\end{figure}
+
+\subsection{Pas 2 : integration continue Jenkins}
+
+La CI verifie que le code peut etre livre sans introduire de regression
+evidente. Elle execute les tests, les validations statiques, les audits de
+dependances et les controles de securite. Les resultats sont archives sous
+forme de rapports exploitables.
+
+\begin{figure}[htbp]
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tikzpicture}[node distance=11mm and 9mm]
+  \node[srStep] (push) {Push ou\\merge request};
+  \node[srStep, right=of push] (checkout) {Checkout\\Jenkins};
+  \node[srStep, right=of checkout] (lint) {Lint et rendu\\Kustomize};
+  \node[srStep, right=of lint] (tests) {Tests Laravel\\et coverage};
+  \node[srSec, right=of tests] (security) {Semgrep\\Gitleaks\\Trivy FS};
+  \node[srGate, right=of security] (gate) {Quality\\Gate CI};
+  \node[srProof, right=of gate] (reports) {Rapports CI\\archives};
+
+  \draw[srArrow] (push) -- (checkout);
+  \draw[srArrow] (checkout) -- (lint);
+  \draw[srArrow] (lint) -- (tests);
+  \draw[srArrow] (tests) -- (security);
+  \draw[srArrow] (security) -- (gate);
+  \draw[srArrow] (gate) -- (reports);
+\end{tikzpicture}}
+\caption{Pipeline Jenkins CI}
+\label{fig:devsecops-ci}
+\end{figure}
+
+\subsection{Pas 3 : controles de securite applicative et dependances}
+
+Les controles applicatifs sont positionnes tot dans la chaine. Ils incluent la
+recherche de secrets, les scans de dependances Composer et npm lorsque les
+lockfiles sont presents, les regles SAST et les validations Sonar lorsque
+l'environnement fournit les variables necessaires.
+
+\begin{figure}[htbp]
+\centering
+\resizebox{0.98\textwidth}{!}{%
+\begin{tikzpicture}[node distance=10mm and 10mm]
+  \node[srStep] (code) {Code Laravel\\et scripts};
+  \node[srSec, below left=of code] (deps) {Composer audit\\npm audit};
+  \node[srSec, below=of code] (sast) {Semgrep\\Sonar optionnel};
+  \node[srSec, below right=of code] (secrets) {Gitleaks\\secrets};
+  \node[srGate, right=of code] (block) {Gate\\bloquant};
+  \node[srProof, right=of block] (evidence) {security/reports\\artifacts/ci};
+
+  \draw[srArrow] (code) -- (deps);
+  \draw[srArrow] (code) -- (sast);
+  \draw[srArrow] (code) -- (secrets);
+  \draw[srArrow] (deps) -- (block);
+  \draw[srArrow] (sast) -- (block);
+  \draw[srArrow] (secrets) -- (block);
+  \draw[srArrow] (block) -- (evidence);
+\end{tikzpicture}}
+\caption{Controles de securite applicative et dependances}
+\label{fig:devsecops-security-checks}
+\end{figure}
+
+\subsection{Pas 4 : construction des images OCI}
+
+Le build produit les images officielles des workloads Laravel. Le runtime
+officiel est separe des dossiers legacy afin de ne pas construire ni deployer
+des composants sans source applicative exploitable. Les images sont poussees
+dans un registre local pour etre consommees par le cluster kind.
+
+\begin{figure}[htbp]
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tikzpicture}[node distance=11mm and 9mm]
+  \node[srStep] (src) {Sources Laravel\\officielles};
+  \node[srStep, right=of src] (dockerfile) {Dockerfiles\\production};
+  \node[srStep, right=of dockerfile] (build) {docker build};
+  \node[srStep, right=of build] (tag) {Tags\\dev/demo/production};
+  \node[srStep, right=of tag] (registry) {Registre local\\localhost:5001};
+  \node[srRuntime, right=of registry] (kind) {Cluster kind\\pull images};
+
+  \draw[srArrow] (src) -- (dockerfile);
+  \draw[srArrow] (dockerfile) -- (build);
+  \draw[srArrow] (build) -- (tag);
+  \draw[srArrow] (tag) -- (registry);
+  \draw[srArrow] (registry) -- (kind);
+\end{tikzpicture}}
+\caption{Construction et publication des images OCI}
+\label{fig:devsecops-build-images}
+\end{figure}
+
+\subsection{Pas 5 : supply chain securisee}
+
+La supply chain vise a prouver qu'une image livree correspond bien a l'artefact
+construit, scanne, documente par SBOM, signe et verifie. Le projet suit une
+logique \textit{digest-first} pour eviter de reconstruire une image au moment du
+deploiement.
+
+\begin{figure}[htbp]
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tikzpicture}[node distance=10mm and 8mm]
+  \node[srStep] (image) {Image candidate};
+  \node[srSec, right=of image] (trivy) {Trivy\\image scan};
+  \node[srSec, right=of trivy] (sbom) {Syft\\SBOM};
+  \node[srSec, right=of sbom] (sign) {Cosign\\sign};
+  \node[srSec, right=of sign] (verify) {Cosign\\verify};
+  \node[srGate, right=of verify] (gate) {Evidence\\gate};
+  \node[srStep, right=of gate] (promote) {Promotion\\par digest};
+  \node[srProof, right=of promote] (release) {Attestation\\release};
+
+  \draw[srArrow] (image) -- (trivy);
+  \draw[srArrow] (trivy) -- (sbom);
+  \draw[srArrow] (sbom) -- (sign);
+  \draw[srArrow] (sign) -- (verify);
+  \draw[srArrow] (verify) -- (gate);
+  \draw[srArrow] (gate) -- (promote);
+  \draw[srArrow] (promote) -- (release);
+\end{tikzpicture}}
+\caption{Supply chain securisee : scan, SBOM, signature, verification et promotion}
+\label{fig:devsecops-supply-chain}
+\end{figure}
+
+\subsection{Pas 6 : deploiement CD sans reconstruction}
+
+Le CD ne doit pas reconstruire les images. Il verifie les artefacts promus,
+applique l'overlay Kustomize choisi et collecte les preuves post-deploiement.
+Cette separation limite le risque de divergence entre l'image testee et l'image
+deployee.
+
+\begin{figure}[htbp]
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tikzpicture}[node distance=10mm and 9mm]
+  \node[srProof] (digest) {Digest promu\\promotion-digests.txt};
+  \node[srGate, right=of digest] (verify) {Verification\\pre-deploy};
+  \node[srStep, right=of verify] (kustomize) {Kustomize\\overlay};
+  \node[srRuntime, right=of kustomize] (apply) {kubectl apply\\cluster};
+  \node[srStep, right=of apply] (smoke) {Smoke tests\\security smoke};
+  \node[srProof, right=of smoke] (runtime) {Runtime\\evidence};
+
+  \draw[srArrow] (digest) -- (verify);
+  \draw[srArrow] (verify) -- (kustomize);
+  \draw[srArrow] (kustomize) -- (apply);
+  \draw[srArrow] (apply) -- (smoke);
+  \draw[srArrow] (smoke) -- (runtime);
+\end{tikzpicture}}
+\caption{Deploiement CD sans reconstruction d'image}
+\label{fig:devsecops-cd-no-rebuild}
+\end{figure}
+
+\subsection{Pas 7 : architecture Kubernetes production-like}
+
+L'overlay \texttt{production} conserve le perimetre officiel Laravel et ajoute
+les controles attendus pour une plateforme production-like : plusieurs replicas,
+rolling update controle, PDB, anti-affinity, topology spread constraints, HPA,
+NetworkPolicies et exposition officielle du portail par un Service Kubernetes.
+
+\begin{figure}[htbp]
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tikzpicture}[node distance=10mm and 10mm]
+  \node[srRuntime] (ns) {Namespace\\securerag-hub};
+  \node[srRuntime, below left=of ns] (portal) {portal-web\\replicas 3};
+  \node[srRuntime, below=of ns] (services) {Services Laravel\\replicas 2};
+  \node[srRuntime, below right=of ns] (network) {NetworkPolicies\\default deny};
+  \node[srSec, right=of ns] (hardening) {PSA restricted\\securityContext};
+  \node[srRuntime, right=of hardening] (ha) {PDB, HPA\\spread};
+  \node[srProof, right=of ha] (proof) {production\\runtime evidence};
+
+  \draw[srArrow] (ns) -- (portal);
+  \draw[srArrow] (ns) -- (services);
+  \draw[srArrow] (ns) -- (network);
+  \draw[srArrow] (ns) -- (hardening);
+  \draw[srArrow] (hardening) -- (ha);
+  \draw[srArrow] (ha) -- (proof);
+\end{tikzpicture}}
+\caption{Overlay Kubernetes production-like}
+\label{fig:devsecops-k8s-production}
+\end{figure}
+
+\subsection{Pas 8 : metrics-server et HPA}
+
+Le HPA n'est credible que si \texttt{metrics-server} est disponible et si les
+valeurs CPU/memoire ne restent pas a \texttt{\string<unknown\string>}. Le projet distingue
+donc les HPA rendus statiquement et les HPA prouves runtime.
+
+\begin{figure}[htbp]
+\centering
+\resizebox{0.98\textwidth}{!}{%
+\begin{tikzpicture}[node distance=10mm and 10mm]
+  \node[srRuntime] (cluster) {Cluster\\actif};
+  \node[srRuntime, right=of cluster] (metrics) {metrics-server\\Available};
+  \node[srStep, right=of metrics] (top) {kubectl top\\nodes/pods};
+  \node[srRuntime, right=of top] (hpa) {HPA\\targets remplis};
+  \node[srGate, right=of hpa] (gate) {Aucun\\\texttt{\string<unknown\string>}};
+  \node[srProof, right=of gate] (report) {hpa-runtime\\report};
+
+  \draw[srArrow] (cluster) -- (metrics);
+  \draw[srArrow] (metrics) -- (top);
+  \draw[srArrow] (top) -- (hpa);
+  \draw[srArrow] (hpa) -- (gate);
+  \draw[srArrow] (gate) -- (report);
+\end{tikzpicture}}
+\caption{Validation runtime de metrics-server et des HPA}
+\label{fig:devsecops-hpa}
+\end{figure}
+
+\subsection{Pas 9 : Kyverno Audit puis preparation Enforce}
+
+Kyverno est utilise pour auditer les exigences de securite Kubernetes :
+profil pod restreint, absence de privileges, references d'images, exposition
+des Services et verification Cosign. Le mode \texttt{Enforce} n'est prepare
+qu'apres preuve de la supply chain.
+
+\begin{figure}[htbp]
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tikzpicture}[node distance=10mm and 9mm]
+  \node[srRuntime] (cluster) {Cluster\\Kubernetes};
+  \node[srSec, right=of cluster] (kyverno) {Kyverno\\Audit};
+  \node[srStep, right=of kyverno] (policies) {ClusterPolicies\\SecureRAG};
+  \node[srProof, right=of policies] (reports) {PolicyReports};
+  \node[srGate, right=of reports] (ready) {Supply chain\\prouvee ?};
+  \node[srSec, right=of ready] (enforce) {Enforce\\prudent};
+
+  \draw[srArrow] (cluster) -- (kyverno);
+  \draw[srArrow] (kyverno) -- (policies);
+  \draw[srArrow] (policies) -- (reports);
+  \draw[srArrow] (reports) -- (ready);
+  \draw[srArrow] (ready) -- node[above]{oui} (enforce);
+\end{tikzpicture}}
+\caption{Passage progressif de Kyverno Audit vers Enforce}
+\label{fig:devsecops-kyverno}
+\end{figure}
+
+\subsection{Pas 10 : gestion des secrets}
+
+La gestion des secrets repose sur une separation entre les valeurs exemples,
+les secrets locaux generes, les credentials Jenkins et les secrets Kubernetes.
+Aucun secret reel ne doit etre versionne. La rotation reste documentee et doit
+etre prouvee dans un environnement d'exploitation.
+
+\begin{figure}[htbp]
+\centering
+\resizebox{0.98\textwidth}{!}{%
+\begin{tikzpicture}[node distance=10mm and 10mm]
+  \node[srSec] (strategy) {Strategie\\secrets};
+  \node[srStep, below left=of strategy] (examples) {.env.example\\sans secret reel};
+  \node[srStep, below=of strategy] (local) {Bootstrap\\local};
+  \node[srStep, below right=of strategy] (jenkins) {Credentials\\Jenkins};
+  \node[srRuntime, right=of local] (k8s) {Secrets\\Kubernetes};
+  \node[srProof, right=of k8s] (audit) {Runbook\\rotation};
+
+  \draw[srArrow] (strategy) -- (examples);
+  \draw[srArrow] (strategy) -- (local);
+  \draw[srArrow] (strategy) -- (jenkins);
+  \draw[srArrow] (local) -- (k8s);
+  \draw[srArrow] (jenkins) -- (k8s);
+  \draw[srArrow] (k8s) -- (audit);
+\end{tikzpicture}}
+\caption{Gestion des secrets DevSecOps}
+\label{fig:devsecops-secrets}
+\end{figure}
+
+\subsection{Pas 11 : resilience donnees, backup et restore}
+
+La resilience donnees production-like impose de sortir d'une logique de
+stockage local fragile. L'approche cible est d'utiliser une base externe ou
+dediee, de produire des backups, de tester le restore et d'archiver la preuve.
+
+\begin{figure}[htbp]
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tikzpicture}[node distance=10mm and 9mm]
+  \node[srRuntime] (app) {Workloads\\Laravel};
+  \node[srRuntime, right=of app] (db) {DB externe\\PostgreSQL};
+  \node[srStep, right=of db] (backup) {Backup\\planifie};
+  \node[srGate, right=of backup] (restore) {Restore\\teste};
+  \node[srProof, right=of restore] (evidence) {Preuve\\data resilience};
+
+  \draw[srArrow] (app) -- (db);
+  \draw[srArrow] (db) -- (backup);
+  \draw[srArrow] (backup) -- (restore);
+  \draw[srArrow] (restore) -- (evidence);
+\end{tikzpicture}}
+\caption{Resilience donnees : DB externe, backup et restore}
+\label{fig:devsecops-data-resilience}
+\end{figure}
+
+\subsection{Pas 12 : observabilite runtime}
+
+L'observabilite minimale exploitable repose sur les objets Kubernetes, les
+events, les logs applicatifs, les HPA, les metriques \texttt{kubectl top}, les
+rapports Kyverno et les snapshots collectes dans les artefacts. Une stack
+Prometheus/Grafana/Loki reste une evolution possible, mais n'est pas requise
+pour ne pas surcharger la demonstration.
+
+\begin{figure}[htbp]
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tikzpicture}[node distance=10mm and 8mm]
+  \node[srRuntime] (cluster) {Cluster\\runtime};
+  \node[srStep, right=of cluster] (objects) {deploy, pods\\svc, pdb, hpa};
+  \node[srStep, right=of objects] (events) {Events\\logs};
+  \node[srStep, right=of events] (metrics) {kubectl top\\metrics};
+  \node[srStep, right=of metrics] (kyverno) {Kyverno\\reports};
+  \node[srProof, right=of kyverno] (snapshot) {Observability\\snapshot};
+
+  \draw[srArrow] (cluster) -- (objects);
+  \draw[srArrow] (objects) -- (events);
+  \draw[srArrow] (events) -- (metrics);
+  \draw[srArrow] (metrics) -- (kyverno);
+  \draw[srArrow] (kyverno) -- (snapshot);
+\end{tikzpicture}}
+\caption{Observabilite runtime exploitable}
+\label{fig:devsecops-observability}
+\end{figure}
+
+\subsection{Pas 13 : support pack et preuves finales}
+
+La derniere etape consiste a consolider les preuves produites par la CI, la
+release, Kubernetes, Kyverno, metrics-server, les HPA et les runbooks dans un
+support pack final. Ce support pack evite de presenter oralement des controles
+non prouves.
+
+\begin{figure}[htbp]
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tikzpicture}[node distance=10mm and 8mm]
+  \node[srProof] (ci) {Preuves CI};
+  \node[srProof, right=of ci] (release) {Preuves\\release};
+  \node[srProof, right=of release] (runtime) {Preuves\\runtime};
+  \node[srProof, right=of runtime] (security) {Preuves\\securite};
+  \node[srStep, right=of security] (pack) {Support\\pack};
+  \node[srGate, right=of pack] (truth) {Tableau\\etat final};
+
+  \draw[srArrow] (ci) -- (release);
+  \draw[srArrow] (release) -- (runtime);
+  \draw[srArrow] (runtime) -- (security);
+  \draw[srArrow] (security) -- (pack);
+  \draw[srArrow] (pack) -- (truth);
+\end{tikzpicture}}
+\caption{Consolidation des preuves dans le support pack}
+\label{fig:devsecops-support-pack}
+\end{figure}
+
+\subsection{Synthese des pas DevSecOps}
+
+\begin{center}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{|p{8mm}|p{42mm}|p{55mm}|p{35mm}|}
+\hline
+\textbf{Pas} & \textbf{Objectif} & \textbf{Preuve attendue} & \textbf{Etat cible} \\
+\hline
+1 & Gouvernance du depot & Structure repo, Jenkins source de verite & Termine \\
+\hline
+2 & CI Jenkins & Rapports tests, lint, scans & Termine si artefacts presents \\
+\hline
+3 & Securite code et dependances & Semgrep, Gitleaks, Composer/npm audit, Sonar si configure & Termine ou dependant environnement \\
+\hline
+4 & Build images & Images OCI officielles dans registre local & Termine si Docker/registry actifs \\
+\hline
+5 & Supply chain & Trivy, Syft, Cosign sign/verify, digest & Termine seulement avec preuves release \\
+\hline
+6 & CD sans rebuild & Deploiement d'image promue par digest & Termine avec preuve no-rebuild \\
+\hline
+7 & Kubernetes production-like & Overlay production, PDB, HPA, NetworkPolicies & Termine statique, runtime a prouver \\
+\hline
+8 & metrics-server et HPA & kubectl top, HPA sans \texttt{\string<unknown\string>} & Dependant cluster actif \\
+\hline
+9 & Kyverno Audit/Enforce & CRDs, policies, PolicyReports & Audit d'abord, Enforce prudent \\
+\hline
+10 & Secrets & Aucun secret reel dans Git, bootstrap controle & Partiel sans rotation prouvee \\
+\hline
+11 & Data resilience & Backup, restore, preuve minimale & Pret non execute si DB absente \\
+\hline
+12 & Observabilite & Snapshot runtime, logs, events, metrics & Dependant cluster actif \\
+\hline
+13 & Support pack & Archive finale des preuves & Termine si artefacts generes \\
+\hline
+\end{tabular}
+\end{center}
+
+\subsection{Formulation recommandee pour le memoire}
+
+La partie DevSecOps de \textit{SecureRAG Hub} ne se limite pas a une execution
+CI/CD. Elle constitue une chaine de confiance complete reliant le depot Git, la
+CI Jenkins, les controles de securite, la construction d'images OCI, la supply
+chain par SBOM et signature, le deploiement Kubernetes production-like, les
+policies Kyverno, l'observabilite runtime et l'archivage des preuves. Les
+controles ne sont declares termines que lorsque les artefacts correspondants
+sont presents. Les controles dependant de Docker, kind, metrics-server, Kyverno,
+Cosign, Syft, Trivy, PostgreSQL ou Jenkins sont explicitement distingues afin
+d'eviter toute surdeclaration.

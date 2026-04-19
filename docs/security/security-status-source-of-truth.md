@@ -26,7 +26,7 @@ Ce document sert de source de vérité sécurité pour éviter les écarts entre
 - Overlay production HA : `TERMINÉ` seulement si `bash scripts/validate/validate-production-ha.sh` passe et génère `artifacts/security/production-ha-readiness.md`. Cela reste une preuve statique, pas une preuve de tolérance réelle à la perte d'un nœud.
 - Preuves runtime production : `TERMINÉ` seulement si `artifacts/validation/production-runtime-evidence.md` ne contient aucun `DÉPENDANT_DE_L_ENVIRONNEMENT` et prouve deployments, pods, PDB, HPA et metrics.
 - Résilience données : `TERMINÉ` seulement si les images supportent une DB externe, si l'overlay/secret production n'utilise plus SQLite temporaire pour les composants critiques, et si backup + restore sont prouvés.
-- metrics-server/HPA : `TERMINÉ` seulement si `kubectl top nodes`, `kubectl top pods -n securerag-hub` et `kubectl get hpa -n securerag-hub` fonctionnent.
+- metrics-server/HPA : `TERMINÉ` seulement si `kubectl top nodes`, `kubectl top pods -n securerag-hub`, `kubectl get hpa -n securerag-hub` et `artifacts/validation/hpa-runtime-report.md` prouvent des HPA sans métriques `<unknown>`.
 - Workloads Kubernetes officiels : `portal-web`, `auth-users`, `chatbot-manager`, `conversation-service`, `audit-security-service`.
 - `conversation-service` et `audit-security-service` : `TERMINÉ` côté manifests/rendu Kustomize ; `DÉPENDANT_DE_L_ENVIRONNEMENT` pour la preuve de pods `Ready` et logs runtime.
 - Runtime legacy Python sous `services/` : `PARTIEL` et exclu de la build/deploy officielle tant que les sources applicatives `.py` ne sont pas restaurées.

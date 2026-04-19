@@ -18,6 +18,8 @@ Chaque workload officiel possède `Deployment`, `Service`, `ServiceAccount`, pro
 
 Un overlay `production` est maintenant disponible sous `infra/k8s/overlays/production`. Il conserve le périmètre Laravel officiel et ajoute une posture HA statique : replicas `>=2`, `portal-web` à `3`, PDB adaptés, rolling update `maxUnavailable=0`, anti-affinity, topology spread et HPA CPU/mémoire pour tous les services officiels. Le mode `demo` reste inchangé.
 
+L'overlay `production` expose officiellement le portail par `Service/portal-web` en `NodePort` `30081`. Le cluster kind production-like `infra/kind/kind-production.yaml` mappe ce NodePort vers `http://localhost:8081/health`. Cette exposition remplace les conteneurs de forward ad hoc dans le scénario production.
+
 Le namespace est rendu avec Pod Security Admission `restricted` en `enforce`, `audit` et `warn`. Les pods de validation éphémères utilisent désormais un ServiceAccount dédié `sa-validation`, sans token monté automatiquement, avec `runAsNonRoot`, `seccomp RuntimeDefault`, `allowPrivilegeEscalation=false`, `readOnlyRootFilesystem=true`, `capabilities.drop=["ALL"]` et des ressources bornées.
 
 ## Périmètre legacy exclu
@@ -41,12 +43,16 @@ kubectl kustomize infra/k8s/overlays/demo >/tmp/securerag-demo.yaml
 bash scripts/validate/validate-k8s-cleartext-scope.sh
 bash scripts/validate/validate-k8s-resource-guards.sh
 bash scripts/validate/validate-k8s-ultra-hardening.sh
+STATIC_ONLY=true bash scripts/validate/validate-production-cluster-clean.sh
 ```
 
 ## Validation runtime si cluster actif
 ```bash
 kubectl get deploy,svc,networkpolicy,pdb,hpa -n securerag-hub
 kubectl get pods -n securerag-hub -o wide
+kubectl get svc portal-web -n securerag-hub -o wide
+curl -fsS http://localhost:8081/health
+bash scripts/validate/validate-production-cluster-clean.sh
 kubectl logs -n securerag-hub deploy/conversation-service --tail=80
 kubectl logs -n securerag-hub deploy/audit-security-service --tail=80
 bash scripts/validate/smoke-tests.sh

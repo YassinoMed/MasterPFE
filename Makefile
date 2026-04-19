@@ -13,7 +13,7 @@ DIGEST_RECORD_FILE ?= $(REPORT_DIR)/promotion-digests.txt
 OFFICIAL_SCENARIO ?= demo
 SUPPORT_PACK_ROOT ?= artifacts/support-pack
 
-.PHONY: help lint test laravel-test sonar-analysis kyverno-policy-check image-scan sbom-attest verify promote promote-digest deploy validate demo production-ha production-runtime-evidence production-data-resilience production-readiness-campaign campaign final-campaign release-evidence release-attestation supply-chain-evidence supply-chain-execute observability-snapshot portal-service-proof global-project-status security-posture k8s-resource-guards close-missing-phases jenkins-webhook-proof jenkins-ci-push-proof cluster-security-proof refresh-cluster-security-proof devsecops-final-proof devsecops-readiness final-proof final-summary support-pack kyverno-install kyverno-enforce metrics-install clean
+.PHONY: help lint test laravel-test sonar-analysis kyverno-policy-check image-scan sbom-attest verify promote promote-digest deploy validate demo production-cluster production-cleanup-plan production-cleanup production-cluster-clean-proof production-ha production-runtime-evidence hpa-runtime-proof refresh-hpa-runtime-proof production-data-resilience production-readiness-campaign campaign final-campaign release-evidence release-attestation supply-chain-evidence supply-chain-execute observability-snapshot portal-service-proof global-project-status security-posture k8s-resource-guards close-missing-phases jenkins-webhook-proof jenkins-ci-push-proof cluster-security-proof refresh-cluster-security-proof devsecops-final-proof devsecops-readiness final-proof final-summary support-pack kyverno-install kyverno-enforce metrics-install clean
 
 help: ## Show available targets
 	@awk 'BEGIN {FS = ":.*## "; print "Available targets:"} /^[a-zA-Z0-9_.-]+:.*## / {printf "  %-12s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
@@ -30,6 +30,7 @@ lint: ## Validate shell scripts, Jenkins config, Kustomize renders and security 
 	@bash scripts/validate/validate-k8s-resource-guards.sh >/dev/null
 	@bash scripts/validate/validate-k8s-ultra-hardening.sh >/dev/null
 	@bash scripts/validate/validate-production-ha.sh >/dev/null
+	@STATIC_ONLY=true bash scripts/validate/validate-production-cluster-clean.sh >/dev/null
 	@bash scripts/validate/validate-production-data-resilience.sh >/dev/null
 	@bash scripts/ci/validate-sonar-cpd-scope.sh >/dev/null
 
@@ -86,11 +87,29 @@ demo: ## Deploy the Laravel demo overlay
 	@REGISTRY_HOST=$(REGISTRY_HOST) IMAGE_PREFIX=$(IMAGE_PREFIX) IMAGE_TAG=$(IMAGE_TAG) KUSTOMIZE_OVERLAY=infra/k8s/overlays/demo \
 		bash scripts/deploy/deploy-kind.sh
 
+production-cluster: ## Create a guarded production-like kind cluster
+	@bash scripts/deploy/recreate-production-kind.sh
+
+production-cleanup-plan: ## Show legacy runtime objects without deleting anything
+	@bash scripts/deploy/cleanup-nonproduction-workloads.sh
+
+production-cleanup: ## Delete legacy runtime objects only when CONFIRM_CLEANUP=YES is provided
+	@CONFIRM_CLEANUP=$(CONFIRM_CLEANUP) DELETE_STATEFUL_LEGACY=$(DELETE_STATEFUL_LEGACY) bash scripts/deploy/cleanup-nonproduction-workloads.sh
+
+production-cluster-clean-proof: ## Validate production-only runtime scope and official portal exposure
+	@bash scripts/validate/validate-production-cluster-clean.sh
+
 production-ha: ## Validate the production overlay HA controls without mutating the cluster
 	@bash scripts/validate/validate-production-ha.sh
 
 production-runtime-evidence: ## Collect read-only runtime evidence for production HA and HPA
 	@bash scripts/validate/collect-production-runtime-evidence.sh
+
+hpa-runtime-proof: ## Collect a read-only strict HPA and metrics-server runtime report
+	@bash scripts/validate/validate-hpa-runtime.sh
+
+refresh-hpa-runtime-proof: ## Install/repair metrics-server and collect strict HPA runtime proof
+	@bash scripts/validate/refresh-hpa-runtime-proof.sh
 
 production-data-resilience: ## Validate production data resilience readiness
 	@bash scripts/validate/validate-production-data-resilience.sh

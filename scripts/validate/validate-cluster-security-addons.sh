@@ -80,9 +80,12 @@ fi
 printf '| metrics-server | %s | %s |\n' "${metrics_status}" "${metrics_detail}" >> "${OUT_FILE}"
 
 if hpa_rows="$(kubectl get hpa -n "${NS}" --no-headers 2>/dev/null || true)" && [[ -n "${hpa_rows}" ]]; then
-  if [[ "${metrics_status}" == "TERMINÉ" ]]; then
+  if grep -q '<unknown>' <<<"${hpa_rows}"; then
+    hpa_status="PARTIEL"
+    hpa_detail="HPA objects are present, but at least one target is still <unknown>"
+  elif [[ "${metrics_status}" == "TERMINÉ" ]]; then
     hpa_status="TERMINÉ"
-    hpa_detail="HPA objects are present and metrics-server is usable"
+    hpa_detail="HPA objects are present and targets are populated"
   else
     hpa_status="PARTIEL"
     hpa_detail="HPA objects are present, but metrics-server is not fully proven"
