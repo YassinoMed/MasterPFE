@@ -1,6 +1,6 @@
 # Production Data Resilience - SecureRAG Hub
 
-- Generated at UTC: `2026-04-20T10:18:32Z`
+- Generated at UTC: `2026-04-20T10:32:28Z`
 - Strict mode: `false`
 
 | Control | Status | Evidence |

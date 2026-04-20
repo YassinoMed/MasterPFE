@@ -93,14 +93,20 @@ promote_exact_digest() {
   local source_ref="$1"
   local target_ref="$2"
   local digest="$3"
+  local source_digest_ref
+
+  source_digest_ref="$(digest_ref_for "${source_ref}" "${digest}")"
 
   if docker buildx version >/dev/null 2>&1; then
-    docker buildx imagetools create --tag "${target_ref}" "${source_ref%@*}@${digest}" >/dev/null
-    return 0
+    if docker buildx imagetools create --tag "${target_ref}" "${source_digest_ref}" >/dev/null; then
+      docker pull "${target_ref}" >/dev/null 2>&1 || true
+      return 0
+    fi
+    warn "buildx digest promotion failed for ${source_digest_ref}; falling back to pull/tag/push"
   fi
 
-  docker pull "${source_ref}" >/dev/null
-  docker tag "${source_ref}" "${target_ref}"
+  docker pull "${source_digest_ref}" >/dev/null
+  docker tag "${source_digest_ref}" "${target_ref}"
   docker push "${target_ref}" >/dev/null
 }
 
@@ -141,6 +147,7 @@ if is_true "${VERIFY_SOURCE_BEFORE_PROMOTION}"; then
     COSIGN_CERTIFICATE_IDENTITY_REGEXP="${COSIGN_CERTIFICATE_IDENTITY_REGEXP:-}" \
     COSIGN_CERTIFICATE_OIDC_ISSUER="${COSIGN_CERTIFICATE_OIDC_ISSUER:-}" \
     COSIGN_CERTIFICATE_OIDC_ISSUER_REGEXP="${COSIGN_CERTIFICATE_OIDC_ISSUER_REGEXP:-}" \
+    COSIGN_ALLOW_INSECURE_REGISTRY="${COSIGN_ALLOW_INSECURE_REGISTRY:-false}" \
     bash scripts/release/verify-signatures.sh
 fi
 
@@ -151,7 +158,7 @@ for service in "${SERVICES_ARRAY[@]}"; do
 
   info "Promoting ${source_ref} -> ${target_ref} by digest"
 
-  if ! docker manifest inspect "${source_ref}" >/dev/null 2>&1; then
+  if ! image_reachable_in_registry "${source_ref}"; then
     message="source image is not reachable in the registry"
     if is_true "${ALLOW_MISSING_IMAGES}"; then
       skip_count=$((skip_count + 1))
@@ -222,6 +229,7 @@ if is_true "${VERIFY_TARGET_AFTER_PROMOTION}"; then
     COSIGN_CERTIFICATE_IDENTITY_REGEXP="${COSIGN_CERTIFICATE_IDENTITY_REGEXP:-}" \
     COSIGN_CERTIFICATE_OIDC_ISSUER="${COSIGN_CERTIFICATE_OIDC_ISSUER:-}" \
     COSIGN_CERTIFICATE_OIDC_ISSUER_REGEXP="${COSIGN_CERTIFICATE_OIDC_ISSUER_REGEXP:-}" \
+    COSIGN_ALLOW_INSECURE_REGISTRY="${COSIGN_ALLOW_INSECURE_REGISTRY:-false}" \
     bash scripts/release/verify-signatures.sh
 fi
 

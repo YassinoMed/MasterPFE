@@ -43,7 +43,7 @@ detect_source_ref() {
       return 0
     fi
 
-    if docker manifest inspect "${image_ref}" >/dev/null 2>&1; then
+    if image_reachable_in_registry "${image_ref}"; then
       printf 'registry:%s' "${image_ref}"
       return 0
     fi

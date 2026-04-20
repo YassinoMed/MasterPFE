@@ -46,6 +46,10 @@ if is_true "${COSIGN_YES}"; then
   attest_args+=(--yes)
 fi
 
+if is_true "${COSIGN_ALLOW_INSECURE_REGISTRY:-false}"; then
+  attest_args+=(--allow-insecure-registry)
+fi
+
 mode="keyless"
 if [[ -n "${COSIGN_KEY:-}" ]]; then
   [[ -f "${COSIGN_KEY}" ]] || { error "COSIGN_KEY points to a non-existent file: ${COSIGN_KEY}"; exit 2; }
