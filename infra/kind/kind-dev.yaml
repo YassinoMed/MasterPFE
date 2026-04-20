@@ -13,6 +13,7 @@ containerdConfigPatches:
 
 nodes:
   - role: control-plane
+    image: kindest/node:v1.33.1
     extraPortMappings:
       - containerPort: 30080
         hostPort: 8080
@@ -30,3 +31,4 @@ nodes:
           kubeletExtraArgs:
             node-labels: "ingress-ready=true"
   - role: worker
+    image: kindest/node:v1.33.1
