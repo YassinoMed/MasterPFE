@@ -56,6 +56,32 @@ RUN_SUPPORT_PACK=true \
 ./securerag-launch-all.sh
 ```
 
+## Correction kind sur VPS
+
+Le projet utilise `kind v0.29.0` comme version testée pour Debian/VPS. Si `kind version` indique `0.31.0` et que la création échoue avec :
+
+```text
+could not find a log line that matches "Reached target .*Multi-User System.*|detected cgroup v1"
+```
+
+réinstalle la version stable :
+
+```bash
+ARCH="$(dpkg --print-architecture)"
+curl -fsSLo /usr/local/bin/kind "https://kind.sigs.k8s.io/dl/v0.29.0/kind-linux-${ARCH}"
+chmod +x /usr/local/bin/kind
+kind version
+```
+
+Puis supprime uniquement le cluster kind raté avant de relancer :
+
+```bash
+kind delete cluster --name securerag-dev || true
+docker rm -f securerag-dev-control-plane securerag-dev-worker 2>/dev/null || true
+
+MODE=production RUN_METRICS=true RUN_KYVERNO_AUDIT=true RUN_SUPPORT_PACK=true ./securerag-launch-all.sh
+```
+
 ## Avec le script de bootstrap versionné
 
 Depuis une copie locale du dépôt :
