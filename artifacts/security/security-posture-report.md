@@ -1,7 +1,7 @@
 # Security Posture Report — SecureRAG Hub
 
-- Generated at UTC: `2026-04-17T06:28:09Z`
-- Git commit: `b1ec122075c41373de28d9ff708d9254deabb733`
+- Generated at UTC: `2026-04-20T04:51:37Z`
+- Git commit: `028df424b6f7988c6b4d1c22b2781f23a2f57aa9`
 - Kubernetes namespace: `securerag-hub`
 
 ## 1. Security controls status
@@ -11,19 +11,23 @@
 | Semgrep SAST | `TERMINÉ` | `security/reports/semgrep.json`, findings=0 |
 | Sonar CPD scope | `TERMINÉ` | `artifacts/security/sonar-cpd-scope.md` |
 | Sonar Quality Gate | `PRÊT_NON_EXÉCUTÉ` | `security/reports/sonar-analysis.md` |
-| Gitleaks secret scan | `PARTIEL` | `security/reports/gitleaks.json`, findings=n/a |
-| Trivy filesystem scan | `PARTIEL` | `security/reports/trivy-fs.json`, vulnerabilities=n/a |
-| Trivy image scan | `PARTIEL` | `artifacts/release/image-scan-summary.txt` |
-| SBOM Syft | `PARTIEL` | `artifacts/release/sbom-summary.txt`, sbom_count=0, expected=5 |
-| SBOM Cosign attestation | `PARTIEL` | `artifacts/release/attest-summary.txt` |
-| Cosign sign | `PARTIEL` | `artifacts/release/sign-summary.txt` |
-| Cosign verify | `PARTIEL` | `artifacts/release/verify-summary.txt` |
-| Digest promotion | `PARTIEL` | `artifacts/release/promotion-digests.txt` |
-| Release attestation | `PARTIEL` | `artifacts/release/release-attestation.json` |
+| Gitleaks secret scan | `PRÊT_NON_EXÉCUTÉ` | `security/reports/gitleaks.json`, findings=n/a |
+| Trivy filesystem scan | `DÉPENDANT_DE_L_ENVIRONNEMENT` | `security/reports/trivy-fs.json`, vulnerabilities=n/a |
+| Trivy image scan | `DÉPENDANT_DE_L_ENVIRONNEMENT` | `artifacts/release/image-scan-summary.txt` |
+| SBOM Syft | `DÉPENDANT_DE_L_ENVIRONNEMENT` | `artifacts/release/sbom-summary.txt`, sbom_count=0, expected=5 |
+| SBOM Cosign attestation | `DÉPENDANT_DE_L_ENVIRONNEMENT` | `artifacts/release/attest-summary.txt` |
+| Cosign sign | `DÉPENDANT_DE_L_ENVIRONNEMENT` | `artifacts/release/sign-summary.txt` |
+| Cosign verify | `DÉPENDANT_DE_L_ENVIRONNEMENT` | `artifacts/release/verify-summary.txt` |
+| Digest promotion | `DÉPENDANT_DE_L_ENVIRONNEMENT` | `artifacts/release/promotion-digests.txt` |
+| Release attestation | `DÉPENDANT_DE_L_ENVIRONNEMENT` | `artifacts/release/release-attestation.json` |
+| SLSA-style provenance | `PRÊT_NON_EXÉCUTÉ` | `artifacts/release/provenance.slsa.md` |
 | Kubernetes ultra hardening static | `TERMINÉ` | `artifacts/security/k8s-ultra-hardening.md` |
 | Kubernetes production HA static | `TERMINÉ` | `artifacts/security/production-ha-readiness.md` |
 | Production runtime evidence | `DÉPENDANT_DE_L_ENVIRONNEMENT` | `artifacts/validation/production-runtime-evidence.md` |
-| Production data resilience | `PARTIEL` | `artifacts/security/production-data-resilience.md` |
+| Production data resilience | `PRÊT_NON_EXÉCUTÉ` | `artifacts/security/production-data-resilience.md` |
+| Production Dockerfiles | `TERMINÉ` | `artifacts/security/production-dockerfiles.md` |
+| Image size evidence | `DÉPENDANT_DE_L_ENVIRONNEMENT` | `artifacts/security/image-size-evidence.md` |
+| Secrets management | `PRÊT_NON_EXÉCUTÉ` | `artifacts/security/secrets-management.md` |
 | Production readiness campaign | `DÉPENDANT_DE_L_ENVIRONNEMENT` | `artifacts/final/production-readiness-final.md` |
 | Kyverno policy CLI validation | `PRÊT_NON_EXÉCUTÉ` | `artifacts/security/kyverno-policy-validation.md` |
 | Metrics Server runtime | `DÉPENDANT_DE_L_ENVIRONNEMENT` | `kubectl top pods -n securerag-hub` |
@@ -34,7 +38,8 @@
 ## 2. Honest interpretation
 
 - `TERMINÉ` means all expected evidence rows are proven, or the runtime command succeeds in the current environment.
-- `PARTIEL` means the control is scripted/configured but the expected evidence is missing, incomplete, failed, skipped or partial.
+- `PARTIEL` means a control was executed or partially evidenced, but the resulting evidence is incomplete, failed, skipped or inconsistent.
+- `PRÊT_NON_EXÉCUTÉ` means the repository-side control is ready but has not been replayed in the final evidence environment.
 - `DÉPENDANT_DE_L_ENVIRONNEMENT` means the control needs an active Docker/kind/Kubernetes/Jenkins/Cosign/Syft/Kyverno runtime.
 
 ## 3. Security-ready reading

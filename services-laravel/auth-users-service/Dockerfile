@@ -1,11 +1,11 @@
-FROM composer:2 AS composer-bin
+FROM composer:2@sha256:dc292c5c0f95f526b051d4c341bf08e7e2b18504c74625e3203d7f123050e318 AS composer-bin
 
-FROM php:8.4-cli-bookworm
+FROM php:8.4-cli-bookworm@sha256:4714c394e9ea215809c4b68da9fda778044c723435279f7188a251134c64502a
 
 ENV COMPOSER_ALLOW_SUPERUSER=1
 
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends git curl unzip libicu-dev libsqlite3-dev libzip-dev libpq-dev default-mysql-client postgresql-client \
+    && apt-get install -y --no-install-recommends curl unzip libicu-dev libsqlite3-dev libzip-dev libpq-dev \
     && docker-php-ext-install pdo_sqlite pdo_mysql pdo_pgsql intl \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
@@ -19,7 +19,7 @@ WORKDIR /var/www/html
 
 COPY services-laravel/auth-users-service/composer.json services-laravel/auth-users-service/composer.lock ./
 COPY services-laravel/shared-security /var/www/shared-security
-RUN composer install --no-interaction --prefer-dist --optimize-autoloader --no-scripts
+RUN composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader --no-scripts
 
 COPY services-laravel/auth-users-service/app ./app
 COPY services-laravel/auth-users-service/artisan ./

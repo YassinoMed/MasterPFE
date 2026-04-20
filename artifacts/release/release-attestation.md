@@ -1,7 +1,7 @@
 # Release Attestation — SecureRAG Hub
 
-- Generated at UTC: `2026-04-17T06:27:12Z`
-- Git commit: `b1ec122075c41373de28d9ff708d9254deabb733`
+- Generated at UTC: `2026-04-20T04:50:39Z`
+- Git commit: `028df424b6f7988c6b4d1c22b2781f23a2f57aa9`
 - Expected services: `5`
 - Expected service names: `auth-users chatbot-manager conversation-service audit-security-service portal-web`
 - Status: `PARTIAL_READY_TO_PROVE`

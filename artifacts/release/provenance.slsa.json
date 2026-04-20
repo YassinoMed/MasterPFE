@@ -1,0 +1,53 @@
+{
+  "_type": "https://in-toto.io/Statement/v1",
+  "predicate": {
+    "buildDefinition": {
+      "buildType": "https://securerag.local/buildtypes/jenkins-cd-digest-release/v1",
+      "externalParameters": {
+        "branch": "main",
+        "commit": "028df424b6f7988c6b4d1c22b2781f23a2f57aa9",
+        "repository": "https://github.com/YassinoMed/MasterPFE.git"
+      },
+      "resolvedDependencies": [
+        {
+          "digest": {
+            "gitCommit": "028df424b6f7988c6b4d1c22b2781f23a2f57aa9"
+          },
+          "uri": "https://github.com/YassinoMed/MasterPFE.git"
+        }
+      ]
+    },
+    "runDetails": {
+      "builder": {
+        "id": "jenkins://securerag-hub-cd"
+      },
+      "byproducts": [
+        {
+          "digest": {
+            "sha256": "83bc29f830a9b2439a5d3cc382524c0d1f9e9b61cbda26230d8a527622e3359f"
+          },
+          "uri": "artifacts/release/release-attestation.json"
+        },
+        {
+          "digest": {
+            "sha256": "missing"
+          },
+          "uri": "artifacts/release/promotion-digests.txt"
+        }
+      ],
+      "metadata": {
+        "finishedOn": "2026-04-20T04:50:39Z",
+        "invocationId": "local",
+        "startedOn": "2026-04-20T04:50:39Z"
+      }
+    },
+    "securerag": {
+      "note": "This is a repository-generated SLSA-style provenance statement. It is complete only when release-attestation.json is COMPLETE_PROVEN and promoted image digests are present.",
+      "release_attestation_status": "PARTIAL_READY_TO_PROVE",
+      "status": "PR\u00caT_NON_EX\u00c9CUT\u00c9",
+      "subject_count": 0
+    }
+  },
+  "predicateType": "https://slsa.dev/provenance/v1",
+  "subject": []
+}

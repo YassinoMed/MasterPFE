@@ -37,6 +37,9 @@ KYVERNO_POLICY_MODE="audit" APPLY_POLICIES="true" bash scripts/deploy/install-ky
 info "Collecting cluster security addon status"
 bash scripts/validate/validate-cluster-security-addons.sh
 
+info "Collecting Kyverno runtime and Enforce readiness proof"
+NS="${NS}" OUT_DIR="${REPORT_DIR}" bash scripts/validate/validate-kyverno-runtime.sh
+
 info "Collecting runtime evidence"
 NS="${NS}" REPORT_DIR="${REPORT_DIR}" bash scripts/validate/collect-runtime-evidence.sh
 
@@ -47,6 +50,7 @@ NS="${NS}" REPORT_DIR="${REPORT_DIR}" bash scripts/validate/collect-runtime-evid
   printf -- '- Metrics server install: `scripts/deploy/install-metrics-server.sh`\n'
   printf -- '- Kyverno install (Audit): `scripts/deploy/install-kyverno.sh`\n'
   printf -- '- Addon validation: `artifacts/validation/cluster-security-addons.md`\n'
+  printf -- '- Kyverno runtime report: `artifacts/validation/kyverno-runtime-report.md`\n'
   printf -- '- Runtime evidence: `artifacts/validation/k8s-*.txt`\n'
 } > "${SUMMARY_FILE}"
 

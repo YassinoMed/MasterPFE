@@ -1,6 +1,6 @@
 # Production Data Resilience - SecureRAG Hub
 
-- Generated at UTC: `2026-04-17T20:41:14Z`
+- Generated at UTC: `2026-04-20T04:51:50Z`
 - Strict mode: `false`
 
 | Control | Status | Evidence |
@@ -10,16 +10,21 @@
 | `services-laravel/chatbot-manager-service` external DB PHP drivers | TERMINÉ | `pdo_mysql` and `pdo_pgsql` installed in Dockerfile |
 | `services-laravel/conversation-service` external DB PHP drivers | TERMINÉ | `pdo_mysql` and `pdo_pgsql` installed in Dockerfile |
 | `services-laravel/audit-security-service` external DB PHP drivers | TERMINÉ | `pdo_mysql` and `pdo_pgsql` installed in Dockerfile |
-| Production overlay DB mode | PARTIEL | Render still contains `DB_CONNECTION=sqlite` for local/kind compatibility |
+| Production kind overlay DB mode | PRÊT_NON_EXÉCUTÉ | `infra/k8s/overlays/production` keeps SQLite for local/kind compatibility |
+| External DB overlay SQLite removal | TERMINÉ | `production-external-db` renders without SQLite |
+| External DB secret references | TERMINÉ | workloads reference `securerag-database-secrets` |
 | Data resilience runbook | TERMINÉ | `docs/runbooks/data-resilience.md` present |
+| Backup and restore scripts | TERMINÉ | `scripts/data/backup-postgres.sh` and `scripts/data/restore-postgres.sh` are executable |
+| Backup runtime proof | PRÊT_NON_EXÉCUTÉ | run `scripts/data/backup-postgres.sh` against an external PostgreSQL DB |
+| Restore runtime proof | PRÊT_NON_EXÉCUTÉ | run `scripts/data/restore-postgres.sh` into an isolated restore database |
 
 ## Global status
 
-Statut global: `PARTIEL`
+Statut global: `PRÊT_NON_EXÉCUTÉ`
 
 ## Interpretation
 
-Data resilience is not fully production-grade yet. The code is prepared for external databases, but runtime production still requires an external database, secrets, backup and restore execution.
+Static production data resilience is ready. Runtime backup and restore still require an external PostgreSQL endpoint and credentials.
 
 ## Required production evidence
 

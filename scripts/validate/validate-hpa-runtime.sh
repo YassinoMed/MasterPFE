@@ -50,7 +50,7 @@ row() {
 }
 
 require_command kubectl
-require_command ruby
+require_command python3
 
 {
   printf '# HPA Runtime Report - SecureRAG Hub\n\n'
@@ -119,54 +119,86 @@ hpa_json="$(mktemp)"
 trap 'rm -f "${hpa_json}"' EXIT
 if kubectl get hpa -n "${NS}" -o json > "${hpa_json}" 2>/dev/null; then
   set +e
-  ruby -rjson - "${hpa_json}" "${OUT_FILE}" "${expected_hpas[@]}" <<'RUBY'
-file, report, *expected = ARGV
-data = JSON.parse(File.read(file))
-items = data.fetch("items", [])
-by_name = items.to_h { |item| [item.dig("metadata", "name"), item] }
+  python3 - "${hpa_json}" "${OUT_FILE}" "${expected_hpas[@]}" <<'PY'
+import json
+import sys
+
+path, report, *expected = sys.argv[1:]
+with open(path, encoding="utf-8") as handle:
+    data = json.load(handle)
+
+items = data.get("items", [])
+by_name = {item.get("metadata", {}).get("name"): item for item in items}
 failures = 0
 
-def append_row(report, component, check, status, evidence)
-  File.open(report, "a") do |f|
-    f.puts "| #{component} | #{check} | #{status} | #{evidence} |"
-  end
-end
 
-expected.each do |name|
-  hpa = by_name[name]
-  unless hpa
-    append_row(report, "`#{name}`", "HPA exists", "PARTIEL", "missing")
-    failures += 1
-    next
-  end
+def append_row(component, check, status, evidence):
+    with open(report, "a", encoding="utf-8") as handle:
+        handle.write(f"| {component} | {check} | {status} | {evidence} |\n")
 
-  append_row(report, "`#{name}`", "HPA exists", "TERMINÉ", "HorizontalPodAutoscaler present")
 
-  current_metrics = hpa.dig("status", "currentMetrics") || []
-  spec_metrics = hpa.dig("spec", "metrics") || []
-  metric_names = current_metrics.map { |metric| metric.dig("resource", "name") }.compact
-  expected_metrics = spec_metrics.map { |metric| metric.dig("resource", "name") }.compact
+def nested(obj, *keys, default=None):
+    current = obj
+    for key in keys:
+        if not isinstance(current, dict):
+            return default
+        current = current.get(key)
+    return default if current is None else current
 
-  missing_metrics = expected_metrics - metric_names
-  if missing_metrics.empty? && !current_metrics.empty?
-    append_row(report, "`#{name}`", "runtime metrics populated", "TERMINÉ", "metrics=#{metric_names.join(",")}")
-  else
-    append_row(report, "`#{name}`", "runtime metrics populated", "PARTIEL", "missing=#{missing_metrics.join(",").empty? ? "all" : missing_metrics.join(",")}")
-    failures += 1
-  end
 
-  conditions = hpa.dig("status", "conditions") || []
-  failed_metric = conditions.find { |condition| condition["reason"].to_s.include?("FailedGet") || condition["message"].to_s.include?("unable to get metrics") }
-  if failed_metric
-    append_row(report, "`#{name}`", "HPA metric condition", "PARTIEL", "#{failed_metric["type"]}=#{failed_metric["reason"]}")
-    failures += 1
-  else
-    append_row(report, "`#{name}`", "HPA metric condition", "TERMINÉ", "no failed metric condition")
-  end
-end
+for name in expected:
+    hpa = by_name.get(name)
+    if not hpa:
+        append_row(f"`{name}`", "HPA exists", "PARTIEL", "missing")
+        failures += 1
+        continue
 
-exit failures
-RUBY
+    append_row(f"`{name}`", "HPA exists", "TERMINÉ", "HorizontalPodAutoscaler present")
+
+    current_metrics = nested(hpa, "status", "currentMetrics", default=[]) or []
+    spec_metrics = nested(hpa, "spec", "metrics", default=[]) or []
+    metric_names = [
+        nested(metric, "resource", "name")
+        for metric in current_metrics
+        if nested(metric, "resource", "name")
+    ]
+    expected_metrics = [
+        nested(metric, "resource", "name")
+        for metric in spec_metrics
+        if nested(metric, "resource", "name")
+    ]
+
+    missing_metrics = [metric for metric in expected_metrics if metric not in metric_names]
+    if not missing_metrics and current_metrics:
+        append_row(f"`{name}`", "runtime metrics populated", "TERMINÉ", f"metrics={','.join(metric_names)}")
+    else:
+        missing = ",".join(missing_metrics) if missing_metrics else "all"
+        append_row(f"`{name}`", "runtime metrics populated", "PARTIEL", f"missing={missing}")
+        failures += 1
+
+    conditions = nested(hpa, "status", "conditions", default=[]) or []
+    failed_metric = next(
+        (
+            condition
+            for condition in conditions
+            if "FailedGet" in str(condition.get("reason", ""))
+            or "unable to get metrics" in str(condition.get("message", ""))
+        ),
+        None,
+    )
+    if failed_metric:
+        append_row(
+            f"`{name}`",
+            "HPA metric condition",
+            "PARTIEL",
+            f"{failed_metric.get('type')}={failed_metric.get('reason')}",
+        )
+        failures += 1
+    else:
+        append_row(f"`{name}`", "HPA metric condition", "TERMINÉ", "no failed metric condition")
+
+raise SystemExit(failures)
+PY
   hpa_failures=$?
   set -e
   failures=$((failures + hpa_failures))

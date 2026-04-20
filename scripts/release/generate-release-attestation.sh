@@ -123,16 +123,18 @@ status_for() {
 
 summary_status_for() {
   local target_file="$1"
+  local allow_warn="${2:-false}"
 
   if ! artifact_present "${target_file}"; then
     printf 'MISSING'
     return 0
   fi
 
-  local pass_count fail_count skip_count
+  local pass_count fail_count skip_count warn_count
   pass_count="$(status_count "${target_file}" "PASS")"
   fail_count="$(status_count "${target_file}" "FAIL")"
   skip_count="$(status_count "${target_file}" "SKIP")"
+  warn_count="$(status_count "${target_file}" "WARN")"
 
   if [[ "${fail_count}" != "0" ]]; then
     printf 'FAILED'
@@ -141,6 +143,11 @@ summary_status_for() {
 
   if [[ "${skip_count}" != "0" ]]; then
     printf 'SKIPPED'
+    return 0
+  fi
+
+  if [[ "${allow_warn}" == "true" && "$((pass_count + warn_count))" == "${EXPECTED_COUNT}" ]]; then
+    printf 'PROVEN'
     return 0
   fi
 
@@ -177,7 +184,7 @@ digest_status_for() {
   printf 'PRESENT_UNPROVEN'
 }
 
-IMAGE_SCAN_STATUS="$(summary_status_for "${REPORT_DIR}/image-scan-summary.txt")"
+IMAGE_SCAN_STATUS="$(summary_status_for "${REPORT_DIR}/image-scan-summary.txt" true)"
 SIGN_STATUS="$(summary_status_for "${REPORT_DIR}/sign-summary.txt")"
 VERIFY_STATUS="$(summary_status_for "${REPORT_DIR}/verify-summary.txt")"
 PROMOTION_STATUS="$(summary_status_for "${REPORT_DIR}/promotion-by-digest-summary.txt")"

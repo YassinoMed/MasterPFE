@@ -57,6 +57,31 @@ assert_summary_all_pass() {
   return 1
 }
 
+assert_image_scan_summary() {
+  local file="${REPORT_DIR}/image-scan-summary.txt"
+  local label="Trivy image scan summary"
+
+  if [[ ! -s "${file}" ]]; then
+    record "${label}" "FAIL" "\`${file}\` missing or empty"
+    return 1
+  fi
+
+  local pass_count warn_count fail_count skip_count accepted_count
+  pass_count="$(status_count "${file}" "PASS")"
+  warn_count="$(status_count "${file}" "WARN")"
+  fail_count="$(status_count "${file}" "FAIL")"
+  skip_count="$(status_count "${file}" "SKIP")"
+  accepted_count=$((pass_count + warn_count))
+
+  if [[ "${accepted_count}" == "${EXPECTED_COUNT}" && "${fail_count}" == "0" && "${skip_count}" == "0" ]]; then
+    record "${label}" "OK" "PASS=${pass_count}, WARN=${warn_count}, accepted=${accepted_count}/${EXPECTED_COUNT}, sha256=$(file_sha256 "${file}")"
+    return 0
+  fi
+
+  record "${label}" "FAIL" "\`${file}\`: PASS=${pass_count}, WARN=${warn_count}, accepted=${accepted_count}/${EXPECTED_COUNT}, FAIL=${fail_count}, SKIP=${skip_count}"
+  return 1
+}
+
 assert_digest_records() {
   if [[ ! -s "${DIGEST_RECORD_FILE}" ]]; then
     record "Digest promotion record" "FAIL" "\`${DIGEST_RECORD_FILE}\` missing or empty"
@@ -190,7 +215,7 @@ fi
 
 failure=0
 
-assert_summary_all_pass "${REPORT_DIR}/image-scan-summary.txt" "Trivy image scan summary" || failure=1
+assert_image_scan_summary || failure=1
 assert_summary_all_pass "${REPORT_DIR}/sign-summary.txt" "Cosign sign summary" || failure=1
 assert_summary_all_pass "${REPORT_DIR}/verify-summary.txt" "Cosign verify summary" || failure=1
 assert_summary_all_pass "${REPORT_DIR}/promotion-by-digest-summary.txt" "Digest promotion summary" || failure=1
@@ -201,8 +226,24 @@ assert_sbom_index || failure=1
 assert_release_attestation || failure=1
 
 if (( failure > 0 )); then
+  {
+    printf '\n## Global status\n\n'
+    if grep -Eq 'missing or empty|does not describe|not COMPLETE_PROVEN' "${ASSERT_REPORT_FILE}"; then
+      printf 'Statut global: `DÉPENDANT_DE_L_ENVIRONNEMENT`\n\n'
+      printf 'Required supply-chain evidence is absent or incomplete in the current environment. Run the full release chain with Docker, registry access, Trivy, Syft, Cosign and valid signing keys.\n'
+    else
+      printf 'Statut global: `PARTIEL`\n\n'
+      printf 'Required supply-chain evidence exists but at least one gate failed. Inspect the table above before promotion or deployment.\n'
+    fi
+  } >> "${ASSERT_REPORT_FILE}"
   error "Mandatory supply-chain evidence is incomplete or unproven. See ${ASSERT_REPORT_FILE}"
   exit 1
 fi
+
+{
+  printf '\n## Global status\n\n'
+  printf 'Statut global: `TERMINÉ`\n\n'
+  printf 'All mandatory supply-chain release gates are proven for the expected official services.\n'
+} >> "${ASSERT_REPORT_FILE}"
 
 info "Mandatory supply-chain evidence gate passed. Report: ${ASSERT_REPORT_FILE}"

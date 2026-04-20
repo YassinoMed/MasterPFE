@@ -32,7 +32,7 @@ spec:
                 operator: Equals
                 value: LoadBalancer
               - key: "{{ request.object.spec.type || 'ClusterIP' }}:{{ request.object.metadata.name }}"
-                operator: NotIn
+                operator: AnyNotIn
                 value:
                   - ClusterIP:portal-web
                   - NodePort:portal-web

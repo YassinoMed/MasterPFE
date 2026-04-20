@@ -10,10 +10,12 @@ KUSTOMIZE_OVERLAY ?= infra/k8s/overlays/dev
 REPORT_DIR ?= artifacts/release
 SBOM_DIR ?= artifacts/sbom
 DIGEST_RECORD_FILE ?= $(REPORT_DIR)/promotion-digests.txt
+REQUIRE_DIGEST_DEPLOY ?= false
+DEPLOY_EVIDENCE_FILE ?= $(REPORT_DIR)/no-rebuild-deploy-summary.md
 OFFICIAL_SCENARIO ?= demo
 SUPPORT_PACK_ROOT ?= artifacts/support-pack
 
-.PHONY: help lint test laravel-test sonar-analysis kyverno-policy-check image-scan sbom-attest verify promote promote-digest deploy validate demo production-cluster production-cleanup-plan production-cleanup production-cluster-clean-proof production-ha production-runtime-evidence hpa-runtime-proof refresh-hpa-runtime-proof production-data-resilience production-readiness-campaign campaign final-campaign release-evidence release-attestation supply-chain-evidence supply-chain-execute observability-snapshot portal-service-proof global-project-status security-posture k8s-resource-guards close-missing-phases jenkins-webhook-proof jenkins-ci-push-proof cluster-security-proof refresh-cluster-security-proof devsecops-final-proof devsecops-readiness final-proof final-summary support-pack kyverno-install kyverno-enforce metrics-install clean
+.PHONY: help lint test laravel-test sonar-analysis kyverno-policy-check image-scan sbom-attest sbom-validate verify promote promote-digest deploy validate demo production-cluster production-cleanup-plan production-cleanup production-cluster-clean-proof production-ha production-runtime-evidence production-proof-full ha-chaos-lite hpa-runtime-proof refresh-hpa-runtime-proof production-data-resilience data-resilience-proof production-dockerfiles image-size-evidence secrets-management production-db-secret data-backup data-restore production-readiness-campaign campaign final-campaign release-evidence release-attestation release-provenance release-proof-strict supply-chain-evidence supply-chain-execute observability-snapshot portal-service-proof global-project-status final-source-of-truth security-posture k8s-resource-guards close-missing-phases jenkins-webhook-proof jenkins-ci-push-proof cluster-security-proof kyverno-runtime-proof kyverno-enforce-readiness refresh-cluster-security-proof devsecops-final-proof devsecops-readiness final-proof final-summary support-pack kyverno-install kyverno-enforce metrics-install clean
 
 help: ## Show available targets
 	@awk 'BEGIN {FS = ":.*## "; print "Available targets:"} /^[a-zA-Z0-9_.-]+:.*## / {printf "  %-12s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
@@ -24,6 +26,7 @@ lint: ## Validate shell scripts, Jenkins config, Kustomize renders and security 
 	@kubectl kustomize infra/k8s/overlays/dev >/dev/null
 	@kubectl kustomize infra/k8s/overlays/demo >/dev/null
 	@kubectl kustomize infra/k8s/overlays/production >/dev/null
+	@kubectl kustomize infra/k8s/overlays/production-external-db >/dev/null
 	@kubectl kustomize infra/k8s/policies/kyverno >/dev/null
 	@kubectl kustomize infra/k8s/policies/kyverno-enforce >/dev/null
 	@bash scripts/validate/validate-k8s-cleartext-scope.sh >/dev/null
@@ -32,6 +35,9 @@ lint: ## Validate shell scripts, Jenkins config, Kustomize renders and security 
 	@bash scripts/validate/validate-production-ha.sh >/dev/null
 	@STATIC_ONLY=true bash scripts/validate/validate-production-cluster-clean.sh >/dev/null
 	@bash scripts/validate/validate-production-data-resilience.sh >/dev/null
+	@bash scripts/validate/validate-production-dockerfiles.sh >/dev/null
+	@bash scripts/secrets/validate-secrets-management.sh >/dev/null
+	@bash scripts/release/validate-sbom-cyclonedx.sh >/dev/null
 	@bash scripts/ci/validate-sonar-cpd-scope.sh >/dev/null
 
 test: ## Run automated tests and coverage collection
@@ -58,6 +64,9 @@ sbom-attest: ## Attach generated CycloneDX SBOMs to images using Cosign attest
 	@REGISTRY_HOST=$(REGISTRY_HOST) IMAGE_PREFIX=$(IMAGE_PREFIX) IMAGE_TAG=$(TARGET_IMAGE_TAG) REPORT_DIR=$(REPORT_DIR) SBOM_DIR=$(SBOM_DIR) \
 		bash scripts/release/attest-sboms.sh
 
+sbom-validate: ## Validate generated SBOM files are CycloneDX JSON
+	@REPORT_DIR=$(REPORT_DIR) SBOM_DIR=$(SBOM_DIR) bash scripts/release/validate-sbom-cyclonedx.sh
+
 verify: ## Verify image signatures for IMAGE_TAG
 	@REGISTRY_HOST=$(REGISTRY_HOST) IMAGE_PREFIX=$(IMAGE_PREFIX) IMAGE_TAG=$(IMAGE_TAG) REPORT_DIR=$(REPORT_DIR) \
 		bash scripts/release/verify-signatures.sh
@@ -71,14 +80,13 @@ promote-digest: ## Promote already verified images by digest and record per-serv
 		bash scripts/release/promote-by-digest.sh
 
 deploy: ## Verify, then deploy TARGET_IMAGE_TAG (or IMAGE_TAG if set explicitly) to kind
-	@REGISTRY_HOST=$(REGISTRY_HOST) IMAGE_PREFIX=$(IMAGE_PREFIX) IMAGE_TAG=$(IMAGE_TAG) REPORT_DIR=$(REPORT_DIR) DIGEST_RECORD_FILE=$(DIGEST_RECORD_FILE) KUSTOMIZE_OVERLAY=$(KUSTOMIZE_OVERLAY) \
+	@REGISTRY_HOST=$(REGISTRY_HOST) IMAGE_PREFIX=$(IMAGE_PREFIX) IMAGE_TAG=$(IMAGE_TAG) REPORT_DIR=$(REPORT_DIR) IMAGE_DIGEST_FILE=$(DIGEST_RECORD_FILE) KUSTOMIZE_OVERLAY=$(KUSTOMIZE_OVERLAY) REQUIRE_DIGEST_DEPLOY=$(REQUIRE_DIGEST_DEPLOY) DEPLOY_EVIDENCE_FILE=$(DEPLOY_EVIDENCE_FILE) \
 		bash scripts/deploy/verify-and-deploy-kind.sh
 
 validate: ## Run post-deployment validation and collect runtime evidence
 	@bash scripts/validate/smoke-tests.sh
 	@bash scripts/validate/security-smoke.sh
 	@bash scripts/validate/e2e-functional-flow.sh
-	@bash scripts/validate/rag-smoke.sh
 	@bash scripts/validate/security-adversarial-advanced.sh
 	@bash scripts/validate/generate-validation-report.sh
 	@bash scripts/validate/collect-runtime-evidence.sh
@@ -105,6 +113,12 @@ production-ha: ## Validate the production overlay HA controls without mutating t
 production-runtime-evidence: ## Collect read-only runtime evidence for production HA and HPA
 	@bash scripts/validate/collect-production-runtime-evidence.sh
 
+production-proof-full: ## Run the full production proof orchestrator; read-only unless RUN_CLUSTER_MUTATIONS=true
+	@bash scripts/validate/run-production-proof-full.sh
+
+ha-chaos-lite: ## Collect HA resilience proof; mutative checks require explicit RUN_* variables
+	@bash scripts/validate/validate-ha-chaos-lite.sh
+
 hpa-runtime-proof: ## Collect a read-only strict HPA and metrics-server runtime report
 	@bash scripts/validate/validate-hpa-runtime.sh
 
@@ -113,6 +127,27 @@ refresh-hpa-runtime-proof: ## Install/repair metrics-server and collect strict H
 
 production-data-resilience: ## Validate production data resilience readiness
 	@bash scripts/validate/validate-production-data-resilience.sh
+
+data-resilience-proof: ## Run DB external secret, backup, restore and data resilience proof when PostgreSQL env vars exist
+	@bash scripts/data/run-data-resilience-proof.sh
+
+production-dockerfiles: ## Validate production Laravel Dockerfiles are hardened and dependency-clean
+	@bash scripts/validate/validate-production-dockerfiles.sh
+
+image-size-evidence: ## Collect local Docker image size evidence for official Laravel images
+	@REGISTRY_HOST=$(REGISTRY_HOST) IMAGE_PREFIX=$(IMAGE_PREFIX) IMAGE_TAG=$(IMAGE_TAG) bash scripts/validate/collect-image-size-evidence.sh
+
+secrets-management: ## Validate modern secrets management readiness without exposing values
+	@bash scripts/secrets/validate-secrets-management.sh
+
+production-db-secret: ## Create/update the production external DB Secret from environment variables
+	@bash scripts/secrets/create-production-db-secret.sh
+
+data-backup: ## Create a PostgreSQL backup evidence artifact from external DB env vars
+	@bash scripts/data/backup-postgres.sh
+
+data-restore: ## Restore a PostgreSQL backup into an isolated restore database
+	@bash scripts/data/restore-postgres.sh
 
 production-readiness-campaign: ## Run the production readiness campaign, read-only by default
 	@bash scripts/validate/run-production-readiness-campaign.sh
@@ -133,6 +168,13 @@ release-attestation: ## Generate a local release attestation from available evid
 	@REGISTRY_HOST=$(REGISTRY_HOST) IMAGE_PREFIX=$(IMAGE_PREFIX) SOURCE_IMAGE_TAG=$(SOURCE_IMAGE_TAG) TARGET_IMAGE_TAG=$(TARGET_IMAGE_TAG) REPORT_DIR=$(REPORT_DIR) SBOM_DIR=$(SBOM_DIR) DIGEST_RECORD_FILE=$(DIGEST_RECORD_FILE) \
 		bash scripts/release/generate-release-attestation.sh
 
+release-provenance: ## Generate a SLSA-style provenance statement from release evidence
+	@REPORT_DIR=$(REPORT_DIR) DIGEST_RECORD_FILE=$(DIGEST_RECORD_FILE) bash scripts/release/generate-provenance-statement.sh
+
+release-proof-strict: ## Execute strict supply-chain proof with SBOM validation, attestation and SLSA-style provenance
+	@REGISTRY_HOST=$(REGISTRY_HOST) IMAGE_PREFIX=$(IMAGE_PREFIX) SOURCE_IMAGE_TAG=$(SOURCE_IMAGE_TAG) TARGET_IMAGE_TAG=$(TARGET_IMAGE_TAG) REPORT_DIR=$(REPORT_DIR) SBOM_DIR=$(SBOM_DIR) DIGEST_RECORD_FILE=$(DIGEST_RECORD_FILE) \
+		bash scripts/release/run-release-proof-strict.sh
+
 supply-chain-evidence: ## Consolidate SBOM, signature, verification and promotion evidence
 	@REPORT_DIR=$(REPORT_DIR) SBOM_DIR=$(SBOM_DIR) bash scripts/release/collect-supply-chain-evidence.sh
 
@@ -148,6 +190,9 @@ portal-service-proof: ## Validate Blade portal connectivity to Laravel business 
 
 global-project-status: ## Generate a factual global project status report
 	@bash scripts/validate/generate-global-project-status.sh
+
+final-source-of-truth: ## Generate final security, production, release and memory artefact status tables
+	@bash scripts/validate/generate-final-source-of-truth.sh
 
 security-posture: ## Generate a factual security posture report
 	@bash scripts/validate/generate-security-posture-report.sh
@@ -172,6 +217,12 @@ jenkins-ci-push-proof: ## Verify Jenkins consumed the latest pushed Git commit
 
 cluster-security-proof: ## Collect metrics-server, HPA and Kyverno runtime evidence
 	@bash scripts/validate/validate-cluster-security-addons.sh
+
+kyverno-runtime-proof: ## Collect Kyverno CRD, policy, PolicyReport and Enforce readiness evidence
+	@bash scripts/validate/validate-kyverno-runtime.sh
+
+kyverno-enforce-readiness: ## Generate a dedicated Kyverno Enforce readiness decision report
+	@bash scripts/validate/validate-kyverno-enforce-readiness.sh
 
 refresh-cluster-security-proof: ## Install metrics-server/Kyverno (Audit) and archive fresh runtime security proof
 	@bash scripts/validate/refresh-cluster-security-proof.sh

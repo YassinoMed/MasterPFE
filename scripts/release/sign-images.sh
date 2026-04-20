@@ -30,6 +30,9 @@ COSIGN_EXPERIMENTAL="${COSIGN_EXPERIMENTAL:-}"
 init_services_array
 
 SUMMARY_FILE="${REPORT_DIR}/sign-summary.txt"
+SUMMARY_MD="${REPORT_DIR}/sign-summary.md"
+INDEX_JSON="${REPORT_DIR}/sign-index.json"
+INDEX_JSONL="${REPORT_DIR}/sign-index.jsonl"
 
 pass_count=0
 fail_count=0
@@ -48,9 +51,53 @@ record_result() {
     | tee -a "${SUMMARY_FILE}"
 }
 
+record_markdown_row() {
+  local status="$1"
+  local service="$2"
+  local image_ref="$3"
+  local digest="$4"
+  local mode="$5"
+  local artifact="$6"
+  local detail="$7"
+
+  printf '| `%s` | `%s` | `%s` | `%s` | `%s` | `%s` | %s |\n' \
+    "${service}" "${image_ref}" "${status}" "${digest}" "${mode}" "${artifact}" "${detail}" \
+    >> "${SUMMARY_MD}"
+}
+
+record_json_entry() {
+  local status="$1"
+  local service="$2"
+  local image_ref="$3"
+  local digest="$4"
+  local mode="$5"
+  local artifact="$6"
+  local detail="$7"
+
+  python3 - "${INDEX_JSONL}" "${status}" "${service}" "${image_ref}" "${digest}" "${mode}" "${artifact}" "${detail}" <<'PY'
+import json
+import sys
+
+path, status, service, image_ref, digest, mode, artifact, detail = sys.argv[1:]
+entry = {
+    "status": status,
+    "service": service,
+    "image": image_ref,
+    "digest": None if digest == "-" else digest,
+    "mode": mode,
+    "artifact": None if artifact == "-" else artifact,
+    "detail": detail,
+}
+
+with open(path, "a", encoding="utf-8") as handle:
+    handle.write(json.dumps(entry, sort_keys=True) + "\n")
+PY
+}
+
 require_command cosign
 require_command python3
 mkdir -p "${REPORT_DIR}"
+: > "${INDEX_JSONL}"
 
 if [[ -n "${COSIGN_EXPERIMENTAL}" ]]; then
   export COSIGN_EXPERIMENTAL
@@ -83,6 +130,15 @@ fi
     "STATUS" "SERVICE" "IMAGE" "MODE" "ARTIFACT" "DETAIL"
 } > "${SUMMARY_FILE}"
 
+{
+  printf '# Cosign Sign Summary - SecureRAG Hub\n\n'
+  printf -- '- Generated at UTC: `%s`\n' "$(date -u '+%Y-%m-%dT%H:%M:%SZ')"
+  printf -- '- Cosign version: `%s`\n' "$(cosign version 2>/dev/null | head -n 1 || printf 'unavailable')"
+  printf -- '- Mode: `%s`\n\n' "${mode}"
+  printf '| Service | Image | Status | Digest | Mode | Log | Detail |\n'
+  printf '|---|---|---:|---|---|---|---|\n'
+} > "${SUMMARY_MD}"
+
 info "Cosign signing mode: ${mode}"
 
 for service in "${SERVICES_ARRAY[@]}"; do
@@ -97,19 +153,25 @@ for service in "${SERVICES_ARRAY[@]}"; do
     if is_true "${ALLOW_MISSING_IMAGES}"; then
       skip_count=$((skip_count + 1))
       record_result "SKIP" "${service}" "${image_ref}" "${mode}" "-" "${message}"
+      record_markdown_row "SKIP" "${service}" "${image_ref}" "-" "${mode}" "-" "${message}"
+      record_json_entry "SKIP" "${service}" "${image_ref}" "-" "${mode}" "-" "${message}"
       warn "${service}: ${message}"
       continue
     fi
 
     fail_count=$((fail_count + 1))
     record_result "FAIL" "${service}" "${image_ref}" "${mode}" "-" "${message}"
+    record_markdown_row "FAIL" "${service}" "${image_ref}" "-" "${mode}" "-" "${message}"
+    record_json_entry "FAIL" "${service}" "${image_ref}" "-" "${mode}" "-" "${message}"
     handle_failure "${service}: ${message}"
     continue
   fi
 
   sign_ref="${image_ref}"
+  digest="-"
   sign_detail="signature created for tag; digest unavailable"
-  if digest="$(resolve_digest "${image_ref}")"; then
+  if resolved_digest="$(resolve_digest "${image_ref}")"; then
+    digest="${resolved_digest}"
     sign_ref="$(digest_ref_for "${image_ref}" "${digest}")"
     sign_detail="signature created for digest ${digest}"
   fi
@@ -117,16 +179,49 @@ for service in "${SERVICES_ARRAY[@]}"; do
   if cosign "${sign_args[@]}" "${sign_ref}" > "${log_file}" 2>&1; then
     pass_count=$((pass_count + 1))
     record_result "PASS" "${service}" "${sign_ref}" "${mode}" "${log_file}" "${sign_detail}"
+    record_markdown_row "PASS" "${service}" "${sign_ref}" "${digest}" "${mode}" "${log_file}" "${sign_detail}"
+    record_json_entry "PASS" "${service}" "${sign_ref}" "${digest}" "${mode}" "${log_file}" "${sign_detail}"
     info "${service}: ${sign_detail}"
   else
     fail_count=$((fail_count + 1))
     record_result "FAIL" "${service}" "${sign_ref}" "${mode}" "${log_file}" "cosign sign failed"
+    record_markdown_row "FAIL" "${service}" "${sign_ref}" "${digest}" "${mode}" "${log_file}" "cosign sign failed"
+    record_json_entry "FAIL" "${service}" "${sign_ref}" "${digest}" "${mode}" "${log_file}" "cosign sign failed"
     handle_failure "${service}: signing failed, inspect ${log_file}"
   fi
 done
 
+python3 - "${INDEX_JSONL}" "${INDEX_JSON}" <<'PY'
+import json
+import sys
+
+jsonl_path, json_path = sys.argv[1:]
+entries = []
+with open(jsonl_path, encoding="utf-8") as handle:
+    for line in handle:
+        line = line.strip()
+        if line:
+            entries.append(json.loads(line))
+
+with open(json_path, "w", encoding="utf-8") as handle:
+    json.dump({"signatures": entries}, handle, indent=2, sort_keys=True)
+    handle.write("\n")
+PY
+
+rm -f "${INDEX_JSONL}"
+
+{
+  printf '\n## Result\n\n'
+  printf -- '- PASS: `%s`\n' "${pass_count}"
+  printf -- '- FAIL: `%s`\n' "${fail_count}"
+  printf -- '- SKIP: `%s`\n' "${skip_count}"
+  printf -- '- JSON index: `%s`\n' "${INDEX_JSON}"
+} >> "${SUMMARY_MD}"
+
 printf '\n[INFO] Image signing completed: PASS=%s FAIL=%s SKIP=%s\n' \
   "${pass_count}" "${fail_count}" "${skip_count}" | tee -a "${SUMMARY_FILE}"
+info "Cosign sign Markdown summary: ${SUMMARY_MD}"
+info "Cosign sign JSON index: ${INDEX_JSON}"
 
 if (( fail_count > 0 )); then
   exit 1

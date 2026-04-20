@@ -16,6 +16,7 @@
 | Supply chain | Vérification de signature | `scripts/release/verify-signatures.sh` + Cosign public key/identity | DÉPENDANT_DE_L_ENVIRONNEMENT |
 | Supply chain | Promotion sans rebuild | `scripts/release/promote-by-digest.sh` + `promotion-digests.txt` | DÉPENDANT_DE_L_ENVIRONNEMENT |
 | Supply chain | Gate release obligatoire | `scripts/release/assert-supply-chain-evidence.sh` | PRÊT_NON_EXÉCUTÉ |
+| Supply chain | Provenance SLSA-style | `scripts/release/generate-provenance-statement.sh`, `artifacts/release/provenance.slsa.json` | PRÊT_NON_EXÉCUTÉ |
 | CD | Déploiement d’artefacts vérifiés | `scripts/deploy/verify-and-deploy-kind.sh` | TERMINÉ |
 | Kubernetes | Namespace dédié | `infra/k8s/base/namespace.yaml` | TERMINÉ |
 | Kubernetes | NetworkPolicies | `infra/k8s/base/networkpolicy-*.yaml` | TERMINÉ |
@@ -33,8 +34,13 @@
 | Kubernetes | Admission policy (Enforce) | overlay unique `infra/k8s/policies/kyverno-enforce` | PRÊT_NON_EXÉCUTÉ |
 | Secrets | Jenkins credentials | `scripts/jenkins/bootstrap-local-credentials.sh`, `JENKINS_ADMIN_PASSWORD_FILE` | TERMINÉ |
 | Secrets | Kubernetes secrets | `scripts/secrets/bootstrap-local-secrets.sh`, `scripts/secrets/create-dev-secrets.sh` | TERMINÉ |
+| Secrets | Production DB secret | `scripts/secrets/create-production-db-secret.sh`, `artifacts/security/production-db-secret.md` | PRÊT_NON_EXÉCUTÉ |
+| Secrets | SOPS/age option | `infra/secrets/sops`, `infra/secrets/production/*.template.yaml` | PRÊT_NON_EXÉCUTÉ |
+| Secrets | Secrets readiness report | `scripts/secrets/validate-secrets-management.sh`, `artifacts/security/secrets-management.md` | PRÊT_NON_EXÉCUTÉ |
 | Runtime | Laravel workloads officiels | `portal-web`, `auth-users`, `chatbot-manager`, `conversation-service`, `audit-security-service` | TERMINÉ |
-| Runtime | Services Python legacy | Exclus du build/deploy officiel car sources absentes | PARTIEL |
-| Résilience données | Readiness DB externe / backup / restore | `scripts/validate/validate-production-data-resilience.sh`, `docs/runbooks/data-resilience.md` | PARTIEL |
+| Runtime | Dockerfiles production Laravel | `scripts/validate/validate-production-dockerfiles.sh`, `artifacts/security/production-dockerfiles.md` | TERMINÉ |
+| Runtime | Image size evidence | `scripts/validate/collect-image-size-evidence.sh`, `artifacts/security/image-size-evidence.md` | DÉPENDANT_DE_L_ENVIRONNEMENT |
+| Runtime | Services Python legacy | Exclus du build/deploy officiel car sources absentes | PRÊT_NON_EXÉCUTÉ |
+| Résilience données | Readiness DB externe / backup / restore | `infra/k8s/overlays/production-external-db`, `scripts/data/backup-postgres.sh`, `scripts/data/restore-postgres.sh`, `docs/runbooks/data-resilience.md` | PRÊT_NON_EXÉCUTÉ |
 | Validation | Smoke tests | `scripts/validate/*.sh` | TERMINÉ |
 | Validation | Rapport final | `scripts/validate/generate-validation-report.sh` | TERMINÉ |
