@@ -168,6 +168,25 @@ bash scripts/deploy/deploy-kind.sh
 
 Le scénario legacy RAG/Ollama n’est pas officiel tant que les sources Python correspondantes ne sont pas restaurées.
 
+### VPS Debian 12 depuis Git
+Pour un serveur cloud, utilisez l'URL Git complète avec `.git`. Ne laissez pas un `\` seul après `REPO_URL`.
+
+```bash
+apt-get update
+apt-get install -y ca-certificates git
+
+REPO_URL="https://github.com/YassinoMed/MasterPFE.git"
+APP_DIR="/MasterPFE"
+BRANCH="main"
+
+git clone --branch "${BRANCH}" "${REPO_URL}" "${APP_DIR}"
+cd "${APP_DIR}"
+
+bash scripts/deploy/cloud-debian12-full-run.sh
+```
+
+Voir aussi `docs/runbooks/cloud-debian12-vps.md`.
+
 ---
 
 ## 🔐 Jenkins local

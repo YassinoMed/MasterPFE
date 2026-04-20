@@ -50,6 +50,7 @@ copy_file_if_present "docs/runbooks/devsecops-final-proof.md" "docs/devsecops-fi
 copy_file_if_present "docs/runbooks/missing-phases-closure.md" "docs/missing-phases-closure.md"
 copy_file_if_present "docs/runbooks/jenkins-github-webhook.md" "docs/jenkins-github-webhook.md"
 copy_file_if_present "docs/runbooks/jenkins-cloud-fallback.md" "docs/jenkins-cloud-fallback.md"
+copy_file_if_present "docs/runbooks/cloud-debian12-vps.md" "docs/cloud-debian12-vps.md"
 copy_file_if_present "docs/runbooks/release-promotion.md" "docs/release-promotion.md"
 copy_file_if_present "docs/runbooks/production-ha.md" "docs/production-ha.md"
 copy_file_if_present "docs/runbooks/production-readiness-roadmap.md" "docs/production-readiness-roadmap.md"
