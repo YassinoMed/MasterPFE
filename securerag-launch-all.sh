@@ -22,6 +22,7 @@ set -Eeuo pipefail
 #   RUN_KYVERNO_AUDIT=true|false        Default: false
 #   RUN_SMOKE_TESTS=true|false          Default: true
 #   RUN_SUPPORT_PACK=true|false         Default: false
+#   ALLOW_UNTESTED_KIND=true|false      Default: false
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 MODE="${MODE:-demo}"
@@ -40,6 +41,8 @@ RUN_METRICS="${RUN_METRICS:-false}"
 RUN_KYVERNO_AUDIT="${RUN_KYVERNO_AUDIT:-false}"
 RUN_SMOKE_TESTS="${RUN_SMOKE_TESTS:-true}"
 RUN_SUPPORT_PACK="${RUN_SUPPORT_PACK:-false}"
+ALLOW_UNTESTED_KIND="${ALLOW_UNTESTED_KIND:-false}"
+TESTED_KIND_VERSION="${TESTED_KIND_VERSION:-0.29.0}"
 
 OVERLAY="infra/k8s/overlays/${MODE}"
 
@@ -84,7 +87,11 @@ if ! docker info >/dev/null 2>&1; then
 fi
 
 if command -v kind >/dev/null 2>&1; then
-  log "kind détecté: $(kind --version 2>/dev/null || true)"
+  KIND_VERSION_OUTPUT="$(kind --version 2>/dev/null || true)"
+  log "kind détecté: ${KIND_VERSION_OUTPUT}"
+  if [[ "${KIND_VERSION_OUTPUT}" != *"${TESTED_KIND_VERSION}"* && "${ALLOW_UNTESTED_KIND}" != "true" ]]; then
+    die "Version kind non testée pour ce VPS: ${KIND_VERSION_OUTPUT}. Installe kind v${TESTED_KIND_VERSION}, ou relance avec ALLOW_UNTESTED_KIND=true si tu assumes le risque."
+  fi
 else
   die "kind non détecté. Installe kind ou lance d'abord install_securerag_hub_all_in_one.sh."
 fi

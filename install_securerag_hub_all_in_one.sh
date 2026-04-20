@@ -41,6 +41,7 @@ REPO_BRANCH="${REPO_BRANCH:-main}"
 VPS_USER="${VPS_USER:-${SUDO_USER:-$USER}}"
 
 CLUSTER_NAME="${CLUSTER_NAME:-securerag-prod}"
+KIND_VERSION="${KIND_VERSION:-v0.29.0}"
 REGISTRY_HOST="${REGISTRY_HOST:-localhost:5001}"
 IMAGE_PREFIX="${IMAGE_PREFIX:-securerag-hub}"
 IMAGE_TAG="${IMAGE_TAG:-production}"
@@ -213,8 +214,7 @@ kubectl version --client
 # 4) Install kind                      #
 ########################################
 
-log "Installation de kind"
-KIND_VERSION="$(curl -fsSL https://api.github.com/repos/kubernetes-sigs/kind/releases/latest | jq -r .tag_name)"
+log "Installation de kind ${KIND_VERSION}"
 curl -Lo kind "https://kind.sigs.k8s.io/dl/${KIND_VERSION}/kind-linux-${KARCH}"
 chmod +x kind
 sudo mv kind /usr/local/bin/kind
