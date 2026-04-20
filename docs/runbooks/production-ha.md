@@ -143,6 +143,18 @@ kubectl rollout status deployment/portal-web -n securerag-hub --timeout=180s
 kubectl get pods -n securerag-hub -o wide
 ```
 
+Preuve recommandee apres rebuild d'images ou redeploiement par digest :
+
+```bash
+REGISTRY_HOST=localhost:5001 \
+IMAGE_PREFIX=securerag-hub \
+IMAGE_TAG=production \
+REPORT_FILE=artifacts/validation/runtime-image-rollout-proof.md \
+bash scripts/validate/validate-runtime-image-rollout.sh
+```
+
+Cette preuve compare les images declarees dans les Deployments, les pods Ready et les `imageID` reels des conteneurs. Si `DEPLOY_STARTED_AT` est fourni par `deploy-kind.sh`, les pods doivent aussi etre plus recents que l'action de deploiement, ce qui evite le faux positif `deployment unchanged`.
+
 Drain d'un noeud, uniquement sur cluster multi-noeud :
 
 ```bash

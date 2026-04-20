@@ -64,6 +64,7 @@ memoire_file="${OUT_DIR}/memoire-artifacts-to-cite.md"
   printf '|---|---:|---|\n'
   printf '| Production HA static | %s | `artifacts/security/production-ha-readiness.md` |\n' "$(status_from_file artifacts/security/production-ha-readiness.md)"
   printf '| Runtime evidence | %s | `artifacts/validation/production-runtime-evidence.md` |\n' "$(status_from_file artifacts/validation/production-runtime-evidence.md)"
+  printf '| Runtime image rollout | %s | `artifacts/validation/runtime-image-rollout-proof.md` |\n' "$(status_from_file artifacts/validation/runtime-image-rollout-proof.md)"
   printf '| HPA runtime | %s | `artifacts/validation/hpa-runtime-report.md` |\n' "$(status_from_file artifacts/validation/hpa-runtime-report.md)"
   printf '| HA chaos lite | %s | `artifacts/validation/ha-chaos-lite-report.md` |\n' "$(status_from_file artifacts/validation/ha-chaos-lite-report.md)"
   printf '| Data resilience | %s | `artifacts/security/production-data-resilience.md` |\n' "$(status_from_file artifacts/security/production-data-resilience.md)"
@@ -89,6 +90,7 @@ memoire_file="${OUT_DIR}/memoire-artifacts-to-cite.md"
   printf -- '- `artifacts/validation/hpa-runtime-report.md`\n'
   printf -- '- `artifacts/validation/kyverno-runtime-report.md`\n'
   printf -- '- `artifacts/validation/production-runtime-evidence.md`\n'
+  printf -- '- `artifacts/validation/runtime-image-rollout-proof.md`\n'
   printf -- '- `artifacts/release/release-attestation.json`\n'
   printf -- '- `artifacts/release/provenance.slsa.json`\n'
   printf -- '- `artifacts/final/security-final-status.md`\n'

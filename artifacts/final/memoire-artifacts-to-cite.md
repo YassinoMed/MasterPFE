@@ -7,6 +7,7 @@
 - `artifacts/validation/hpa-runtime-report.md`
 - `artifacts/validation/kyverno-runtime-report.md`
 - `artifacts/validation/production-runtime-evidence.md`
+- `artifacts/validation/runtime-image-rollout-proof.md`
 - `artifacts/release/release-attestation.json`
 - `artifacts/release/provenance.slsa.json`
 - `artifacts/final/security-final-status.md`

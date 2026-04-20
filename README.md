@@ -73,6 +73,8 @@ build → image scan → sign → verify → promote by digest → sbom → sbom
 
 **Principe clé** : Aucune reconstruction d'image au déploiement.
 
+Le déploiement Kubernetes force un rollout contrôlé par défaut et archive une preuve `runtime-image-rollout-proof` afin de vérifier que les pods Ready utilisent réellement les images attendues. En mode release, `REQUIRE_DIGEST_DEPLOY=true` interdit le fallback silencieux par tag si les digests promus sont absents.
+
 ---
 
 ## 📂 Structure du dépôt

@@ -12,10 +12,11 @@ SBOM_DIR ?= artifacts/sbom
 DIGEST_RECORD_FILE ?= $(REPORT_DIR)/promotion-digests.txt
 REQUIRE_DIGEST_DEPLOY ?= false
 DEPLOY_EVIDENCE_FILE ?= $(REPORT_DIR)/no-rebuild-deploy-summary.md
+RUNTIME_IMAGE_PROOF_FILE ?= artifacts/validation/runtime-image-rollout-proof.md
 OFFICIAL_SCENARIO ?= demo
 SUPPORT_PACK_ROOT ?= artifacts/support-pack
 
-.PHONY: help lint test laravel-test sonar-analysis kyverno-policy-check image-scan sbom-attest sbom-validate verify promote promote-digest deploy validate demo production-cluster production-cleanup-plan production-cleanup production-cluster-clean-proof production-ha production-runtime-evidence production-proof-full ha-chaos-lite hpa-runtime-proof refresh-hpa-runtime-proof production-data-resilience data-resilience-proof production-dockerfiles image-size-evidence secrets-management production-db-secret data-backup data-restore production-readiness-campaign campaign final-campaign release-evidence release-attestation release-provenance release-proof-strict supply-chain-evidence supply-chain-execute observability-snapshot portal-service-proof global-project-status final-source-of-truth security-posture k8s-resource-guards close-missing-phases jenkins-webhook-proof jenkins-ci-push-proof cluster-security-proof kyverno-runtime-proof kyverno-enforce-readiness refresh-cluster-security-proof devsecops-final-proof devsecops-readiness final-proof final-summary support-pack kyverno-install kyverno-enforce metrics-install clean
+.PHONY: help lint test laravel-test sonar-analysis kyverno-policy-check image-scan sbom-attest sbom-validate verify promote promote-digest deploy runtime-image-proof validate demo production-cluster production-cleanup-plan production-cleanup production-cluster-clean-proof production-ha production-runtime-evidence production-proof-full ha-chaos-lite hpa-runtime-proof refresh-hpa-runtime-proof production-data-resilience data-resilience-proof production-dockerfiles image-size-evidence secrets-management production-db-secret data-backup data-restore production-readiness-campaign campaign final-campaign release-evidence release-attestation release-provenance release-proof-strict supply-chain-evidence supply-chain-execute observability-snapshot portal-service-proof global-project-status final-source-of-truth security-posture k8s-resource-guards close-missing-phases jenkins-webhook-proof jenkins-ci-push-proof cluster-security-proof kyverno-runtime-proof kyverno-enforce-readiness refresh-cluster-security-proof devsecops-final-proof devsecops-readiness final-proof final-summary support-pack kyverno-install kyverno-enforce metrics-install clean
 
 help: ## Show available targets
 	@awk 'BEGIN {FS = ":.*## "; print "Available targets:"} /^[a-zA-Z0-9_.-]+:.*## / {printf "  %-12s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
@@ -80,8 +81,12 @@ promote-digest: ## Promote already verified images by digest and record per-serv
 		bash scripts/release/promote-by-digest.sh
 
 deploy: ## Verify, then deploy TARGET_IMAGE_TAG (or IMAGE_TAG if set explicitly) to kind
-	@REGISTRY_HOST=$(REGISTRY_HOST) IMAGE_PREFIX=$(IMAGE_PREFIX) IMAGE_TAG=$(IMAGE_TAG) REPORT_DIR=$(REPORT_DIR) IMAGE_DIGEST_FILE=$(DIGEST_RECORD_FILE) KUSTOMIZE_OVERLAY=$(KUSTOMIZE_OVERLAY) REQUIRE_DIGEST_DEPLOY=$(REQUIRE_DIGEST_DEPLOY) DEPLOY_EVIDENCE_FILE=$(DEPLOY_EVIDENCE_FILE) \
+	@REGISTRY_HOST=$(REGISTRY_HOST) IMAGE_PREFIX=$(IMAGE_PREFIX) IMAGE_TAG=$(IMAGE_TAG) REPORT_DIR=$(REPORT_DIR) IMAGE_DIGEST_FILE=$(DIGEST_RECORD_FILE) KUSTOMIZE_OVERLAY=$(KUSTOMIZE_OVERLAY) REQUIRE_DIGEST_DEPLOY=$(REQUIRE_DIGEST_DEPLOY) DEPLOY_EVIDENCE_FILE=$(DEPLOY_EVIDENCE_FILE) RUNTIME_IMAGE_PROOF_FILE=$(RUNTIME_IMAGE_PROOF_FILE) \
 		bash scripts/deploy/verify-and-deploy-kind.sh
+
+runtime-image-proof: ## Prove deployed pods are running the expected tag or promoted immutable digest
+	@REGISTRY_HOST=$(REGISTRY_HOST) IMAGE_PREFIX=$(IMAGE_PREFIX) IMAGE_TAG=$(IMAGE_TAG) DIGEST_RECORD_FILE=$(DIGEST_RECORD_FILE) REQUIRE_DIGEST_DEPLOY=$(REQUIRE_DIGEST_DEPLOY) REPORT_FILE=$(RUNTIME_IMAGE_PROOF_FILE) \
+		bash scripts/validate/validate-runtime-image-rollout.sh
 
 validate: ## Run post-deployment validation and collect runtime evidence
 	@bash scripts/validate/smoke-tests.sh
