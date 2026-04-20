@@ -16,7 +16,7 @@ RUNTIME_IMAGE_PROOF_FILE ?= artifacts/validation/runtime-image-rollout-proof.md
 OFFICIAL_SCENARIO ?= demo
 SUPPORT_PACK_ROOT ?= artifacts/support-pack
 
-.PHONY: help lint test laravel-test sonar-analysis kyverno-policy-check image-scan sbom-attest sbom-validate verify promote promote-digest deploy runtime-image-proof validate demo production-cluster production-cleanup-plan production-cleanup production-cluster-clean-proof production-ha production-runtime-evidence production-proof-full ha-chaos-lite hpa-runtime-proof refresh-hpa-runtime-proof production-data-resilience data-resilience-proof production-dockerfiles image-size-evidence secrets-management production-db-secret data-backup data-restore production-readiness-campaign campaign final-campaign release-evidence release-attestation release-provenance release-proof-strict supply-chain-evidence supply-chain-execute observability-snapshot portal-service-proof global-project-status final-source-of-truth security-posture k8s-resource-guards close-missing-phases jenkins-webhook-proof jenkins-ci-push-proof cluster-security-proof kyverno-runtime-proof kyverno-enforce-readiness refresh-cluster-security-proof devsecops-final-proof devsecops-readiness final-proof final-summary support-pack kyverno-install kyverno-enforce metrics-install clean
+.PHONY: help lint test laravel-test sonar-analysis kyverno-policy-check image-scan sbom-attest sbom-validate verify promote promote-digest deploy runtime-image-proof validate demo production-cluster production-cleanup-plan production-cleanup production-cluster-clean-proof production-ha production-runtime-evidence production-proof-full ha-chaos-lite hpa-runtime-proof refresh-hpa-runtime-proof production-data-resilience data-resilience-proof production-dockerfiles image-size-evidence secrets-management production-db-secret data-backup data-restore production-readiness-campaign campaign final-campaign release-evidence release-attestation release-provenance release-proof-strict supply-chain-evidence supply-chain-execute observability-snapshot portal-service-proof global-project-status final-source-of-truth security-posture k8s-resource-guards close-missing-phases jenkins-webhook-proof jenkins-ci-push-proof cluster-security-proof kyverno-runtime-proof kyverno-enforce-readiness refresh-cluster-security-proof devsecops-final-proof devsecops-system-proof devsecops-readiness final-proof final-summary support-pack kyverno-install kyverno-enforce metrics-install clean
 
 help: ## Show available targets
 	@awk 'BEGIN {FS = ":.*## "; print "Available targets:"} /^[a-zA-Z0-9_.-]+:.*## / {printf "  %-12s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
@@ -234,6 +234,10 @@ refresh-cluster-security-proof: ## Install metrics-server/Kyverno (Audit) and ar
 
 devsecops-final-proof: ## Run the non-destructive final DevSecOps proof orchestrator
 	@bash scripts/validate/run-devsecops-final-proof.sh
+
+devsecops-system-proof: ## Run the full DevSecOps system proof and archive runtime/release evidence
+	@REGISTRY_HOST=$(REGISTRY_HOST) IMAGE_PREFIX=$(IMAGE_PREFIX) IMAGE_TAG=$(IMAGE_TAG) SOURCE_IMAGE_TAG=$(SOURCE_IMAGE_TAG) TARGET_IMAGE_TAG=$(TARGET_IMAGE_TAG) REPORT_DIR=$(REPORT_DIR) SBOM_DIR=$(SBOM_DIR) DIGEST_RECORD_FILE=$(DIGEST_RECORD_FILE) KUSTOMIZE_OVERLAY=$(KUSTOMIZE_OVERLAY) \
+		bash scripts/validate/run-devsecops-system-proof.sh
 
 devsecops-readiness: ## Generate a factual DevSecOps readiness report for soutenance
 	@bash scripts/validate/generate-devsecops-readiness-report.sh
