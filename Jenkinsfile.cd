@@ -288,9 +288,16 @@ pipeline {
             REGISTRY_HOST="${REGISTRY_HOST}" IMAGE_PREFIX="${IMAGE_PREFIX}" IMAGE_TAG="${TARGET_IMAGE_TAG}" \
             REPORT_DIR="${REPORT_DIR}" IMAGE_DIGEST_FILE="${REPORT_DIR}/promotion-digests.txt" COSIGN_PUBLIC_KEY="${COSIGN_PUBLIC_KEY}" \
             RUN_POSTDEPLOY_VALIDATION="false" ENSURE_KIND_CLUSTER="true" REQUIRE_DIGEST_DEPLOY="true" \
+            FORCE_WORKLOAD_ROLLOUT="true" STRICT_RUNTIME_IMAGE_PROOF="true" \
             DEPLOY_EVIDENCE_FILE="${REPORT_DIR}/no-rebuild-deploy-summary.md" \
+            RUNTIME_IMAGE_PROOF_FILE="${REPORT_DIR}/runtime-image-rollout-proof.md" \
             bash scripts/deploy/verify-and-deploy-kind.sh
           '''
+        }
+      }
+      post {
+        always {
+          archiveArtifacts allowEmptyArchive: true, artifacts: 'artifacts/release/no-rebuild-deploy-summary.md,artifacts/release/runtime-image-rollout-proof.*'
         }
       }
     }

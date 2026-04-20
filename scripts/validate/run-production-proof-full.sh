@@ -83,6 +83,7 @@ fi
 run_step "kyverno-runtime-proof" "artifacts/validation/kyverno-runtime-report.md" bash scripts/validate/validate-kyverno-runtime.sh
 run_step "kyverno-enforce-readiness" "artifacts/validation/kyverno-enforce-readiness.md" bash scripts/validate/validate-kyverno-enforce-readiness.sh
 run_step "production-runtime-evidence" "artifacts/validation/production-runtime-evidence.md" bash scripts/validate/collect-production-runtime-evidence.sh
+run_step "runtime-image-rollout-proof" "artifacts/validation/runtime-image-rollout-proof.md" bash scripts/validate/validate-runtime-image-rollout.sh
 run_step "ha-chaos-lite-readonly" "artifacts/validation/ha-chaos-lite-report.md" bash scripts/validate/validate-ha-chaos-lite.sh
 run_step "observability-snapshot" "artifacts/observability/observability-snapshot.md" bash scripts/validate/generate-observability-snapshot.sh
 run_step "security-posture" "artifacts/security/security-posture-report.md" bash scripts/validate/generate-security-posture-report.sh

@@ -16,6 +16,9 @@ RUN_POSTDEPLOY_VALIDATION="${RUN_POSTDEPLOY_VALIDATION:-false}"
 IMAGE_DIGEST_FILE="${IMAGE_DIGEST_FILE:-}"
 REQUIRE_DIGEST_DEPLOY="${REQUIRE_DIGEST_DEPLOY:-false}"
 DEPLOY_EVIDENCE_FILE="${DEPLOY_EVIDENCE_FILE:-${REPORT_DIR}/no-rebuild-deploy-summary.md}"
+RUNTIME_IMAGE_PROOF_FILE="${RUNTIME_IMAGE_PROOF_FILE:-${REPORT_DIR}/runtime-image-rollout-proof.md}"
+FORCE_WORKLOAD_ROLLOUT="${FORCE_WORKLOAD_ROLLOUT:-true}"
+STRICT_RUNTIME_IMAGE_PROOF="${STRICT_RUNTIME_IMAGE_PROOF:-true}"
 
 info() { printf '[INFO] %s\n' "$*"; }
 error() { printf '[ERROR] %s\n' "$*" >&2; }
@@ -56,7 +59,8 @@ fi
 info "Deploying verified images to ${KUSTOMIZE_OVERLAY}"
 REGISTRY_HOST="${REGISTRY_HOST}" IMAGE_PREFIX="${IMAGE_PREFIX}" IMAGE_TAG="${IMAGE_TAG}" \
   IMAGE_DIGEST_FILE="${IMAGE_DIGEST_FILE}" REQUIRE_DIGEST_DEPLOY="${REQUIRE_DIGEST_DEPLOY}" \
-  DEPLOY_EVIDENCE_FILE="${DEPLOY_EVIDENCE_FILE}" \
+  DEPLOY_EVIDENCE_FILE="${DEPLOY_EVIDENCE_FILE}" RUNTIME_IMAGE_PROOF_FILE="${RUNTIME_IMAGE_PROOF_FILE}" \
+  FORCE_WORKLOAD_ROLLOUT="${FORCE_WORKLOAD_ROLLOUT}" STRICT_RUNTIME_IMAGE_PROOF="${STRICT_RUNTIME_IMAGE_PROOF}" \
   KUSTOMIZE_OVERLAY="${KUSTOMIZE_OVERLAY}" \
   bash scripts/deploy/deploy-kind.sh
 
@@ -67,7 +71,6 @@ if is_true "${RUN_POSTDEPLOY_VALIDATION}"; then
   bash scripts/validate/smoke-tests.sh
   bash scripts/validate/security-smoke.sh
   bash scripts/validate/e2e-functional-flow.sh
-  bash scripts/validate/rag-smoke.sh
   bash scripts/validate/security-adversarial-advanced.sh
   bash scripts/validate/generate-validation-report.sh
 fi

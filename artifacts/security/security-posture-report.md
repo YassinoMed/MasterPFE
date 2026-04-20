@@ -1,7 +1,7 @@
 # Security Posture Report — SecureRAG Hub
 
-- Generated at UTC: `2026-04-20T04:51:37Z`
-- Git commit: `028df424b6f7988c6b4d1c22b2781f23a2f57aa9`
+- Generated at UTC: `2026-04-20T08:45:26Z`
+- Git commit: `91552efb6ac2ad0f3ba7817cf670e3e860cf0834`
 - Kubernetes namespace: `securerag-hub`
 
 ## 1. Security controls status
@@ -24,6 +24,7 @@
 | Kubernetes ultra hardening static | `TERMINÉ` | `artifacts/security/k8s-ultra-hardening.md` |
 | Kubernetes production HA static | `TERMINÉ` | `artifacts/security/production-ha-readiness.md` |
 | Production runtime evidence | `DÉPENDANT_DE_L_ENVIRONNEMENT` | `artifacts/validation/production-runtime-evidence.md` |
+| Runtime image rollout proof | `DÉPENDANT_DE_L_ENVIRONNEMENT` | `artifacts/validation/runtime-image-rollout-proof.md` |
 | Production data resilience | `PRÊT_NON_EXÉCUTÉ` | `artifacts/security/production-data-resilience.md` |
 | Production Dockerfiles | `TERMINÉ` | `artifacts/security/production-dockerfiles.md` |
 | Image size evidence | `DÉPENDANT_DE_L_ENVIRONNEMENT` | `artifacts/security/image-size-evidence.md` |

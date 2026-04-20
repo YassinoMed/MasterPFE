@@ -81,6 +81,8 @@ IMAGE_PREFIX=securerag-hub \
 IMAGE_TAG=release-local \
 IMAGE_DIGEST_FILE=artifacts/release/promotion-digests.txt \
 REQUIRE_DIGEST_DEPLOY=true \
+FORCE_WORKLOAD_ROLLOUT=true \
+STRICT_RUNTIME_IMAGE_PROOF=true \
 COSIGN_PUBLIC_KEY=/absolute/path/to/cosign.pub \
 RUN_POSTDEPLOY_VALIDATION=true \
 bash scripts/deploy/verify-and-deploy-kind.sh
@@ -96,6 +98,8 @@ bash scripts/deploy/verify-and-deploy-kind.sh
 - `artifacts/release/promotion-digests.txt`
 - `artifacts/release/promotion-digests.json`
 - `artifacts/release/no-rebuild-deploy-summary.md`
+- `artifacts/release/runtime-image-rollout-proof.md`
+- `artifacts/release/runtime-image-rollout-proof.json`
 - `artifacts/release/release-evidence.md`
 - `artifacts/release/release-attestation.json`
 - `artifacts/release/release-attestation.md`
@@ -125,6 +129,8 @@ Le pipeline CD utilise :
 
 Le pipeline CD ne doit pas reconstruire les images.
 Quand `REQUIRE_DIGEST_DEPLOY=true`, le deploiement echoue si `promotion-digests.txt` est absent ou incomplet. C'est le mode attendu pour une release defendable.
+
+Quand `STRICT_RUNTIME_IMAGE_PROOF=true`, le deploiement echoue aussi si les pods Ready ne prouvent pas l'image attendue. Cela ferme le cas ou `kubectl apply` affiche `deployment unchanged` alors que les images viennent d'etre reconstruites. Le script force un rollout controle avec `FORCE_WORKLOAD_ROLLOUT=true`, puis archive les images de deployment et les `imageID` reels des conteneurs.
 
 Le stage de provenance SLSA-style est volontairement strict dans Jenkins : il
 échoue si les digests promus sont absents ou si `release-attestation.json` n'est
