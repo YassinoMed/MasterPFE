@@ -8,6 +8,10 @@ set -euo pipefail
 # This script does not build images. It assumes the source images already exist
 # in the target registry under SOURCE_IMAGE_TAG.
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=scripts/release/lib/common.sh
+source "${SCRIPT_DIR}/lib/common.sh"
+
 REGISTRY_HOST="${REGISTRY_HOST:-localhost:5001}"
 IMAGE_PREFIX="${IMAGE_PREFIX:-securerag-hub}"
 SOURCE_IMAGE_TAG="${SOURCE_IMAGE_TAG:-dev}"
@@ -18,6 +22,7 @@ DIGEST_RECORD_FILE="${DIGEST_RECORD_FILE:-${REPORT_DIR}/promotion-digests.txt}"
 COSIGN_KEY="${COSIGN_KEY:-infra/jenkins/secrets/cosign.key}"
 COSIGN_PUBLIC_KEY="${COSIGN_PUBLIC_KEY:-infra/jenkins/secrets/cosign.pub}"
 COSIGN_PASSWORD_FILE="${COSIGN_PASSWORD_FILE:-infra/jenkins/secrets/cosign.password}"
+COSIGN_ALLOW_INSECURE_REGISTRY="${COSIGN_ALLOW_INSECURE_REGISTRY:-}"
 SUPPLY_CHAIN_MODE="${SUPPLY_CHAIN_MODE:-execute}"
 FAIL_FAST="${FAIL_FAST:-true}"
 
@@ -50,6 +55,18 @@ if [[ -n "${SERVICES:-}" ]]; then
   services=(${SERVICES//,/ })
 fi
 
+if [[ -z "${COSIGN_ALLOW_INSECURE_REGISTRY}" ]]; then
+  case "${REGISTRY_HOST}" in
+    localhost:*|127.0.0.1:*|0.0.0.0:*)
+      COSIGN_ALLOW_INSECURE_REGISTRY=true
+      ;;
+    *)
+      COSIGN_ALLOW_INSECURE_REGISTRY=false
+      ;;
+  esac
+fi
+export COSIGN_ALLOW_INSECURE_REGISTRY
+
 mkdir -p "${REPORT_DIR}" "${SBOM_DIR}"
 
 {
@@ -60,6 +77,7 @@ mkdir -p "${REPORT_DIR}" "${SBOM_DIR}"
   printf -- '- Image prefix: `%s`\n' "${IMAGE_PREFIX}"
   printf -- '- Source tag: `%s`\n' "${SOURCE_IMAGE_TAG}"
   printf -- '- Target tag: `%s`\n\n' "${TARGET_IMAGE_TAG}"
+  printf -- '- Cosign allow insecure registry: `%s`\n\n' "${COSIGN_ALLOW_INSECURE_REGISTRY:-auto}"
   printf '## Preflight\n\n'
 } > "${SUMMARY_FILE}"
 
@@ -79,7 +97,7 @@ export COSIGN_YES=true
 
 for service in "${services[@]}"; do
   source_ref="$(image_ref "${service}" "${SOURCE_IMAGE_TAG}")"
-  if docker manifest inspect "${source_ref}" >/dev/null 2>&1; then
+  if image_reachable_in_registry "${source_ref}"; then
     printf -- '- OK: `%s`\n' "${source_ref}" >> "${SUMMARY_FILE}"
   else
     printf -- '- FAIL: `%s` not reachable\n' "${source_ref}" >> "${SUMMARY_FILE}"
@@ -107,11 +125,13 @@ REGISTRY_HOST="${REGISTRY_HOST}" IMAGE_PREFIX="${IMAGE_PREFIX}" IMAGE_TAG="${SOU
 info "Signing source images"
 REGISTRY_HOST="${REGISTRY_HOST}" IMAGE_PREFIX="${IMAGE_PREFIX}" IMAGE_TAG="${SOURCE_IMAGE_TAG}" \
   REPORT_DIR="${REPORT_DIR}" COSIGN_KEY="${COSIGN_KEY}" FAIL_FAST="${FAIL_FAST}" \
+  COSIGN_ALLOW_INSECURE_REGISTRY="${COSIGN_ALLOW_INSECURE_REGISTRY}" \
   bash scripts/release/sign-images.sh
 
 info "Verifying source signatures"
 REGISTRY_HOST="${REGISTRY_HOST}" IMAGE_PREFIX="${IMAGE_PREFIX}" IMAGE_TAG="${SOURCE_IMAGE_TAG}" \
   REPORT_DIR="${REPORT_DIR}" COSIGN_PUBLIC_KEY="${COSIGN_PUBLIC_KEY}" FAIL_FAST="${FAIL_FAST}" \
+  COSIGN_ALLOW_INSECURE_REGISTRY="${COSIGN_ALLOW_INSECURE_REGISTRY}" \
   bash scripts/release/verify-signatures.sh
 
 info "Promoting verified images by digest"
@@ -119,6 +139,7 @@ REGISTRY_HOST="${REGISTRY_HOST}" IMAGE_PREFIX="${IMAGE_PREFIX}" \
   SOURCE_IMAGE_TAG="${SOURCE_IMAGE_TAG}" TARGET_IMAGE_TAG="${TARGET_IMAGE_TAG}" \
   REPORT_DIR="${REPORT_DIR}" DIGEST_RECORD_FILE="${DIGEST_RECORD_FILE}" \
   COSIGN_PUBLIC_KEY="${COSIGN_PUBLIC_KEY}" FAIL_FAST="${FAIL_FAST}" \
+  COSIGN_ALLOW_INSECURE_REGISTRY="${COSIGN_ALLOW_INSECURE_REGISTRY}" \
   VERIFY_SOURCE_BEFORE_PROMOTION=false VERIFY_TARGET_AFTER_PROMOTION=true \
   bash scripts/release/promote-by-digest.sh
 
@@ -130,6 +151,7 @@ REGISTRY_HOST="${REGISTRY_HOST}" IMAGE_PREFIX="${IMAGE_PREFIX}" IMAGE_TAG="${TAR
 info "Attesting promoted image SBOMs"
 REGISTRY_HOST="${REGISTRY_HOST}" IMAGE_PREFIX="${IMAGE_PREFIX}" IMAGE_TAG="${TARGET_IMAGE_TAG}" \
   SBOM_DIR="${SBOM_DIR}" REPORT_DIR="${REPORT_DIR}" COSIGN_KEY="${COSIGN_KEY}" FAIL_FAST="${FAIL_FAST}" \
+  COSIGN_ALLOW_INSECURE_REGISTRY="${COSIGN_ALLOW_INSECURE_REGISTRY}" \
   bash scripts/release/attest-sboms.sh
 
 info "Recording release and supply-chain evidence"

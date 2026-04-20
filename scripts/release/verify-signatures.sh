@@ -134,6 +134,10 @@ mode="keyless"
 declare -a verify_args
 verify_args=(verify)
 
+if is_true "${COSIGN_ALLOW_INSECURE_REGISTRY:-false}"; then
+  verify_args+=(--allow-insecure-registry)
+fi
+
 if [[ -n "${COSIGN_PUBLIC_KEY:-}" ]]; then
   if [[ ! -f "${COSIGN_PUBLIC_KEY}" ]]; then
     error "COSIGN_PUBLIC_KEY points to a non-existent file: ${COSIGN_PUBLIC_KEY}"
