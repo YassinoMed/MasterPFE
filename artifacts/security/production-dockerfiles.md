@@ -1,6 +1,6 @@
 # Production Dockerfiles - SecureRAG Hub
 
-- Generated at UTC: `2026-04-20T08:44:55Z`
+- Generated at UTC: `2026-04-20T08:59:37Z`
 - Strict mode: `true`
 
 | Component | Control | Status | Evidence |
