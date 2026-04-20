@@ -27,16 +27,29 @@ spec:
         message: >-
           Literal clear-text HTTP environment URLs require the annotation
           security.securerag.dev/internal-cleartext-scope=cluster-only-networkpolicy.
-          Prefer $(INTERNAL_SERVICE_SCHEME)://service:port for internal
-          demo traffic and HTTPS for public exposure.
-        foreach:
-          - list: "request.object.spec.containers[].env[]"
-            deny:
-              conditions:
-                all:
-                  - key: "{{ element.value || '' }}"
-                    operator: Matches
-                    value: "h[t]{2}p://.*"
-                  - key: "{{ request.object.metadata.annotations.\"security.securerag.dev/internal-cleartext-scope\" || '' }}"
-                    operator: NotEquals
-                    value: cluster-only-networkpolicy
+          Prefer an internal service scheme variable for cluster-only
+          traffic and HTTPS for public exposure.
+        cel:
+          expressions:
+            - expression: >-
+                (
+                  has(object.metadata.annotations) &&
+                  'security.securerag.dev/internal-cleartext-scope' in object.metadata.annotations &&
+                  object.metadata.annotations['security.securerag.dev/internal-cleartext-scope'] == 'cluster-only-networkpolicy'
+                ) ||
+                (
+                  !object.spec.containers.exists(container,
+                    has(container.env) &&
+                    container.env.exists(env, has(env.value) && env.value.startsWith('http://'))
+                  ) &&
+                  (
+                    !has(object.spec.initContainers) ||
+                    !object.spec.initContainers.exists(container,
+                      has(container.env) &&
+                      container.env.exists(env, has(env.value) && env.value.startsWith('http://'))
+                    )
+                  )
+                )
+              message: >-
+                Literal clear-text HTTP environment URLs require the annotation
+                security.securerag.dev/internal-cleartext-scope=cluster-only-networkpolicy.

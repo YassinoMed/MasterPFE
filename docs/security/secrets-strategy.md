@@ -13,6 +13,7 @@ Définir une stratégie réaliste et démontrable pour trois périmètres sépar
 | Jenkins admin | `infra/jenkins/secrets/jenkins-admin-password` ignoré par Git | `JENKINS_ADMIN_PASSWORD_FILE` dans Docker Compose | TERMINÉ |
 | Cosign Jenkins | `infra/jenkins/secrets/cosign.*` ignoré par Git | Jenkins Credentials bootstrap | TERMINÉ |
 | Sonar Jenkins | `infra/jenkins/secrets/sonar-token` ignoré par Git | Jenkins credential `sonar-token` si fourni | PRÊT_NON_EXÉCUTÉ |
+| DB externe production | Variables d'environnement opérateur ou SOPS/age optionnel | Secret Kubernetes `securerag-database-secrets` | PRÊT_NON_EXÉCUTÉ |
 
 Le mot de passe admin Jenkins n’est pas injecté dans le Secret applicatif Kubernetes.
 
@@ -31,6 +32,36 @@ Pour activer Sonar dans Jenkins sans exposer le token :
 SONAR_TOKEN_VALUE='<token-sonar-reel>' bash scripts/jenkins/bootstrap-local-credentials.sh
 ```
 
+## Production external DB
+
+Le chemin production-like ne versionne pas le Secret DB. Il utilise soit des
+variables d'environnement opérateur, soit un secret chiffré SOPS/age.
+
+Création directe depuis variables d'environnement :
+
+```bash
+DB_HOST='<postgres-host>' \
+DB_USERNAME='<postgres-user>' \
+DB_PASSWORD='<mot-de-passe-fort-minimum-20-caracteres>' \
+make production-db-secret
+```
+
+Le script écrit uniquement une preuve redigée :
+
+```text
+artifacts/security/production-db-secret.md
+```
+
+Option SOPS/age préparée :
+
+```text
+infra/secrets/sops/sops-age.example.yaml
+infra/secrets/production/securerag-database-secrets.template.yaml
+```
+
+Elle reste `PRÊT_NON_EXÉCUTÉ` tant qu'un destinataire age réel et un fichier
+chiffré n'ont pas été créés.
+
 ## Rotation
 - `SECURERAG_SHARED_API_TOKEN` : à régénérer après fuite ou changement de périmètre service-to-service.
 - `APP_KEY` : rotation destructive pour données chiffrées Laravel ; à planifier.
@@ -39,4 +70,6 @@ SONAR_TOKEN_VALUE='<token-sonar-reel>' bash scripts/jenkins/bootstrap-local-cred
 - Jenkins admin password/API token : rotation après soutenance, publication temporaire ou changement de collaborateur.
 
 ## Options futures
-Pour une pré-production, utiliser SOPS/age, Sealed Secrets ou External Secrets Operator. Non activé par défaut pour ne pas complexifier la démonstration kind locale.
+External Secrets Operator ou Vault restent pertinents pour une vraie production
+multi-environnement. Ils ne sont pas activés par défaut pour ne pas complexifier
+la démonstration kind locale.

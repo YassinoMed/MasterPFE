@@ -100,6 +100,8 @@ fi
 info "Scanning source images before signing"
 REGISTRY_HOST="${REGISTRY_HOST}" IMAGE_PREFIX="${IMAGE_PREFIX}" IMAGE_TAG="${SOURCE_IMAGE_TAG}" \
   REPORT_DIR="${REPORT_DIR}" IMAGE_SCAN_DIR="security/reports" \
+  TRIVY_BLOCKING_SEVERITY="${TRIVY_BLOCKING_SEVERITY:-CRITICAL}" \
+  TRIVY_FAIL_ON_HIGH="${TRIVY_FAIL_ON_HIGH:-false}" \
   bash scripts/release/scan-images.sh
 
 info "Signing source images"
@@ -143,6 +145,13 @@ info "Asserting mandatory supply-chain release evidence"
 REPORT_DIR="${REPORT_DIR}" SBOM_DIR="${SBOM_DIR}" DIGEST_RECORD_FILE="${DIGEST_RECORD_FILE}" \
   bash scripts/release/assert-supply-chain-evidence.sh
 
+info "Generating complete release attestation and SLSA-style provenance"
+REPORT_DIR="${REPORT_DIR}" SBOM_DIR="${SBOM_DIR}" DIGEST_RECORD_FILE="${DIGEST_RECORD_FILE}" \
+  STRICT_RELEASE_ATTESTATION=true bash scripts/release/generate-release-attestation.sh
+
+REPORT_DIR="${REPORT_DIR}" DIGEST_RECORD_FILE="${DIGEST_RECORD_FILE}" \
+  STRICT_PROVENANCE=true bash scripts/release/generate-provenance-statement.sh
+
 {
   printf '\n## Executed steps\n\n'
   printf -- '- scan source images with Trivy: OK\n'
@@ -154,17 +163,32 @@ REPORT_DIR="${REPORT_DIR}" SBOM_DIR="${SBOM_DIR}" DIGEST_RECORD_FILE="${DIGEST_R
   printf -- '- attest promoted image SBOMs: OK\n'
   printf -- '- record release evidence: OK\n\n'
   printf -- '- mandatory supply-chain evidence gate: OK\n\n'
+  printf -- '- release attestation: OK\n'
+  printf -- '- SLSA-style provenance statement: OK\n\n'
   printf '## Produced evidence\n\n'
   printf -- '- `%s/image-scan-summary.txt`\n' "${REPORT_DIR}"
+  printf -- '- `%s/image-scan-summary.md`\n' "${REPORT_DIR}"
+  printf -- '- `%s/image-scan-index.json`\n' "${REPORT_DIR}"
   printf -- '- `%s/sign-summary.txt`\n' "${REPORT_DIR}"
+  printf -- '- `%s/sign-summary.md`\n' "${REPORT_DIR}"
+  printf -- '- `%s/sign-index.json`\n' "${REPORT_DIR}"
   printf -- '- `%s/verify-summary.txt`\n' "${REPORT_DIR}"
+  printf -- '- `%s/verify-summary.md`\n' "${REPORT_DIR}"
+  printf -- '- `%s/verify-index.json`\n' "${REPORT_DIR}"
   printf -- '- `%s/promotion-by-digest-summary.txt`\n' "${REPORT_DIR}"
+  printf -- '- `%s/promotion-by-digest-summary.md`\n' "${REPORT_DIR}"
   printf -- '- `%s/promotion-digests.txt`\n' "${REPORT_DIR}"
+  printf -- '- `%s/promotion-digests.json`\n' "${REPORT_DIR}"
   printf -- '- `%s/sbom-summary.txt`\n' "${REPORT_DIR}"
+  printf -- '- `%s/sbom-summary.md`\n' "${REPORT_DIR}"
   printf -- '- `%s/attest-summary.txt`\n' "${REPORT_DIR}"
   printf -- '- `%s/release-evidence.md`\n' "${REPORT_DIR}"
   printf -- '- `%s/supply-chain-evidence.md`\n' "${REPORT_DIR}"
   printf -- '- `%s/supply-chain-gate-report.md`\n' "${REPORT_DIR}"
+  printf -- '- `%s/release-attestation.json`\n' "${REPORT_DIR}"
+  printf -- '- `%s/release-attestation.md`\n' "${REPORT_DIR}"
+  printf -- '- `%s/provenance.slsa.json`\n' "${REPORT_DIR}"
+  printf -- '- `%s/provenance.slsa.md`\n' "${REPORT_DIR}"
   printf -- '- `%s/sbom-index.txt`\n' "${SBOM_DIR}"
 } >> "${SUMMARY_FILE}"
 

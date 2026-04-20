@@ -55,7 +55,8 @@ install_apt_packages() {
     git \
     jq \
     make \
-    python3
+    python3 \
+    ruby
 }
 
 install_kubectl_if_missing() {

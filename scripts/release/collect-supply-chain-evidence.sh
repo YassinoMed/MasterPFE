@@ -46,6 +46,9 @@ fi
 REPORT_DIR="${REPORT_DIR}" SBOM_DIR="${SBOM_DIR}" SERVICES="${SERVICES:-}" EXPECTED_SERVICE_COUNT="${EXPECTED_SERVICE_COUNT:-}" \
   bash scripts/release/generate-release-attestation.sh
 
+REPORT_DIR="${REPORT_DIR}" DIGEST_RECORD_FILE="${REPORT_DIR}/promotion-digests.txt" \
+  bash scripts/release/generate-provenance-statement.sh
+
 {
   printf '# Supply Chain Evidence — SecureRAG Hub\n\n'
   printf -- '- Generated at UTC: `%s`\n' "$(date -u '+%Y-%m-%dT%H:%M:%SZ')"
@@ -55,14 +58,27 @@ REPORT_DIR="${REPORT_DIR}" SBOM_DIR="${SBOM_DIR}" SERVICES="${SERVICES:-}" EXPEC
   printf '| Evidence | Status |\n'
   printf '|---|---|\n'
   printf '| `image-scan-summary.txt` | %s |\n' "$(pass_fail_summary "${REPORT_DIR}/image-scan-summary.txt")"
+  printf '| `image-scan-summary.md` | %s |\n' "$(status_file "${REPORT_DIR}/image-scan-summary.md")"
+  printf '| `image-scan-index.json` | %s |\n' "$(status_file "${REPORT_DIR}/image-scan-index.json")"
   printf '| `sign-summary.txt` | %s |\n' "$(pass_fail_summary "${REPORT_DIR}/sign-summary.txt")"
+  printf '| `sign-summary.md` | %s |\n' "$(status_file "${REPORT_DIR}/sign-summary.md")"
+  printf '| `sign-index.json` | %s |\n' "$(status_file "${REPORT_DIR}/sign-index.json")"
   printf '| `verify-summary.txt` | %s |\n' "$(pass_fail_summary "${REPORT_DIR}/verify-summary.txt")"
+  printf '| `verify-summary.md` | %s |\n' "$(status_file "${REPORT_DIR}/verify-summary.md")"
+  printf '| `verify-index.json` | %s |\n' "$(status_file "${REPORT_DIR}/verify-index.json")"
   printf '| `promotion-by-digest-summary.txt` | %s |\n' "$(pass_fail_summary "${REPORT_DIR}/promotion-by-digest-summary.txt")"
+  printf '| `promotion-by-digest-summary.md` | %s |\n' "$(status_file "${REPORT_DIR}/promotion-by-digest-summary.md")"
   printf '| `promotion-digests.txt` | %s |\n' "$(status_file "${REPORT_DIR}/promotion-digests.txt")"
+  printf '| `promotion-digests.json` | %s |\n' "$(status_file "${REPORT_DIR}/promotion-digests.json")"
   printf '| `sbom-summary.txt` | %s |\n' "$(pass_fail_summary "${REPORT_DIR}/sbom-summary.txt")"
+  printf '| `sbom-summary.md` | %s |\n' "$(status_file "${REPORT_DIR}/sbom-summary.md")"
   printf '| `attest-summary.txt` | %s |\n' "$(pass_fail_summary "${REPORT_DIR}/attest-summary.txt")"
+  printf '| `no-rebuild-deploy-summary.md` | %s |\n' "$(status_file "${REPORT_DIR}/no-rebuild-deploy-summary.md")"
   printf '| `release-evidence.md` | %s |\n' "$(status_file "${REPORT_DIR}/release-evidence.md")"
   printf '| `release-attestation.json` | %s |\n' "$(status_file "${REPORT_DIR}/release-attestation.json")"
+  printf '| `release-attestation.md` | %s |\n' "$(status_file "${REPORT_DIR}/release-attestation.md")"
+  printf '| `provenance.slsa.json` | %s |\n' "$(status_file "${REPORT_DIR}/provenance.slsa.json")"
+  printf '| `provenance.slsa.md` | %s |\n' "$(status_file "${REPORT_DIR}/provenance.slsa.md")"
   printf '| SBOM files | %s |\n\n' "${sbom_count}"
 
   printf '## SBOM files\n\n'
@@ -82,7 +98,10 @@ REPORT_DIR="${REPORT_DIR}" SBOM_DIR="${SBOM_DIR}" SERVICES="${SERVICES:-}" EXPEC
 
 if [[ "${GENERATE_PACK}" == "true" ]]; then
   if command -v tar >/dev/null 2>&1 && [[ -d "${REPORT_DIR}" ]]; then
-    tar -czf "${PACK_NAME}" -C "$(dirname "${REPORT_DIR}")" "$(basename "${REPORT_DIR}")"
+    tar_sources=("${REPORT_DIR}")
+    [[ -d "${SBOM_DIR}" ]] && tar_sources+=("${SBOM_DIR}")
+    [[ -d "security/reports" ]] && tar_sources+=("security/reports")
+    tar -czf "${PACK_NAME}" "${tar_sources[@]}"
     info "Supply-chain evidence pack written to ${PACK_NAME}"
   else
     warn "tar unavailable or ${REPORT_DIR} missing; evidence pack not generated"

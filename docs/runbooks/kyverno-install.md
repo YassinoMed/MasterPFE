@@ -41,7 +41,12 @@ kubectl get crd clusterpolicies.kyverno.io
 kubectl get clusterpolicy
 kubectl get policyreport,clusterpolicyreport -A
 bash scripts/validate/validate-cluster-security-addons.sh
+make kyverno-runtime-proof
 ```
+
+Preuves attendues :
+- `artifacts/validation/cluster-security-addons.md`
+- `artifacts/validation/kyverno-runtime-report.md`
 
 ## Strategie Audit -> Enforce
 
@@ -59,6 +64,16 @@ Mode recommande seulement si :
 - la cle publique Cosign correspond bien aux signatures publiees ;
 - la registry est joignable par le cluster et/ou le moteur Kyverno ;
 - les images non signees ne sont plus deployees sur le namespace cible.
+- `artifacts/validation/kyverno-runtime-report.md` indique que les PolicyReports existent et ne contiennent pas de `fail` ou `error` ;
+- `artifacts/release/release-attestation.json` est en statut `COMPLETE_PROVEN`.
+
+Verification readiness Enforce :
+```bash
+make kyverno-runtime-proof
+grep -n "Kyverno Enforce readiness" artifacts/validation/kyverno-runtime-report.md
+```
+
+Ne pas lancer `make kyverno-enforce` si cette ligne ne retourne pas `TERMINÉ`.
 
 ## Risque si Enforce est active trop tot
 - refus de creation des Pods SecureRAG ;
@@ -69,4 +84,4 @@ Mode recommande seulement si :
 - commencer en `Audit`
 - valider la campagne `verify -> promote -> deploy -> validate`
 - passer ensuite a `Enforce` sur un cluster de demonstration stabilise
-- conserver `artifacts/validation/cluster-security-addons.md` comme preuve runtime
+- conserver `artifacts/validation/cluster-security-addons.md` et `artifacts/validation/kyverno-runtime-report.md` comme preuves runtime

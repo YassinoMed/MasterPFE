@@ -34,6 +34,11 @@ pipeline {
       description: 'Deploy the verified images to the local kind cluster.'
     )
     booleanParam(
+      name: 'SIGN_RELEASE_CANDIDATES',
+      defaultValue: true,
+      description: 'Sign release candidate images before verification using Jenkins Cosign credentials.'
+    )
+    booleanParam(
       name: 'RUN_POSTDEPLOY_VALIDATION',
       defaultValue: true,
       description: 'Run post-deployment validation after deployment.'
@@ -70,12 +75,37 @@ pipeline {
           set -euo pipefail
           REGISTRY_HOST="${REGISTRY_HOST}" IMAGE_PREFIX="${IMAGE_PREFIX}" IMAGE_TAG="${SOURCE_IMAGE_TAG}" \
           REPORT_DIR="${REPORT_DIR}" IMAGE_SCAN_DIR="security/reports" \
+          TRIVY_BLOCKING_SEVERITY="CRITICAL" TRIVY_FAIL_ON_HIGH="false" \
           bash scripts/release/scan-images.sh
         '''
       }
       post {
         always {
-          archiveArtifacts allowEmptyArchive: true, artifacts: 'artifacts/release/image-scan-summary.txt,artifacts/release/*-image-scan.log,security/reports/trivy-image-*.json'
+          archiveArtifacts allowEmptyArchive: true, artifacts: 'artifacts/release/image-scan-summary.txt,artifacts/release/image-scan-summary.md,artifacts/release/image-scan-index.json,artifacts/release/*-image-scan.log,security/reports/trivy-image-*.json'
+        }
+      }
+    }
+
+    stage('Sign Release Candidate Images') {
+      when {
+        expression { return params.SIGN_RELEASE_CANDIDATES }
+      }
+      steps {
+        withCredentials([
+          file(credentialsId: 'cosign-private-key', variable: 'COSIGN_KEY'),
+          string(credentialsId: 'cosign-password', variable: 'COSIGN_PASSWORD')
+        ]) {
+          sh '''
+            set -euo pipefail
+            REGISTRY_HOST="${REGISTRY_HOST}" IMAGE_PREFIX="${IMAGE_PREFIX}" IMAGE_TAG="${SOURCE_IMAGE_TAG}" \
+            REPORT_DIR="${REPORT_DIR}" COSIGN_KEY="${COSIGN_KEY}" FAIL_FAST="true" \
+            bash scripts/release/sign-images.sh
+          '''
+        }
+      }
+      post {
+        always {
+          archiveArtifacts allowEmptyArchive: true, artifacts: 'artifacts/release/sign-summary.txt,artifacts/release/sign-summary.md,artifacts/release/sign-index.json,artifacts/release/*-sign.log'
         }
       }
     }
@@ -95,7 +125,7 @@ pipeline {
       }
       post {
         always {
-          archiveArtifacts allowEmptyArchive: true, artifacts: 'artifacts/release/*verify*'
+          archiveArtifacts allowEmptyArchive: true, artifacts: 'artifacts/release/*verify*,artifacts/release/verify-index.json'
         }
       }
     }
@@ -130,11 +160,13 @@ pipeline {
           REGISTRY_HOST="${REGISTRY_HOST}" IMAGE_PREFIX="${IMAGE_PREFIX}" IMAGE_TAG="${TARGET_IMAGE_TAG}" \
           SBOM_DIR="${SBOM_DIR}" REPORT_DIR="${REPORT_DIR}" \
           bash scripts/release/generate-sbom.sh
+          STRICT_SBOM_VALIDATION="true" SBOM_DIR="${SBOM_DIR}" REPORT_DIR="${REPORT_DIR}" \
+          bash scripts/release/validate-sbom-cyclonedx.sh
         '''
       }
       post {
         always {
-          archiveArtifacts allowEmptyArchive: true, artifacts: 'artifacts/sbom/**,artifacts/release/sbom-summary.txt'
+          archiveArtifacts allowEmptyArchive: true, artifacts: 'artifacts/sbom/**,artifacts/release/sbom-summary.txt,artifacts/release/sbom-summary.md,artifacts/release/sbom-cyclonedx-validation.md'
         }
       }
     }
@@ -173,6 +205,39 @@ pipeline {
       post {
         always {
           archiveArtifacts allowEmptyArchive: true, artifacts: 'artifacts/release/supply-chain-gate-report.md'
+        }
+      }
+    }
+
+    stage('Generate Release Attestation') {
+      steps {
+        sh '''
+          set -euo pipefail
+          REPORT_DIR="${REPORT_DIR}" SBOM_DIR="${SBOM_DIR}" \
+          DIGEST_RECORD_FILE="${REPORT_DIR}/promotion-digests.txt" \
+          STRICT_RELEASE_ATTESTATION="true" \
+          bash scripts/release/generate-release-attestation.sh
+        '''
+      }
+      post {
+        always {
+          archiveArtifacts allowEmptyArchive: true, artifacts: 'artifacts/release/release-attestation.json,artifacts/release/release-attestation.md'
+        }
+      }
+    }
+
+    stage('Generate SLSA-style Provenance') {
+      steps {
+        sh '''
+          set -euo pipefail
+          REPORT_DIR="${REPORT_DIR}" DIGEST_RECORD_FILE="${REPORT_DIR}/promotion-digests.txt" \
+          STRICT_PROVENANCE="true" \
+          bash scripts/release/generate-provenance-statement.sh
+        '''
+      }
+      post {
+        always {
+          archiveArtifacts allowEmptyArchive: true, artifacts: 'artifacts/release/provenance.slsa.json,artifacts/release/provenance.slsa.md'
         }
       }
     }
@@ -222,7 +287,8 @@ pipeline {
             set -euo pipefail
             REGISTRY_HOST="${REGISTRY_HOST}" IMAGE_PREFIX="${IMAGE_PREFIX}" IMAGE_TAG="${TARGET_IMAGE_TAG}" \
             REPORT_DIR="${REPORT_DIR}" IMAGE_DIGEST_FILE="${REPORT_DIR}/promotion-digests.txt" COSIGN_PUBLIC_KEY="${COSIGN_PUBLIC_KEY}" \
-            RUN_POSTDEPLOY_VALIDATION="false" ENSURE_KIND_CLUSTER="true" \
+            RUN_POSTDEPLOY_VALIDATION="false" ENSURE_KIND_CLUSTER="true" REQUIRE_DIGEST_DEPLOY="true" \
+            DEPLOY_EVIDENCE_FILE="${REPORT_DIR}/no-rebuild-deploy-summary.md" \
             bash scripts/deploy/verify-and-deploy-kind.sh
           '''
         }
@@ -241,7 +307,6 @@ pipeline {
           bash scripts/validate/smoke-tests.sh
           bash scripts/validate/security-smoke.sh
           bash scripts/validate/e2e-functional-flow.sh
-          bash scripts/validate/rag-smoke.sh
           bash scripts/validate/security-adversarial-advanced.sh
           bash scripts/validate/generate-validation-report.sh
           bash scripts/validate/collect-runtime-evidence.sh

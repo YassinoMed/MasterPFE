@@ -27,19 +27,11 @@ spec:
         message: Mutable latest tags are not accepted for SecureRAG runtime Pods.
         foreach:
           - list: "request.object.spec.containers[]"
-            deny:
-              conditions:
-                any:
-                  - key: "{{ element.image || '' }}"
-                    operator: Matches
-                    value: ".*:latest$"
+            pattern:
+              image: "!*:latest"
           - list: "request.object.spec.initContainers[] || []"
-            deny:
-              conditions:
-                any:
-                  - key: "{{ element.image || '' }}"
-                    operator: Matches
-                    value: ".*:latest$"
+            pattern:
+              image: "!*:latest"
     - name: restrict-registries
       match:
         any:
@@ -56,19 +48,13 @@ spec:
         message: Runtime images must come from localhost:5001 or ghcr.io.
         foreach:
           - list: "request.object.spec.containers[]"
-            deny:
-              conditions:
-                all:
-                  - key: "{{ element.image || '' }}"
-                    operator: NotMatches
-                    value: "^(localhost:5001/|ghcr.io/).*"
+            anyPattern:
+              - image: "localhost:5001/*"
+              - image: "ghcr.io/*"
           - list: "request.object.spec.initContainers[] || []"
-            deny:
-              conditions:
-                all:
-                  - key: "{{ element.image || '' }}"
-                    operator: NotMatches
-                    value: "^(localhost:5001/|ghcr.io/).*"
+            anyPattern:
+              - image: "localhost:5001/*"
+              - image: "ghcr.io/*"
     - name: restrict-validation-helper-image
       match:
         any:
@@ -84,16 +70,8 @@ spec:
         message: Validation Pods may only use the pinned curlimages/curl helper family.
         foreach:
           - list: "request.object.spec.containers[]"
-            deny:
-              conditions:
-                any:
-                  - key: "{{ element.image || '' }}"
-                    operator: NotMatches
-                    value: "^curlimages/curl:[0-9][A-Za-z0-9._-]*$"
+            pattern:
+              image: "curlimages/curl:*"
           - list: "request.object.spec.initContainers[] || []"
-            deny:
-              conditions:
-                any:
-                  - key: "{{ element.image || '' }}"
-                    operator: NotMatches
-                    value: "^curlimages/curl:[0-9][A-Za-z0-9._-]*$"
+            pattern:
+              image: "curlimages/curl:*"

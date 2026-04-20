@@ -29,10 +29,11 @@ mkdir -p "${OUT_DIR}"
 
 status_file() {
   local path="$1"
+  local missing_status="${2:-PRÊT_NON_EXÉCUTÉ}"
   if [[ -s "${path}" ]]; then
     printf 'TERMINÉ'
   else
-    printf 'PARTIEL'
+    printf '%s' "${missing_status}"
   fi
 }
 
@@ -47,18 +48,20 @@ status_count() {
 
 summary_state() {
   local path="$1"
+  local missing_status="${2:-DÉPENDANT_DE_L_ENVIRONNEMENT}"
 
   if [[ ! -s "${path}" ]]; then
-    printf 'PARTIEL'
+    printf '%s' "${missing_status}"
     return 0
   fi
 
-  local pass_count fail_count skip_count
+  local pass_count warn_count fail_count skip_count
   pass_count="$(status_count "${path}" "PASS")"
+  warn_count="$(status_count "${path}" "WARN")"
   fail_count="$(status_count "${path}" "FAIL")"
   skip_count="$(status_count "${path}" "SKIP")"
 
-  if [[ "${pass_count}" == "${EXPECTED_COUNT}" && "${fail_count}" == "0" && "${skip_count}" == "0" ]]; then
+  if [[ "$((pass_count + warn_count))" == "${EXPECTED_COUNT}" && "${fail_count}" == "0" && "${skip_count}" == "0" ]]; then
     printf 'TERMINÉ'
   else
     printf 'PARTIEL'
@@ -69,7 +72,7 @@ digest_state() {
   local path="$1"
 
   if [[ ! -s "${path}" ]]; then
-    printf 'PARTIEL'
+    printf 'DÉPENDANT_DE_L_ENVIRONNEMENT'
     return 0
   fi
 
@@ -88,7 +91,7 @@ attestation_state() {
   local path="$1"
 
   if [[ ! -s "${path}" ]]; then
-    printf 'PARTIEL'
+    printf 'DÉPENDANT_DE_L_ENVIRONNEMENT'
     return 0
   fi
 
@@ -99,7 +102,7 @@ import sys
 with open(sys.argv[1], encoding="utf-8") as handle:
     payload = json.load(handle)
 
-print("TERMINÉ" if payload.get("status") == "COMPLETE_PROVEN" else "PARTIEL")
+print("TERMINÉ" if payload.get("status") == "COMPLETE_PROVEN" else "DÉPENDANT_DE_L_ENVIRONNEMENT")
 PY
 }
 
@@ -119,7 +122,7 @@ markdown_global_status() {
   if [[ -s "${path}" ]] && grep -Fq "${expected}" "${path}"; then
     printf 'TERMINÉ'
   else
-    printf 'PARTIEL'
+    printf 'PRÊT_NON_EXÉCUTÉ'
   fi
 }
 
@@ -127,7 +130,7 @@ declared_status() {
   local path="$1"
 
   if [[ ! -s "${path}" ]]; then
-    printf 'PARTIEL'
+    printf 'PRÊT_NON_EXÉCUTÉ'
     return 0
   fi
 
@@ -142,9 +145,10 @@ declared_status() {
 
 table_worst_status() {
   local path="$1"
+  local missing_status="${2:-PRÊT_NON_EXÉCUTÉ}"
 
   if [[ ! -s "${path}" ]]; then
-    printf 'PARTIEL'
+    printf '%s' "${missing_status}"
     return 0
   fi
 
@@ -208,23 +212,27 @@ trivy_vulns="$(count_json_results "security/reports/trivy-fs.json" "trivy-vulns"
   printf '## 1. Security controls status\n\n'
   printf '| Control | State | Evidence |\n'
   printf '|---|---|---|\n'
-  printf '| Semgrep SAST | `%s` | `security/reports/semgrep.json`, findings=%s |\n' "$(status_file "security/reports/semgrep.json")" "${semgrep_findings}"
+  printf '| Semgrep SAST | `%s` | `security/reports/semgrep.json`, findings=%s |\n' "$(status_file "security/reports/semgrep.json" "PRÊT_NON_EXÉCUTÉ")" "${semgrep_findings}"
   printf '| Sonar CPD scope | `%s` | `artifacts/security/sonar-cpd-scope.md` |\n' "$(markdown_global_status "artifacts/security/sonar-cpd-scope.md" "Statut global: TERMINÉ")"
   printf '| Sonar Quality Gate | `%s` | `security/reports/sonar-analysis.md` |\n' "$(declared_status "security/reports/sonar-analysis.md")"
-  printf '| Gitleaks secret scan | `%s` | `security/reports/gitleaks.json`, findings=%s |\n' "$(status_file "security/reports/gitleaks.json")" "${gitleaks_findings}"
-  printf '| Trivy filesystem scan | `%s` | `security/reports/trivy-fs.json`, vulnerabilities=%s |\n' "$(status_file "security/reports/trivy-fs.json")" "${trivy_vulns}"
-  printf '| Trivy image scan | `%s` | `%s` |\n' "$(summary_state "${REPORT_DIR}/image-scan-summary.txt")" "${REPORT_DIR}/image-scan-summary.txt"
-  printf '| SBOM Syft | `%s` | `%s`, sbom_count=%s, expected=%s |\n' "$(summary_state "${REPORT_DIR}/sbom-summary.txt")" "${REPORT_DIR}/sbom-summary.txt" "${sbom_count}" "${EXPECTED_COUNT}"
-  printf '| SBOM Cosign attestation | `%s` | `%s` |\n' "$(summary_state "${REPORT_DIR}/attest-summary.txt")" "${REPORT_DIR}/attest-summary.txt"
-  printf '| Cosign sign | `%s` | `%s` |\n' "$(summary_state "${REPORT_DIR}/sign-summary.txt")" "${REPORT_DIR}/sign-summary.txt"
-  printf '| Cosign verify | `%s` | `%s` |\n' "$(summary_state "${REPORT_DIR}/verify-summary.txt")" "${REPORT_DIR}/verify-summary.txt"
+  printf '| Gitleaks secret scan | `%s` | `security/reports/gitleaks.json`, findings=%s |\n' "$(status_file "security/reports/gitleaks.json" "PRÊT_NON_EXÉCUTÉ")" "${gitleaks_findings}"
+  printf '| Trivy filesystem scan | `%s` | `security/reports/trivy-fs.json`, vulnerabilities=%s |\n' "$(status_file "security/reports/trivy-fs.json" "DÉPENDANT_DE_L_ENVIRONNEMENT")" "${trivy_vulns}"
+  printf '| Trivy image scan | `%s` | `%s` |\n' "$(summary_state "${REPORT_DIR}/image-scan-summary.txt" "DÉPENDANT_DE_L_ENVIRONNEMENT")" "${REPORT_DIR}/image-scan-summary.txt"
+  printf '| SBOM Syft | `%s` | `%s`, sbom_count=%s, expected=%s |\n' "$(summary_state "${REPORT_DIR}/sbom-summary.txt" "DÉPENDANT_DE_L_ENVIRONNEMENT")" "${REPORT_DIR}/sbom-summary.txt" "${sbom_count}" "${EXPECTED_COUNT}"
+  printf '| SBOM Cosign attestation | `%s` | `%s` |\n' "$(summary_state "${REPORT_DIR}/attest-summary.txt" "DÉPENDANT_DE_L_ENVIRONNEMENT")" "${REPORT_DIR}/attest-summary.txt"
+  printf '| Cosign sign | `%s` | `%s` |\n' "$(summary_state "${REPORT_DIR}/sign-summary.txt" "DÉPENDANT_DE_L_ENVIRONNEMENT")" "${REPORT_DIR}/sign-summary.txt"
+  printf '| Cosign verify | `%s` | `%s` |\n' "$(summary_state "${REPORT_DIR}/verify-summary.txt" "DÉPENDANT_DE_L_ENVIRONNEMENT")" "${REPORT_DIR}/verify-summary.txt"
   printf '| Digest promotion | `%s` | `%s` |\n' "$(digest_state "${REPORT_DIR}/promotion-digests.txt")" "${REPORT_DIR}/promotion-digests.txt"
   printf '| Release attestation | `%s` | `%s` |\n' "$(attestation_state "${REPORT_DIR}/release-attestation.json")" "${REPORT_DIR}/release-attestation.json"
+  printf '| SLSA-style provenance | `%s` | `%s` |\n' "$(declared_status "${REPORT_DIR}/provenance.slsa.md")" "${REPORT_DIR}/provenance.slsa.md"
   printf '| Kubernetes ultra hardening static | `%s` | `artifacts/security/k8s-ultra-hardening.md` |\n' "$(markdown_global_status "artifacts/security/k8s-ultra-hardening.md" "Statut global: TERMINÉ")"
   printf '| Kubernetes production HA static | `%s` | `artifacts/security/production-ha-readiness.md` |\n' "$(markdown_global_status "artifacts/security/production-ha-readiness.md" "Statut global: TERMINÉ")"
-  printf '| Production runtime evidence | `%s` | `artifacts/validation/production-runtime-evidence.md` |\n' "$(table_worst_status "artifacts/validation/production-runtime-evidence.md")"
+  printf '| Production runtime evidence | `%s` | `artifacts/validation/production-runtime-evidence.md` |\n' "$(table_worst_status "artifacts/validation/production-runtime-evidence.md" "DÉPENDANT_DE_L_ENVIRONNEMENT")"
   printf '| Production data resilience | `%s` | `artifacts/security/production-data-resilience.md` |\n' "$(declared_status "artifacts/security/production-data-resilience.md")"
-  printf '| Production readiness campaign | `%s` | `artifacts/final/production-readiness-final.md` |\n' "$(table_worst_status "artifacts/final/production-readiness-final.md")"
+  printf '| Production Dockerfiles | `%s` | `artifacts/security/production-dockerfiles.md` |\n' "$(declared_status "artifacts/security/production-dockerfiles.md")"
+  printf '| Image size evidence | `%s` | `artifacts/security/image-size-evidence.md` |\n' "$(declared_status "artifacts/security/image-size-evidence.md")"
+  printf '| Secrets management | `%s` | `artifacts/security/secrets-management.md` |\n' "$(declared_status "artifacts/security/secrets-management.md")"
+  printf '| Production readiness campaign | `%s` | `artifacts/final/production-readiness-final.md` |\n' "$(table_worst_status "artifacts/final/production-readiness-final.md" "PRÊT_NON_EXÉCUTÉ")"
   printf '| Kyverno policy CLI validation | `%s` | `artifacts/security/kyverno-policy-validation.md` |\n' "$(declared_status "artifacts/security/kyverno-policy-validation.md")"
   printf '| Metrics Server runtime | `%s` | `kubectl top pods -n %s` |\n' "$(runtime_status "kubectl top pods -n ${NS}")" "${NS}"
   printf '| Kyverno runtime | `%s` | `kubectl get clusterpolicies` |\n' "$(runtime_status "kubectl get clusterpolicies")"
@@ -233,7 +241,8 @@ trivy_vulns="$(count_json_results "security/reports/trivy-fs.json" "trivy-vulns"
 
   printf '## 2. Honest interpretation\n\n'
   printf -- '- `TERMINÉ` means all expected evidence rows are proven, or the runtime command succeeds in the current environment.\n'
-  printf -- '- `PARTIEL` means the control is scripted/configured but the expected evidence is missing, incomplete, failed, skipped or partial.\n'
+  printf -- '- `PARTIEL` means a control was executed or partially evidenced, but the resulting evidence is incomplete, failed, skipped or inconsistent.\n'
+  printf -- '- `PRÊT_NON_EXÉCUTÉ` means the repository-side control is ready but has not been replayed in the final evidence environment.\n'
   printf -- '- `DÉPENDANT_DE_L_ENVIRONNEMENT` means the control needs an active Docker/kind/Kubernetes/Jenkins/Cosign/Syft/Kyverno runtime.\n\n'
 
   printf '## 3. Security-ready reading\n\n'

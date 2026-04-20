@@ -239,6 +239,8 @@ Sécurité d'admission :
 | `security/secrets/.env.example` | Modèles de secrets |
 | `scripts/secrets/bootstrap-local-secrets.sh` | Génération locale |
 | `scripts/secrets/create-dev-secrets.sh` | Injection K8s |
+| `scripts/secrets/create-production-db-secret.sh` | Secret DB externe production-like |
+| `infra/secrets/sops/` | Option SOPS/age préparée, non active par défaut |
 | `scripts/jenkins/bootstrap-local-credentials.sh` | Credentials Jenkins/Cosign locaux |
 
 ### Pipeline de sécurité
@@ -267,12 +269,20 @@ make test                               # Tests Laravel et collecte éventuelle 
 make sonar-analysis                     # Sonar si SONAR_HOST_URL/SONAR_TOKEN sont fournis
 make kyverno-policy-check               # Validation Kyverno hors cluster si CLI disponible
 make image-scan IMAGE_TAG=dev           # Scan Trivy des images candidates
+make sbom-validate                      # Validation CycloneDX des SBOM générés
 make sbom-attest TARGET_IMAGE_TAG=release-local # Attestation Cosign des SBOM
 make production-ha                      # Validation statique HA de l'overlay production
 make production-runtime-evidence        # Preuves runtime production en lecture seule
+make production-proof-full              # Orchestrateur final de preuves production, read-only par défaut
+make ha-chaos-lite                      # Preuve HA légère ; mutations opt-in
 make hpa-runtime-proof                  # Rapport read-only metrics-server/HPA
 make refresh-hpa-runtime-proof          # Installe/répare metrics-server puis prouve HPA
 make production-data-resilience         # Readiness données / backup / restore
+make data-resilience-proof              # Secret DB + backup + restore si PostgreSQL est fourni
+make production-dockerfiles             # Dockerfiles Laravel production sans dépendances dev/runtime inutiles
+make image-size-evidence                # Preuve taille images locales
+make secrets-management                 # Validation stratégie secrets moderne
+make production-db-secret               # Création mutative du Secret DB externe depuis variables d'env
 make production-readiness-campaign      # Campagne production globale, lecture seule par défaut
 make verify IMAGE_TAG=dev               # Vérification SBOM/Cosign
 make promote SOURCE=dev TARGET=release  # Promotion images
@@ -282,16 +292,24 @@ make demo IMAGE_TAG=dev                 # Mode démo complet
 make campaign SOURCE=dev TARGET=release # Campagne intégrale
 make final-campaign SCENARIO=demo       # Campagne officielle
 make release-evidence                   # Preuves release
+make release-proof-strict               # Supply chain stricte complète
+make release-provenance                 # Provenance SLSA-style
 make final-proof                        # Preuve finale complète
 make final-summary                      # Résumé exécutif
+make final-source-of-truth              # Tableaux finaux sécurité/production/release/mémoire
 make support-pack                       # Package de support
+make security-posture                   # Source de vérité sécurité factuelle
 make kyverno-install                    # Installation Kyverno
+make kyverno-runtime-proof              # Preuve Kyverno CRDs/pods/policies/PolicyReports
+make kyverno-enforce-readiness          # Décision Enforce prudente
 make k8s-ultra-hardening                # Validation PSA restricted / RBAC / NetworkPolicy / probes
 make metrics-install                    # Installation metrics-server
 make production-cluster                 # Cluster kind production-like, garde destructif
 make production-cleanup-plan            # Inventaire legacy sans suppression
 CONFIRM_CLEANUP=YES make production-cleanup # Nettoyage legacy runtime, mutatif
 make production-cluster-clean-proof     # Preuve production-only runtime et exposition portail
+make data-backup                        # Backup PostgreSQL externe si credentials fournis
+make data-restore                       # Restore PostgreSQL dans une base isolée
 ```
 
 ---
@@ -337,6 +355,8 @@ make support-pack
 | [troubleshooting.md](./docs/runbooks/troubleshooting.md) | Résolution problèmes |
 | [final-proof.md](./docs/runbooks/final-proof.md) | Génération de preuves |
 | [kyverno-install.md](./docs/runbooks/kyverno-install.md) | Installation Kyverno |
+| [control-matrix.md](./docs/security/control-matrix.md) | Source de vérité des contrôles |
+| [security-status-source-of-truth.md](./docs/security/security-status-source-of-truth.md) | Règles de statut des preuves |
 | [policy-matrix.md](./docs/security/policy-matrix.md) | Matrice de sécurité |
 | [devsecops-hardening-applied.md](./docs/security/devsecops-hardening-applied.md) | Renforcements DevSecOps appliqués |
 
@@ -362,7 +382,7 @@ La promotion vers CD n'est autorisée que si :
 - ✅ Scans critiques (SAST, secrets, dépendances, Trivy FS) : **PASS**
 - ✅ Validation Sonar CPD : **PASS**
 - ✅ Images : présentes dans registre cible
-- ✅ Trivy image scan : **PASS**
+- ✅ Trivy image scan : **PASS** ou **WARN** sans `CRITICAL` ; `HIGH` reste documenté et non bloquant par défaut
 - ✅ Cosign : vérification signatures réussie
 - ✅ Promotion : digest produit et tracé
 - ✅ SBOM : générés et attestés
@@ -379,6 +399,7 @@ La promotion vers CD n'est autorisée que si :
 | Runtime Python legacy absent | Build/deploy non prouvable pour `services/` | Runtime officiel Laravel sous `services-laravel/` |
 | Preuve Jenkins complète locale | Requiert Docker/kind/Cosign | Runner préconfiguré ou pré-test en dev |
 | Déploiement par digest tracé | Requiert promotion préalable | Vérifier output promotion avant deploy |
+| DB externe / backup / restore | Requiert PostgreSQL externe et credentials hors Git | Overlay `production-external-db` + `make data-backup` / `make data-restore` |
 
 ---
 

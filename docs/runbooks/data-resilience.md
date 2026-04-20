@@ -10,8 +10,9 @@ Sortir SecureRAG Hub d'un stockage local fragile pour les usages production, san
 |---|---:|---|
 | Mode demo SQLite | TERMINÉ | Suffisant pour soutenance et execution locale |
 | Images Laravel avec `pdo_mysql` / `pdo_pgsql` | TERMINÉ | Les images peuvent parler a MySQL ou PostgreSQL apres rebuild |
-| Externalisation DB production | PRÊT_NON_EXÉCUTÉ | Necessite endpoint, secret et migration runtime |
-| Backup / restore runtime | DÉPENDANT_DE_L_ENVIRONNEMENT | Necessite DB cible, credentials et cluster actif |
+| Overlay production kind SQLite | PRÊT_NON_EXÉCUTÉ | Conserve SQLite pour ne pas casser la demo kind existante |
+| Overlay `production-external-db` | TERMINÉ statique | Rend les workloads sans SQLite et avec `securerag-database-secrets` |
+| Backup / restore runtime | PRÊT_NON_EXÉCUTÉ | Necessite DB cible, credentials et execution reelle |
 
 ## Strategie production recommandee
 
@@ -35,7 +36,7 @@ Sortir SecureRAG Hub d'un stockage local fragile pour les usages production, san
 
 ## Variables attendues
 
-Exemple de secret a creer hors Git :
+Exemple de secret a creer hors Git avant `production-external-db` :
 
 ```bash
 kubectl create secret generic securerag-database-secrets \
@@ -48,21 +49,33 @@ kubectl create secret generic securerag-database-secrets \
   --from-literal=DB_SSLMODE='require'
 ```
 
+Deploiement avec DB externe :
+
+```bash
+KUSTOMIZE_OVERLAY=infra/k8s/overlays/production-external-db \
+REGISTRY_HOST=localhost:5001 \
+IMAGE_PREFIX=securerag-hub \
+IMAGE_TAG=release-local \
+IMAGE_DIGEST_FILE=artifacts/release/promotion-digests.txt \
+REQUIRE_DIGEST_DEPLOY=true \
+bash scripts/deploy/deploy-kind.sh
+```
+
 ## Backup
 
 Action mutative externe : lit la base cible et produit un dump.
 
-PostgreSQL :
+PostgreSQL avec le script versionne :
 
 ```bash
-PGPASSWORD='<password>' pg_dump \
-  --host='<postgres-host>' \
-  --port=5432 \
-  --username='<user>' \
-  --dbname='<database>' \
-  --format=custom \
-  --file="artifacts/backup/<service>-$(date -u +%Y%m%dT%H%M%SZ).dump"
-shasum -a 256 artifacts/backup/*.dump > artifacts/backup/checksums.txt
+SERVICE_NAME=portal-web \
+DB_HOST='<postgres-host>' \
+DB_PORT=5432 \
+DB_USERNAME='<user>' \
+DB_PASSWORD='<password>' \
+DB_DATABASE='portal_web' \
+DB_SSLMODE=require \
+make data-backup
 ```
 
 MySQL :
@@ -81,18 +94,18 @@ shasum -a 256 artifacts/backup/*.sql > artifacts/backup/checksums.txt
 
 Action destructive si elle cible une base existante. Pour les tests, restaurer dans une base isolee.
 
-PostgreSQL :
+PostgreSQL avec le script versionne :
 
 ```bash
-createdb '<restore_database>'
-PGPASSWORD='<password>' pg_restore \
-  --host='<postgres-host>' \
-  --port=5432 \
-  --username='<user>' \
-  --dbname='<restore_database>' \
-  --clean \
-  --if-exists \
-  artifacts/backup/<service>.dump
+BACKUP_FILE='artifacts/backup/portal-web-portal_web-<timestamp>.dump' \
+DB_HOST='<postgres-host>' \
+DB_PORT=5432 \
+DB_USERNAME='<user>' \
+DB_PASSWORD='<password>' \
+DB_DATABASE='portal_web' \
+RESTORE_DB_DATABASE='portal_web_restore_test' \
+DB_SSLMODE=require \
+make data-restore
 ```
 
 MySQL :
@@ -116,6 +129,7 @@ mysql \
 
 ## Limites honnetes
 
-- Tant que l'overlay production rendu contient `DB_CONNECTION=sqlite`, la resilience donnees reste `PARTIEL`.
+- L'overlay `production` garde SQLite volontairement pour la demonstration kind locale.
+- L'overlay `production-external-db` est la trajectoire production-grade.
 - Le passage a une base externe ne doit etre declare `TERMINÉ` qu'apres preuve de migration, backup et restore.
 - Le mode `demo` reste volontairement simple et ne doit pas etre confondu avec la strategie production.

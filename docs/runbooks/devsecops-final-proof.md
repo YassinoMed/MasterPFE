@@ -98,7 +98,7 @@ make devsecops-final-proof
 ## Interprétation
 
 - `OK` : preuve produite dans l'environnement courant.
-- `PARTIEL` : script présent mais preuve complète non obtenue.
+- `PARTIEL` : une étape a été lancée, mais la preuve produite est incomplète, échouée ou incohérente.
 - `SKIPPED` : étape volontairement désactivée pour éviter une mutation.
 - `MUTATING_RELEASE` : étape pouvant signer ou promouvoir des images.
 - `MUTATING_CLUSTER` : étape pouvant installer ou modifier des ressources cluster.
@@ -107,4 +107,4 @@ make devsecops-final-proof
 
 Ne présenter comme réellement exécuté que ce qui dispose d'un artefact daté.
 
-Si une étape est `SKIPPED` ou `PARTIEL`, la présenter comme prête à être exécutée ou dépendante de l'environnement.
+Si une étape est `SKIPPED`, la présenter comme volontairement non exécutée. Si une étape est `PARTIEL`, relire le détail du rapport : elle doit être reclassée en `PRÊT_NON_EXÉCUTÉ` ou `DÉPENDANT_DE_L_ENVIRONNEMENT` quand il manque seulement l'environnement final.

@@ -43,6 +43,14 @@ Utiliser SOPS avec Age :
 
 Coût : gestion des clés Age, discipline Git, runbook supplémentaire.
 
+Dans le dépôt, cette option est préparée sans être activée par défaut :
+
+- `infra/secrets/sops/sops-age.example.yaml` : exemple de règle SOPS/age ;
+- `infra/secrets/production/securerag-database-secrets.template.yaml` : modèle Kubernetes `Secret` sans valeur réelle ;
+- `infra/secrets/.gitignore` : empêche de versionner les fichiers plaintext, `.env` ou clés age locales.
+
+L'état de cette option est `PRÊT_NON_EXÉCUTÉ` tant qu'aucun secret chiffré réel n'a été produit avec un destinataire age réel.
+
 ### Option avancée
 
 Utiliser External Secrets Operator avec Vault ou un backend cloud.
@@ -66,3 +74,33 @@ Coût : plus lourd pour une démo locale, dépendances supplémentaires, risque 
 - capture Jenkins Credentials sans révéler les valeurs ;
 - preuve que `infra/jenkins/docker-compose.yml` lit `JENKINS_ADMIN_PASSWORD_FILE` et ne contient pas de mot de passe statique ;
 - rapport final indiquant que les secrets réels sont hors dépôt.
+- `artifacts/security/secrets-management.md` après `make secrets-management` ;
+- `artifacts/security/production-db-secret.md` après création du Secret DB externe sur le cluster cible.
+
+## Commandes production-like
+
+Validation non destructive :
+
+```bash
+make secrets-management
+```
+
+Création du Secret DB externe. Cette action est mutative sur le cluster cible :
+
+```bash
+DB_HOST='<postgres-host>' \
+DB_USERNAME='<postgres-user>' \
+DB_PASSWORD='<mot-de-passe-fort-minimum-20-caracteres>' \
+DB_SSLMODE=require \
+make production-db-secret
+```
+
+Dry-run sans mutation :
+
+```bash
+DRY_RUN=true \
+DB_HOST='<postgres-host>' \
+DB_USERNAME='<postgres-user>' \
+DB_PASSWORD='<mot-de-passe-fort-minimum-20-caracteres>' \
+make production-db-secret
+```

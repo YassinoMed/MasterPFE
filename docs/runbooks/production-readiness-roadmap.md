@@ -8,8 +8,8 @@
 | Production overlay | Overlay HA statique ajoute | Pas encore prouve runtime | HA statique prete, preuve cluster manquante | P0 | Deployer overlay production et archiver runtime evidence |
 | HPA | HPA production pour cinq services | Depend de metrics-server | Scaling non exploitable sans metriques | P0 | Installer metrics-server et lancer `production-runtime-evidence` |
 | PDB | PDB adaptes dans overlay production | Eviction reelle non testee ici | Maintenance mieux controlee | P1 | Tester rollout restart et drain sur cluster multi-noeud |
-| Supply chain | Scripts Trivy/Syft/Cosign/digest/attestation disponibles | Preuve E2E non presente sans registry/outils | Release pas encore supply-chain-ready prouvee | P0 | Executer `make supply-chain-execute` |
-| Donnees | Runtime Laravel local simple | SQLite/tmp non production-grade | Perte de donnees au restart | P1 | Externaliser DB et documenter backup/restore |
+| Supply chain | Scripts Trivy/Syft/Cosign/digest/attestation disponibles et gates Jenkins durcis | Preuve E2E depend de Docker, registry, Trivy, Syft, Cosign et cles | Release pas encore supply-chain-ready prouvee sans evidence cible | P0 | Executer `make supply-chain-execute` puis `make supply-chain-evidence` |
+| Donnees | Overlay `production-external-db`, scripts backup/restore et runbook prets | Backup/restore pas encore rejoues sans PostgreSQL externe | Donnees production credibles apres preuve de backup + restore | P1 | Creer secret DB externe, deployer overlay, lancer `make data-backup` et `make data-restore` |
 | Observabilite | Snapshots et collecteurs disponibles | Pas de stack Prometheus/Loki par defaut | Exploitation possible mais limitee | P2 | Ajouter stack optionnelle apres HA runtime |
 | Secrets | Bootstrap local et rotation documentes | Pas de solution prod type External Secrets activee | Gestion prod encore manuelle | P1 | Preparer SOPS/External Secrets en phase suivante |
 
@@ -54,7 +54,7 @@ Etat : `DÉPENDANT_DE_L_ENVIRONNEMENT`.
 
 ### Phase 3 - securite et supply chain expertes
 
-Etat : `PARTIEL`.
+Etat : `DÉPENDANT_DE_L_ENVIRONNEMENT`.
 
 - Trivy image scan ;
 - SBOM Syft ;
@@ -72,6 +72,7 @@ Etat : `PRÊT_NON_EXÉCUTÉ`.
 - modes degrades ;
 - backup/restore donnees ;
 - support pack production ;
+- Dockerfiles production sans dependencies Composer dev, valides par `make production-dockerfiles` ;
 - option Prometheus/Grafana/Loki.
 
 ### Phase 5 - validation finale et preuves
@@ -91,9 +92,12 @@ Etat : `DÉPENDANT_DE_L_ENVIRONNEMENT`.
 - `scripts/validate/collect-production-runtime-evidence.sh`
 - `scripts/validate/run-production-readiness-campaign.sh`
 - `scripts/validate/validate-production-data-resilience.sh`
+- `scripts/validate/validate-production-dockerfiles.sh`
+- `infra/k8s/overlays/production-external-db/kustomization.yaml`
 - `docs/runbooks/production-ha.md`
 - `docs/runbooks/data-resilience.md`
 - `artifacts/security/production-ha-readiness.md`
+- `artifacts/security/production-dockerfiles.md`
 
 ## 5. Validation
 
@@ -104,6 +108,8 @@ kubectl kustomize infra/k8s/overlays/production >/tmp/securerag-production.yaml
 bash scripts/validate/validate-production-ha.sh
 bash scripts/validate/validate-k8s-resource-guards.sh
 bash scripts/validate/validate-k8s-ultra-hardening.sh
+make production-dockerfiles
+make production-data-resilience
 make lint
 ```
 
@@ -112,6 +118,7 @@ Runtime lecture seule :
 ```bash
 make production-runtime-evidence
 make production-readiness-campaign
+make kyverno-runtime-proof
 ```
 
 Runtime mutatif :
@@ -123,13 +130,23 @@ KUSTOMIZE_OVERLAY=infra/k8s/overlays/production \
 bash scripts/deploy/deploy-kind.sh
 ```
 
+Runtime supply chain et donnees :
+
+```bash
+make supply-chain-execute
+make supply-chain-evidence
+make release-attestation
+make data-backup
+make data-restore
+```
+
 ## 6. Tableau final global
 
 | Bloc | Tache | Etat | Priorite | Action restante |
 |---|---|---:|---:|---|
 | A | Kubernetes HA statique | TERMINÉ | P0 | Deployer sur cluster actif |
-| B | Runtime scaling | PARTIEL | P0 | Installer metrics-server et archiver HPA |
+| B | Runtime scaling | DÉPENDANT_DE_L_ENVIRONNEMENT | P0 | Installer metrics-server et archiver HPA |
 | C | Securite prod statique | TERMINÉ | P0 | Prouver Kyverno runtime |
-| D | Supply chain prod | PARTIEL | P0 | Executer Trivy/Syft/Cosign/digest |
+| D | Supply chain prod | DÉPENDANT_DE_L_ENVIRONNEMENT | P0 | Executer Trivy/Syft/Cosign/digest |
 | E | Resilience donnees | PRÊT_NON_EXÉCUTÉ | P1 | Externaliser DB et tester backup/restore |
-| F | Observabilite runtime | PARTIEL | P1 | Collecter runtime evidence et support pack |
+| F | Observabilite runtime | DÉPENDANT_DE_L_ENVIRONNEMENT | P1 | Collecter runtime evidence et support pack |

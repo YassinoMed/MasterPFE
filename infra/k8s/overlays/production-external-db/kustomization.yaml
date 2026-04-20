@@ -1,0 +1,67 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# Production-like overlay that replaces local SQLite runtime storage with an
+# external PostgreSQL database supplied through Kubernetes Secrets.
+# It intentionally layers on top of the regular production overlay so the
+# existing kind demo remains stable unless this overlay is selected explicitly.
+
+resources:
+  - ../production
+
+patches:
+  - target: { group: apps, version: v1, kind: Deployment, name: portal-web }
+    patch: |-
+      - op: add
+        path: /spec/template/spec/containers/0/envFrom/-
+        value: { secretRef: { name: securerag-database-secrets } }
+      - op: replace
+        path: /spec/template/spec/containers/0/env/4
+        value: { name: DB_CONNECTION, valueFrom: { secretKeyRef: { name: securerag-database-secrets, key: DB_CONNECTION } } }
+      - op: replace
+        path: /spec/template/spec/containers/0/env/5
+        value: { name: DB_DATABASE, valueFrom: { secretKeyRef: { name: securerag-database-secrets, key: PORTAL_WEB_DB_DATABASE } } }
+  - target: { group: apps, version: v1, kind: Deployment, name: auth-users }
+    patch: |-
+      - op: add
+        path: /spec/template/spec/containers/0/envFrom/-
+        value: { secretRef: { name: securerag-database-secrets } }
+      - op: replace
+        path: /spec/template/spec/containers/0/env/5
+        value: { name: DB_CONNECTION, valueFrom: { secretKeyRef: { name: securerag-database-secrets, key: DB_CONNECTION } } }
+      - op: replace
+        path: /spec/template/spec/containers/0/env/6
+        value: { name: DB_DATABASE, valueFrom: { secretKeyRef: { name: securerag-database-secrets, key: AUTH_USERS_DB_DATABASE } } }
+  - target: { group: apps, version: v1, kind: Deployment, name: chatbot-manager }
+    patch: |-
+      - op: add
+        path: /spec/template/spec/containers/0/envFrom/-
+        value: { secretRef: { name: securerag-database-secrets } }
+      - op: replace
+        path: /spec/template/spec/containers/0/env/6
+        value: { name: DB_CONNECTION, valueFrom: { secretKeyRef: { name: securerag-database-secrets, key: DB_CONNECTION } } }
+      - op: replace
+        path: /spec/template/spec/containers/0/env/7
+        value: { name: DB_DATABASE, valueFrom: { secretKeyRef: { name: securerag-database-secrets, key: CHATBOT_MANAGER_DB_DATABASE } } }
+  - target: { group: apps, version: v1, kind: Deployment, name: conversation-service }
+    patch: |-
+      - op: add
+        path: /spec/template/spec/containers/0/envFrom/-
+        value: { secretRef: { name: securerag-database-secrets } }
+      - op: replace
+        path: /spec/template/spec/containers/0/env/5
+        value: { name: DB_CONNECTION, valueFrom: { secretKeyRef: { name: securerag-database-secrets, key: DB_CONNECTION } } }
+      - op: replace
+        path: /spec/template/spec/containers/0/env/6
+        value: { name: DB_DATABASE, valueFrom: { secretKeyRef: { name: securerag-database-secrets, key: CONVERSATION_SERVICE_DB_DATABASE } } }
+  - target: { group: apps, version: v1, kind: Deployment, name: audit-security-service }
+    patch: |-
+      - op: add
+        path: /spec/template/spec/containers/0/envFrom/-
+        value: { secretRef: { name: securerag-database-secrets } }
+      - op: replace
+        path: /spec/template/spec/containers/0/env/5
+        value: { name: DB_CONNECTION, valueFrom: { secretKeyRef: { name: securerag-database-secrets, key: DB_CONNECTION } } }
+      - op: replace
+        path: /spec/template/spec/containers/0/env/6
+        value: { name: DB_DATABASE, valueFrom: { secretKeyRef: { name: securerag-database-secrets, key: AUDIT_SECURITY_SERVICE_DB_DATABASE } } }
