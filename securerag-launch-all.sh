@@ -11,7 +11,9 @@ set -Eeuo pipefail
 #
 # Environment variables:
 #   MODE=demo|dev|production            Default: demo
-#   ROOT_DIR=/path/to/MasterPFE         Default: current directory
+#   ROOT_DIR=/path/to/MasterPFE         Default: directory containing this script
+#   CLUSTER_NAME=<name>                 Default: securerag-prod in production, securerag-dev otherwise
+#   RECREATE_PRODUCTION_CLUSTER=true    Recreate the production kind cluster destructively
 #   REGISTRY_HOST=localhost:5001        Default: localhost:5001
 #   IMAGE_PREFIX=securerag-hub          Default: securerag-hub
 #   IMAGE_TAG=<tag>                     Default: MODE
@@ -21,8 +23,15 @@ set -Eeuo pipefail
 #   RUN_SMOKE_TESTS=true|false          Default: true
 #   RUN_SUPPORT_PACK=true|false         Default: false
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 MODE="${MODE:-demo}"
-ROOT_DIR="${ROOT_DIR:-$PWD}"
+ROOT_DIR="${ROOT_DIR:-$SCRIPT_DIR}"
+if [[ "${MODE}" == "production" ]]; then
+  CLUSTER_NAME="${CLUSTER_NAME:-securerag-prod}"
+else
+  CLUSTER_NAME="${CLUSTER_NAME:-securerag-dev}"
+fi
+RECREATE_PRODUCTION_CLUSTER="${RECREATE_PRODUCTION_CLUSTER:-false}"
 REGISTRY_HOST="${REGISTRY_HOST:-localhost:5001}"
 IMAGE_PREFIX="${IMAGE_PREFIX:-securerag-hub}"
 IMAGE_TAG="${IMAGE_TAG:-$MODE}"
@@ -62,6 +71,7 @@ cd "${ROOT_DIR}" || die "Impossible d'entrer dans ${ROOT_DIR}"
 [[ "$MODE" =~ ^(demo|dev|production)$ ]] || die "MODE invalide: ${MODE}. Utiliser demo, dev ou production."
 
 ensure_file "scripts/deploy/create-kind.sh"
+ensure_file "scripts/deploy/recreate-production-kind.sh"
 ensure_file "scripts/deploy/build-local-images.sh"
 ensure_file "scripts/deploy/deploy-kind.sh"
 ensure_file "${OVERLAY}/kustomization.yaml"
@@ -76,11 +86,12 @@ fi
 if command -v kind >/dev/null 2>&1; then
   log "kind détecté: $(kind --version 2>/dev/null || true)"
 else
-  warn "kind non détecté. Le script create-kind.sh peut embarquer son propre binaire, sinon installe kind."
+  die "kind non détecté. Installe kind ou lance d'abord install_securerag_hub_all_in_one.sh."
 fi
 
 log "Mode sélectionné: ${MODE}"
 log "Overlay sélectionné: ${OVERLAY}"
+log "Cluster kind: ${CLUSTER_NAME}"
 log "Registry: ${REGISTRY_HOST}"
 log "Image prefix: ${IMAGE_PREFIX}"
 log "Image tag: ${IMAGE_TAG}"
@@ -95,7 +106,20 @@ if [[ "${RUN_JENKINS}" == "true" ]]; then
 fi
 
 log "Création/validation du cluster kind..."
-bash scripts/deploy/create-kind.sh
+if [[ "${MODE}" == "production" ]]; then
+  if [[ "${RECREATE_PRODUCTION_CLUSTER}" == "true" ]]; then
+    warn "RECREATE_PRODUCTION_CLUSTER=true: suppression/recréation destructive du cluster ${CLUSTER_NAME}."
+    CONFIRM_DESTROY=YES CLUSTER_NAME="${CLUSTER_NAME}" bash scripts/deploy/recreate-production-kind.sh
+  elif kind get clusters | grep -Fxq "${CLUSTER_NAME}"; then
+    log "Cluster ${CLUSTER_NAME} existant; réutilisation sans destruction."
+    kubectl config use-context "kind-${CLUSTER_NAME}" >/dev/null
+    kubectl wait --for=condition=Ready nodes --all --timeout=240s
+  else
+    CLUSTER_NAME="${CLUSTER_NAME}" bash scripts/deploy/recreate-production-kind.sh
+  fi
+else
+  CLUSTER_NAME="${CLUSTER_NAME}" bash scripts/deploy/create-kind.sh
+fi
 
 if [[ -f "scripts/secrets/bootstrap-local-secrets.sh" ]]; then
   log "Bootstrap des secrets locaux..."
@@ -170,7 +194,6 @@ Vérifications utiles:
   kubectl get all -n securerag-hub
   kubectl get pdb,hpa -n securerag-hub
   kubectl top pods -n securerag-hub
-  curl http://localhost:8080/healthz
   curl http://localhost:8081/health
 
 Exemples:

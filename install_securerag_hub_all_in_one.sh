@@ -10,7 +10,7 @@ set -Eeuo pipefail
 #   sudo -u <your_user> ./install_securerag_hub_all_in_one.sh
 #
 # Example:
-#   REPO_URL="https://github.com/your-org/securerag-hub.git" \
+#   REPO_URL="https://github.com/YassinoMed/MasterPFE.git" \
 #   REPO_BRANCH="main" \
 #   VPS_USER="$USER" \
 #   ./install_securerag_hub_all_in_one.sh
@@ -27,11 +27,20 @@ set -Eeuo pipefail
 # Configurable variables               #
 ########################################
 
-REPO_URL="${REPO_URL:-<URL_DU_REPO>}"
-REPO_DIR="${REPO_DIR:-$HOME/securerag-hub}"
-REPO_BRANCH="${REPO_BRANCH:-main}"
-VPS_USER="${VPS_USER:-$USER}"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+DEFAULT_REPO_URL="https://github.com/YassinoMed/MasterPFE.git"
+if [[ -d "${SCRIPT_DIR}/.git" ]]; then
+  DEFAULT_REPO_DIR="${SCRIPT_DIR}"
+else
+  DEFAULT_REPO_DIR="${HOME}/securerag-hub"
+fi
 
+REPO_URL="${REPO_URL:-${DEFAULT_REPO_URL}}"
+REPO_DIR="${REPO_DIR:-${DEFAULT_REPO_DIR}}"
+REPO_BRANCH="${REPO_BRANCH:-main}"
+VPS_USER="${VPS_USER:-${SUDO_USER:-$USER}}"
+
+CLUSTER_NAME="${CLUSTER_NAME:-securerag-prod}"
 REGISTRY_HOST="${REGISTRY_HOST:-localhost:5001}"
 IMAGE_PREFIX="${IMAGE_PREFIX:-securerag-hub}"
 IMAGE_TAG="${IMAGE_TAG:-production}"
@@ -90,11 +99,27 @@ get_arch() {
 }
 
 ensure_not_placeholder() {
-  if [[ "$REPO_URL" == "<URL_DU_REPO>" ]]; then
-    echo "Vous devez définir REPO_URL avant d'exécuter le script." >&2
-    echo 'Exemple: REPO_URL="https://github.com/your-org/securerag-hub.git" ./install_securerag_hub_all_in_one.sh' >&2
-    exit 1
+  if [[ -z "$REPO_URL" || "$REPO_URL" == "<URL_DU_REPO>" || "$REPO_URL" == "https://github.com/your-org/securerag-hub.git" ]]; then
+    REPO_URL="${DEFAULT_REPO_URL}"
   fi
+
+  if [[ "$REPO_URL" != *.git ]]; then
+    log "REPO_URL ne termine pas par .git; tentative d'utilisation telle quelle: ${REPO_URL}"
+  fi
+}
+
+setup_privilege() {
+  if [[ "$EUID" -eq 0 ]]; then
+    sudo() { "$@"; }
+    log "Exécution en root détectée; les commandes sudo seront exécutées directement."
+    if [[ "$VPS_USER" == "root" ]]; then
+      log "VPS_USER=root. C'est acceptable pour un VPS de démonstration, mais un utilisateur sudo dédié reste recommandé."
+    fi
+    return
+  fi
+
+  require_cmd sudo
+  sudo -v >/dev/null
 }
 
 ########################################
@@ -102,13 +127,7 @@ ensure_not_placeholder() {
 ########################################
 
 ensure_not_placeholder
-
-if [[ "$EUID" -eq 0 ]]; then
-  echo "Évitez d'exécuter ce script en root direct. Lancez-le avec un utilisateur sudo." >&2
-  exit 1
-fi
-
-require_cmd sudo
+setup_privilege
 require_cmd curl
 require_cmd bash
 
@@ -227,9 +246,13 @@ make help || true
 
 log "Création du cluster kind production-like"
 if bool_true "$DESTROY_EXISTING_KIND_CLUSTER"; then
-  CONFIRM_DESTROY=YES bash scripts/deploy/recreate-production-kind.sh
+  CONFIRM_DESTROY=YES CLUSTER_NAME="$CLUSTER_NAME" bash scripts/deploy/recreate-production-kind.sh
+elif kind get clusters | grep -Fxq "$CLUSTER_NAME"; then
+  log "Cluster kind ${CLUSTER_NAME} déjà présent; réutilisation sans destruction."
+  kubectl config use-context "kind-${CLUSTER_NAME}" >/dev/null
+  kubectl wait --for=condition=Ready nodes --all --timeout=240s
 else
-  bash scripts/deploy/recreate-production-kind.sh
+  CLUSTER_NAME="$CLUSTER_NAME" bash scripts/deploy/recreate-production-kind.sh
 fi
 
 kubectl config current-context
@@ -491,4 +514,4 @@ echo "  ssh -L 8081:127.0.0.1:8081 ${VPS_USER}@<IP_DU_VPS>"
 echo "Puis ouvrez : http://localhost:8081"
 echo
 echo "Exemple minimal :"
-echo "  REPO_URL=\"https://github.com/your-org/securerag-hub.git\" ./$(basename "$0")"
+echo "  REPO_URL=\"https://github.com/YassinoMed/MasterPFE.git\" ./$(basename "$0")"

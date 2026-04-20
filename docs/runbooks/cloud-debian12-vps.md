@@ -35,6 +35,27 @@ cd "${APP_DIR}"
 bash scripts/deploy/cloud-debian12-full-run.sh
 ```
 
+## Depuis un dépôt déjà cloné dans `/MasterPFE`
+
+Le script all-in-one possède maintenant l'URL officielle par défaut. Cette commande est valide même si `REPO_URL` n'est pas défini :
+
+```bash
+cd /MasterPFE
+chmod +x install_securerag_hub_all_in_one.sh securerag-launch-all.sh
+
+./install_securerag_hub_all_in_one.sh
+```
+
+Pour relancer explicitement le runtime production sans détruire le cluster existant :
+
+```bash
+MODE=production \
+RUN_METRICS=true \
+RUN_KYVERNO_AUDIT=true \
+RUN_SUPPORT_PACK=true \
+./securerag-launch-all.sh
+```
+
 ## Avec le script de bootstrap versionné
 
 Depuis une copie locale du dépôt :

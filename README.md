@@ -187,6 +187,18 @@ bash scripts/deploy/cloud-debian12-full-run.sh
 
 Voir aussi `docs/runbooks/cloud-debian12-vps.md`.
 
+Si le dépôt est déjà présent dans `/MasterPFE`, l'installation all-in-one ne nécessite plus de définir `REPO_URL` :
+
+```bash
+cd /MasterPFE
+chmod +x install_securerag_hub_all_in_one.sh securerag-launch-all.sh
+
+./install_securerag_hub_all_in_one.sh
+
+MODE=production RUN_METRICS=true RUN_KYVERNO_AUDIT=true RUN_SUPPORT_PACK=true \
+./securerag-launch-all.sh
+```
+
 ---
 
 ## 🔐 Jenkins local
