@@ -5,6 +5,7 @@ set -euo pipefail
 NS="${NS:-securerag-hub}"
 OUT_DIR="${OUT_DIR:-artifacts/validation}"
 OUT_FILE="${OUT_FILE:-${OUT_DIR}/kyverno-runtime-report.md}"
+BLOCKER_FILE="${BLOCKER_FILE:-${OUT_DIR}/kyverno-local-registry-enforce-blocker.md}"
 SUPPLY_CHAIN_ATTESTATION="${SUPPLY_CHAIN_ATTESTATION:-artifacts/release/release-attestation.json}"
 EXPECTED_POLICIES="${EXPECTED_POLICIES:-securerag-audit-cleartext-env-values,securerag-require-pod-security,securerag-require-workload-controls,securerag-restrict-image-references,securerag-restrict-service-exposure,securerag-restrict-volume-types,securerag-verify-cosign-images}"
 
@@ -55,6 +56,31 @@ require_command python3
 
 if ! kubectl version --request-timeout=5s >/dev/null 2>&1; then
   row "Kubernetes API" "DÉPENDANT_DE_L_ENVIRONNEMENT" "API server unreachable"
+  {
+    printf '# Kyverno Cosign Enforce Local Registry Blocker
+
+'
+    printf -- '- Generated at UTC: `%s`
+' "$(date -u '+%Y-%m-%dT%H:%M:%SZ')"
+    printf -- '- Namespace: `%s`
+' "${NS}"
+    printf -- '- Affected policy: `securerag-verify-cosign-images`
+'
+    printf -- '- Status: `DÉPENDANT_DE_L_ENVIRONNEMENT`
+
+'
+    printf '## Finding
+
+'
+    printf 'The Kubernetes API is unreachable in the current environment, so Kyverno workload image references and `verifyImages` Enforce readiness cannot be proven.
+
+'
+    printf '## Decision
+
+'
+    printf 'Treat local-registry Enforce readiness as environment-dependent until a reachable cluster context is available and the runtime proof can inspect live Deployment image references.
+'
+  } > "${BLOCKER_FILE}"
   cat >> "${OUT_FILE}" <<'EOF'
 
 ## Diagnostic
@@ -125,18 +151,20 @@ fi
 
 policy_json="$(mktemp)"
 cluster_policy_json="$(mktemp)"
+deployments_json="$(mktemp)"
 attestation_summary="$(mktemp)"
-trap 'rm -f "${policy_json}" "${cluster_policy_json}" "${attestation_summary}"' EXIT
+trap 'rm -f "${policy_json}" "${cluster_policy_json}" "${deployments_json}" "${attestation_summary}"' EXIT
 
 kubectl get policyreport -A -o json > "${policy_json}" 2>/dev/null || printf '{"items":[]}\n' > "${policy_json}"
 kubectl get clusterpolicyreport -A -o json > "${cluster_policy_json}" 2>/dev/null || printf '{"items":[]}\n' > "${cluster_policy_json}"
+kubectl get deploy -n "${NS}" -o json > "${deployments_json}" 2>/dev/null || printf '{"items":[]}\n' > "${deployments_json}"
 
-python3 - "${policy_json}" "${cluster_policy_json}" "${attestation_summary}" "${SUPPLY_CHAIN_ATTESTATION}" <<'PY'
+python3 - "${policy_json}" "${cluster_policy_json}" "${deployments_json}" "${attestation_summary}" "${SUPPLY_CHAIN_ATTESTATION}" <<'PY'
 import json
 import pathlib
 import sys
 
-policy_path, cluster_policy_path, summary_path, attestation_path = sys.argv[1:]
+policy_path, cluster_policy_path, deployments_path, summary_path, attestation_path = sys.argv[1:]
 
 
 def load_json(path):
@@ -155,6 +183,14 @@ def add_counts(target, result):
 reports = []
 for payload in (load_json(policy_path), load_json(cluster_policy_path)):
     reports.extend(payload.get("items") or [])
+
+deployments = load_json(deployments_path).get("items") or []
+local_registry_refs = []
+for deployment in deployments:
+    for container in (((deployment.get("spec") or {}).get("template") or {}).get("spec") or {}).get("containers", []) or []:
+        image = str(container.get("image", ""))
+        if image.startswith("localhost:") or image.startswith("127.0.0.1:") or image.startswith("0.0.0.0:"):
+            local_registry_refs.append(image)
 
 counts = {}
 for report in reports:
@@ -199,7 +235,10 @@ else:
     policy_report_status = "PRÊT_NON_EXÉCUTÉ"
     policy_report_evidence = "no PolicyReport returned yet; wait for Kyverno reports controller or generate workload events"
 
-if report_count > 0 and fail_count == 0 and attestation_ready:
+if local_registry_refs:
+    enforce_status = "DÉPENDANT_DE_L_ENVIRONNEMENT"
+    enforce_evidence = "local registry references used by workloads are not reachable from Kyverno pods for verifyImages Enforce"
+elif report_count > 0 and fail_count == 0 and attestation_ready:
     enforce_status = "TERMINÉ"
     enforce_evidence = "Audit reports have no fail/error and supply-chain attestation is COMPLETE_PROVEN"
 else:
@@ -221,6 +260,8 @@ summary = {
     "report_count": report_count,
     "counts": counts,
     "attestation_status": attestation_status,
+    "local_registry_blocker": bool(local_registry_refs),
+    "local_registry_refs": sorted(set(local_registry_refs)),
 }
 
 pathlib.Path(summary_path).write_text(json.dumps(summary, indent=2, sort_keys=True) + "\n", encoding="utf-8")
@@ -246,9 +287,47 @@ import json, sys
 print(json.load(open(sys.argv[1], encoding="utf-8"))["enforce_evidence"])
 PY
 )"
+local_registry_blocker="$(python3 - "${attestation_summary}" <<'PY'
+import json, sys
+print("true" if json.load(open(sys.argv[1], encoding="utf-8"))["local_registry_blocker"] else "false")
+PY
+)"
+local_registry_refs="$(python3 - "${attestation_summary}" <<'PY'
+import json, sys
+refs = json.load(open(sys.argv[1], encoding="utf-8"))["local_registry_refs"]
+print(", ".join(refs))
+PY
+)"
 
 row "Kyverno PolicyReports" "${policy_report_status}" "${policy_report_evidence}"
 row "Kyverno Enforce readiness" "${enforce_status}" "${enforce_evidence}"
+if [[ "${local_registry_blocker}" == "true" ]]; then
+  row "Kyverno local registry Enforce blocker" "DÉPENDANT_DE_L_ENVIRONNEMENT" "${local_registry_refs}"
+else
+  row "Kyverno local registry Enforce blocker" "TERMINÉ" "No localhost/loopback image registry reference detected in current Deployments"
+fi
+
+{
+  printf '# Kyverno Cosign Enforce Local Registry Blocker\n\n'
+  printf -- '- Generated at UTC: `%s`\n' "$(date -u '+%Y-%m-%dT%H:%M:%SZ')"
+  printf -- '- Namespace: `%s`\n' "${NS}"
+  if [[ "${local_registry_blocker}" == "true" ]]; then
+    printf -- '- Registry reference used by workloads: `%s`\n' "${local_registry_refs}"
+    printf -- '- Affected policy: `securerag-verify-cosign-images`\n'
+    printf -- '- Status: `DÉPENDANT_DE_L_ENVIRONNEMENT`\n\n'
+    printf '## Finding\n\n'
+    printf 'Kyverno admission runs inside the cluster. For workload images referenced with `localhost` or another loopback address, `verifyImages` Enforce cannot reach the same registry endpoint that is reachable from the host.\n\n'
+    printf '## Decision\n\n'
+    printf 'Keep `securerag-verify-cosign-images` in Audit for the local kind registry, and keep host-side Cosign verification and digest deploy as the blocking release gate.\n'
+  else
+    printf -- '- Affected policy: `securerag-verify-cosign-images`\n'
+    printf -- '- Status: `TERMINÉ`\n\n'
+    printf '## Finding\n\n'
+    printf 'No loopback image registry reference was detected in the current SecureRAG workload Deployments.\n\n'
+    printf '## Decision\n\n'
+    printf 'No local-registry-specific Enforce blocker is currently detected from the workload image references.\n'
+  fi
+} > "${BLOCKER_FILE}"
 
 capture "Kubernetes context" kubectl config current-context
 capture "Kyverno CRDs" kubectl get crd clusterpolicies.kyverno.io policyreports.wgpolicyk8s.io clusterpolicyreports.wgpolicyk8s.io
@@ -256,6 +335,7 @@ capture "Kyverno deployments" kubectl get deploy -n kyverno -o wide
 capture "Kyverno pods" kubectl get pods -n kyverno -o wide
 capture "Kyverno policies" kubectl get clusterpolicy -o wide
 capture "Kyverno policy reports" kubectl get policyreport,clusterpolicyreport -A
+capture "SecureRAG deployment images" kubectl get deploy -n "${NS}" -o jsonpath='{range .items[*]}{.metadata.name}{"\t"}{range .spec.template.spec.containers[*]}{.image}{" "}{end}{"\n"}{end}'
 
 cat >> "${OUT_FILE}" <<'EOF'
 
@@ -267,6 +347,7 @@ cat >> "${OUT_FILE}" <<'EOF'
 - PolicyReports exist and contain no `fail` or `error` result.
 - The supply-chain release attestation is `COMPLETE_PROVEN`.
 - The deployed images are the same digests that were signed, verified and promoted.
+- No loopback image registry reference such as `localhost:5001` is used by the workload images targeted by `verifyImages`.
 EOF
 
 info "Kyverno runtime report written to ${OUT_FILE}"

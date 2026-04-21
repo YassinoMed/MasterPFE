@@ -15,6 +15,19 @@ Définir une stratégie réaliste et démontrable pour trois périmètres sépar
 | Sonar Jenkins | `infra/jenkins/secrets/sonar-token` ignoré par Git | Jenkins credential `sonar-token` si fourni | PRÊT_NON_EXÉCUTÉ |
 | DB externe production | Variables d'environnement opérateur ou SOPS/age optionnel | Secret Kubernetes `securerag-database-secrets` | PRÊT_NON_EXÉCUTÉ |
 
+## Options modernes documentées
+
+| Option | Rôle | État honnête |
+|---|---|---:|
+| SOPS/age | Secret chiffré versionné, déchiffrement contrôlé par clés age | PRÊT_NON_EXÉCUTÉ |
+| External Secrets Operator | Synchroniser des secrets depuis un backend central | PRÊT_NON_EXÉCUTÉ |
+| Vault | Gestion centralisée, rotation et accès dynamiques | PRÊT_NON_EXÉCUTÉ |
+
+Ces options sont volontairement documentées sans être déclarées `TERMINÉ`. Le
+projet reste défendable aujourd'hui avec des secrets Kubernetes créés hors Git
+et des credentials Jenkins locaux, puis extensible vers un modèle opérateur
+quand l'environnement cible le justifie.
+
 Le mot de passe admin Jenkins n’est pas injecté dans le Secret applicatif Kubernetes.
 
 ## Bootstrap local
@@ -72,4 +85,5 @@ chiffré n'ont pas été créés.
 ## Options futures
 External Secrets Operator ou Vault restent pertinents pour une vraie production
 multi-environnement. Ils ne sont pas activés par défaut pour ne pas complexifier
-la démonstration kind locale.
+la démonstration kind locale, mais la stratégie cible est désormais documentée
+explicitement pour ne pas laisser ce sujet implicite.

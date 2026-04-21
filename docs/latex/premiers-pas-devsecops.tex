@@ -1,0 +1,282 @@
+\documentclass[12pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{geometry}
+\usepackage{array}
+\usepackage{longtable}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage{listings}
+
+\geometry{margin=2.5cm}
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=blue,
+  urlcolor=blue,
+  citecolor=blue
+}
+
+\lstdefinestyle{shellstyle}{
+  basicstyle=\ttfamily\small,
+  breaklines=true,
+  frame=single,
+  columns=fullflexible,
+  backgroundcolor=\color{gray!8}
+}
+
+\title{Premiers pas DevSecOps}
+\author{SecureRAG Hub}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\section{Introduction}
+
+Le DevSecOps consiste à intégrer la sécurité directement dans le cycle de
+développement, d'intégration, de livraison et d'exploitation. L'objectif n'est
+pas d'ajouter une étape de contrôle à la fin du projet, mais de rendre la
+sécurité continue, automatisée, mesurable et vérifiable.
+
+Dans une démarche DevSecOps moderne, chaque changement de code doit pouvoir
+être construit, testé, scanné, signé, déployé et prouvé. Les preuves produites
+par la chaîne CI/CD deviennent aussi importantes que le déploiement lui-même,
+car elles permettent de démontrer la qualité, la traçabilité et la conformité du
+système.
+
+\section{Objectifs initiaux}
+
+Les premiers pas DevSecOps visent à poser une base fiable avant d'aller vers des
+mécanismes plus avancés comme la signature d'images, l'attestation de release,
+les politiques Kubernetes ou la résilience de données.
+
+\begin{itemize}[leftmargin=*]
+  \item automatiser les tests et validations de base ;
+  \item contrôler la qualité du code dès les premiers commits ;
+  \item scanner les dépendances et les images conteneurisées ;
+  \item standardiser les environnements de build et de déploiement ;
+  \item produire des artefacts de preuve exploitables ;
+  \item éviter l'exposition de secrets dans le dépôt ;
+  \item préparer un déploiement reproductible et traçable.
+\end{itemize}
+
+\section{Étape 1 : Culture et responsabilités}
+
+Le point de départ du DevSecOps est organisationnel. La sécurité ne doit pas
+être portée uniquement par une équipe spécialisée. Les développeurs,
+administrateurs système, ingénieurs plateforme, responsables sécurité et
+exploitants doivent partager une même responsabilité.
+
+\begin{longtable}{|p{4cm}|p{9cm}|}
+\hline
+\textbf{Rôle} & \textbf{Responsabilité DevSecOps} \\
+\hline
+Développeur & Écrire du code testable, éviter les secrets, corriger les alertes
+de sécurité proches du code. \\
+\hline
+DevOps / Platform Engineer & Automatiser les pipelines, standardiser les
+environnements, fiabiliser les déploiements. \\
+\hline
+Security Engineer & Définir les contrôles, prioriser les risques, valider les
+politiques de sécurité. \\
+\hline
+SRE & Mesurer la disponibilité, superviser les incidents, vérifier la résilience
+et les objectifs de service. \\
+\hline
+\end{longtable}
+
+\section{Étape 2 : Gestion du code source}
+
+La première base technique est un dépôt propre, versionné et contrôlé. Chaque
+modification doit passer par une revue et un pipeline automatisé.
+
+\begin{itemize}[leftmargin=*]
+  \item utiliser Git comme source de vérité ;
+  \item protéger la branche principale ;
+  \item exiger une revue avant fusion ;
+  \item éviter les commits directs en production ;
+  \item ajouter un fichier \texttt{.gitignore} adapté ;
+  \item refuser les secrets, fichiers temporaires et artefacts sensibles.
+\end{itemize}
+
+\begin{lstlisting}[style=shellstyle,caption={Commandes Git de base}]
+git status
+git checkout -b feature/devsecops-bootstrap
+git add .
+git commit -m "Add DevSecOps bootstrap checks"
+git push origin feature/devsecops-bootstrap
+\end{lstlisting}
+
+\section{Étape 3 : Intégration continue}
+
+L'intégration continue permet de détecter rapidement les erreurs. Un pipeline
+minimal doit exécuter les tests, vérifier la syntaxe, contrôler la structure du
+projet et produire un résultat clair.
+
+\begin{longtable}{|p{5cm}|p{8cm}|}
+\hline
+\textbf{Contrôle} & \textbf{But} \\
+\hline
+Lint & Détecter les erreurs de style, syntaxe et scripts invalides. \\
+\hline
+Tests unitaires & Vérifier les fonctions isolées du code applicatif. \\
+\hline
+Tests d'intégration & Vérifier les interactions entre composants. \\
+\hline
+Build conteneur & Vérifier que l'application peut être empaquetée. \\
+\hline
+Archivage des résultats & Garder les preuves du pipeline. \\
+\hline
+\end{longtable}
+
+\section{Étape 4 : Sécurité shift-left}
+
+Le principe \textit{shift-left} consiste à déplacer les contrôles de sécurité le
+plus tôt possible dans le cycle de développement. Cela réduit le coût de
+correction et évite de découvrir les problèmes au moment du déploiement.
+
+\begin{itemize}[leftmargin=*]
+  \item scan des dépendances ;
+  \item scan des images Docker ;
+  \item détection de secrets ;
+  \item analyse statique de code ;
+  \item validation des fichiers Kubernetes ;
+  \item contrôle des configurations dangereuses.
+\end{itemize}
+
+\begin{lstlisting}[style=shellstyle,caption={Exemples de contrôles sécurité}]
+trivy fs .
+trivy image localhost:5001/mon-application:dev
+syft localhost:5001/mon-application:dev -o cyclonedx-json
+\end{lstlisting}
+
+\section{Étape 5 : Conteneurisation sécurisée}
+
+Les images conteneur doivent être reproductibles, minimales et durcies. Une
+image de production ne doit pas contenir d'outils inutiles, de secrets ou de
+dépendances de développement.
+
+\begin{itemize}[leftmargin=*]
+  \item utiliser une image de base maintenue ;
+  \item exécuter l'application avec un utilisateur non root ;
+  \item limiter les permissions du conteneur ;
+  \item séparer dépendances de build et dépendances de runtime ;
+  \item scanner l'image avant promotion ;
+  \item éviter les tags mutables pour les releases finales.
+\end{itemize}
+
+\section{Étape 6 : Premiers contrôles Kubernetes}
+
+Dans Kubernetes, la sécurité doit être décrite sous forme de manifestes et de
+politiques. Les premiers contrôles à mettre en place concernent les ressources,
+les permissions, les probes et l'exposition réseau.
+
+\begin{longtable}{|p{5cm}|p{8cm}|}
+\hline
+\textbf{Contrôle Kubernetes} & \textbf{Intérêt} \\
+\hline
+Requests et limits & Éviter qu'un pod consomme toutes les ressources. \\
+\hline
+Readiness et liveness probes & Détecter les pods indisponibles. \\
+\hline
+SecurityContext & Interdire les privilèges inutiles. \\
+\hline
+NetworkPolicy & Réduire les communications réseau non nécessaires. \\
+\hline
+RBAC minimal & Limiter les permissions accordées aux services. \\
+\hline
+PodDisruptionBudget & Maintenir une disponibilité minimale pendant les
+opérations. \\
+\hline
+\end{longtable}
+
+\section{Étape 7 : Gestion des secrets}
+
+Un secret ne doit jamais être stocké en clair dans le dépôt Git. La première
+règle est de séparer les modèles de configuration des valeurs réelles.
+
+\begin{itemize}[leftmargin=*]
+  \item versionner uniquement des fichiers \texttt{.template} ou exemples ;
+  \item stocker les vraies valeurs dans un gestionnaire de secrets ;
+  \item limiter les permissions des fichiers locaux ;
+  \item renouveler régulièrement les secrets ;
+  \item documenter la procédure de rotation.
+\end{itemize}
+
+\section{Étape 8 : Supply chain logicielle}
+
+Une chaîne DevSecOps crédible doit prouver l'origine et l'intégrité des
+artefacts produits. Les étapes essentielles sont les suivantes :
+
+\begin{enumerate}[leftmargin=*]
+  \item construire l'image ;
+  \item scanner l'image avec Trivy ;
+  \item générer un SBOM avec Syft ;
+  \item signer l'image avec Cosign ;
+  \item vérifier la signature ;
+  \item promouvoir l'image par digest immuable ;
+  \item générer une attestation de release ;
+  \item générer une provenance.
+\end{enumerate}
+
+\begin{lstlisting}[style=shellstyle,caption={Exemple de chaîne supply chain}]
+make supply-chain-execute
+make release-proof-strict
+\end{lstlisting}
+
+\section{Étape 9 : Observabilité et preuves}
+
+Un système DevSecOps ne doit pas seulement fonctionner : il doit pouvoir le
+prouver. Les métriques, journaux, rapports et snapshots permettent de défendre
+l'état réel du système.
+
+\begin{itemize}[leftmargin=*]
+  \item état des nœuds Kubernetes ;
+  \item état des pods et deployments ;
+  \item métriques CPU et mémoire ;
+  \item état HPA ;
+  \item rapports Kyverno ;
+  \item rapports Trivy, Syft et Cosign ;
+  \item attestation et provenance de release ;
+  \item support pack final.
+\end{itemize}
+
+\section{Étape 10 : Lecture honnête des statuts}
+
+Pour éviter les fausses déclarations de réussite, chaque preuve doit être
+classée avec un statut explicite.
+
+\begin{longtable}{|p{4cm}|p{9cm}|}
+\hline
+\textbf{Statut} & \textbf{Signification} \\
+\hline
+TERMINÉ & La preuve réelle existe et le contrôle a réussi. \\
+\hline
+PARTIEL & Le contrôle a été exécuté mais un écart reste présent. \\
+\hline
+PRÊT\_NON\_EXÉCUTÉ & Le composant est prêt, mais l'action n'a pas encore été
+lancée. \\
+\hline
+DÉPENDANT\_DE\_L\_ENVIRONNEMENT & Le résultat dépend d'un service externe, d'un
+outil ou d'une infrastructure absente. \\
+\hline
+\end{longtable}
+
+\section{Conclusion}
+
+Les premiers pas DevSecOps consistent à rendre le projet testable, observable,
+sécurisé et vérifiable dès le début. Une fois ces bases en place, il devient
+possible de progresser vers une plateforme plus crédible : déploiement par
+digest immuable, politiques Kubernetes, attestations de release, provenance,
+haute disponibilité et résilience des données.
+
+La valeur principale du DevSecOps est la preuve. Un système n'est pas seulement
+déclaré sécurisé ou prêt pour la production : il doit produire des artefacts
+concrets permettant de le démontrer.
+
+\end{document}

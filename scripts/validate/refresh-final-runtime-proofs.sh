@@ -221,6 +221,7 @@ snapshot "Bloc A" "Kyverno pods" kubectl get pods -n kyverno -o wide
 snapshot "Bloc A" "Kyverno policies reports" bash -c 'kubectl get clusterpolicy; printf "\n"; kubectl get policyreport -A; printf "\n"; kubectl get clusterpolicyreport || true'
 
 run_step "Bloc A" "Production runtime evidence" env NS="${NS}" bash scripts/validate/collect-production-runtime-evidence.sh
+run_step "Bloc A" "Runtime security post-deploy" env NS="${NS}" bash scripts/validate/validate-runtime-security-postdeploy.sh
 run_step "Bloc A" "Observability snapshot" bash scripts/validate/generate-observability-snapshot.sh
 run_step "Bloc A" "Security posture refresh" bash scripts/validate/generate-security-posture-report.sh
 run_step "Bloc A" "Final source of truth refresh" bash scripts/validate/generate-final-source-of-truth.sh
@@ -238,6 +239,8 @@ fi
   printf -- '- HPA runtime proof: `artifacts/validation/hpa-runtime-report.md`\n'
   printf -- '- Kyverno runtime proof: `artifacts/validation/kyverno-runtime-report.md`\n'
   printf -- '- Kyverno Enforce readiness: `artifacts/validation/kyverno-enforce-readiness.md`\n'
+  printf -- '- Runtime security post-deploy: `artifacts/security/runtime-security-postdeploy.md`\n'
+  printf -- '- Kyverno local registry blocker: `artifacts/validation/kyverno-local-registry-enforce-blocker.md`\n'
   printf -- '- Production runtime evidence: `artifacts/validation/production-runtime-evidence.md`\n'
   printf -- '- Observability snapshot: `artifacts/observability/observability-snapshot.md`\n'
   printf -- '- Final validation summary: `artifacts/final/final-validation-summary.md`\n'
