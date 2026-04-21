@@ -27,15 +27,18 @@
 | Kubernetes | Ultra hardening statique | `scripts/validate/validate-k8s-ultra-hardening.sh` contrôle PSA restricted, ServiceAccounts, probes, PDB, NetworkPolicies, hostPath, images et Kyverno | TERMINÉ |
 | Kubernetes | Overlay production HA | `infra/k8s/overlays/production`, `scripts/validate/validate-production-ha.sh` | TERMINÉ statique |
 | Kubernetes | Preuves runtime production | `scripts/validate/collect-production-runtime-evidence.sh`, `artifacts/validation/production-runtime-evidence.md` | DÉPENDANT_DE_L_ENVIRONNEMENT |
+| Kubernetes | Sécurité runtime post-déploiement | `scripts/validate/validate-runtime-security-postdeploy.sh`, `artifacts/security/runtime-security-postdeploy.md` | DÉPENDANT_DE_L_ENVIRONNEMENT |
 | Kubernetes | Validation Kyverno hors cluster | `scripts/ci/validate-kyverno-policies.sh`, `kyverno apply` si le CLI est disponible | PRÊT_NON_EXÉCUTÉ |
 | Kubernetes | PodDisruptionBudget | manifests `*/pdb.yaml` sur composants critiques | TERMINÉ |
 | Kubernetes | HorizontalPodAutoscaler | manifests `*/hpa.yaml`, `scripts/validate/validate-hpa-runtime.sh`, preuve `artifacts/validation/hpa-runtime-report.md` | DÉPENDANT_DE_L_ENVIRONNEMENT |
 | Kubernetes | Admission policy (Audit) | `infra/k8s/policies/kyverno/*`; preuve via `cluster-security-addons.md` | DÉPENDANT_DE_L_ENVIRONNEMENT |
 | Kubernetes | Admission policy (Enforce) | overlay unique `infra/k8s/policies/kyverno-enforce` | PRÊT_NON_EXÉCUTÉ |
+| Kubernetes | Blocage Enforce registry locale | `artifacts/validation/kyverno-local-registry-enforce-blocker.md` documente le cas `localhost:5001` | DÉPENDANT_DE_L_ENVIRONNEMENT |
 | Secrets | Jenkins credentials | `scripts/jenkins/bootstrap-local-credentials.sh`, `JENKINS_ADMIN_PASSWORD_FILE` | TERMINÉ |
 | Secrets | Kubernetes secrets | `scripts/secrets/bootstrap-local-secrets.sh`, `scripts/secrets/create-dev-secrets.sh` | TERMINÉ |
 | Secrets | Production DB secret | `scripts/secrets/create-production-db-secret.sh`, `artifacts/security/production-db-secret.md` | PRÊT_NON_EXÉCUTÉ |
 | Secrets | SOPS/age option | `infra/secrets/sops`, `infra/secrets/production/*.template.yaml` | PRÊT_NON_EXÉCUTÉ |
+| Secrets | External Secrets / Vault strategy | `docs/security/secrets-strategy.md` documente la trajectoire moderne sans la surdéclarer | PRÊT_NON_EXÉCUTÉ |
 | Secrets | Secrets readiness report | `scripts/secrets/validate-secrets-management.sh`, `artifacts/security/secrets-management.md` | PRÊT_NON_EXÉCUTÉ |
 | Runtime | Laravel workloads officiels | `portal-web`, `auth-users`, `chatbot-manager`, `conversation-service`, `audit-security-service` | TERMINÉ |
 | Runtime | Dockerfiles production Laravel | `scripts/validate/validate-production-dockerfiles.sh`, `artifacts/security/production-dockerfiles.md` | TERMINÉ |

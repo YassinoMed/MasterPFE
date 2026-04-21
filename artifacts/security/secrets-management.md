@@ -1,6 +1,6 @@
 # Secrets Management Readiness - SecureRAG Hub
 
-- Generated at UTC: `2026-04-20T10:32:29Z`
+- Generated at UTC: `2026-04-21T18:58:27Z`
 
 | Control | Status | Evidence |
 |---|---:|---|
@@ -9,6 +9,7 @@
 | Demo/dev secret bootstrap | TERMINÉ | `bootstrap and Kubernetes injection scripts executable` |
 | Production DB secret bootstrap | TERMINÉ | `scripts/secrets/create-production-db-secret.sh executable` |
 | SOPS/age production option | PRÊT_NON_EXÉCUTÉ | `example policy and placeholder Secret template present` |
+| Modern secret delivery strategy | PRÊT_NON_EXÉCUTÉ | `External Secrets Operator / Vault path documented without overclaiming runtime use` |
 | Secrets documentation | TERMINÉ | `hardening and strategy docs present` |
 | Production DB secret runtime evidence | PRÊT_NON_EXÉCUTÉ | `run scripts/secrets/create-production-db-secret.sh with DB env vars` |
 

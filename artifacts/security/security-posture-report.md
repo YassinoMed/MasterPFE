@@ -1,7 +1,7 @@
 # Security Posture Report — SecureRAG Hub
 
-- Generated at UTC: `2026-04-20T08:45:26Z`
-- Git commit: `91552efb6ac2ad0f3ba7817cf670e3e860cf0834`
+- Generated at UTC: `2026-04-21T19:00:01Z`
+- Git commit: `302b6c0c20d2603908aa5a473b05bb727ac0fbbe`
 - Kubernetes namespace: `securerag-hub`
 
 ## 1. Security controls status
@@ -22,9 +22,13 @@
 | Release attestation | `DÉPENDANT_DE_L_ENVIRONNEMENT` | `artifacts/release/release-attestation.json` |
 | SLSA-style provenance | `PRÊT_NON_EXÉCUTÉ` | `artifacts/release/provenance.slsa.md` |
 | Kubernetes ultra hardening static | `TERMINÉ` | `artifacts/security/k8s-ultra-hardening.md` |
+| Runtime security post-deployment | `DÉPENDANT_DE_L_ENVIRONNEMENT` | `artifacts/security/runtime-security-postdeploy.md` |
 | Kubernetes production HA static | `TERMINÉ` | `artifacts/security/production-ha-readiness.md` |
 | Production runtime evidence | `DÉPENDANT_DE_L_ENVIRONNEMENT` | `artifacts/validation/production-runtime-evidence.md` |
 | Runtime image rollout proof | `DÉPENDANT_DE_L_ENVIRONNEMENT` | `artifacts/validation/runtime-image-rollout-proof.md` |
+| Jenkins webhook proof | `PARTIEL` | `artifacts/jenkins/github-webhook-validation.md` |
+| Jenkins CI push proof | `PARTIEL` | `artifacts/jenkins/ci-push-trigger-proof.md` |
+| Kyverno Enforce local registry blocker | `DÉPENDANT_DE_L_ENVIRONNEMENT` | `artifacts/validation/kyverno-local-registry-enforce-blocker.md` |
 | Production data resilience | `PRÊT_NON_EXÉCUTÉ` | `artifacts/security/production-data-resilience.md` |
 | Production Dockerfiles | `TERMINÉ` | `artifacts/security/production-dockerfiles.md` |
 | Image size evidence | `DÉPENDANT_DE_L_ENVIRONNEMENT` | `artifacts/security/image-size-evidence.md` |

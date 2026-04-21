@@ -132,6 +132,22 @@ Quand `REQUIRE_DIGEST_DEPLOY=true`, le deploiement echoue si `promotion-digests.
 
 Quand `STRICT_RUNTIME_IMAGE_PROOF=true`, le deploiement echoue aussi si les pods Ready ne prouvent pas l'image attendue. Cela ferme le cas ou `kubectl apply` affiche `deployment unchanged` alors que les images viennent d'etre reconstruites. Le script force un rollout controle avec `FORCE_WORKLOAD_ROLLOUT=true`, puis archive les images de deployment et les `imageID` reels des conteneurs.
 
+Pour figer la preuve finale apres le deploiement digest strict :
+
+```bash
+REGISTRY_HOST=localhost:5001 \
+IMAGE_PREFIX=securerag-hub \
+IMAGE_TAG=release-local \
+DIGEST_RECORD_FILE=artifacts/release/promotion-digests.txt \
+REQUIRE_DIGEST_DEPLOY=true \
+RUN_METRICS_REFRESH=true \
+RUN_KYVERNO_REFRESH=true \
+RUN_SUPPORT_PACK=true \
+make final-runtime-proof
+```
+
+Le support pack final doit etre regenere apres cette preuve, pas avant.
+
 Le stage de provenance SLSA-style est volontairement strict dans Jenkins : il
 échoue si les digests promus sont absents ou si `release-attestation.json` n'est
 pas `COMPLETE_PROVEN`.
@@ -144,3 +160,4 @@ pas `COMPLETE_PROVEN`.
 - conserver les rapports de vérification et de promotion comme preuves de la chaîne de confiance
 - privilégier la vérification par clé publique Cosign dans Jenkins pour une démo stable et reproductible
 - si la registry change de dépôt et pas seulement de tag, revalider soigneusement le comportement de vérification car les références Cosign dépendent du digest et du repository
+- si les workloads pointent vers `localhost:5001`, conserver Kyverno `verifyImages` en `Audit` et archiver `artifacts/validation/kyverno-local-registry-enforce-blocker.md`

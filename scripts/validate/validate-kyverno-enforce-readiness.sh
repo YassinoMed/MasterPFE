@@ -5,6 +5,7 @@ set -euo pipefail
 REPORT_DIR="${REPORT_DIR:-artifacts/validation}"
 REPORT_FILE="${REPORT_FILE:-${REPORT_DIR}/kyverno-enforce-readiness.md}"
 KYVERNO_RUNTIME_REPORT="${KYVERNO_RUNTIME_REPORT:-${REPORT_DIR}/kyverno-runtime-report.md}"
+BLOCKER_FILE="${BLOCKER_FILE:-${REPORT_DIR}/kyverno-local-registry-enforce-blocker.md}"
 ATTESTATION_FILE="${ATTESTATION_FILE:-artifacts/release/release-attestation.json}"
 
 mkdir -p "${REPORT_DIR}"
@@ -16,7 +17,10 @@ if [[ -x scripts/validate/validate-kyverno-runtime.sh ]]; then
   bash scripts/validate/validate-kyverno-runtime.sh >/dev/null || true
 fi
 
-if [[ -s "${KYVERNO_RUNTIME_REPORT}" ]] && grep -Fq '| Kyverno Enforce readiness | TERMINÉ |' "${KYVERNO_RUNTIME_REPORT}"; then
+if [[ -s "${BLOCKER_FILE}" ]] && grep -Fq 'Status: `DÉPENDANT_DE_L_ENVIRONNEMENT`' "${BLOCKER_FILE}"; then
+  status="DÉPENDANT_DE_L_ENVIRONNEMENT"
+  reason="Local loopback registry references are not reachable from Kyverno pods for verifyImages Enforce in this environment."
+elif [[ -s "${KYVERNO_RUNTIME_REPORT}" ]] && grep -Fq '| Kyverno Enforce readiness | TERMINÉ |' "${KYVERNO_RUNTIME_REPORT}"; then
   status="TERMINÉ"
   reason="Kyverno runtime report says Enforce readiness is TERMINÉ."
 elif [[ -s "${KYVERNO_RUNTIME_REPORT}" ]] && grep -Fq 'DÉPENDANT_DE_L_ENVIRONNEMENT' "${KYVERNO_RUNTIME_REPORT}"; then
@@ -29,6 +33,7 @@ fi
   printf -- '- Generated at UTC: `%s`\n' "$(date -u '+%Y-%m-%dT%H:%M:%SZ')"
   printf -- '- Status: `%s`\n' "${status}"
   printf -- '- Kyverno runtime report: `%s`\n' "${KYVERNO_RUNTIME_REPORT}"
+  printf -- '- Local registry blocker: `%s`\n' "${BLOCKER_FILE}"
   printf -- '- Release attestation: `%s`\n\n' "${ATTESTATION_FILE}"
   printf '| Gate | Expected |\n'
   printf '|---|---|\n'

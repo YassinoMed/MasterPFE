@@ -75,6 +75,24 @@ build → image scan → sign → verify → promote by digest → sbom → sbom
 
 Le déploiement Kubernetes force un rollout contrôlé par défaut et archive une preuve `runtime-image-rollout-proof` afin de vérifier que les pods Ready utilisent réellement les images attendues. En mode release, `REQUIRE_DIGEST_DEPLOY=true` interdit le fallback silencieux par tag si les digests promus sont absents.
 
+## 🔍 Preuves finales production-like
+
+Pour rejouer la chaîne finale défendable sans surpromettre :
+
+```bash
+make release-proof-strict
+make final-runtime-proof
+make security-posture
+make final-source-of-truth
+make support-pack
+```
+
+Lecture honnête attendue :
+- le déploiement final doit être prouvé en digest strict avec `imageID` runtime ;
+- `kubectl top` et les HPA doivent être figés sans métriques `<unknown>` ;
+- Kyverno doit être prouvé en `Audit` avec `PolicyReports` ;
+- `verifyImages` en `Enforce` reste `DÉPENDANT_DE_L_ENVIRONNEMENT` si les workloads utilisent une registry locale en `localhost:5001`, car cette référence n'est pas joignable depuis les pods Kyverno de la même manière que depuis l'hôte.
+
 ---
 
 ## 📂 Structure du dépôt

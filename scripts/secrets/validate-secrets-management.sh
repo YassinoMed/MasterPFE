@@ -63,6 +63,12 @@ else
   row "SOPS/age production option" "FAIL" "SOPS/age example or Secret template missing"
 fi
 
+if [[ -s docs/security/secrets-strategy.md ]] && grep -Eq 'External Secrets Operator|Vault' docs/security/secrets-strategy.md; then
+  row "Modern secret delivery strategy" "PRÊT_NON_EXÉCUTÉ" "External Secrets Operator / Vault path documented without overclaiming runtime use"
+else
+  row "Modern secret delivery strategy" "FAIL" "docs/security/secrets-strategy.md does not document a modern operator path"
+fi
+
 if [[ -s docs/security/secrets-management-hardening.md && -s docs/security/secrets-strategy.md ]]; then
   row "Secrets documentation" "TERMINÉ" "hardening and strategy docs present"
 else

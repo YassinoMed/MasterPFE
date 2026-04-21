@@ -75,6 +75,17 @@ grep -n "Kyverno Enforce readiness" artifacts/validation/kyverno-runtime-report.
 
 Ne pas lancer `make kyverno-enforce` si cette ligne ne retourne pas `TERMINÉ`.
 
+### Cas particulier de la registry locale kind
+
+Si les workloads SecureRAG utilisent `localhost:5001/...`, la verification
+Cosign `verifyImages` en `Enforce` est bloqueee de maniere honnete en local :
+depuis un pod Kyverno, `localhost` pointe vers le pod lui-meme et non vers la
+registry de l'hote. Dans ce cas :
+
+- conserver `securerag-verify-cosign-images` en `Audit` ;
+- garder Cosign verify cote hote comme gate release bloquant ;
+- archiver `artifacts/validation/kyverno-local-registry-enforce-blocker.md`.
+
 ## Risque si Enforce est active trop tot
 - refus de creation des Pods SecureRAG ;
 - echec de deploiement si la signature est absente ou invalide ;

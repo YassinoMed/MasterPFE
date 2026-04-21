@@ -161,12 +161,17 @@ cat > "${OUT}" <<EOF
 | \`artifacts/release/release-evidence.md\` | $(status_from_file artifacts/release/release-evidence.md) |
 | \`artifacts/release/supply-chain-evidence.md\` | $(status_from_file artifacts/release/supply-chain-evidence.md) |
 | \`artifacts/release/supply-chain-gate-report.md\` | $(status_from_file artifacts/release/supply-chain-gate-report.md) |
+| \`artifacts/release/no-rebuild-deploy-summary.md\` | $(status_from_file artifacts/release/no-rebuild-deploy-summary.md) |
 | \`artifacts/release/release-attestation.json\` | ${release_attestation_status} |
 | \`artifacts/observability/observability-snapshot.md\` | ${observability_snapshot_status} |
+| \`artifacts/security/runtime-security-postdeploy.md\` | $(status_from_file artifacts/security/runtime-security-postdeploy.md) |
+| \`artifacts/validation/kyverno-local-registry-enforce-blocker.md\` | $(status_from_file artifacts/validation/kyverno-local-registry-enforce-blocker.md) |
 | \`artifacts/application/portal-service-connectivity.md\` | ${portal_service_status} |
 | \`artifacts/final/global-project-status.md\` | ${global_project_status} |
 | \`artifacts/final/missing-phases-closure.md\` | ${missing_phases_status} |
 | \`artifacts/final/devsecops-readiness-report.md\` | $(status_from_file artifacts/final/devsecops-readiness-report.md) |
+| \`artifacts/jenkins/github-webhook-validation.md\` | $(status_from_file artifacts/jenkins/github-webhook-validation.md) |
+| \`artifacts/jenkins/ci-push-trigger-proof.md\` | $(status_from_file artifacts/jenkins/ci-push-trigger-proof.md) |
 | Latest support pack | ${latest_support_pack:-missing} |
 
 ## 5. Honest limits

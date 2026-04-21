@@ -15,7 +15,7 @@
 |---|---|
 | Static checks | See Jenkins or shell output |
 | Tests | 54 Laravel tests, failures=0, errors=0 |
-| Coverage | not-available |
+| Coverage | unknown |
 | Semgrep findings | 0 |
 | Gitleaks leaks | unknown |
 | Trivy vulnerabilities | unknown |
@@ -37,13 +37,18 @@
 | `artifacts/release/release-evidence.md` | present |
 | `artifacts/release/supply-chain-evidence.md` | present |
 | `artifacts/release/supply-chain-gate-report.md` | present |
+| `artifacts/release/no-rebuild-deploy-summary.md` | missing |
 | `artifacts/release/release-attestation.json` | present |
 | `artifacts/observability/observability-snapshot.md` | present |
+| `artifacts/security/runtime-security-postdeploy.md` | present |
+| `artifacts/validation/kyverno-local-registry-enforce-blocker.md` | present |
 | `artifacts/application/portal-service-connectivity.md` | present |
 | `artifacts/final/global-project-status.md` | present |
 | `artifacts/final/missing-phases-closure.md` | present |
 | `artifacts/final/devsecops-readiness-report.md` | present |
-| Latest support pack | artifacts/support-pack/support-demo-20260416T202515Z.tar.gz |
+| `artifacts/jenkins/github-webhook-validation.md` | present |
+| `artifacts/jenkins/ci-push-trigger-proof.md` | present |
+| Latest support pack | artifacts/support-pack/20260421T190230Z.tar.gz |
 
 ## 5. Honest limits
 

@@ -82,11 +82,15 @@ capture "Kubernetes context" kubectl config current-context
 capture "Deployments" kubectl get deploy -n "${NS}" -o wide
 capture "Pods" kubectl get pods -n "${NS}" -o wide
 capture "Services" kubectl get svc -n "${NS}" -o wide
+capture "ServiceAccounts" kubectl get sa -n "${NS}" -o wide
+capture "Roles and RoleBindings" kubectl get role,rolebinding -n "${NS}" -o wide
 capture "PDB" kubectl get pdb -n "${NS}" -o wide
 capture "HPA" kubectl get hpa -n "${NS}" -o wide
 capture "ResourceQuota" kubectl get resourcequota -n "${NS}" -o wide
 capture "LimitRange" kubectl get limitrange -n "${NS}" -o wide
 capture "NetworkPolicies" kubectl get networkpolicy -n "${NS}" -o wide
+capture "Pod images and imageIDs" bash -c \
+  "kubectl get pods -n '${NS}' -o jsonpath='{range .items[*]}{.metadata.name}{\"\\t\"}{range .status.containerStatuses[*]}{.image}{\"\\t\"}{.imageID}{\"\\n\"}{end}{end}'"
 capture "Recent events" kubectl get events -n "${NS}" --sort-by=.lastTimestamp
 capture "Metrics APIService" kubectl get apiservice v1beta1.metrics.k8s.io -o wide
 capture "Node metrics" kubectl top nodes
