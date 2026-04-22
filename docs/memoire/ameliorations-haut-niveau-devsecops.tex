@@ -1,0 +1,63 @@
+\section{Ameliorations haut niveau et perspectives}
+
+Cette section presente les ameliorations haut niveau recommandees pour SecureRAG Hub apres la consolidation du socle DevSecOps, Kubernetes et supply chain. La lecture adoptee reste volontairement honnete: la chaine est \textbf{TERMINEE cote depot}, mais plusieurs preuves finales restent \textbf{DEPENDANTES DE L'ENVIRONNEMENT} tant qu'elles ne sont pas rejouees sur une cible saine et stable.
+
+\subsection{Lecture de l'etat actuel}
+
+\begin{itemize}
+  \item \textbf{TERMINE cote depot}: la chaine est concue, automatisee, versionnee et documentee.
+  \item \textbf{DEPENDANT DE L'ENVIRONNEMENT}: la preuve runtime finale, la release finale, Kyverno live, la base externe et Jenkins live.
+  \item \textbf{PRET NON EXECUTE}: la modernisation secrets de type SOPS/External Secrets Operator/Vault.
+  \item \textbf{PARTIEL}: la demonstration live tant que le cluster cible n'est pas proprement rejoue.
+\end{itemize}
+
+\subsection{Objectif strategique}
+
+L'objectif n'est plus d'ajouter des composants de facon opportuniste. Il s'agit plutot de faire evoluer une plateforme deja bien structuree vers un niveau plus proche d'un environnement cloud exploitable, en refermant les ecarts de runtime, de gouvernance des secrets, d'observabilite et de resilience des donnees.
+
+\subsection{Roadmap d'amelioration}
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{|p{1.2cm}|p{3.4cm}|p{4.4cm}|p{4.5cm}|}
+\hline
+\textbf{Priorite} & \textbf{Amelioration} & \textbf{Interet principal} & \textbf{Action recommandee} \\
+\hline
+P0 & Registry joignable par le cluster & Debloquer Kyverno Enforce, fiabiliser la release et sortir de la limite \texttt{localhost:5001} & Utiliser une registry accessible par les noeuds et les pods Kyverno \\
+\hline
+P0 & Rejoue finale sur cluster sain & Convertir la maturite depot en preuve runtime reelle & Stabiliser ou recreer le cluster cible, puis rejouer la campagne finale \\
+\hline
+P0 & PostgreSQL externe + backup/restore & Renforcer la credibilite des donnees et de la reprise & Activer l'overlay base externe, creer le secret, lancer backup et restore \\
+\hline
+P1 & Secrets modernes & Ameliorer rotation, auditabilite et separation des responsabilites & Choisir SOPS/age ou ESO/Vault et l'operer de bout en bout \\
+\hline
+P1 & Observabilite complete & Passer de la preuve ponctuelle a l'exploitation continue & Deployer Prometheus, Grafana, Alertmanager puis Loki \\
+\hline
+P1 & Detection runtime & Completer le hardening preventif par de la detection & Ajouter Falco ou Tetragon en mode progressif \\
+\hline
+P2 & GitOps & Renforcer la derive control, l'auditabilite et la reconciliation & Introduire Argo CD ou Flux sur les overlays \\
+\hline
+P2 & Conformite et SRE & Structurer la gouvernance et l'exploitation a moyen terme & Etendre la matrice de controle et formaliser SLO/incident drills \\
+\hline
+\end{tabular}
+\caption{Roadmap d'amelioration haut niveau pour SecureRAG Hub}
+\end{table}
+
+\subsection{Analyse SWOT}
+
+\paragraph{Forces.}
+Le projet dispose deja d'un socle DevSecOps solide. La chaine de release est pensee autour des digests, de la signature et des attestations. Les workloads Kubernetes sont durcis, les policies reseau et les comptes de service sont explicitement definis, et la documentation produit des preuves reproductibles.
+
+\paragraph{Faiblesses.}
+Les principales limites ne sont plus des manques de code structurants. Elles concernent surtout les preuves live encore dependantes d'un environnement stable: cluster sain, registry joignable par le cluster, base PostgreSQL externe et pipeline Jenkins rejoue.
+
+\paragraph{Opportunites.}
+Le projet peut franchir un cap important avec une vraie registry cloud, une gestion moderne des secrets, une observabilite complete et une approche GitOps. Ces evolutions renforceraient a la fois la credibilite technique et l'exploitabilite operationnelle.
+
+\paragraph{Menaces.}
+Le principal risque serait de surdeclarer la readiness production alors que certains blocs ne sont pas encore rejoues en runtime. Une autre menace est de conserver trop longtemps des compromis locaux qui limitent l'admission control ou la gouvernance des secrets.
+
+\subsection{Synthese}
+
+Les ameliorations les plus fortes, a court terme, consistent a: (1) deployer la plateforme sur un cluster sain avec une registry joignable par les noeuds, (2) externaliser PostgreSQL avec preuve de sauvegarde et de restauration, et (3) moderniser la livraison des secrets. Ces trois axes referment les ecarts les plus visibles entre une plateforme \og production-like \fg{} tres solide et une plateforme cloud plus credible en exploitation reelle.
