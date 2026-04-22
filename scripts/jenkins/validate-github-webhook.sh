@@ -41,14 +41,14 @@ http_code() {
 
   local code
   if ((${#auth_args[@]} > 0)); then
-    code="$(curl -k -sS -o /tmp/securerag-webhook-check-body.txt \
+    code="$(curl --globoff -k -sS -o /tmp/securerag-webhook-check-body.txt \
       -w '%{http_code}' \
       -X "${method}" \
       "${auth_args[@]}" \
       "$@" \
       "${url}" || true)"
   else
-    code="$(curl -k -sS -o /tmp/securerag-webhook-check-body.txt \
+    code="$(curl --globoff -k -sS -o /tmp/securerag-webhook-check-body.txt \
       -w '%{http_code}' \
       -X "${method}" \
       "$@" \

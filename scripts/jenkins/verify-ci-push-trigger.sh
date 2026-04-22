@@ -51,7 +51,7 @@ fetch_last_build() {
   # shellcheck disable=SC2207
   local auth_args=($(curl_auth_args))
 
-  curl -k -sS \
+  curl --globoff -k -sS \
     -o "${output}" \
     -w '%{http_code}' \
     "${auth_args[@]}" \
