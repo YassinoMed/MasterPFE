@@ -30,6 +30,16 @@ require_command() {
   command -v "$1" >/dev/null 2>&1 || fail "Missing required command: $1"
 }
 
+normalize_kubeconfig_target() {
+  if [[ -d "${KUBECONFIG_OUTPUT}" ]]; then
+    local backup_path="${KUBECONFIG_OUTPUT}.dir.bak.$(date +%Y%m%d%H%M%S)"
+    warn "${KUBECONFIG_OUTPUT} is a directory; moving it to ${backup_path}"
+    mv "${KUBECONFIG_OUTPUT}" "${backup_path}"
+  fi
+
+  mkdir -p "$(dirname "${KUBECONFIG_OUTPUT}")"
+}
+
 ensure_prerequisites() {
   require_command docker
   require_command kind
@@ -55,7 +65,7 @@ verify_apiserver_network() {
 
 write_jenkins_kubeconfig() {
   log "Exporting kubeconfig for Jenkins"
-  mkdir -p "$(dirname "${KUBECONFIG_OUTPUT}")"
+  normalize_kubeconfig_target
   kind export kubeconfig --name "${CLUSTER_NAME}" --kubeconfig /tmp/kubeconfig-jenkins
   sed -i "s#server: https://.*:6443#server: https://${CONTROL_PLANE_NAME}:6443#g" /tmp/kubeconfig-jenkins
   cp /tmp/kubeconfig-jenkins "${KUBECONFIG_OUTPUT}"
