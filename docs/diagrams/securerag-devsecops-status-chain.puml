@@ -1,0 +1,72 @@
+@startuml
+title SecureRAG Hub - Chaine DevSecOps avec statuts honnetes
+
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam rectangle {
+  BorderColor #2F3B52
+  BackgroundColor #F7F9FC
+  RoundCorner 8
+}
+skinparam note {
+  BorderColor #7A8599
+  BackgroundColor #FFF9DB
+}
+skinparam arrow {
+  Color #2F3B52
+}
+
+legend right
+|= Statut |= Sens |
+| TERMINE cote depot | Chaine concue, automatisee, versionnee et documentee |
+| DEPENDANT_DE_L_ENVIRONNEMENT | Preuve live a rejouer ou environnement reel requis |
+| PRET_NON_EXECUTE | Strategie preparee mais non encore operee |
+| PARTIEL | Demonstration live inachevee tant que la cible n'est pas proprement rejouee |
+endlegend
+
+rectangle "1. Depot et gouvernance\nGit, Jenkinsfile, runbooks, matrices\n[TERMINÉ côté dépôt]" as depot
+rectangle "2. CI statique\nLint, tests Laravel, Semgrep, Gitleaks, Trivy FS\n[TERMINÉ côté dépôt]" as ci
+rectangle "3. Build et registry\nDocker, images OCI, localhost:5001\n[TERMINÉ côté dépôt]" as build
+rectangle "4. Supply chain\nTrivy, Syft, Cosign sign/verify\n[DÉPENDANT_DE_L_ENVIRONNEMENT]" as supply
+rectangle "5. Promotion release\nDigest-first, no-rebuild deploy,\nattestation, provenance\n[DÉPENDANT_DE_L_ENVIRONNEMENT]" as release
+rectangle "6. Déploiement K8s\nkind, overlays demo/production,\nrollout contrôlé\n[TERMINÉ côté dépôt]" as deploy
+rectangle "7. Runtime final\nPods récents, imageID, digests,\nhealthchecks, HPA, metrics\n[DÉPENDANT_DE_L_ENVIRONNEMENT]" as runtime
+rectangle "8. Sécurité post-déploiement\nHardening runtime, NetPol, SA, RBAC,\nPDB, probes, logs, events\n[DÉPENDANT_DE_L_ENVIRONNEMENT]" as postdeploy
+rectangle "9. Kyverno Audit\nClusterPolicies, PolicyReports,\nruntime proof\n[DÉPENDANT_DE_L_ENVIRONNEMENT]" as kyverno
+rectangle "10. Kyverno Enforce\nverifyImages readiness\n[DÉPENDANT_DE_L_ENVIRONNEMENT]" as enforce
+rectangle "11. Données externes\nPostgreSQL, secret DB,\nbackup, restore\n[DÉPENDANT_DE_L_ENVIRONNEMENT]" as data
+rectangle "12. Secrets modernes\nSOPS/age, ESO, Vault\n[PRÊT_NON_EXÉCUTÉ]" as secrets
+rectangle "13. Jenkins live\nWebhook, CI/CD réel,\npreuve pipeline\n[PARTIEL]" as jenkins
+rectangle "14. Support pack final\nREADME, runbooks, matrices,\nsource de vérité\n[TERMINÉ côté dépôt]" as support
+
+depot --> ci
+ci --> build
+build --> supply
+supply --> release
+release --> deploy
+deploy --> runtime
+runtime --> postdeploy
+postdeploy --> kyverno
+kyverno --> enforce
+postdeploy --> data
+postdeploy --> secrets
+ci --> jenkins
+release --> jenkins
+runtime --> support
+postdeploy --> support
+kyverno --> support
+data --> support
+secrets --> support
+jenkins --> support
+
+note bottom of support
+Lecture honnete finale :
+- TERMINE cote depot : la chaine est concue, automatisee, versionnee et documentee.
+- DEPENDANT_DE_L_ENVIRONNEMENT : la preuve runtime finale, la release finale,
+  Kyverno live, la DB externe et Jenkins live.
+- PRET_NON_EXECUTE : la modernisation secrets type SOPS/ESO/Vault.
+- PARTIEL : la demonstration live tant que le cluster cible n'est pas proprement rejoue.
+end note
+
+@enduml

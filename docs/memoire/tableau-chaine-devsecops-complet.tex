@@ -1,0 +1,58 @@
+\subsection{Tableau de synthese de la chaine DevSecOps}
+\label{sec:tableau-chaine-devsecops-complet}
+
+Le tableau~\ref{tab:chaine-devsecops-complete} resume la chaine DevSecOps et
+Kubernetes de \textit{SecureRAG Hub} avec une lecture volontairement honnete :
+ce qui est termine cote depot est distingue de ce qui doit encore etre rejoue
+ou prouve sur l'environnement cible.
+
+\begin{table}[h]
+\centering
+\scriptsize
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{|p{2.2cm}|p{2.9cm}|p{4.0cm}|p{2.3cm}|p{2.4cm}|}
+\hline
+\textbf{Bloc} & \textbf{Objectif} & \textbf{Composants principaux} & \textbf{Preuve attendue} & \textbf{Statut honnete} \\
+\hline
+Code et gouvernance & Versionner, revoir et tracer les changements & Git, GitHub, Jenkins, documentation, runbooks & Historique, scripts, documentation versionnee & TERMINE cote depot \\
+\hline
+CI statique & Verifier la qualite et la securite en amont & lint shell, tests Laravel, rendu Kustomize, Semgrep, Gitleaks, Trivy FS & rapports CI, comptes rendus de tests, scans statiques & TERMINE cote depot \\
+\hline
+Build images & Produire les images officielles & Docker, build local, registry locale & images OCI construites et poussees & TERMINE cote depot \\
+\hline
+Supply chain & Securiser les artefacts & Trivy image, Syft, Cosign sign, Cosign verify & scan image, SBOM, signatures, verification & DEPENDANT\_DE\_L'ENVIRONNEMENT \\
+\hline
+Promotion release & Promouvoir sans rebuild & digest-first, release proof, attestation, provenance & \texttt{promotion-digests.txt}, attestation, provenance & DEPENDANT\_DE\_L'ENVIRONNEMENT \\
+\hline
+Deploiement Kubernetes & Appliquer le runtime officiel & kind, Kustomize, overlays \texttt{demo} et \texttt{production} & workloads deployes, services exposes, rollout controle & TERMINE cote depot \\
+\hline
+Runtime final & Prouver l'etat reel des pods & pods actifs, pods recents, \texttt{imageID}, healthchecks, HPA, metrics & preuves runtime archivees dans \texttt{artifacts/validation/} & DEPENDANT\_DE\_L'ENVIRONNEMENT \\
+\hline
+Hardening runtime & Verifier le durcissement des workloads actifs & \texttt{runAsNonRoot}, \texttt{allowPrivilegeEscalation=false}, \texttt{readOnlyRootFilesystem=true}, \texttt{seccompProfile}, \texttt{capabilities.drop=[ALL]} & rapport securite post-deploiement consolide & DEPENDANT\_DE\_L'ENVIRONNEMENT \\
+\hline
+Controles Kubernetes & Limiter l'exposition du runtime & NetworkPolicies, ServiceAccounts, RBAC minimal, PDB, HPA, probes & conformite manifests versus pods actifs & TERMINE cote depot \\
+\hline
+Kyverno Audit & Controler les workloads en admission et en background scan & ClusterPolicies, PolicyReports, ClusterPolicyReports & rapport Kyverno runtime, rapports de policy & DEPENDANT\_DE\_L'ENVIRONNEMENT \\
+\hline
+Kyverno Enforce & Evaluer l'activation stricte de \texttt{verifyImages} & readiness Enforce, acces registry depuis les pods Kyverno & readiness Enforce ou blocage documente proprement & DEPENDANT\_DE\_L'ENVIRONNEMENT \\
+\hline
+Donnees externes & Sortir du stockage local demo & PostgreSQL externe, Secret DB, backup, restore & preuve DB, dump, restore isole, rapport de resilience & DEPENDANT\_DE\_L'ENVIRONNEMENT \\
+\hline
+Secrets modernes & Formaliser une trajectoire plus credible & SOPS/age, External Secrets Operator, Vault & strategie documentee sans surpromesse runtime & PRET\_NON\_EXECUTE \\
+\hline
+Jenkins live & Prouver la chaine CI/CD sur l'instance reelle & Jenkins CI, Jenkins CD, webhook GitHub, jobs live & preuves Jenkins, pipeline execute, artefacts archives & PARTIEL \\
+\hline
+Support pack et synthese & Consolider toutes les preuves & support pack, tableaux finaux, README, matrice securite & archive finale et source de verite coherente & TERMINE cote depot \\
+\hline
+\end{tabular}
+\caption{Resume complet de la chaine DevSecOps de SecureRAG Hub}
+\label{tab:chaine-devsecops-complete}
+\end{table}
+
+\paragraph{Lecture honnete.}
+\begin{itemize}
+  \item \textbf{TERMINE cote depot} : la chaine est concue, automatisee, versionnee et documentee.
+  \item \textbf{DEPENDANT\_DE\_L'ENVIRONNEMENT} : la preuve runtime finale, la release finale, Kyverno live, la base externe et Jenkins live doivent encore etre executes ou rejoues sur la cible.
+  \item \textbf{PRET\_NON\_EXECUTE} : la modernisation des secrets par SOPS, External Secrets Operator ou Vault reste preparee mais non operee.
+  \item \textbf{PARTIEL} : la demonstration live reste incomplete tant que le cluster cible n'est pas rejoue proprement de bout en bout.
+\end{itemize}
