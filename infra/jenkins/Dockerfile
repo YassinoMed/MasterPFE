@@ -15,8 +15,10 @@ RUN apt-get update && \
       ca-certificates \
       curl \
       docker.io \
+      docker-compose-plugin \
       git \
       jq \
+      make \
       composer \
       nodejs \
       npm \
