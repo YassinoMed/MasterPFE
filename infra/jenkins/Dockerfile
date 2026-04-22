@@ -15,7 +15,7 @@ RUN apt-get update && \
       ca-certificates \
       curl \
       docker.io \
-      docker-compose-plugin \
+      docker-buildx \
       git \
       jq \
       make \
