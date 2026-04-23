@@ -8,6 +8,27 @@ OUT_FILE="${OUT_FILE:-${OUT_DIR}/production-runtime-evidence.md}"
 TAIL_LINES="${TAIL_LINES:-120}"
 
 mkdir -p "${OUT_DIR}"
+GLOBAL_STATUS="TERMINÉ"
+
+update_global_status() {
+  local candidate="$1"
+
+  case "${candidate}" in
+    PARTIEL)
+      GLOBAL_STATUS="PARTIEL"
+      ;;
+    DÉPENDANT_DE_L_ENVIRONNEMENT)
+      if [[ "${GLOBAL_STATUS}" != "PARTIEL" ]]; then
+        GLOBAL_STATUS="DÉPENDANT_DE_L_ENVIRONNEMENT"
+      fi
+      ;;
+    PRÊT_NON_EXÉCUTÉ)
+      if [[ "${GLOBAL_STATUS}" != "PARTIEL" && "${GLOBAL_STATUS}" != "DÉPENDANT_DE_L_ENVIRONNEMENT" ]]; then
+        GLOBAL_STATUS="PRÊT_NON_EXÉCUTÉ"
+      fi
+      ;;
+  esac
+}
 
 capture() {
   local title="$1"
@@ -26,13 +47,15 @@ status_line() {
   local status="$2"
   local detail="$3"
 
+  update_global_status "${status}"
   printf '| %s | %s | %s |\n' "${component}" "${status}" "${detail}" >> "${OUT_FILE}"
 }
 
 {
   printf '# Production Runtime Evidence - SecureRAG Hub\n\n'
   printf -- '- Generated at UTC: `%s`\n' "$(date -u '+%Y-%m-%dT%H:%M:%SZ')"
-  printf -- '- Namespace: `%s`\n\n' "${NS}"
+  printf -- '- Namespace: `%s`\n' "${NS}"
+  printf -- '- Status: `PENDING`\n\n'
   printf '| Component | Status | Detail |\n'
   printf '|---|---:|---|\n'
 } > "${OUT_FILE}"
@@ -40,6 +63,15 @@ status_line() {
 if ! command -v kubectl >/dev/null 2>&1; then
   status_line "kubectl" "DÉPENDANT_DE_L_ENVIRONNEMENT" "kubectl is not installed"
   printf '\n## Diagnostic\n\nInstall kubectl or run this from the Jenkins/container image that contains kubectl.\n' >> "${OUT_FILE}"
+  python3 - "${OUT_FILE}" "${GLOBAL_STATUS}" <<'PY'
+from pathlib import Path
+import sys
+
+path = Path(sys.argv[1])
+status = sys.argv[2]
+content = path.read_text(encoding="utf-8")
+path.write_text(content.replace("- Status: `PENDING`", f"- Status: `{status}`", 1), encoding="utf-8")
+PY
   printf '[WARN] kubectl missing. Report: %s\n' "${OUT_FILE}" >&2
   exit 0
 fi
@@ -48,6 +80,15 @@ if ! kubectl version --request-timeout=3s >/dev/null 2>&1; then
   status_line "Kubernetes API" "DÉPENDANT_DE_L_ENVIRONNEMENT" "API server unreachable"
   capture "Kubernetes context" kubectl config current-context
   printf '\n## Diagnostic\n\nStart kind or export a valid kubeconfig, then rerun this script.\n' >> "${OUT_FILE}"
+  python3 - "${OUT_FILE}" "${GLOBAL_STATUS}" <<'PY'
+from pathlib import Path
+import sys
+
+path = Path(sys.argv[1])
+status = sys.argv[2]
+content = path.read_text(encoding="utf-8")
+path.write_text(content.replace("- Status: `PENDING`", f"- Status: `{status}`", 1), encoding="utf-8")
+PY
   printf '[WARN] Kubernetes API unreachable. Report: %s\n' "${OUT_FILE}" >&2
   exit 0
 fi
@@ -110,5 +151,15 @@ cat >> "${OUT_FILE}" <<'EOF'
 - `DÉPENDANT_DE_L_ENVIRONNEMENT` means an active cluster, metrics-server or kubeconfig is required.
 - This script is read-only and does not install, patch, delete or restart any workload.
 EOF
+
+python3 - "${OUT_FILE}" "${GLOBAL_STATUS}" <<'PY'
+from pathlib import Path
+import sys
+
+path = Path(sys.argv[1])
+status = sys.argv[2]
+content = path.read_text(encoding="utf-8")
+path.write_text(content.replace("- Status: `PENDING`", f"- Status: `{status}`", 1), encoding="utf-8")
+PY
 
 printf '[INFO] Production runtime evidence written to %s\n' "${OUT_FILE}"

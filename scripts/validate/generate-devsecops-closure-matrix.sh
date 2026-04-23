@@ -97,6 +97,60 @@ support_pack_status() {
   fi
 }
 
+first_existing_file() {
+  local candidate
+  for candidate in "$@"; do
+    if [[ -s "${candidate}" ]]; then
+      printf '%s' "${candidate}"
+      return 0
+    fi
+  done
+  return 1
+}
+
+portal_health_status() {
+  local health_file
+
+  if health_file="$(first_existing_file artifacts/validation/runtime-portal-health.txt artifacts/validation/portal-health.txt)"; then
+    if grep -Eq '(^|[^0-9])200([^0-9]|$)' "${health_file}"; then
+      printf 'TERMINÉ'
+    else
+      printf 'PARTIEL'
+    fi
+    return 0
+  fi
+
+  status_from_file artifacts/application/portal-service-connectivity.md
+}
+
+hpa_runtime_status() {
+  local report_status
+  local hpa_file
+  local top_nodes_file
+  local top_pods_file
+
+  report_status="$(status_from_file artifacts/validation/hpa-runtime-report.md)"
+  if [[ "${report_status}" == "TERMINÉ" || "${report_status}" == "PARTIEL" ]]; then
+    printf '%s' "${report_status}"
+    return 0
+  fi
+
+  hpa_file="$(first_existing_file artifacts/validation/runtime-hpa.txt artifacts/validation/k8s-hpa.txt || true)"
+  top_nodes_file="$(first_existing_file artifacts/validation/runtime-top-nodes.txt artifacts/validation/k8s-top-nodes.txt || true)"
+  top_pods_file="$(first_existing_file artifacts/validation/runtime-top-pods.txt artifacts/validation/k8s-top-pods.txt || true)"
+
+  if [[ -n "${hpa_file}" && -n "${top_nodes_file}" && -n "${top_pods_file}" ]]; then
+    if grep -Eq '<unknown>|unable to get metrics|error|not available' "${hpa_file}" "${top_nodes_file}" "${top_pods_file}"; then
+      printf 'PARTIEL'
+    else
+      printf 'TERMINÉ'
+    fi
+    return 0
+  fi
+
+  printf '%s' "${report_status}"
+}
+
 row() {
   local block="$1"
   local task="$2"
@@ -109,8 +163,8 @@ row() {
 
 runtime_rollout_status="$(status_from_file artifacts/validation/runtime-image-rollout-proof.md)"
 runtime_evidence_status="$(status_from_file artifacts/validation/production-runtime-evidence.md)"
-portal_health_status="$(status_from_file artifacts/application/portal-service-connectivity.md)"
-hpa_status="$(status_from_file artifacts/validation/hpa-runtime-report.md)"
+portal_health_status="$(portal_health_status)"
+hpa_status="$(hpa_runtime_status)"
 runtime_security_status="$(status_from_file artifacts/security/runtime-security-postdeploy.md)"
 k8s_hardening_status="$(merge_status "$(status_from_file artifacts/security/k8s-ultra-hardening.md)" "$(status_from_file artifacts/security/k8s-resource-guards.md)")"
 release_attestation_status="$(status_from_file artifacts/release/release-attestation.md)"
