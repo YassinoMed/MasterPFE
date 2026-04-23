@@ -80,6 +80,7 @@ Le déploiement Kubernetes force un rollout contrôlé par défaut et archive un
 Pour rejouer la chaîne finale défendable sans surpromettre :
 
 ```bash
+make devsecops-closure
 make release-proof-strict
 make final-runtime-proof
 make security-posture
@@ -88,6 +89,7 @@ make support-pack
 ```
 
 Lecture honnête attendue :
+- `make devsecops-closure` orchestre les blocs runtime, sécurité, supply chain, Kyverno, données, secrets, Jenkins et support pack, puis régénère `artifacts/final/devsecops-closure-matrix.md` ;
 - le déploiement final doit être prouvé en digest strict avec `imageID` runtime ;
 - `kubectl top` et les HPA doivent être figés sans métriques `<unknown>` ;
 - Kyverno doit être prouvé en `Audit` avec `PolicyReports` ;
