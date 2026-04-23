@@ -162,6 +162,11 @@ bash scripts/validate/rag-smoke.sh
 bash scripts/validate/generate-validation-report.sh
 ```
 
+Les pods éphémères de validation respectent désormais les minima du `LimitRange`
+Kubernetes. Si un namespace cible impose d’autres seuils, ajuste au besoin
+`VALIDATION_REQUEST_CPU`, `VALIDATION_REQUEST_MEMORY`,
+`VALIDATION_REQUEST_EPHEMERAL_STORAGE` et les variables `VALIDATION_LIMIT_*`.
+
 ---
 
 ## 🎭 Modes de déploiement

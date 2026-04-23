@@ -1,12 +1,12 @@
 # DevSecOps Closure Matrix - SecureRAG Hub
 
-- Generated at UTC: `2026-04-23T11:41:32Z`
+- Generated at UTC: `2026-04-23T14:16:09Z`
 
 | Bloc | Tâche | État | Priorité | Action restante |
 |---|---|---:|---:|---|
 | Bloc A | Preuve runtime imageID / digest | DÉPENDANT_DE_L_ENVIRONNEMENT | P0 | Rejouer `make runtime-image-proof` ou `make final-runtime-proof` sur le cluster cible. |
 | Bloc A | Pods récents, logs, events et healthchecks | PARTIEL | P0 | Rejouer `make production-runtime-evidence` et `make portal-service-proof` après le dernier déploiement. |
-| Bloc A | HPA runtime sans `<unknown>` | DÉPENDANT_DE_L_ENVIRONNEMENT | P1 | Rejouer `make hpa-runtime-proof` après installation ou réparation de metrics-server. |
+| Bloc A | HPA runtime sans `<unknown>` | TERMINÉ | P1 | Rejouer `make hpa-runtime-proof` après installation ou réparation de metrics-server. |
 | Bloc B | Sécurité post-déploiement runtime | DÉPENDANT_DE_L_ENVIRONNEMENT | P1 | Rejouer `make runtime-security-postdeploy` sur les pods actifs du namespace cible. |
 | Bloc B | Hardening workloads / guards statiques | TERMINÉ | P1 | Corriger les lignes `FAIL` éventuelles puis rejouer `make k8s-ultra-hardening` et `make k8s-resource-guards`. |
 | Bloc C | Supply chain complète / attestation release | PARTIEL | P0 | Rejouer `make supply-chain-execute` puis `make release-proof-strict` avec Docker, registry, Trivy, Syft et Cosign. |
@@ -23,10 +23,10 @@
 
 ## Synthèse par état
 
-- `TERMINÉ`: 2
+- `TERMINÉ`: 3
 - `PARTIEL`: 3
 - `PRÊT_NON_EXÉCUTÉ`: 5
-- `DÉPENDANT_DE_L_ENVIRONNEMENT`: 6
+- `DÉPENDANT_DE_L_ENVIRONNEMENT`: 5
 
 ## Lecture honnête
 

@@ -56,7 +56,8 @@ require_command python3
   printf '# HPA Runtime Report - SecureRAG Hub\n\n'
   printf -- '- Generated at UTC: `%s`\n' "$(date -u '+%Y-%m-%dT%H:%M:%SZ')"
   printf -- '- Namespace: `%s`\n' "${NS}"
-  printf -- '- Strict mode: `%s`\n\n' "${STRICT}"
+  printf -- '- Strict mode: `%s`\n' "${STRICT}"
+  printf -- '- Status: `PENDING`\n\n'
   printf '| Component | Check | Status | Evidence |\n'
   printf '|---|---|---:|---|\n'
 } > "${OUT_FILE}"
@@ -66,6 +67,14 @@ failures=0
 if ! kubectl version --request-timeout=5s >/dev/null 2>&1; then
   row "Kubernetes API" "reachable" "DÉPENDANT_DE_L_ENVIRONNEMENT" "API server unreachable"
   printf '\n## Diagnostic\n\nStart kind or export a valid kubeconfig, deploy `infra/k8s/overlays/production`, install metrics-server, then rerun this script.\n' >> "${OUT_FILE}"
+  python3 - "${OUT_FILE}" <<'PY'
+from pathlib import Path
+import sys
+
+path = Path(sys.argv[1])
+content = path.read_text(encoding="utf-8")
+path.write_text(content.replace("- Status: `PENDING`", "- Status: `DÉPENDANT_DE_L_ENVIRONNEMENT`", 1), encoding="utf-8")
+PY
   [[ "${STRICT}" == "true" ]] && exit 1
   info "HPA runtime report written to ${OUT_FILE}"
   exit 0
@@ -224,6 +233,21 @@ cat >> "${OUT_FILE}" <<'EOF'
 - `PARTIEL` means Kubernetes answered but metrics or HPA status are incomplete.
 - `DÉPENDANT_DE_L_ENVIRONNEMENT` means a reachable cluster or metrics-server is required.
 EOF
+
+global_status="TERMINÉ"
+if [[ "${failures}" -gt 0 ]]; then
+  global_status="PARTIEL"
+fi
+
+python3 - "${OUT_FILE}" "${global_status}" <<'PY'
+from pathlib import Path
+import sys
+
+path = Path(sys.argv[1])
+status = sys.argv[2]
+content = path.read_text(encoding="utf-8")
+path.write_text(content.replace("- Status: `PENDING`", f"- Status: `{status}`", 1), encoding="utf-8")
+PY
 
 if [[ "${failures}" -gt 0 ]]; then
   warn "HPA runtime report contains ${failures} gap(s): ${OUT_FILE}"
