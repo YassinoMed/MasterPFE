@@ -16,6 +16,7 @@ RUN apt-get update && \
       curl \
       docker.io \
       docker-buildx \
+      docker-compose-plugin \
       git \
       jq \
       make \
