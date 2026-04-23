@@ -14,9 +14,9 @@
 | Gate | Result |
 |---|---|
 | Static checks | See Jenkins or shell output |
-| Tests | 54 Laravel tests, failures=0, errors=0 |
+| Tests | unknown |
 | Coverage | unknown |
-| Semgrep findings | 0 |
+| Semgrep findings | unknown |
 | Gitleaks leaks | unknown |
 | Trivy vulnerabilities | unknown |
 
@@ -25,8 +25,8 @@
 | Check | Status |
 |---|---|
 | Jenkins reachable | partial |
-| Kubernetes namespace | partial |
-| Portal Web health | partial |
+| Kubernetes namespace | ok |
+| Portal Web health | ok |
 
 ## 4. Evidence files
 
@@ -37,7 +37,7 @@
 | `artifacts/release/release-evidence.md` | present |
 | `artifacts/release/supply-chain-evidence.md` | present |
 | `artifacts/release/supply-chain-gate-report.md` | present |
-| `artifacts/release/no-rebuild-deploy-summary.md` | missing |
+| `artifacts/release/no-rebuild-deploy-summary.md` | present |
 | `artifacts/release/release-attestation.json` | present |
 | `artifacts/observability/observability-snapshot.md` | present |
 | `artifacts/security/runtime-security-postdeploy.md` | present |
@@ -48,7 +48,7 @@
 | `artifacts/final/devsecops-readiness-report.md` | present |
 | `artifacts/jenkins/github-webhook-validation.md` | present |
 | `artifacts/jenkins/ci-push-trigger-proof.md` | present |
-| Latest support pack | artifacts/support-pack/20260421T190230Z.tar.gz |
+| Latest support pack | artifacts/support-pack/20260422T174109Z.tar.gz |
 
 ## 5. Honest limits
 

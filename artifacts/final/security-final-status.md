@@ -1,11 +1,11 @@
 # Security Final Status - SecureRAG Hub
 
-- Generated at UTC: `2026-04-21T19:00:07Z`
+- Generated at UTC: `2026-04-22T17:41:09Z`
 
 | Control | Status | Evidence |
 |---|---:|---|
 | Kubernetes hardening static | TERMINÉ | `artifacts/security/k8s-ultra-hardening.md` |
-| Runtime security post-deploy | DÉPENDANT_DE_L_ENVIRONNEMENT | `artifacts/security/runtime-security-postdeploy.md` |
+| Runtime security post-deploy | TERMINÉ | `artifacts/security/runtime-security-postdeploy.md` |
 | Dockerfiles production | TERMINÉ | `artifacts/security/production-dockerfiles.md` |
 | Secrets management | PRÊT_NON_EXÉCUTÉ | `artifacts/security/secrets-management.md` |
 | Kyverno runtime | DÉPENDANT_DE_L_ENVIRONNEMENT | `artifacts/validation/kyverno-runtime-report.md` |
