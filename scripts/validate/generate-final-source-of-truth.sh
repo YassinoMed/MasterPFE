@@ -12,10 +12,17 @@ status_from_file() {
     return 0
   fi
   local status
+  local fail_count
+  local warn_count
+  local skip_count
   status="$(grep -E '^- Status: `|^Statut global: `' "${file}" | head -n 1 | sed -E 's/.*Status: `([^`]+)`.*/\1/; s/.*Statut global: `([^`]+)`.*/\1/' || true)"
   case "${status}" in
     TERMINÉ|PARTIEL|PRÊT_NON_EXÉCUTÉ|DÉPENDANT_DE_L_ENVIRONNEMENT|FAIL)
       printf '%s' "${status}"
+      return 0
+      ;;
+    COMPLETE_PROVEN)
+      printf 'TERMINÉ'
       return 0
       ;;
     PARTIAL_READY_TO_PROVE)
@@ -32,12 +39,33 @@ status_from_file() {
       ;;
   esac
 
+  fail_count="$(grep -E '^- FAIL: `' "${file}" | head -n 1 | sed -E 's/^- FAIL: `([^`]+)`.*/\1/' || true)"
+  warn_count="$(grep -E '^- WARN: `' "${file}" | head -n 1 | sed -E 's/^- WARN: `([^`]+)`.*/\1/' || true)"
+  skip_count="$(grep -E '^- SKIP: `' "${file}" | head -n 1 | sed -E 's/^- SKIP: `([^`]+)`.*/\1/' || true)"
+
+  if [[ -n "${fail_count}" || -n "${warn_count}" || -n "${skip_count}" ]]; then
+    fail_count="${fail_count:-0}"
+    warn_count="${warn_count:-0}"
+    skip_count="${skip_count:-0}"
+
+    if [[ "${fail_count}" != "0" || "${warn_count}" != "0" ]]; then
+      printf 'PARTIEL'
+    elif [[ "${skip_count}" != "0" ]]; then
+      printf 'PRÊT_NON_EXÉCUTÉ'
+    else
+      printf 'TERMINÉ'
+    fi
+    return 0
+  fi
+
   if grep -Fq 'DÉPENDANT_DE_L_ENVIRONNEMENT' "${file}"; then
     printf 'DÉPENDANT_DE_L_ENVIRONNEMENT'
-  elif grep -Fq 'FAIL' "${file}"; then
+  elif grep -Eq '[|][[:space:]]*[^|]+[[:space:]]*[|][[:space:]]*(FAIL|WARN|PARTIEL|FAILED|MISSING)[[:space:]]*[|]' "${file}"; then
     printf 'PARTIEL'
   elif grep -Fq 'PARTIEL' "${file}"; then
     printf 'PARTIEL'
+  elif grep -Eq '[|][[:space:]]*[^|]+[[:space:]]*[|][[:space:]]*(PRÊT_NON_EXÉCUTÉ|SKIPPED)[[:space:]]*[|]' "${file}"; then
+    printf 'PRÊT_NON_EXÉCUTÉ'
   elif grep -Fq 'PRÊT_NON_EXÉCUTÉ' "${file}"; then
     printf 'PRÊT_NON_EXÉCUTÉ'
   else
@@ -114,6 +142,7 @@ security_global_status="$(merge_status \
   "${security_jenkins_ci_status}")"
 
 production_ha_status="$(status_from_file artifacts/security/production-ha-readiness.md)"
+production_external_db_status="$(status_from_file artifacts/security/production-external-db-readiness.md)"
 production_runtime_evidence_status="$(status_from_file artifacts/validation/production-runtime-evidence.md)"
 production_runtime_security_status="$(status_from_file artifacts/security/runtime-security-postdeploy.md)"
 production_runtime_image_status="$(status_from_file artifacts/validation/runtime-image-rollout-proof.md)"
@@ -166,6 +195,7 @@ release_global_status="$(merge_status \
   printf '| Control | Status | Evidence |\n'
   printf '|---|---:|---|\n'
   printf '| Production HA static | %s | `artifacts/security/production-ha-readiness.md` |\n' "${production_ha_status}"
+  printf '| External DB overlay / secret DB | %s | `artifacts/security/production-external-db-readiness.md` |\n' "${production_external_db_status}"
   printf '| Runtime evidence | %s | `artifacts/validation/production-runtime-evidence.md` |\n' "${production_runtime_evidence_status}"
   printf '| Runtime security post-deploy | %s | `artifacts/security/runtime-security-postdeploy.md` |\n' "${production_runtime_security_status}"
   printf '| Runtime image rollout | %s | `artifacts/validation/runtime-image-rollout-proof.md` |\n' "${production_runtime_image_status}"
@@ -192,6 +222,7 @@ release_global_status="$(merge_status \
   printf '# Artefacts DevSecOps à citer dans le mémoire\n\n'
   printf -- '- `artifacts/security/security-posture-report.md`\n'
   printf -- '- `artifacts/security/production-ha-readiness.md`\n'
+  printf -- '- `artifacts/security/production-external-db-readiness.md`\n'
   printf -- '- `artifacts/security/production-dockerfiles.md`\n'
   printf -- '- `artifacts/security/secrets-management.md`\n'
   printf -- '- `artifacts/security/runtime-security-postdeploy.md`\n'
