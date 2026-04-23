@@ -1,0 +1,40 @@
+NAME                                     READY   UP-TO-DATE   AVAILABLE   AGE    CONTAINERS               IMAGES                                                           SELECTOR
+deployment.apps/audit-security-service   2/2     2            2           165m   audit-security-service   localhost:5001/securerag-hub-audit-security-service:production   app.kubernetes.io/name=audit-security-service,app.kubernetes.io/part-of=securerag-hub
+deployment.apps/auth-users               2/2     2            2           165m   auth-users               localhost:5001/securerag-hub-auth-users:production               app.kubernetes.io/name=auth-users,app.kubernetes.io/part-of=securerag-hub
+deployment.apps/chatbot-manager          2/2     2            2           165m   chatbot-manager          localhost:5001/securerag-hub-chatbot-manager:production          app.kubernetes.io/name=chatbot-manager,app.kubernetes.io/part-of=securerag-hub
+deployment.apps/conversation-service     2/2     2            2           165m   conversation-service     localhost:5001/securerag-hub-conversation-service:production     app.kubernetes.io/name=conversation-service,app.kubernetes.io/part-of=securerag-hub
+deployment.apps/portal-web               3/3     3            3           165m   portal-web               localhost:5001/securerag-hub-portal-web:production               app.kubernetes.io/name=portal-web,app.kubernetes.io/part-of=securerag-hub
+
+NAME                                          READY   STATUS    RESTARTS   AGE    IP            NODE                     NOMINATED NODE   READINESS GATES
+pod/audit-security-service-568984ff67-mmgg7   1/1     Running   0          165m   10.244.4.6    securerag-prod-worker2   <none>           <none>
+pod/audit-security-service-568984ff67-pjtzt   1/1     Running   0          164m   10.244.2.8    securerag-prod-worker    <none>           <none>
+pod/auth-users-58df94bcb8-2cbgb               1/1     Running   0          165m   10.244.3.6    securerag-prod-worker3   <none>           <none>
+pod/auth-users-58df94bcb8-ncghs               1/1     Running   0          164m   10.244.4.9    securerag-prod-worker2   <none>           <none>
+pod/chatbot-manager-659cdc7cdc-25cgq          1/1     Running   0          165m   10.244.2.6    securerag-prod-worker    <none>           <none>
+pod/chatbot-manager-659cdc7cdc-db6dr          1/1     Running   0          164m   10.244.4.7    securerag-prod-worker2   <none>           <none>
+pod/conversation-service-6c9f48ff84-tk7zx     1/1     Running   0          164m   10.244.4.8    securerag-prod-worker2   <none>           <none>
+pod/conversation-service-6c9f48ff84-z8qhh     1/1     Running   0          165m   10.244.2.7    securerag-prod-worker    <none>           <none>
+pod/portal-web-6859f8c7b7-k64rs               1/1     Running   0          164m   10.244.4.10   securerag-prod-worker2   <none>           <none>
+pod/portal-web-6859f8c7b7-kjdgj               1/1     Running   0          165m   10.244.2.5    securerag-prod-worker    <none>           <none>
+pod/portal-web-6859f8c7b7-lwthj               1/1     Running   0          164m   10.244.3.7    securerag-prod-worker3   <none>           <none>
+
+NAME                             TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)          AGE    SELECTOR
+service/audit-security-service   ClusterIP   10.96.42.21     <none>        8000/TCP         165m   app.kubernetes.io/name=audit-security-service,app.kubernetes.io/part-of=securerag-hub
+service/auth-users               ClusterIP   10.96.219.212   <none>        8000/TCP         165m   app.kubernetes.io/name=auth-users,app.kubernetes.io/part-of=securerag-hub
+service/chatbot-manager          ClusterIP   10.96.48.130    <none>        8000/TCP         165m   app.kubernetes.io/name=chatbot-manager,app.kubernetes.io/part-of=securerag-hub
+service/conversation-service     ClusterIP   10.96.110.74    <none>        8000/TCP         165m   app.kubernetes.io/name=conversation-service,app.kubernetes.io/part-of=securerag-hub
+service/portal-web               NodePort    10.96.42.1      <none>        8000:30081/TCP   165m   app.kubernetes.io/name=portal-web,app.kubernetes.io/part-of=securerag-hub
+
+NAME                                                         REFERENCE                           TARGETS                        MINPODS   MAXPODS   REPLICAS   AGE
+horizontalpodautoscaler.autoscaling/audit-security-service   Deployment/audit-security-service   cpu: 2%/70%, memory: 45%/80%   2         6         2          165m
+horizontalpodautoscaler.autoscaling/auth-users               Deployment/auth-users               cpu: 2%/70%, memory: 45%/80%   2         6         2          165m
+horizontalpodautoscaler.autoscaling/chatbot-manager          Deployment/chatbot-manager          cpu: 1%/70%, memory: 45%/80%   2         6         2          165m
+horizontalpodautoscaler.autoscaling/conversation-service     Deployment/conversation-service     cpu: 2%/70%, memory: 45%/80%   2         8         2          165m
+horizontalpodautoscaler.autoscaling/portal-web               Deployment/portal-web               cpu: 2%/70%, memory: 44%/80%   3         9         3          165m
+
+NAME                                                    MIN AVAILABLE   MAX UNAVAILABLE   ALLOWED DISRUPTIONS   AGE
+poddisruptionbudget.policy/audit-security-service-pdb   1               N/A               1                     165m
+poddisruptionbudget.policy/auth-users-pdb               1               N/A               1                     165m
+poddisruptionbudget.policy/chatbot-manager-pdb          1               N/A               1                     165m
+poddisruptionbudget.policy/conversation-service-pdb     1               N/A               1                     165m
+poddisruptionbudget.policy/portal-web-pdb               2               N/A               1                     165m

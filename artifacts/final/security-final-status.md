@@ -1,6 +1,6 @@
 # Security Final Status - SecureRAG Hub
 
-- Generated at UTC: `2026-04-22T17:41:09Z`
+- Generated at UTC: `2026-04-23T14:28:28Z`
 
 | Control | Status | Evidence |
 |---|---:|---|
@@ -10,5 +10,5 @@
 | Secrets management | PRÊT_NON_EXÉCUTÉ | `artifacts/security/secrets-management.md` |
 | Kyverno runtime | DÉPENDANT_DE_L_ENVIRONNEMENT | `artifacts/validation/kyverno-runtime-report.md` |
 | Kyverno Enforce local registry blocker | DÉPENDANT_DE_L_ENVIRONNEMENT | `artifacts/validation/kyverno-local-registry-enforce-blocker.md` |
-| Jenkins webhook proof | PARTIEL | `artifacts/jenkins/github-webhook-validation.md` |
-| Jenkins CI push proof | PARTIEL | `artifacts/jenkins/ci-push-trigger-proof.md` |
+| Jenkins webhook proof | TERMINÉ | `artifacts/jenkins/github-webhook-validation.md` |
+| Jenkins CI push proof | TERMINÉ | `artifacts/jenkins/ci-push-trigger-proof.md` |

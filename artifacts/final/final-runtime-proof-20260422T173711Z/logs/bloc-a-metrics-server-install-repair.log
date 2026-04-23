@@ -1,0 +1,45 @@
+[INFO] Rendering metrics-server addon from infra/k8s/addons/metrics-server
+[INFO] Server-side dry-run for metrics-server addon
+[INFO] Installing metrics-server from infra/k8s/addons/metrics-server
+serviceaccount/metrics-server serverside-applied
+clusterrole.rbac.authorization.k8s.io/system:aggregated-metrics-reader serverside-applied
+clusterrole.rbac.authorization.k8s.io/system:metrics-server serverside-applied
+rolebinding.rbac.authorization.k8s.io/metrics-server-auth-reader serverside-applied
+clusterrolebinding.rbac.authorization.k8s.io/metrics-server:system:auth-delegator serverside-applied
+clusterrolebinding.rbac.authorization.k8s.io/system:metrics-server serverside-applied
+service/metrics-server serverside-applied
+deployment.apps/metrics-server serverside-applied
+apiservice.apiregistration.k8s.io/v1beta1.metrics.k8s.io serverside-applied
+[INFO] Waiting for metrics-server deployment
+deployment.apps/metrics-server condition met
+[INFO] Checking Metrics API availability
+NAME                     SERVICE                      AVAILABLE   AGE
+v1beta1.metrics.k8s.io   kube-system/metrics-server   True        163m
+apiservice.apiregistration.k8s.io/v1beta1.metrics.k8s.io condition met
+[INFO] kubectl top nodes is available
+NAME                           CPU(cores)   CPU(%)   MEMORY(bytes)   MEMORY(%)   
+securerag-prod-control-plane   122m         2%       1192Mi          4%          
+securerag-prod-worker          28m          0%       694Mi           2%          
+securerag-prod-worker2         23m          0%       673Mi           2%          
+securerag-prod-worker3         33m          0%       585Mi           2%          
+[INFO] kubectl top pods is available in securerag-hub
+NAME                                      CPU(cores)   MEMORY(bytes)   
+audit-security-service-568984ff67-mmgg7   2m           58Mi            
+audit-security-service-568984ff67-pjtzt   2m           58Mi            
+auth-users-58df94bcb8-2cbgb               2m           57Mi            
+auth-users-58df94bcb8-ncghs               2m           57Mi            
+chatbot-manager-659cdc7cdc-25cgq          2m           57Mi            
+chatbot-manager-659cdc7cdc-db6dr          1m           58Mi            
+conversation-service-6c9f48ff84-tk7zx     2m           57Mi            
+conversation-service-6c9f48ff84-z8qhh     2m           57Mi            
+portal-web-6859f8c7b7-k64rs               2m           58Mi            
+portal-web-6859f8c7b7-kjdgj               2m           57Mi            
+portal-web-6859f8c7b7-lwthj               2m           57Mi            
+[INFO] Current HPA status in securerag-hub
+NAME                     REFERENCE                           TARGETS                        MINPODS   MAXPODS   REPLICAS   AGE
+audit-security-service   Deployment/audit-security-service   cpu: 2%/70%, memory: 45%/80%   2         6         2          165m
+auth-users               Deployment/auth-users               cpu: 2%/70%, memory: 45%/80%   2         6         2          165m
+chatbot-manager          Deployment/chatbot-manager          cpu: 1%/70%, memory: 45%/80%   2         6         2          165m
+conversation-service     Deployment/conversation-service     cpu: 2%/70%, memory: 45%/80%   2         8         2          165m
+portal-web               Deployment/portal-web               cpu: 2%/70%, memory: 44%/80%   3         9         3          165m
+[INFO] metrics-server installation and runtime metric checks completed

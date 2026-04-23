@@ -16,3 +16,4 @@
 - `artifacts/final/security-final-status.md`
 - `artifacts/final/production-final-status.md`
 - `artifacts/final/release-final-status.md`
+- `artifacts/final/devsecops-closure-matrix.md`

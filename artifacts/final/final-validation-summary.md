@@ -24,7 +24,7 @@
 
 | Check | Status |
 |---|---|
-| Jenkins reachable | partial |
+| Jenkins reachable | ok |
 | Kubernetes namespace | ok |
 | Portal Web health | ok |
 

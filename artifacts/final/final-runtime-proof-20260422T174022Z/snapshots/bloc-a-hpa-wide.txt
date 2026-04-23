@@ -1,0 +1,6 @@
+NAME                     REFERENCE                           TARGETS                        MINPODS   MAXPODS   REPLICAS   AGE
+audit-security-service   Deployment/audit-security-service   cpu: 2%/70%, memory: 45%/80%   2         6         2          168m
+auth-users               Deployment/auth-users               cpu: 2%/70%, memory: 45%/80%   2         6         2          168m
+chatbot-manager          Deployment/chatbot-manager          cpu: 1%/70%, memory: 45%/80%   2         6         2          168m
+conversation-service     Deployment/conversation-service     cpu: 2%/70%, memory: 45%/80%   2         8         2          168m
+portal-web               Deployment/portal-web               cpu: 2%/70%, memory: 44%/80%   3         9         3          168m

@@ -1,0 +1,5 @@
+NAME                           CPU(cores)   CPU(%)   MEMORY(bytes)   MEMORY(%)   
+securerag-prod-control-plane   111m         1%       1197Mi          4%          
+securerag-prod-worker          29m          0%       700Mi           2%          
+securerag-prod-worker2         24m          0%       673Mi           2%          
+securerag-prod-worker3         30m          0%       584Mi           2%          

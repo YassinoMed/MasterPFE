@@ -1,0 +1,7 @@
+[INFO] Waiting for HPA metrics without <unknown> (1/15)
+NAME                     REFERENCE                           TARGETS                        MINPODS   MAXPODS   REPLICAS   AGE
+audit-security-service   Deployment/audit-security-service   cpu: 2%/70%, memory: 45%/80%   2         6         2          165m
+auth-users               Deployment/auth-users               cpu: 2%/70%, memory: 45%/80%   2         6         2          165m
+chatbot-manager          Deployment/chatbot-manager          cpu: 1%/70%, memory: 45%/80%   2         6         2          165m
+conversation-service     Deployment/conversation-service     cpu: 2%/70%, memory: 45%/80%   2         8         2          165m
+portal-web               Deployment/portal-web               cpu: 2%/70%, memory: 44%/80%   3         9         3          165m
