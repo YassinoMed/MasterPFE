@@ -49,7 +49,8 @@ require_command python3
   printf '# Kyverno Runtime Report - SecureRAG Hub\n\n'
   printf -- '- Generated at UTC: `%s`\n' "$(date -u '+%Y-%m-%dT%H:%M:%SZ')"
   printf -- '- Namespace: `%s`\n' "${NS}"
-  printf -- '- Supply chain attestation: `%s`\n\n' "${SUPPLY_CHAIN_ATTESTATION}"
+  printf -- '- Supply chain attestation: `%s`\n' "${SUPPLY_CHAIN_ATTESTATION}"
+  printf -- '- Status: `PENDING`\n\n'
   printf '| Component | Status | Evidence |\n'
   printf '|---|---:|---|\n'
 } > "${OUT_FILE}"
@@ -91,11 +92,24 @@ Start kind or export a valid kubeconfig, install Kyverno Audit, then rerun:
 make kyverno-runtime-proof
 ```
 EOF
+  python3 - "${OUT_FILE}" <<'PY'
+from pathlib import Path
+import sys
+
+path = Path(sys.argv[1])
+content = path.read_text(encoding="utf-8")
+path.write_text(content.replace("- Status: `PENDING`", "- Status: `DÉPENDANT_DE_L_ENVIRONNEMENT`", 1), encoding="utf-8")
+PY
   warn "Kubernetes API unreachable. Kyverno runtime report written to ${OUT_FILE}"
   exit 0
 fi
 
 row "Kubernetes API" "TERMINÉ" "API server reachable"
+crds_ready=true
+kyverno_namespace_ready=true
+kyverno_deployments_ready=true
+policies_ready=true
+policy_reports_ready=false
 
 required_crds=(
   clusterpolicies.kyverno.io
@@ -113,12 +127,14 @@ done
 if ((${#missing_crds[@]} == 0)); then
   row "Kyverno CRDs" "TERMINÉ" "required CRDs are present"
 else
+  crds_ready=false
   row "Kyverno CRDs" "DÉPENDANT_DE_L_ENVIRONNEMENT" "missing: ${missing_crds[*]}"
 fi
 
 if kubectl get namespace kyverno >/dev/null 2>&1; then
   row "Kyverno namespace" "TERMINÉ" "namespace/kyverno exists"
 else
+  kyverno_namespace_ready=false
   row "Kyverno namespace" "DÉPENDANT_DE_L_ENVIRONNEMENT" "namespace/kyverno missing"
 fi
 
@@ -127,9 +143,11 @@ if kyverno_deployments="$(kubectl get deploy -n kyverno --no-headers 2>/dev/null
   if [[ -z "${not_ready}" ]]; then
     row "Kyverno deployments" "TERMINÉ" "all Kyverno deployments are ready"
   else
+    kyverno_deployments_ready=false
     row "Kyverno deployments" "DÉPENDANT_DE_L_ENVIRONNEMENT" "not ready: ${not_ready}"
   fi
 else
+  kyverno_deployments_ready=false
   row "Kyverno deployments" "DÉPENDANT_DE_L_ENVIRONNEMENT" "no Kyverno deployments returned"
 fi
 
@@ -146,6 +164,7 @@ done
 if ((${#missing_policies[@]} == 0)); then
   row "Kyverno Audit policies" "TERMINÉ" "all expected SecureRAG ClusterPolicies are present"
 else
+  policies_ready=false
   row "Kyverno Audit policies" "PRÊT_NON_EXÉCUTÉ" "missing policies: ${missing_policies[*]}"
 fi
 
@@ -307,6 +326,19 @@ else
   row "Kyverno local registry Enforce blocker" "TERMINÉ" "No localhost/loopback image registry reference detected in current Deployments"
 fi
 
+if [[ "${policy_report_status}" == "TERMINÉ" ]]; then
+  policy_reports_ready=true
+fi
+
+runtime_status="TERMINÉ"
+if [[ "${crds_ready}" != "true" || "${kyverno_namespace_ready}" != "true" || "${kyverno_deployments_ready}" != "true" ]]; then
+  runtime_status="DÉPENDANT_DE_L_ENVIRONNEMENT"
+elif [[ "${policies_ready}" != "true" ]]; then
+  runtime_status="PRÊT_NON_EXÉCUTÉ"
+elif [[ "${policy_reports_ready}" != "true" ]]; then
+  runtime_status="${policy_report_status}"
+fi
+
 {
   printf '# Kyverno Cosign Enforce Local Registry Blocker\n\n'
   printf -- '- Generated at UTC: `%s`\n' "$(date -u '+%Y-%m-%dT%H:%M:%SZ')"
@@ -349,5 +381,15 @@ cat >> "${OUT_FILE}" <<'EOF'
 - The deployed images are the same digests that were signed, verified and promoted.
 - No loopback image registry reference such as `localhost:5001` is used by the workload images targeted by `verifyImages`.
 EOF
+
+python3 - "${OUT_FILE}" "${runtime_status}" <<'PY'
+from pathlib import Path
+import sys
+
+path = Path(sys.argv[1])
+status = sys.argv[2]
+content = path.read_text(encoding="utf-8")
+path.write_text(content.replace("- Status: `PENDING`", f"- Status: `{status}`", 1), encoding="utf-8")
+PY
 
 info "Kyverno runtime report written to ${OUT_FILE}"
