@@ -138,13 +138,22 @@ else
   row "Kyverno namespace" "DÉPENDANT_DE_L_ENVIRONNEMENT" "namespace/kyverno missing"
 fi
 
-if kyverno_deployments="$(kubectl get deploy -n kyverno --no-headers 2>/dev/null || true)" && [[ -n "${kyverno_deployments}" ]]; then
-  not_ready="$(awk '$2 != $3 {print $1 "=" $2 "/" $3}' <<<"${kyverno_deployments}" | paste -sd ', ' - || true)"
+if kyverno_deployments="$(kubectl get deploy -n kyverno -o jsonpath='{range .items[*]}{.metadata.name}{"\t"}{.status.readyReplicas}{"\t"}{.status.availableReplicas}{"\t"}{.spec.replicas}{"\n"}{end}' 2>/dev/null || true)" && [[ -n "${kyverno_deployments}" ]]; then
+  not_ready="$(awk -F '\t' '
+    {
+      ready = ($2 == "" ? 0 : $2)
+      available = ($3 == "" ? 0 : $3)
+      desired = ($4 == "" ? 0 : $4)
+      if (desired == 0 || ready != desired || available != desired) {
+        print $1 "=" ready "/" available "/" desired
+      }
+    }
+  ' <<<"${kyverno_deployments}" | paste -sd ', ' - || true)"
   if [[ -z "${not_ready}" ]]; then
     row "Kyverno deployments" "TERMINÉ" "all Kyverno deployments are ready"
   else
     kyverno_deployments_ready=false
-    row "Kyverno deployments" "DÉPENDANT_DE_L_ENVIRONNEMENT" "not ready: ${not_ready}"
+    row "Kyverno deployments" "PARTIEL" "not ready: ${not_ready}"
   fi
 else
   kyverno_deployments_ready=false
@@ -247,8 +256,11 @@ if attestation_file.is_file() and attestation_file.stat().st_size > 0:
     except Exception as exc:
         attestation_status = f"INVALID:{exc}"
 
-if report_count > 0:
+if report_count > 0 and fail_count == 0 and warn_count == 0:
     policy_report_status = "TERMINÉ"
+    policy_report_evidence = f"reports={report_count}; pass={pass_count}; warn={warn_count}; fail_or_error={fail_count}"
+elif report_count > 0:
+    policy_report_status = "PARTIEL"
     policy_report_evidence = f"reports={report_count}; pass={pass_count}; warn={warn_count}; fail_or_error={fail_count}"
 else:
     policy_report_status = "PRÊT_NON_EXÉCUTÉ"
