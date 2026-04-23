@@ -334,6 +334,7 @@ case "${RUN_DIGEST_DEPLOY}" in
     ;;
 esac
 
+run_step "Bloc E" "Production external DB readiness" make production-external-db-readiness
 run_step "Bloc E" "Production data resilience readiness" make production-data-resilience
 case "${RUN_DATA_PROOF}" in
   true|TRUE|1|yes|YES|on|ON)
@@ -378,6 +379,8 @@ copy_key_artifacts
   printf -- '- Release attestation: `artifacts/release/release-attestation.md`\n'
   printf -- '- Provenance: `artifacts/release/provenance.slsa.md`\n'
   printf -- '- Data resilience: `artifacts/security/production-data-resilience.md`\n'
+  printf -- '- External DB readiness: `artifacts/security/production-external-db-readiness.md`\n'
+  printf -- '- External Secrets runtime: `artifacts/security/external-secrets-runtime.md`\n'
   printf -- '- Final production status: `artifacts/final/production-final-status.md`\n'
   printf -- '- Final release status: `artifacts/final/release-final-status.md`\n'
   printf -- '- Final security status: `artifacts/final/security-final-status.md`\n'

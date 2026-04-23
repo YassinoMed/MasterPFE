@@ -16,7 +16,7 @@ RUNTIME_IMAGE_PROOF_FILE ?= artifacts/validation/runtime-image-rollout-proof.md
 OFFICIAL_SCENARIO ?= demo
 SUPPORT_PACK_ROOT ?= artifacts/support-pack
 
-.PHONY: help lint test laravel-test sonar-analysis kyverno-policy-check image-scan sbom-attest sbom-validate verify promote promote-digest deploy runtime-image-proof validate demo production-cluster production-cleanup-plan production-cleanup production-cluster-clean-proof production-ha production-runtime-evidence runtime-security-postdeploy production-proof-full final-runtime-proof ha-chaos-lite hpa-runtime-proof refresh-hpa-runtime-proof production-data-resilience data-resilience-proof production-dockerfiles image-size-evidence secrets-management production-db-secret data-backup data-restore production-readiness-campaign campaign final-campaign release-evidence release-attestation release-provenance release-proof-strict supply-chain-evidence supply-chain-execute observability-snapshot portal-service-proof global-project-status final-source-of-truth security-posture k8s-resource-guards close-missing-phases jenkins-webhook-proof jenkins-ci-push-proof cluster-security-proof kyverno-runtime-proof kyverno-enforce-readiness refresh-cluster-security-proof devsecops-final-proof devsecops-system-proof devsecops-closure devsecops-readiness final-proof final-summary support-pack kyverno-install kyverno-enforce metrics-install clean
+.PHONY: help lint test laravel-test sonar-analysis kyverno-policy-check image-scan sbom-attest sbom-validate verify promote promote-digest deploy runtime-image-proof validate demo production-cluster production-cleanup-plan production-cleanup production-cluster-clean-proof production-ha production-runtime-evidence runtime-security-postdeploy production-proof-full final-runtime-proof ha-chaos-lite hpa-runtime-proof refresh-hpa-runtime-proof production-external-db-readiness production-data-resilience data-resilience-proof production-dockerfiles image-size-evidence secrets-management production-db-secret sops-db-secret external-secret-render external-secret-runtime-proof data-backup data-restore production-readiness-campaign campaign final-campaign release-evidence release-attestation release-provenance release-proof-strict supply-chain-evidence supply-chain-execute observability-snapshot portal-service-proof global-project-status final-source-of-truth security-posture k8s-resource-guards close-missing-phases jenkins-webhook-proof jenkins-ci-push-proof cluster-security-proof kyverno-runtime-proof kyverno-enforce-readiness refresh-cluster-security-proof devsecops-final-proof devsecops-system-proof devsecops-closure devsecops-readiness final-proof final-summary support-pack kyverno-install kyverno-enforce metrics-install clean
 
 help: ## Show available targets
 	@awk 'BEGIN {FS = ":.*## "; print "Available targets:"} /^[a-zA-Z0-9_.-]+:.*## / {printf "  %-12s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
@@ -140,6 +140,9 @@ refresh-hpa-runtime-proof: ## Install/repair metrics-server and collect strict H
 production-data-resilience: ## Validate production data resilience readiness
 	@bash scripts/validate/validate-production-data-resilience.sh
 
+production-external-db-readiness: ## Validate the external DB overlay and production-grade secret delivery paths
+	@bash scripts/validate/validate-production-external-db-readiness.sh
+
 data-resilience-proof: ## Run DB external secret, backup, restore and data resilience proof when PostgreSQL env vars exist
 	@bash scripts/data/run-data-resilience-proof.sh
 
@@ -154,6 +157,15 @@ secrets-management: ## Validate modern secrets management readiness without expo
 
 production-db-secret: ## Create/update the production external DB Secret from environment variables
 	@bash scripts/secrets/create-production-db-secret.sh
+
+sops-db-secret: ## Decrypt and apply a SOPS-encrypted production DB Secret
+	@bash scripts/secrets/apply-sops-production-db-secret.sh
+
+external-secret-render: ## Render the production DB ExternalSecret manifest without exposing any secret value
+	@bash scripts/secrets/render-production-db-external-secret.sh
+
+external-secret-runtime-proof: ## Validate live External Secrets Operator reconciliation for the production DB Secret
+	@bash scripts/secrets/validate-external-secrets-runtime.sh
 
 data-backup: ## Create a PostgreSQL backup evidence artifact from external DB env vars
 	@bash scripts/data/backup-postgres.sh

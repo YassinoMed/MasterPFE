@@ -25,14 +25,13 @@ spec:
                 - securerag-hub
       validate:
         message: Every SecureRAG deployment container must declare readiness, liveness and startup probes.
-        pattern:
-          spec:
-            template:
-              spec:
-                containers:
-                  - readinessProbe: "?*"
-                    livenessProbe: "?*"
-                    startupProbe: "?*"
+        foreach:
+          - list: "request.object.spec.template.spec.containers"
+            pattern:
+              name: "?*"
+              readinessProbe: "?*"
+              livenessProbe: "?*"
+              startupProbe: "?*"
     - name: require-pod-template-service-account-token-disabled
       match:
         any:

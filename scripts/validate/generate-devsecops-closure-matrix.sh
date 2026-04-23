@@ -172,6 +172,7 @@ digest_deploy_status="$(status_from_file artifacts/release/no-rebuild-deploy-sum
 provenance_status="$(status_from_file artifacts/release/provenance.slsa.md)"
 kyverno_runtime_status="$(status_from_file artifacts/validation/kyverno-runtime-report.md)"
 kyverno_enforce_status="$(status_from_file artifacts/validation/kyverno-enforce-readiness.md)"
+external_db_status="$(status_from_file artifacts/security/production-external-db-readiness.md)"
 data_resilience_status="$(status_from_file artifacts/security/production-data-resilience.md)"
 backup_restore_status="$(status_from_file artifacts/backup/data-resilience-proof.md)"
 secrets_status="$(status_from_file artifacts/security/secrets-management.md)"
@@ -201,7 +202,7 @@ row "Bloc C" "Provenance SLSA-style" "${provenance_status}" "P0" "Régénérer a
 row "Bloc D" "Kyverno Audit / PolicyReports runtime" "${kyverno_runtime_status}" "P1" "Rejouer \`make kyverno-runtime-proof\` avec cluster, CRDs, contrôleurs et PolicyReports joignables."
 row "Bloc D" "Kyverno Enforce readiness" "${kyverno_enforce_status}" "P2" "Garder Audit tant que \`kyverno-enforce-readiness\` n’est pas \`TERMINÉ\`."
 
-row "Bloc E" "PostgreSQL externe / overlay / secret DB" "${data_resilience_status}" "P1" "Utiliser \`infra/k8s/overlays/production-external-db\` et créer \`securerag-database-secrets\` hors Git."
+row "Bloc E" "PostgreSQL externe / overlay / secret DB" "${external_db_status}" "P1" "Utiliser \`infra/k8s/overlays/production-external-db\` et prouver un chemin secret direct, SOPS ou External Secrets."
 row "Bloc E" "Backup / restore prouvés" "${backup_restore_status}" "P1" "Renseigner les variables DB et rejouer \`make data-resilience-proof\` sur une base de restauration isolée."
 
 row "Bloc F" "Secrets management moderne" "${secrets_status}" "P1" "Appliquer le Secret DB externe réel; garder SOPS/age et ESO/Vault en \`PRÊT_NON_EXÉCUTÉ\` tant qu’ils ne tournent pas."

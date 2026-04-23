@@ -47,6 +47,7 @@ Dans le dépôt, cette option est préparée sans être activée par défaut :
 
 - `infra/secrets/sops/sops-age.example.yaml` : exemple de règle SOPS/age ;
 - `infra/secrets/production/securerag-database-secrets.template.yaml` : modèle Kubernetes `Secret` sans valeur réelle ;
+- `scripts/secrets/apply-sops-production-db-secret.sh` : déchiffrement et application contrôlée avec preuve redigée ;
 - `infra/secrets/.gitignore` : empêche de versionner les fichiers plaintext, `.env` ou clés age locales.
 
 L'état de cette option est `PRÊT_NON_EXÉCUTÉ` tant qu'aucun secret chiffré réel n'a été produit avec un destinataire age réel.
@@ -58,6 +59,13 @@ Utiliser External Secrets Operator avec Vault ou un backend cloud.
 Valeur : proche production.
 
 Coût : plus lourd pour une démo locale, dépendances supplémentaires, risque de déstabiliser la soutenance.
+
+Le dépôt contient maintenant les briques opérables suivantes :
+
+- `infra/secrets/external-secrets/cluster-secret-store.vault.template.yaml` ;
+- `infra/secrets/external-secrets/securerag-database.external-secret.template.yaml` ;
+- `scripts/secrets/render-production-db-external-secret.sh` ;
+- `scripts/secrets/validate-external-secrets-runtime.sh`.
 
 ## Politique de rotation
 
@@ -103,4 +111,23 @@ DB_HOST='<postgres-host>' \
 DB_USERNAME='<postgres-user>' \
 DB_PASSWORD='<mot-de-passe-fort-minimum-20-caracteres>' \
 make production-db-secret
+```
+
+Application depuis un secret SOPS chiffré. Action mutative sur le cluster cible :
+
+```bash
+ENCRYPTED_SECRET_FILE='infra/secrets/production/securerag-database-secrets.enc.yaml' \
+make sops-db-secret
+```
+
+Rendu non destructif du chemin External Secrets :
+
+```bash
+make external-secret-render
+```
+
+Preuve runtime External Secrets si l'opérateur est installé :
+
+```bash
+make external-secret-runtime-proof
 ```
