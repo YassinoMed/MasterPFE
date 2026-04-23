@@ -234,6 +234,26 @@ report_count = len(reports)
 fail_count = counts.get("fail", 0) + counts.get("error", 0)
 warn_count = counts.get("warn", 0)
 pass_count = counts.get("pass", 0)
+failed_results = []
+
+for report in reports:
+    scope = report.get("scope") or {}
+    resource = "/".join(
+        part for part in [str(scope.get("kind", "")).strip(), str(scope.get("name", "")).strip()] if part
+    ) or report.get("metadata", {}).get("name", "unknown-scope")
+    for result in report.get("results") or []:
+        outcome = str(result.get("result", "")).lower()
+        if outcome not in {"fail", "error"}:
+            continue
+        policy = str(result.get("policy", "unknown-policy"))
+        rule = str(result.get("rule", "unknown-rule"))
+        message = str(result.get("message", "")).strip()
+        failed_results.append({
+            "resource": resource,
+            "policy": policy,
+            "rule": rule,
+            "message": message,
+        })
 
 attestation_ready = False
 attestation_status = "MISSING"
@@ -293,6 +313,7 @@ summary = {
     "attestation_status": attestation_status,
     "local_registry_blocker": bool(local_registry_refs),
     "local_registry_refs": sorted(set(local_registry_refs)),
+    "failed_results": failed_results[:25],
 }
 
 pathlib.Path(summary_path).write_text(json.dumps(summary, indent=2, sort_keys=True) + "\n", encoding="utf-8")
@@ -327,6 +348,19 @@ local_registry_refs="$(python3 - "${attestation_summary}" <<'PY'
 import json, sys
 refs = json.load(open(sys.argv[1], encoding="utf-8"))["local_registry_refs"]
 print(", ".join(refs))
+PY
+)"
+failed_results_detail="$(python3 - "${attestation_summary}" <<'PY'
+import json, sys
+failed = json.load(open(sys.argv[1], encoding="utf-8")).get("failed_results", [])
+if not failed:
+    print("")
+else:
+    for item in failed:
+        message = item.get("message", "")
+        if len(message) > 180:
+            message = message[:177] + "..."
+        print(f"{item['resource']}: {item['policy']}/{item['rule']} :: {message}")
 PY
 )"
 
@@ -380,6 +414,13 @@ capture "Kyverno pods" kubectl get pods -n kyverno -o wide
 capture "Kyverno policies" kubectl get clusterpolicy -o wide
 capture "Kyverno policy reports" kubectl get policyreport,clusterpolicyreport -A
 capture "SecureRAG deployment images" kubectl get deploy -n "${NS}" -o jsonpath='{range .items[*]}{.metadata.name}{"\t"}{range .spec.template.spec.containers[*]}{.image}{" "}{end}{"\n"}{end}'
+
+if [[ -n "${failed_results_detail}" ]]; then
+  {
+    printf '\n## Failing PolicyReport results\n\n'
+    printf '```text\n%s\n```\n' "${failed_results_detail}"
+  } >> "${OUT_FILE}"
+fi
 
 cat >> "${OUT_FILE}" <<'EOF'
 

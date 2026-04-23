@@ -70,10 +70,39 @@ Option SOPS/age préparée :
 ```text
 infra/secrets/sops/sops-age.example.yaml
 infra/secrets/production/securerag-database-secrets.template.yaml
+scripts/secrets/apply-sops-production-db-secret.sh
 ```
 
 Elle reste `PRÊT_NON_EXÉCUTÉ` tant qu'un destinataire age réel et un fichier
 chiffré n'ont pas été créés.
+
+Application depuis un secret chiffré SOPS :
+
+```bash
+ENCRYPTED_SECRET_FILE='infra/secrets/production/securerag-database-secrets.enc.yaml' \
+make sops-db-secret
+```
+
+Option External Secrets / Vault préparée :
+
+```text
+infra/secrets/external-secrets/cluster-secret-store.vault.template.yaml
+infra/secrets/external-secrets/securerag-database.external-secret.template.yaml
+scripts/secrets/render-production-db-external-secret.sh
+scripts/secrets/validate-external-secrets-runtime.sh
+```
+
+Rendu non destructif :
+
+```bash
+make external-secret-render
+```
+
+Preuve runtime si External Secrets Operator est installé :
+
+```bash
+make external-secret-runtime-proof
+```
 
 ## Rotation
 - `SECURERAG_SHARED_API_TOKEN` : à régénérer après fuite ou changement de périmètre service-to-service.

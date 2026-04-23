@@ -222,6 +222,7 @@ run_step "Bloc D" "Kyverno Enforce readiness" make kyverno-enforce-readiness
 snapshot "Bloc D" "ClusterPolicies" bash -c 'kubectl get clusterpolicy || true'
 snapshot "Bloc D" "PolicyReports" bash -c 'kubectl get policyreport -A || true; printf "\n"; kubectl get clusterpolicyreport || true'
 
+run_step "Bloc E" "PostgreSQL externe / secret DB" make production-external-db-readiness
 run_step "Bloc E" "PostgreSQL externe / résilience statique" make production-data-resilience
 case "${RUN_DATA_PROOF}" in
   true|TRUE|1|yes|YES|on|ON)
@@ -281,8 +282,10 @@ fi
   printf -- '- `artifacts/release/release-attestation.md`\n'
   printf -- '- `artifacts/release/provenance.slsa.md`\n'
   printf -- '- `artifacts/validation/kyverno-runtime-report.md`\n'
+  printf -- '- `artifacts/security/production-external-db-readiness.md`\n'
   printf -- '- `artifacts/security/production-data-resilience.md`\n'
   printf -- '- `artifacts/security/secrets-management.md`\n'
+  printf -- '- `artifacts/security/external-secrets-runtime.md`\n'
   printf -- '- `artifacts/final/devsecops-closure-matrix.md`\n'
   printf -- '- `artifacts/final/final-validation-summary.md`\n'
   printf '\n## Lecture honnête\n\n'

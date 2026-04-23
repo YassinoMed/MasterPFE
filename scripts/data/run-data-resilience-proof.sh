@@ -4,8 +4,21 @@ set -euo pipefail
 
 REPORT_DIR="${REPORT_DIR:-artifacts/backup}"
 SUMMARY_FILE="${SUMMARY_FILE:-${REPORT_DIR}/data-resilience-proof.md}"
+BACKUP_TARGET_SERVICE="${BACKUP_TARGET_SERVICE:-portal-web}"
 
 mkdir -p "${REPORT_DIR}"
+
+infer_db_database() {
+  local service="$1"
+  case "${service}" in
+    portal-web) printf '%s' "${PORTAL_WEB_DB_DATABASE:-}" ;;
+    auth-users) printf '%s' "${AUTH_USERS_DB_DATABASE:-}" ;;
+    chatbot-manager) printf '%s' "${CHATBOT_MANAGER_DB_DATABASE:-}" ;;
+    conversation-service) printf '%s' "${CONVERSATION_SERVICE_DB_DATABASE:-}" ;;
+    audit-security-service) printf '%s' "${AUDIT_SECURITY_SERVICE_DB_DATABASE:-}" ;;
+    *) printf '' ;;
+  esac
+}
 
 {
   printf '# Data Resilience Proof - SecureRAG Hub\n\n'
@@ -14,10 +27,17 @@ mkdir -p "${REPORT_DIR}"
   printf '|---|---:|---|\n'
 } > "${SUMMARY_FILE}"
 
-if [[ -z "${DB_HOST:-}" || -z "${DB_USERNAME:-}" || -z "${DB_PASSWORD:-}" ]]; then
+if [[ -z "${DB_DATABASE:-}" ]]; then
+  inferred_db="$(infer_db_database "${BACKUP_TARGET_SERVICE}")"
+  if [[ -n "${inferred_db}" ]]; then
+    export DB_DATABASE="${inferred_db}"
+  fi
+fi
+
+if [[ -z "${DB_HOST:-}" || -z "${DB_USERNAME:-}" || -z "${DB_PASSWORD:-}" || -z "${DB_DATABASE:-}" ]]; then
   {
     printf '| Production DB secret | PRÊT_NON_EXÉCUTÉ | `DB_HOST`, `DB_USERNAME`, `DB_PASSWORD` required |\n'
-    printf '| Backup | PRÊT_NON_EXÉCUTÉ | PostgreSQL credentials required |\n'
+    printf '| Backup | PRÊT_NON_EXÉCUTÉ | PostgreSQL credentials and `DB_DATABASE` or `BACKUP_TARGET_SERVICE` required |\n'
     printf '| Restore | PRÊT_NON_EXÉCUTÉ | `BACKUP_FILE` and restore DB required after backup |\n'
   } >> "${SUMMARY_FILE}"
   bash scripts/validate/validate-production-data-resilience.sh >/dev/null || true
