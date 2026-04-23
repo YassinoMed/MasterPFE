@@ -123,6 +123,7 @@ memoire_file="${OUT_DIR}/memoire-artifacts-to-cite.md"
   printf -- '- `artifacts/final/security-final-status.md`\n'
   printf -- '- `artifacts/final/production-final-status.md`\n'
   printf -- '- `artifacts/final/release-final-status.md`\n'
+  printf -- '- `artifacts/final/devsecops-closure-matrix.md`\n'
 } > "${memoire_file}"
 
 printf '[INFO] Final source of truth generated in %s\n' "${OUT_DIR}"
