@@ -1,0 +1,12 @@
+NAME                                      CPU(cores)   MEMORY(bytes)   
+audit-security-service-568984ff67-mmgg7   2m           58Mi            
+audit-security-service-568984ff67-pjtzt   2m           58Mi            
+auth-users-58df94bcb8-2cbgb               2m           57Mi            
+auth-users-58df94bcb8-ncghs               2m           57Mi            
+chatbot-manager-659cdc7cdc-25cgq          1m           57Mi            
+chatbot-manager-659cdc7cdc-db6dr          2m           58Mi            
+conversation-service-6c9f48ff84-tk7zx     2m           57Mi            
+conversation-service-6c9f48ff84-z8qhh     1m           57Mi            
+portal-web-6859f8c7b7-k64rs               2m           58Mi            
+portal-web-6859f8c7b7-kjdgj               1m           57Mi            
+portal-web-6859f8c7b7-lwthj               2m           57Mi            
