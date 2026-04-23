@@ -11,10 +11,116 @@ mkdir -p "$(dirname "${OUT}")"
 
 status_from_file() {
   local file="$1"
-  if [[ -f "${file}" ]]; then
-    printf 'present'
+  local status
+  local fail_count
+  local warn_count
+  local skip_count
+
+  if [[ ! -s "${file}" ]]; then
+    printf 'PRÊT_NON_EXÉCUTÉ'
+    return 0
+  fi
+
+  status="$(grep -E '^- Status: `|^Statut global: `' "${file}" | head -n 1 | sed -E 's/.*Status: `([^`]+)`.*/\1/; s/.*Statut global: `([^`]+)`.*/\1/' || true)"
+  case "${status}" in
+    TERMINÉ|PARTIEL|PRÊT_NON_EXÉCUTÉ|DÉPENDANT_DE_L_ENVIRONNEMENT|FAIL)
+      printf '%s' "${status}"
+      return 0
+      ;;
+    COMPLETE_PROVEN)
+      printf 'TERMINÉ'
+      return 0
+      ;;
+    PARTIAL_READY_TO_PROVE)
+      printf 'PARTIEL'
+      return 0
+      ;;
+    PRESENT_UNPROVEN)
+      printf 'PRÊT_NON_EXÉCUTÉ'
+      return 0
+      ;;
+    PARTIAL*|PRESENT|FAILED)
+      printf 'PARTIEL'
+      return 0
+      ;;
+  esac
+
+  fail_count="$(grep -E '^- FAIL: `' "${file}" | head -n 1 | sed -E 's/^- FAIL: `([^`]+)`.*/\1/' || true)"
+  warn_count="$(grep -E '^- WARN: `' "${file}" | head -n 1 | sed -E 's/^- WARN: `([^`]+)`.*/\1/' || true)"
+  skip_count="$(grep -E '^- SKIP: `' "${file}" | head -n 1 | sed -E 's/^- SKIP: `([^`]+)`.*/\1/' || true)"
+
+  if [[ -n "${fail_count}" || -n "${warn_count}" || -n "${skip_count}" ]]; then
+    fail_count="${fail_count:-0}"
+    warn_count="${warn_count:-0}"
+    skip_count="${skip_count:-0}"
+
+    if [[ "${fail_count}" != "0" || "${warn_count}" != "0" ]]; then
+      printf 'PARTIEL'
+    elif [[ "${skip_count}" != "0" ]]; then
+      printf 'PRÊT_NON_EXÉCUTÉ'
+    else
+      printf 'TERMINÉ'
+    fi
+    return 0
+  fi
+
+  if grep -Fq 'DÉPENDANT_DE_L_ENVIRONNEMENT' "${file}"; then
+    printf 'DÉPENDANT_DE_L_ENVIRONNEMENT'
+  elif grep -Eq '[|][[:space:]]*[^|]+[[:space:]]*[|][[:space:]]*(FAIL|WARN|PARTIEL|FAILED|MISSING)[[:space:]]*[|]' "${file}"; then
+    printf 'PARTIEL'
+  elif grep -Fq 'PARTIEL' "${file}"; then
+    printf 'PARTIEL'
+  elif grep -Eq '[|][[:space:]]*[^|]+[[:space:]]*[|][[:space:]]*(PRÊT_NON_EXÉCUTÉ|SKIPPED)[[:space:]]*[|]' "${file}"; then
+    printf 'PRÊT_NON_EXÉCUTÉ'
+  elif grep -Fq 'PRÊT_NON_EXÉCUTÉ' "${file}"; then
+    printf 'PRÊT_NON_EXÉCUTÉ'
   else
-    printf 'missing'
+    printf 'TERMINÉ'
+  fi
+}
+
+merge_status() {
+  local statuses=("$@")
+  local status
+
+  for status in "${statuses[@]}"; do
+    if [[ "${status}" == "PARTIEL" || "${status}" == "FAIL" ]]; then
+      printf 'PARTIEL'
+      return 0
+    fi
+  done
+
+  for status in "${statuses[@]}"; do
+    if [[ "${status}" == "DÉPENDANT_DE_L_ENVIRONNEMENT" ]]; then
+      printf 'DÉPENDANT_DE_L_ENVIRONNEMENT'
+      return 0
+    fi
+  done
+
+  for status in "${statuses[@]}"; do
+    if [[ "${status}" == "PRÊT_NON_EXÉCUTÉ" ]]; then
+      printf 'PRÊT_NON_EXÉCUTÉ'
+      return 0
+    fi
+  done
+
+  printf 'TERMINÉ'
+}
+
+jenkins_status_from_file() {
+  local file="$1"
+  if [[ ! -s "${file}" ]]; then
+    printf 'DÉPENDANT_DE_L_ENVIRONNEMENT'
+    return 0
+  fi
+  if grep -Eq '[|][[:space:]]*[^|]+[[:space:]]*[|][[:space:]]*FAIL[[:space:]]*[|]' "${file}"; then
+    printf 'PARTIEL'
+  elif grep -Eq '[|][[:space:]]*[^|]+[[:space:]]*[|][[:space:]]*WARN[[:space:]]*[|]' "${file}"; then
+    printf 'PARTIEL'
+  elif grep -Eq '[|][[:space:]]*[^|]+[[:space:]]*[|][[:space:]]*OK[[:space:]]*[|]' "${file}"; then
+    printf 'TERMINÉ'
+  else
+    printf 'PARTIEL'
   fi
 }
 
@@ -90,26 +196,39 @@ fi
 semgrep_results="$(json_count security/reports/semgrep.json semgrep_results)"
 gitleaks_results="$(json_count security/reports/gitleaks.json gitleaks_results)"
 trivy_results="$(json_count security/reports/trivy-fs.json trivy_vulnerabilities)"
-release_attestation_status="$(status_from_file artifacts/release/release-attestation.json)"
+release_attestation_status="$(status_from_file artifacts/release/release-attestation.md)"
 observability_snapshot_status="$(status_from_file artifacts/observability/observability-snapshot.md)"
 portal_service_status="$(status_from_file artifacts/application/portal-service-connectivity.md)"
 global_project_status="$(status_from_file artifacts/final/global-project-status.md)"
 missing_phases_status="$(status_from_file artifacts/final/missing-phases-closure.md)"
+security_final_status="$(status_from_file artifacts/final/security-final-status.md)"
+production_final_status="$(status_from_file artifacts/final/production-final-status.md)"
+release_final_status="$(status_from_file artifacts/final/release-final-status.md)"
 
-jenkins_status="partial"
-cluster_status="partial"
-portal_status="partial"
+jenkins_status="$(merge_status \
+  "$(jenkins_status_from_file artifacts/jenkins/github-webhook-validation.md)" \
+  "$(jenkins_status_from_file artifacts/jenkins/ci-push-trigger-proof.md)")"
+cluster_status="$(status_from_file artifacts/validation/production-runtime-evidence.md)"
+portal_status="${portal_service_status}"
+execute_status="$(merge_status "${production_final_status}" "${release_final_status}")"
+summary_global_status="$(merge_status "${security_final_status}" "${production_final_status}" "${release_final_status}")"
 
 if command -v curl >/dev/null 2>&1 && curl -fsS "${JENKINS_URL}" >/dev/null 2>&1; then
-  jenkins_status="ok"
+  if [[ "${jenkins_status}" == "DÉPENDANT_DE_L_ENVIRONNEMENT" ]]; then
+    jenkins_status="TERMINÉ"
+  fi
 fi
 
 if command -v kubectl >/dev/null 2>&1 && kubectl get ns "${NS}" >/dev/null 2>&1 && kubectl get pods -n "${NS}" >/dev/null 2>&1; then
-  cluster_status="ok"
+  if [[ "${cluster_status}" == "DÉPENDANT_DE_L_ENVIRONNEMENT" || "${cluster_status}" == "PRÊT_NON_EXÉCUTÉ" ]]; then
+    cluster_status="TERMINÉ"
+  fi
 fi
 
 if command -v curl >/dev/null 2>&1 && curl -fsS "${PORTAL_HEALTH_URL}" >/dev/null 2>&1; then
-  portal_status="ok"
+  if [[ "${portal_status}" == "DÉPENDANT_DE_L_ENVIRONNEMENT" || "${portal_status}" == "PRÊT_NON_EXÉCUTÉ" ]]; then
+    portal_status="TERMINÉ"
+  fi
 fi
 
 latest_support_pack="$(python3 - <<'PY'
@@ -124,6 +243,9 @@ PY
 cat > "${OUT}" <<EOF
 # Final Validation Summary - SecureRAG Hub
 
+- Generated at UTC: \`$(date -u '+%Y-%m-%dT%H:%M:%SZ')\`
+- Status: \`${summary_global_status}\`
+
 ## 1. Official scenario
 
 - Official mode: \`demo\`
@@ -131,7 +253,7 @@ cat > "${OUT}" <<EOF
 - GitHub Actions status: legacy / historical workflows
 - Promotion policy: digest-first
 - Dry-run status: accepted as preparatory evidence
-- Execute status: environment-dependent
+- Execute status: \`${execute_status}\`
 
 ## 2. CI results
 
@@ -148,8 +270,8 @@ cat > "${OUT}" <<EOF
 
 | Check | Status |
 |---|---|
-| Jenkins reachable | ${jenkins_status} |
-| Kubernetes namespace | ${cluster_status} |
+| Jenkins / CD gates | ${jenkins_status} |
+| Kubernetes runtime | ${cluster_status} |
 | Portal Web health | ${portal_status} |
 
 ## 4. Evidence files
@@ -164,7 +286,9 @@ cat > "${OUT}" <<EOF
 | \`artifacts/release/no-rebuild-deploy-summary.md\` | $(status_from_file artifacts/release/no-rebuild-deploy-summary.md) |
 | \`artifacts/release/release-attestation.json\` | ${release_attestation_status} |
 | \`artifacts/observability/observability-snapshot.md\` | ${observability_snapshot_status} |
+| \`artifacts/security/production-external-db-readiness.md\` | $(status_from_file artifacts/security/production-external-db-readiness.md) |
 | \`artifacts/security/runtime-security-postdeploy.md\` | $(status_from_file artifacts/security/runtime-security-postdeploy.md) |
+| \`artifacts/security/external-secrets-runtime.md\` | $(status_from_file artifacts/security/external-secrets-runtime.md) |
 | \`artifacts/validation/kyverno-local-registry-enforce-blocker.md\` | $(status_from_file artifacts/validation/kyverno-local-registry-enforce-blocker.md) |
 | \`artifacts/application/portal-service-connectivity.md\` | ${portal_service_status} |
 | \`artifacts/final/global-project-status.md\` | ${global_project_status} |
@@ -184,7 +308,7 @@ cat > "${OUT}" <<EOF
 
 ## 6. Conclusion
 
-SecureRAG Hub is demonstrable in the official \`demo\` mode with Jenkins as the CI/CD authority, a Laravel-first Kubernetes runtime, archived evidence, and an explicit distinction between dry-run preparation and environment-dependent execute mode.
+SecureRAG Hub is demonstrable in the official \`demo\` mode with Jenkins as the CI/CD authority, a Laravel-first Kubernetes runtime, archived evidence, and an explicit distinction between fully proven controls, partial runtime policy findings, and environment-dependent items that remain intentionally unexecuted.
 EOF
 
 printf 'Final validation summary written to %s\n' "${OUT}"

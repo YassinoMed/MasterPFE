@@ -61,6 +61,12 @@ REQUIRE_DIGEST_DEPLOY=true \
 bash scripts/deploy/deploy-kind.sh
 ```
 
+Validation de la readiness overlay + secret DB :
+
+```bash
+make production-external-db-readiness
+```
+
 ## Backup
 
 Action mutative externe : lit la base cible et produit un dump.
@@ -68,14 +74,15 @@ Action mutative externe : lit la base cible et produit un dump.
 PostgreSQL avec le script versionne :
 
 ```bash
+BACKUP_TARGET_SERVICE=portal-web \
 SERVICE_NAME=portal-web \
 DB_HOST='<postgres-host>' \
 DB_PORT=5432 \
 DB_USERNAME='<user>' \
 DB_PASSWORD='<password>' \
-DB_DATABASE='portal_web' \
+PORTAL_WEB_DB_DATABASE='portal_web' \
 DB_SSLMODE=require \
-make data-backup
+make data-resilience-proof
 ```
 
 MySQL :
@@ -98,14 +105,15 @@ PostgreSQL avec le script versionne :
 
 ```bash
 BACKUP_FILE='artifacts/backup/portal-web-portal_web-<timestamp>.dump' \
+BACKUP_TARGET_SERVICE=portal-web \
 DB_HOST='<postgres-host>' \
 DB_PORT=5432 \
 DB_USERNAME='<user>' \
 DB_PASSWORD='<password>' \
-DB_DATABASE='portal_web' \
+PORTAL_WEB_DB_DATABASE='portal_web' \
 RESTORE_DB_DATABASE='portal_web_restore_test' \
 DB_SSLMODE=require \
-make data-restore
+make data-resilience-proof
 ```
 
 MySQL :
