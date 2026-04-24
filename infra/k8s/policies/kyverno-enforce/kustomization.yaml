@@ -35,6 +35,9 @@ patches:
       - op: replace
         path: /spec/validationFailureAction
         value: Enforce
+      - op: replace
+        path: /spec/rules/0/verifyImages/0/verifyDigest
+        value: true
   - target:
       group: kyverno.io
       version: v1

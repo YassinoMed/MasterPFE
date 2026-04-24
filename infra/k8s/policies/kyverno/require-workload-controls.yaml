@@ -26,12 +26,19 @@ spec:
       validate:
         message: Every SecureRAG deployment container must declare readiness, liveness and startup probes.
         foreach:
-          - list: "request.object.spec.template.spec.containers"
-            pattern:
-              name: "?*"
-              readinessProbe: "?*"
-              livenessProbe: "?*"
-              startupProbe: "?*"
+          - list: "request.object.spec.template.spec.containers[]"
+            deny:
+              conditions:
+                any:
+                  - key: livenessProbe
+                    operator: AllNotIn
+                    value: "{{ element.keys(@)[] }}"
+                  - key: readinessProbe
+                    operator: AllNotIn
+                    value: "{{ element.keys(@)[] }}"
+                  - key: startupProbe
+                    operator: AllNotIn
+                    value: "{{ element.keys(@)[] }}"
     - name: require-pod-template-service-account-token-disabled
       match:
         any:

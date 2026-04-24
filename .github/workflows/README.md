@@ -14,6 +14,7 @@ Les workflows GitHub Actions conserves dans ce dossier sont maintenus a titre :
 - Les workflows GitHub presents ici sont deprecies.
 - Ils sont volontairement limites a `workflow_dispatch` pour eviter toute double execution automatique sur `push` ou `pull_request`.
 - Ils ne doivent pas etre re-actives sur `push` ou `pull_request` sans decision explicite de gouvernance.
+- Aucun resultat GitHub Actions legacy ne doit etre utilise comme preuve finale si un artefact Jenkins ou shell equivalent existe.
 
 ## Workflows concernes
 
@@ -32,6 +33,7 @@ Etape 1 :
 - conserver les workflows dans `.github/workflows/`
 - les garder en `workflow_dispatch`
 - conserver le prefixe `legacy-`
+- documenter ce choix comme une desactivation claire, sans deplacement destructif de l'historique
 
 Etape 2 :
 - une fois plusieurs campagnes Jenkins consolidees, deplacer ces fichiers vers un dossier de type `.github/workflows-legacy/`

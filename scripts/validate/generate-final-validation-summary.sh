@@ -180,8 +180,11 @@ fi
 
 if [[ -f ".coverage-artifacts/coverage-summary.txt" ]]; then
   coverage="$(awk -F= '/^coverage_percent=/{print $2}' .coverage-artifacts/coverage-summary.txt | tail -n 1)"
+  coverage_status="$(awk -F= '/^status=/{print $2}' .coverage-artifacts/coverage-summary.txt | tail -n 1)"
   if [[ -n "${coverage}" && "${coverage}" != "not-available" ]]; then
     coverage="${coverage}%"
+  elif [[ -n "${coverage_status}" ]]; then
+    coverage="${coverage_status}"
   fi
 elif [[ -f ".coverage-artifacts/coverage.xml" ]]; then
   coverage="$(python3 - <<'PY'
