@@ -83,6 +83,17 @@ Cela permet de conserver les mêmes valeurs de `REGISTRY_HOST` et les mêmes scr
 - le job `securerag-hub-ci` utilise un polling SCM léger (`H/5 * * * *`) pour une démo locale simple
 - en environnement plus mature, remplacer ce mode par un webhook GitHub
 
+## RBAC Jenkins
+
+La configuration JCasC actuelle utilise `loggedInUsersCanDoAnything` avec `allowAnonymousRead: false`. Ce choix est acceptable pour l'instance locale ou VPS de demonstration, ou un seul compte administrateur pilote les campagnes de preuve.
+
+Pour une production reelle, remplacer cette strategie par Matrix Authorization ou Role Strategy :
+
+- accorder l'administration uniquement au groupe plateforme ;
+- donner aux developpeurs un droit de lecture et de lancement limite aux jobs necessaires ;
+- separer les droits CI, CD, credentials et configuration globale ;
+- archiver une preuve Jenkins montrant la strategie active avant de declarer le RBAC production `TERMINÉ`.
+
 ## Jobs attendus
 
 ### `securerag-hub-ci`
@@ -123,6 +134,7 @@ bash scripts/jenkins/collect-local-proof.sh
 
 ## Points d’attention sécurité
 - le compte `admin` local n’est acceptable que pour un environnement de démonstration
+- `loggedInUsersCanDoAnything` doit rester documente comme limitation demo tant qu'une strategie Matrix Authorization ou Role Strategy n'est pas appliquee et prouvee
 - les credentials Cosign ne doivent jamais être committés dans le dépôt
 - l’accès au socket Docker donne des privilèges élevés au conteneur Jenkins ; ce choix est acceptable pour une démo locale, mais doit être remplacé par des agents dédiés en contexte professionnel plus strict
 - si Jenkins devient la source de vérité officielle, les workflows GitHub Actions du dépôt doivent être dépréciés explicitement

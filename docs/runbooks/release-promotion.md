@@ -88,6 +88,18 @@ RUN_POSTDEPLOY_VALIDATION=true \
 bash scripts/deploy/verify-and-deploy-kind.sh
 ```
 
+## Strategie registry kind vs production
+
+`localhost:5001` est acceptable pour le scenario `kind` local et le VPS de demonstration quand :
+
+- les noeuds `kind` sont configures pour tirer les images depuis le registre local ;
+- les preuves host-side Cosign, promotion par digest et runtime `imageID` sont archivees ;
+- Kyverno `verifyImages` reste en `Audit` tant que les pods Kyverno ne peuvent pas resoudre la meme reference de registre.
+
+Une production reelle doit utiliser une registry joignable depuis les noeuds Kubernetes et depuis les pods Kyverno, par exemple GHCR, Harbor, GitLab Registry, ECR, GAR ou ACR. Dans ce cas, le mode Enforce doit viser des images referencees par digest et l'overlay `infra/k8s/policies/kyverno-enforce` impose `verifyDigest: true`.
+
+Tant que les workloads ciblent `localhost:5001`, le statut Kyverno Enforce reste `DÉPENDANT_DE_L_ENVIRONNEMENT` et doit etre justifie par `artifacts/validation/kyverno-local-registry-enforce-blocker.md`.
+
 ## Résultats attendus
 - `artifacts/release/image-scan-summary.txt`
 - `artifacts/release/image-scan-summary.md`
