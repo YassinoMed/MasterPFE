@@ -20,7 +20,7 @@ OFFICIAL_SCENARIO ?= demo
 SUPPORT_PACK_ROOT ?= artifacts/support-pack
 
 .PHONY: help lint test laravel-test sonar-analysis kyverno-policy-check image-scan sbom-attest sbom-validate verify promote promote-digest deploy runtime-image-proof validate demo production-cluster production-cleanup-plan production-cleanup production-cluster-clean-proof production-ha production-runtime-evidence runtime-security-postdeploy production-proof-full final-runtime-proof ha-chaos-lite hpa-runtime-proof refresh-hpa-runtime-proof production-external-db-readiness production-data-resilience data-resilience-proof production-dockerfiles image-size-evidence secrets-management production-db-secret sops-db-secret external-secret-render external-secret-runtime-proof data-backup data-restore production-readiness-campaign campaign final-campaign release-evidence release-attestation release-provenance release-proof-strict supply-chain-evidence supply-chain-execute observability-snapshot portal-service-proof global-project-status final-source-of-truth security-posture k8s-resource-guards close-missing-phases jenkins-webhook-proof jenkins-ci-push-proof cluster-security-proof kyverno-runtime-proof kyverno-enforce-readiness refresh-cluster-security-proof devsecops-final-proof devsecops-system-proof devsecops-closure devsecops-readiness final-proof final-summary support-pack kyverno-install kyverno-enforce metrics-install clean
-.PHONY: cluster-registry-setup cluster-registry-proof kyverno-enforce-proof gitops-update-digests gitops-sync-proof secret-rotation-proof observability-stack-proof scheduled-backup-proof jenkins-rbac-proof intoto-attestation expert-readiness
+.PHONY: cluster-registry-setup cluster-registry-proof kyverno-enforce-proof gitops-update-digests gitops-sync-proof secret-rotation-proof observability-stack-proof scheduled-backup-proof jenkins-rbac-proof intoto-attestation normalize-artifacts expert-readiness
 
 help: ## Show available targets
 	@awk 'BEGIN {FS = ":.*## "; print "Available targets:"} /^[a-zA-Z0-9_.-]+:.*## / {printf "  %-12s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
@@ -321,6 +321,9 @@ jenkins-rbac-proof: ## Validate the Jenkins production RBAC profile or live API 
 intoto-attestation: ## Generate an in-toto style release statement from existing evidence
 	@REPORT_DIR=$(REPORT_DIR) DIGEST_RECORD_FILE=$(DIGEST_RECORD_FILE) bash scripts/release/generate-intoto-attestation.sh
 
+normalize-artifacts: ## Normalize generated artifact text files to LF and trim trailing whitespace
+	@bash scripts/validate/normalize-artifacts.sh
+
 expert-readiness: ## Run non-destructive expert-readiness evidence refresh
 	@$(MAKE) cluster-registry-proof
 	@$(MAKE) kyverno-enforce-readiness
@@ -330,6 +333,7 @@ expert-readiness: ## Run non-destructive expert-readiness evidence refresh
 	@$(MAKE) scheduled-backup-proof
 	@$(MAKE) jenkins-rbac-proof
 	@$(MAKE) intoto-attestation
+	@$(MAKE) normalize-artifacts
 
 metrics-install: ## Install metrics-server for local HPA metrics
 	@bash scripts/deploy/install-metrics-server.sh

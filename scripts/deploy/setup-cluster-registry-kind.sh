@@ -15,6 +15,11 @@ registry_host_port="${REGISTRY_HOST_SIDE##*:}"
 info() { printf '[INFO] %s\n' "$*"; }
 warn() { printf '[WARN] %s\n' "$*" >&2; }
 
+registry_attached_to_kind_network() {
+  docker network inspect kind --format '{{range $id, $container := .Containers}}{{println $container.Name}}{{end}}' \
+    | grep -Fxq "${REGISTRY_CONTAINER}"
+}
+
 write_report() {
   local status="$1"
   local detail="$2"
@@ -63,7 +68,7 @@ else
     registry:2 >/dev/null
 fi
 
-if ! docker network inspect kind --format '{{json .Containers}}' | grep -Fq "\"${REGISTRY_CONTAINER}\""; then
+if ! registry_attached_to_kind_network; then
   docker network connect kind "${REGISTRY_CONTAINER}" >/dev/null 2>&1 || true
 fi
 
@@ -87,13 +92,19 @@ TOML
   docker exec "${node}" sh -c 'systemctl restart containerd >/dev/null 2>&1 || pkill -SIGHUP containerd || true'
 done
 
-registry_ip="$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' "${REGISTRY_CONTAINER}" 2>/dev/null || true)"
+registry_ip="$(docker inspect -f '{{with index .NetworkSettings.Networks "kind"}}{{.IPAddress}}{{end}}' "${REGISTRY_CONTAINER}" 2>/dev/null || true)"
+if [[ -z "${registry_ip}" ]]; then
+  registry_ip="$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' "${REGISTRY_CONTAINER}" 2>/dev/null || true)"
+fi
+
 if [[ -n "${registry_ip}" && -w /etc/hosts ]]; then
   tmp_hosts="$(mktemp)"
   grep -vE "[[:space:]]${registry_name}($|[[:space:]])" /etc/hosts > "${tmp_hosts}" || true
   printf '%s %s\n' "${registry_ip}" "${registry_name}" >> "${tmp_hosts}"
   cat "${tmp_hosts}" > /etc/hosts
   rm -f "${tmp_hosts}"
+elif [[ -n "${registry_ip}" ]]; then
+  warn "/etc/hosts is not writable; add '${registry_ip} ${registry_name}' manually if host-side tools must resolve the cluster registry name."
 fi
 
 write_report "TERMINÉ" "Registry container is running and every kind node has an HTTP containerd mirror for `${REGISTRY_CLUSTER_HOST}`."
