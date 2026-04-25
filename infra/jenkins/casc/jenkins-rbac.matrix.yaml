@@ -1,0 +1,18 @@
+jenkins:
+  authorizationStrategy:
+    globalMatrix:
+      permissions:
+        - "Overall/Administer:${JENKINS_ADMIN_ID}"
+        - "Overall/Read:authenticated"
+        - "Job/Read:authenticated"
+        - "View/Read:authenticated"
+        - "Credentials/View:${JENKINS_CI_USER_ID}"
+        - "Job/Build:${JENKINS_CI_USER_ID}"
+        - "Job/Cancel:${JENKINS_CI_USER_ID}"
+        - "Job/Read:${JENKINS_CI_USER_ID}"
+        - "Run/Replay:${JENKINS_CI_USER_ID}"
+        - "Run/Update:${JENKINS_CI_USER_ID}"
+
+# This profile is intentionally separate from infra/jenkins/casc/jenkins.yaml.
+# Apply it only after creating distinct admin and CI/CD identities and testing
+# recovery access on the target Jenkins instance.

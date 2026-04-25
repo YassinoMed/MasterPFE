@@ -14,6 +14,11 @@ pipeline {
       description: 'Target OCI registry used for release artifacts.'
     )
     string(
+      name: 'CLUSTER_REGISTRY_HOST',
+      defaultValue: 'securerag-registry:5000',
+      description: 'Cluster-reachable registry host used by GitOps digest manifests.'
+    )
+    string(
       name: 'IMAGE_PREFIX',
       defaultValue: 'securerag-hub',
       description: 'OCI image prefix used by the microservices.'
@@ -149,6 +154,31 @@ pipeline {
       post {
         always {
           archiveArtifacts allowEmptyArchive: true, artifacts: 'artifacts/release/*promot*,artifacts/release/*digest*,artifacts/release/*verify*'
+        }
+      }
+    }
+
+    stage('Generate Cluster Registry Digest Manifest') {
+      steps {
+        sh '''
+          set -euo pipefail
+          input="${REPORT_DIR}/promotion-digests.txt"
+          output="${REPORT_DIR}/promotion-digests-cluster.txt"
+          awk -F'|' -v host="${REGISTRY_HOST}" -v cluster="${CLUSTER_REGISTRY_HOST}" '
+            BEGIN { OFS = "|" }
+            /^#/ { print; next }
+            NF >= 4 {
+              if (index($3, host) == 1) {
+                $3 = cluster substr($3, length(host) + 1)
+              }
+              print $1, $2, $3, $4
+            }
+          ' "${input}" > "${output}"
+        '''
+      }
+      post {
+        always {
+          archiveArtifacts allowEmptyArchive: true, artifacts: 'artifacts/release/promotion-digests-cluster.txt'
         }
       }
     }

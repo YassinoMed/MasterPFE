@@ -1,0 +1,48 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: securerag-slo-rules
+  namespace: monitoring
+  labels:
+    release: kube-prometheus-stack
+    app.kubernetes.io/name: securerag-slo-rules
+spec:
+  groups:
+    - name: securerag.slo
+      rules:
+        - alert: SecureRAGPodNotReady
+          expr: |
+            sum by (namespace) (
+              kube_pod_status_ready{namespace="securerag-hub", condition="true"} == 0
+            ) > 0
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: SecureRAG pod readiness dropped below the SLO target.
+        - alert: SecureRAGCrashLoopBackOff
+          expr: |
+            max by (namespace, pod, container) (
+              kube_pod_container_status_waiting_reason{namespace="securerag-hub", reason="CrashLoopBackOff"}
+            ) > 0
+          for: 2m
+          labels:
+            severity: critical
+          annotations:
+            summary: A SecureRAG container is in CrashLoopBackOff.
+        - alert: SecureRAGHPAMetricsUnavailable
+          expr: |
+            absent(kube_horizontalpodautoscaler_status_current_metrics{namespace="securerag-hub"})
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            summary: HPA metrics are unavailable for SecureRAG.
+        - alert: SecureRAGPortalHealthProbeMissing
+          expr: |
+            absent(probe_success{namespace="securerag-hub", job="portal-health"})
+          for: 15m
+          labels:
+            severity: warning
+          annotations:
+            summary: Portal health SLO probe is not configured or not scraped.
