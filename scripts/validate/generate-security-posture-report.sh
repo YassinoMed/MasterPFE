@@ -124,6 +124,15 @@ jenkins_markdown_state() {
     return 0
   fi
 
+  local declared
+  declared="$(grep -E '^- Status: `|^Statut global: `' "${path}" | head -n 1 | sed -E 's/.*Status: `([^`]+)`.*/\1/; s/.*Statut global: `([^`]+)`.*/\1/' || true)"
+  case "${declared}" in
+    TERMINÉ|PARTIEL|PRÊT_NON_EXÉCUTÉ|DÉPENDANT_DE_L_ENVIRONNEMENT|FAIL)
+      printf '%s' "${declared}"
+      return 0
+      ;;
+  esac
+
   if grep -Eq '[|][[:space:]]*[^|]+[[:space:]]*[|][[:space:]]*FAIL[[:space:]]*[|]' "${path}"; then
     printf 'PARTIEL'
   elif grep -Eq '[|][[:space:]]*[^|]+[[:space:]]*[|][[:space:]]*WARN[[:space:]]*[|]' "${path}"; then
@@ -246,13 +255,17 @@ trivy_vulns="$(count_json_results "security/reports/trivy-fs.json" "trivy-vulns"
   printf '| Release attestation | `%s` | `%s` |\n' "$(attestation_state "${REPORT_DIR}/release-attestation.json")" "${REPORT_DIR}/release-attestation.json"
   printf '| SLSA-style provenance | `%s` | `%s` |\n' "$(declared_status "${REPORT_DIR}/provenance.slsa.md")" "${REPORT_DIR}/provenance.slsa.md"
   printf '| Kubernetes ultra hardening static | `%s` | `artifacts/security/k8s-ultra-hardening.md` |\n' "$(markdown_global_status "artifacts/security/k8s-ultra-hardening.md" "Statut global: TERMINÉ")"
+  printf '| Official scope / legacy exclusion | `%s` | `artifacts/final/official-scope-report.md` |\n' "$(declared_status "artifacts/final/official-scope-report.md")"
   printf '| Runtime security post-deployment | `%s` | `artifacts/security/runtime-security-postdeploy.md` |\n' "$(declared_status "artifacts/security/runtime-security-postdeploy.md")"
   printf '| Kubernetes production HA static | `%s` | `artifacts/security/production-ha-readiness.md` |\n' "$(markdown_global_status "artifacts/security/production-ha-readiness.md" "Statut global: TERMINÉ")"
   printf '| Production runtime evidence | `%s` | `artifacts/validation/production-runtime-evidence.md` |\n' "$(table_worst_status "artifacts/validation/production-runtime-evidence.md" "DÉPENDANT_DE_L_ENVIRONNEMENT")"
   printf '| Runtime image rollout proof | `%s` | `artifacts/validation/runtime-image-rollout-proof.md` |\n' "$(declared_status "artifacts/validation/runtime-image-rollout-proof.md")"
-  printf '| Jenkins webhook proof | `%s` | `artifacts/jenkins/github-webhook-validation.md` |\n' "$(jenkins_markdown_state "artifacts/jenkins/github-webhook-validation.md" "DÉPENDANT_DE_L_ENVIRONNEMENT")"
-  printf '| Jenkins CI push proof | `%s` | `artifacts/jenkins/ci-push-trigger-proof.md` |\n' "$(jenkins_markdown_state "artifacts/jenkins/ci-push-trigger-proof.md" "DÉPENDANT_DE_L_ENVIRONNEMENT")"
-  printf '| Kyverno Enforce local registry blocker | `%s` | `artifacts/validation/kyverno-local-registry-enforce-blocker.md` |\n' "$(declared_status "artifacts/validation/kyverno-local-registry-enforce-blocker.md")"
+  printf '| Jenkins webhook/API proof | `%s` | `artifacts/validation/jenkins-webhook-proof.md` |\n' "$(jenkins_markdown_state "artifacts/validation/jenkins-webhook-proof.md" "DÉPENDANT_DE_L_ENVIRONNEMENT")"
+  printf '| Jenkins CI push proof | `%s` | `artifacts/validation/jenkins-ci-push-proof.md` |\n' "$(jenkins_markdown_state "artifacts/validation/jenkins-ci-push-proof.md" "DÉPENDANT_DE_L_ENVIRONNEMENT")"
+  printf '| Kyverno Enforce admission proof | `%s` | `artifacts/validation/kyverno-enforce-proof.md` |\n' "$(declared_status "artifacts/validation/kyverno-enforce-proof.md")"
+  printf '| GitOps Argo CD sync | `%s` | `artifacts/gitops/argocd-sync.md` |\n' "$(declared_status "artifacts/gitops/argocd-sync.md")"
+  printf '| Runtime detection audit | `%s` | `artifacts/security/runtime-detection-proof.md` |\n' "$(declared_status "artifacts/security/runtime-detection-proof.md")"
+  printf '| Observability SLO summary | `%s` | `artifacts/observability/slo-summary.md` |\n' "$(declared_status "artifacts/observability/slo-summary.md")"
   printf '| Production data resilience | `%s` | `artifacts/security/production-data-resilience.md` |\n' "$(declared_status "artifacts/security/production-data-resilience.md")"
   printf '| Production Dockerfiles | `%s` | `artifacts/security/production-dockerfiles.md` |\n' "$(declared_status "artifacts/security/production-dockerfiles.md")"
   printf '| Image size evidence | `%s` | `artifacts/security/image-size-evidence.md` |\n' "$(declared_status "artifacts/security/image-size-evidence.md")"

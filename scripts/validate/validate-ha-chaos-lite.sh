@@ -8,6 +8,7 @@ OUT_FILE="${OUT_FILE:-${OUT_DIR}/ha-chaos-lite-report.md}"
 RUN_POD_DELETE="${RUN_POD_DELETE:-false}"
 RUN_ROLLOUT_RESTART="${RUN_ROLLOUT_RESTART:-false}"
 RUN_NODE_DRAIN="${RUN_NODE_DRAIN:-false}"
+CONFIRM_CHAOS_LITE="${CONFIRM_CHAOS_LITE:-NO}"
 CONFIRM_NODE_DRAIN="${CONFIRM_NODE_DRAIN:-NO}"
 NODE_NAME="${NODE_NAME:-}"
 
@@ -104,7 +105,9 @@ else
   row "Pod node spread" "PARTIEL" "unable to query pods"
 fi
 
-if is_true "${RUN_POD_DELETE}"; then
+if is_true "${RUN_POD_DELETE}" && [[ "${CONFIRM_CHAOS_LITE}" != "YES" ]]; then
+  row "Pod delete recovery" "PRÊT_NON_EXÉCUTÉ" "requires CONFIRM_CHAOS_LITE=YES with RUN_POD_DELETE=true"
+elif is_true "${RUN_POD_DELETE}"; then
   for deploy in "${official_deployments[@]}"; do
     pod="$(kubectl get pods -n "${NS}" -l "app.kubernetes.io/name=${deploy}" -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || true)"
     if [[ -z "${pod}" ]]; then
@@ -122,7 +125,9 @@ else
   row "Pod delete recovery" "PRÊT_NON_EXÉCUTÉ" "set RUN_POD_DELETE=true to delete one pod per official deployment"
 fi
 
-if is_true "${RUN_ROLLOUT_RESTART}"; then
+if is_true "${RUN_ROLLOUT_RESTART}" && [[ "${CONFIRM_CHAOS_LITE}" != "YES" ]]; then
+  row "Rollout restart proof" "PRÊT_NON_EXÉCUTÉ" "requires CONFIRM_CHAOS_LITE=YES with RUN_ROLLOUT_RESTART=true"
+elif is_true "${RUN_ROLLOUT_RESTART}"; then
   for deploy in "${official_deployments[@]}"; do
     kubectl rollout restart "deployment/${deploy}" -n "${NS}" >/dev/null
     if kubectl rollout status "deployment/${deploy}" -n "${NS}" --timeout=180s >/dev/null 2>&1; then
@@ -136,8 +141,8 @@ else
 fi
 
 if is_true "${RUN_NODE_DRAIN}"; then
-  if [[ "${CONFIRM_NODE_DRAIN}" != "YES" || -z "${NODE_NAME}" ]]; then
-    row "Node drain proof" "PRÊT_NON_EXÉCUTÉ" "requires CONFIRM_NODE_DRAIN=YES and NODE_NAME"
+  if [[ "${CONFIRM_CHAOS_LITE}" != "YES" || "${CONFIRM_NODE_DRAIN}" != "YES" || -z "${NODE_NAME}" ]]; then
+    row "Node drain proof" "PRÊT_NON_EXÉCUTÉ" "requires CONFIRM_CHAOS_LITE=YES CONFIRM_NODE_DRAIN=YES and NODE_NAME"
   else
     warn "Mutating action: draining node ${NODE_NAME}"
     kubectl drain "${NODE_NAME}" --ignore-daemonsets --delete-emptydir-data --force --timeout=180s >/dev/null
@@ -169,7 +174,7 @@ cat >> "${OUT_FILE}" <<'EOF'
 ## Safety model
 
 - Default mode is read-only.
-- Pod delete and rollout restart are mutative but bounded to official Laravel deployments.
+- Pod delete and rollout restart are mutative but bounded to official Laravel deployments and require `CONFIRM_CHAOS_LITE=YES`.
 - Node drain is guarded by `CONFIRM_NODE_DRAIN=YES` and explicit `NODE_NAME`.
 EOF
 

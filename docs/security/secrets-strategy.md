@@ -76,6 +76,22 @@ scripts/secrets/apply-sops-production-db-secret.sh
 Elle reste `PRÊT_NON_EXÉCUTÉ` tant qu'un destinataire age réel et un fichier
 chiffré n'ont pas été créés.
 
+Rotation chiffrée SOPS/age :
+
+```bash
+SOPS_AGE_RECIPIENT='<recipient-age>' \
+DB_HOST='<postgres-host>' \
+DB_USERNAME='<postgres-user>' \
+CONFIRM_SECRET_ROTATION=YES \
+make secret-rotation-proof
+```
+
+Le script génère ou utilise `DB_PASSWORD` localement, chiffre le Secret avec SOPS/age et n'écrit aucune valeur secrète dans `artifacts/security/secret-rotation-proof.md`. L'application au cluster reste séparée :
+
+```bash
+APPLY_ROTATED_SECRET=true CONFIRM_SECRET_ROTATION=YES make secret-rotation-proof
+```
+
 Application depuis un secret chiffré SOPS :
 
 ```bash

@@ -32,7 +32,14 @@ Cela :
 KYVERNO_POLICY_MODE=enforce bash scripts/deploy/install-kyverno.sh
 ```
 
-Cette variante utilise l'overlay `infra/k8s/policies/kyverno-enforce` et bascule les policies de securite Pod et de verification Cosign en `Enforce`. Elle est volontairement separee du mode `Audit`.
+Cette variante utilise l'overlay `infra/k8s/policies/kyverno-enforce`. Elle bascule uniquement les policies image sûres en `Enforce` :
+
+- interdiction des tags `latest` ;
+- restriction à `securerag-registry:5000` ;
+- exigence de digest `@sha256` pour les images SecureRAG officielles ;
+- `verifyImages` Cosign lorsque les signatures sont disponibles.
+
+Les policies plus larges de securite Pod, volumes, services et probes restent en `Audit` au depart pour eviter de casser le runtime stable pendant la demo.
 
 ## Verification post-install
 ```bash
@@ -75,16 +82,29 @@ grep -n "Kyverno Enforce readiness" artifacts/validation/kyverno-runtime-report.
 
 Ne pas lancer `make kyverno-enforce` si cette ligne ne retourne pas `TERMINÉ`.
 
+Preuve d'admission positive/negative :
+
+```bash
+APPLY_ENFORCE=true REGISTRY_CLUSTER_HOST=securerag-registry:5000 make kyverno-enforce-proof
+```
+
+Artefacts :
+
+- `artifacts/validation/kyverno-enforce-proof.md`
+- `artifacts/validation/kyverno-admission-positive-test.md`
+- `artifacts/validation/kyverno-admission-negative-test.md`
+- `artifacts/validation/kyverno-enforce-rollback.md`
+
 ### Cas particulier de la registry locale kind
 
-Si les workloads SecureRAG utilisent `localhost:5001/...`, la verification
-Cosign `verifyImages` en `Enforce` est bloqueee de maniere honnete en local :
-depuis un pod Kyverno, `localhost` pointe vers le pod lui-meme et non vers la
-registry de l'hote. Dans ce cas :
+Si un ancien environnement utilise encore `localhost:5001/...`, la verification
+Cosign `verifyImages` en `Enforce` doit rester bloquee : depuis un pod Kyverno,
+`localhost` pointe vers le pod lui-meme et non vers la registry de l'hote. Le
+perimetre officiel corrige cela avec `securerag-registry:5000/...@sha256`.
 
-- conserver `securerag-verify-cosign-images` en `Audit` ;
+- ne pas reintroduire `localhost:5001` ou `127.0.0.1:5002` dans les manifests Kubernetes officiels ;
 - garder Cosign verify cote hote comme gate release bloquant ;
-- archiver `artifacts/validation/kyverno-local-registry-enforce-blocker.md`.
+- archiver la preuve d'admission ou le rollback dans `artifacts/validation/`.
 
 ## Risque si Enforce est active trop tot
 - refus de creation des Pods SecureRAG ;

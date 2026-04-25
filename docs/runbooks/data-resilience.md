@@ -85,6 +85,19 @@ DB_SSLMODE=require \
 make data-resilience-proof
 ```
 
+Backup planifié Kubernetes :
+
+```bash
+kubectl apply -k infra/k8s/jobs
+make scheduled-backup-proof
+```
+
+La création manuelle d'un Job depuis le CronJob est protégée :
+
+```bash
+RUN_BACKUP_CRONJOB_NOW=true CONFIRM_SCHEDULED_BACKUP_RUN=YES make scheduled-backup-proof
+```
+
 MySQL :
 
 ```bash
@@ -99,7 +112,7 @@ shasum -a 256 artifacts/backup/*.sql > artifacts/backup/checksums.txt
 
 ## Restore
 
-Action destructive si elle cible une base existante. Pour les tests, restaurer dans une base isolee.
+Action destructive si elle cible une base existante. Pour les tests, restaurer dans une base isolee. Une restauration dans la base source est refusée sauf si `ALLOW_DESTRUCTIVE_RESTORE=true CONFIRM_DESTRUCTIVE_RESTORE=YES` est explicitement fourni.
 
 PostgreSQL avec le script versionne :
 

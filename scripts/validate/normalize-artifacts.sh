@@ -22,6 +22,7 @@ tmp_list="$(mktemp)"
 trap 'rm -f "${tmp_list}"' EXIT
 
 find "${ARTIFACT_ROOT}" -type f \
+  ! -path "${ARTIFACT_ROOT%/}/support-pack/*" \
   \( -name '*.md' -o -name '*.txt' -o -name '*.json' -o -name '*.jsonl' -o -name '*.yaml' -o -name '*.yml' -o -name '*.env' -o -name '*.log' \) \
   -print > "${tmp_list}"
 

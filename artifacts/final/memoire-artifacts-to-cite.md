@@ -2,12 +2,16 @@
 
 - `artifacts/security/security-posture-report.md`
 - `artifacts/security/production-ha-readiness.md`
+- `artifacts/security/production-external-db-readiness.md`
 - `artifacts/security/production-dockerfiles.md`
 - `artifacts/security/secrets-management.md`
 - `artifacts/security/runtime-security-postdeploy.md`
 - `artifacts/validation/hpa-runtime-report.md`
 - `artifacts/validation/kyverno-runtime-report.md`
-- `artifacts/validation/kyverno-local-registry-enforce-blocker.md`
+- `artifacts/validation/kyverno-enforce-proof.md`
+- `artifacts/validation/jenkins-webhook-proof.md`
+- `artifacts/validation/jenkins-ci-push-proof.md`
+- `artifacts/final/official-scope-report.md`
 - `artifacts/validation/production-runtime-evidence.md`
 - `artifacts/validation/runtime-image-rollout-proof.md`
 - `artifacts/release/release-attestation.json`
@@ -16,3 +20,4 @@
 - `artifacts/final/security-final-status.md`
 - `artifacts/final/production-final-status.md`
 - `artifacts/final/release-final-status.md`
+- `artifacts/final/devsecops-closure-matrix.md`

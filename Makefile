@@ -20,7 +20,7 @@ OFFICIAL_SCENARIO ?= demo
 SUPPORT_PACK_ROOT ?= artifacts/support-pack
 
 .PHONY: help lint test laravel-test sonar-analysis kyverno-policy-check image-scan sbom-attest sbom-validate verify promote promote-digest deploy runtime-image-proof validate demo production-cluster production-cleanup-plan production-cleanup production-cluster-clean-proof production-ha production-runtime-evidence runtime-security-postdeploy production-proof-full final-runtime-proof ha-chaos-lite hpa-runtime-proof refresh-hpa-runtime-proof production-external-db-readiness production-data-resilience data-resilience-proof production-dockerfiles image-size-evidence secrets-management production-db-secret sops-db-secret external-secret-render external-secret-runtime-proof data-backup data-restore production-readiness-campaign campaign final-campaign release-evidence release-attestation release-provenance release-proof-strict supply-chain-evidence supply-chain-execute observability-snapshot portal-service-proof global-project-status final-source-of-truth security-posture k8s-resource-guards close-missing-phases jenkins-webhook-proof jenkins-ci-push-proof cluster-security-proof kyverno-runtime-proof kyverno-enforce-readiness refresh-cluster-security-proof devsecops-final-proof devsecops-system-proof devsecops-closure devsecops-readiness final-proof final-summary support-pack kyverno-install kyverno-enforce metrics-install clean
-.PHONY: cluster-registry-setup cluster-registry-proof kyverno-enforce-proof gitops-update-digests gitops-sync-proof secret-rotation-proof observability-stack-proof scheduled-backup-proof jenkins-rbac-proof intoto-attestation normalize-artifacts expert-readiness
+.PHONY: cluster-registry-setup cluster-registry-proof kyverno-enforce-proof kyverno-admission-tests gitops-update-digests gitops-sync-proof gitops-drift-proof secret-rotation-proof observability-stack-proof scheduled-backup-proof jenkins-rbac-proof intoto-attestation normalize-artifacts official-scope runtime-detection-proof chaos-lite-proof ci-authority-report expert-readiness
 
 help: ## Show available targets
 	@awk 'BEGIN {FS = ":.*## "; print "Available targets:"} /^[a-zA-Z0-9_.-]+:.*## / {printf "  %-12s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
@@ -241,10 +241,10 @@ close-missing-phases: ## Close remaining environment-dependent phases with safe 
 	@bash scripts/validate/run-missing-phases-closure.sh
 
 jenkins-webhook-proof: ## Validate Jenkins GitHub webhook reachability and CI trigger readiness
-	@bash scripts/jenkins/validate-github-webhook.sh
+	@bash scripts/validate/validate-jenkins-webhook-proof.sh
 
 jenkins-ci-push-proof: ## Verify Jenkins consumed the latest pushed Git commit
-	@bash scripts/jenkins/verify-ci-push-trigger.sh
+	@bash scripts/validate/validate-jenkins-ci-push-proof.sh
 
 cluster-security-proof: ## Collect metrics-server, HPA and Kyverno runtime evidence
 	@bash scripts/validate/validate-cluster-security-addons.sh
@@ -299,12 +299,18 @@ kyverno-enforce-proof: ## Prove Kyverno Enforce accepts signed digests and rejec
 	@NAMESPACE=$(NS) CLUSTER_DIGEST_RECORD_FILE=$(CLUSTER_DIGEST_RECORD_FILE) \
 		bash scripts/validate/validate-kyverno-enforce.sh
 
+kyverno-admission-tests: ## Run Kyverno positive and negative admission tests against current policy mode
+	@bash scripts/validate/kyverno-admission-tests.sh
+
 gitops-update-digests: ## Update the Argo CD kustomization with cluster-reachable immutable digests
 	@DIGEST_RECORD_FILE=$(CLUSTER_DIGEST_RECORD_FILE) IMAGE_PREFIX=$(IMAGE_PREFIX) \
 		bash scripts/gitops/update-digests.sh
 
 gitops-sync-proof: ## Validate Argo CD sync and optionally create a controlled drift proof
 	@bash scripts/validate/validate-gitops-sync.sh
+
+gitops-drift-proof: ## Create controlled Argo CD drift only when CONFIRM_GITOPS_DRIFT=YES
+	@bash scripts/validate/validate-gitops-drift.sh
 
 secret-rotation-proof: ## Rotate the SOPS/age DB Secret when explicit rotation inputs are provided
 	@bash scripts/secrets/rotate-sops-production-db-secret.sh
@@ -314,6 +320,18 @@ observability-stack-proof: ## Validate Prometheus, Grafana, Loki and Alertmanage
 
 scheduled-backup-proof: ## Validate scheduled PostgreSQL backup CronJob readiness
 	@bash scripts/validate/validate-scheduled-backup.sh
+
+runtime-detection-proof: ## Validate optional Falco/Tetragon runtime detection in audit mode
+	@bash scripts/validate/validate-runtime-detection.sh
+
+chaos-lite-proof: ## Prove light self-healing checks; mutative actions require CONFIRM_CHAOS_LITE=YES
+	@bash scripts/validate/chaos-lite.sh
+
+ci-authority-report: ## Document Jenkins as official CI/CD authority and GitHub Actions as manual legacy
+	@bash scripts/validate/generate-ci-authority-report.sh
+
+official-scope: ## Generate the official Laravel-first scope and legacy RAG exclusion report
+	@bash scripts/validate/generate-official-scope-report.sh
 
 jenkins-rbac-proof: ## Validate the Jenkins production RBAC profile or live API proof
 	@bash scripts/validate/validate-jenkins-rbac.sh
@@ -325,14 +343,20 @@ normalize-artifacts: ## Normalize generated artifact text files to LF and trim t
 	@bash scripts/validate/normalize-artifacts.sh
 
 expert-readiness: ## Run non-destructive expert-readiness evidence refresh
-	@$(MAKE) cluster-registry-proof
+	@$(MAKE) official-scope
 	@$(MAKE) kyverno-enforce-readiness
 	@$(MAKE) gitops-sync-proof
 	@$(MAKE) secret-rotation-proof
 	@$(MAKE) observability-stack-proof
 	@$(MAKE) scheduled-backup-proof
-	@$(MAKE) jenkins-rbac-proof
-	@$(MAKE) intoto-attestation
+	@$(MAKE) runtime-detection-proof
+	@$(MAKE) chaos-lite-proof
+	@$(MAKE) jenkins-webhook-proof
+	@$(MAKE) jenkins-ci-push-proof
+	@$(MAKE) ci-authority-report
+	@$(MAKE) final-source-of-truth
+	@$(MAKE) final-summary
+	@bash scripts/validate/generate-expert-readiness-report.sh
 	@$(MAKE) normalize-artifacts
 
 metrics-install: ## Install metrics-server for local HPA metrics

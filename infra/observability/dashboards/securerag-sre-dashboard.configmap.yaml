@@ -60,6 +60,39 @@ data:
               "legendFormat": "{{pod}}"
             }
           ]
+        },
+        {
+          "type": "timeseries",
+          "title": "Memory working set by pod",
+          "gridPos": { "x": 0, "y": 11, "w": 12, "h": 7 },
+          "targets": [
+            {
+              "expr": "sum by (pod) (container_memory_working_set_bytes{namespace=\"securerag-hub\", container!=\"\"})",
+              "legendFormat": "{{pod}}"
+            }
+          ]
+        },
+        {
+          "type": "stat",
+          "title": "Portal health success",
+          "gridPos": { "x": 12, "y": 11, "w": 6, "h": 4 },
+          "targets": [
+            {
+              "expr": "max(up{namespace=\"securerag-hub\", service=\"portal-web\"})",
+              "legendFormat": "portal"
+            }
+          ]
+        },
+        {
+          "type": "timeseries",
+          "title": "Application errors",
+          "gridPos": { "x": 18, "y": 11, "w": 6, "h": 4 },
+          "targets": [
+            {
+              "expr": "sum by (pod) (rate({namespace=\"securerag-hub\"} |~ \"(?i)error|exception|critical\" [5m]))",
+              "legendFormat": "{{pod}}"
+            }
+          ]
         }
       ]
     }
