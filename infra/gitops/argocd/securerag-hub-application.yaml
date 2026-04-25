@@ -1,0 +1,24 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: securerag-hub
+  namespace: argocd
+  labels:
+    app.kubernetes.io/name: securerag-hub
+    app.kubernetes.io/part-of: securerag-platform
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/YassinoMed/MasterPFE.git
+    targetRevision: codex/devsecops-closure-fixes
+    path: infra/gitops/apps/securerag-hub
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: securerag-hub
+  syncPolicy:
+    automated:
+      prune: false
+      selfHeal: false
+    syncOptions:
+      - CreateNamespace=true
+      - ApplyOutOfSyncOnly=true

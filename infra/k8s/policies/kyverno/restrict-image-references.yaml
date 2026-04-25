@@ -45,14 +45,16 @@ spec:
                   - key: job-role
                     operator: DoesNotExist
       validate:
-        message: Runtime images must come from localhost:5001 or ghcr.io.
+        message: Runtime images must come from securerag-registry:5000, localhost:5001 or ghcr.io.
         foreach:
           - list: "request.object.spec.containers[]"
             anyPattern:
+              - image: "securerag-registry:5000/*"
               - image: "localhost:5001/*"
               - image: "ghcr.io/*"
           - list: "request.object.spec.initContainers[] || []"
             anyPattern:
+              - image: "securerag-registry:5000/*"
               - image: "localhost:5001/*"
               - image: "ghcr.io/*"
     - name: restrict-validation-helper-image

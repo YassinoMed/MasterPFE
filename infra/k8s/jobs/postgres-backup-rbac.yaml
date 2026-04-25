@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: securerag-backup
+  namespace: securerag-hub
+  labels:
+    app.kubernetes.io/name: securerag-postgres-backup
+    app.kubernetes.io/part-of: securerag-platform
+automountServiceAccountToken: false

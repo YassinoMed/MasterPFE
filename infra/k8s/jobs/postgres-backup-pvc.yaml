@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: securerag-backup-pvc
+  namespace: securerag-hub
+  labels:
+    app.kubernetes.io/name: securerag-postgres-backup
+    app.kubernetes.io/part-of: securerag-platform
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi

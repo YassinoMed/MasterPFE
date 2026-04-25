@@ -1,0 +1,36 @@
+driver:
+  kind: modern_ebpf
+
+falco:
+  jsonOutput: true
+  priority: warning
+  rules_file:
+    - /etc/falco/falco_rules.yaml
+    - /etc/falco/falco_rules.local.yaml
+
+falcosidekick:
+  enabled: false
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    cpu: 500m
+    memory: 768Mi
+
+tolerations:
+  - operator: Exists
+
+customRules:
+  securerag_rules.local.yaml: |-
+    - rule: SecureRAG Shell In Application Container
+      desc: Detect interactive shells spawned in SecureRAG namespace containers.
+      condition: >
+        spawned_process and container and k8s.ns.name=securerag-hub
+        and proc.name in (sh, bash, ash)
+      output: >
+        shell spawned in SecureRAG container
+        (user=%user.name command=%proc.cmdline pod=%k8s.pod.name container=%container.name)
+      priority: WARNING
+      tags: [securerag, runtime, audit]
