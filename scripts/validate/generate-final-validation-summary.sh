@@ -4,7 +4,7 @@ set -euo pipefail
 
 NS="${NS:-securerag-hub}"
 OUT="${OUT:-artifacts/final/final-validation-summary.md}"
-JENKINS_URL="${JENKINS_URL:-http://localhost:8085/login}"
+JENKINS_URL="${JENKINS_URL:-http://127.0.0.1:8085}"
 PORTAL_HEALTH_URL="${PORTAL_HEALTH_URL:-http://localhost:8081/health}"
 
 mkdir -p "$(dirname "${OUT}")"
@@ -113,6 +113,14 @@ jenkins_status_from_file() {
     printf 'DÉPENDANT_DE_L_ENVIRONNEMENT'
     return 0
   fi
+  local declared
+  declared="$(grep -E '^- Status: `|^Statut global: `' "${file}" | head -n 1 | sed -E 's/.*Status: `([^`]+)`.*/\1/; s/.*Statut global: `([^`]+)`.*/\1/' || true)"
+  case "${declared}" in
+    TERMINÉ|PARTIEL|PRÊT_NON_EXÉCUTÉ|DÉPENDANT_DE_L_ENVIRONNEMENT|FAIL)
+      printf '%s' "${declared}"
+      return 0
+      ;;
+  esac
   if grep -Eq '[|][[:space:]]*[^|]+[[:space:]]*[|][[:space:]]*FAIL[[:space:]]*[|]' "${file}"; then
     printf 'PARTIEL'
   elif grep -Eq '[|][[:space:]]*[^|]+[[:space:]]*[|][[:space:]]*WARN[[:space:]]*[|]' "${file}"; then
@@ -122,6 +130,96 @@ jenkins_status_from_file() {
   else
     printf 'PARTIEL'
   fi
+}
+
+status_from_json_attestation() {
+  local file="$1"
+  if [[ ! -s "${file}" ]]; then
+    printf 'PRÊT_NON_EXÉCUTÉ'
+    return 0
+  fi
+  python3 - "${file}" <<'PY' 2>/dev/null || { printf 'PARTIEL'; exit 0; }
+import json
+import sys
+
+with open(sys.argv[1], encoding="utf-8") as handle:
+    payload = json.load(handle)
+status = payload.get("status")
+if status == "COMPLETE_PROVEN":
+    print("TERMINÉ")
+elif status in {"PARTIAL_READY_TO_PROVE", "PRESENT_UNPROVEN"}:
+    print("DÉPENDANT_DE_L_ENVIRONNEMENT")
+else:
+    print("PARTIEL")
+PY
+}
+
+status_prefer_file() {
+  local primary="$1"
+  local fallback="$2"
+  if [[ -s "${primary}" ]]; then
+    status_from_file "${primary}"
+  else
+    status_from_file "${fallback}"
+  fi
+}
+
+jenkins_status_prefer_file() {
+  local primary="$1"
+  local fallback="$2"
+  if [[ -s "${primary}" ]]; then
+    jenkins_status_from_file "${primary}"
+  else
+    jenkins_status_from_file "${fallback}"
+  fi
+}
+
+cluster_digest_status() {
+  local file="${1:-artifacts/release/promotion-digests-cluster.txt}"
+  if [[ ! -s "${file}" ]]; then
+    printf 'PRÊT_NON_EXÉCUTÉ'
+    return 0
+  fi
+  if awk -F'|' '
+    $0 !~ /^#/ && NF >= 4 {
+      records++
+      if ($3 !~ /^securerag-registry:5000\/securerag-hub-/ || $4 !~ /^sha256:[0-9a-f]{64}$/) bad++
+    }
+    END { exit(records >= 5 && bad == 0 ? 0 : 1) }
+  ' "${file}"; then
+    printf 'TERMINÉ'
+  else
+    printf 'PARTIEL'
+  fi
+}
+
+table_status_excluding() {
+  local file="$1"
+  local exclude_regex="$2"
+  if [[ ! -s "${file}" ]]; then
+    printf 'PRÊT_NON_EXÉCUTÉ'
+    return 0
+  fi
+  awk -F'|' -v exclude="${exclude_regex}" '
+    /^[|]/ && $2 !~ /---/ {
+      label=$2
+      status=$3
+      gsub(/^[ \t`]+|[ \t`]+$/, "", label)
+      gsub(/^[ \t`]+|[ \t`]+$/, "", status)
+      if (label ~ exclude) next
+      if (status == "PARTIEL" || status == "FAIL" || status == "FAILED") partial=1
+      else if (status == "DÉPENDANT_DE_L_ENVIRONNEMENT") dep=1
+      else if (status == "PRÊT_NON_EXÉCUTÉ" || status == "SKIPPED") ready=1
+      else if (status == "TERMINÉ") term=1
+    }
+    END {
+      if (partial) print "PARTIEL"
+      else if (dep) print "DÉPENDANT_DE_L_ENVIRONNEMENT"
+      else if (ready) print "PRÊT_NON_EXÉCUTÉ"
+      else if (term) print "TERMINÉ"
+      else print "PRÊT_NON_EXÉCUTÉ"
+    }
+  ' "${file}"
 }
 
 json_count() {
@@ -199,7 +297,7 @@ fi
 semgrep_results="$(json_count security/reports/semgrep.json semgrep_results)"
 gitleaks_results="$(json_count security/reports/gitleaks.json gitleaks_results)"
 trivy_results="$(json_count security/reports/trivy-fs.json trivy_vulnerabilities)"
-release_attestation_status="$(status_from_file artifacts/release/release-attestation.md)"
+release_attestation_status="$(status_from_json_attestation artifacts/release/release-attestation.json)"
 observability_snapshot_status="$(status_from_file artifacts/observability/observability-snapshot.md)"
 portal_service_status="$(status_from_file artifacts/application/portal-service-connectivity.md)"
 global_project_status="$(status_from_file artifacts/final/global-project-status.md)"
@@ -207,19 +305,28 @@ missing_phases_status="$(status_from_file artifacts/final/missing-phases-closure
 security_final_status="$(status_from_file artifacts/final/security-final-status.md)"
 production_final_status="$(status_from_file artifacts/final/production-final-status.md)"
 release_final_status="$(status_from_file artifacts/final/release-final-status.md)"
+official_scope_status="$(status_from_file artifacts/final/official-scope-report.md)"
+cluster_digest_status_value="$(cluster_digest_status artifacts/release/promotion-digests-cluster.txt)"
+kyverno_enforce_status="$(status_from_file artifacts/validation/kyverno-enforce-proof.md)"
+chaos_lite_status="$(status_prefer_file artifacts/validation/chaos-lite-proof.md artifacts/validation/ha-chaos-lite-report.md)"
+scheduled_backup_status="$(status_prefer_file artifacts/backup/scheduled-backup-proof.md artifacts/backup/scheduled-backup-report.md)"
+runtime_detection_status="$(status_from_file artifacts/security/runtime-detection-proof.md)"
+gitops_digest_status="$(status_prefer_file artifacts/gitops/gitops-digest-update.md artifacts/gitops/digest-update.md)"
+gitops_sync_status="$(status_from_file artifacts/gitops/argocd-sync.md)"
+gitops_drift_status="$(status_from_file artifacts/gitops/drift-proof.md)"
+observability_slo_status="$(status_from_file artifacts/observability/slo-summary.md)"
 
 jenkins_status="$(merge_status \
-  "$(jenkins_status_from_file artifacts/jenkins/github-webhook-validation.md)" \
-  "$(jenkins_status_from_file artifacts/jenkins/ci-push-trigger-proof.md)")"
+  "$(jenkins_status_prefer_file artifacts/validation/jenkins-webhook-proof.md artifacts/jenkins/github-webhook-validation.md)" \
+  "$(jenkins_status_prefer_file artifacts/validation/jenkins-ci-push-proof.md artifacts/jenkins/ci-push-trigger-proof.md)")"
 cluster_status="$(status_from_file artifacts/validation/production-runtime-evidence.md)"
 portal_status="${portal_service_status}"
 execute_status="$(merge_status "${production_final_status}" "${release_final_status}")"
-summary_global_status="$(merge_status "${security_final_status}" "${production_final_status}" "${release_final_status}")"
-
-if command -v curl >/dev/null 2>&1 && curl -fsS "${JENKINS_URL}" >/dev/null 2>&1; then
-  if [[ "${jenkins_status}" == "DÉPENDANT_DE_L_ENVIRONNEMENT" ]]; then
-    jenkins_status="TERMINÉ"
-  fi
+security_without_jenkins_status="$(table_status_excluding artifacts/final/security-final-status.md 'Jenkins')"
+core_global_status="$(merge_status "${security_without_jenkins_status}" "${production_final_status}" "${release_final_status}")"
+summary_global_status="${core_global_status}"
+if [[ "${core_global_status}" == "TERMINÉ" && "${jenkins_status}" == "DÉPENDANT_DE_L_ENVIRONNEMENT" ]]; then
+  summary_global_status="TERMINÉ AVEC DÉPENDANCE JENKINS LIVE"
 fi
 
 if command -v kubectl >/dev/null 2>&1 && kubectl get ns "${NS}" >/dev/null 2>&1 && kubectl get pods -n "${NS}" >/dev/null 2>&1; then
@@ -276,6 +383,16 @@ cat > "${OUT}" <<EOF
 | Jenkins / CD gates | ${jenkins_status} |
 | Kubernetes runtime | ${cluster_status} |
 | Portal Web health | ${portal_status} |
+| Official scope / legacy exclusion | ${official_scope_status} |
+| Cluster registry immutable digests | ${cluster_digest_status_value} |
+| Kyverno Enforce admission | ${kyverno_enforce_status} |
+| GitOps digest update | ${gitops_digest_status} |
+| Argo CD sync | ${gitops_sync_status} |
+| Argo CD drift proof | ${gitops_drift_status} |
+| Observability SLO summary | ${observability_slo_status} |
+| Scheduled backup | ${scheduled_backup_status} |
+| Chaos lite | ${chaos_lite_status} |
+| Runtime detection | ${runtime_detection_status} |
 
 ## 4. Evidence files
 
@@ -288,17 +405,27 @@ cat > "${OUT}" <<EOF
 | \`artifacts/release/supply-chain-gate-report.md\` | $(status_from_file artifacts/release/supply-chain-gate-report.md) |
 | \`artifacts/release/no-rebuild-deploy-summary.md\` | $(status_from_file artifacts/release/no-rebuild-deploy-summary.md) |
 | \`artifacts/release/release-attestation.json\` | ${release_attestation_status} |
+| \`artifacts/release/promotion-digests-cluster.txt\` | ${cluster_digest_status_value} |
 | \`artifacts/observability/observability-snapshot.md\` | ${observability_snapshot_status} |
+| \`artifacts/observability/slo-summary.md\` | ${observability_slo_status} |
 | \`artifacts/security/production-external-db-readiness.md\` | $(status_from_file artifacts/security/production-external-db-readiness.md) |
 | \`artifacts/security/runtime-security-postdeploy.md\` | $(status_from_file artifacts/security/runtime-security-postdeploy.md) |
 | \`artifacts/security/external-secrets-runtime.md\` | $(status_from_file artifacts/security/external-secrets-runtime.md) |
-| \`artifacts/validation/kyverno-local-registry-enforce-blocker.md\` | $(status_from_file artifacts/validation/kyverno-local-registry-enforce-blocker.md) |
+| \`artifacts/validation/kyverno-enforce-proof.md\` | ${kyverno_enforce_status} |
+| \`artifacts/validation/kyverno-admission-positive-test.md\` | $(status_from_file artifacts/validation/kyverno-admission-positive-test.md) |
+| \`artifacts/validation/kyverno-admission-negative-test.md\` | $(status_from_file artifacts/validation/kyverno-admission-negative-test.md) |
+| \`artifacts/gitops/gitops-digest-update.md\` | ${gitops_digest_status} |
+| \`artifacts/gitops/argocd-sync.md\` | ${gitops_sync_status} |
+| \`artifacts/gitops/drift-proof.md\` | ${gitops_drift_status} |
+| \`artifacts/backup/scheduled-backup-proof.md\` | ${scheduled_backup_status} |
+| \`artifacts/security/runtime-detection-proof.md\` | ${runtime_detection_status} |
+| \`artifacts/final/official-scope-report.md\` | ${official_scope_status} |
 | \`artifacts/application/portal-service-connectivity.md\` | ${portal_service_status} |
 | \`artifacts/final/global-project-status.md\` | ${global_project_status} |
 | \`artifacts/final/missing-phases-closure.md\` | ${missing_phases_status} |
 | \`artifacts/final/devsecops-readiness-report.md\` | $(status_from_file artifacts/final/devsecops-readiness-report.md) |
-| \`artifacts/jenkins/github-webhook-validation.md\` | $(status_from_file artifacts/jenkins/github-webhook-validation.md) |
-| \`artifacts/jenkins/ci-push-trigger-proof.md\` | $(status_from_file artifacts/jenkins/ci-push-trigger-proof.md) |
+| \`artifacts/validation/jenkins-webhook-proof.md\` | $(status_from_file artifacts/validation/jenkins-webhook-proof.md) |
+| \`artifacts/validation/jenkins-ci-push-proof.md\` | $(status_from_file artifacts/validation/jenkins-ci-push-proof.md) |
 | Latest support pack | ${latest_support_pack:-missing} |
 
 ## 5. Honest limits
@@ -308,6 +435,7 @@ cat > "${OUT}" <<EOF
 - Full \`execute\` mode depends on Docker, kind, kubectl, Cosign keys and registry availability.
 - Kyverno policies are repository-ready, but admission proof depends on an installed Kyverno controller.
 - HPA objects exist, while live CPU metrics depend on metrics-server availability.
+- Jenkins live API proof is classified separately as \`DÉPENDANT_DE_L_ENVIRONNEMENT\` when token/API permissions or job naming prevent live verification.
 
 ## 6. Conclusion
 

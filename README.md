@@ -15,6 +15,20 @@ Ce dépôt contient l'intégralité du système : microservices, portail web, in
 
 ---
 
+## ✅ Périmètre officiel
+
+Le périmètre officiel de soutenance et de déploiement production-like est Laravel-first :
+
+- portail Laravel `portal-web` ;
+- services Laravel `auth-users`, `chatbot-manager`, `conversation-service`, `audit-security-service` ;
+- socle DevSecOps/Kubernetes : Jenkins, kind, registry cluster-side `securerag-registry:5000`, déploiement par digest, supply chain, Kyverno, HPA, sécurité runtime, backup, observabilité et support pack.
+
+Les anciens composants Python IA/RAG (`services/`, `ollama`, `qdrant`, anciens workloads) sont legacy et exclus du runtime officiel. Ils ne doivent pas être présentés comme un pipeline RAG complet tant qu'ils ne sont pas restaurés et revalidés.
+
+Source de vérité : [docs/architecture/official-scope.md](./docs/architecture/official-scope.md). Preuve générée : `artifacts/final/official-scope-report.md`.
+
+---
+
 ## 🎯 Objectifs stratégiques
 
 | Objectif | Description |
@@ -93,7 +107,7 @@ Lecture honnête attendue :
 - le déploiement final doit être prouvé en digest strict avec `imageID` runtime ;
 - `kubectl top` et les HPA doivent être figés sans métriques `<unknown>` ;
 - Kyverno doit être prouvé en `Audit` avec `PolicyReports` ;
-- `verifyImages` en `Enforce` reste `DÉPENDANT_DE_L_ENVIRONNEMENT` si les workloads utilisent une registry locale en `localhost:5001`, car cette référence n'est pas joignable depuis les pods Kyverno de la même manière que depuis l'hôte.
+- `verifyImages` en `Enforce` est testé uniquement contre la registry cluster-side `securerag-registry:5000` et des images `@sha256`.
 
 ---
 
@@ -360,6 +374,17 @@ make security-posture                   # Source de vérité sécurité factuell
 make kyverno-install                    # Installation Kyverno
 make kyverno-runtime-proof              # Preuve Kyverno CRDs/pods/policies/PolicyReports
 make kyverno-enforce-readiness          # Décision Enforce prudente
+APPLY_ENFORCE=true REGISTRY_CLUSTER_HOST=securerag-registry:5000 make kyverno-enforce-proof
+make gitops-update-digests              # Mise à jour intention GitOps avec digests cluster-side
+make gitops-sync-proof                  # Preuve Argo CD Synced/Healthy si installé
+CONFIRM_GITOPS_DRIFT=YES make gitops-drift-proof
+make observability-stack-proof          # Prometheus/Grafana/Loki/Alertmanager/SLO si stack installée
+SOPS_AGE_RECIPIENT='<recipient>' make secret-rotation-proof
+make scheduled-backup-proof             # CronJob PostgreSQL backup
+make chaos-lite-proof                   # Read-only par défaut
+make runtime-detection-proof            # Falco/Tetragon optionnel en Audit
+make ci-authority-report                # Jenkins officiel, GitHub Actions legacy manuel
+make expert-readiness                   # Rapport expert consolidé
 make k8s-ultra-hardening                # Validation PSA restricted / RBAC / NetworkPolicy / probes
 make metrics-install                    # Installation metrics-server
 make production-cluster                 # Cluster kind production-like, garde destructif
@@ -402,6 +427,7 @@ make support-pack
 | Runbook | Sujet |
 |---------|-------|
 | [jenkins-setup.md](./docs/runbooks/jenkins-setup.md) | Configuration Jenkins locale |
+| [jenkins.md](./docs/runbooks/jenkins.md) | Preuve Jenkins live API/SCM paramétrable |
 | [local-kind.md](./docs/runbooks/local-kind.md) | Cluster Kubernetes kind |
 | [production-cluster-clean.md](./docs/runbooks/production-cluster-clean.md) | Cluster production propre et sans legacy runtime |
 | [release-promotion.md](./docs/runbooks/release-promotion.md) | Promotion d'images |
@@ -413,6 +439,10 @@ make support-pack
 | [troubleshooting.md](./docs/runbooks/troubleshooting.md) | Résolution problèmes |
 | [final-proof.md](./docs/runbooks/final-proof.md) | Génération de preuves |
 | [kyverno-install.md](./docs/runbooks/kyverno-install.md) | Installation Kyverno |
+| [observability.md](./docs/runbooks/observability.md) | Observabilité SRE Prometheus/Grafana/Loki/SLO |
+| [chaos-lite.md](./docs/runbooks/chaos-lite.md) | Tests self-healing légers |
+| [runtime-detection.md](./docs/runbooks/runtime-detection.md) | Falco/Tetragon optionnel en audit |
+| [official-scope.md](./docs/architecture/official-scope.md) | Périmètre officiel Laravel-first et legacy RAG |
 | [control-matrix.md](./docs/security/control-matrix.md) | Source de vérité des contrôles |
 | [security-status-source-of-truth.md](./docs/security/security-status-source-of-truth.md) | Règles de statut des preuves |
 | [policy-matrix.md](./docs/security/policy-matrix.md) | Matrice de sécurité |

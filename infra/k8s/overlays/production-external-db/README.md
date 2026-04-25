@@ -41,7 +41,7 @@ The repository also contains an optional SOPS/age template under
 
 ```bash
 KUSTOMIZE_OVERLAY=infra/k8s/overlays/production-external-db \
-REGISTRY_HOST=localhost:5001 \
+REGISTRY_HOST=securerag-registry:5000 \
 IMAGE_PREFIX=securerag-hub \
 IMAGE_TAG=release-local \
 bash scripts/deploy/deploy-kind.sh

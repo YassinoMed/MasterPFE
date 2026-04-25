@@ -1,6 +1,7 @@
 # Release Final Status - SecureRAG Hub
 
-- Generated at UTC: `2026-04-21T19:00:07Z`
+- Generated at UTC: `2026-04-25T20:08:19Z`
+- Status: `DÉPENDANT_DE_L_ENVIRONNEMENT`
 
 | Control | Status | Evidence |
 |---|---:|---|

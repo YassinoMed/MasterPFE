@@ -4,8 +4,10 @@ set -euo pipefail
 
 NAMESPACE="${NAMESPACE:-securerag-hub}"
 CRONJOB_NAME="${CRONJOB_NAME:-securerag-postgres-backup}"
-REPORT_FILE="${REPORT_FILE:-artifacts/backup/scheduled-backup-report.md}"
+REPORT_FILE="${REPORT_FILE:-artifacts/backup/scheduled-backup-proof.md}"
+LEGACY_REPORT_FILE="${LEGACY_REPORT_FILE:-artifacts/backup/scheduled-backup-report.md}"
 RUN_BACKUP_CRONJOB_NOW="${RUN_BACKUP_CRONJOB_NOW:-false}"
+CONFIRM_SCHEDULED_BACKUP_RUN="${CONFIRM_SCHEDULED_BACKUP_RUN:-NO}"
 
 is_true() { case "${1:-}" in 1|true|TRUE|yes|YES|on|ON) return 0 ;; *) return 1 ;; esac; }
 mkdir -p "$(dirname "${REPORT_FILE}")"
@@ -26,10 +28,12 @@ elif kubectl get cronjob "${CRONJOB_NAME}" -n "${NAMESPACE}" >/dev/null 2>&1; th
     detail="${cron}\nCronJob is installed but suspended."
   fi
 
-  if is_true "${RUN_BACKUP_CRONJOB_NOW}"; then
+  if is_true "${RUN_BACKUP_CRONJOB_NOW}" && [[ "${CONFIRM_SCHEDULED_BACKUP_RUN}" == "YES" ]]; then
     job_name="${CRONJOB_NAME}-manual-$(date -u '+%Y%m%d%H%M%S')"
     kubectl create job "${job_name}" -n "${NAMESPACE}" --from=cronjob/"${CRONJOB_NAME}" >/dev/null
     detail="${detail}\nManual job created: ${job_name}"
+  elif is_true "${RUN_BACKUP_CRONJOB_NOW}"; then
+    detail="${detail}\nManual job creation skipped because CONFIRM_SCHEDULED_BACKUP_RUN=YES was not provided."
   fi
 fi
 
@@ -41,5 +45,6 @@ fi
   printf -- '- CronJob: `%s`\n\n' "${CRONJOB_NAME}"
   printf '## Detail\n\n```text\n%s\n```\n' "${detail}"
 } > "${REPORT_FILE}"
+cp "${REPORT_FILE}" "${LEGACY_REPORT_FILE}"
 
 printf '[INFO] Scheduled backup report written to %s\n' "${REPORT_FILE}"

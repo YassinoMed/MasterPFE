@@ -16,19 +16,19 @@ generatorOptions:
 
 images:
   - name: ghcr.io/example/securerag-hub-portal-web
-    newName: localhost:5001/securerag-hub-portal-web
+    newName: securerag-registry:5000/securerag-hub-portal-web
     newTag: dev
   - name: ghcr.io/example/securerag-hub-auth-users
-    newName: localhost:5001/securerag-hub-auth-users
+    newName: securerag-registry:5000/securerag-hub-auth-users
     newTag: dev
   - name: ghcr.io/example/securerag-hub-chatbot-manager
-    newName: localhost:5001/securerag-hub-chatbot-manager
+    newName: securerag-registry:5000/securerag-hub-chatbot-manager
     newTag: dev
   - name: ghcr.io/example/securerag-hub-conversation-service
-    newName: localhost:5001/securerag-hub-conversation-service
+    newName: securerag-registry:5000/securerag-hub-conversation-service
     newTag: dev
   - name: ghcr.io/example/securerag-hub-audit-security-service
-    newName: localhost:5001/securerag-hub-audit-security-service
+    newName: securerag-registry:5000/securerag-hub-audit-security-service
     newTag: dev
 
 patches:

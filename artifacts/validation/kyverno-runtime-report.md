@@ -1,8 +1,9 @@
 # Kyverno Runtime Report - SecureRAG Hub
 
-- Generated at UTC: `2026-04-21T18:59:26Z`
+- Generated at UTC: `2026-04-25T20:06:13Z`
 - Namespace: `securerag-hub`
 - Supply chain attestation: `artifacts/release/release-attestation.json`
+- Status: `DÉPENDANT_DE_L_ENVIRONNEMENT`
 
 | Component | Status | Evidence |
 |---|---:|---|

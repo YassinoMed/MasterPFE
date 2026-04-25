@@ -77,9 +77,9 @@ flowchart TD
 
 ```mermaid
 flowchart LR
-  A["Docker local"] --> B["Registre local localhost:5001"]
+  A["Docker local"] --> B["Registry cluster-side securerag-registry:5000"]
   B --> C["Cluster kind"]
-  C --> D["Overlay dev ou demo"]
+  C --> D["Overlay officiel avec images @sha256"]
   D --> E["portal-web"]
   D --> F["auth-users"]
   D --> G["chatbot-manager"]

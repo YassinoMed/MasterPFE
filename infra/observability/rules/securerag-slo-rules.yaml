@@ -40,9 +40,17 @@ spec:
             summary: HPA metrics are unavailable for SecureRAG.
         - alert: SecureRAGPortalHealthProbeMissing
           expr: |
-            absent(probe_success{namespace="securerag-hub", job="portal-health"})
+            absent(up{namespace="securerag-hub", service="portal-web"})
           for: 15m
           labels:
             severity: warning
           annotations:
             summary: Portal health SLO probe is not configured or not scraped.
+        - alert: SecureRAGPortalHealthDown
+          expr: |
+            max(up{namespace="securerag-hub", service="portal-web"}) == 0
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: SecureRAG portal health endpoint is down.

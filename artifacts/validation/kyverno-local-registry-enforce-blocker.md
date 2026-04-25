@@ -1,6 +1,6 @@
 # Kyverno Cosign Enforce Local Registry Blocker
 
-- Generated at UTC: `2026-04-21T18:59:26Z`
+- Generated at UTC: `2026-04-25T20:06:13Z`
 - Namespace: `securerag-hub`
 - Affected policy: `securerag-verify-cosign-images`
 - Status: `DÉPENDANT_DE_L_ENVIRONNEMENT`

@@ -1,31 +1,14 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
-# Optional Enforce overlay. Apply only after Audit policies are clean and image
-# signatures are proven for the release tag/digests deployed to the cluster.
+# Optional Enforce overlay. It only promotes the low-risk image reference
+# policies first: no latest tags, trusted cluster registry, digest references,
+# and Cosign verifyImages when the release signatures are available.
 
 resources:
   - ../kyverno
 
 patches:
-  - target:
-      group: kyverno.io
-      version: v1
-      kind: ClusterPolicy
-      name: securerag-audit-cleartext-env-values
-    patch: |-
-      - op: replace
-        path: /spec/validationFailureAction
-        value: Enforce
-  - target:
-      group: kyverno.io
-      version: v1
-      kind: ClusterPolicy
-      name: securerag-require-pod-security
-    patch: |-
-      - op: replace
-        path: /spec/validationFailureAction
-        value: Enforce
   - target:
       group: kyverno.io
       version: v1
@@ -43,33 +26,6 @@ patches:
       version: v1
       kind: ClusterPolicy
       name: securerag-restrict-image-references
-    patch: |-
-      - op: replace
-        path: /spec/validationFailureAction
-        value: Enforce
-  - target:
-      group: kyverno.io
-      version: v1
-      kind: ClusterPolicy
-      name: securerag-restrict-volume-types
-    patch: |-
-      - op: replace
-        path: /spec/validationFailureAction
-        value: Enforce
-  - target:
-      group: kyverno.io
-      version: v1
-      kind: ClusterPolicy
-      name: securerag-require-workload-controls
-    patch: |-
-      - op: replace
-        path: /spec/validationFailureAction
-        value: Enforce
-  - target:
-      group: kyverno.io
-      version: v1
-      kind: ClusterPolicy
-      name: securerag-restrict-service-exposure
     patch: |-
       - op: replace
         path: /spec/validationFailureAction

@@ -1,7 +1,7 @@
 # Security Posture Report — SecureRAG Hub
 
-- Generated at UTC: `2026-04-21T19:00:01Z`
-- Git commit: `302b6c0c20d2603908aa5a473b05bb727ac0fbbe`
+- Generated at UTC: `2026-04-25T20:08:19Z`
+- Git commit: `808eb363d8aa4eba3fb202858af6482fbde73b35`
 - Kubernetes namespace: `securerag-hub`
 
 ## 1. Security controls status
@@ -22,13 +22,17 @@
 | Release attestation | `DÉPENDANT_DE_L_ENVIRONNEMENT` | `artifacts/release/release-attestation.json` |
 | SLSA-style provenance | `PRÊT_NON_EXÉCUTÉ` | `artifacts/release/provenance.slsa.md` |
 | Kubernetes ultra hardening static | `TERMINÉ` | `artifacts/security/k8s-ultra-hardening.md` |
+| Official scope / legacy exclusion | `TERMINÉ` | `artifacts/final/official-scope-report.md` |
 | Runtime security post-deployment | `DÉPENDANT_DE_L_ENVIRONNEMENT` | `artifacts/security/runtime-security-postdeploy.md` |
 | Kubernetes production HA static | `TERMINÉ` | `artifacts/security/production-ha-readiness.md` |
 | Production runtime evidence | `DÉPENDANT_DE_L_ENVIRONNEMENT` | `artifacts/validation/production-runtime-evidence.md` |
 | Runtime image rollout proof | `DÉPENDANT_DE_L_ENVIRONNEMENT` | `artifacts/validation/runtime-image-rollout-proof.md` |
-| Jenkins webhook proof | `PARTIEL` | `artifacts/jenkins/github-webhook-validation.md` |
-| Jenkins CI push proof | `PARTIEL` | `artifacts/jenkins/ci-push-trigger-proof.md` |
-| Kyverno Enforce local registry blocker | `DÉPENDANT_DE_L_ENVIRONNEMENT` | `artifacts/validation/kyverno-local-registry-enforce-blocker.md` |
+| Jenkins webhook/API proof | `DÉPENDANT_DE_L_ENVIRONNEMENT` | `artifacts/validation/jenkins-webhook-proof.md` |
+| Jenkins CI push proof | `DÉPENDANT_DE_L_ENVIRONNEMENT` | `artifacts/validation/jenkins-ci-push-proof.md` |
+| Kyverno Enforce admission proof | `PRÊT_NON_EXÉCUTÉ` | `artifacts/validation/kyverno-enforce-proof.md` |
+| GitOps Argo CD sync | `PRÊT_NON_EXÉCUTÉ` | `artifacts/gitops/argocd-sync.md` |
+| Runtime detection audit | `PRÊT_NON_EXÉCUTÉ` | `artifacts/security/runtime-detection-proof.md` |
+| Observability SLO summary | `PRÊT_NON_EXÉCUTÉ` | `artifacts/observability/slo-summary.md` |
 | Production data resilience | `PRÊT_NON_EXÉCUTÉ` | `artifacts/security/production-data-resilience.md` |
 | Production Dockerfiles | `TERMINÉ` | `artifacts/security/production-dockerfiles.md` |
 | Image size evidence | `DÉPENDANT_DE_L_ENVIRONNEMENT` | `artifacts/security/image-size-evidence.md` |

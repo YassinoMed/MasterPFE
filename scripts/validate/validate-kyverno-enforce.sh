@@ -12,13 +12,28 @@ POSITIVE_IMAGE_DIGEST="${POSITIVE_IMAGE_DIGEST:-}"
 NEGATIVE_IMAGE="${NEGATIVE_IMAGE:-nginx:latest}"
 CLUSTER_DIGEST_RECORD_FILE="${CLUSTER_DIGEST_RECORD_FILE:-artifacts/release/promotion-digests-cluster.txt}"
 REPORT_FILE="${REPORT_FILE:-artifacts/validation/kyverno-enforce-proof.md}"
+POSITIVE_REPORT_FILE="${POSITIVE_REPORT_FILE:-artifacts/validation/kyverno-admission-positive-test.md}"
 NEGATIVE_REPORT_FILE="${NEGATIVE_REPORT_FILE:-artifacts/validation/kyverno-admission-negative-test.md}"
+ROLLBACK_REPORT_FILE="${ROLLBACK_REPORT_FILE:-artifacts/validation/kyverno-enforce-rollback.md}"
 STRICT_KYVERNO_ENFORCE="${STRICT_KYVERNO_ENFORCE:-false}"
+AUTO_ROLLBACK_ON_FAILURE="${AUTO_ROLLBACK_ON_FAILURE:-true}"
 
 info() { printf '[INFO] %s\n' "$*"; }
 is_true() { case "${1:-}" in 1|true|TRUE|yes|YES|on|ON) return 0 ;; *) return 1 ;; esac; }
 
-mkdir -p "$(dirname "${REPORT_FILE}")"
+mkdir -p "$(dirname "${REPORT_FILE}")" "$(dirname "${POSITIVE_REPORT_FILE}")" "$(dirname "${ROLLBACK_REPORT_FILE}")"
+
+write_rollback_report() {
+  local status="$1"
+  local detail="$2"
+  {
+    printf '# Kyverno Enforce Rollback - SecureRAG Hub\n\n'
+    printf -- '- Generated at UTC: `%s`\n' "$(date -u '+%Y-%m-%dT%H:%M:%SZ')"
+    printf -- '- Status: `%s`\n' "${status}"
+    printf -- '- Audit overlay: `%s`\n\n' "${AUDIT_OVERLAY}"
+    printf '## Detail\n\n%s\n' "${detail}"
+  } > "${ROLLBACK_REPORT_FILE}"
+}
 
 write_reports() {
   local status="$1"
@@ -51,7 +66,16 @@ write_reports() {
     printf '## Detail\n\n```text\n%s\n```\n' "${negative_detail}"
   } > "${NEGATIVE_REPORT_FILE}"
 
+  {
+    printf '# Kyverno Admission Positive Test - SecureRAG Hub\n\n'
+    printf -- '- Generated at UTC: `%s`\n' "$(date -u '+%Y-%m-%dT%H:%M:%SZ')"
+    printf -- '- Status: `%s`\n' "${positive_status}"
+    printf -- '- Positive image: `%s`\n\n' "${POSITIVE_IMAGE_DIGEST:-not-resolved}"
+    printf '## Detail\n\n```text\n%s\n```\n' "${POSITIVE_DETAIL:-not executed}"
+  } > "${POSITIVE_REPORT_FILE}"
+
   info "Kyverno Enforce proof written to ${REPORT_FILE}"
+  info "Kyverno positive admission proof written to ${POSITIVE_REPORT_FILE}"
   info "Kyverno negative admission proof written to ${NEGATIVE_REPORT_FILE}"
 
   if [[ "${status}" != "TERMINÉ" ]] && is_true "${STRICT_KYVERNO_ENFORCE}"; then
@@ -66,9 +90,12 @@ fi
 
 if is_true "${ROLLBACK_TO_AUDIT}"; then
   kubectl apply -k "${AUDIT_OVERLAY}" >/dev/null
+  write_rollback_report "TERMINÉ" "Rollback to Audit overlay was applied on explicit request."
   write_reports "PRÊT_NON_EXÉCUTÉ" "PRÊT_NON_EXÉCUTÉ" "PRÊT_NON_EXÉCUTÉ" "Rollback to Audit overlay was applied on request." "Rollback requested; no negative admission test executed."
   exit 0
 fi
+
+write_rollback_report "PRÊT_NON_EXÉCUTÉ" "No rollback was required."
 
 if is_true "${APPLY_ENFORCE}"; then
   kubectl apply -k "${ENFORCE_OVERLAY}" >/dev/null
@@ -137,6 +164,7 @@ else
   positive_status="PARTIEL"
 fi
 positive_detail="$(cat "${positive_output}")"
+POSITIVE_DETAIL="${positive_detail}"
 rm -f "${positive_output}"
 
 negative_output="$(mktemp)"
@@ -190,5 +218,12 @@ kubectl delete pod kyverno-positive-digest-test -n "${NAMESPACE}" --ignore-not-f
 if [[ "${positive_status}" == "TERMINÉ" && "${negative_status}" == "TERMINÉ" ]]; then
   write_reports "TERMINÉ" "${positive_status}" "${negative_status}" "Kyverno Enforce accepted a signed digest image and rejected the unsafe negative image." "${negative_detail}"
 else
+  if is_true "${APPLY_ENFORCE}" && is_true "${AUTO_ROLLBACK_ON_FAILURE}"; then
+    if kubectl apply -k "${AUDIT_OVERLAY}" >/dev/null 2>&1; then
+      write_rollback_report "TERMINÉ" "Admission proof failed or was incomplete; policies were automatically returned to Audit mode."
+    else
+      write_rollback_report "PARTIEL" "Admission proof failed or was incomplete, but automatic rollback to Audit mode failed. Re-run with ROLLBACK_TO_AUDIT=true."
+    fi
+  fi
   write_reports "PARTIEL" "${positive_status}" "${negative_status}" "Kyverno Enforce is active, but one admission proof did not match the expected result. Positive detail: ${positive_detail}" "${negative_detail}"
 fi

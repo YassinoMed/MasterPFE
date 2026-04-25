@@ -8,9 +8,10 @@ metadata:
     policies.kyverno.io/severity: high
     policies.kyverno.io/subject: Pod
     policies.kyverno.io/description: >-
-      Audits Pods that use mutable latest tags or images outside the trusted
-      registries required by the official SecureRAG Laravel runtime. Validation
-      Pods are limited to the pinned curlimages/curl helper image family.
+      Audits Pods that use mutable latest tags, images without digests, or
+      images outside the cluster-reachable registry required by the official
+      SecureRAG Laravel runtime. Validation Pods are limited to the pinned
+      curlimages/curl helper image family.
 spec:
   validationFailureAction: Audit
   background: true
@@ -32,6 +33,39 @@ spec:
           - list: "request.object.spec.initContainers[] || []"
             pattern:
               image: "!*:latest"
+    - name: require-immutable-digests-for-official-images
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+              namespaces:
+                - securerag-hub
+      validate:
+        message: Official SecureRAG images must be referenced by immutable sha256 digest.
+        foreach:
+          - list: "request.object.spec.containers[]"
+            deny:
+              conditions:
+                all:
+                  - key: "{{ element.image }}"
+                    operator: AnyIn
+                    value:
+                      - "securerag-registry:5000/securerag-hub-*"
+                  - key: "{{ contains(element.image, '@sha256:') }}"
+                    operator: Equals
+                    value: false
+          - list: "request.object.spec.initContainers[] || []"
+            deny:
+              conditions:
+                all:
+                  - key: "{{ element.image }}"
+                    operator: AnyIn
+                    value:
+                      - "securerag-registry:5000/securerag-hub-*"
+                  - key: "{{ contains(element.image, '@sha256:') }}"
+                    operator: Equals
+                    value: false
     - name: restrict-registries
       match:
         any:
@@ -45,18 +79,14 @@ spec:
                   - key: job-role
                     operator: DoesNotExist
       validate:
-        message: Runtime images must come from securerag-registry:5000, localhost:5001 or ghcr.io.
+        message: Runtime images must come from the cluster-reachable registry securerag-registry:5000.
         foreach:
           - list: "request.object.spec.containers[]"
             anyPattern:
               - image: "securerag-registry:5000/*"
-              - image: "localhost:5001/*"
-              - image: "ghcr.io/*"
           - list: "request.object.spec.initContainers[] || []"
             anyPattern:
               - image: "securerag-registry:5000/*"
-              - image: "localhost:5001/*"
-              - image: "ghcr.io/*"
     - name: restrict-validation-helper-image
       match:
         any:

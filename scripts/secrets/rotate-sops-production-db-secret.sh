@@ -7,6 +7,7 @@ ENCRYPTED_SECRET_FILE="${ENCRYPTED_SECRET_FILE:-infra/secrets/production/securer
 REPORT_FILE="${REPORT_FILE:-artifacts/security/secret-rotation-proof.md}"
 ROTATE_SOPS_SECRET="${ROTATE_SOPS_SECRET:-false}"
 APPLY_ROTATED_SECRET="${APPLY_ROTATED_SECRET:-false}"
+CONFIRM_SECRET_ROTATION="${CONFIRM_SECRET_ROTATION:-NO}"
 DB_PORT="${DB_PORT:-5432}"
 DB_SSLMODE="${DB_SSLMODE:-require}"
 
@@ -29,28 +30,38 @@ write_report() {
   } > "${REPORT_FILE}"
 }
 
+if [[ -n "${SOPS_AGE_RECIPIENT:-}" ]]; then
+  ROTATE_SOPS_SECRET=true
+fi
+
 if ! is_true "${ROTATE_SOPS_SECRET}"; then
-  write_report "PRÊT_NON_EXÉCUTÉ" "Rotation is disabled by default. Re-run with `ROTATE_SOPS_SECRET=true`, `SOPS_AGE_RECIPIENT`, `DB_HOST` and `DB_USERNAME`."
+  write_report "PRÊT_NON_EXÉCUTÉ" "Rotation is disabled by default. Re-run with \`ROTATE_SOPS_SECRET=true\`, \`SOPS_AGE_RECIPIENT\`, \`DB_HOST\` and \`DB_USERNAME\`."
+  info "Secret rotation report written to ${REPORT_FILE}"
+  exit 0
+fi
+
+if [[ -s "${ENCRYPTED_SECRET_FILE}" && "${CONFIRM_SECRET_ROTATION}" != "YES" ]]; then
+  write_report "PRÊT_NON_EXÉCUTÉ" "Encrypted secret already exists. Refusing to overwrite it without \`CONFIRM_SECRET_ROTATION=YES\`."
   info "Secret rotation report written to ${REPORT_FILE}"
   exit 0
 fi
 
 for command_name in sops openssl python3; do
   if ! command -v "${command_name}" >/dev/null 2>&1; then
-    write_report "DÉPENDANT_DE_L_ENVIRONNEMENT" "Missing required command: `${command_name}`."
+    write_report "DÉPENDANT_DE_L_ENVIRONNEMENT" "Missing required command: \`${command_name}\`."
     info "Secret rotation report written to ${REPORT_FILE}"
     exit 0
   fi
 done
 
 if [[ -z "${SOPS_AGE_RECIPIENT:-}" || -z "${DB_HOST:-}" || -z "${DB_USERNAME:-}" ]]; then
-  write_report "PRÊT_NON_EXÉCUTÉ" "Required inputs are missing. Provide `SOPS_AGE_RECIPIENT`, `DB_HOST` and `DB_USERNAME`. `DB_PASSWORD` is optional and generated when absent."
+  write_report "PRÊT_NON_EXÉCUTÉ" "Required inputs are missing. Provide \`SOPS_AGE_RECIPIENT\`, \`DB_HOST\` and \`DB_USERNAME\`. \`DB_PASSWORD\` is optional and generated when absent."
   info "Secret rotation report written to ${REPORT_FILE}"
   exit 0
 fi
 
 [[ -s "${TEMPLATE_FILE}" ]] || {
-  write_report "PARTIEL" "Template file is missing: `${TEMPLATE_FILE}`."
+  write_report "PARTIEL" "Template file is missing: \`${TEMPLATE_FILE}\`."
   info "Secret rotation report written to ${REPORT_FILE}"
   exit 0
 }
@@ -106,12 +117,17 @@ ROTATED_DB_PASSWORD="${generated_password}" \
   sops --encrypt --age "${SOPS_AGE_RECIPIENT}" "${plain_file}" > "${ENCRYPTED_SECRET_FILE}"
 
 if is_true "${APPLY_ROTATED_SECRET}"; then
+  if [[ "${CONFIRM_SECRET_ROTATION}" != "YES" ]]; then
+    write_report "PRÊT_NON_EXÉCUTÉ" "Applying a rotated secret requires \`CONFIRM_SECRET_ROTATION=YES\`."
+    info "Secret rotation report written to ${REPORT_FILE}"
+    exit 0
+  fi
   ENCRYPTED_SECRET_FILE="${ENCRYPTED_SECRET_FILE}" DRY_RUN=false bash scripts/secrets/apply-sops-production-db-secret.sh >/dev/null
   status="TERMINÉ"
   detail="SOPS-encrypted Secret was rotated and applied to the target cluster."
 else
   status="PRÊT_NON_EXÉCUTÉ"
-  detail="SOPS-encrypted Secret was rotated locally but not applied. Re-run with `APPLY_ROTATED_SECRET=true` after review."
+  detail="SOPS-encrypted Secret was rotated locally but not applied. Re-run with \`APPLY_ROTATED_SECRET=true\` after review."
 fi
 
 write_report "${status}" "${detail}"

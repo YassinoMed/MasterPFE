@@ -13,6 +13,7 @@ DB_DATABASE="${DB_DATABASE:-}"
 RESTORE_DB_DATABASE="${RESTORE_DB_DATABASE:-}"
 PGSSLMODE="${DB_SSLMODE:-${PGSSLMODE:-prefer}}"
 ALLOW_DESTRUCTIVE_RESTORE="${ALLOW_DESTRUCTIVE_RESTORE:-false}"
+CONFIRM_DESTRUCTIVE_RESTORE="${CONFIRM_DESTRUCTIVE_RESTORE:-NO}"
 
 info() { printf '[INFO] %s\n' "$*"; }
 fail() { printf '[ERROR] %s\n' "$*" >&2; exit 1; }
@@ -43,8 +44,8 @@ require_env RESTORE_DB_DATABASE
 
 [[ -f "${BACKUP_FILE}" ]] || fail "Backup file not found: ${BACKUP_FILE}"
 
-if [[ -n "${DB_DATABASE}" && "${RESTORE_DB_DATABASE}" == "${DB_DATABASE}" ]] && ! is_true "${ALLOW_DESTRUCTIVE_RESTORE}"; then
-  fail "Refusing to restore into source DB_DATABASE=${DB_DATABASE}. Set RESTORE_DB_DATABASE to an isolated database or ALLOW_DESTRUCTIVE_RESTORE=true."
+if [[ -n "${DB_DATABASE}" && "${RESTORE_DB_DATABASE}" == "${DB_DATABASE}" ]] && { ! is_true "${ALLOW_DESTRUCTIVE_RESTORE}" || [[ "${CONFIRM_DESTRUCTIVE_RESTORE}" != "YES" ]]; }; then
+  fail "Refusing to restore into source DB_DATABASE=${DB_DATABASE}. Set RESTORE_DB_DATABASE to an isolated database, or use ALLOW_DESTRUCTIVE_RESTORE=true CONFIRM_DESTRUCTIVE_RESTORE=YES."
 fi
 
 mkdir -p "${BACKUP_DIR}"
@@ -77,6 +78,7 @@ table_count="$(psql --host="${DB_HOST}" --port="${DB_PORT}" --username="${DB_USE
   printf -- '- Restore database: `%s`\n' "${RESTORE_DB_DATABASE}"
   printf -- '- Table count after restore: `%s`\n' "${table_count}"
   printf -- '- Destructive restore allowed: `%s`\n' "${ALLOW_DESTRUCTIVE_RESTORE}"
+  printf -- '- Destructive restore confirmed: `%s`\n' "${CONFIRM_DESTRUCTIVE_RESTORE}"
   printf -- '- Status: `TERMINÉ`\n'
 } > "${REPORT_FILE}"
 
