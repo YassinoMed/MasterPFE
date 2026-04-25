@@ -14,6 +14,8 @@ set -euo pipefail
 
 JENKINS_URL="${JENKINS_URL:-http://localhost:8085}"
 JENKINS_CI_JOB="${JENKINS_CI_JOB:-securerag-hub-ci}"
+JENKINS_ADMIN_ID="${JENKINS_ADMIN_ID:-admin}"
+JENKINS_ADMIN_PASSWORD_FILE="${JENKINS_ADMIN_PASSWORD_FILE:-infra/jenkins/secrets/jenkins-admin-password}"
 GIT_REMOTE="${GIT_REMOTE:-origin}"
 GIT_BRANCH="${GIT_BRANCH:-main}"
 EXPECTED_COMMIT="${EXPECTED_COMMIT:-}"
@@ -36,6 +38,19 @@ require_command() {
 curl_auth_args() {
   if [[ -n "${JENKINS_USER:-}" && -n "${JENKINS_TOKEN:-}" ]]; then
     printf '%s\n' "-u" "${JENKINS_USER}:${JENKINS_TOKEN}"
+  fi
+}
+
+load_local_jenkins_auth() {
+  if [[ -n "${JENKINS_USER:-}" || -n "${JENKINS_TOKEN:-}" ]]; then
+    return 0
+  fi
+
+  if [[ -r "${JENKINS_ADMIN_PASSWORD_FILE}" ]]; then
+    JENKINS_USER="${JENKINS_ADMIN_ID}"
+    JENKINS_TOKEN="$(tr -d '\r\n' < "${JENKINS_ADMIN_PASSWORD_FILE}")"
+    export JENKINS_USER JENKINS_TOKEN
+    info "Using local Jenkins admin password file for authenticated API reads"
   fi
 }
 
@@ -155,6 +170,7 @@ PY
 
 require_command curl
 require_command python3
+load_local_jenkins_auth
 
 expected_commit="$(resolve_expected_commit)"
 expected_short="${expected_commit:0:12}"
@@ -192,9 +208,9 @@ while (( SECONDS <= deadline )); do
         printf '## Status\n\n'
         printf '| Check | Status | Detail |\n'
         printf '|---|---:|---|\n'
-        printf '| Jenkins API | PARTIEL | HTTP 403. Provide `JENKINS_USER` and `JENKINS_TOKEN`. |\n'
+        printf '| Jenkins API | PARTIEL | HTTP 403. Provide `JENKINS_USER` and `JENKINS_TOKEN`, or a readable `JENKINS_ADMIN_PASSWORD_FILE`. |\n'
       } >> "${OUT_FILE}"
-      fail "Jenkins API returned 403. Provide JENKINS_USER and JENKINS_TOKEN."
+      fail "Jenkins API returned 403. Provide JENKINS_USER and JENKINS_TOKEN, or a readable JENKINS_ADMIN_PASSWORD_FILE."
       ;;
     404)
       {

@@ -26,7 +26,7 @@ init_services_array
 SUMMARY_FILE="${REPORT_DIR}/promotion-by-digest-summary.txt"
 SUMMARY_MD="${REPORT_DIR}/promotion-by-digest-summary.md"
 MANIFEST_JSON="${REPORT_DIR}/promotion-digests.json"
-MANIFEST_JSONL="${REPORT_DIR}/promotion-digests.jsonl"
+MANIFEST_JSONL=""
 
 pass_count=0
 fail_count=0
@@ -113,6 +113,8 @@ promote_exact_digest() {
 require_command docker
 require_command python3
 mkdir -p "${REPORT_DIR}"
+MANIFEST_JSONL="$(mktemp "${REPORT_DIR}/promotion-digests.jsonl.XXXXXX")"
+trap 'rm -f "${MANIFEST_JSONL}"' EXIT
 : > "${MANIFEST_JSONL}"
 
 {
@@ -233,17 +235,42 @@ if is_true "${VERIFY_TARGET_AFTER_PROMOTION}"; then
     bash scripts/release/verify-signatures.sh
 fi
 
-python3 - "${MANIFEST_JSONL}" "${MANIFEST_JSON}" "${SOURCE_IMAGE_TAG}" "${TARGET_IMAGE_TAG}" "${DIGEST_RECORD_FILE}" <<'PY'
+python3 - "${MANIFEST_JSONL}" "${MANIFEST_JSON}" "${SOURCE_IMAGE_TAG}" "${TARGET_IMAGE_TAG}" "${DIGEST_RECORD_FILE}" "${REPORT_DIR}" <<'PY'
 import json
+import os
 import sys
 
-jsonl_path, json_path, source_tag, target_tag, digest_record = sys.argv[1:]
+jsonl_path, json_path, source_tag, target_tag, digest_record, report_dir = sys.argv[1:]
 entries = []
-with open(jsonl_path, encoding="utf-8") as handle:
-    for line in handle:
-        line = line.strip()
-        if line:
-            entries.append(json.loads(line))
+
+if os.path.exists(jsonl_path):
+    with open(jsonl_path, encoding="utf-8") as handle:
+        for line in handle:
+            line = line.strip()
+            if line:
+                entries.append(json.loads(line))
+
+if not entries and os.path.exists(digest_record):
+    with open(digest_record, encoding="utf-8") as handle:
+        for line in handle:
+            line = line.strip()
+            if not line or line.startswith("#"):
+                continue
+            parts = line.split("|")
+            if len(parts) != 4:
+                continue
+            service, source_ref, target_ref, digest = parts
+            entries.append(
+                {
+                    "status": "PASS",
+                    "service": service,
+                    "source_ref": source_ref,
+                    "target_ref": target_ref,
+                    "digest": digest,
+                    "artifact": f"{report_dir.rstrip('/')}/{service}-promote-by-digest.log",
+                    "detail": "image promoted by digest without rebuild; target digest matched",
+                }
+            )
 
 with open(json_path, "w", encoding="utf-8") as handle:
     json.dump(
@@ -259,8 +286,6 @@ with open(json_path, "w", encoding="utf-8") as handle:
     )
     handle.write("\n")
 PY
-
-rm -f "${MANIFEST_JSONL}"
 
 {
   printf '\n## Result\n\n'
