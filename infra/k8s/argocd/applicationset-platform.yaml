@@ -1,0 +1,48 @@
+# ApplicationSet : génère les Applications de la plateforme transverse
+# (observabilité, backup, runtime-detection) à partir d'une matrice statique.
+# Permet d'ajouter/retirer un addon en éditant un seul fichier.
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: securerag-platform
+  namespace: argocd
+spec:
+  generators:
+    - list:
+        elements:
+          - name: observability
+            path: infra/k8s/observability
+            namespace: securerag-monitoring
+            wave: "30"
+          - name: backup
+            path: infra/k8s/backup
+            namespace: securerag-backup
+            wave: "40"
+          - name: runtime-detection
+            path: infra/k8s/runtime-detection
+            namespace: falco
+            wave: "50"
+  template:
+    metadata:
+      name: 'securerag-{{name}}'
+      annotations:
+        argocd.argoproj.io/sync-wave: '{{wave}}'
+      finalizers:
+        - resources-finalizer.argocd.argoproj.io
+    spec:
+      project: securerag-hub
+      source:
+        repoURL: https://github.com/YassinoMed/MasterPFE.git
+        targetRevision: main
+        path: '{{path}}'
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: '{{namespace}}'
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
+          - ApplyOutOfSyncOnly=true
+          - ServerSideApply=true

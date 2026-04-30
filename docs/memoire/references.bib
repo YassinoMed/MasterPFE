@@ -1,128 +1,373 @@
+% =====================================================================
+% Références bibliographiques — SecureRAG Hub
+% Toutes les sources sont vérifiables : DOI, URL ou éditeur identifiable.
+% =====================================================================
+
+% ---------- Ouvrages de référence ----------
+
 @book{russell_norvig_ai,
   author    = {Russell, Stuart and Norvig, Peter},
   title     = {Artificial Intelligence: A Modern Approach},
   publisher = {Pearson},
   year      = {2021},
-  edition   = {4}
+  edition   = {4},
+  isbn      = {978-0134610993}
 }
 
 @book{goodfellow_deep_learning,
-  author    = {Goodfellow, Ian and Bengio, Yoshua and Courville, Aaron},
-  title     = {Deep Learning},
-  publisher = {MIT Press},
-  year      = {2016}
-}
-
-@article{bommasani_foundation_models,
-  author  = {Bommasani, Rishi and others},
-  title   = {On the Opportunities and Risks of Foundation Models},
-  journal = {arXiv preprint arXiv:2108.07258},
-  year    = {2021}
-}
-
-@article{ji_hallucination_survey,
-  author  = {Ji, Ziwei and others},
-  title   = {Survey of Hallucination in Natural Language Generation},
-  journal = {ACM Computing Surveys},
-  year    = {2023}
-}
-
-@inproceedings{lewis_rag_2020,
-  author    = {Lewis, Patrick and others},
-  title     = {Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks},
-  booktitle = {Advances in Neural Information Processing Systems},
-  year      = {2020}
+  author       = {Goodfellow, Ian and Bengio, Yoshua and Courville, Aaron},
+  title        = {Deep Learning},
+  publisher    = {MIT Press},
+  year         = {2016},
+  isbn         = {978-0262035613},
+  howpublished = {\url{https://www.deeplearningbook.org/}}
 }
 
 @book{newman_microservices,
   author    = {Newman, Sam},
-  title     = {Building Microservices},
+  title     = {Building Microservices: Designing Fine-Grained Systems},
   publisher = {O'Reilly Media},
   year      = {2021},
-  edition   = {2}
+  edition   = {2},
+  isbn      = {978-1492034025}
 }
+
+@book{burns_kubernetes_2022,
+  author    = {Burns, Brendan and Beda, Joe and Hightower, Kelsey and Evenson, Lachlan},
+  title     = {Kubernetes: Up and Running},
+  publisher = {O'Reilly Media},
+  year      = {2022},
+  edition   = {3},
+  isbn      = {978-1098110208}
+}
+
+@book{humble_continuous_delivery,
+  author    = {Humble, Jez and Farley, David},
+  title     = {Continuous Delivery: Reliable Software Releases through Build, Test, and Deployment Automation},
+  publisher = {Addison-Wesley},
+  year      = {2010},
+  isbn      = {978-0321601919}
+}
+
+@book{wieringa_design_science_2014,
+  author    = {Wieringa, Roel J.},
+  title     = {Design Science Methodology for Information Systems and Software Engineering},
+  publisher = {Springer},
+  year      = {2014},
+  doi       = {10.1007/978-3-662-43839-8},
+  isbn      = {978-3662438381}
+}
+
+% ---------- Articles fondateurs ----------
+
+@article{sandhu_rbac_1996,
+  author  = {Sandhu, Ravi S. and Coyne, Edward J. and Feinstein, Hal L. and Youman, Charles E.},
+  title   = {Role-Based Access Control Models},
+  journal = {IEEE Computer},
+  volume  = {29},
+  number  = {2},
+  pages   = {38--47},
+  year    = {1996},
+  doi     = {10.1109/2.485845}
+}
+
+@inproceedings{vaswani_transformer_2017,
+  author    = {Vaswani, Ashish and Shazeer, Noam and Parmar, Niki and Uszkoreit, Jakob and Jones, Llion and Gomez, Aidan N. and Kaiser, Lukasz and Polosukhin, Illia},
+  title     = {Attention Is All You Need},
+  booktitle = {Advances in Neural Information Processing Systems (NeurIPS)},
+  year      = {2017},
+  url       = {https://papers.nips.cc/paper/2017/hash/3f5ee243547dee91fbd053c1c4a845aa-Abstract.html}
+}
+
+@inproceedings{lewis_rag_2020,
+  author    = {Lewis, Patrick and Perez, Ethan and Piktus, Aleksandra and Petroni, Fabio and Karpukhin, Vladimir and Goyal, Naman and K{\"u}ttler, Heinrich and Lewis, Mike and Yih, Wen-tau and Rockt{\"a}schel, Tim and Riedel, Sebastian and Kiela, Douwe},
+  title     = {Retrieval-Augmented Generation for Knowledge-Intensive {NLP} Tasks},
+  booktitle = {Advances in Neural Information Processing Systems (NeurIPS)},
+  year      = {2020},
+  url       = {https://arxiv.org/abs/2005.11401}
+}
+
+@inproceedings{karpukhin_dpr_2020,
+  author    = {Karpukhin, Vladimir and O{\u{g}}uz, Barlas and Min, Sewon and Lewis, Patrick and Wu, Ledell and Edunov, Sergey and Chen, Danqi and Yih, Wen-tau},
+  title     = {Dense Passage Retrieval for Open-Domain Question Answering},
+  booktitle = {Proceedings of the 2020 Conference on Empirical Methods in Natural Language Processing (EMNLP)},
+  year      = {2020},
+  doi       = {10.18653/v1/2020.emnlp-main.550},
+  url       = {https://arxiv.org/abs/2004.04906}
+}
+
+@article{lecun_deep_learning_2015,
+  author  = {LeCun, Yann and Bengio, Yoshua and Hinton, Geoffrey},
+  title   = {Deep Learning},
+  journal = {Nature},
+  volume  = {521},
+  pages   = {436--444},
+  year    = {2015},
+  doi     = {10.1038/nature14539}
+}
+
+% ---------- Enquêtes, synthèses et études secondaires ----------
+
+@article{bommasani_foundation_models,
+  author  = {Bommasani, Rishi and Hudson, Drew A. and Adeli, Ehsan and Altman, Russ and Arora, Simran and von Arx, Sydney and others},
+  title   = {On the Opportunities and Risks of Foundation Models},
+  journal = {arXiv preprint arXiv:2108.07258},
+  year    = {2021},
+  url     = {https://arxiv.org/abs/2108.07258}
+}
+
+@article{ji_hallucination_survey,
+  author  = {Ji, Ziwei and Lee, Nayeon and Frieske, Rita and Yu, Tiezheng and Su, Dan and Xu, Yan and Ishii, Etsuko and Bang, Yejin and Madotto, Andrea and Fung, Pascale},
+  title   = {Survey of Hallucination in Natural Language Generation},
+  journal = {ACM Computing Surveys},
+  volume  = {55},
+  number  = {12},
+  pages   = {1--38},
+  year    = {2023},
+  doi     = {10.1145/3571730}
+}
+
+@article{gao_rag_survey_2024,
+  author  = {Gao, Yunfan and Xiong, Yun and Gao, Xinyu and Jia, Kangxiang and Pan, Jinliu and Bi, Yuxi and Dai, Yi and Sun, Jiawei and Wang, Meng and Wang, Haofen},
+  title   = {Retrieval-Augmented Generation for Large Language Models: A Survey},
+  journal = {arXiv preprint arXiv:2312.10997},
+  year    = {2024},
+  url     = {https://arxiv.org/abs/2312.10997}
+}
+
+@inproceedings{myrbakken_devsecops_2017,
+  author    = {Myrbakken, H{\aa}vard and Colomo-Palacios, Ricardo},
+  title     = {DevSecOps: A Multivocal Literature Review},
+  booktitle = {International Conference on Software Process Improvement and Capability Determination (SPICE)},
+  pages     = {17--29},
+  year      = {2017},
+  publisher = {Springer},
+  doi       = {10.1007/978-3-319-67383-7_2}
+}
+
+@article{ohm_supply_chain_attacks_2020,
+  author    = {Ohm, Marc and Plate, Henrik and Sykosch, Arnold and Meier, Michael},
+  title     = {Backstabber's Knife Collection: A Review of Open Source Software Supply Chain Attacks},
+  booktitle = {Detection of Intrusions and Malware, and Vulnerability Assessment (DIMVA)},
+  pages     = {23--43},
+  year      = {2020},
+  publisher = {Springer},
+  doi       = {10.1007/978-3-030-52683-2_2}
+}
+
+@inproceedings{sigstore_paper,
+  author    = {Newman, Zachary and Meyers, John Speed and Torres-Arias, Santiago},
+  title     = {Sigstore: Software Signing for Everybody},
+  booktitle = {Proceedings of the 2022 ACM SIGSAC Conference on Computer and Communications Security (CCS)},
+  pages     = {2353--2367},
+  year      = {2022},
+  doi       = {10.1145/3548606.3560596}
+}
+
+@misc{fowler_microservices_2014,
+  author       = {Fowler, Martin and Lewis, James},
+  title        = {Microservices},
+  howpublished = {\url{https://martinfowler.com/articles/microservices.html}},
+  year         = {2014}
+}
+
+% ---------- Référentiels et standards ----------
+
+@misc{nist_rbac_standard,
+  author       = {{NIST}},
+  title        = {INCITS 359-2012 (R2017): Information Technology — Role-Based Access Control},
+  howpublished = {\url{https://csrc.nist.gov/projects/role-based-access-control}},
+  year         = {2012}
+}
+
+@techreport{nist_sp_800_204,
+  author      = {Chandramouli, Ramaswamy},
+  title       = {Security Strategies for Microservices-based Application Systems},
+  institution = {National Institute of Standards and Technology},
+  number      = {SP 800-204},
+  year        = {2019},
+  doi         = {10.6028/NIST.SP.800-204}
+}
+
+@techreport{nist_ssdf_800218,
+  author      = {Souppaya, Murugiah and Scarfone, Karen and Dodson, Donna},
+  title       = {Secure Software Development Framework (SSDF) Version 1.1: Recommendations for Mitigating the Risk of Software Vulnerabilities},
+  institution = {National Institute of Standards and Technology},
+  number      = {SP 800-218},
+  year        = {2022},
+  doi         = {10.6028/NIST.SP.800-218}
+}
+
+@techreport{nist_ai_rmf_2023,
+  author      = {{NIST}},
+  title       = {Artificial Intelligence Risk Management Framework (AI RMF 1.0)},
+  institution = {National Institute of Standards and Technology},
+  number      = {NIST AI 100-1},
+  year        = {2023},
+  doi         = {10.6028/NIST.AI.100-1}
+}
+
+@misc{owasp_llm_top10,
+  author       = {{OWASP Foundation}},
+  title        = {OWASP Top 10 for Large Language Model Applications},
+  howpublished = {\url{https://owasp.org/www-project-top-10-for-large-language-model-applications/}},
+  year         = {2025}
+}
+
+@misc{slsa_spec_v1,
+  author       = {{Open Source Security Foundation (OpenSSF)}},
+  title        = {Supply-chain Levels for Software Artifacts (SLSA) Specification v1.0},
+  howpublished = {\url{https://slsa.dev/spec/v1.0/}},
+  year         = {2023}
+}
+
+@misc{cyclonedx_spec,
+  author       = {{OWASP Foundation}},
+  title        = {CycloneDX Bill of Materials Standard},
+  howpublished = {\url{https://cyclonedx.org/specification/overview/}},
+  year         = {2024}
+}
+
+@misc{cis_k8s_benchmark,
+  author       = {{Center for Internet Security}},
+  title        = {CIS Kubernetes Benchmark},
+  howpublished = {\url{https://www.cisecurity.org/benchmark/kubernetes}},
+  year         = {2024}
+}
+
+@misc{k8s_pod_security_standards,
+  author       = {{Cloud Native Computing Foundation}},
+  title        = {Kubernetes Pod Security Standards},
+  howpublished = {\url{https://kubernetes.io/docs/concepts/security/pod-security-standards/}},
+  year         = {2024}
+}
+
+@misc{schwaber_scrum_guide,
+  author       = {Schwaber, Ken and Sutherland, Jeff},
+  title        = {The Scrum Guide},
+  howpublished = {\url{https://scrumguides.org/scrum-guide.html}},
+  year         = {2020}
+}
+
+@misc{omg_uml_2_5,
+  author       = {{Object Management Group}},
+  title        = {Unified Modeling Language (UML) Specification, Version 2.5.1},
+  howpublished = {\url{https://www.omg.org/spec/UML/2.5.1}},
+  year         = {2017}
+}
+
+@misc{brown_c4_model,
+  author       = {Brown, Simon},
+  title        = {The C4 Model for Visualising Software Architecture},
+  howpublished = {\url{https://c4model.com/}},
+  year         = {2024}
+}
+
+@misc{openapi_spec,
+  author       = {{OpenAPI Initiative}},
+  title        = {OpenAPI Specification},
+  howpublished = {\url{https://spec.openapis.org/oas/latest.html}},
+  year         = {2024}
+}
+
+@misc{stanford_ai_index_2024,
+  author       = {{Stanford Institute for Human-Centered Artificial Intelligence}},
+  title        = {Artificial Intelligence Index Report 2024},
+  howpublished = {\url{https://aiindex.stanford.edu/report/}},
+  year         = {2024}
+}
+
+% ---------- Documentations officielles ----------
 
 @misc{kubernetes_docs,
   author       = {{Cloud Native Computing Foundation}},
   title        = {Kubernetes Documentation},
   howpublished = {\url{https://kubernetes.io/docs/}},
-  year         = {2026},
-  note         = {Consulté pour les concepts Kubernetes}
+  year         = {2024}
 }
 
 @misc{kind_docs,
   author       = {{Kubernetes SIG Testing}},
-  title        = {kind Documentation},
+  title        = {kind — Kubernetes in Docker Documentation},
   howpublished = {\url{https://kind.sigs.k8s.io/}},
-  year         = {2026}
+  year         = {2024}
 }
 
 @misc{kustomize_docs,
   author       = {{Kubernetes}},
   title        = {Kustomize Documentation},
   howpublished = {\url{https://kubectl.docs.kubernetes.io/references/kustomize/}},
-  year         = {2026}
+  year         = {2024}
 }
+
+@misc{kyverno_docs,
+  author       = {{Kyverno}},
+  title        = {Kyverno — Kubernetes Native Policy Management},
+  howpublished = {\url{https://kyverno.io/docs/}},
+  year         = {2024}
+}
+
+% ---------- Solutions commerciales et frameworks ----------
 
 @misc{openai_chatgpt_enterprise,
   author       = {{OpenAI}},
   title        = {ChatGPT Enterprise},
   howpublished = {\url{https://openai.com/chatgpt/enterprise/}},
-  year         = {2026}
+  year         = {2024}
 }
 
 @misc{microsoft_copilot_studio,
   author       = {{Microsoft}},
   title        = {Microsoft Copilot Studio Documentation},
   howpublished = {\url{https://learn.microsoft.com/microsoft-copilot-studio/}},
-  year         = {2026}
+  year         = {2024}
 }
 
 @misc{google_vertex_ai_agent_builder,
   author       = {{Google Cloud}},
   title        = {Vertex AI Agent Builder Documentation},
   howpublished = {\url{https://cloud.google.com/products/agent-builder}},
-  year         = {2026}
+  year         = {2024}
 }
 
 @misc{aws_q_business,
   author       = {{Amazon Web Services}},
   title        = {Amazon Q Business Documentation},
   howpublished = {\url{https://docs.aws.amazon.com/amazonq/}},
-  year         = {2026}
+  year         = {2024}
 }
 
 @misc{ibm_watsonx_assistant,
   author       = {{IBM}},
   title        = {IBM watsonx Assistant Documentation},
   howpublished = {\url{https://www.ibm.com/products/watsonx-assistant}},
-  year         = {2026}
+  year         = {2024}
 }
 
 @misc{rasa_docs,
   author       = {{Rasa}},
   title        = {Rasa Documentation},
   howpublished = {\url{https://rasa.com/docs/}},
-  year         = {2026}
+  year         = {2024}
 }
 
 @misc{botpress_docs,
   author       = {{Botpress}},
   title        = {Botpress Documentation},
   howpublished = {\url{https://botpress.com/docs}},
-  year         = {2026}
+  year         = {2024}
 }
 
 @misc{langchain_docs,
   author       = {{LangChain}},
   title        = {LangChain Documentation},
   howpublished = {\url{https://docs.langchain.com/}},
-  year         = {2026}
+  year         = {2024}
 }
 
 @misc{langgraph_docs,
   author       = {{LangChain}},
   title        = {LangGraph Documentation},
   howpublished = {\url{https://langchain-ai.github.io/langgraph/}},
-  year         = {2026}
+  year         = {2024}
 }

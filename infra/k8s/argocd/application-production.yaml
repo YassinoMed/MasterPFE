@@ -1,0 +1,41 @@
+# Application Argo CD pour l'overlay 'production' (HA Laravel + digests).
+# Sync MANUEL : approbation explicite requise pour production.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: securerag-production
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "20"
+    argocd.argoproj.io/sync-options: PruneLast=true
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: securerag-hub
+  source:
+    repoURL: https://github.com/YassinoMed/MasterPFE.git
+    targetRevision: main
+    path: infra/k8s/overlays/production
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: securerag-hub
+  syncPolicy:
+    # Pas d'automated{} : sync manuel requis sur production.
+    syncOptions:
+      - CreateNamespace=true
+      - ApplyOutOfSyncOnly=true
+      - ServerSideApply=true
+      - RespectIgnoreDifferences=true
+    retry:
+      limit: 3
+      backoff:
+        duration: 30s
+        factor: 2
+        maxDuration: 10m
+  ignoreDifferences:
+    # HPA ajuste replicas hors-Argo : ne pas considérer comme drift.
+    - group: apps
+      kind: Deployment
+      jsonPointers:
+        - /spec/replicas
+  revisionHistoryLimit: 20

@@ -1,0 +1,39 @@
+# AppProject SecureRAG : isole les Applications GitOps de SecureRAG Hub.
+# Whitelist source repos + namespaces + cluster destinations.
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: securerag-hub
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  description: "SecureRAG Hub — Laravel platform GitOps project"
+  sourceRepos:
+    - https://github.com/YassinoMed/MasterPFE.git
+    - https://github.com/YassinoMed/MasterPFE
+  destinations:
+    - server: https://kubernetes.default.svc
+      namespace: securerag-hub
+    - server: https://kubernetes.default.svc
+      namespace: securerag-monitoring
+    - server: https://kubernetes.default.svc
+      namespace: securerag-backup
+  clusterResourceWhitelist:
+    - group: ""
+      kind: Namespace
+    - group: rbac.authorization.k8s.io
+      kind: ClusterRole
+    - group: rbac.authorization.k8s.io
+      kind: ClusterRoleBinding
+  namespaceResourceWhitelist:
+    - group: "*"
+      kind: "*"
+  orphanedResources:
+    warn: true
+  roles:
+    - name: read-only
+      description: "Read-only access for auditors"
+      policies:
+        - p, proj:securerag-hub:read-only, applications, get, securerag-hub/*, allow
+        - p, proj:securerag-hub:read-only, applications, sync, securerag-hub/*, deny

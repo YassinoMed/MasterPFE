@@ -5,9 +5,48 @@ set -euo pipefail
 NS="${NS:-securerag-hub}"
 OUT="${OUT:-artifacts/final/final-validation-summary.md}"
 JENKINS_URL="${JENKINS_URL:-http://localhost:8085/login}"
+JENKINS_CI_JOB="${JENKINS_CI_JOB:-securerag-hub-ci}"
 PORTAL_HEALTH_URL="${PORTAL_HEALTH_URL:-http://localhost:8081/health}"
+REGISTRY_HOST="${REGISTRY_HOST:-securerag-registry:5000}"
+DIGEST_RECORD_FILE="${DIGEST_RECORD_FILE:-artifacts/release/promotion-digests.txt}"
 
 mkdir -p "$(dirname "${OUT}")"
+
+# Detect whether deployed Pods reference immutable @sha256 digests pointing at
+# the production registry. Returns one of:
+#   TERMINÉ                       all targeted pods use @sha256 digests
+#   PARTIEL                       some pods use mutable tags
+#   DÉPENDANT_DE_L_ENVIRONNEMENT  no cluster reachable
+detect_digest_runtime_status() {
+  if ! command -v kubectl >/dev/null 2>&1; then
+    printf 'DÉPENDANT_DE_L_ENVIRONNEMENT'
+    return 0
+  fi
+  if ! kubectl get ns "${NS}" >/dev/null 2>&1; then
+    printf 'DÉPENDANT_DE_L_ENVIRONNEMENT'
+    return 0
+  fi
+  local images
+  images="$(kubectl get pods -n "${NS}" \
+    -o jsonpath='{range .items[*]}{range .spec.containers[*]}{.image}{"\n"}{end}{end}' \
+    2>/dev/null | grep -E "^${REGISTRY_HOST//./\\.}/" || true)"
+  if [[ -z "${images}" ]]; then
+    printf 'DÉPENDANT_DE_L_ENVIRONNEMENT'
+    return 0
+  fi
+  local mutable=0
+  while IFS= read -r img; do
+    [[ -z "${img}" ]] && continue
+    if ! grep -Eq '@sha256:[0-9a-f]{64}$' <<<"${img}"; then
+      mutable=$((mutable + 1))
+    fi
+  done <<<"${images}"
+  if (( mutable == 0 )); then
+    printf 'TERMINÉ'
+  else
+    printf 'PARTIEL'
+  fi
+}
 
 status_from_file() {
   local file="$1"
@@ -217,7 +256,19 @@ if command -v curl >/dev/null 2>&1 && curl -fsS "${JENKINS_URL}" >/dev/null 2>&1
   if [[ "${jenkins_status}" == "DÉPENDANT_DE_L_ENVIRONNEMENT" ]]; then
     jenkins_status="TERMINÉ"
   fi
+else
+  # Jenkins live not reachable: explicitly classify as environment-dependent
+  # rather than letting an empty/missing artifact fall back to PARTIEL.
+  if [[ -z "${jenkins_status}" || "${jenkins_status}" == "PARTIEL" ]]; then
+    if [[ ! -s artifacts/jenkins/github-webhook-validation.md \
+       && ! -s artifacts/jenkins/ci-push-trigger-proof.md ]]; then
+      jenkins_status="DÉPENDANT_DE_L_ENVIRONNEMENT"
+    fi
+  fi
 fi
+
+# Digest-runtime status: production overlay must reach all-digest pods.
+digest_runtime_status="$(detect_digest_runtime_status)"
 
 if command -v kubectl >/dev/null 2>&1 && kubectl get ns "${NS}" >/dev/null 2>&1 && kubectl get pods -n "${NS}" >/dev/null 2>&1; then
   if [[ "${cluster_status}" == "DÉPENDANT_DE_L_ENVIRONNEMENT" || "${cluster_status}" == "PRÊT_NON_EXÉCUTÉ" ]]; then
@@ -270,9 +321,10 @@ cat > "${OUT}" <<EOF
 
 | Check | Status |
 |---|---|
-| Jenkins / CD gates | ${jenkins_status} |
+| Jenkins / CD gates (job: \`${JENKINS_CI_JOB}\`) | ${jenkins_status} |
 | Kubernetes runtime | ${cluster_status} |
 | Portal Web health | ${portal_status} |
+| Digest-pinned runtime (registry: \`${REGISTRY_HOST}\`) | ${digest_runtime_status} |
 
 ## 4. Evidence files
 

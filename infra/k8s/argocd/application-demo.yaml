@@ -1,0 +1,38 @@
+# Application Argo CD pour l'overlay 'demo' (Laravel 5 services).
+# Sync auto + self-heal + drift detection actifs.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: securerag-demo
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "10"
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: securerag-hub
+  source:
+    repoURL: https://github.com/YassinoMed/MasterPFE.git
+    targetRevision: main
+    path: infra/k8s/overlays/demo
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: securerag-hub
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+      allowEmpty: false
+    syncOptions:
+      - CreateNamespace=true
+      - ApplyOutOfSyncOnly=true
+      - PrunePropagationPolicy=foreground
+      - PruneLast=true
+      - ServerSideApply=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 10s
+        factor: 2
+        maxDuration: 5m
+  revisionHistoryLimit: 10

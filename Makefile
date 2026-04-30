@@ -285,3 +285,63 @@ metrics-install: ## Install metrics-server for local HPA metrics
 
 clean: ## Remove generated local artifacts
 	@rm -rf .coverage-artifacts artifacts/release artifacts/sbom artifacts/validation artifacts/jenkins artifacts/final artifacts/support-pack security/reports
+
+# ----------------------------------------------------------------------------
+# Expert-level improvement targets (P0/P1/P2). All targets are idempotent and
+# produce evidence under artifacts/. See docs/architecture/official-scope.md.
+# ----------------------------------------------------------------------------
+
+.PHONY: official-scope jenkins-live-proofs argocd-bootstrap argocd-down \
+        observability-up observability-down sops-rotate sops-validate \
+        backup-test-cycle kyverno-admission-tests kyverno-enforce-on \
+        kyverno-enforce-off falco-up falco-down expert-readiness expert-up-all
+
+official-scope: ## Validate official RAG/legacy scope vs rendered overlays
+	@bash scripts/validate/validate-official-scope.sh
+
+jenkins-live-proofs: ## Run webhook + CI push proofs (uses JENKINS_URL/USER/TOKEN)
+	@bash scripts/jenkins/run-live-proofs.sh
+
+argocd-bootstrap: ## Apply Argo CD AppProject + Applications + ApplicationSet
+	@kubectl apply -k infra/k8s/argocd
+
+argocd-down: ## Remove Argo CD SecureRAG Applications (keeps controller)
+	@kubectl delete -k infra/k8s/argocd --ignore-not-found
+
+observability-up: ## Deploy Prometheus + Grafana + Loki + Alertmanager
+	@kubectl apply -k infra/k8s/observability
+	@kubectl rollout status -n securerag-monitoring deploy/prometheus --timeout=180s || true
+
+observability-down: ## Remove the observability stack
+	@kubectl delete -k infra/k8s/observability --ignore-not-found
+
+sops-rotate: ## Rotate the SOPS age recipient and re-encrypt secrets
+	@bash scripts/secrets/rotate-sops-age-recipient.sh
+
+sops-validate: ## Validate the SOPS workflow without applying
+	@bash scripts/secrets/validate-sops-workflow.sh
+
+backup-test-cycle: ## Trigger postgres-backup CronJob and verify restore cycle
+	@bash scripts/data/test-backup-restore-cycle.sh
+
+kyverno-admission-tests: ## Run positive/negative admission tests against Kyverno
+	@bash scripts/validate/test-kyverno-admission.sh
+
+kyverno-enforce-on: ## Toggle Kyverno Audit -> Enforce with auto-rollback safety
+	@bash scripts/deploy/kyverno-enforce-toggle.sh on
+
+kyverno-enforce-off: ## Toggle Kyverno Enforce -> Audit (rollback)
+	@bash scripts/deploy/kyverno-enforce-toggle.sh off
+
+falco-up: ## Deploy Falco DaemonSet with SecureRAG runtime rules
+	@kubectl apply -k infra/k8s/runtime-detection
+	@kubectl rollout status -n falco daemonset/falco --timeout=300s || true
+
+falco-down: ## Remove Falco DaemonSet
+	@kubectl delete -k infra/k8s/runtime-detection --ignore-not-found
+
+expert-readiness: ## Generate the expert readiness report (P0/P1/P2 synthesis)
+	@bash scripts/validate/generate-expert-readiness-report.sh
+
+expert-up-all: official-scope argocd-bootstrap observability-up falco-up kyverno-admission-tests expert-readiness ## Full expert bootstrap (cluster required)
+	@echo "[OK] expert bootstrap complete; review artifacts/final/expert-readiness-report.md"

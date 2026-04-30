@@ -149,11 +149,21 @@ pipeline {
           bash scripts/validate/validate-k8s-ultra-hardening.sh
           REQUIRE_KYVERNO_CLI="${REQUIRE_KYVERNO_CLI:-false}" \
             bash scripts/ci/validate-kyverno-policies.sh
+
+          # kube-score: best-effort gate. Fails only on CRITICAL findings.
+          # Records PRÊT_NON_EXÉCUTÉ if the binary is missing.
+          bash scripts/ci/validate-kube-score.sh
+
+          # Falco rules linter. Returns 77 (skip) when no validator present.
+          bash scripts/ci/validate-falco-rules.sh || rc=$?
+          if [ "${rc:-0}" -ne 0 ] && [ "${rc:-0}" -ne 77 ]; then
+            echo "[FAIL] Falco rules invalid"; exit 1
+          fi
         '''
       }
       post {
         always {
-          archiveArtifacts allowEmptyArchive: true, artifacts: 'artifacts/security/k8s-ultra-hardening.md,artifacts/security/kyverno-policy-validation.md,artifacts/security/kyverno-apply.log'
+          archiveArtifacts allowEmptyArchive: true, artifacts: 'artifacts/security/k8s-ultra-hardening.md,artifacts/security/kyverno-policy-validation.md,artifacts/security/kyverno-apply.log,artifacts/security/kube-score-report.md,artifacts/security/kube-score-raw.txt,artifacts/security/falco-rules-validation.log'
         }
       }
     }
