@@ -1,5 +1,9 @@
 # Legacy GitHub Actions Workflows
 
+> **Statut officiel: `LEGACY_MIRROR_ONLY`.** Ces workflows ne sont **plus** des
+> gates de la chaîne DevSecOps SecureRAG Hub. La référence canonique est
+> `docs/architecture/official-scope.md`.
+
 Jenkins est la source de verite officielle pour la CI/CD de SecureRAG Hub.
 
 Les workflows GitHub Actions conserves dans ce dossier sont maintenus a titre :
