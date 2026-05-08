@@ -1,0 +1,73 @@
+# Helm values for the official Falco chart (alternative install path).
+# Chart: oci://ghcr.io/falcosecurity/charts/falco
+# Usage:
+#   helm repo add falcosecurity https://falcosecurity.github.io/charts
+#   helm upgrade --install falco falcosecurity/falco \
+#     -n falco --create-namespace -f security/falco/values.yaml
+#
+# This file is OPTIONAL. The repo also ships a raw-manifest install at
+# infra/k8s/runtime-detection/ (DaemonSet via Kustomize). Choose one.
+
+driver:
+  kind: modern_ebpf            # Requires kernel >= 5.8
+
+falco:
+  json_output: true
+  json_include_output_property: true
+  log_level: info
+  priority: notice
+  syscall_event_drops:
+    threshold: 0.1
+    actions: [log, alert]
+  rules_file:
+    - /etc/falco/falco_rules.yaml
+    - /etc/falco/k8s_audit_rules.yaml
+    - /etc/falco/rules.d
+  http_output:
+    enabled: false             # Enable when Falcosidekick is deployed.
+
+# Mount custom SecureRAG rules from this repo.
+customRules:
+  securerag-rules.yaml: |-
+    # See security/falco/custom-rules.yaml for the canonical source.
+    # When using Helm, copy that file's contents here verbatim.
+
+# Kubernetes audit log integration (Falco evaluates K8s API events too).
+falcoctl:
+  artifact:
+    install:
+      enabled: true
+    follow:
+      enabled: true
+
+# Forward alerts to Falcosidekick → Loki / Slack / Alertmanager.
+# Disabled by default; flip to true after wiring outputs.
+falcosidekick:
+  enabled: false
+  webui:
+    enabled: false
+  config:
+    loki:
+      hostport: "http://loki.observability.svc.cluster.local:3100"
+      tenant: "securerag"
+    alertmanager:
+      hostport: "http://alertmanager.observability.svc.cluster.local:9093"
+      minimumpriority: "warning"
+
+# Pod hardening for the Falco DaemonSet itself.
+podSecurityContext:
+  fsGroup: 0
+containerSecurityContext:
+  privileged: true             # Required for kernel access.
+  readOnlyRootFilesystem: false
+
+resources:
+  requests: { cpu: 100m, memory: 256Mi }
+  limits:   { cpu: 1,    memory: 1Gi   }
+
+tolerations:
+  - operator: Exists           # Run on every node, including tainted.
+
+# Restrict the chart to relevant nodes (uncomment to target Linux only).
+# nodeSelector:
+#   kubernetes.io/os: linux

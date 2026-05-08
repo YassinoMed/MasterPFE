@@ -1,0 +1,168 @@
+\documentclass[12pt, a4paper]{report}
+
+\input{config}
+
+\begin{document}
+
+\iffalse
+\begin{titlepage}
+    \begin{center}
+        
+        \includegraphics[height=3cm]{logo_universite.png} \hfill \includegraphics[height=3cm]{logo_iset.png}
+        
+        \vspace*{0.5cm}
+        {\large \textbf{République Tunisienne}} \\
+        {\large Ministère de l'Enseignement Supérieur et de la Recherche Scientifique} \\
+        \vspace{0.3cm}
+        {\Large \textbf{Institut Supérieur des Études Technologiques de Sfax}} \\
+        \vspace{1.5cm}
+
+        {\large \textbf{MÉMOIRE DE FIN D'ÉTUDES}} \\
+        \vspace{0.5cm}
+        {\large Pour l'obtention du diplôme de} \\
+        {\Large \textbf{Mastère Professionnel DSIR}} \\
+        {\large (Développement des Systèmes Informatiques et Réseaux)} \\
+        \vspace{1.5cm}
+
+        \rule{\linewidth}{0.5mm} \\ [0.4cm]
+        {\huge \textbf{Conception et Développement d'un Agent IA Intelligent / Autonome}} \\ [0.4cm]
+        \rule{\linewidth}{0.5mm} \\
+        \vspace{1.5cm}
+
+        \textit{Élaboré par :} \\
+        {\Large \textbf{[Ton Nom et Ton Prénom]}} \\
+        \vspace{1.2cm}
+
+        \textit{Soutenu le [Date de la soutenance ex: 15 Juillet 2026] devant le jury composé de :} \\
+        \vspace{0.4cm}
+        \begin{tabular}{>{\bfseries}l l l}
+            M. [Nom et Prénom] & Président du jury & (ISET Sfax) \\
+            M. [Nom et Prénom] & Rapporteur & (Institution) \\
+            M. [Nom de l'Encadrant] & Encadrant ISET & (ISET Sfax) \\
+            M. [Nom du Co-encadrant] & Co-encadrant Entreprise & (Nom Entreprise) \\
+        \end{tabular}
+
+        \vfill 
+        {\large Année Universitaire : 2025 - 2026}
+    \end{center}
+\end{titlepage}
+
+\pagenumbering{roman}
+
+\pdfbookmark[0]{Dédicace}{dedicace} 
+\chapter*{Dédicace}
+\addcontentsline{toc}{chapter}{Dédicace} 
+\begin{flushright}
+    \textit{À mes chers parents,\\
+    Pour leur amour, leur soutien inconditionnel et leurs sacrifices.\\
+    \vspace{0.5cm}
+    À mes frères et sœurs,\\
+    À tous mes amis et collègues de la promotion DSIR.\\
+    \vspace{0.5cm}
+    À tous ceux qui m'ont aidé de près ou de loin à la réalisation de ce travail.\\}
+\end{flushright}
+\vspace{1cm}
+
+\chapter*{Remerciements}
+\addcontentsline{toc}{chapter}{Remerciements}
+Je tiens tout d'abord à exprimer ma profonde gratitude à mon encadrant académique, \textbf{Monsieur [Nom de l'encadrant]}, pour son encadrement, sa disponibilité, et ses précieux conseils tout au long de ce projet de fin d'études.
+
+Mes remerciements s'adressent également à \textbf{Monsieur/Madame [Nom du co-encadrant, si applicable]} pour le soutien technique et l'accueil chaleureux au sein de l'entreprise \textbf{[Nom de l'entreprise]}.
+
+Je remercie chaleureusement les membres du jury d'avoir accepté d'évaluer ce travail.
+Enfin, je remercie tout le corps professoral de l'ISET Sfax, et particulièrement l'équipe du Mastère DSIR, pour la qualité de l'enseignement prodigué.
+
+\chapter*{Résumé}
+\addcontentsline{toc}{chapter}{Résumé}
+Dans le cadre de l'évolution fulgurante de l'intelligence artificielle générative et de l'automatisation avancée, ce mémoire présente la conception et le développement d'un agent IA intelligent et autonome. L'objectif principal de ce projet est de ...
+
+\noindent \textbf{Mots-clés :} Agent IA, LLM, LangChain, ReAct, Autonomie, DSIR.
+
+\chapter*{Abstract}
+\addcontentsline{toc}{chapter}{Abstract}
+In the context of the rapid evolution of generative artificial intelligence and advanced automation, this thesis presents the design and development of an intelligent and autonomous AI agent. The main objective of this project is to ...
+
+\noindent \textbf{Keywords:} AI Agent, LLM, LangChain, ReAct, Autonomy, DSIR.
+
+\tableofcontents
+
+\clearpage
+\listoffigures
+\addcontentsline{toc}{chapter}{Liste des figures}
+
+\clearpage
+\listoftables
+\addcontentsline{toc}{chapter}{Liste des tableaux}
+
+\clearpage
+\chapter*{Liste des abréviations et acronymes}
+\addcontentsline{toc}{chapter}{Liste des abréviations}
+\begin{acronym}[LangGraph] 
+    \acro{API}{Application Programming Interface}
+    \acro{DSIR}{Développement des Systèmes Informatiques et Réseaux}
+    \acro{IA}{Intelligence Artificielle}
+    \acro{LLM}{Large Language Model}
+    \acro{NLP}{Natural Language Processing}
+    \acro{UML}{Unified Modeling Language}
+\end{acronym}
+\fi
+
+
+\clearpage
+\pagenumbering{arabic}
+
+\input{intro}
+ \input{chapitre_1}
+% \input{chapitre_2}
+% \input{chapitre_3}
+% \input{chapitre_4}
+% \input{chapitre_5}
+% \input{chapitre_6}
+% \input{chapitre_7}
+% \input{chapitre_8}
+% \input{chapitre_9}
+% \input{chapitre_10}
+
+\iffalse
+\clearpage
+\fancyhead[L]{Conclusion Générale et Perspectives}
+\chapter*{Conclusion Générale et Perspectives}
+\addcontentsline{toc}{chapter}{Conclusion Générale et Perspectives}
+
+Ce projet de Mastère professionnel a permis d'explorer de manière approfondie l'univers fascinant des agents d'intelligence artificielle autonomes. De la conceptualisation théorique jusqu'au déploiement de l'architecture, nous avons réussi à :
+\begin{itemize}
+    \item Intégrer avec succès [Technologies] pour concevoir un flux logique.
+    \item Réduire l'intervention humaine sur le processus [Processus].
+\end{itemize}
+
+Toutefois, certaines contraintes sont apparues, comme la forte latence liée aux appels des API LLM externes, ou le coût des tokens.
+
+\vspace{0.5cm}
+\textbf{Perspectives d'avenir :}
+\begin{itemize}
+    \item Utilisation de modèles LLM Open Source hostés localement (comme LLaMA 3 ou Mistral) pour réduire les coûts et garantir la confidentialité des données.
+    \item Ajout d'une capacité multimodale (analyse d'images ou d'audio par l'agent).
+\end{itemize}
+
+\clearpage
+\fancyhead[L]{Bibliographie}
+\printbibliography[heading=bibintoc, title={Bibliographie et Nétographie}]
+
+\appendix
+\fancyhead[L]{\leftmark} 
+\chapter{Complément de code source}
+\label{annexe:code}
+
+\chapter{Manuel d'installation ou Documentations supplémentaires}
+\label{annexe:manuel}
+
+\clearpage
+\thispagestyle{empty}
+\vspace*{\fill}
+\begin{center}
+    \textbf{Institut Supérieur des Études Technologiques de Sfax} \\
+    Route Mahdia Km 2.5 El-Boustène Sfax 3099, Tunisie
+\end{center}
+\fi
+
+\end{document}

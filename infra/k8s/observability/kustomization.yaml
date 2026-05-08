@@ -1,0 +1,16 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: securerag-monitoring
+resources:
+  - namespace.yaml
+  - prometheus-rbac.yaml
+  - prometheus-config.yaml
+  - prometheus-rules.yaml
+  - prometheus-deployment.yaml
+  - grafana-deployment.yaml
+  - loki-deployment.yaml
+  - alertmanager.yaml
+  - networkpolicy.yaml
+commonLabels:
+  app.kubernetes.io/part-of: securerag-hub
+  app.kubernetes.io/component: observability
