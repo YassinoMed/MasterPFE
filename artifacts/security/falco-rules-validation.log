@@ -1,0 +1,30 @@
+[OK] ConfigMap YAML well-formed: /Users/mohamedyassine/Desktop/PFE/Master/.claude/worktrees/festive-moore-d50050/infra/k8s/runtime-detection/configmap-rules.yaml
+[OK]   /Users/mohamedyassine/Desktop/PFE/Master/.claude/worktrees/festive-moore-d50050/infra/k8s/runtime-detection/configmap-rules.yaml (YAML)
+[INFO] Validating Falco rules via falcosecurity/falco container
+[INFO] -> /Users/mohamedyassine/Desktop/PFE/Master/.claude/worktrees/festive-moore-d50050/security/falco/custom-rules.yaml
+2026-04-30T12:32:34+0000: Falco version: 0.38.2 (aarch64)
+2026-04-30T12:32:34+0000: Falco initialized with configuration files:
+2026-04-30T12:32:34+0000:    /etc/falco/falco.yaml
+2026-04-30T12:32:34+0000: System info: Linux version 6.12.76-linuxkit (root@buildkitsandbox) (gcc (Alpine 15.2.0) 15.2.0, GNU ld (GNU Binutils) 2.45.1) #1 SMP Sun Mar  8 14:41:59 UTC 2026
+2026-04-30T12:32:34+0000: Validating rules file(s):
+2026-04-30T12:32:34+0000:    /etc/falco/falco_rules.yaml
+2026-04-30T12:32:34+0000:    /rules.yaml
+2026-04-30T12:32:34+0000: /rules.yaml: Ok, with warnings
+2 Warnings:
+In rules content: (/rules.yaml:0:0)
+    rule 'SecureRAG Suspicious K8s API Verb': (/rules.yaml:178:2)
+------
+- rule: SecureRAG Suspicious K8s API Verb
+  ^
+------
+LOAD_UNKNOWN_SOURCE (Unknown event source): Unknown source k8s_audit, skipping
+In rules content: (/rules.yaml:0:0)
+    macro 'securerag_known_procs': (/rules.yaml:26:2)
+------
+- macro: securerag_known_procs
+  ^
+------
+LOAD_UNUSED_MACRO (Unused macro): Macro not referred to by any other rule/macro
+/etc/falco/falco_rules.yaml: Ok
+/rules.yaml: Ok, with warnings
+[OK]   /Users/mohamedyassine/Desktop/PFE/Master/.claude/worktrees/festive-moore-d50050/security/falco/custom-rules.yaml

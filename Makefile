@@ -2,8 +2,6 @@ SHELL := /usr/bin/env bash
 .DEFAULT_GOAL := help
 
 REGISTRY_HOST ?= localhost:5001
-REGISTRY_HOST_SIDE ?= 127.0.0.1:5002
-REGISTRY_CLUSTER_HOST ?= securerag-registry:5000
 IMAGE_PREFIX ?= securerag-hub
 IMAGE_TAG ?= dev
 SOURCE_IMAGE_TAG ?= $(IMAGE_TAG)
@@ -12,7 +10,6 @@ KUSTOMIZE_OVERLAY ?= infra/k8s/overlays/dev
 REPORT_DIR ?= artifacts/release
 SBOM_DIR ?= artifacts/sbom
 DIGEST_RECORD_FILE ?= $(REPORT_DIR)/promotion-digests.txt
-CLUSTER_DIGEST_RECORD_FILE ?= $(REPORT_DIR)/promotion-digests-cluster.txt
 REQUIRE_DIGEST_DEPLOY ?= false
 DEPLOY_EVIDENCE_FILE ?= $(REPORT_DIR)/no-rebuild-deploy-summary.md
 RUNTIME_IMAGE_PROOF_FILE ?= artifacts/validation/runtime-image-rollout-proof.md
@@ -20,21 +17,17 @@ OFFICIAL_SCENARIO ?= demo
 SUPPORT_PACK_ROOT ?= artifacts/support-pack
 
 .PHONY: help lint test laravel-test sonar-analysis kyverno-policy-check image-scan sbom-attest sbom-validate verify promote promote-digest deploy runtime-image-proof validate demo production-cluster production-cleanup-plan production-cleanup production-cluster-clean-proof production-ha production-runtime-evidence runtime-security-postdeploy production-proof-full final-runtime-proof ha-chaos-lite hpa-runtime-proof refresh-hpa-runtime-proof production-external-db-readiness production-data-resilience data-resilience-proof production-dockerfiles image-size-evidence secrets-management production-db-secret sops-db-secret external-secret-render external-secret-runtime-proof data-backup data-restore production-readiness-campaign campaign final-campaign release-evidence release-attestation release-provenance release-proof-strict supply-chain-evidence supply-chain-execute observability-snapshot portal-service-proof global-project-status final-source-of-truth security-posture k8s-resource-guards close-missing-phases jenkins-webhook-proof jenkins-ci-push-proof cluster-security-proof kyverno-runtime-proof kyverno-enforce-readiness refresh-cluster-security-proof devsecops-final-proof devsecops-system-proof devsecops-closure devsecops-readiness final-proof final-summary support-pack kyverno-install kyverno-enforce metrics-install clean
-.PHONY: cluster-registry-setup cluster-registry-proof kyverno-enforce-proof kyverno-admission-tests gitops-update-digests gitops-sync-proof gitops-drift-proof secret-rotation-proof observability-stack-proof scheduled-backup-proof jenkins-rbac-proof intoto-attestation normalize-artifacts official-scope runtime-detection-proof chaos-lite-proof ci-authority-report expert-readiness
 
 help: ## Show available targets
 	@awk 'BEGIN {FS = ":.*## "; print "Available targets:"} /^[a-zA-Z0-9_.-]+:.*## / {printf "  %-12s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
 lint: ## Validate shell scripts, Jenkins config, Kustomize renders and security scopes
-	@bash -n scripts/ci/*.sh scripts/cd/*.sh scripts/deploy/*.sh scripts/gitops/*.sh scripts/release/*.sh scripts/release/lib/*.sh scripts/secrets/*.sh scripts/validate/*.sh scripts/validate/lib/*.sh scripts/jenkins/*.sh
+	@bash -n scripts/ci/*.sh scripts/cd/*.sh scripts/deploy/*.sh scripts/release/*.sh scripts/release/lib/*.sh scripts/secrets/*.sh scripts/validate/*.sh scripts/validate/lib/*.sh scripts/jenkins/*.sh
 	@docker compose -f infra/jenkins/docker-compose.yml config >/dev/null
 	@kubectl kustomize infra/k8s/overlays/dev >/dev/null
 	@kubectl kustomize infra/k8s/overlays/demo >/dev/null
 	@kubectl kustomize infra/k8s/overlays/production >/dev/null
 	@kubectl kustomize infra/k8s/overlays/production-external-db >/dev/null
-	@kubectl kustomize infra/k8s/jobs >/dev/null
-	@kubectl kustomize infra/observability >/dev/null
-	@kubectl kustomize infra/gitops/apps/securerag-hub >/dev/null
 	@kubectl kustomize infra/k8s/policies/kyverno >/dev/null
 	@kubectl kustomize infra/k8s/policies/kyverno-enforce >/dev/null
 	@bash scripts/validate/validate-k8s-cleartext-scope.sh >/dev/null
@@ -241,10 +234,10 @@ close-missing-phases: ## Close remaining environment-dependent phases with safe 
 	@bash scripts/validate/run-missing-phases-closure.sh
 
 jenkins-webhook-proof: ## Validate Jenkins GitHub webhook reachability and CI trigger readiness
-	@bash scripts/validate/validate-jenkins-webhook-proof.sh
+	@bash scripts/jenkins/validate-github-webhook.sh
 
 jenkins-ci-push-proof: ## Verify Jenkins consumed the latest pushed Git commit
-	@bash scripts/validate/validate-jenkins-ci-push-proof.sh
+	@bash scripts/jenkins/verify-ci-push-trigger.sh
 
 cluster-security-proof: ## Collect metrics-server, HPA and Kyverno runtime evidence
 	@bash scripts/validate/validate-cluster-security-addons.sh
@@ -287,80 +280,68 @@ kyverno-install: ## Install Kyverno and apply SecureRAG policies in Audit mode
 kyverno-enforce: ## Install Kyverno and apply the Enforce overlay for Cosign verification
 	@KYVERNO_POLICY_MODE=enforce bash scripts/deploy/install-kyverno.sh
 
-cluster-registry-setup: ## Create the kind-reachable registry and configure kind node mirrors
-	@KIND_CLUSTER=$(KIND_CLUSTER) REGISTRY_CLUSTER_HOST=$(REGISTRY_CLUSTER_HOST) REGISTRY_HOST_SIDE=$(REGISTRY_HOST_SIDE) \
-		bash scripts/deploy/setup-cluster-registry-kind.sh
-
-cluster-registry-proof: ## Prove registry DNS, catalog and digest pull from inside the cluster
-	@NAMESPACE=$(NS) REGISTRY_CLUSTER_HOST=$(REGISTRY_CLUSTER_HOST) REGISTRY_HOST_SIDE=$(REGISTRY_HOST_SIDE) IMAGE_PREFIX=$(IMAGE_PREFIX) IMAGE_TAG=$(IMAGE_TAG) TARGET_IMAGE_TAG=$(TARGET_IMAGE_TAG) CLUSTER_DIGEST_RECORD_FILE=$(CLUSTER_DIGEST_RECORD_FILE) \
-		bash scripts/validate/validate-cluster-registry.sh
-
-kyverno-enforce-proof: ## Prove Kyverno Enforce accepts signed digests and rejects unsafe images
-	@NAMESPACE=$(NS) CLUSTER_DIGEST_RECORD_FILE=$(CLUSTER_DIGEST_RECORD_FILE) \
-		bash scripts/validate/validate-kyverno-enforce.sh
-
-kyverno-admission-tests: ## Run Kyverno positive and negative admission tests against current policy mode
-	@bash scripts/validate/kyverno-admission-tests.sh
-
-gitops-update-digests: ## Update the Argo CD kustomization with cluster-reachable immutable digests
-	@DIGEST_RECORD_FILE=$(CLUSTER_DIGEST_RECORD_FILE) IMAGE_PREFIX=$(IMAGE_PREFIX) \
-		bash scripts/gitops/update-digests.sh
-
-gitops-sync-proof: ## Validate Argo CD sync and optionally create a controlled drift proof
-	@bash scripts/validate/validate-gitops-sync.sh
-
-gitops-drift-proof: ## Create controlled Argo CD drift only when CONFIRM_GITOPS_DRIFT=YES
-	@bash scripts/validate/validate-gitops-drift.sh
-
-secret-rotation-proof: ## Rotate the SOPS/age DB Secret when explicit rotation inputs are provided
-	@bash scripts/secrets/rotate-sops-production-db-secret.sh
-
-observability-stack-proof: ## Validate Prometheus, Grafana, Loki and Alertmanager evidence
-	@bash scripts/validate/validate-observability-stack.sh
-
-scheduled-backup-proof: ## Validate scheduled PostgreSQL backup CronJob readiness
-	@bash scripts/validate/validate-scheduled-backup.sh
-
-runtime-detection-proof: ## Validate optional Falco/Tetragon runtime detection in audit mode
-	@bash scripts/validate/validate-runtime-detection.sh
-
-chaos-lite-proof: ## Prove light self-healing checks; mutative actions require CONFIRM_CHAOS_LITE=YES
-	@bash scripts/validate/chaos-lite.sh
-
-ci-authority-report: ## Document Jenkins as official CI/CD authority and GitHub Actions as manual legacy
-	@bash scripts/validate/generate-ci-authority-report.sh
-
-official-scope: ## Generate the official Laravel-first scope and legacy RAG exclusion report
-	@bash scripts/validate/generate-official-scope-report.sh
-
-jenkins-rbac-proof: ## Validate the Jenkins production RBAC profile or live API proof
-	@bash scripts/validate/validate-jenkins-rbac.sh
-
-intoto-attestation: ## Generate an in-toto style release statement from existing evidence
-	@REPORT_DIR=$(REPORT_DIR) DIGEST_RECORD_FILE=$(DIGEST_RECORD_FILE) bash scripts/release/generate-intoto-attestation.sh
-
-normalize-artifacts: ## Normalize generated artifact text files to LF and trim trailing whitespace
-	@bash scripts/validate/normalize-artifacts.sh
-
-expert-readiness: ## Run non-destructive expert-readiness evidence refresh
-	@$(MAKE) official-scope
-	@$(MAKE) kyverno-enforce-readiness
-	@$(MAKE) gitops-sync-proof
-	@$(MAKE) secret-rotation-proof
-	@$(MAKE) observability-stack-proof
-	@$(MAKE) scheduled-backup-proof
-	@$(MAKE) runtime-detection-proof
-	@$(MAKE) chaos-lite-proof
-	@$(MAKE) jenkins-webhook-proof
-	@$(MAKE) jenkins-ci-push-proof
-	@$(MAKE) ci-authority-report
-	@$(MAKE) final-source-of-truth
-	@$(MAKE) final-summary
-	@bash scripts/validate/generate-expert-readiness-report.sh
-	@$(MAKE) normalize-artifacts
-
 metrics-install: ## Install metrics-server for local HPA metrics
 	@bash scripts/deploy/install-metrics-server.sh
 
 clean: ## Remove generated local artifacts
 	@rm -rf .coverage-artifacts artifacts/release artifacts/sbom artifacts/validation artifacts/jenkins artifacts/final artifacts/support-pack security/reports
+
+# ----------------------------------------------------------------------------
+# Expert-level improvement targets (P0/P1/P2). All targets are idempotent and
+# produce evidence under artifacts/. See docs/architecture/official-scope.md.
+# ----------------------------------------------------------------------------
+
+.PHONY: official-scope jenkins-live-proofs argocd-bootstrap argocd-down \
+        observability-up observability-down sops-rotate sops-validate \
+        backup-test-cycle kyverno-admission-tests kyverno-enforce-on \
+        kyverno-enforce-off falco-up falco-down expert-readiness expert-up-all
+
+official-scope: ## Validate official RAG/legacy scope vs rendered overlays
+	@bash scripts/validate/validate-official-scope.sh
+
+jenkins-live-proofs: ## Run webhook + CI push proofs (uses JENKINS_URL/USER/TOKEN)
+	@bash scripts/jenkins/run-live-proofs.sh
+
+argocd-bootstrap: ## Apply Argo CD AppProject + Applications + ApplicationSet
+	@kubectl apply -k infra/k8s/argocd
+
+argocd-down: ## Remove Argo CD SecureRAG Applications (keeps controller)
+	@kubectl delete -k infra/k8s/argocd --ignore-not-found
+
+observability-up: ## Deploy Prometheus + Grafana + Loki + Alertmanager
+	@kubectl apply -k infra/k8s/observability
+	@kubectl rollout status -n securerag-monitoring deploy/prometheus --timeout=180s || true
+
+observability-down: ## Remove the observability stack
+	@kubectl delete -k infra/k8s/observability --ignore-not-found
+
+sops-rotate: ## Rotate the SOPS age recipient and re-encrypt secrets
+	@bash scripts/secrets/rotate-sops-age-recipient.sh
+
+sops-validate: ## Validate the SOPS workflow without applying
+	@bash scripts/secrets/validate-sops-workflow.sh
+
+backup-test-cycle: ## Trigger postgres-backup CronJob and verify restore cycle
+	@bash scripts/data/test-backup-restore-cycle.sh
+
+kyverno-admission-tests: ## Run positive/negative admission tests against Kyverno
+	@bash scripts/validate/test-kyverno-admission.sh
+
+kyverno-enforce-on: ## Toggle Kyverno Audit -> Enforce with auto-rollback safety
+	@bash scripts/deploy/kyverno-enforce-toggle.sh on
+
+kyverno-enforce-off: ## Toggle Kyverno Enforce -> Audit (rollback)
+	@bash scripts/deploy/kyverno-enforce-toggle.sh off
+
+falco-up: ## Deploy Falco DaemonSet with SecureRAG runtime rules
+	@kubectl apply -k infra/k8s/runtime-detection
+	@kubectl rollout status -n falco daemonset/falco --timeout=300s || true
+
+falco-down: ## Remove Falco DaemonSet
+	@kubectl delete -k infra/k8s/runtime-detection --ignore-not-found
+
+expert-readiness: ## Generate the expert readiness report (P0/P1/P2 synthesis)
+	@bash scripts/validate/generate-expert-readiness-report.sh
+
+expert-up-all: official-scope argocd-bootstrap observability-up falco-up kyverno-admission-tests expert-readiness ## Full expert bootstrap (cluster required)
+	@echo "[OK] expert bootstrap complete; review artifacts/final/expert-readiness-report.md"

@@ -1,0 +1,365 @@
+@startuml
+title SecureRAG Hub — Vue Globale DevSecOps (layout 2 colonnes, packages en grille)
+
+top to bottom direction
+
+skinparam dpi 220
+skinparam shadowing false
+skinparam linetype ortho
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 26
+skinparam titleFontSize 28
+skinparam roundcorner 18
+skinparam nodesep 60
+skinparam ranksep 80
+skinparam ArrowColor #4B5563
+skinparam ArrowThickness 1.4
+
+' Marge gauche/droite d'environ 1 cm (86 px à 220 dpi)
+skinparam margin 86
+
+skinparam packageStyle rectangle
+skinparam packageBorderColor #CBD5E1
+skinparam packageBackgroundColor #F8FAFC
+skinparam packageFontColor #0F172A
+skinparam packageFontSize 21
+
+skinparam componentBorderColor #64748B
+skinparam componentBackgroundColor white
+skinparam componentFontColor #0F172A
+skinparam componentFontSize 24
+
+skinparam databaseBorderColor #B45309
+skinparam databaseBackgroundColor #FFF7ED
+skinparam databaseFontColor #7C2D12
+
+skinparam cloudBorderColor #2563EB
+skinparam cloudBackgroundColor #EFF6FF
+skinparam cloudFontColor #1E3A8A
+
+skinparam folderBorderColor #7C3AED
+skinparam folderBackgroundColor #F5F3FF
+skinparam folderFontColor #4C1D95
+
+skinparam actorFontSize 18
+skinparam noteFontSize 15
+skinparam noteBackgroundColor #FEF3C7
+skinparam noteBorderColor #D97706
+
+' ── Acteurs (haut gauche et haut droite) ──────────────
+actor "Développeur\nDevSecOps" as Dev
+actor "Jenkins\nCI/CD" as Jenkins
+
+' ── COLONNE GAUCHE : 1,2,3 ───────────────────────────
+package "1. Gouvernance & CI" as P1 #EAF3FF {
+    component "GitHub Repository\ncode, manifests, runbooks" as Git #EAF7EE
+    component "Quality Gates\nTests, Semgrep,\nGitleaks, Trivy FS" as Gates #EAF7EE
+    component "Branches / Pull Requests\nreview + traçabilité" as PR #EAF7EE
+    component "Jenkins RBAC\nmatrix / rôles" as JenkinsRBAC #EAF7EE
+    component "Jenkinsfile\npipeline officielle" as Jenkinsfile #EAF7EE
+    component "Jenkins live SCM/API\nWebhook + API token" as JenkinsLive #EAF2FF
+
+    ' Disposition en 2 colonnes (3 lignes)
+    Git -[hidden]right-> Gates
+    PR -[hidden]right-> JenkinsRBAC
+    Jenkinsfile -[hidden]right-> JenkinsLive
+
+    Git -[hidden]down-> PR
+    PR -[hidden]down-> Jenkinsfile
+    Gates -[hidden]down-> JenkinsRBAC
+    JenkinsRBAC -[hidden]down-> JenkinsLive
+}
+
+package "2. Build, Registry & Supply Chain" as P2 #FFF4E8 {
+    component "Build Docker\nimages OCI" as Build #EAF7EE
+    component "Registry demo\nlocalhost:5001" as DemoRegistry #F8FAFC
+    component "Images officielles\n5 services applicatifs" as Images #EAF7EE
+    component "Registry cluster-reachable\nsecurerag-registry:5000" as ClusterRegistry #EAF7EE
+    component "Registry proof\nDNS pod + pull + catalog" as RegistryProof #EAF7EE
+    component "Trivy scan" as Trivy #EAF7EE
+    component "Syft SBOM\nCycloneDX" as Syft #EAF7EE
+    component "Cosign\nsign + verify" as Cosign #EAF7EE
+    component "Promotion digest-first\npromotion-digests-cluster.txt" as Digest #EAF7EE
+    component "No-rebuild deploy\nimage@sha256" as NoRebuild #EAF7EE
+    component "Attestation + Provenance\nCOMPLETE_PROVEN / SLSA-style" as Attestation #EAF7EE
+    component "in-toto attestation" as Intoto #EAF7EE
+
+    ' 3 colonnes (4 lignes)
+    Build -[hidden]right-> DemoRegistry
+    DemoRegistry -[hidden]right-> RegistryProof
+    Images -[hidden]right-> ClusterRegistry
+    ClusterRegistry -[hidden]right-> Trivy
+    Syft -[hidden]right-> Cosign
+    Cosign -[hidden]right-> Digest
+    NoRebuild -[hidden]right-> Attestation
+    Attestation -[hidden]right-> Intoto
+
+    Build -[hidden]down-> Images
+    DemoRegistry -[hidden]down-> ClusterRegistry
+    RegistryProof -[hidden]down-> Trivy
+    Images -[hidden]down-> Syft
+    ClusterRegistry -[hidden]down-> Cosign
+    Trivy -[hidden]down-> Digest
+    Syft -[hidden]down-> NoRebuild
+    Cosign -[hidden]down-> Attestation
+    Digest -[hidden]down-> Intoto
+}
+
+package "3. Déploiement Kubernetes" as P3 #EAF7FF {
+    component "GitOps repository\nmanifests par digest" as GitOpsRepo #F3E8FF
+    component "Overlay production\nKustomize" as OverlayProd #EAF7EE
+    component "Argo CD\nsync / health" as Argo #F3E8FF
+    component "Déploiement strict\nREQUIRE_DIGEST_DEPLOY=true" as Deploy #EAF7EE
+    component "Drift detection\nOutOfSync proof" as Drift #F3E8FF
+    cloud "Cluster Kubernetes\nkind sur VPS\nproduction-like" as K8s #EAF7EE
+    component "Workloads officiels\nportal-web x3, auth-users x2,\nchatbot-manager x2... " as Workloads #EAF7EE
+    component "Runtime imageID proof\npods récents + @sha256" as RuntimeProof #EAF7EE
+
+    ' 2 colonnes (4 lignes)
+    GitOpsRepo -[hidden]right-> OverlayProd
+    Argo -[hidden]right-> Deploy
+    Drift -[hidden]right-> K8s
+    Workloads -[hidden]right-> RuntimeProof
+
+    GitOpsRepo -[hidden]down-> Argo
+    OverlayProd -[hidden]down-> Deploy
+    Argo -[hidden]down-> Drift
+    Deploy -[hidden]down-> K8s
+    Drift -[hidden]down-> Workloads
+    K8s -[hidden]down-> RuntimeProof
+}
+
+' ── Liaison verticale colonne gauche (packages) ──────
+P1 -[hidden]down- P2
+P2 -[hidden]down- P3
+
+' ── COLONNE DROITE : SRE, 4,5,6,7 ───────────────────
+actor "SRE /\nSecurity Lead" as SRE
+
+package "4. Sécurité Runtime & Admission" as P4 #F1F8EE {
+    component "SecurityContext\nnon-root, seccomp, drop ALL" as SecCtx #EAF7EE
+    component "Kyverno Audit\nClusterPolicies + PolicyReports" as KyvernoAudit #EAF7EE
+    component "NetworkPolicies\ndefault deny + flux autorisés" as NetPol #EAF7EE
+    component "Kyverno Enforce readiness\nverifyImages + verifyDigest" as KyvernoEnforce #EAF2FF
+    component "RBAC minimal\nServiceAccounts dédiés" as RBAC #EAF7EE
+    component "Admission tests\npositifs / négatifs" as AdmissionTests #F3E8FF
+    component "ResourceQuota\nLimitRange" as Quota #EAF7EE
+    component "Rollback Audit\nsi blocage admission" as KyvernoRollback #F3E8FF
+    component "PDB + probes\nreadiness / liveness" as PDB #EAF7EE
+    component "Falco / Tetragon\nruntime detection" as RuntimeDetection #F3E8FF
+
+    ' 2 colonnes (5 lignes)
+    SecCtx -[hidden]right-> KyvernoAudit
+    NetPol -[hidden]right-> KyvernoEnforce
+    RBAC -[hidden]right-> AdmissionTests
+    Quota -[hidden]right-> KyvernoRollback
+    PDB -[hidden]right-> RuntimeDetection
+
+    SecCtx -[hidden]down-> NetPol
+    KyvernoAudit -[hidden]down-> KyvernoEnforce
+    NetPol -[hidden]down-> RBAC
+    KyvernoEnforce -[hidden]down-> AdmissionTests
+    RBAC -[hidden]down-> Quota
+    AdmissionTests -[hidden]down-> KyvernoRollback
+    Quota -[hidden]down-> PDB
+    KyvernoRollback -[hidden]down-> RuntimeDetection
+}
+
+package "5. Secrets, Données & Résilience" as P5 #FFF7F2 {
+    database "PostgreSQL externe" as PG #EAF7EE
+    component "Secret DB Kubernetes\nproduction" as DBSecret #EAF7EE
+    component "SOPS/age\nsecrets chiffrés Git" as SOPS #F3E8FF
+    component "Backup PostgreSQL\nmanuel prouvé" as BackupManual #EAF7EE
+    component "Secret rotation proof\nsans fuite de valeur" as SecretRotation #F3E8FF
+    component "Backup CronJob\nplanifié" as BackupCron #F3E8FF
+    component "External Secrets / Vault" as ESO #F3E8FF
+    component "Restore test isolé\nchecksum + preuve" as RestoreTest #EAF7EE
+
+    ' 2 colonnes (4 lignes)
+    PG -[hidden]right-> DBSecret
+    SOPS -[hidden]right-> BackupManual
+    SecretRotation -[hidden]right-> BackupCron
+    ESO -[hidden]right-> RestoreTest
+
+    PG -[hidden]down-> SOPS
+    DBSecret -[hidden]down-> BackupManual
+    SOPS -[hidden]down-> SecretRotation
+    BackupManual -[hidden]down-> BackupCron
+    SecretRotation -[hidden]down-> ESO
+    BackupCron -[hidden]down-> RestoreTest
+}
+
+package "6. Observabilité & SRE" as P6 #EEF7F7 {
+    component "metrics-server + HPA\nsans UNKNOWN" as HPA #EAF7EE
+    component "Grafana\ndashboards SLO" as Grafana #F3E8FF
+    component "Prometheus\nmetrics + targets" as Prometheus #F3E8FF
+    component "Loki\nlogs applicatifs" as Loki #F3E8FF
+    component "Alertmanager\nalertes" as Alertmanager #F3E8FF
+    component "SLOs\nhealth, readiness,\nlatence, disponibilité" as SLO #F3E8FF
+    component "Chaos lite\npod kill / restart" as Chaos #F3E8FF
+
+    ' 2 colonnes (4 lignes) – Chaos placé en fin de 2ème colonne
+    HPA -[hidden]right-> Grafana
+    Prometheus -[hidden]right-> Loki
+    Alertmanager -[hidden]right-> SLO
+    SLO -[hidden]right-> Chaos
+
+    HPA -[hidden]down-> Prometheus
+    Grafana -[hidden]down-> Loki
+    Prometheus -[hidden]down-> Alertmanager
+    Loki -[hidden]down-> SLO
+    Alertmanager -[hidden]down-> Chaos
+}
+
+package "7. Preuves & Readiness Finale" as P7 #F8F4FF {
+    folder "artifacts/release\nSBOM, signatures,\ndigests, attestations" as ArtRelease #EAF7EE
+    folder "artifacts/observability\nPrometheus, Grafana,\nLoki, alerts" as ArtObservability #F3E8FF
+    folder "artifacts/validation\nruntime, HPA,\nKyverno, GitOps" as ArtValidation #EAF7EE
+    folder "artifacts/gitops\nsync + drift proof" as ArtGitOps #F3E8FF
+    folder "artifacts/security\nposture, secrets,\nbackup/restore" as ArtSecurity #EAF7EE
+    folder "support-pack final" as SupportPack #EAF7EE
+    component "Final source of truth" as Truth #EAF7EE
+    component "Mémoire / Soutenance\nartefacts à citer" as Memoire #EAF7EE
+    component "Production Readiness\nExpert Report" as Readiness #FFF4E5
+
+    ' 3 colonnes (3 lignes)
+    ArtRelease -[hidden]right-> ArtObservability
+    ArtObservability -[hidden]right-> SupportPack
+    ArtValidation -[hidden]right-> ArtGitOps
+    ArtGitOps -[hidden]right-> Truth
+    ArtSecurity -[hidden]right-> Memoire
+    Memoire -[hidden]right-> Readiness
+
+    ArtRelease -[hidden]down-> ArtValidation
+    ArtObservability -[hidden]down-> ArtGitOps
+    SupportPack -[hidden]down-> Truth
+    ArtValidation -[hidden]down-> ArtSecurity
+    ArtGitOps -[hidden]down-> Memoire
+    Truth -[hidden]down-> Readiness
+}
+
+' ── Placement colonne droite ──────────────────────────
+P1 -[hidden]right- SRE
+SRE -[hidden]down- P4
+P4 -[hidden]down- P5
+P5 -[hidden]down- P6
+P6 -[hidden]down- P7
+
+' ===== FLUX PRINCIPAUX (inchangés) =====
+Dev --> Git
+Git --> Jenkinsfile
+Git --> PR
+PR --> Jenkins
+Jenkins --> Gates
+Jenkins --> JenkinsRBAC
+Jenkins --> JenkinsLive
+Gates --> Build
+
+Build --> Images
+Images --> DemoRegistry
+Images --> ClusterRegistry
+ClusterRegistry --> RegistryProof
+ClusterRegistry --> Trivy
+ClusterRegistry --> Syft
+ClusterRegistry --> Cosign
+Trivy --> Digest
+Syft --> Digest
+Cosign --> Digest
+Digest --> NoRebuild
+NoRebuild --> Attestation
+Attestation --> Intoto
+
+Digest --> GitOpsRepo
+GitOpsRepo --> Argo
+Argo --> Drift
+Argo --> Deploy
+Deploy --> K8s
+K8s --> Workloads
+Workloads --> RuntimeProof
+
+OverlayProd --> Deploy
+
+SecCtx --> Workloads
+NetPol --> Workloads
+RBAC --> Workloads
+Quota --> Workloads
+PDB --> Workloads
+
+KyvernoAudit --> K8s
+KyvernoAudit --> KyvernoEnforce
+Cosign --> KyvernoEnforce
+Digest --> KyvernoEnforce
+KyvernoEnforce --> AdmissionTests
+KyvernoEnforce --> KyvernoRollback
+
+DBSecret --> Workloads
+SOPS --> DBSecret
+SecretRotation --> DBSecret
+ESO --> DBSecret
+Workloads --> PG
+PG --> BackupManual
+PG --> BackupCron
+BackupManual --> RestoreTest
+BackupCron --> RestoreTest
+
+Workloads --> HPA
+Workloads --> Prometheus
+Workloads --> Loki
+Prometheus --> Grafana
+Prometheus --> Alertmanager
+Grafana --> SLO
+Alertmanager --> SLO
+Workloads --> Chaos
+Workloads --> RuntimeDetection
+
+Trivy --> ArtRelease
+Syft --> ArtRelease
+Cosign --> ArtRelease
+Digest --> ArtRelease
+NoRebuild --> ArtRelease
+Attestation --> ArtRelease
+Intoto --> ArtRelease
+
+RuntimeProof --> ArtValidation
+HPA --> ArtValidation
+KyvernoAudit --> ArtValidation
+KyvernoEnforce --> ArtValidation
+AdmissionTests --> ArtValidation
+JenkinsLive --> ArtValidation
+Argo --> ArtGitOps
+Drift --> ArtGitOps
+
+SecCtx --> ArtSecurity
+NetPol --> ArtSecurity
+RBAC --> ArtSecurity
+RestoreTest --> ArtSecurity
+DBSecret --> ArtSecurity
+SOPS --> ArtSecurity
+SecretRotation --> ArtSecurity
+JenkinsRBAC --> ArtSecurity
+
+Prometheus --> ArtObservability
+Grafana --> ArtObservability
+Loki --> ArtObservability
+Alertmanager --> ArtObservability
+Chaos --> ArtObservability
+RuntimeDetection --> ArtObservability
+
+ArtRelease --> SupportPack
+ArtValidation --> SupportPack
+ArtSecurity --> SupportPack
+ArtObservability --> SupportPack
+ArtGitOps --> SupportPack
+
+SupportPack --> Truth
+SupportPack --> Readiness
+SupportPack --> Memoire
+
+SRE --> RuntimeProof
+SRE --> KyvernoEnforce
+SRE --> Grafana
+SRE --> Readiness
+SRE --> SupportPack
+
+@enduml

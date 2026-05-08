@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: falco
+  labels:
+    name: falco
+    # Falco DaemonSet must access kernel/proc — privileged is required.
+    pod-security.kubernetes.io/enforce: privileged
+    pod-security.kubernetes.io/audit: privileged
+    pod-security.kubernetes.io/warn: privileged
+    app.kubernetes.io/part-of: securerag-hub
+    app.kubernetes.io/component: runtime-detection

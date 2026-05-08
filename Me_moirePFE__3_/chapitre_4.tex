@@ -1,0 +1,32 @@
+\chapter{Réalisation et Implémentation}
+\section{Introduction}
+
+\section{Environnements de Travail}
+\begin{itemize}
+    \item \textbf{IDE :} Visual Studio Code.
+    \item \textbf{Langage :} Python 3.10.
+    \item \textbf{Bibliothèques :} LangChain, OpenAI, FastAPI.
+\end{itemize}
+
+\section{Exemple d'Implémentation du Code}
+\begin{lstlisting}[language=Python, caption=Définition d'un agent avec outils personnalisés, label=lst:codeAgent]
+from langchain_core.tools import tool
+from langchain_openai import ChatOpenAI
+from langgraph.prebuilt import create_react_agent
+
+@tool
+def get_weather(city: str) -> str:
+    return f"Le soleil brille à {city}"
+
+llm = ChatOpenAI(model="gpt-4-turbo")
+tools = [get_weather]
+
+app = create_react_agent(llm, tools)
+
+messages = app.invoke({"messages": [("user", "Quelle est la météo à Sfax ?")]})
+print(messages["messages"][-1].content)
+\end{lstlisting}
+
+\section{Interfaces Graphiques et Écrans}
+
+\section{Conclusion}

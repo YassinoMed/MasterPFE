@@ -1,0 +1,39 @@
+# Tetragon (option) — exécution kernel-level (eBPF) du Cilium project.
+# Non installé par défaut : Falco couvre les besoins SecureRAG. Cette définition
+# documente le path "experts" et reste neutre tant que la ressource n'est pas
+# référencée par une Kustomization.
+#
+# Pour activer:
+#   helm repo add cilium https://helm.cilium.io
+#   helm install tetragon cilium/tetragon -n kube-system
+# puis:
+#   kubectl apply -f infra/k8s/runtime-detection/tetragon-tracingpolicy.yaml
+#
+# Ci-dessous: TracingPolicy d'exemple (ne s'applique que si CRD installé).
+apiVersion: cilium.io/v1alpha1
+kind: TracingPolicy
+metadata:
+  name: securerag-process-creds
+spec:
+  kprobes:
+    - call: __sys_setuid
+      syscall: true
+      args:
+        - index: 0
+          type: int
+      selectors:
+        - matchActions:
+            - action: Post
+    - call: security_path_unlink
+      args:
+        - index: 1
+          type: path
+      selectors:
+        - matchArgs:
+            - index: 1
+              operator: Prefix
+              values:
+                - /var/run/secrets/kubernetes.io
+                - /etc/shadow
+          matchActions:
+            - action: Sigkill

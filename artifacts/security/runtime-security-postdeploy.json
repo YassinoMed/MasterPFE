@@ -1,1 +1,192 @@
-{"status":"DÉPENDANT_DE_L_ENVIRONNEMENT","reason":"The namespace is not reachable in the current Kubernetes context."}
+{
+  "failures": [],
+  "globalControls": {
+    "auditRoleBinding": true,
+    "defaultDenyNetworkPolicy": true,
+    "dnsEgressNetworkPolicy": true,
+    "runtimeReadonlyRole": true
+  },
+  "namespace": "securerag-hub",
+  "services": [
+    {
+      "desired": 2,
+      "failures": [],
+      "hpaPresent": true,
+      "imageIDCoverage": 2,
+      "livePods": 2,
+      "networkPolicySelected": true,
+      "pdbPresent": true,
+      "pods": [
+        {
+          "created": "2026-04-22T14:51:47Z",
+          "imageIDs": [
+            "localhost:5001/securerag-hub-auth-users@sha256:a24823c29f2a122a979b70bdfb3e55308f15bc0543d57aa3ed0108b2d15858a2"
+          ],
+          "name": "auth-users-58df94bcb8-2cbgb",
+          "ready": true,
+          "runtimeFailures": []
+        },
+        {
+          "created": "2026-04-22T14:52:23Z",
+          "imageIDs": [
+            "localhost:5001/securerag-hub-auth-users@sha256:a24823c29f2a122a979b70bdfb3e55308f15bc0543d57aa3ed0108b2d15858a2"
+          ],
+          "name": "auth-users-58df94bcb8-ncghs",
+          "ready": true,
+          "runtimeFailures": []
+        }
+      ],
+      "readyPods": 2,
+      "runtimeCoverage": 2,
+      "service": "auth-users",
+      "serviceAccount": "sa-auth-users",
+      "status": "TERMIN\u00c9"
+    },
+    {
+      "desired": 2,
+      "failures": [],
+      "hpaPresent": true,
+      "imageIDCoverage": 2,
+      "livePods": 2,
+      "networkPolicySelected": true,
+      "pdbPresent": true,
+      "pods": [
+        {
+          "created": "2026-04-22T14:51:47Z",
+          "imageIDs": [
+            "localhost:5001/securerag-hub-chatbot-manager@sha256:c3d6137749412b624a94be14a611d941d82b614630ad14f1e3bed867c100a0d4"
+          ],
+          "name": "chatbot-manager-659cdc7cdc-25cgq",
+          "ready": true,
+          "runtimeFailures": []
+        },
+        {
+          "created": "2026-04-22T14:52:18Z",
+          "imageIDs": [
+            "localhost:5001/securerag-hub-chatbot-manager@sha256:c3d6137749412b624a94be14a611d941d82b614630ad14f1e3bed867c100a0d4"
+          ],
+          "name": "chatbot-manager-659cdc7cdc-db6dr",
+          "ready": true,
+          "runtimeFailures": []
+        }
+      ],
+      "readyPods": 2,
+      "runtimeCoverage": 2,
+      "service": "chatbot-manager",
+      "serviceAccount": "sa-chatbot-manager",
+      "status": "TERMIN\u00c9"
+    },
+    {
+      "desired": 2,
+      "failures": [],
+      "hpaPresent": true,
+      "imageIDCoverage": 2,
+      "livePods": 2,
+      "networkPolicySelected": true,
+      "pdbPresent": true,
+      "pods": [
+        {
+          "created": "2026-04-22T14:52:18Z",
+          "imageIDs": [
+            "localhost:5001/securerag-hub-conversation-service@sha256:79da79ea590f4df64b5f8f86f9c09bd335c28f5968b94fd6266a608084e21e48"
+          ],
+          "name": "conversation-service-6c9f48ff84-tk7zx",
+          "ready": true,
+          "runtimeFailures": []
+        },
+        {
+          "created": "2026-04-22T14:51:47Z",
+          "imageIDs": [
+            "localhost:5001/securerag-hub-conversation-service@sha256:79da79ea590f4df64b5f8f86f9c09bd335c28f5968b94fd6266a608084e21e48"
+          ],
+          "name": "conversation-service-6c9f48ff84-z8qhh",
+          "ready": true,
+          "runtimeFailures": []
+        }
+      ],
+      "readyPods": 2,
+      "runtimeCoverage": 2,
+      "service": "conversation-service",
+      "serviceAccount": "sa-conversation-service",
+      "status": "TERMIN\u00c9"
+    },
+    {
+      "desired": 2,
+      "failures": [],
+      "hpaPresent": true,
+      "imageIDCoverage": 2,
+      "livePods": 2,
+      "networkPolicySelected": true,
+      "pdbPresent": true,
+      "pods": [
+        {
+          "created": "2026-04-22T14:51:47Z",
+          "imageIDs": [
+            "localhost:5001/securerag-hub-audit-security-service@sha256:913e469cfb32945378452fde7b58da3ba66c6fd231c0d6ad3de64425308d7459"
+          ],
+          "name": "audit-security-service-568984ff67-mmgg7",
+          "ready": true,
+          "runtimeFailures": []
+        },
+        {
+          "created": "2026-04-22T14:52:23Z",
+          "imageIDs": [
+            "localhost:5001/securerag-hub-audit-security-service@sha256:913e469cfb32945378452fde7b58da3ba66c6fd231c0d6ad3de64425308d7459"
+          ],
+          "name": "audit-security-service-568984ff67-pjtzt",
+          "ready": true,
+          "runtimeFailures": []
+        }
+      ],
+      "readyPods": 2,
+      "runtimeCoverage": 2,
+      "service": "audit-security-service",
+      "serviceAccount": "sa-audit-security-service",
+      "status": "TERMIN\u00c9"
+    },
+    {
+      "desired": 3,
+      "failures": [],
+      "hpaPresent": true,
+      "imageIDCoverage": 3,
+      "livePods": 3,
+      "networkPolicySelected": true,
+      "pdbPresent": true,
+      "pods": [
+        {
+          "created": "2026-04-22T14:52:55Z",
+          "imageIDs": [
+            "localhost:5001/securerag-hub-portal-web@sha256:7c8563a385b2600a6250348bfcf94b945b498862c83e1360c2973040b886f468"
+          ],
+          "name": "portal-web-6859f8c7b7-k64rs",
+          "ready": true,
+          "runtimeFailures": []
+        },
+        {
+          "created": "2026-04-22T14:51:46Z",
+          "imageIDs": [
+            "localhost:5001/securerag-hub-portal-web@sha256:7c8563a385b2600a6250348bfcf94b945b498862c83e1360c2973040b886f468"
+          ],
+          "name": "portal-web-6859f8c7b7-kjdgj",
+          "ready": true,
+          "runtimeFailures": []
+        },
+        {
+          "created": "2026-04-22T14:52:28Z",
+          "imageIDs": [
+            "localhost:5001/securerag-hub-portal-web@sha256:7c8563a385b2600a6250348bfcf94b945b498862c83e1360c2973040b886f468"
+          ],
+          "name": "portal-web-6859f8c7b7-lwthj",
+          "ready": true,
+          "runtimeFailures": []
+        }
+      ],
+      "readyPods": 3,
+      "runtimeCoverage": 3,
+      "service": "portal-web",
+      "serviceAccount": "sa-portal-web",
+      "status": "TERMIN\u00c9"
+    }
+  ],
+  "status": "TERMIN\u00c9"
+}

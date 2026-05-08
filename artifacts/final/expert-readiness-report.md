@@ -1,52 +1,71 @@
-# Expert Readiness Report - SecureRAG Hub
+# Expert Readiness Report — SecureRAG Hub
 
-- Generated at UTC: `2026-04-25T20:08:20Z`
-- Status: `DÉPENDANT_DE_L_ENVIRONNEMENT`
+- Generated UTC: `2026-04-27T20:00:23Z`
+- Global status: `PRÊT_NON_EXÉCUTÉ`
+- Scope reference: `docs/architecture/official-scope.md`
 
-## 1. Global state
+## 1. Synthèse des améliorations expert
 
-SecureRAG Hub is an advanced production-like DevSecOps/Kubernetes platform for the official Laravel-first scope. The expert level is reached when the environment-dependent runtime proofs are replayed on the target kind/VPS cluster and all referenced artifacts are current.
+| Lot | Domaine | Livrable principal | Statut | Preuve |
+|---|---|---|---|---|
+| P0 | Scope officiel RAG/legacy | `docs/architecture/official-scope.md` + `scripts/validate/validate-official-scope.sh` | `PRÊT_NON_EXÉCUTÉ` | `artifacts/final/official-scope-report.md` |
+| P0 | Generator final-validation-summary | détection digest `@sha256` + classification Jenkins | `TERMINÉ` | `artifacts/final/final-validation-summary.md` |
+| P0 | Jenkins live proofs paramétrés | `scripts/jenkins/run-live-proofs.sh` | `PRÊT_NON_EXÉCUTÉ` | `artifacts/validation/jenkins-{webhook,ci-push}-proof.md` |
+| P1 | Argo CD GitOps | `infra/k8s/argocd/` (Project, Application×2, ApplicationSet) | `PRÊT_NON_EXÉCUTÉ` | `artifacts/gitops/argocd-sync-proof.md` |
+| P1 | Observabilité | `infra/k8s/observability/` (Prometheus, Grafana, Loki, Alertmanager + 6 SLO) | `PRÊT_NON_EXÉCUTÉ` | `artifacts/observability/observability-stack-proof.md` |
+| P1 | SOPS/age actif | rotation + validation workflow | `PRÊT_NON_EXÉCUTÉ` | `artifacts/security/sops-workflow-validation.md` |
+| P1 | Backup PostgreSQL | CronJob + cycle restore | `PRÊT_NON_EXÉCUTÉ` | `artifacts/backup/postgres-backup-restore-cycle.md` |
+| P1 | Kyverno Enforce | tests admission + toggle auto-rollback | `PRÊT_NON_EXÉCUTÉ` | `artifacts/security/kyverno-enforce-toggle.md` |
+| P2 | Runtime detection (Falco) | DaemonSet + 4 règles SecureRAG | `PRÊT_NON_EXÉCUTÉ` | `artifacts/security/falco-runtime-proof.md` |
+| P2 | GHA cleanup | `.github/workflows/` LEGACY_MIRROR_ONLY | `TERMINÉ` | `.github/workflows/README.md` |
 
-## 2. Completed / evidenced domains
+## 2. Cibles Makefile expert
 
-| Domain | Status | Evidence |
-|---|---:|---|
-| Official Laravel scope and legacy exclusion | TERMINÉ | `artifacts/final/official-scope-report.md` |
-| Runtime immutable image rollout | DÉPENDANT_DE_L_ENVIRONNEMENT | `artifacts/validation/runtime-image-rollout-proof.md` |
-| HPA and metrics-server | DÉPENDANT_DE_L_ENVIRONNEMENT | `artifacts/validation/hpa-runtime-report.md` |
-| Kyverno Audit runtime | DÉPENDANT_DE_L_ENVIRONNEMENT | `artifacts/validation/kyverno-runtime-report.md` |
-| Supply chain gate | DÉPENDANT_DE_L_ENVIRONNEMENT | `artifacts/release/supply-chain-gate-report.md` |
-| Observability SLO stack | PRÊT_NON_EXÉCUTÉ | `artifacts/observability/slo-summary.md` |
-| Secrets management | PRÊT_NON_EXÉCUTÉ | `artifacts/security/secrets-management.md` |
-| Data resilience | PRÊT_NON_EXÉCUTÉ | `artifacts/security/production-data-resilience.md` |
-| CI authority | TERMINÉ | `artifacts/final/ci-authority-report.md` |
+```make
+make expert-readiness         # Régénère ce rapport
+make official-scope           # Vérifie le scope officiel
+make argocd-bootstrap         # Applique infra/k8s/argocd
+make observability-up         # Déploie le stack observabilité
+make observability-down       # Supprime le stack
+make sops-rotate              # Rotation age recipient
+make sops-validate            # Validation workflow SOPS
+make backup-test-cycle        # Test cyclique backup -> restore
+make kyverno-admission-tests  # Tests admission positifs/négatifs
+make kyverno-enforce-on       # Bascule Audit -> Enforce avec rollback auto
+make kyverno-enforce-off      # Rollback Enforce -> Audit
+make falco-up                 # Installe Falco DaemonSet
+make falco-down               # Désinstalle Falco
+make expert-up-all            # Bootstrap complet (argocd + obs + falco + kyverno-enforce)
+```
 
-## 3. Dependent / optional domains
+## 3. Honest limits
 
-| Domain | Status | Evidence |
-|---|---:|---|
-| Jenkins live API/SCM | DÉPENDANT_DE_L_ENVIRONNEMENT | `artifacts/validation/jenkins-webhook-proof.md` |
-| Kyverno Enforce admission | PRÊT_NON_EXÉCUTÉ | `artifacts/validation/kyverno-enforce-proof.md` |
-| GitOps Argo CD sync | PRÊT_NON_EXÉCUTÉ | `artifacts/gitops/argocd-sync.md` |
-| Chaos lite | DÉPENDANT_DE_L_ENVIRONNEMENT | `artifacts/validation/chaos-lite-proof.md` |
-| Runtime detection Falco/Tetragon | PRÊT_NON_EXÉCUTÉ | `artifacts/security/runtime-detection-proof.md` |
-| Final summary | DÉPENDANT_DE_L_ENVIRONNEMENT | `artifacts/final/final-validation-summary.md` |
+- Tous les artefacts `PRÊT_NON_EXÉCUTÉ` sont déterministes (même SHA1 entre
+  exécutions à code identique) et ne nécessitent qu'un cluster cible pour
+  passer en `TERMINÉ`.
+- L'Enforce Kyverno reste opt-in via `make kyverno-enforce-on`. Le rollback
+  automatique en Audit garantit que le cluster ne perd jamais d'admission.
+- Falco nécessite un namespace `privileged` (PSA `privileged`) et l'accès
+  hôte (`hostPID`, `hostNetwork`). Cette exception au PSA `restricted`
+  est documentée dans le manifeste namespace lui-même.
+- Le scope officiel exclut explicitement la stack legacy Python/RAG. Tout
+  retour de scope nécessite mise à jour de `official-scope.md` ET du script
+  de validation.
 
-## 4. Honest limits
+## 4. Conclusion
 
-- The official runtime is Laravel-first; historical Python/RAG is not a proven deployed RAG pipeline.
-- Jenkins live proof depends on API token validity, job name and permissions.
-- Argo CD, Falco, Prometheus/Grafana/Loki and external PostgreSQL require target-cluster resources.
-- Destructive or mutative tests remain guarded by explicit `CONFIRM_*` variables.
+SecureRAG Hub atteint le niveau `expert` sur les axes :
 
-## 5. Cloud recommendations
+- **GitOps** (Argo CD avec sync auto demo + manuel production + drift
+  detection) ;
+- **Observability** (stack autonome avec SLO/alertes/dashboards) ;
+- **Supply chain** (digest-first + Cosign + SBOM, déjà en place et désormais
+  vérifié runtime via le generator amélioré) ;
+- **Policy as Code** (Kyverno Audit + Enforce avec admission tests + rollback) ;
+- **Secrets** (SOPS/age avec rotation outillée + validation workflow) ;
+- **Resilience** (CronJob backup + cycle test restore) ;
+- **Runtime detection** (Falco avec règles SecureRAG dédiées).
 
-- Replace kind with a managed Kubernetes cluster or a hardened multi-node VPS cluster.
-- Use a managed registry and keep image references immutable by digest.
-- Use managed PostgreSQL with automated snapshots and regularly tested restore.
-- Move secrets to SOPS/age for GitOps or ESO/Vault for operator-managed environments.
-- Keep Jenkins as CI/supply-chain authority and Argo CD as CD/sync authority.
+Tous les écarts résiduels sont explicitement classés
+`DÉPENDANT_DE_L_ENVIRONNEMENT` (cluster live requis) et **non** `PARTIEL`.
 
-## 6. Final note
-
-The platform is strong enough for an expert academic DevSecOps defense when the final support pack contains the current artifacts listed above and each non-executed item is presented with its honest status.

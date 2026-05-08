@@ -1,0 +1,11 @@
+audit-security-service-568984ff67-mmgg7	localhost:5001/securerag-hub-audit-security-service:production	localhost:5001/securerag-hub-audit-security-service@sha256:913e469cfb32945378452fde7b58da3ba66c6fd231c0d6ad3de64425308d7459
+audit-security-service-568984ff67-pjtzt	localhost:5001/securerag-hub-audit-security-service:production	localhost:5001/securerag-hub-audit-security-service@sha256:913e469cfb32945378452fde7b58da3ba66c6fd231c0d6ad3de64425308d7459
+auth-users-58df94bcb8-2cbgb	localhost:5001/securerag-hub-auth-users:production	localhost:5001/securerag-hub-auth-users@sha256:a24823c29f2a122a979b70bdfb3e55308f15bc0543d57aa3ed0108b2d15858a2
+auth-users-58df94bcb8-ncghs	localhost:5001/securerag-hub-auth-users:production	localhost:5001/securerag-hub-auth-users@sha256:a24823c29f2a122a979b70bdfb3e55308f15bc0543d57aa3ed0108b2d15858a2
+chatbot-manager-659cdc7cdc-25cgq	localhost:5001/securerag-hub-chatbot-manager:production	localhost:5001/securerag-hub-chatbot-manager@sha256:c3d6137749412b624a94be14a611d941d82b614630ad14f1e3bed867c100a0d4
+chatbot-manager-659cdc7cdc-db6dr	localhost:5001/securerag-hub-chatbot-manager:production	localhost:5001/securerag-hub-chatbot-manager@sha256:c3d6137749412b624a94be14a611d941d82b614630ad14f1e3bed867c100a0d4
+conversation-service-6c9f48ff84-tk7zx	localhost:5001/securerag-hub-conversation-service:production	localhost:5001/securerag-hub-conversation-service@sha256:79da79ea590f4df64b5f8f86f9c09bd335c28f5968b94fd6266a608084e21e48
+conversation-service-6c9f48ff84-z8qhh	localhost:5001/securerag-hub-conversation-service:production	localhost:5001/securerag-hub-conversation-service@sha256:79da79ea590f4df64b5f8f86f9c09bd335c28f5968b94fd6266a608084e21e48
+portal-web-6859f8c7b7-k64rs	localhost:5001/securerag-hub-portal-web:production	localhost:5001/securerag-hub-portal-web@sha256:7c8563a385b2600a6250348bfcf94b945b498862c83e1360c2973040b886f468
+portal-web-6859f8c7b7-kjdgj	localhost:5001/securerag-hub-portal-web:production	localhost:5001/securerag-hub-portal-web@sha256:7c8563a385b2600a6250348bfcf94b945b498862c83e1360c2973040b886f468
+portal-web-6859f8c7b7-lwthj	localhost:5001/securerag-hub-portal-web:production	localhost:5001/securerag-hub-portal-web@sha256:7c8563a385b2600a6250348bfcf94b945b498862c83e1360c2973040b886f468
