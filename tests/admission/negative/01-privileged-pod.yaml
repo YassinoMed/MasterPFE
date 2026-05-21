@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: neg-privileged
+  namespace: securerag-hub
+  annotations:
+    test/expect: REJECT
+    test/policy: securerag-require-pod-security
+spec:
+  containers:
+    - name: c
+      image: ghcr.io/example/securerag-hub-portal-web@sha256:1111111111111111111111111111111111111111111111111111111111111111
+      securityContext:
+        privileged: true

@@ -1,0 +1,93 @@
+# Backup PostgreSQL (P1-17) — CronJob quotidien chiffré + retention 30j.
+# Cible : MinIO/S3 compatible. Endpoint, bucket et credentials dans le Secret.
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: pg-backup-sa
+  namespace: securerag-hub
+automountServiceAccountToken: false
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: pg-backup
+  namespace: securerag-hub
+  labels: { app.kubernetes.io/name: pg-backup }
+spec:
+  schedule: "0 2 * * *"             # 02:00 UTC chaque jour
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 7
+  startingDeadlineSeconds: 3600
+  jobTemplate:
+    spec:
+      backoffLimit: 2
+      template:
+        metadata:
+          labels: { app.kubernetes.io/name: pg-backup }
+        spec:
+          serviceAccountName: pg-backup-sa
+          automountServiceAccountToken: false
+          restartPolicy: OnFailure
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 65532
+            seccompProfile: { type: RuntimeDefault }
+          containers:
+            - name: pgdump
+              # Image Alpine + postgres-client + restic.
+              # Cette image DOIT être buildée puis pinée par digest avant tout
+              # déploiement réel. Le tag présent ici est un placeholder
+              # documentaire ; il sera refusé par Kyverno require-image-digest
+              # en mode Enforce.
+              # TODO(P0): scripts/release/build-pg-restic.sh + pin-overlay-digests.sh
+              image: ghcr.io/example/securerag-pg-restic:1.0.0
+              imagePullPolicy: IfNotPresent
+              securityContext:
+                allowPrivilegeEscalation: false
+                readOnlyRootFilesystem: true
+                capabilities: { drop: ["ALL"] }
+              env:
+                - name: PGHOST
+                  valueFrom: { secretKeyRef: { name: securerag-database-secrets, key: PG_HOST } }
+                - name: PGPORT
+                  valueFrom: { secretKeyRef: { name: securerag-database-secrets, key: PG_PORT } }
+                - name: PGUSER
+                  valueFrom: { secretKeyRef: { name: securerag-database-secrets, key: PG_BACKUP_USER } }
+                - name: PGPASSWORD
+                  valueFrom: { secretKeyRef: { name: securerag-database-secrets, key: PG_BACKUP_PASSWORD } }
+                - name: PGDATABASE
+                  valueFrom: { secretKeyRef: { name: securerag-database-secrets, key: PG_DATABASE } }
+                - name: RESTIC_REPOSITORY
+                  valueFrom: { secretKeyRef: { name: pg-backup-secrets, key: RESTIC_REPOSITORY } }
+                - name: RESTIC_PASSWORD
+                  valueFrom: { secretKeyRef: { name: pg-backup-secrets, key: RESTIC_PASSWORD } }
+                - name: AWS_ACCESS_KEY_ID
+                  valueFrom: { secretKeyRef: { name: pg-backup-secrets, key: AWS_ACCESS_KEY_ID } }
+                - name: AWS_SECRET_ACCESS_KEY
+                  valueFrom: { secretKeyRef: { name: pg-backup-secrets, key: AWS_SECRET_ACCESS_KEY } }
+              command:
+                - /bin/sh
+                - -c
+                - |
+                  set -euo pipefail
+                  ts="$(date -u +%Y%m%dT%H%M%SZ)"
+                  out="/tmp/dump-${ts}.sql.gz"
+                  pg_dump --format=plain --no-owner --no-privileges \
+                    --quote-all-identifiers \
+                    | gzip -9 > "${out}"
+                  size=$(wc -c < "${out}")
+                  echo "[INFO] dump size=${size} bytes"
+                  test "${size}" -gt 1024  # sanity
+                  restic backup --tag "pg" --tag "auto" "${out}"
+                  restic forget --keep-daily 14 --keep-weekly 4 --keep-monthly 6 --prune
+                  echo "BACKUP_OK"
+              resources:
+                requests: { cpu: 100m, memory: 128Mi }
+                limits:   { cpu: 500m, memory: 512Mi }
+              volumeMounts:
+                - { name: tmp, mountPath: /tmp }
+          volumes:
+            - name: tmp
+              emptyDir: { sizeLimit: 2Gi }

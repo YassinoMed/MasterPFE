@@ -1,0 +1,14 @@
+{
+  "timestamp": "2026-05-07T19:30:28Z",
+  "overall": "FAIL",
+  "checks": [
+    {"name":"unit-tests","status":"PARTIEL","required":true,"details":"no junit-*.xml found in /Users/mohamedyassine/Desktop/PFE/Master/.claude/worktrees/intelligent-kirch-35c142/.coverage-artifacts"},
+    {"name":"coverage","status":"PARTIEL","required":false,"details":"no coverage-summary.txt"},
+    {"name":"semgrep-sast","status":"PARTIEL","required":true,"details":"semgrep.json missing"},
+    {"name":"gitleaks","status":"PARTIEL","required":true,"details":"gitleaks.json missing"},
+    {"name":"trivy-fs","status":"PARTIEL","required":true,"details":"trivy-fs.json missing"},
+    {"name":"dependency-audit","status":"PARTIEL","required":false,"details":"summary present but verdict unclear"},
+    {"name":"kube-score","status":"PARTIEL","required":true,"details":"binary missing (non-strict mode)"},
+    {"name":"kyverno-static","status":"PARTIEL","required":false,"details":"kyverno CLI absent (non-strict)"}
+  ]
+}

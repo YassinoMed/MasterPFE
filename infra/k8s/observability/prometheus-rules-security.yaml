@@ -1,0 +1,129 @@
+# Security alert rules (P1-13)
+# Branchées sur Prometheus + kube-state-metrics + Kyverno metrics + Falco metrics.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-rules-security
+  namespace: securerag-monitoring
+  labels:
+    app.kubernetes.io/component: rules
+    app.kubernetes.io/category: security
+data:
+  securerag-security.yaml: |
+    groups:
+      - name: securerag-security-runtime
+        interval: 30s
+        rules:
+          # ── Pod / workload health ───────────────────────────
+          - alert: PodCrashLoopBackOff
+            expr: |
+              max_over_time(
+                kube_pod_container_status_waiting_reason{namespace="securerag-hub",reason="CrashLoopBackOff"}[5m]
+              ) > 0
+            for: 2m
+            labels:
+              severity: warning
+              category: reliability
+            annotations:
+              summary: "Pod {{ $labels.pod }} in CrashLoopBackOff"
+              description: "Container {{ $labels.container }} of pod {{ $labels.pod }} has been crash-looping for >2m."
+
+          - alert: PodNotReady
+            expr: |
+              sum by (namespace, pod) (
+                kube_pod_status_ready{namespace="securerag-hub",condition="false"}
+              ) > 0
+            for: 5m
+            labels:
+              severity: warning
+              category: reliability
+            annotations:
+              summary: "Pod {{ $labels.pod }} not Ready"
+              description: "Pod {{ $labels.pod }} has been not Ready for >5m."
+
+          # ── OOMKilled ───────────────────────────────────────
+          - alert: PodOOMKilled
+            expr: |
+              increase(kube_pod_container_status_terminated_reason{reason="OOMKilled",namespace="securerag-hub"}[5m]) > 0
+            labels:
+              severity: warning
+              category: reliability
+            annotations:
+              summary: "Pod {{ $labels.pod }} OOMKilled"
+              description: "Container {{ $labels.container }} OOMKilled. Check memory limits."
+
+          # ── Kyverno admission denials (security signal) ─────
+          - alert: KyvernoPolicyViolation
+            expr: |
+              increase(kyverno_policy_results_total{result="fail"}[10m]) > 0
+            labels:
+              severity: critical
+              category: admission
+            annotations:
+              summary: "Kyverno policy violation: {{ $labels.policy }}"
+              description: "Policy {{ $labels.policy }} returned {{ $value }} failure(s) in last 10 min on resource {{ $labels.resource_kind }}/{{ $labels.resource_namespace }}/{{ $labels.resource_name }}."
+
+          - alert: KyvernoPolicyError
+            expr: |
+              increase(kyverno_policy_results_total{result="error"}[10m]) > 0
+            labels:
+              severity: warning
+              category: admission
+            annotations:
+              summary: "Kyverno policy ERROR: {{ $labels.policy }}"
+              description: "Policy {{ $labels.policy }} threw an error — investigate webhook health."
+
+          # ── Falco runtime alerts ────────────────────────────
+          - alert: FalcoCriticalEvent
+            expr: |
+              increase(falco_events_total{priority=~"Critical|Emergency|Alert"}[5m]) > 0
+            labels:
+              severity: critical
+              category: runtime
+            annotations:
+              summary: "Falco {{ $labels.priority }}: {{ $labels.rule }}"
+              description: "Rule '{{ $labels.rule }}' fired {{ $value }} time(s) in last 5min."
+
+          - alert: FalcoShellInContainer
+            expr: |
+              increase(falco_events_total{rule="Terminal shell in container"}[1m]) > 0
+            labels:
+              severity: critical
+              category: runtime
+            annotations:
+              summary: "Interactive shell spawned in container"
+              description: "An interactive shell was spawned in a securerag-hub container — possible compromise or unauthorized access."
+
+          # ── Argo CD drift / sync issues ─────────────────────
+          - alert: ArgoCDAppOutOfSync
+            expr: |
+              argocd_app_info{sync_status!="Synced"} == 1
+            for: 10m
+            labels:
+              severity: warning
+              category: gitops
+            annotations:
+              summary: "Argo CD app {{ $labels.name }} OutOfSync"
+              description: "Application {{ $labels.name }} has been OutOfSync for >10min — possible drift."
+
+          - alert: ArgoCDAppDegraded
+            expr: |
+              argocd_app_info{health_status="Degraded"} == 1
+            for: 5m
+            labels:
+              severity: critical
+              category: gitops
+            annotations:
+              summary: "Argo CD app {{ $labels.name }} Degraded"
+
+          # ── Auth / supply chain anomalies ───────────────────
+          - alert: HighRateOfAuthFailures
+            expr: |
+              sum(rate(http_requests_total{namespace="securerag-hub",status=~"401|403"}[5m])) > 5
+            for: 5m
+            labels:
+              severity: warning
+              category: auth
+            annotations:
+              summary: "Spike of 401/403 responses"
+              description: "{{ $value | humanize }} 401/403 per second over last 5m — possible brute-force."

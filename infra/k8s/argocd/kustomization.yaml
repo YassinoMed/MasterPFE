@@ -10,6 +10,7 @@ resources:
   - application-demo.yaml
   - application-production.yaml
   - applicationset-platform.yaml
+  - notifications-cm.yaml         # P1-15 drift notifications
 commonLabels:
   app.kubernetes.io/part-of: securerag-hub
   app.kubernetes.io/managed-by: argocd

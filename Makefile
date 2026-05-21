@@ -345,3 +345,34 @@ expert-readiness: ## Generate the expert readiness report (P0/P1/P2 synthesis)
 
 expert-up-all: official-scope argocd-bootstrap observability-up falco-up kyverno-admission-tests expert-readiness ## Full expert bootstrap (cluster required)
 	@echo "[OK] expert bootstrap complete; review artifacts/final/expert-readiness-report.md"
+
+# ── DevSecOps Expert Hardening (P0/P1 final wave) ────────────
+quality-gate: ## CI consolidated Quality Gate (aggregates all signals)
+	@bash scripts/ci/quality-gate.sh
+
+audit-pod-security: ## Static audit Pod Security strict (RO rootfs, dropAll, seccomp, etc.)
+	@bash scripts/validate/audit-pod-security.sh
+
+audit-networkpolicies: ## Static audit per-service NetworkPolicies coverage
+	@bash scripts/validate/audit-networkpolicies.sh
+
+kyverno-fixtures: ## Run Kyverno admission fixtures (positive + negative)
+	@bash scripts/validate/test-kyverno-fixtures.sh
+
+kyverno-enforce-sequenced: ## Roll Audit -> Enforce policy by policy with safety
+	@bash scripts/deploy/kyverno-enforce-sequenced.sh
+
+pin-overlay-digests: ## Pin a Kustomize overlay to verified digests (OVERLAY=path required)
+	@bash scripts/release/pin-overlay-digests.sh --overlay $(OVERLAY) --digest-file $(or $(DIGEST_FILE),artifacts/release/promotion-digests.txt)
+
+restore-drill: ## Run PostgreSQL restore drill in isolated namespace (P1-17)
+	@bash scripts/backup/restore-drill.sh
+
+chaos-pod-delete: ## Run pod-delete chaos drill with self-heal proof (P1-18)
+	@bash scripts/chaos/pod-delete-and-prove.sh
+
+secret-rotation-drill: ## Run secret rotation drill in isolated namespace (P0-7)
+	@bash scripts/secrets/rotate-and-verify.sh
+
+devsecops-expert-audit: audit-pod-security audit-networkpolicies quality-gate ## Run all static expert audits in one shot
+	@echo "[OK] expert audits complete; reports under artifacts/security/"

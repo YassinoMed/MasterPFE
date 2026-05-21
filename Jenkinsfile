@@ -23,6 +23,26 @@ pipeline {
       defaultValue: false,
       description: 'Fail CI if the Kyverno CLI is missing instead of recording a ready-not-executed policy validation.'
     )
+    booleanParam(
+      name: 'STRICT_KUBE_SCORE',
+      defaultValue: true,
+      description: 'Fail CI if kube-score binary is missing or thresholds are exceeded. Disable only for local dry-runs.'
+    )
+    string(
+      name: 'KUBE_SCORE_MAX_CRITICAL',
+      defaultValue: '0',
+      description: 'Maximum allowed CRITICAL findings across all overlays.'
+    )
+    string(
+      name: 'KUBE_SCORE_MAX_WARNINGS',
+      defaultValue: '0',
+      description: 'Maximum allowed WARNING findings across all overlays. Set higher (e.g. 50) during incremental hardening.'
+    )
+    booleanParam(
+      name: 'ENFORCE_QUALITY_GATE',
+      defaultValue: true,
+      description: 'Run the consolidated CI Quality Gate stage that aggregates all signals (tests, SAST, scans, kube-score, kyverno).'
+    )
   }
 
   environment {
@@ -150,9 +170,13 @@ pipeline {
           REQUIRE_KYVERNO_CLI="${REQUIRE_KYVERNO_CLI:-false}" \
             bash scripts/ci/validate-kyverno-policies.sh
 
-          # kube-score: best-effort gate. Fails only on CRITICAL findings.
-          # Records PRÊT_NON_EXÉCUTÉ if the binary is missing.
-          bash scripts/ci/validate-kube-score.sh
+          # kube-score: blocking gate (P0-1).
+          # Fails on missing binary in strict mode, on CRITICAL > seuil, and
+          # on WARNING > seuil. Tunable via Jenkins parameters.
+          STRICT_KUBE_SCORE="${STRICT_KUBE_SCORE:-true}" \
+          KUBE_SCORE_MAX_CRITICAL="${KUBE_SCORE_MAX_CRITICAL:-0}" \
+          KUBE_SCORE_MAX_WARNINGS="${KUBE_SCORE_MAX_WARNINGS:-0}" \
+            bash scripts/ci/validate-kube-score.sh
 
           # Falco rules linter. Returns 77 (skip) when no validator present.
           bash scripts/ci/validate-falco-rules.sh || rc=$?
@@ -164,6 +188,31 @@ pipeline {
       post {
         always {
           archiveArtifacts allowEmptyArchive: true, artifacts: 'artifacts/security/k8s-ultra-hardening.md,artifacts/security/kyverno-policy-validation.md,artifacts/security/kyverno-apply.log,artifacts/security/kube-score-report.md,artifacts/security/kube-score-raw.txt,artifacts/security/falco-rules-validation.log'
+        }
+      }
+    }
+
+    stage('CI_QUALITY_GATE - Aggregated Verdict') {
+      when {
+        expression { return params.ENFORCE_QUALITY_GATE }
+      }
+      steps {
+        sh '''
+          set -euo pipefail
+
+          # Aggregates: tests, coverage, semgrep, gitleaks, trivy fs,
+          # dependency-audit, kube-score, kyverno static. Fails the build
+          # if any REQUIRED check is not PASS.
+          QG_REQUIRE_SONAR="${RUN_SONAR:-false}" \
+          QG_REQUIRE_COSIGN="false" \
+          QG_COVERAGE_MIN="${COVERAGE_MIN:-70}" \
+            bash scripts/ci/quality-gate.sh
+        '''
+      }
+      post {
+        always {
+          archiveArtifacts allowEmptyArchive: true,
+            artifacts: 'artifacts/security/quality-gate-summary.md,artifacts/security/quality-gate-summary.json,artifacts/security/kube-score-status.txt'
         }
       }
     }

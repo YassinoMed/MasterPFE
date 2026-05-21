@@ -1,0 +1,41 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pos-conformant
+  namespace: securerag-hub
+  annotations:
+    test/expect: ACCEPT
+    test/note: All controls met -- baseline accepted shape.
+spec:
+  serviceAccountName: default
+  automountServiceAccountToken: false
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 65532
+    runAsGroup: 65532
+    fsGroup: 65532
+    seccompProfile: { type: RuntimeDefault }
+  containers:
+    - name: c
+      # Image du registre projet, signée (digest fictif pour test --dry-run=server).
+      image: ghcr.io/example/securerag-hub-portal-web@sha256:0000000000000000000000000000000000000000000000000000000000000000
+      imagePullPolicy: IfNotPresent
+      ports:
+        - { name: http, containerPort: 8000 }
+      securityContext:
+        allowPrivilegeEscalation: false
+        readOnlyRootFilesystem: true
+        capabilities: { drop: ["ALL"] }
+      resources:
+        requests: { cpu: 50m, memory: 64Mi }
+        limits:   { cpu: 500m, memory: 256Mi }
+      readinessProbe:
+        httpGet: { path: /health, port: http }
+      livenessProbe:
+        httpGet: { path: /health, port: http }
+        initialDelaySeconds: 10
+      volumeMounts:
+        - { name: tmp, mountPath: /tmp }
+  volumes:
+    - name: tmp
+      emptyDir: {}

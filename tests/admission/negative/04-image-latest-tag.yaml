@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: neg-latest
+  namespace: securerag-hub
+  annotations:
+    test/expect: REJECT
+    test/policy: securerag-restrict-image-references
+spec:
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 65532
+    seccompProfile: { type: RuntimeDefault }
+  containers:
+    - name: c
+      image: ghcr.io/example/securerag-hub-portal-web:latest   # interdit
+      securityContext:
+        allowPrivilegeEscalation: false
+        readOnlyRootFilesystem: true
+        capabilities: { drop: ["ALL"] }

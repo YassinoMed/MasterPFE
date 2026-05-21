@@ -1,4 +1,12 @@
 # Application Argo CD pour l'overlay 'production' (HA Laravel + digests).
+#
+# ⚠️  IMPORTANT — targetRevision: main
+#     Seuls les commits mergés sur la branche `main` du repo GitHub sont
+#     considérés par Argo CD. Toute modification appliquée sur une branche
+#     feature/topic (ex: claude/intelligent-kirch-*) n'arrive en prod
+#     qu'après PR mergée. Vérifier avant la soutenance que la branche démo
+#     est bien `main`, ou créer un overlay de démo dédié.
+#
 # Sync MANUEL : approbation explicite requise pour production.
 apiVersion: argoproj.io/v1alpha1
 kind: Application

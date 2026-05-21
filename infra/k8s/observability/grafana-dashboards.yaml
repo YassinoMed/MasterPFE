@@ -1,0 +1,150 @@
+# Grafana dashboards (P1-14) provisionnés via ConfigMap + sidecar
+# (`grafana-sc-dashboards` ou Grafana operator). Le label
+# `grafana_dashboard: "1"` est consommé automatiquement par le sidecar.
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-dashboard-sre
+  namespace: securerag-monitoring
+  labels:
+    grafana_dashboard: "1"
+    app.kubernetes.io/category: sre
+data:
+  securerag-sre.json: |
+    {
+      "title": "SecureRAG — SRE Overview",
+      "uid": "securerag-sre",
+      "schemaVersion": 38,
+      "version": 1,
+      "refresh": "30s",
+      "time": { "from": "now-6h", "to": "now" },
+      "panels": [
+        {
+          "id": 1, "type": "stat",
+          "title": "Pods Ready (securerag-hub)",
+          "gridPos": { "x": 0, "y": 0, "w": 6, "h": 4 },
+          "targets": [{
+            "expr": "sum(kube_pod_status_ready{namespace=\"securerag-hub\",condition=\"true\"})",
+            "refId": "A"
+          }]
+        },
+        {
+          "id": 2, "type": "timeseries",
+          "title": "HTTP request rate per service",
+          "gridPos": { "x": 6, "y": 0, "w": 18, "h": 8 },
+          "targets": [{
+            "expr": "sum by (service) (rate(http_requests_total{namespace=\"securerag-hub\"}[1m]))",
+            "legendFormat": "{{service}}", "refId": "A"
+          }]
+        },
+        {
+          "id": 3, "type": "timeseries",
+          "title": "p95 latency per service",
+          "gridPos": { "x": 0, "y": 8, "w": 12, "h": 8 },
+          "targets": [{
+            "expr": "histogram_quantile(0.95, sum by (service, le) (rate(http_server_request_duration_seconds_bucket{namespace=\"securerag-hub\"}[5m])))",
+            "legendFormat": "{{service}}", "refId": "A"
+          }]
+        },
+        {
+          "id": 4, "type": "timeseries",
+          "title": "Error rate (5xx) per service",
+          "gridPos": { "x": 12, "y": 8, "w": 12, "h": 8 },
+          "targets": [{
+            "expr": "sum by (service) (rate(http_requests_total{namespace=\"securerag-hub\",status=~\"5..\"}[5m]))",
+            "legendFormat": "{{service}}", "refId": "A"
+          }]
+        },
+        {
+          "id": 5, "type": "timeseries",
+          "title": "CPU & Memory saturation",
+          "gridPos": { "x": 0, "y": 16, "w": 24, "h": 8 },
+          "targets": [
+            {
+              "expr": "sum by (pod) (rate(container_cpu_usage_seconds_total{namespace=\"securerag-hub\"}[5m]))",
+              "legendFormat": "cpu {{pod}}", "refId": "A"
+            },
+            {
+              "expr": "sum by (pod) (container_memory_working_set_bytes{namespace=\"securerag-hub\"}) / 1024 / 1024",
+              "legendFormat": "mem {{pod}} MiB", "refId": "B"
+            }
+          ]
+        }
+      ]
+    }
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-dashboard-security
+  namespace: securerag-monitoring
+  labels:
+    grafana_dashboard: "1"
+    app.kubernetes.io/category: security
+data:
+  securerag-security.json: |
+    {
+      "title": "SecureRAG — Security Posture",
+      "uid": "securerag-security",
+      "schemaVersion": 38,
+      "version": 1,
+      "refresh": "30s",
+      "time": { "from": "now-24h", "to": "now" },
+      "panels": [
+        {
+          "id": 1, "type": "stat",
+          "title": "Kyverno failures (24h)",
+          "gridPos": { "x": 0, "y": 0, "w": 6, "h": 4 },
+          "targets": [{
+            "expr": "sum(increase(kyverno_policy_results_total{result=\"fail\"}[24h]))",
+            "refId": "A"
+          }]
+        },
+        {
+          "id": 2, "type": "stat",
+          "title": "Falco events Critical (24h)",
+          "gridPos": { "x": 6, "y": 0, "w": 6, "h": 4 },
+          "targets": [{
+            "expr": "sum(increase(falco_events_total{priority=~\"Critical|Emergency|Alert\"}[24h]))",
+            "refId": "A"
+          }]
+        },
+        {
+          "id": 3, "type": "stat",
+          "title": "Auth failures rate (5m)",
+          "gridPos": { "x": 12, "y": 0, "w": 6, "h": 4 },
+          "targets": [{
+            "expr": "sum(rate(http_requests_total{namespace=\"securerag-hub\",status=~\"401|403\"}[5m]))",
+            "refId": "A"
+          }]
+        },
+        {
+          "id": 4, "type": "stat",
+          "title": "Argo CD apps OutOfSync",
+          "gridPos": { "x": 18, "y": 0, "w": 6, "h": 4 },
+          "targets": [{
+            "expr": "sum(argocd_app_info{sync_status!=\"Synced\"})",
+            "refId": "A"
+          }]
+        },
+        {
+          "id": 5, "type": "table",
+          "title": "Top Falco rules (1h)",
+          "gridPos": { "x": 0, "y": 4, "w": 12, "h": 8 },
+          "targets": [{
+            "expr": "topk(10, sum by (rule, priority) (increase(falco_events_total[1h])))",
+            "refId": "A", "format": "table", "instant": true
+          }]
+        },
+        {
+          "id": 6, "type": "table",
+          "title": "Top Kyverno failing policies (1h)",
+          "gridPos": { "x": 12, "y": 4, "w": 12, "h": 8 },
+          "targets": [{
+            "expr": "topk(10, sum by (policy, resource_kind, resource_namespace) (increase(kyverno_policy_results_total{result=\"fail\"}[1h])))",
+            "refId": "A", "format": "table", "instant": true
+          }]
+        }
+      ]
+    }

@@ -1,0 +1,95 @@
+# Falcosidekick — relais Falco -> Loki (+ Alertmanager) (P1-12).
+# Helm-equivalent manifest pour install all-in-one sans dépendre de Helm.
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: falcosidekick-config
+  namespace: falco
+data:
+  config.yaml: |
+    debug: false
+    customfields: "cluster:securerag-hub,env:production"
+    loki:
+      hostport: "http://loki.securerag-monitoring.svc.cluster.local:3100"
+      endpoint: "/loki/api/v1/push"
+      minimumpriority: "notice"
+      checkcert: false
+      tenant: "securerag"
+    alertmanager:
+      hostport: "http://alertmanager.securerag-monitoring.svc.cluster.local:9093"
+      minimumpriority: "warning"
+      mutualtls: false
+      checkcert: false
+      expireafter: 0
+      extralabels: "category:runtime,source:falco"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: falcosidekick
+  namespace: falco
+  labels: { app.kubernetes.io/name: falcosidekick }
+spec:
+  replicas: 1
+  selector: { matchLabels: { app.kubernetes.io/name: falcosidekick } }
+  template:
+    metadata:
+      labels: { app.kubernetes.io/name: falcosidekick }
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65532
+        seccompProfile: { type: RuntimeDefault }
+      containers:
+        - name: falcosidekick
+          # TODO(P0-pinning): après premier pull en cluster, remplacer par
+          #   image: falcosecurity/falcosidekick:2.30.0@sha256:<REAL_DIGEST>
+          # `docker buildx imagetools inspect falcosecurity/falcosidekick:2.30.0`
+          # fournit le digest. Tag seul est ACCEPTÉ par kustomize mais REFUSÉ
+          # par Kyverno restrict-image-references en Enforce.
+          image: falcosecurity/falcosidekick:2.30.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - { name: http, containerPort: 2801 }
+          env:
+            - { name: CONFIG_FILE, value: /etc/falcosidekick/config.yaml }
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: { drop: ["ALL"] }
+          resources:
+            requests: { cpu: 50m, memory: 64Mi }
+            limits:   { cpu: 200m, memory: 128Mi }
+          readinessProbe:
+            httpGet: { path: /ping, port: http }
+          volumeMounts:
+            - { name: cfg, mountPath: /etc/falcosidekick }
+      volumes:
+        - name: cfg
+          configMap: { name: falcosidekick-config }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: falcosidekick
+  namespace: falco
+spec:
+  selector: { app.kubernetes.io/name: falcosidekick }
+  ports:
+    - { name: http, port: 2801, targetPort: http }
+---
+# Falco config patch — to send events to falcosidekick HTTP endpoint
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: falco-output-falcosidekick
+  namespace: falco
+data:
+  http_output.yaml: |
+    http_output:
+      enabled: true
+      url: "http://falcosidekick.falco.svc.cluster.local:2801"
+      user_agent: "falcosecurity/falco"
+      insecure: true

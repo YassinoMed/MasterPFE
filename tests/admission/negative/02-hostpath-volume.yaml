@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: neg-hostpath
+  namespace: securerag-hub
+  annotations:
+    test/expect: REJECT
+    test/policy: securerag-restrict-volume-types
+spec:
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 65532
+    seccompProfile: { type: RuntimeDefault }
+  containers:
+    - name: c
+      image: ghcr.io/example/securerag-hub-portal-web@sha256:1111111111111111111111111111111111111111111111111111111111111111
+      securityContext:
+        allowPrivilegeEscalation: false
+        readOnlyRootFilesystem: true
+        capabilities: { drop: ["ALL"] }
+      volumeMounts:
+        - { name: host, mountPath: /host }
+  volumes:
+    - name: host
+      hostPath: { path: /etc, type: Directory }

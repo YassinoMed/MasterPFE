@@ -1,0 +1,46 @@
+# SOPS configuration — SecureRAG Hub
+#
+# Convention :
+#   - Tous les Secrets Kubernetes commitables doivent être encryptés via SOPS+age.
+#   - Les fichiers en clair (`*.yaml`) sont .gitignored ; seuls les `*.enc.yaml`
+#     sont commités.
+#   - Les clés age publiques sont publiques par design ; les clés privées
+#     vivent dans :
+#       - dev    : ~/.config/sops/age/keys.txt (machine dev)
+#       - prod   : Jenkins credential `sops-age-key` (provisionné CASC)
+#       - cluster: secret `sops-age` dans namespace `argocd` (lecture par
+#                  l'argocd-vault-plugin) — non accessible aux apps déployées.
+#
+# Procédure de rotation : voir docs/runbooks/secret-rotation.md
+#
+# Génération initiale :
+#   age-keygen -o ~/.config/sops/age/keys.txt
+#   grep "public key" ~/.config/sops/age/keys.txt   # à coller dans `recipients`
+#
+# Encrypt :
+#   sops --encrypt --in-place infra/secrets/production/db.yaml
+#   mv infra/secrets/production/db.yaml infra/secrets/production/db.enc.yaml
+#
+# Decrypt à la volée pour kubectl/Argo CD :
+#   sops --decrypt infra/secrets/production/db.enc.yaml | kubectl apply -f -
+
+creation_rules:
+  # Production secrets — recipient prod uniquement
+  - path_regex: ^infra/secrets/production/.*\.enc\.ya?ml$
+    encrypted_regex: ^(data|stringData)$
+    age: >-
+      age1prodxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+    # Remplacer la clé ci-dessus par la vraie clé publique prod après
+    # `age-keygen` ; ne PAS encrypter avec la clé dev en production.
+
+  # Dev / demo secrets — recipient dev (peut être commité par les contributeurs)
+  - path_regex: ^infra/secrets/(demo|dev)/.*\.enc\.ya?ml$
+    encrypted_regex: ^(data|stringData)$
+    age: >-
+      age1devxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+  # Catch-all — refuse: oblige à passer par les rules ci-dessus pour ne pas
+  # encrypter par accident avec la mauvaise clé.
+  - path_regex: \.enc\.ya?ml$
+    age: ""
+    # SOPS échouera si une rule above ne matche pas — comportement voulu.

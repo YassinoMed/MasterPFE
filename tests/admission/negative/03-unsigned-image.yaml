@@ -1,0 +1,23 @@
+# Image inconnue (non signée) — la policy verify-cosign-images doit refuser.
+apiVersion: v1
+kind: Pod
+metadata:
+  name: neg-unsigned
+  namespace: securerag-hub
+  annotations:
+    test/expect: REJECT
+    test/policy: securerag-verify-cosign-images
+spec:
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 65532
+    seccompProfile: { type: RuntimeDefault }
+  containers:
+    - name: c
+      # Volontairement une image qui matche le pattern `securerag-hub-*` mais
+      # absente du registre (donc pas signée).
+      image: ghcr.io/example/securerag-hub-portal-web:not-signed
+      securityContext:
+        allowPrivilegeEscalation: false
+        readOnlyRootFilesystem: true
+        capabilities: { drop: ["ALL"] }

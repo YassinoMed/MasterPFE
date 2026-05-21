@@ -6,6 +6,7 @@ resources:
   - rbac.yaml
   - configmap-rules.yaml
   - daemonset.yaml
+  - falcosidekick.yaml      # P1-12 relais Falco -> Loki + Alertmanager
 labels:
   - pairs:
       app.kubernetes.io/part-of: securerag-hub

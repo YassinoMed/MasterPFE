@@ -2,6 +2,18 @@
 
 Plateforme unifiée de chatbots métier sécurisés conçue comme projet Master DSIR avec architecture microservices et chaîne DevSecOps complète.
 
+> 🧭 **Décision architecturale officielle :** le **runtime officiel est
+> Laravel**. Le cahier des charges initial évoquait FastAPI Python ; la
+> dérogation est argumentée dans :
+>
+> - 📜 [ADR-001 — Laravel comme runtime officiel](docs/architecture/decision-001-laravel-as-official-runtime.md)
+> - 🎤 [Argumentaire soutenance](docs/soutenance-argumentaire.md)
+> - 📊 [Final Validation Summary](artifacts/validation/final-validation-summary.md)
+> - 🛡️ [Security Readiness Report](docs/security/security-readiness-report.md)
+>
+> Les dossiers `services/*/` (Python) sont conservés comme **prototype
+> non retenu** — voir [`services/README.md`](services/README.md).
+
 ## 📋 Vue d'ensemble
 
 **SecureRAG Hub** est une solution d'entreprise robuste qui combine :

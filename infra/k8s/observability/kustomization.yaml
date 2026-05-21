@@ -6,8 +6,10 @@ resources:
   - prometheus-rbac.yaml
   - prometheus-config.yaml
   - prometheus-rules.yaml
+  - prometheus-rules-security.yaml      # P1-13 alertes sécurité
   - prometheus-deployment.yaml
   - grafana-deployment.yaml
+  - grafana-dashboards.yaml             # P1-14 dashboards SRE/Sécurité
   - loki-deployment.yaml
   - alertmanager.yaml
   - networkpolicy.yaml
