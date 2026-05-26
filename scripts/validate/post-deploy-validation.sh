@@ -9,7 +9,7 @@ NS="${NS:-securerag-hub}"
 REGISTRY_HOST="${REGISTRY_HOST:-localhost:5001}"
 IMAGE_PREFIX="${IMAGE_PREFIX:-securerag-hub}"
 IMAGE_TAG="${IMAGE_TAG:-dev}"
-REPORT_DIR="${REPORT_DIR:-artifacts/validation}"
+REPORT_DIR="${REPORT_DIR:-reports/postdeploy}"
 SUMMARY_FILE="${REPORT_DIR}/post-deploy-summary.md"
 JSON_FILE="${REPORT_DIR}/post-deploy-summary.json"
 COSIGN_PUBLIC_KEY="${COSIGN_PUBLIC_KEY:-infra/jenkins/secrets/cosign.pub}"
@@ -109,9 +109,9 @@ run_step "Runtime Image Rollout Proof" \
   "NS=${NS} REGISTRY_HOST=${REGISTRY_HOST} IMAGE_PREFIX=${IMAGE_PREFIX} IMAGE_TAG=${IMAGE_TAG} DIGEST_RECORD_FILE=${DIGEST_RECORD_FILE} REQUIRE_DIGEST_DEPLOY=${REQUIRE_DIGEST_DEPLOY} REPORT_FILE=${REPORT_DIR}/runtime-image-rollout-proof.md STRICT_RUNTIME_IMAGE_PROOF=false"
 
 run_step "Kubernetes Hardening Validation" \
-  "${SCRIPT_DIR}/validate-k8s-ultra-hardening.sh" \
+  "${SCRIPT_DIR}/validate-k8s-hardening.sh" \
   false \
-  "NS=${NS}"
+  "NS=${NS} REPORT_DIR=${REPORT_DIR}"
 
 run_step "Runtime Security Post-deploy" \
   "${SCRIPT_DIR}/validate-runtime-security-postdeploy.sh" \

@@ -272,7 +272,7 @@ final-summary: ## Generate the final soutenance validation summary
 	@bash scripts/validate/generate-final-validation-summary.sh
 
 support-pack: ## Build a support pack from current release, validation and Jenkins artefacts
-	@SUPPORT_PACK_ROOT=$(SUPPORT_PACK_ROOT) bash scripts/validate/build-support-pack.sh
+	@bash scripts/evidence/generate-support-pack.sh
 
 kyverno-install: ## Install Kyverno and apply SecureRAG policies in Audit mode
 	@bash scripts/deploy/install-kyverno.sh
@@ -334,12 +334,23 @@ verify-signature: ## Verify Cosign signatures for IMAGE_TAG (alias for verify)
 	@REGISTRY_HOST=$(REGISTRY_HOST) IMAGE_PREFIX=$(IMAGE_PREFIX) IMAGE_TAG=$(IMAGE_TAG) REPORT_DIR=$(REPORT_DIR) \
 		bash scripts/release/verify-signatures.sh
 
-post-deploy-validation: validate ## Run post-deployment validation suite (alias for validate)
+post-deploy-validation: ## Run the complete post-deployment validation orchestrator
+	@bash scripts/validate/post-deploy-validation.sh
 
 runtime-security-validation: ## Validate runtime security: hardening, Kyverno, ServiceAccounts, RBAC
 	@bash scripts/validate/validate-runtime-security-postdeploy.sh
 	@bash scripts/validate/validate-kyverno-runtime.sh || true
-	@bash scripts/validate/validate-k8s-ultra-hardening.sh
+	@bash scripts/validate/validate-k8s-hardening.sh
+
+kyverno-runtime-validation: ## Validate Kyverno runtime policies and PolicyReports
+	@bash scripts/validate/validate-kyverno-runtime.sh
+
+k8s-hardening-validation: ## Validate Kubernetes Pod/Namespace hardening standards
+	@bash scripts/validate/validate-k8s-hardening.sh
+
+observability-validate: ## Validate observability stack components readiness
+	@bash scripts/validate/validate-observability.sh
+
 
 # ----------------------------------------------------------------------------
 # Expert-level improvement targets (P0/P1/P2). All targets are idempotent and
