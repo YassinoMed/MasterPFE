@@ -48,6 +48,7 @@ pipeline {
   environment {
     SEMGREP_VERSION = '1.156.0'
     COVERAGE_MIN = '70'
+    ENFORCE_COVERAGE_GATE = 'true'
     GITLEAKS_IMAGE = 'ghcr.io/gitleaks/gitleaks:v8.30.1@sha256:c00b6bd0aeb3071cbcb79009cb16a60dd9e0a7c60e2be9ab65d25e6bc8abbb7f'
     LARAVEL_APPS = 'platform/portal-web services-laravel/auth-users-service services-laravel/chatbot-manager-service services-laravel/conversation-service services-laravel/audit-security-service'
   }
@@ -91,20 +92,47 @@ pipeline {
       }
     }
 
-    stage('CI_SECURITY_STATIC - Lint and Tests') {
+    stage('CI_LINT - Laravel Syntax and Manifest Validation') {
       steps {
         sh '''
           set -euo pipefail
 
           make lint
+        '''
+      }
+    }
+
+    stage('CI_TESTS - Laravel Tests and Coverage') {
+      steps {
+        sh '''
+          set -euo pipefail
+
+          COVERAGE_MIN="${COVERAGE_MIN}" \
+          ENFORCE_COVERAGE_GATE="${ENFORCE_COVERAGE_GATE}" \
           bash scripts/ci/run-tests.sh
-          bash scripts/ci/collect-coverage.sh
         '''
       }
       post {
         always {
           junit allowEmptyResults: true, testResults: '.coverage-artifacts/junit-*.xml'
           archiveArtifacts allowEmptyArchive: true, artifacts: '.coverage-artifacts/**'
+        }
+      }
+    }
+
+    stage('CI_COVERAGE_GATE - Enforce 70% Minimum Coverage') {
+      steps {
+        sh '''
+          set -euo pipefail
+
+          echo "[INFO] Enforcing coverage gate: minimum ${COVERAGE_MIN}%"
+          COVERAGE_MIN="${COVERAGE_MIN}" \
+          bash scripts/ci/collect-coverage.sh
+        '''
+      }
+      post {
+        always {
+          archiveArtifacts allowEmptyArchive: true, artifacts: '.coverage-artifacts/coverage-summary.txt,.coverage-artifacts/coverage*.xml'
         }
       }
     }

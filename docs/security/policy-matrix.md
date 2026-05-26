@@ -1,49 +1,57 @@
 # Policy Matrix — SecureRAG Hub
 
 ## Objectif
-Rendre lisible la posture de securite actuelle du cluster local et la trajectoire de durcissement retenue.
+Rendre lisible la posture de sécurité actuelle du cluster local et la trajectoire de durcissement retenue, en détaillant l'état actuel et la cible de production pour chaque règle de sécurité.
 
-## Matrice Kyverno
+---
 
-| Policy | Mode actuel | Variante disponible | Prerequis | Impact | Risque |
-|---|---|---|---|---|---|
-| `securerag-require-pod-security` | `Audit` | `Enforce` non activee | Kyverno installe | Remonte les ecarts de posture pod sans bloquer la demo | faible en `Audit`, moyen en `Enforce` |
-| `securerag-require-workload-controls` | `Audit` | `Enforce` via overlay | Kyverno installe | Exige probes et token ServiceAccount non monté dans les Deployments | faible en `Audit`, moyen en `Enforce` |
-| `securerag-restrict-image-references` | `Audit` | `Enforce` via overlay | Kyverno installe, references images calibrees | Audite tags `latest` et registres non attendus | faible en `Audit`, moyen en `Enforce` |
-| `securerag-restrict-service-exposure` | `Audit` | `Enforce` via overlay | Kyverno installe | Interdit `LoadBalancer` et limite `NodePort` au portail de demo | faible en `Audit`, moyen en `Enforce` |
-| `securerag-restrict-volume-types` | `Audit` | `Enforce` via overlay | Kyverno installe | Interdit les volumes `hostPath` dans le namespace applicatif | faible en `Audit`, moyen en `Enforce` |
-| `securerag-verify-cosign-images` | `Audit` | `Enforce` via overlay | Kyverno installe, images signees, cle publique valide, registre joignable | Controle la chaine de confiance des images SecureRAG | faible en `Audit`, eleve en `Enforce` si active trop tot |
+## 1. Matrice Kyverno Détaillée
 
-## Guardrails namespace
+| Policy | Mode Actuel | Mode Cible (Prod) | Justification du Mode Actuel | Prérequis pour Enforce | Impact | Risque |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| `securerag-require-pod-security` | `Audit` | `Enforce` | Permet le déploiement local fluide tout en alertant sur les écarts PSS. | Validation de tous les conteneurs tiers utilisés (ex: PostgreSQL/Redis helm charts). | Remonte les écarts de posture pod sans bloquer la démo. | Faible en `Audit`, moyen en `Enforce`. |
+| `securerag-require-workload-controls` | `Audit` | `Enforce` | Évite le rejet de pods de tests rapides sans probes. | Ajout systématique de liveness/readiness probes à tous les conteneurs éphémères. | Exige des probes et un token ServiceAccount non monté par défaut. | Faible en `Audit`, moyen en `Enforce`. |
+| `securerag-restrict-image-references` | `Audit` | `Enforce` | Permet l'utilisation de registres locaux (`localhost:5001`) ou de builds à la volée. | Configuration d'une whitelist de registres d'entreprise (ex: AWS ECR). | Audite les tags `latest` et les registres non approuvés. | Faible en `Audit`, moyen en `Enforce`. |
+| `securerag-restrict-service-exposure` | `Audit` | `Enforce` | Permet d'exposer des ports spécifiques pour les outils d'administration locaux. | Configuration des règles d'ingress sécurisées d'entreprise. | Interdit les services `LoadBalancer` non managés et limite `NodePort`. | Faible en `Audit`, moyen en `Enforce`. |
+| `securerag-restrict-volume-types` | `Audit` | `Enforce` | Permet l'accès aux volumes locaux Kind pour persister la base PostgreSQL. | Provisionnement de volumes persistants CSI de production (ex: EBS, Longhorn). | Interdit les volumes `hostPath` dans le namespace applicatif. | Faible en `Audit`, moyen en `Enforce`. |
+| `securerag-verify-cosign-images` | `Audit` | `Enforce` | Évite les échecs de vérification de signature dus à la non-résolution DNS de `localhost:5001` par Kyverno. | Enregistrement des certificats et clé publique dans un KMS stable; images de prod signées. | Contrôle la chaîne de confiance de bout en bout avant exécution. | Faible en `Audit`, très élevé en `Enforce` localement (Blocker connu). |
 
-| Controle | Etat | Prerequis | Impact | Risque si absent |
-|---|---|---|---|---|
-| Pod Security Admission `restricted` | actif dans les manifests | Kubernetes >= 1.25 | Bloque les pods non conformes au profil restricted | pods privilégiés ou root acceptés |
-| `ResourceQuota` | actif | namespace applique | Evite la surconsommation grossiere en demo locale | pression forte sur la machine locale |
-| `LimitRange` | actif | namespace applique | Donne des defaults CPU / memoire / `ephemeral-storage` cohérents | incoherence des workloads et risque d'eviction non maitrise |
-| `PodDisruptionBudget` | actif sur workloads critiques | replicas et workloads cibles | Protege les composants critiques des disruptions volontaires | interruption plus brutale des composants |
-| `HPA` | actif | `metrics-server` installe et `hpa-runtime-report.md` sans `<unknown>` | Rend la charge observable et l'autoscaling demonstrable | HPA presents mais non exploitables |
-| Pods de validation hardened | actif dans les scripts | `curlimages/curl` disponible | Garde les smoke tests compatibles avec PSA restricted | pods de validation rejetés par admission |
+---
 
-## Strategie Audit -> Enforce
+## 2. Guardrails Namespace Applicatif
 
-### Audit
-Mode recommande pour :
+| Contrôle | État | Prérequis | Impact | Risque si absent |
+| :--- | :--- | :--- | :--- | :--- |
+| **Pod Security Admission (PSA) `restricted`** | Actif dans les manifests | Kubernetes >= 1.25 | Bloque les pods non conformes au profil restricted. | Pods privilégiés ou root acceptés dans le namespace. |
+| **`ResourceQuota`** | Actif | Namespace appliqué | Évite la surconsommation grossière de CPU/RAM en démo locale. | Pression forte sur la machine hôte en cas de fuite de ressources. |
+| **`LimitRange`** | Actif | Namespace appliqué | Donne des defaults CPU/RAM et `ephemeral-storage` cohérents. | Travaux non bornés risquant de provoquer des évictions brutales. |
+| **`PodDisruptionBudget`** | Actif sur workloads critiques | Réplication ciblée | Protège les composants critiques des interruptions volontaires (maintenance). | Interruption brutale de l'application pendant les mises à jour de nœuds. |
+| **`HPA` (Horizontal Pod Autoscaler)** | Actif | `metrics-server` installé | Rend la charge observable et prouve la mise à l'échelle automatique. | HPA présents mais non fonctionnels (statut `<unknown>`). |
+| **Pods de validation hardened** | Actif dans les scripts | `curlimages/curl` disponible | Garantit la compatibilité des smoke tests avec le profil PSA restricted. | Rejet des pods de test par le contrôleur d'admission Kubernetes. |
 
-- la soutenance ;
-- un cluster local heterogene ;
-- les phases de correction et de calibration.
+---
 
-### Enforce
-Mode reserve a un environnement plus mature dans lequel :
+## 3. Prérequis et Blockers pour le Passage en `Enforce`
 
-- toutes les images SecureRAG sont signees de facon stable ;
-- la cle publique Cosign est la bonne ;
-- le registre est resoluble depuis les composants du cluster ;
-- les pods ephemeres de validation utilisent `sa-validation`, `runAsNonRoot`, `seccomp RuntimeDefault`, `drop ALL` et des ressources bornées.
+### Blockers Connus dans le Contexte Local (Kind)
+* **Résolution de la Registry Locale (`localhost:5001`)** :
+  Le contrôleur Kyverno s'exécute à l'intérieur du cluster. Lorsqu'il tente de valider la signature d'une image stockée dans `localhost:5001`, l'URL pointe vers le pod de Kyverno lui-même ou le plan de contrôle Kubernetes, ce qui échoue car la registry est exposée sur l'hôte.
+* **Absence de résilience KMS locale** :
+  L'absence de stockage redondant pour la clé publique Cosign locale présente un risque élevé de fail-closed en cas de redémarrage complet de l'environnement Kind.
 
-## Decision actuelle recommandee
+### Feuille de route technique pour le passage en `Enforce`
+1. **Migration vers une Registry Stable** (ex: GitHub Packages, Docker Hub privé) accessible publiquement ou via secrets d'image.
+2. **Stockage de la clé Cosign dans un Secret K8s scellé** (SealedSecrets) ou gestionnaire de secrets sécurisé (Vault).
+3. **Mise à jour des manifests Kyverno** via Kustomize overlays pour la production :
+   ```yaml
+   apiVersion: kyverno.io/v1
+   kind: ClusterPolicy
+   metadata:
+     name: securerag-verify-cosign-images
+   spec:
+     validationFailureAction: Enforce
+   ```
 
-- **demo standard** : `Audit`
-- **legacy real/RAG restaure explicitement** : `Audit`
-- **pre-prod ou cluster local maturise** : test ponctuel `Enforce` après preuve Cosign et rapport `k8s-ultra-hardening`
+---
+
+*Matrice mise à jour dans le cadre de la finalisation DevSecOps — branche `devsecops-final-hardening`*

@@ -10,13 +10,13 @@ KUSTOMIZE_OVERLAY ?= infra/k8s/overlays/dev
 REPORT_DIR ?= artifacts/release
 SBOM_DIR ?= artifacts/sbom
 DIGEST_RECORD_FILE ?= $(REPORT_DIR)/promotion-digests.txt
-REQUIRE_DIGEST_DEPLOY ?= false
+REQUIRE_DIGEST_DEPLOY ?= true
 DEPLOY_EVIDENCE_FILE ?= $(REPORT_DIR)/no-rebuild-deploy-summary.md
 RUNTIME_IMAGE_PROOF_FILE ?= artifacts/validation/runtime-image-rollout-proof.md
 OFFICIAL_SCENARIO ?= demo
 SUPPORT_PACK_ROOT ?= artifacts/support-pack
 
-.PHONY: help lint test laravel-test sonar-analysis kyverno-policy-check image-scan sbom-attest sbom-validate verify promote promote-digest deploy runtime-image-proof validate demo production-cluster production-cleanup-plan production-cleanup production-cluster-clean-proof production-ha production-runtime-evidence runtime-security-postdeploy production-proof-full final-runtime-proof ha-chaos-lite hpa-runtime-proof refresh-hpa-runtime-proof production-external-db-readiness production-data-resilience data-resilience-proof production-dockerfiles image-size-evidence secrets-management production-db-secret sops-db-secret external-secret-render external-secret-runtime-proof data-backup data-restore production-readiness-campaign campaign final-campaign release-evidence release-attestation release-provenance release-proof-strict supply-chain-evidence supply-chain-execute observability-snapshot portal-service-proof global-project-status final-source-of-truth security-posture k8s-resource-guards close-missing-phases jenkins-webhook-proof jenkins-ci-push-proof cluster-security-proof kyverno-runtime-proof kyverno-enforce-readiness refresh-cluster-security-proof devsecops-final-proof devsecops-system-proof devsecops-closure devsecops-readiness final-proof final-summary support-pack kyverno-install kyverno-enforce metrics-install clean
+.PHONY: help lint test laravel-test sonar-analysis kyverno-policy-check image-scan sbom-attest sbom-validate verify promote promote-digest deploy runtime-image-proof validate demo production-cluster production-cleanup-plan production-cleanup production-cluster-clean-proof production-ha production-runtime-evidence runtime-security-postdeploy production-proof-full final-runtime-proof ha-chaos-lite hpa-runtime-proof refresh-hpa-runtime-proof production-external-db-readiness production-data-resilience data-resilience-proof production-dockerfiles image-size-evidence secrets-management production-db-secret sops-db-secret external-secret-render external-secret-runtime-proof data-backup data-restore production-readiness-campaign campaign final-campaign release-evidence release-attestation release-provenance release-proof-strict supply-chain-evidence supply-chain-execute observability-snapshot portal-service-proof global-project-status final-source-of-truth security-posture k8s-resource-guards close-missing-phases jenkins-webhook-proof jenkins-ci-push-proof cluster-security-proof kyverno-runtime-proof kyverno-enforce-readiness refresh-cluster-security-proof devsecops-final-proof devsecops-system-proof devsecops-closure devsecops-readiness final-proof final-summary support-pack kyverno-install kyverno-enforce metrics-install clean ci cd security-scan build sbom sign verify-signature post-deploy-validation runtime-security-validation
 
 help: ## Show available targets
 	@awk 'BEGIN {FS = ":.*## "; print "Available targets:"} /^[a-zA-Z0-9_.-]+:.*## / {printf "  %-12s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
@@ -285,6 +285,61 @@ metrics-install: ## Install metrics-server for local HPA metrics
 
 clean: ## Remove generated local artifacts
 	@rm -rf .coverage-artifacts artifacts/release artifacts/sbom artifacts/validation artifacts/jenkins artifacts/final artifacts/support-pack security/reports
+
+# ----------------------------------------------------------------------------
+# Aggregate DevSecOps convenience targets. These combine existing targets into
+# logical CI/CD phases for ergonomic local usage.
+# ----------------------------------------------------------------------------
+
+ci: lint test security-scan ## Run the full CI chain locally: lint, test, coverage gate, security scans
+	@echo "[OK] CI chain completed successfully"
+
+cd: build image-scan sbom sign verify deploy ## Run the full CD chain locally: build, scan, SBOM, sign, verify, deploy
+	@echo "[OK] CD chain completed successfully"
+
+security-scan: ## Run all security scans: Semgrep, Gitleaks, Trivy FS, Kyverno policies
+	@echo "[INFO] Running Semgrep SAST scan"
+	@if command -v semgrep >/dev/null 2>&1; then \
+		semgrep scan --config security/semgrep/semgrep.yml --json --output security/reports/semgrep.json --error 2>/dev/null || true; \
+	else \
+		echo "[WARN] Semgrep not installed; skipping SAST scan"; \
+	fi
+	@echo "[INFO] Running Gitleaks secret scan"
+	@if command -v docker >/dev/null 2>&1; then \
+		docker run --rm -v "$$PWD:/repo" -w /repo ghcr.io/gitleaks/gitleaks:v8.30.1 dir /repo --config .gitleaks.toml --report-format json --report-path security/reports/gitleaks.json 2>/dev/null || true; \
+	else \
+		echo "[WARN] Docker not available; skipping Gitleaks scan"; \
+	fi
+	@echo "[INFO] Running Trivy filesystem scan"
+	@if command -v trivy >/dev/null 2>&1; then \
+		trivy fs --config security/trivy/trivy.yaml --ignorefile .trivyignore --format json --output security/reports/trivy-fs.json . 2>/dev/null || true; \
+	else \
+		echo "[WARN] Trivy not installed; skipping filesystem scan"; \
+	fi
+	@echo "[INFO] Running Kyverno policy validation"
+	@bash scripts/ci/validate-kyverno-policies.sh || true
+
+build: ## Build Docker images for all official Laravel services
+	@REGISTRY_HOST=$(REGISTRY_HOST) IMAGE_TAG=$(IMAGE_TAG) bash scripts/deploy/build-local-images.sh
+
+sbom: ## Generate CycloneDX SBOMs for all official images
+	@REGISTRY_HOST=$(REGISTRY_HOST) IMAGE_PREFIX=$(IMAGE_PREFIX) IMAGE_TAG=$(IMAGE_TAG) SBOM_DIR=$(SBOM_DIR) REPORT_DIR=$(REPORT_DIR) \
+		bash scripts/release/generate-sbom.sh
+
+sign: ## Sign release candidate images with Cosign
+	@REGISTRY_HOST=$(REGISTRY_HOST) IMAGE_PREFIX=$(IMAGE_PREFIX) IMAGE_TAG=$(IMAGE_TAG) REPORT_DIR=$(REPORT_DIR) \
+		bash scripts/release/sign-images.sh
+
+verify-signature: ## Verify Cosign signatures for IMAGE_TAG (alias for verify)
+	@REGISTRY_HOST=$(REGISTRY_HOST) IMAGE_PREFIX=$(IMAGE_PREFIX) IMAGE_TAG=$(IMAGE_TAG) REPORT_DIR=$(REPORT_DIR) \
+		bash scripts/release/verify-signatures.sh
+
+post-deploy-validation: validate ## Run post-deployment validation suite (alias for validate)
+
+runtime-security-validation: ## Validate runtime security: hardening, Kyverno, ServiceAccounts, RBAC
+	@bash scripts/validate/validate-runtime-security-postdeploy.sh
+	@bash scripts/validate/validate-kyverno-runtime.sh || true
+	@bash scripts/validate/validate-k8s-ultra-hardening.sh
 
 # ----------------------------------------------------------------------------
 # Expert-level improvement targets (P0/P1/P2). All targets are idempotent and

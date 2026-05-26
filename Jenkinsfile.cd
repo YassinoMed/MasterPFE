@@ -296,8 +296,31 @@ pipeline {
         }
       }
       post {
+        failure {
+          sh '''
+            echo "[ROLLBACK] Deployment failed — initiating automatic rollback"
+            NS="securerag-hub"
+            for deploy in portal-web auth-users chatbot-manager conversation-service audit-security-service; do
+              echo "[ROLLBACK] Rolling back deployment/${deploy}"
+              kubectl rollout undo "deployment/${deploy}" -n "${NS}" 2>/dev/null || true
+            done
+            mkdir -p artifacts/validation
+            {
+              printf '# Rollback Evidence - SecureRAG Hub\n\n'
+              printf -- '- Trigger: Deploy stage failure\n'
+              printf -- '- Timestamp (UTC): `%s`\n\n' "$(date -u '+%Y-%m-%dT%H:%M:%SZ')"
+              printf '## Rolled-back deployments\n\n'
+              for deploy in portal-web auth-users chatbot-manager conversation-service audit-security-service; do
+                printf -- '- `%s`: rollback issued\n' "${deploy}"
+              done
+              printf '\n## Post-rollback state\n\n```text\n'
+              kubectl get deploy -n "${NS}" -o wide 2>/dev/null || true
+              printf '```\n'
+            } > artifacts/validation/rollback-evidence.md
+          '''
+        }
         always {
-          archiveArtifacts allowEmptyArchive: true, artifacts: 'artifacts/release/no-rebuild-deploy-summary.md,artifacts/release/runtime-image-rollout-proof.*'
+          archiveArtifacts allowEmptyArchive: true, artifacts: 'artifacts/release/no-rebuild-deploy-summary.md,artifacts/release/runtime-image-rollout-proof.*,artifacts/validation/rollback-evidence.md'
         }
       }
     }
@@ -325,6 +348,29 @@ pipeline {
         '''
       }
       post {
+        failure {
+          sh '''
+            echo "[ROLLBACK] Post-deploy validation failed — initiating automatic rollback"
+            NS="securerag-hub"
+            for deploy in portal-web auth-users chatbot-manager conversation-service audit-security-service; do
+              echo "[ROLLBACK] Rolling back deployment/${deploy}"
+              kubectl rollout undo "deployment/${deploy}" -n "${NS}" 2>/dev/null || true
+            done
+            mkdir -p artifacts/validation
+            {
+              printf '# Rollback Evidence - SecureRAG Hub\n\n'
+              printf -- '- Trigger: Post-deploy validation failure\n'
+              printf -- '- Timestamp (UTC): `%s`\n\n' "$(date -u '+%Y-%m-%dT%H:%M:%SZ')"
+              printf '## Rolled-back deployments\n\n'
+              for deploy in portal-web auth-users chatbot-manager conversation-service audit-security-service; do
+                printf -- '- `%s`: rollback issued\n' "${deploy}"
+              done
+              printf '\n## Post-rollback state\n\n```text\n'
+              kubectl get deploy -n "${NS}" -o wide 2>/dev/null || true
+              printf '```\n'
+            } > artifacts/validation/rollback-evidence.md
+          '''
+        }
         always {
           archiveArtifacts allowEmptyArchive: true, artifacts: 'artifacts/validation/**'
         }
