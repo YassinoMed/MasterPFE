@@ -10,12 +10,21 @@ ARG SYFT_VERSION=v1.42.3
 ARG TRIVY_VERSION=0.69.3
 ARG SONAR_SCANNER_VERSION=5.0.1.3006
 
+# Install gnupg first (not present in base image), then add Docker official repo
 RUN apt-get update && \
+    apt-get install -y --no-install-recommends ca-certificates curl gnupg && \
+    install -m 0755 -d /etc/apt/keyrings && \
+    curl -fsSL https://download.docker.com/linux/debian/gpg \
+      | gpg --dearmor -o /etc/apt/keyrings/docker.gpg && \
+    chmod a+r /etc/apt/keyrings/docker.gpg && \
+    echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] \
+      https://download.docker.com/linux/debian \
+      $(. /etc/os-release && echo "$VERSION_CODENAME") stable" \
+      > /etc/apt/sources.list.d/docker.list && \
+    apt-get update && \
     apt-get install -y --no-install-recommends \
-      ca-certificates \
-      curl \
-      docker.io \
-      docker-buildx \
+      docker-ce-cli \
+      docker-buildx-plugin \
       docker-compose-plugin \
       git \
       jq \

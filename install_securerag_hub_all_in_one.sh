@@ -135,7 +135,7 @@ require_cmd bash
 export DEBIAN_FRONTEND=noninteractive
 KARCH="$(get_arch)"
 
-log "Début de l'installation SecureRAG Hub sur Debian"
+log "Début de l'installation SecureRAG Hub sur $(. /etc/os-release && echo "$PRETTY_NAME")"
 
 ########################################
 # 1) Prepare Debian                    #
@@ -234,9 +234,13 @@ kind version
 log "Clonage ou mise à jour du dépôt"
 mkdir -p "$(dirname "$REPO_DIR")"
 if [[ -d "$REPO_DIR/.git" ]]; then
+  # Stash any local changes (including to this script) to prevent
+  # git pull from modifying the file while bash is executing it.
+  git -C "$REPO_DIR" stash --include-untracked || true
   git -C "$REPO_DIR" fetch --all --tags
   git -C "$REPO_DIR" checkout "$REPO_BRANCH"
   git -C "$REPO_DIR" pull --ff-only origin "$REPO_BRANCH"
+  git -C "$REPO_DIR" stash pop || true
 else
   git clone "$REPO_URL" "$REPO_DIR"
   git -C "$REPO_DIR" checkout "$REPO_BRANCH"
