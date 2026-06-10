@@ -4,7 +4,7 @@ name: securerag-dev
 
 networking:
   apiServerAddress: "127.0.0.1"
-  apiServerPort: 6443
+  apiServerPort: 6445
 
 containerdConfigPatches:
   - |-
@@ -16,13 +16,13 @@ nodes:
     image: kindest/node:v1.33.1
     extraPortMappings:
       - containerPort: 30080
-        hostPort: 8080
+        hostPort: 9080
         protocol: TCP
       - containerPort: 30081
-        hostPort: 8081
+        hostPort: 9081
         protocol: TCP
       - containerPort: 30443
-        hostPort: 8443
+        hostPort: 9443
         protocol: TCP
     kubeadmConfigPatches:
       - |
