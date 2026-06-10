@@ -41,6 +41,7 @@ RUN apt-get update && \
       php-zip \
       python3 \
       python3-pip \
+      python3-yaml \
       python3-venv \
       ruby \
       socat \

@@ -156,6 +156,7 @@ sudo apt install -y \
   openssl \
   python3 \
   python3-pip \
+  python3-yaml \
   bash \
   coreutils \
   apt-transport-https \
