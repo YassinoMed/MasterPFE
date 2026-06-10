@@ -1,11 +1,30 @@
 @import 'tailwindcss';
 
+/* ====================== CONTENT SOURCES ====================== */
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
 @source '../**/*.blade.php';
 @source '../**/*.js';
+@source '../**/*.vue';
+/* Si tu utilises Vue */
+@source '../**/*.tsx';
+/* Si tu utilises React/TSX */
+@source '../../public/**/*.html';
 
+/* ====================== THEME CUSTOMIZATION ====================== */
 @theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-        'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif,
+        'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+
+    /* Optionnel : Police pour le code */
+    --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+
+    /* Améliorations typographiques pro */
+    --text-base: 1rem;
+    --leading-relaxed: 1.625;
+    --tracking-tight: -0.025em;
 }
+
+/* ====================== CUSTOM VARIANTS ====================== */
+@variant dark (&:where(.dark, .dark *));
