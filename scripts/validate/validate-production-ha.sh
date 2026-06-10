@@ -19,6 +19,14 @@ if ! python3 - <<'PY' >/dev/null 2>&1
 import yaml  # noqa: F401
 PY
 then
+  echo "[INFO] Missing Python module: yaml. Attempting to install PyYAML dynamically..." >&2
+  python3 -m pip install PyYAML --break-system-packages --user >/dev/null 2>&1 || true
+fi
+
+if ! python3 - <<'PY' >/dev/null 2>&1
+import yaml  # noqa: F401
+PY
+then
   echo "[ERROR] Missing Python module: yaml. Install python3-yaml or PyYAML." >&2
   exit 2
 fi
