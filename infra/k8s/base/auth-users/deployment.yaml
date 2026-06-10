@@ -49,9 +49,15 @@ spec:
             - name: APP_URL
               value: $(INTERNAL_SERVICE_SCHEME)://auth-users:8000
             - name: DB_CONNECTION
-              value: sqlite
+              value: pgsql
+            - name: DB_HOST
+              value: postgres-auth
+            - name: DB_PORT
+              value: "5432"
             - name: DB_DATABASE
-              value: /tmp/securerag-runtime/database/database.sqlite
+              value: auth_users
+            - name: DB_USERNAME
+              value: securerag
             - name: SESSION_DRIVER
               value: file
             - name: CACHE_STORE

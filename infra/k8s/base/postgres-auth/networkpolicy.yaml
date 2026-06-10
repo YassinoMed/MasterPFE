@@ -1,0 +1,21 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: postgres-auth-policy
+  namespace: securerag-hub
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: postgres-auth
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: auth-users
+      ports:
+        - protocol: TCP
+          port: 5432
+  egress: []

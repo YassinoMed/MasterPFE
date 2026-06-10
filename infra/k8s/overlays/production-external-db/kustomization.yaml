@@ -65,3 +65,32 @@ patches:
       - op: replace
         path: /spec/template/spec/containers/0/env/6
         value: { name: DB_DATABASE, valueFrom: { secretKeyRef: { name: securerag-database-secrets, key: AUDIT_SECURITY_SERVICE_DB_DATABASE } } }
+  - patch: |-
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: postgres-auth
+        namespace: securerag-hub
+      $patch: delete
+  - patch: |-
+      apiVersion: v1
+      kind: Service
+      metadata:
+        name: postgres-auth
+        namespace: securerag-hub
+      $patch: delete
+  - patch: |-
+      apiVersion: v1
+      kind: ServiceAccount
+      metadata:
+        name: sa-postgres-auth
+        namespace: securerag-hub
+      $patch: delete
+  - patch: |-
+      apiVersion: networking.k8s.io/v1
+      kind: NetworkPolicy
+      metadata:
+        name: postgres-auth-policy
+        namespace: securerag-hub
+      $patch: delete
+

@@ -15,7 +15,6 @@ export APP_ROUTES_CACHE="${APP_ROUTES_CACHE:-${RUNTIME_ROOT}/bootstrap-cache/rou
 export APP_EVENTS_CACHE="${APP_EVENTS_CACHE:-${RUNTIME_ROOT}/bootstrap-cache/events.php}"
 
 mkdir -p \
-  "$(dirname "${DB_DATABASE}")" \
   "${LARAVEL_STORAGE_PATH}/app" \
   "${LARAVEL_STORAGE_PATH}/framework/cache" \
   "${LARAVEL_STORAGE_PATH}/framework/sessions" \
@@ -26,7 +25,11 @@ mkdir -p \
   "$(dirname "${APP_CONFIG_CACHE}")" \
   "$(dirname "${APP_ROUTES_CACHE}")" \
   "$(dirname "${APP_EVENTS_CACHE}")"
-touch "${DB_DATABASE}"
+
+if [ "${DB_CONNECTION:-sqlite}" = "sqlite" ]; then
+  mkdir -p "$(dirname "${DB_DATABASE}")"
+  touch "${DB_DATABASE}"
+fi
 
 if [ ! -f .env ] && [ "${CREATE_DOTENV:-false}" = "true" ]; then
   cp .env.example .env
