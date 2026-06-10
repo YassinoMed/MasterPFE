@@ -14,8 +14,10 @@ credentials
 credentials-binding
 plain-credentials
 ssh-credentials
+ssh-agent
 docker-workflow
 timestamper
 ws-cleanup
 matrix-auth
 role-strategy
+

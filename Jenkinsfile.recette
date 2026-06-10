@@ -1,0 +1,458 @@
+pipeline {
+  agent any
+
+  options {
+    timestamps()
+    disableConcurrentBuilds()
+    buildDiscarder(logRotator(numToKeepStr: '20'))
+  }
+
+  parameters {
+    // ── CI Parameters ──────────────────────────────────────────────────
+    booleanParam(
+      name: 'RUN_SONAR',
+      defaultValue: false,
+      description: 'Run Sonar analysis and block on the quality gate.'
+    )
+    string(
+      name: 'SONAR_HOST_URL',
+      defaultValue: '',
+      description: 'SonarQube/SonarCloud URL. Required only when RUN_SONAR=true.'
+    )
+    booleanParam(
+      name: 'ENFORCE_QUALITY_GATE',
+      defaultValue: true,
+      description: 'Run the consolidated CI Quality Gate stage.'
+    )
+    string(
+      name: 'KUBE_SCORE_MAX_CRITICAL',
+      defaultValue: '0',
+      description: 'Maximum allowed CRITICAL findings for kube-score.'
+    )
+    string(
+      name: 'KUBE_SCORE_MAX_WARNINGS',
+      defaultValue: '0',
+      description: 'Maximum allowed WARNING findings for kube-score.'
+    )
+
+    // ── Deploy Recette Parameters ──────────────────────────────────────
+    string(
+      name: 'RECETTE_HOST',
+      defaultValue: '63.250.59.72',
+      description: 'IP address or hostname of the recette (staging) machine.'
+    )
+    string(
+      name: 'RECETTE_USER',
+      defaultValue: 'root',
+      description: 'SSH user on the recette machine.'
+    )
+    booleanParam(
+      name: 'DEPLOY_TO_RECETTE',
+      defaultValue: true,
+      description: 'Deploy to the recette machine after a successful CI.'
+    )
+    booleanParam(
+      name: 'RUN_SMOKE_TESTS',
+      defaultValue: true,
+      description: 'Run smoke tests on the recette machine after deployment.'
+    )
+    string(
+      name: 'IMAGE_TAG',
+      defaultValue: 'demo',
+      description: 'Docker image tag to build and deploy.'
+    )
+    string(
+      name: 'BRANCH',
+      defaultValue: 'main',
+      description: 'Git branch to deploy on the recette machine.'
+    )
+  }
+
+  environment {
+    SEMGREP_VERSION     = '1.156.0'
+    COVERAGE_MIN        = '70'
+    ENFORCE_COVERAGE_GATE = 'true'
+    GITLEAKS_IMAGE      = 'ghcr.io/gitleaks/gitleaks:v8.30.1@sha256:c00b6bd0aeb3071cbcb79009cb16a60dd9e0a7c60e2be9ab65d25e6bc8abbb7f'
+    LARAVEL_APPS        = 'platform/portal-web services-laravel/auth-users-service services-laravel/chatbot-manager-service services-laravel/conversation-service services-laravel/audit-security-service'
+    SSH_KEY_CREDENTIAL   = 'recette-deploy-ssh-key'
+  }
+
+  stages {
+
+    // ════════════════════════════════════════════════════════════════════
+    //  PHASE 1 — CONTINUOUS INTEGRATION
+    // ════════════════════════════════════════════════════════════════════
+
+    stage('Checkout') {
+      steps {
+        checkout scm
+      }
+    }
+
+    stage('Prepare Workspace') {
+      steps {
+        sh '''
+          set -euo pipefail
+          mkdir -p security/reports .coverage-artifacts
+          find scripts -type f -name "*.sh" -exec chmod +x {} +
+        '''
+      }
+    }
+
+    stage('Install CI Dependencies') {
+      steps {
+        sh '''
+          set -euo pipefail
+
+          python3 -m venv .tools/semgrep-venv
+          . .tools/semgrep-venv/bin/activate
+          python -m pip install --upgrade pip
+          python -m pip install "semgrep==${SEMGREP_VERSION}"
+
+          for app in ${LARAVEL_APPS}; do
+            echo "[INFO] Installing Composer dependencies for ${app}"
+            (cd "${app}" && composer install --no-interaction --prefer-dist --no-progress)
+            if [ -f "${app}/package-lock.json" ]; then
+              echo "[INFO] Installing npm dependencies for ${app}"
+              (cd "${app}" && npm ci --ignore-scripts)
+            fi
+          done
+        '''
+      }
+    }
+
+    stage('CI_LINT - Syntax and Manifest Validation') {
+      steps {
+        sh '''
+          set -euo pipefail
+          make lint
+        '''
+      }
+    }
+
+    stage('CI_TESTS - Laravel Tests and Coverage') {
+      steps {
+        sh '''
+          set -euo pipefail
+          COVERAGE_MIN="${COVERAGE_MIN}" \
+          ENFORCE_COVERAGE_GATE="${ENFORCE_COVERAGE_GATE}" \
+          bash scripts/ci/run-tests.sh
+        '''
+      }
+      post {
+        always {
+          junit allowEmptyResults: true, testResults: '.coverage-artifacts/junit-*.xml'
+          archiveArtifacts allowEmptyArchive: true, artifacts: '.coverage-artifacts/**'
+        }
+      }
+    }
+
+    stage('CI_COVERAGE_GATE - Enforce Minimum Coverage') {
+      steps {
+        sh '''
+          set -euo pipefail
+          echo "[INFO] Enforcing coverage gate: minimum ${COVERAGE_MIN}%"
+          COVERAGE_MIN="${COVERAGE_MIN}" \
+          bash scripts/ci/collect-coverage.sh
+        '''
+      }
+      post {
+        always {
+          archiveArtifacts allowEmptyArchive: true, artifacts: '.coverage-artifacts/coverage-summary.txt,.coverage-artifacts/coverage*.xml'
+        }
+      }
+    }
+
+    stage('CI_DEPENDENCIES - Dependency Audit') {
+      steps {
+        sh '''
+          set -euo pipefail
+          bash scripts/ci/audit-dependencies.sh
+        '''
+      }
+      post {
+        always {
+          archiveArtifacts allowEmptyArchive: true, artifacts: 'security/reports/dependency-audit-summary.md,security/reports/composer-audit-*.json,security/reports/npm-audit-*.json'
+        }
+      }
+    }
+
+    stage('CI_SECURITY_STATIC - SAST and Secret Scans') {
+      steps {
+        sh '''
+          set -euo pipefail
+
+          . .tools/semgrep-venv/bin/activate
+
+          semgrep scan \
+            --config security/semgrep/semgrep.yml \
+            --json \
+            --output security/reports/semgrep.json \
+            --error
+
+          docker run --rm \
+            -v "$PWD:/repo" \
+            -w /repo \
+            "${GITLEAKS_IMAGE}" \
+            dir /repo \
+            --config .gitleaks.toml \
+            --report-format json \
+            --report-path security/reports/gitleaks.json
+
+          trivy fs \
+            --config security/trivy/trivy.yaml \
+            --ignorefile .trivyignore \
+            --format json \
+            --output security/reports/trivy-fs.json \
+            .
+        '''
+      }
+      post {
+        always {
+          archiveArtifacts allowEmptyArchive: true, artifacts: 'security/reports/**'
+        }
+      }
+    }
+
+    stage('CI_K8S_POLICY - Kubernetes Policy Checks') {
+      steps {
+        sh '''
+          set -euo pipefail
+
+          bash scripts/validate/validate-k8s-ultra-hardening.sh
+          REQUIRE_KYVERNO_CLI="false" \
+            bash scripts/ci/validate-kyverno-policies.sh
+
+          STRICT_KUBE_SCORE="true" \
+          KUBE_SCORE_MAX_CRITICAL="${KUBE_SCORE_MAX_CRITICAL:-0}" \
+          KUBE_SCORE_MAX_WARNINGS="${KUBE_SCORE_MAX_WARNINGS:-0}" \
+            bash scripts/ci/validate-kube-score.sh
+
+          bash scripts/ci/validate-falco-rules.sh || rc=$?
+          if [ "${rc:-0}" -ne 0 ] && [ "${rc:-0}" -ne 77 ]; then
+            echo "[FAIL] Falco rules invalid"; exit 1
+          fi
+        '''
+      }
+      post {
+        always {
+          archiveArtifacts allowEmptyArchive: true, artifacts: 'artifacts/security/k8s-ultra-hardening.md,artifacts/security/kyverno-policy-validation.md,artifacts/security/kube-score-report.md,artifacts/security/falco-rules-validation.log'
+        }
+      }
+    }
+
+    stage('CI_QUALITY_GATE - Aggregated Verdict') {
+      when {
+        expression { return params.ENFORCE_QUALITY_GATE }
+      }
+      steps {
+        sh '''
+          set -euo pipefail
+          QG_REQUIRE_SONAR="${RUN_SONAR:-false}" \
+          QG_REQUIRE_COSIGN="false" \
+          QG_COVERAGE_MIN="${COVERAGE_MIN:-70}" \
+            bash scripts/ci/quality-gate.sh
+        '''
+      }
+      post {
+        always {
+          archiveArtifacts allowEmptyArchive: true,
+            artifacts: 'artifacts/security/quality-gate-summary.md,artifacts/security/quality-gate-summary.json'
+        }
+      }
+    }
+
+    // ════════════════════════════════════════════════════════════════════
+    //  PHASE 2 — DEPLOY TO RECETTE (63.250.59.72)
+    // ════════════════════════════════════════════════════════════════════
+
+    stage('Deploy to Recette') {
+      when {
+        expression { return params.DEPLOY_TO_RECETTE }
+      }
+      steps {
+        sshagent(credentials: [env.SSH_KEY_CREDENTIAL]) {
+          sh '''
+            set -euo pipefail
+
+            echo "══════════════════════════════════════════════════════════════"
+            echo "  Deploying to Recette: ${RECETTE_USER}@${RECETTE_HOST}"
+            echo "══════════════════════════════════════════════════════════════"
+
+            SSH_OPTS="-o StrictHostKeyChecking=no -o ConnectTimeout=30"
+
+            # Step 1: Update code on recette
+            echo "[INFO] Step 1/3: Updating code on recette..."
+            ssh ${SSH_OPTS} ${RECETTE_USER}@${RECETTE_HOST} bash -s <<'REMOTE_UPDATE'
+              set -euo pipefail
+              APP_DIR="/MasterPFE"
+              REPO_URL="https://github.com/YassinoMed/MasterPFE.git"
+
+              if ! command -v git >/dev/null 2>&1; then
+                apt-get update && apt-get install -y ca-certificates git
+              fi
+
+              if [ -d "${APP_DIR}/.git" ]; then
+                cd "${APP_DIR}"
+                git fetch origin main
+                git checkout main
+                git reset --hard origin/main
+                echo "[RECETTE] Updated to: $(git log -1 --oneline)"
+              else
+                git clone --branch main "${REPO_URL}" "${APP_DIR}"
+                echo "[RECETTE] Cloned: $(cd ${APP_DIR} && git log -1 --oneline)"
+              fi
+REMOTE_UPDATE
+
+            # Step 2: Build and deploy
+            echo "[INFO] Step 2/3: Building and deploying on recette..."
+            ssh ${SSH_OPTS} ${RECETTE_USER}@${RECETTE_HOST} bash -s <<REMOTE_DEPLOY
+              set -euo pipefail
+              cd /MasterPFE
+
+              # Ensure infrastructure
+              sysctl -w net.ipv4.ip_forward=1 || true
+              iptables -P FORWARD ACCEPT 2>/dev/null || true
+
+              # Create/ensure Kind cluster
+              bash scripts/deploy/create-kind.sh
+
+              # Bootstrap secrets
+              bash scripts/secrets/bootstrap-local-secrets.sh
+              bash scripts/secrets/create-dev-secrets.sh
+
+              # Build images
+              REGISTRY_HOST="localhost:5001" \
+              IMAGE_PREFIX="securerag-hub" \
+              IMAGE_TAG="${IMAGE_TAG}" \
+                bash scripts/deploy/build-local-images.sh
+
+              # Deploy
+              REGISTRY_HOST="localhost:5001" \
+              IMAGE_PREFIX="securerag-hub" \
+              IMAGE_TAG="${IMAGE_TAG}" \
+              KUSTOMIZE_OVERLAY="infra/k8s/overlays/demo" \
+                bash scripts/deploy/deploy-kind.sh
+
+              # Restart pods
+              kubectl delete pod -n securerag-hub --all 2>/dev/null || true
+              kubectl wait --for=condition=Ready pod --all -n securerag-hub --timeout=300s || true
+
+              kubectl get all -n securerag-hub
+REMOTE_DEPLOY
+
+            # Step 3: Start Jenkins on recette
+            echo "[INFO] Step 3/3: Ensuring Jenkins is running on recette..."
+            ssh ${SSH_OPTS} ${RECETTE_USER}@${RECETTE_HOST} bash -s <<'REMOTE_JENKINS'
+              set -euo pipefail
+              cd /MasterPFE
+
+              bash scripts/jenkins/bootstrap-local-credentials.sh
+              bash scripts/jenkins/bootstrap-local-kubeconfig.sh
+              docker compose -f infra/jenkins/docker-compose.yml up -d --build
+
+              echo "[RECETTE] Waiting for Jenkins..."
+              for i in $(seq 1 20); do
+                if curl -fsS --max-time 5 "http://127.0.0.1:8085/login" >/dev/null 2>&1; then
+                  echo "[RECETTE] Jenkins is ready!"
+                  break
+                fi
+                sleep 10
+              done
+REMOTE_JENKINS
+
+            echo "══════════════════════════════════════════════════════════════"
+            echo "  ✅ Deployment to Recette Complete"
+            echo "  Portal: http://${RECETTE_HOST}:8081/health"
+            echo "  Jenkins: http://${RECETTE_HOST}:8085"
+            echo "══════════════════════════════════════════════════════════════"
+          '''
+        }
+      }
+      post {
+        failure {
+          echo '❌ Deployment to recette failed. Check SSH connectivity and remote logs.'
+        }
+      }
+    }
+
+    stage('Post-deploy Smoke Tests on Recette') {
+      when {
+        expression { return params.DEPLOY_TO_RECETTE && params.RUN_SMOKE_TESTS }
+      }
+      steps {
+        sshagent(credentials: [env.SSH_KEY_CREDENTIAL]) {
+          sh '''
+            set -euo pipefail
+            SSH_OPTS="-o StrictHostKeyChecking=no -o ConnectTimeout=30"
+
+            echo "[INFO] Running smoke tests on recette ${RECETTE_HOST}..."
+
+            ssh ${SSH_OPTS} ${RECETTE_USER}@${RECETTE_HOST} bash -s <<'REMOTE_SMOKE'
+              set -euo pipefail
+              cd /MasterPFE
+
+              echo "[RECETTE] === Smoke Tests ==="
+
+              # Health check
+              echo "[RECETTE] Checking portal health..."
+              HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" --max-time 15 "http://127.0.0.1:8081/health" || echo "000")
+              if [ "${HTTP_CODE}" = "200" ]; then
+                echo "[RECETTE] ✅ Portal health: HTTP ${HTTP_CODE}"
+              else
+                echo "[RECETTE] ⚠️  Portal health: HTTP ${HTTP_CODE}"
+              fi
+
+              # Jenkins health check
+              echo "[RECETTE] Checking Jenkins..."
+              JENKINS_CODE=$(curl -s -o /dev/null -w "%{http_code}" --max-time 15 "http://127.0.0.1:8085/login" || echo "000")
+              if [ "${JENKINS_CODE}" = "200" ]; then
+                echo "[RECETTE] ✅ Jenkins: HTTP ${JENKINS_CODE}"
+              else
+                echo "[RECETTE] ⚠️  Jenkins: HTTP ${JENKINS_CODE}"
+              fi
+
+              # Kubernetes pod status
+              echo "[RECETTE] Kubernetes pod status:"
+              kubectl get pods -n securerag-hub -o wide 2>/dev/null || echo "[WARN] kubectl not available"
+
+              # Run official smoke tests
+              IMAGE_TAG="demo" bash scripts/validate/smoke-tests.sh || {
+                echo "[WARN] Some smoke tests had failures"
+              }
+
+              echo "[RECETTE] === Smoke Tests Complete ==="
+REMOTE_SMOKE
+          '''
+        }
+      }
+      post {
+        always {
+          echo "Smoke tests on recette completed"
+        }
+      }
+    }
+  }
+
+  post {
+    success {
+      echo '''
+        ╔═══════════════════════════════════════════════════════════════╗
+        ║  SecureRAG Hub CI/CD Pipeline — SUCCESS                     ║
+        ║  All stages completed successfully.                         ║
+        ╚═══════════════════════════════════════════════════════════════╝
+      '''
+    }
+    failure {
+      echo '''
+        ╔═══════════════════════════════════════════════════════════════╗
+        ║  SecureRAG Hub CI/CD Pipeline — FAILED                      ║
+        ║  Check the stage logs for details.                          ║
+        ╚═══════════════════════════════════════════════════════════════╝
+      '''
+    }
+    always {
+      archiveArtifacts allowEmptyArchive: true, artifacts: 'security/reports/**,.coverage-artifacts/**'
+    }
+  }
+}

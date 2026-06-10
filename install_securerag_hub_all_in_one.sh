@@ -168,8 +168,15 @@ sudo apt install -y \
 log "Installation de Docker Engine"
 sudo install -m 0755 -d /etc/apt/keyrings
 
+# Detect distro: ubuntu or debian
+DOCKER_DISTRO="$(. /etc/os-release && echo "${ID}")"
+case "$DOCKER_DISTRO" in
+  ubuntu|debian) ;;
+  *) log "Distribution '${DOCKER_DISTRO}' non testée; tentative avec 'ubuntu'"; DOCKER_DISTRO="ubuntu" ;;
+esac
+
 if [[ ! -f /etc/apt/keyrings/docker.gpg ]]; then
-  curl -fsSL https://download.docker.com/linux/debian/gpg \
+  curl -fsSL "https://download.docker.com/linux/${DOCKER_DISTRO}/gpg" \
     | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
 fi
 
@@ -177,7 +184,7 @@ sudo chmod a+r /etc/apt/keyrings/docker.gpg
 
 echo \
   "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] \
-  https://download.docker.com/linux/debian \
+  https://download.docker.com/linux/${DOCKER_DISTRO} \
   $(. /etc/os-release && echo "$VERSION_CODENAME") stable" \
   | sudo tee /etc/apt/sources.list.d/docker.list >/dev/null
 

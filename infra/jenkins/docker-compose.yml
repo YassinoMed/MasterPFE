@@ -18,6 +18,7 @@ services:
       SECURERAG_GIT_URL: https://github.com/YassinoMed/MasterPFE.git
       SECURERAG_GIT_BRANCH: "*/main"
       ENABLE_LOCAL_FORWARDING: "true"
+      RECETTE_SSH_USER: ${RECETTE_SSH_USER:-root}
     volumes:
       - jenkins_home:/var/jenkins_home
       - ./casc:/var/jenkins_home/casc_configs:ro
@@ -38,3 +39,4 @@ services:
 
 volumes:
   jenkins_home:
+

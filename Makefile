@@ -489,3 +489,31 @@ pre-commit-install: ## Install pre-commit hooks (Gitleaks, shellcheck, yaml-chec
 	  pre-commit install; \
 	  echo "[OK] pre-commit hooks installed"; \
 	fi
+
+# ----------------------------------------------------------------------------
+# Recette (staging) deployment targets — deploy to 63.250.59.72 via SSH
+# Requires: SSH key pair in infra/jenkins/secrets/recette-deploy-key
+# See: scripts/deploy/deploy-to-recette.sh for full documentation.
+# ----------------------------------------------------------------------------
+
+.PHONY: deploy-recette recette-smoke recette-bootstrap
+
+RECETTE_HOST ?= 63.250.59.72
+RECETTE_USER ?= root
+
+recette-bootstrap: ## Generate SSH deploy key pair for the recette machine
+	@bash scripts/jenkins/bootstrap-recette-ssh.sh
+
+deploy-recette: ## Deploy SecureRAG Hub to the recette machine (63.250.59.72) via SSH
+	@RECETTE_HOST=$(RECETTE_HOST) RECETTE_USER=$(RECETTE_USER) \
+	IMAGE_TAG=$(IMAGE_TAG) IMAGE_PREFIX=$(IMAGE_PREFIX) \
+	REGISTRY_HOST=$(REGISTRY_HOST) BRANCH=main \
+	SSH_KEY_FILE=infra/jenkins/secrets/recette-deploy-key \
+		bash scripts/deploy/deploy-to-recette.sh
+
+recette-smoke: ## Run smoke tests on the recette machine via SSH
+	@RECETTE_HOST=$(RECETTE_HOST) RECETTE_USER=$(RECETTE_USER) \
+	SSH_KEY_FILE=infra/jenkins/secrets/recette-deploy-key \
+	SKIP_BUILD=true SKIP_SMOKE=false \
+		bash scripts/deploy/deploy-to-recette.sh
+
