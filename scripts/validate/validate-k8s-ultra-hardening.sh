@@ -2,6 +2,12 @@
 
 set -euo pipefail
 
+# Activate virtual environment if available (useful in CI pipelines)
+if [ -f .tools/semgrep-venv/bin/activate ]; then
+  # shellcheck disable=SC1091
+  . .tools/semgrep-venv/bin/activate
+fi
+
 REPORT_DIR="${REPORT_DIR:-artifacts/security}"
 REPORT_FILE="${REPORT_DIR}/k8s-ultra-hardening.md"
 OVERLAYS=(

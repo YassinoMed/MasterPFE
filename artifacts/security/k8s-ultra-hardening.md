@@ -111,6 +111,7 @@
 | `demo` | Service chatbot-manager exposure restricted | TERMINÉ | `type=ClusterIP` |
 | `demo` | Service conversation-service exposure restricted | TERMINÉ | `type=ClusterIP` |
 | `demo` | Service portal-web exposure restricted | TERMINÉ | `type=NodePort` |
+| `demo` | Service postgres-auth exposure restricted | TERMINÉ | `type=ClusterIP` |
 | `demo` | PDB for portal-web | TERMINÉ | `PodDisruptionBudget present` |
 | `demo` | PDB for auth-users | TERMINÉ | `PodDisruptionBudget present` |
 | `demo` | PDB for chatbot-manager | TERMINÉ | `PodDisruptionBudget present` |
@@ -234,6 +235,7 @@
 | `dev` | Service chatbot-manager exposure restricted | TERMINÉ | `type=ClusterIP` |
 | `dev` | Service conversation-service exposure restricted | TERMINÉ | `type=ClusterIP` |
 | `dev` | Service portal-web exposure restricted | TERMINÉ | `type=NodePort` |
+| `dev` | Service postgres-auth exposure restricted | TERMINÉ | `type=ClusterIP` |
 | `dev` | PDB for portal-web | TERMINÉ | `PodDisruptionBudget present` |
 | `dev` | PDB for auth-users | TERMINÉ | `PodDisruptionBudget present` |
 | `dev` | PDB for chatbot-manager | TERMINÉ | `PodDisruptionBudget present` |
@@ -378,6 +380,7 @@
 | `production` | Service chatbot-manager exposure restricted | TERMINÉ | `type=ClusterIP` |
 | `production` | Service conversation-service exposure restricted | TERMINÉ | `type=ClusterIP` |
 | `production` | Service portal-web exposure restricted | TERMINÉ | `type=NodePort` |
+| `production` | Service postgres-auth exposure restricted | TERMINÉ | `type=ClusterIP` |
 | `production` | PDB for portal-web | TERMINÉ | `PodDisruptionBudget present` |
 | `production` | PDB for auth-users | TERMINÉ | `PodDisruptionBudget present` |
 | `production` | PDB for chatbot-manager | TERMINÉ | `PodDisruptionBudget present` |

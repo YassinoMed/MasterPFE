@@ -107,7 +107,7 @@ pipeline {
           python3 -m venv .tools/semgrep-venv
           . .tools/semgrep-venv/bin/activate
           python -m pip install --upgrade pip
-          python -m pip install "semgrep==${SEMGREP_VERSION}"
+          python -m pip install "semgrep==${SEMGREP_VERSION}" PyYAML
 
           for app in ${LARAVEL_APPS}; do
             echo "[INFO] Installing Composer dependencies for ${app}"

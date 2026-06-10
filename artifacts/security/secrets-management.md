@@ -1,6 +1,6 @@
 # Secrets Management Readiness - SecureRAG Hub
 
-- Generated at UTC: `2026-04-21T18:58:27Z`
+- Generated at UTC: `2026-06-10T21:14:58Z`
 
 | Control | Status | Evidence |
 |---|---:|---|
@@ -8,13 +8,15 @@
 | Jenkins local secrets excluded from Git | TERMINÉ | `infra/jenkins/secrets/.gitignore present` |
 | Demo/dev secret bootstrap | TERMINÉ | `bootstrap and Kubernetes injection scripts executable` |
 | Production DB secret bootstrap | TERMINÉ | `scripts/secrets/create-production-db-secret.sh executable` |
-| SOPS/age production option | PRÊT_NON_EXÉCUTÉ | `example policy and placeholder Secret template present` |
-| Modern secret delivery strategy | PRÊT_NON_EXÉCUTÉ | `External Secrets Operator / Vault path documented without overclaiming runtime use` |
+| SOPS/age repository path | TERMINÉ | `SOPS config, template and apply script present` |
+| External Secrets / Vault repository path | TERMINÉ | `templates, docs and runtime proof script present` |
 | Secrets documentation | TERMINÉ | `hardening and strategy docs present` |
-| Production DB secret runtime evidence | PRÊT_NON_EXÉCUTÉ | `run scripts/secrets/create-production-db-secret.sh with DB env vars` |
+| Direct secret runtime evidence | PRÊT_NON_EXÉCUTÉ | `artifacts/security/production-db-secret.md` |
+| SOPS runtime evidence | PRÊT_NON_EXÉCUTÉ | `artifacts/security/sops-production-db-secret.md` |
+| External Secrets runtime evidence | PRÊT_NON_EXÉCUTÉ | `artifacts/security/external-secrets-runtime.md` |
 
 ## Global status
 
 Statut global: `PRÊT_NON_EXÉCUTÉ`
 
-Repository-side secret controls are ready. Runtime production DB secret evidence is complete only after the Secret is applied on the target cluster.
+Repository-side secret controls are ready. Runtime production secret delivery remains intentionally unexecuted until a target environment is available.

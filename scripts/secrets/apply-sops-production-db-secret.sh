@@ -2,6 +2,12 @@
 
 set -euo pipefail
 
+# Activate virtual environment if available (useful in CI pipelines)
+if [ -f .tools/semgrep-venv/bin/activate ]; then
+  # shellcheck disable=SC1091
+  . .tools/semgrep-venv/bin/activate
+fi
+
 NAMESPACE="${NAMESPACE:-securerag-hub}"
 SECRET_NAME="${SECRET_NAME:-securerag-database-secrets}"
 ENCRYPTED_SECRET_FILE="${ENCRYPTED_SECRET_FILE:-infra/secrets/production/securerag-database-secrets.enc.yaml}"

@@ -78,7 +78,8 @@ kubectl kustomize "${OVERLAY}" > "${rendered}"
 } > "${REPORT_FILE}"
 
 set +e
-ruby -W0 -ryaml - "${rendered}" "${REPORT_FILE}" <<'RUBY'
+ruby -W0 -Eutf-8 -ryaml - "${rendered}" "${REPORT_FILE}" <<'RUBY'
+# encoding: utf-8
 rendered, report_file = ARGV
 official = %w[portal-web auth-users chatbot-manager conversation-service audit-security-service]
 legacy = %w[api-gateway knowledge-hub llm-orchestrator ollama qdrant security-auditor]
