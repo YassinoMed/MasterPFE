@@ -61,11 +61,14 @@ if command -v cosign >/dev/null 2>&1; then
 else
   command -v docker >/dev/null 2>&1 || { error "docker is required when cosign is not installed locally"; exit 2; }
   info "Generating local Cosign key pair with ${COSIGN_IMAGE}"
+  # Temporarily relax permissions so the non-root Cosign container can write
+  chmod 777 "${JENKINS_SECRETS_DIR}"
   docker run --rm \
     -e COSIGN_PASSWORD="${COSIGN_PASSWORD_VALUE}" \
     -v "$(cd "${JENKINS_SECRETS_DIR}" && pwd):/keys" \
     "${COSIGN_IMAGE}" \
     generate-key-pair --output-key-prefix /keys/cosign
+  chmod 700 "${JENKINS_SECRETS_DIR}"
 fi
 
 chmod 600 "${COSIGN_PRIVATE_KEY}" "${COSIGN_PASSWORD_FILE}"
