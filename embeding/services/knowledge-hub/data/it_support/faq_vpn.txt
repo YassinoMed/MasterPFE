@@ -1,0 +1,41 @@
+FAQ VPN - Accès distant SecureRAG
+==================================
+
+Q : Quel client VPN dois-je installer ?
+R : Le client officiel est OpenVPN Connect. Il est disponible pour Windows,
+   macOS, Linux, iOS et Android. Téléchargez-le depuis le portail interne
+   (Logiciels approuvés) afin d'obtenir la version signée.
+
+Q : Comment obtenir mon profil VPN ?
+R : Le profil .ovpn est généré automatiquement et téléchargeable depuis
+   https://vpn.secure-rag.local/profile après authentification SSO + MFA.
+   Le profil contient les certificats et les paramètres ; ne le partagez
+   jamais.
+
+Q : Mon VPN se déconnecte régulièrement, que faire ?
+R : Vérifiez d'abord la qualité de votre connexion (un débit inférieur à
+   2 Mbps peut suffire à provoquer des déconnexions). Si le problème
+   persiste, essayez le serveur de secours (vpn-backup.secure-rag.local).
+   Si la coupure reste systématique, ouvrez un ticket avec les logs du
+   client (menu Aide > Exporter les logs).
+
+Q : Puis-je utiliser le VPN depuis l'étranger ?
+R : Oui pour les déplacements professionnels validés. Pour les
+   déplacements personnels, prévenez votre manager et le service IT au
+   moins cinq jours à l'avance afin que la géolocalisation soit autorisée
+   dans la console de sécurité.
+
+Q : Quels services restent accessibles sans VPN ?
+R : Les services SaaS publics intégrés au SSO (messagerie, suite
+   collaborative, outil RH) restent accessibles. Les ressources internes
+   (Confluence interne, GitLab on-prem, base de données interne)
+   nécessitent obligatoirement le VPN ou une session ZTNA validée.
+
+Q : Pourquoi suis-je obligé d'utiliser le MFA pour me connecter au VPN ?
+R : La politique de sécurité impose un second facteur pour toute connexion
+   à distance. Cette exigence répond aux référentiels ISO 27001 et ANSSI
+   sur l'accès distant aux systèmes d'information.
+
+Q : Mon mot de passe VPN est-il le même que mon mot de passe Windows ?
+R : Oui, depuis la migration SSO en 2024. Les deux mots de passe sont
+   unifiés. Toute réinitialisation se fait via la procédure standard.

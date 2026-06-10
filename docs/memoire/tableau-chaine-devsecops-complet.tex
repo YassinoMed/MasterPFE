@@ -1,10 +1,7 @@
 \subsection{Tableau de synthese de la chaine DevSecOps}
 \label{sec:tableau-chaine-devsecops-complet}
 
-Le tableau~\ref{tab:chaine-devsecops-complete} resume la chaine DevSecOps et
-Kubernetes de \textit{SecureRAG Hub} avec une lecture volontairement honnete :
-ce qui est termine cote depot est distingue de ce qui doit encore etre rejoue
-ou prouve sur l'environnement cible.
+Le tableau~\ref{tab:chaine-devsecops-complete} resume la chaine DevSecOps et Kubernetes de \textit{SecureRAG Hub} avec une lecture volontairement honnete : ce qui est termine cote depot (implémente et versionné) est distingue de ce qui doit encore etre rejoue ou prouve au runtime de l'environnement cible.
 
 \begin{table}[h]
 \centering
@@ -16,7 +13,9 @@ ou prouve sur l'environnement cible.
 \hline
 Code et gouvernance & Versionner, revoir et tracer les changements & Git, GitHub, Jenkins, documentation, runbooks & Historique, scripts, documentation versionnee & TERMINE cote depot \\
 \hline
-CI statique & Verifier la qualite et la securite en amont & lint shell, tests Laravel, rendu Kustomize, Semgrep, Gitleaks, Trivy FS & rapports CI, comptes rendus de tests, scans statiques & TERMINE cote depot \\
+CI statique \& Shift-left & Verifier la qualite et la securite en amont du commit & hooks pre-commit (Gitleaks, shellcheck, yaml-check), tests Laravel, Semgrep, Trivy FS & rapports CI, comptes rendus de tests, scans statiques, hooks pre-commit actifs & TERMINE cote depot \\
+\hline
+DAST (ZAP Scan) & Détecter les failles dynamiques au runtime & stage CD\_DAST OWASP ZAP, validate-dast-report.sh, Makefile targets & rapports DAST, validation des alertes & TERMINE cote depot \\
 \hline
 Build images & Produire les images officielles & Docker, build local, registry locale & images OCI construites et poussees & TERMINE cote depot \\
 \hline
@@ -36,23 +35,25 @@ Kyverno Audit & Controler les workloads en admission et en background scan & Clu
 \hline
 Kyverno Enforce & Evaluer l'activation stricte de \texttt{verifyImages} & readiness Enforce, acces registry depuis les pods Kyverno & readiness Enforce ou blocage documente proprement & DEPENDANT\_DE\_L'ENVIRONNEMENT \\
 \hline
+Détection \& Alerting & Détecter et notifier les menaces runtime & Falco (règles MITRE), Falcosidekick, Alertmanager receivers, alertes Prometheus (+5 nouvelles) & métriques Loki, alertes de sécurité, notifications & TERMINE cote depot \\
+\hline
 Donnees externes & Sortir du stockage local demo & PostgreSQL externe, Secret DB, backup, restore & preuve DB, dump, restore isole, rapport de resilience & DEPENDANT\_DE\_L'ENVIRONNEMENT \\
 \hline
-Secrets modernes & Formaliser une trajectoire plus credible & SOPS/age, External Secrets Operator, Vault & strategie documentee sans surpromesse runtime & PRET\_NON\_EXECUTE \\
+Secrets modernes & Formaliser une trajectoire plus credible & SOPS/age, External Secrets Operator, Vault & roadmap documentee, templates ESO, pre-commit & PRET\_NON\_EXECUTE \\
 \hline
 Jenkins live & Prouver la chaine CI/CD sur l'instance reelle & Jenkins CI, Jenkins CD, webhook GitHub, jobs live & preuves Jenkins, pipeline execute, artefacts archives & PARTIEL \\
 \hline
-Support pack et synthese & Consolider toutes les preuves & support pack, tableaux finaux, README, matrice securite & archive finale et source de verite coherente & TERMINE cote depot \\
+Support pack et synthese & Consolider toutes les preuves & support pack, rapports consolidés, matrices de sécurité, README & archive finale et source de verite coherente & TERMINE cote depot \\
 \hline
 \end{tabular}
 \caption{Resume complet de la chaine DevSecOps de SecureRAG Hub}
 \label{tab:chaine-devsecops-complete}
 \end{table}
 
-\paragraph{Lecture honnete.}
+\paragraph{Interpretation du statut.}
 \begin{itemize}
-  \item \textbf{TERMINE cote depot} : la chaine est concue, automatisee, versionnee et documentee.
-  \item \textbf{DEPENDANT\_DE\_L'ENVIRONNEMENT} : la preuve runtime finale, la release finale, Kyverno live, la base externe et Jenkins live doivent encore etre executes ou rejoues sur la cible.
-  \item \textbf{PRET\_NON\_EXECUTE} : la modernisation des secrets par SOPS, External Secrets Operator ou Vault reste preparee mais non operee.
-  \item \textbf{PARTIEL} : la demonstration live reste incomplete tant que le cluster cible n'est pas rejoue proprement de bout en bout.
+  \item \textbf{TERMINE cote depot} : la brique technique est entièrement conçue, implémentée, versionnée et documentée dans le dépôt de code.
+  \item \textbf{DEPENDANT\_DE\_L'ENVIRONNEMENT} : la brique est prête dans le dépôt, mais sa preuve d'exécution runtime finale dépend de la disponibilité d'une cible d'infrastructure (cluster kind, registre sécurisé, métriques actives, etc.).
+  \item \textbf{PRET\_NON\_EXECUTE} : la trajectoire est planifiée et documentée avec des fichiers de configuration prêts à l'emploi, mais non activée en runtime local de démonstration.
+  \item \textbf{PARTIEL} : le fonctionnement réel est partiellement observable dans la démonstration locale.
 \end{itemize}

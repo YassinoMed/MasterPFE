@@ -90,7 +90,7 @@ Exposition externe & \texttt{api-gateway} joignable depuis l'hote & \texttt{http
 \centering
 \begin{tabular}{|p{3.8cm}|p{3.6cm}|p{4.6cm}|p{2.3cm}|}
 \hline
-\textbf{Test} & \textbf{Attendu} & \textbf{Observe} & \textbf{Statut} \\
+\textbf{Test / Script} & \textbf{Attendu} & \textbf{Observe} & \textbf{Statut} \\
 \hline
 \texttt{security-smoke.sh} & Verification des \textit{ServiceAccount}, \textit{NetworkPolicy} et \textit{security contexts} & Controles executes avec succes ; avertissement residuel pour \texttt{ollama} & PASS \\
 \hline
@@ -99,6 +99,12 @@ Exposition externe & \texttt{api-gateway} joignable depuis l'hote & \texttt{http
 \texttt{security-adversarial-advanced.sh} & \texttt{security-auditor} joignable ; endpoint d'analyse si implemente & \texttt{security-auditor} joignable ; \texttt{/analyze} retourne \texttt{404} & PASS / SKIP \\
 \hline
 \texttt{rag-smoke.sh} & \texttt{llm-orchestrator}, \texttt{knowledge-hub}, \texttt{qdrant}, \texttt{ollama} joignables & Echec a cause de \texttt{ollama} non joignable & FAIL \\
+\hline
+\texttt{validate-dast-report.sh} & Analyse du rapport JSON de scan dynamic OWASP ZAP & Détection et comptage des vulnérabilités, validation de l'absence d'alertes HIGH/CRITICAL & PASS \\
+\hline
+\texttt{pre-commit run} & Exécution locale des hooks pre-commit (Gitleaks, shellcheck, yaml-check) & Validation statique globale de la qualité et blocage de fuites de secrets avant commit & PASS \\
+\hline
+\texttt{falcosidekick} & Routage temps réel des détections d'intrusion système & Alertes runtime Falco routées avec succès vers Loki et l'Alertmanager & PASS \\
 \hline
 \texttt{generate-validation-report.sh} & Rapport synthetique produit & Rapport genere correctement dans \texttt{artifacts/validation/validation-summary.md} & PASS \\
 \hline
@@ -114,7 +120,7 @@ Exposition externe & \texttt{api-gateway} joignable depuis l'hote & \texttt{http
 \hline
 \textbf{Indicateur} & \textbf{Valeur observee} \\
 \hline
-\texttt{PASS} & 15 \\
+\texttt{PASS} & 18 \\
 \hline
 \texttt{FAIL} & 1 \\
 \hline

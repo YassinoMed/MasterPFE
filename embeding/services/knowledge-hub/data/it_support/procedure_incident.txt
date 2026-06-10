@@ -1,0 +1,58 @@
+PROCÉDURE DE GESTION DES INCIDENTS IT
+======================================
+
+1. Définition d'un incident
+---------------------------
+Un incident IT est tout événement non planifié provoquant une interruption,
+une dégradation de service ou un risque pour la sécurité du système
+d'information. Trois niveaux de criticité sont définis :
+
+- P1 (Critique) : indisponibilité totale d'un service critique de
+  production. Impact > 50 utilisateurs ou client externe.
+- P2 (Majeur) : dégradation forte ou panne d'un service non critique
+  affectant plus de 10 utilisateurs.
+- P3 (Mineur) : panne individuelle, demande utilisateur ou anomalie sans
+  impact métier.
+
+2. Déclaration de l'incident
+----------------------------
+Tout collaborateur peut déclarer un incident :
+- Pour P1 : appel téléphonique immédiat au +33 1 23 45 67 89 (24/7).
+- Pour P2 / P3 : ticket via le portail https://servicedesk.secure-rag.local
+  ou e-mail à it-support@secure-rag.local.
+
+Le ticket doit contenir : description claire, date et heure, services
+impactés, captures d'écran ou logs si disponibles.
+
+3. Prise en charge et SLA
+-------------------------
+- P1 : prise en charge en moins de 15 minutes, contournement sous 1h,
+  résolution cible sous 4h.
+- P2 : prise en charge sous 1h, résolution cible sous 8h ouvrées.
+- P3 : prise en charge sous 4h ouvrées, résolution cible sous 3 jours
+  ouvrés.
+
+Un point de communication est diffusé toutes les 30 minutes pour les P1 et
+toutes les 2h pour les P2, jusqu'à résolution.
+
+4. Cellule de crise
+-------------------
+Pour les incidents P1 prolongés, une cellule de crise est activée par le
+responsable des opérations. Elle réunit : ops manager, SRE on-call, RSSI,
+communication interne, et le métier impacté. Les décisions sont consignées
+dans un journal d'incident partagé.
+
+5. Post-mortem et amélioration continue
+---------------------------------------
+Tout incident P1 ou P2 donne lieu à un post-mortem sous cinq jours ouvrés.
+Le document décrit : timeline, cause racine, impact, actions correctives,
+leçons apprises. Les post-mortems sont publiés sur l'intranet et discutés
+en revue mensuelle.
+
+6. Incidents de sécurité
+------------------------
+Tout incident de sécurité (compromission, fuite de données, malware,
+phishing) est escaladé immédiatement au RSSI via security@secure-rag.local
+ou au +33 1 23 45 67 90. La procédure d'incident security suit un
+processus dédié conforme à la directive NIS2 et au RGPD (notification CNIL
+sous 72h si données personnelles concernées).

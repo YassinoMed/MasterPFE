@@ -442,3 +442,50 @@ secret-rotation-drill: ## Run secret rotation drill in isolated namespace (P0-7)
 
 devsecops-expert-audit: audit-pod-security audit-networkpolicies quality-gate ## Run all static expert audits in one shot
 	@echo "[OK] expert audits complete; reports under artifacts/security/"
+
+# ----------------------------------------------------------------------------
+# DAST (Dynamic Application Security Testing) targets — OWASP ZAP
+# Requires: Docker, a running portal-web service (make deploy first).
+# See docs/security/dast-roadmap.md for full documentation.
+# ----------------------------------------------------------------------------
+
+.PHONY: dast-baseline dast-full dast-validate pre-commit-install
+
+dast-baseline: ## Run OWASP ZAP baseline scan against the deployed portal
+	@mkdir -p artifacts/dast
+	@PORTAL_URL=$${PORTAL_URL:-http://localhost:8081}; \
+	echo "[INFO] Running ZAP baseline scan against $${PORTAL_URL}"; \
+	docker run --rm --network host \
+	  -v "$$(pwd)/artifacts/dast:/zap/wrk:rw" \
+	  -t ghcr.io/zaproxy/zaproxy:2.15.0 zap-baseline.py \
+	  -t "$${PORTAL_URL}" \
+	  -r dast-baseline-report.html \
+	  -J dast-baseline-report.json \
+	  -l WARN || true
+	@echo "[OK] DAST baseline report: artifacts/dast/dast-baseline-report.html"
+
+dast-full: ## Run OWASP ZAP full scan against the deployed portal (15-30 min)
+	@mkdir -p artifacts/dast
+	@PORTAL_URL=$${PORTAL_URL:-http://localhost:8081}; \
+	echo "[INFO] Running ZAP full scan against $${PORTAL_URL}"; \
+	docker run --rm --network host \
+	  -v "$$(pwd)/artifacts/dast:/zap/wrk:rw" \
+	  -t ghcr.io/zaproxy/zaproxy:2.15.0 zap-full-scan.py \
+	  -t "$${PORTAL_URL}" \
+	  -r dast-full-report.html \
+	  -J dast-full-report.json || true
+	@echo "[OK] DAST full report: artifacts/dast/dast-full-report.html"
+
+dast-validate: ## Validate DAST report and flag HIGH/CRITICAL alerts
+	@bash scripts/validate/validate-dast-report.sh
+
+pre-commit-install: ## Install pre-commit hooks (Gitleaks, shellcheck, yaml-check)
+	@if command -v pre-commit >/dev/null 2>&1; then \
+	  pre-commit install; \
+	  echo "[OK] pre-commit hooks installed"; \
+	else \
+	  echo "[INFO] Installing pre-commit..."; \
+	  pip install pre-commit; \
+	  pre-commit install; \
+	  echo "[OK] pre-commit hooks installed"; \
+	fi

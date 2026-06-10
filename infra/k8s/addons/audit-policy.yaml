@@ -1,0 +1,126 @@
+# Kubernetes Audit Policy — SecureRAG Hub
+#
+# Cette policy configure l'audit logging natif de Kubernetes pour tracer
+# les accès aux ressources sensibles dans le namespace securerag-hub.
+#
+# Déploiement :
+#   1. Copier ce fichier sur le nœud master :
+#      /etc/kubernetes/audit-policy.yaml
+#
+#   2. Ajouter les flags au kube-apiserver :
+#      --audit-policy-file=/etc/kubernetes/audit-policy.yaml
+#      --audit-log-path=/var/log/kubernetes/audit.log
+#      --audit-log-maxage=30
+#      --audit-log-maxbackup=10
+#      --audit-log-maxsize=100
+#
+#   3. Pour Kind, ajouter dans la config kind :
+#      kind: Cluster
+#      apiVersion: kind.x-k8s.io/v1alpha4
+#      nodes:
+#        - role: control-plane
+#          kubeadmConfigPatches:
+#            - |
+#              kind: ClusterConfiguration
+#              apiServer:
+#                extraArgs:
+#                  audit-policy-file: /etc/kubernetes/audit-policy.yaml
+#                  audit-log-path: /var/log/kubernetes/audit.log
+#                extraVolumes:
+#                  - name: audit-policy
+#                    hostPath: /etc/kubernetes/audit-policy.yaml
+#                    mountPath: /etc/kubernetes/audit-policy.yaml
+#                    readOnly: true
+#                    pathType: File
+#                  - name: audit-logs
+#                    hostPath: /var/log/kubernetes
+#                    mountPath: /var/log/kubernetes
+#                    pathType: DirectoryOrCreate
+#
+# Voir : https://kubernetes.io/docs/tasks/debug/debug-cluster/audit/
+
+apiVersion: audit.k8s.io/v1
+kind: Policy
+rules:
+  # ── Secrets : log complet (RequestResponse) ─────────────────────────
+  # Tracer toutes les opérations sur les Secrets du namespace applicatif.
+  # Cela inclut création, modification, suppression et lecture.
+  - level: RequestResponse
+    resources:
+      - group: ""
+        resources: ["secrets"]
+    namespaces: ["securerag-hub"]
+    omitStages: ["RequestReceived"]
+
+  # ── Exec / Attach dans les pods : log complet ──────────────────────
+  # Détecte les tentatives d'exécution de commandes ou d'attachement
+  # à un conteneur en cours d'exécution (vecteur d'attaque majeur).
+  - level: RequestResponse
+    resources:
+      - group: ""
+        resources: ["pods/exec", "pods/attach", "pods/portforward"]
+    namespaces: ["securerag-hub"]
+    omitStages: ["RequestReceived"]
+
+  # ── RBAC : tracer les modifications de rôles et bindings ────────────
+  - level: RequestResponse
+    resources:
+      - group: "rbac.authorization.k8s.io"
+        resources: ["roles", "rolebindings", "clusterroles", "clusterrolebindings"]
+    verbs: ["create", "update", "patch", "delete"]
+    omitStages: ["RequestReceived"]
+
+  # ── ServiceAccounts : tracer les créations / modifications ──────────
+  - level: Metadata
+    resources:
+      - group: ""
+        resources: ["serviceaccounts"]
+    namespaces: ["securerag-hub"]
+    verbs: ["create", "update", "patch", "delete"]
+
+  # ── ConfigMaps du namespace applicatif ──────────────────────────────
+  - level: Metadata
+    resources:
+      - group: ""
+        resources: ["configmaps"]
+    namespaces: ["securerag-hub"]
+    verbs: ["create", "update", "patch", "delete"]
+
+  # ── Deployments / StatefulSets : tracer les modifications ───────────
+  - level: Metadata
+    resources:
+      - group: "apps"
+        resources: ["deployments", "statefulsets", "daemonsets"]
+    namespaces: ["securerag-hub"]
+    verbs: ["create", "update", "patch", "delete"]
+
+  # ── NetworkPolicies : tracer les modifications de réseau ────────────
+  - level: Metadata
+    resources:
+      - group: "networking.k8s.io"
+        resources: ["networkpolicies"]
+    namespaces: ["securerag-hub"]
+    verbs: ["create", "update", "patch", "delete"]
+
+  # ── Kyverno policies : tracer les changements de politiques ─────────
+  - level: Metadata
+    resources:
+      - group: "kyverno.io"
+        resources: ["clusterpolicies", "policies"]
+    verbs: ["create", "update", "patch", "delete"]
+
+  # ── Namespaces système : métadonnées seulement ─────────────────────
+  - level: Metadata
+    resources:
+      - group: ""
+        resources: ["namespaces"]
+    verbs: ["create", "delete"]
+
+  # ── Catch-all : aucun log pour les requêtes read-only système ──────
+  # Évite de saturer les logs avec les GET/LIST/WATCH du kube-system.
+  - level: None
+    users: ["system:kube-proxy", "system:kube-scheduler", "system:kube-controller-manager"]
+
+  # ── Catch-all : métadonnées pour tout le reste ─────────────────────
+  - level: Metadata
+    omitStages: ["RequestReceived"]

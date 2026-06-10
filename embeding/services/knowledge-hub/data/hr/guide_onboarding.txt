@@ -1,0 +1,43 @@
+GUIDE D'ONBOARDING DES NOUVEAUX COLLABORATEURS
+==============================================
+
+Ce guide décrit le parcours d'intégration sur les trois premiers mois.
+
+Semaine 1 - Accueil administratif et matériel
+---------------------------------------------
+Le premier jour, le nouveau collaborateur est accueilli par son manager et
+un référent RH. Il signe le règlement intérieur, la charte informatique et
+la charte de confidentialité. L'équipe IT lui remet son matériel
+(ordinateur portable, badge, casque) et active ses accès SSO. Une visite
+des locaux et la présentation de l'équipe sont organisées dans la matinée.
+
+Semaine 2 et 3 - Formation produit et processus
+-----------------------------------------------
+Le collaborateur suit les modules de formation obligatoires : sécurité de
+l'information (ISO 27001), RGPD, et harcèlement. Il est invité aux réunions
+d'équipe et observe les rituels en place (daily, weekly, demo). Un buddy
+référent lui est assigné pour répondre à ses questions opérationnelles.
+
+Mois 2 - Prise d'autonomie progressive
+--------------------------------------
+Les premières missions de production sont confiées avec un binôme. Un
+point hebdomadaire de 30 minutes est tenu avec le manager pour faire le
+bilan de la semaine et lever les blocages. Les retours du buddy et des
+pairs sont collectés via un formulaire interne.
+
+Mois 3 - Évaluation de la période d'essai
+-----------------------------------------
+Un entretien formel est conduit à la fin du 3e mois pour évaluer la prise
+de fonction. Les axes évalués sont : intégration culturelle, compétences
+techniques, autonomie, communication. La décision de confirmation est
+prise conjointement par le manager et les RH.
+
+Ressources utiles
+-----------------
+- Portail RH : https://rh.intranet/secure-rag
+- Annuaire : https://annuaire.intranet/secure-rag
+- Helpdesk IT : it-support@secure-rag.local (procédure dans le guide IT)
+- Référents diversité et inclusion : diversite@secure-rag.local
+
+Pour toute question, le service RH se tient à disposition sur le créneau
+quotidien 14h-15h en présentiel ou à l'adresse rh@secure-rag.local.

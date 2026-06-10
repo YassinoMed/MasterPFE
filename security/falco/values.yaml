@@ -41,18 +41,29 @@ falcoctl:
       enabled: true
 
 # Forward alerts to Falcosidekick → Loki / Slack / Alertmanager.
-# Disabled by default; flip to true after wiring outputs.
+# Enabled: runtime alerts are routed to observability stack and optional
+# external channels (Slack, PagerDuty). Disable only for minimal local dev.
 falcosidekick:
-  enabled: false
+  enabled: true
   webui:
-    enabled: false
+    enabled: true
   config:
     loki:
-      hostport: "http://loki.observability.svc.cluster.local:3100"
+      hostport: "http://loki.securerag-monitoring.svc.cluster.local:3100"
       tenant: "securerag"
     alertmanager:
-      hostport: "http://alertmanager.observability.svc.cluster.local:9093"
+      hostport: "http://alertmanager.securerag-monitoring.svc.cluster.local:9093"
       minimumpriority: "warning"
+    # Slack — décommenter et configurer pour recevoir les alertes critiques.
+    # slack:
+    #   webhookurl: "https://hooks.slack.com/services/TXXXXX/BXXXXX/XXXXXXXX"
+    #   channel: "#securerag-alerts"
+    #   minimumpriority: "error"
+    #   outputformat: "all"
+    # PagerDuty — décommenter pour escalade on-call.
+    # pagerduty:
+    #   routingkey: "CHANGE_ME"
+    #   minimumpriority: "critical"
 
 # Pod hardening for the Falco DaemonSet itself.
 podSecurityContext:

@@ -1,0 +1,43 @@
+FAQ RH - Questions fréquentes
+==============================
+
+Q : Comment puis-je consulter mon solde de congés ?
+R : Le solde est visible à tout moment dans l'outil RH, onglet "Mes
+   absences". Il est mis à jour le 1er de chaque mois après acquisition.
+
+Q : Puis-je poser des congés payés et des RTT en même temps ?
+R : Oui, dans la limite du solde disponible. Les RTT ne se cumulent pas
+   automatiquement avec les congés sans accord du manager pour une absence
+   supérieure à dix jours ouvrés consécutifs.
+
+Q : Que se passe-t-il si je ne pose pas mes RTT avant le 31 décembre ?
+R : Les RTT non posés à la fin de l'année civile sont perdus. Ils ne
+   peuvent être ni reportés ni payés, sauf cas exceptionnel validé par les
+   RH (longue maladie, congé maternité, etc.).
+
+Q : Comment demander un télétravail régulier ?
+R : Le télétravail régulier (jusqu'à 3 jours par semaine) se demande par
+   un formulaire adressé au manager, qui valide selon la nature du poste
+   et les besoins de l'équipe. Un avenant au contrat est ensuite signé.
+
+Q : Comment signaler une situation de harcèlement ou de discrimination ?
+R : Trois canaux confidentiels sont disponibles : le référent harcèlement
+   désigné, le service RH (rh@secure-rag.local) et la plateforme de
+   signalement anonyme accessible depuis le portail interne. Toute alerte
+   est traitée sous 48h ouvrées.
+
+Q : Quels sont les avantages sociaux proposés ?
+R : Mutuelle d'entreprise, tickets restaurant (60% pris en charge),
+   participation aux abonnements transports (50%), forfait mobilités
+   durables, plan d'épargne entreprise avec abondement, chèques cadeaux
+   en fin d'année.
+
+Q : Comment obtenir un certificat de travail ou une attestation employeur ?
+R : Toute demande de document administratif (certificat, attestation,
+   bulletin) se fait via l'outil RH, rubrique "Mes documents". Le délai de
+   traitement est de cinq jours ouvrés.
+
+Q : Quelle est la procédure pour un changement de poste interne ?
+R : Les postes ouverts sont publiés sur l'intranet "Mobilité interne". La
+   candidature s'effectue avec l'accord du manager actuel après un an
+   d'ancienneté minimum dans le poste actuel.

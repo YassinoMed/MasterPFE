@@ -127,3 +127,65 @@ data:
             annotations:
               summary: "Spike of 401/403 responses"
               description: "{{ $value | humanize }} 401/403 per second over last 5m — possible brute-force."
+
+          # ── Supply chain / image integrity ────────────────────
+          - alert: ImagePullBackOff
+            expr: |
+              max_over_time(
+                kube_pod_container_status_waiting_reason{namespace="securerag-hub",reason="ImagePullBackOff"}[5m]
+              ) > 0
+            for: 3m
+            labels:
+              severity: critical
+              category: supply_chain
+            annotations:
+              summary: "Pod {{ $labels.pod }} ImagePullBackOff"
+              description: "Container {{ $labels.container }} cannot pull its image — possible registry failure, revoked signature, or tampered digest."
+
+          # ── Anomaly detection ─────────────────────────────────
+          - alert: ContainerHighCPU
+            expr: |
+              rate(container_cpu_usage_seconds_total{namespace="securerag-hub"}[5m]) > 0.9
+            for: 10m
+            labels:
+              severity: warning
+              category: anomaly
+            annotations:
+              summary: "High CPU in {{ $labels.pod }}/{{ $labels.container }}"
+              description: "Container {{ $labels.container }} sustains >90% CPU for 10m — investigate for cryptomining or runaway process."
+
+          # ── Secret access anomaly ────────────────────────────
+          - alert: SecretAccessAnomaly
+            expr: |
+              sum(rate(apiserver_request_total{verb="get",resource="secrets",namespace="securerag-hub"}[5m])) > 2
+            for: 5m
+            labels:
+              severity: warning
+              category: credential_access
+            annotations:
+              summary: "Elevated Secret access rate in securerag-hub"
+              description: "{{ $value | humanize }} Secret GET/s over 5m — possible credential harvesting."
+
+          # ── Capacity planning ────────────────────────────────
+          - alert: NamespaceQuotaNearLimit
+            expr: |
+              kube_resourcequota{namespace="securerag-hub",type="used"} / kube_resourcequota{namespace="securerag-hub",type="hard"} > 0.85
+            for: 10m
+            labels:
+              severity: warning
+              category: capacity
+            annotations:
+              summary: "ResourceQuota {{ $labels.resource }} at {{ $value | humanizePercentage }}"
+              description: "Namespace securerag-hub is using >85% of {{ $labels.resource }} quota."
+
+          # ── Drift detection ──────────────────────────────────
+          - alert: DeploymentReplicasMismatch
+            expr: |
+              kube_deployment_spec_replicas{namespace="securerag-hub"} != kube_deployment_status_ready_replicas{namespace="securerag-hub"}
+            for: 10m
+            labels:
+              severity: warning
+              category: reliability
+            annotations:
+              summary: "Deployment {{ $labels.deployment }} replicas mismatch"
+              description: "Desired {{ $labels.deployment }}: {{ with printf `kube_deployment_spec_replicas{deployment='%s'}` $labels.deployment }}{{ . }}{{ end }} vs ready — possible stuck rollout or node issue."

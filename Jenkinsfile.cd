@@ -43,6 +43,11 @@ pipeline {
       defaultValue: true,
       description: 'Run post-deployment validation after deployment.'
     )
+    booleanParam(
+      name: 'RUN_DAST',
+      defaultValue: false,
+      description: 'Run OWASP ZAP DAST baseline scan against the deployed portal. Requires Docker and a running portal-web service.'
+    )
   }
 
   environment {
@@ -358,6 +363,56 @@ pipeline {
         }
         always {
           archiveArtifacts allowEmptyArchive: true, artifacts: 'reports/postdeploy/**,artifacts/validation/**'
+        }
+      }
+    }
+
+    stage('CD_DAST - OWASP ZAP Baseline') {
+      when {
+        expression { return params.RUN_DEPLOY_KIND && params.RUN_DAST }
+      }
+      steps {
+        sh '''
+          set -euo pipefail
+          mkdir -p artifacts/dast
+
+          # Resolve the portal ClusterIP from the deployed service
+          PORTAL_IP=$(kubectl get svc portal-web -n securerag-hub \
+            -o jsonpath='{.spec.clusterIP}' 2>/dev/null || true)
+          PORTAL_PORT=$(kubectl get svc portal-web -n securerag-hub \
+            -o jsonpath='{.spec.ports[0].port}' 2>/dev/null || echo '8000')
+
+          if [ -z "${PORTAL_IP}" ]; then
+            echo "[WARN] portal-web service not found; skipping DAST scan"
+            echo "DAST_STATUS=SKIPPED" > artifacts/dast/dast-status.env
+            exit 0
+          fi
+
+          PORTAL_URL="http://${PORTAL_IP}:${PORTAL_PORT}"
+          echo "[INFO] Running OWASP ZAP baseline scan against ${PORTAL_URL}"
+
+          # ZAP baseline scan — non-blocking (exit 0/1/2):
+          #   0 = no alerts, 1 = alerts found, 2 = scan error
+          docker run --rm --network host \
+            -v "$(pwd)/artifacts/dast:/zap/wrk:rw" \
+            -t ghcr.io/zaproxy/zaproxy:2.15.0 zap-baseline.py \
+            -t "${PORTAL_URL}" \
+            -r dast-baseline-report.html \
+            -J dast-baseline-report.json \
+            -l WARN || dast_rc=$?
+
+          echo "DAST_EXIT_CODE=${dast_rc:-0}" > artifacts/dast/dast-status.env
+
+          # Validate the DAST report if the validation script exists
+          if [ -f scripts/validate/validate-dast-report.sh ]; then
+            bash scripts/validate/validate-dast-report.sh || true
+          fi
+        '''
+      }
+      post {
+        always {
+          archiveArtifacts allowEmptyArchive: true,
+            artifacts: 'artifacts/dast/**'
         }
       }
     }

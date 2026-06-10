@@ -7,6 +7,8 @@ data:
   alertmanager.yml: |
     global:
       resolve_timeout: 5m
+      # Slack API URL global — décommenter et configurer pour notification Slack.
+      # slack_api_url: "https://hooks.slack.com/services/TXXXXX/BXXXXX/XXXXXXXX"
     route:
       receiver: securerag-default
       group_by: [alertname, namespace, service]
@@ -16,15 +18,47 @@ data:
       routes:
         - matchers: [severity="critical"]
           receiver: securerag-critical
+          continue: true
+        - matchers: [category="runtime"]
+          receiver: securerag-runtime
+        - matchers: [category="admission"]
+          receiver: securerag-admission
     receivers:
       - name: securerag-default
-        # webhook stub: replace by Slack/Email/PagerDuty in production.
+        # Webhook générique — pointer vers un endpoint réel en production.
+        # Pour un cluster local sans webhook externe, les alertes sont
+        # consultables via Alertmanager UI (port-forward 9093).
         webhook_configs:
-          - url: http://localhost:5001/securerag-default
+          - url: "http://alertmanager-webhook.securerag-monitoring.svc.cluster.local:9095/alert"
             send_resolved: true
+            max_alerts: 10
+        # Slack — décommenter pour production :
+        # slack_configs:
+        #   - channel: "#securerag-ops"
+        #     title: '{{ .CommonAnnotations.summary }}'
+        #     text: '{{ .CommonAnnotations.description }}'
+        #     send_resolved: true
       - name: securerag-critical
         webhook_configs:
-          - url: http://localhost:5001/securerag-critical
+          - url: "http://alertmanager-webhook.securerag-monitoring.svc.cluster.local:9095/critical"
+            send_resolved: true
+        # PagerDuty — décommenter pour escalade on-call production :
+        # pagerduty_configs:
+        #   - service_key: "<PD_SERVICE_KEY>"
+        #     severity: critical
+        # Slack — canal dédié alertes critiques :
+        # slack_configs:
+        #   - channel: "#securerag-critical"
+        #     title: '🚨 {{ .CommonAnnotations.summary }}'
+        #     text: '{{ .CommonAnnotations.description }}'
+        #     send_resolved: true
+      - name: securerag-runtime
+        webhook_configs:
+          - url: "http://alertmanager-webhook.securerag-monitoring.svc.cluster.local:9095/runtime"
+            send_resolved: true
+      - name: securerag-admission
+        webhook_configs:
+          - url: "http://alertmanager-webhook.securerag-monitoring.svc.cluster.local:9095/admission"
             send_resolved: true
     inhibit_rules:
       - source_matchers: [severity="critical"]

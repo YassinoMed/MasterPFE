@@ -1,0 +1,48 @@
+GUIDE DE RÉINITIALISATION DU MOT DE PASSE - IT SUPPORT
+=======================================================
+
+Cas 1 - Réinitialisation libre-service (recommandée)
+----------------------------------------------------
+Si vous avez accès à votre messagerie ou à votre téléphone professionnel :
+
+1. Accédez à https://sso.secure-rag.local/reset
+2. Saisissez votre identifiant (firstname.lastname).
+3. Choisissez la méthode de vérification : email pro ou SMS.
+4. Saisissez le code à 6 chiffres reçu.
+5. Définissez un nouveau mot de passe respectant la politique :
+   - Minimum 14 caractères
+   - Au moins une majuscule, une minuscule, un chiffre et un symbole
+   - Pas de réutilisation des 12 derniers mots de passe
+   - Pas d'utilisation du prénom, nom ou date de naissance
+
+Cas 2 - Compte verrouillé ou MFA inaccessible
+---------------------------------------------
+Après cinq tentatives échouées, le compte est verrouillé pendant 15 minutes.
+Si le verrouillage persiste ou si vous n'avez plus accès à votre second
+facteur (téléphone perdu, etc.) :
+
+1. Contactez le helpdesk IT par téléphone au +33 1 23 45 67 89.
+2. L'agent vous demandera un identifiant interne (matricule, date
+   d'embauche) et procédera à une vérification d'identité.
+3. Un mot de passe temporaire vous sera transmis par un canal sécurisé.
+4. Vous devrez le modifier à la première connexion.
+
+Cas 3 - Premier accès (nouveau collaborateur)
+---------------------------------------------
+Le mot de passe initial est remis sous pli scellé le premier jour par le
+référent IT. Une activation immédiate du MFA est obligatoire à la première
+connexion. L'application recommandée est Microsoft Authenticator.
+
+Politique de rotation
+---------------------
+Depuis 2024, la rotation automatique a été supprimée pour les comptes
+standards (recommandation NIST SP 800-63B). Les comptes à privilèges
+restent soumis à une rotation tous les 90 jours.
+
+Que faire en cas de suspicion de compromission ?
+-----------------------------------------------
+Si vous suspectez que votre mot de passe a été compromis (email de
+phishing cliqué, mot de passe partagé par erreur, etc.) :
+- Changez immédiatement votre mot de passe via le libre-service.
+- Déclarez l'incident à security@secure-rag.local.
+- N'éteignez pas votre poste : laissez l'équipe SOC investiguer.

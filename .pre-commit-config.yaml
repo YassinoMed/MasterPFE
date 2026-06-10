@@ -1,0 +1,44 @@
+# SecureRAG Hub — pre-commit hooks
+#
+# Installation :
+#   pip install pre-commit
+#   pre-commit install
+#
+# Usage manuel (tous les fichiers) :
+#   pre-commit run --all-files
+#
+# Voir docs/secrets-management.md pour la stratégie globale de détection.
+
+repos:
+  # ── Secret detection (Gitleaks) ──────────────────────────────────────
+  # Bloque les commits contenant des secrets, tokens, clés ou mots de passe
+  # avant qu'ils n'atteignent l'historique Git. Aligne le hook local avec
+  # le stage CI `CI_SECURITY_STATIC` (Jenkinsfile).
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.30.1
+    hooks:
+      - id: gitleaks
+        args: ['--config', '.gitleaks.toml']
+
+  # ── Linting Shell scripts ────────────────────────────────────────────
+  # Détecte les erreurs bash courantes dans les scripts CI/CD et de
+  # validation. Aligne les vérifications locales avec le `make lint`.
+  - repo: https://github.com/shellcheck-py/shellcheck-py
+    rev: v0.10.0.1
+    hooks:
+      - id: shellcheck
+        args: ['--severity=warning']
+        files: \.sh$
+
+  # ── Nettoyage basique ────────────────────────────────────────────────
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+        args: [--markdown-linebreak-ext=md]
+      - id: end-of-file-fixer
+      - id: check-yaml
+        args: [--allow-multiple-documents]
+        exclude: 'infra/secrets/.*\.enc\.ya?ml$'
+      - id: check-merge-conflict
+      - id: detect-private-key
