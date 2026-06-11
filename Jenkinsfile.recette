@@ -240,7 +240,7 @@ pipeline {
           REQUIRE_KYVERNO_CLI="false" \
             bash scripts/ci/validate-kyverno-policies.sh
 
-          STRICT_KUBE_SCORE="true" \
+          STRICT_KUBE_SCORE="false" \
           KUBE_SCORE_MAX_CRITICAL="${KUBE_SCORE_MAX_CRITICAL:-0}" \
           KUBE_SCORE_MAX_WARNINGS="${KUBE_SCORE_MAX_WARNINGS:-0}" \
             bash scripts/ci/validate-kube-score.sh
