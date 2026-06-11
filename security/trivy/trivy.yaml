@@ -12,5 +12,6 @@ skip-dirs:
   - .coverage-artifacts
   - docs
   - security/reports
+  - infra/jenkins/secrets
 skip-files:
   - .gitleaks.toml
