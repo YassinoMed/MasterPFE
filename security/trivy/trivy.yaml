@@ -15,3 +15,5 @@ skip-dirs:
   - infra/jenkins/secrets
 skip-files:
   - .gitleaks.toml
+  - infra/jenkins/secrets/cosign.key
+  - infra/jenkins/secrets/recette-deploy-key
