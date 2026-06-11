@@ -496,5 +496,5 @@ Pour assistance :
 
 ## 📄 Licence & Authorship
 
-Projet Master DSIR - SecureRAG Hub  BY Yassino
+Projet Master DSIR - SecureRAG Hub BY Yassino
 2026-2027
