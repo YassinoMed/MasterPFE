@@ -13,7 +13,9 @@ paths = [
   '''(^|/)security/secrets/\.env\.local$''',
   '''(^|/)security/secrets/\.env\.example$''',
   '''(^|/)tests/fixtures/''',
-  '''(^|/)tests/security/fixtures/'''
+  '''(^|/)tests/security/fixtures/''',
+  '''(^|/)vendor/''',
+  '''(^|/)node_modules/'''
 ]
 regexes = [
   '''(?i)example[_-]?(token|secret|key|password)''',
