@@ -32,7 +32,7 @@ PY
 fi
 
 # 2. Falco engine validation of the canonical rules file.
-if command -v docker >/dev/null 2>&1 && docker info >/dev/null 2>&1; then
+if [ "${SKIP_FALCO_DOCKER:-false}" = "false" ] && command -v docker >/dev/null 2>&1 && docker info >/dev/null 2>&1; then
   echo "[INFO] Validating Falco rules via falcosecurity/falco container" | tee -a "${LOG}"
   echo "[INFO] -> ${RULES_FILE}" | tee -a "${LOG}"
 

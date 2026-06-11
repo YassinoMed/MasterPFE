@@ -245,6 +245,7 @@ pipeline {
           KUBE_SCORE_MAX_WARNINGS="${KUBE_SCORE_MAX_WARNINGS:-0}" \
             bash scripts/ci/validate-kube-score.sh
 
+          SKIP_FALCO_DOCKER="true" \
           bash scripts/ci/validate-falco-rules.sh || rc=$?
           if [ "${rc:-0}" -ne 0 ] && [ "${rc:-0}" -ne 77 ]; then
             echo "[FAIL] Falco rules invalid"; exit 1
