@@ -85,6 +85,21 @@ EOF
 fi
 
 if ! command -v kustomize >/dev/null 2>&1; then
+  echo "[INFO] kustomize not found. Attempting to download temporarily..." >&2
+  KUSTOMIZE_VERSION="5.3.0"
+  K_ARCH=$(uname -m)
+  if [ "$K_ARCH" = "x86_64" ]; then K_ARCH="amd64"; elif [ "$K_ARCH" = "aarch64" ]; then K_ARCH="arm64"; fi
+  curl -fsSLo /tmp/kustomize.tar.gz "https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv${KUSTOMIZE_VERSION}/kustomize_v${KUSTOMIZE_VERSION}_linux_${K_ARCH}.tar.gz" || true
+  if [ -f /tmp/kustomize.tar.gz ]; then
+    tar -xzf /tmp/kustomize.tar.gz -C /tmp kustomize || true
+    if [ -x /tmp/kustomize ]; then
+      export PATH="/tmp:$PATH"
+      echo "[INFO] kustomize downloaded and added to PATH." >&2
+    fi
+  fi
+fi
+
+if ! command -v kustomize >/dev/null 2>&1; then
   echo "ERREUR_OUTILLAGE" > "${STATUS_FILE}"
   echo "[ERROR] kustomize is required to render overlays." >&2
   exit 2
