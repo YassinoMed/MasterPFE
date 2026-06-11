@@ -8,6 +8,7 @@ ARG KIND_VERSION=v0.29.0
 ARG COSIGN_VERSION=v2.5.3
 ARG SYFT_VERSION=v1.42.3
 ARG TRIVY_VERSION=0.69.3
+ARG KUBE_SCORE_VERSION=1.18.0
 ARG SONAR_SCANNER_VERSION=5.0.1.3006
 
 # Install gnupg first (not present in base image), then add Docker official repo
@@ -53,8 +54,8 @@ RUN jenkins-plugin-cli --plugin-file /usr/share/jenkins/ref/plugins.txt
 
 RUN set -eux; \
     case "${TARGETARCH}" in \
-      amd64) KUBE_ARCH=amd64; OCI_ARCH=amd64; SYFT_ARCH=amd64; TRIVY_ARCH=64bit ;; \
-      arm64) KUBE_ARCH=arm64; OCI_ARCH=arm64; SYFT_ARCH=arm64; TRIVY_ARCH=ARM64 ;; \
+      amd64) KUBE_ARCH=amd64; OCI_ARCH=amd64; SYFT_ARCH=amd64; TRIVY_ARCH=64bit; KS_ARCH=amd64 ;; \
+      arm64) KUBE_ARCH=arm64; OCI_ARCH=arm64; SYFT_ARCH=arm64; TRIVY_ARCH=ARM64; KS_ARCH=arm64 ;; \
       *) echo "Unsupported TARGETARCH=${TARGETARCH}"; exit 1 ;; \
     esac; \
     curl -fsSLo /usr/local/bin/kubectl \
@@ -76,6 +77,11 @@ RUN set -eux; \
     tar -xzf /tmp/trivy.tar.gz -C /tmp trivy; \
     install -m 0755 /tmp/trivy /usr/local/bin/trivy; \
     rm -f /tmp/trivy.tar.gz /tmp/trivy; \
+    curl -fsSLo /tmp/kube-score.tar.gz \
+      "https://github.com/zegl/kube-score/releases/download/v${KUBE_SCORE_VERSION}/kube-score_${KUBE_SCORE_VERSION}_linux_${KS_ARCH}.tar.gz"; \
+    tar -xzf /tmp/kube-score.tar.gz -C /tmp kube-score; \
+    install -m 0755 /tmp/kube-score /usr/local/bin/kube-score; \
+    rm -f /tmp/kube-score.tar.gz /tmp/kube-score; \
     curl -fsSLo /tmp/sonar-scanner.zip \
       "https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-${SONAR_SCANNER_VERSION}-linux.zip"; \
     unzip -q /tmp/sonar-scanner.zip -d /opt; \

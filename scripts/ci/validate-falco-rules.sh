@@ -32,16 +32,33 @@ PY
 fi
 
 # 2. Falco engine validation of the canonical rules file.
-if command -v docker >/dev/null 2>&1; then
+if command -v docker >/dev/null 2>&1 && docker info >/dev/null 2>&1; then
   echo "[INFO] Validating Falco rules via falcosecurity/falco container" | tee -a "${LOG}"
   echo "[INFO] -> ${RULES_FILE}" | tee -a "${LOG}"
+
+  CONTAINER_ID=$(hostname)
+  JENKINS_SOURCE=$(docker inspect "${CONTAINER_ID}" --format='{{range .Mounts}}{{if eq .Destination "/var/jenkins_home"}}{{or .Name .Source}}{{end}}{{end}}' 2>/dev/null || echo "")
+  if [ -z "${JENKINS_SOURCE}" ]; then
+    JENKINS_SOURCE=$(docker inspect securerag-jenkins --format='{{range .Mounts}}{{if eq .Destination "/var/jenkins_home"}}{{or .Name .Source}}{{end}}{{end}}' 2>/dev/null || echo "")
+  fi
+
+  docker_args=()
+  if [ -n "${JENKINS_SOURCE}" ]; then
+    echo "[INFO] Running in Jenkins container. Using Docker-in-Docker path translation." | tee -a "${LOG}"
+    docker_args+=("-v" "${JENKINS_SOURCE}:/var/jenkins_home:ro")
+    validate_target="${RULES_FILE}"
+  else
+    docker_args+=("-v" "${RULES_FILE}:/rules.yaml:ro")
+    validate_target="/rules.yaml"
+  fi
+
   # falco-no-driver skips kmod build. Load bundled rules so built-in macros
   # (container, spawned_process, outbound, open_read, ...) resolve.
   if docker run --rm --entrypoint /usr/bin/falco \
-       -v "${RULES_FILE}:/rules.yaml:ro" \
+       "${docker_args[@]}" \
        falcosecurity/falco-no-driver:0.38.2 \
        --validate /etc/falco/falco_rules.yaml \
-       --validate /rules.yaml >>"${LOG}" 2>&1
+       --validate "${validate_target}" >>"${LOG}" 2>&1
   then
     echo "[OK]   ${RULES_FILE}" | tee -a "${LOG}"
     exit 0

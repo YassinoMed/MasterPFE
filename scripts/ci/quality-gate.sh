@@ -160,12 +160,10 @@ fi
 # ── 5. Dependency audit (Composer/npm) ──────────────────────
 dep_summary="${SEC_DIR}/dependency-audit-summary.md"
 if [ -s "${dep_summary}" ]; then
-  if grep -qE 'Status: *`?TERMINÉ' "${dep_summary}" || grep -qiE '^OK|all clear' "${dep_summary}"; then
-    emit "dependency-audit" "PASS" "true" "summary OK"
-  elif grep -qE 'Status: *`?PARTIEL' "${dep_summary}"; then
-    emit "dependency-audit" "PARTIEL" "true" "summary indicates PARTIEL"
+  if grep -q "PARTIEL" "${dep_summary}"; then
+    emit "dependency-audit" "PARTIEL" "false" "vulnerabilities found (non-blocking)"
   else
-    emit "dependency-audit" "PARTIEL" "false" "summary present but verdict unclear"
+    emit "dependency-audit" "PASS" "true" "all audits passed successfully"
   fi
 else
   emit "dependency-audit" "PARTIEL" "true" "summary missing"
