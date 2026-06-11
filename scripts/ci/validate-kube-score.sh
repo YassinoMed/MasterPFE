@@ -46,6 +46,22 @@ if ! command -v kube-score >/dev/null 2>&1; then
 fi
 
 if [ "${binary_missing}" = "true" ]; then
+  echo "[INFO] kube-score binary missing. Attempting to download temporarily..." >&2
+  KS_VERSION="1.18.0"
+  KS_ARCH=$(uname -m)
+  if [ "$KS_ARCH" = "x86_64" ]; then KS_ARCH="amd64"; elif [ "$KS_ARCH" = "aarch64" ]; then KS_ARCH="arm64"; fi
+  curl -fsSLo /tmp/kube-score.tar.gz "https://github.com/zegl/kube-score/releases/download/v${KS_VERSION}/kube-score_${KS_VERSION}_linux_${KS_ARCH}.tar.gz" || true
+  if [ -f /tmp/kube-score.tar.gz ]; then
+    tar -xzf /tmp/kube-score.tar.gz -C /tmp kube-score || true
+    if [ -x /tmp/kube-score ]; then
+      export PATH="/tmp:$PATH"
+      binary_missing=false
+      echo "[INFO] kube-score downloaded and added to PATH." >&2
+    fi
+  fi
+fi
+
+if [ "${binary_missing}" = "true" ]; then
   cat >"${REPORT}" <<EOF
 # kube-score validation — Status: \`PRÊT_NON_EXÉCUTÉ\`
 
