@@ -190,8 +190,13 @@ pipeline {
             --output security/reports/semgrep.json \
             --error
 
+          WORKSPACE_HOST_PATH=$(docker inspect securerag-jenkins --format='{{range .Mounts}}{{if eq .Destination "/workspace"}}{{.Source}}{{end}}{{end}}' 2>/dev/null || echo "$PWD")
+          if [ -z "${WORKSPACE_HOST_PATH}" ]; then
+            WORKSPACE_HOST_PATH="$PWD"
+          fi
+
           docker run --rm \
-            -v "$PWD:/repo" \
+            -v "${WORKSPACE_HOST_PATH}:/repo" \
             -w /repo \
             "${GITLEAKS_IMAGE}" \
             dir /repo \
