@@ -64,6 +64,7 @@ if command -v docker >/dev/null 2>&1 && docker info >/dev/null 2>&1; then
     exit 0
   else
     echo "[FAIL] ${RULES_FILE}" | tee -a "${LOG}"
+    cat "${LOG}" >&2
     exit 1
   fi
 fi
