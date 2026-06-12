@@ -93,6 +93,15 @@ cov_xml="${COV_DIR}/coverage.xml"
 if [ -s "${cov_summary}" ]; then
   # Format (a) : ligne TOTAL ... N%  (entier ou décimal, peut être 100%)
   cov_pct=$(awk '/^TOTAL/ { for (i=NF; i>0; i--) if ($i ~ /%$/) { gsub(/%/,"",$i); print int($i); exit } }' "${cov_summary}" 2>/dev/null || echo "")
+  # Format (c) : key=value format (coverage_percent=XX.XX)
+  if [ -z "${cov_pct}" ]; then
+    val=$(grep -E '^coverage_percent=' "${cov_summary}" | cut -d= -f2 || echo "")
+    if [ "${val}" = "not-available" ]; then
+      cov_pct="not-available"
+    elif [ -n "${val}" ]; then
+      cov_pct=$(echo "${val}" | awk '{print int($1)}' 2>/dev/null || echo "")
+    fi
+  fi
 fi
 
 if [ -z "${cov_pct}" ] && [ -s "${cov_xml}" ]; then
@@ -104,7 +113,9 @@ if [ -z "${cov_pct}" ] && [ -s "${cov_xml}" ]; then
 fi
 
 if [ -n "${cov_pct}" ]; then
-  if [ "${cov_pct}" -ge "${QG_COVERAGE_MIN}" ]; then
+  if [ "${cov_pct}" = "not-available" ]; then
+    emit "coverage" "PARTIEL" "false" "coverage not available (no driver)"
+  elif [ "${cov_pct}" -ge "${QG_COVERAGE_MIN}" ]; then
     emit "coverage" "PASS" "true" "${cov_pct}% ≥ ${QG_COVERAGE_MIN}%"
   else
     emit "coverage" "FAIL" "true" "${cov_pct}% < ${QG_COVERAGE_MIN}%"
