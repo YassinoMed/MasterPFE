@@ -66,6 +66,11 @@ pipeline {
       defaultValue: 'main',
       description: 'Git branch to deploy on the recette machine.'
     )
+    string(
+      name: 'NOTIFICATION_EMAIL',
+      defaultValue: '',
+      description: 'Email address to notify on build failures. Leave empty to disable.'
+    )
   }
 
   environment {
@@ -464,6 +469,13 @@ REMOTE_SMOKE
         ║  Check the stage logs for details.                          ║
         ╚═══════════════════════════════════════════════════════════════╝
       '''
+      script {
+        if (params.NOTIFICATION_EMAIL && params.NOTIFICATION_EMAIL.trim() != '') {
+          mail to: params.NOTIFICATION_EMAIL,
+               subject: "FAILED: Jenkins Build ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+               body: "The build ${env.JOB_NAME} #${env.BUILD_NUMBER} failed.\n\nConsole output: ${env.BUILD_URL}console"
+        }
+      }
     }
     always {
       archiveArtifacts allowEmptyArchive: true, artifacts: 'security/reports/**,.coverage-artifacts/**'

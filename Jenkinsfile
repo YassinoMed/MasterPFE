@@ -43,6 +43,11 @@ pipeline {
       defaultValue: true,
       description: 'Run the consolidated CI Quality Gate stage that aggregates all signals (tests, SAST, scans, kube-score, kyverno).'
     )
+    string(
+      name: 'NOTIFICATION_EMAIL',
+      defaultValue: '',
+      description: 'Email address to notify on build failures. Leave empty to disable.'
+    )
   }
 
   environment {
@@ -314,6 +319,13 @@ pipeline {
     }
     failure {
       echo 'SecureRAG Hub CI pipeline failed. Inspect tests and security reports.'
+      script {
+        if (params.NOTIFICATION_EMAIL && params.NOTIFICATION_EMAIL.trim() != '') {
+          mail to: params.NOTIFICATION_EMAIL,
+               subject: "FAILED: Jenkins Build ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+               body: "The build ${env.JOB_NAME} #${env.BUILD_NUMBER} failed.\n\nConsole output: ${env.BUILD_URL}console"
+        }
+      }
     }
     always {
       archiveArtifacts allowEmptyArchive: true, artifacts: 'security/reports/**,.coverage-artifacts/**'
