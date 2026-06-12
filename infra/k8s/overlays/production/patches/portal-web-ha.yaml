@@ -3,7 +3,6 @@ kind: Deployment
 metadata:
   name: portal-web
 spec:
-  replicas: 3
   revisionHistoryLimit: 5
   minReadySeconds: 10
   progressDeadlineSeconds: 300
