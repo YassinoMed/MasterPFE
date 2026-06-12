@@ -3,6 +3,7 @@ kind: Deployment
 metadata:
   name: conversation-service
 spec:
+  replicas: 1
   selector:
     matchLabels:
       app.kubernetes.io/name: conversation-service
