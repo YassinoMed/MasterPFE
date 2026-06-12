@@ -232,10 +232,10 @@ IMAGE_TAG="${IMAGE_TAG}" bash scripts/validate/smoke-tests.sh || {
 }
 
 echo "[RECETTE] Checking portal health endpoint"
-if curl -fsS --max-time 10 "http://127.0.0.1:8081/health" >/dev/null 2>&1; then
+if curl -fsS --max-time 10 "http://127.0.0.1:9081/health" >/dev/null 2>&1; then
   echo "[RECETTE] Portal health: OK"
 else
-  echo "[WARN] Portal health endpoint not reachable on localhost:8081"
+  echo "[WARN] Portal health endpoint not reachable on localhost:9081"
 fi
 REMOTE_SCRIPT
 }
@@ -271,7 +271,7 @@ echo ""
 echo "═══════════════════════════════════════════════════════════════"
 echo "  SecureRAG Hub — Recette Deployment Complete"
 echo "═══════════════════════════════════════════════════════════════"
-echo "  Portal Web:  http://${RECETTE_HOST}:8081/health"
+echo "  Portal Web:  http://${RECETTE_HOST}:9081/health"
 echo "  Jenkins:     http://${RECETTE_HOST}:8085"
 echo "═══════════════════════════════════════════════════════════════"
 REMOTE_SCRIPT

@@ -380,7 +380,7 @@ REMOTE_JENKINS
 
             echo "══════════════════════════════════════════════════════════════"
             echo "  ✅ Deployment to Recette Complete"
-            echo "  Portal: http://${RECETTE_HOST}:8081/health"
+            echo "  Portal: http://${RECETTE_HOST}:9081/health"
             echo "  Jenkins: http://${RECETTE_HOST}:8085"
             echo "══════════════════════════════════════════════════════════════"
           '''
@@ -411,7 +411,7 @@ REMOTE_JENKINS
 
               # Health check
               echo "[RECETTE] Checking portal health..."
-              HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" --max-time 15 "http://127.0.0.1:8081/health" || echo "000")
+              HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" --max-time 15 "http://127.0.0.1:9081/health" || echo "000")
               if [ "${HTTP_CODE}" = "200" ]; then
                 echo "[RECETTE] ✅ Portal health: HTTP ${HTTP_CODE}"
               else
