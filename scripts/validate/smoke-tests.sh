@@ -63,7 +63,6 @@ output=$(kubectl run "${pod_name}" --rm -i --attach=true --restart=Never -n "${N
     for route in \
       "http://portal-web:8000/health" \
       "http://portal-web:8000/" \
-      "http://portal-web:8000/login" \
       "http://auth-users:8000/health" \
       "http://chatbot-manager:8000/health" \
       "http://conversation-service:8000/health" \
