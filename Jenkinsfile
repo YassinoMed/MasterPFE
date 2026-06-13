@@ -45,7 +45,7 @@ pipeline {
     )
     string(
       name: 'NOTIFICATION_EMAIL',
-      defaultValue: '',
+      defaultValue: 'med.yassine.bouneb@proton.me',
       description: 'Email address to notify on build failures. Leave empty to disable.'
     )
   }
