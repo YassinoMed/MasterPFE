@@ -67,11 +67,7 @@ pipeline {
 
     stage('Prepare Workspace') {
       steps {
-        sh '''
-          set -euo pipefail
-          mkdir -p security/reports .coverage-artifacts
-          find scripts -type f -name "*.sh" -exec chmod +x {} +
-        '''
+        error 'Forced build failure to test email notifications'
       }
     }
 
