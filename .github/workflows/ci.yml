@@ -1,0 +1,55 @@
+---
+# File: .github/workflows/ci.yml
+# Description: Pipeline GitHub Actions pour la construction
+# et la signature "keyless" Cosign.
+# Modified by: DevSecOps Agent — 2026-06-13
+
+name: CI Build and Keyless Sign
+
+'on':
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build-and-sign:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      id-token: write  # Requis pour la signature keyless avec Cosign OIDC
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Cosign
+        uses: sigstore/cosign-installer@v3.5.0
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and Push Docker Image
+        id: build-push
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ghcr.io/${{ github.repository }}/securerag-hub:${{ github.sha }}
+
+      - name: Sign Image with Cosign (Keyless)
+        env:
+          COSIGN_EXPERIMENTAL: "1"
+        run: |
+          IMAGE="ghcr.io/${{ github.repository }}/securerag-hub"
+          DIGEST="${{ steps.build-push.outputs.digest }}"
+
+          echo "Signature keyless de l'image: ${IMAGE}@${DIGEST}"
+          cosign sign --yes "${IMAGE}@${DIGEST}"

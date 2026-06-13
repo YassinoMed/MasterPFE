@@ -27,6 +27,9 @@ app = FastAPI(title="auth-users", version="0.1.0", docs_url="/docs", redoc_url=N
 @app.on_event("startup")
 def _on_startup() -> None:
     init_db()
+    from .db import _engine
+    from .middleware.metrics_middleware import setup_metrics
+    setup_metrics(app, engine=_engine)
 
 
 # ── Helpers ───────────────────────────────────────────────────

@@ -1,0 +1,12 @@
+---
+# Fichier : infra/helm/prometheus/values-production.yaml
+# Configuration additionnelle pour le scraping de l'exporteur externe.
+
+prometheus:
+  prometheusSpec:
+    additionalScrapeConfigs:
+      - job_name: 'wazuh-exporter'
+        static_configs:
+          - targets:
+              - 'vps-host.securerag.local:9200'
+        scrape_interval: 30s

@@ -211,6 +211,29 @@ pipeline {
       }
     }
 
+    stage('Static Analysis & IaC Scanning') {
+      steps {
+        sh '''
+          set -euo pipefail
+
+          # Checkov
+          checkov -d infra/k8s/ --config-file security/checkov-config.yaml -o junitxml > security/reports/checkov-k8s.xml || true
+          checkov -d infra/helm/ --config-file security/checkov-config.yaml -o junitxml > security/reports/checkov-helm.xml || true
+
+          # Trivy fs scan
+          trivy fs . --scanners vuln,config,secret \
+            --format json \
+            --output security/reports/trivy-iac.json || true
+        '''
+      }
+      post {
+        always {
+          junit allowEmptyResults: true, testResults: 'security/reports/checkov-*.xml'
+          archiveArtifacts allowEmptyArchive: true, artifacts: 'security/reports/checkov-*.xml,security/reports/trivy-iac.json'
+        }
+      }
+    }
+
     stage('CI_K8S_POLICY - Kubernetes Policy Checks') {
       steps {
         sh '''

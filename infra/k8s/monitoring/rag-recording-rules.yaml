@@ -1,0 +1,33 @@
+---
+# Fichier : infra/k8s/monitoring/rag-recording-rules.yaml
+# Règles d'enregistrement pour le service RAG.
+
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: rag-recording-rules
+  namespace: monitoring
+  labels:
+    app.kubernetes.io/part-of: securerag-hub
+spec:
+  groups:
+    - name: rag.rules
+      rules:
+        - record: rag:llm_latency:p95
+          expr: >-
+            histogram_quantile(0.95,
+            sum(rate(rag_llm_latency_seconds_bucket[5m])) by (le, model_name))
+
+        - record: rag:llm_latency:p99
+          expr: >-
+            histogram_quantile(0.99,
+            sum(rate(rag_llm_latency_seconds_bucket[5m])) by (le, model_name))
+
+        - record: rag:cache_hit_ratio
+          expr: >-
+            sum(rate(rag_cache_requests_total{result="hit"}[15m]))
+            /
+            sum(rate(rag_cache_requests_total[15m]))
+
+        - record: rag:tokens_per_minute
+          expr: sum(rate(rag_tokens_total[1m])) by (direction, model_name)

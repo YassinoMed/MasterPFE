@@ -1,0 +1,48 @@
+---
+# Fichier : infra/k8s/monitoring/security-alerts.yaml
+# Alertes Prometheus de sécurité pour Vault, Kyverno et Falco.
+
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: security-alerts
+  namespace: monitoring
+  labels:
+    app.kubernetes.io/part-of: securerag-hub
+spec:
+  groups:
+    - name: security.alerts
+      rules:
+        - alert: VaultSealed
+          expr: vault_core_unsealed == 0
+          for: 0m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Vault est scellé — toutes les requêtes secrets échouent"
+
+        - alert: VaultLeaseExpiringHigh
+          expr: vault_secret_lease_creation_ttl_seconds < 3600
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "TTL de création des baux de secrets Vault très bas (< 1h)"
+
+        - alert: KyvernoPolicyViolationSpike
+          expr: increase(kyverno_admission_requests_rejected_total[15m]) > 10
+          for: 0m
+          labels:
+            severity: warning
+          annotations:
+            summary: >-
+              Plus de 10 violations Kyverno en 15 minutes —
+              possible attaque ou déploiement cassé
+
+        - alert: FalcoCriticalEvent
+          expr: increase(falco_events_total{priority="Critical"}[5m]) > 0
+          for: 0m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Événement de sécurité critique détecté par Falco"

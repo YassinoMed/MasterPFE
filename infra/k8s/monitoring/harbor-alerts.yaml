@@ -1,0 +1,35 @@
+---
+# Fichier : infra/k8s/monitoring/harbor-alerts.yaml
+# Alertes Prometheus pour Harbor.
+
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: harbor-alerts
+  namespace: monitoring
+  labels:
+    app.kubernetes.io/part-of: securerag-hub
+spec:
+  groups:
+    - name: harbor.alerts
+      rules:
+        - alert: HarborCriticalVulnerabilities
+          expr: >-
+            harbor_project_quota_usage_bytes > 0 and
+            sum(harbor_scan_vulnerability_total{severity="Critical"}) by (project) > 0
+          for: 0m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Vulnérabilités critiques détectées dans le projet Harbor {{ $labels.project }}"
+
+        - alert: HarborStorageNearLimit
+          expr: >-
+            harbor_project_quota_usage_bytes
+            /
+            harbor_project_quota_hard_bytes > 0.80
+          for: 15m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Quota de stockage Harbor projet {{ $labels.project }} au-dessus de 80%"

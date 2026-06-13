@@ -1,0 +1,52 @@
+---
+# File: infra/helm/harbor/values-production.yaml
+# Description: Configuration de production pour Harbor OCI Registry
+# (TLS, Trivy, RBAC).
+# Modified by: DevSecOps Agent — 2026-06-13
+
+expose:
+  type: ingress
+  tls:
+    enabled: true
+    certSource: secret
+    secret:
+      secretName: harbor-tls
+  ingress:
+    hosts:
+      core: harbor.securerag.local
+    annotations:
+      kubernetes.io/ingress.class: nginx
+      cert-manager.io/cluster-issuer: letsencrypt-prod
+
+externalURL: https://harbor.securerag.local
+
+persistence:
+  enabled: true
+  persistentVolumeClaim:
+    registry:
+      size: 50Gi
+      accessMode: ReadWriteOnce
+    database:
+      size: 10Gi
+      accessMode: ReadWriteOnce
+
+trivy:
+  enabled: true
+
+notary:
+  enabled: false
+
+registry:
+  credentials:
+    username: admin
+    passwordFromSecret: harbor-registry-credentials
+
+# Harbor ne gère pas les comptes robots directement via les values Helm
+# standard de façon déclarative sans job externe, mais on documente ici la
+# configuration cible des comptes robots pour la création via Terraform.
+# - Robot account: jenkins-pusher (push-only access to project securerag-hub)
+# - Robot account: argo-puller (pull-only access to project securerag-hub)
+
+metrics:
+  enabled: true
+

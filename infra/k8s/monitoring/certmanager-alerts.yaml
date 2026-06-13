@@ -1,0 +1,24 @@
+---
+# Fichier : infra/k8s/monitoring/certmanager-alerts.yaml
+# Alerte d'expiration des certificats TLS.
+
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: certmanager-alerts
+  namespace: monitoring
+  labels:
+    app.kubernetes.io/part-of: securerag-hub
+spec:
+  groups:
+    - name: certmanager.alerts
+      rules:
+        - alert: CertificateExpiringSoon
+          expr: >-
+            (certmanager_certificate_expiration_timestamp_seconds - time())
+            / 86400 < 14
+          for: 1h
+          labels:
+            severity: warning
+          annotations:
+            summary: "Le certificat TLS expire dans moins de 14 jours"

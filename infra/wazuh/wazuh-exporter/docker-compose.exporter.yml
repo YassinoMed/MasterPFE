@@ -1,0 +1,21 @@
+---
+version: '3.8'
+
+services:
+  wazuh-exporter:
+    image: python:3.11-alpine
+    container_name: wazuh-exporter
+    restart: unless-stopped
+    ports:
+      - "9200:9200"
+    volumes:
+      - ./exporter.py:/app/exporter.py
+    working_dir: /app
+    command: >
+      sh -c "pip install --no-cache-dir requests prometheus_client && python exporter.py"
+    environment:
+      - WAZUH_URL=https://wazuh-manager:55000
+      - WAZUH_USER=admin
+      - WAZUH_PASSWORD=SecretPassword
+      - POLL_INTERVAL=60
+      - PORT=9200

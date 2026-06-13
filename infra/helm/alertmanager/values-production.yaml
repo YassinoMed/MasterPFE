@@ -1,0 +1,38 @@
+---
+# File: infra/helm/alertmanager/values-production.yaml
+# Description: Configuration de routage de sécurité pour Alertmanager.
+# Modified by: DevSecOps Agent — 2026-06-13
+
+config:
+  global:
+    resolve_timeout: 5m
+    slack_api_url: "vault:secret/slack/webhook"
+    smtp_smarthost: 'smtp.securerag.local:25'
+    smtp_from: 'alertmanager@securerag.local'
+
+  route:
+    group_by: ['alertname', 'cluster', 'service']
+    group_wait: 30s
+    group_interval: 5m
+    repeat_interval: 12h
+    receiver: 'email-notifications'
+    routes:
+      - matchers:
+          - severity="critical"
+        receiver: 'slack-critical'
+      - matchers:
+          - severity="warning"
+        receiver: 'email-notifications'
+
+  receivers:
+    - name: 'slack-critical'
+      slack_configs:
+        - channel: '#security-alerts'
+          send_resolved: true
+          title: '{{ template "slack.default.title" . }}'
+          text: '{{ template "slack.default.text" . }}'
+
+    - name: 'email-notifications'
+      email_configs:
+        - to: 'security-team@securerag.local'
+          send_resolved: true

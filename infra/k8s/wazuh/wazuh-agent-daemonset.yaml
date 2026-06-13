@@ -1,0 +1,48 @@
+---
+# File: infra/k8s/wazuh/wazuh-agent-daemonset.yaml
+# Description: DaemonSet pour le déploiement de l'agent Wazuh
+# sur les nœuds Kubernetes.
+# Modified by: DevSecOps Agent — 2026-06-13
+
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: wazuh-agent
+  namespace: securerag-hub
+  labels:
+    app.kubernetes.io/name: wazuh-agent
+    app.kubernetes.io/managed-by: devsecops-agent
+    app.kubernetes.io/part-of: securerag-hub
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: wazuh-agent
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: wazuh-agent
+        app.kubernetes.io/managed-by: devsecops-agent
+        app.kubernetes.io/part-of: securerag-hub
+    spec:
+      containers:
+        - name: wazuh-agent
+          image: wazuh/wazuh-agent:4.7.2
+          env:
+            - name: WAZUH_MANAGER
+              value: "wazuh-manager.wazuh.svc.cluster.local"
+          securityContext:
+            privileged: true
+          volumeMounts:
+            - name: var-log
+              mountPath: /var/log
+              readOnly: true
+            - name: var-lib-docker-containers
+              mountPath: /var/lib/docker/containers
+              readOnly: true
+      volumes:
+        - name: var-log
+          hostPath:
+            path: /var/log
+        - name: var-lib-docker-containers
+          hostPath:
+            path: /var/lib/docker/containers

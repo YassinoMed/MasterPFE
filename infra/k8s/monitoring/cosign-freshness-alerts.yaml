@@ -1,0 +1,32 @@
+---
+# Fichier : infra/k8s/monitoring/cosign-freshness-alerts.yaml
+# Alertes de fraîcheur pour les signatures et clés de chiffrement Cosign.
+
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: cosign-freshness-alerts
+  namespace: monitoring
+  labels:
+    app.kubernetes.io/part-of: securerag-hub
+spec:
+  groups:
+    - name: cosign.alerts
+      rules:
+        - alert: CosignKeyStale
+          expr: cosign_key_age_days > 100
+          for: 0m
+          labels:
+            severity: critical
+          annotations:
+            summary: >-
+              Clé Cosign non rotée depuis plus de 100 jours —
+              la rotation automatique a probablement échoué
+
+        - alert: CosignOutdatedSignatures
+          expr: cosign_images_outdated_signature_total > 0
+          for: 0m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Images Harbor détectées avec des signatures obsolètes"

@@ -1,0 +1,33 @@
+---
+# Fichier : infra/k8s/monitoring/app-error-rate-rules.yaml
+# Alertes Prometheus pour les taux d'erreur applicatifs et pools de connexions.
+
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: app-error-rate-rules
+  namespace: monitoring
+  labels:
+    app.kubernetes.io/part-of: securerag-hub
+spec:
+  groups:
+    - name: app.alerts
+      rules:
+        - alert: HighHTTPErrorRate
+          expr: >-
+            sum(rate(http_requests_total{status=~"5.."}[5m])) by (service)
+            /
+            sum(rate(http_requests_total[5m])) by (service) > 0.05
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Taux d'erreur HTTP superieur a 5% sur le service {{ $labels.service }}"
+
+        - alert: DBConnectionPoolNearLimit
+          expr: db_connections_active / db_connections_max > 0.85
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Pool de connexions SQL saturé a plus de 85%"

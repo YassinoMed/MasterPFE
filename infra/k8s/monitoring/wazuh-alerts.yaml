@@ -1,0 +1,24 @@
+---
+# Fichier : infra/k8s/monitoring/wazuh-alerts.yaml
+# Alerte de déconnexion d'agents Wazuh.
+
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: wazuh-alerts
+  namespace: monitoring
+  labels:
+    app.kubernetes.io/part-of: securerag-hub
+spec:
+  groups:
+    - name: wazuh.alerts
+      rules:
+        - alert: WazuhAgentsDisconnected
+          expr: wazuh_agents_active / wazuh_agents_total < 1
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            summary: >-
+              Un ou plusieurs agents Wazuh sont déconnectés —
+              trou de visibilité SIEM

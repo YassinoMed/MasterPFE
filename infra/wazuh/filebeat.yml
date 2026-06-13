@@ -1,0 +1,18 @@
+# File: infra/wazuh/filebeat.yml
+# Description: Configuration Filebeat pour expédier les journaux d'audit
+# Kubernetes vers Wazuh.
+# Modified by: DevSecOps Agent — 2026-06-13
+
+filebeat.inputs:
+  - type: filestream
+    id: k8s-audit-log
+    paths:
+      - /var/log/kube-apiserver-audit.log
+    parsers:
+      - ndjson:
+          target: "k8s_audit"
+          add_error_key: true
+
+output.logstash:
+  # Expédition vers le port Filebeat de Wazuh Manager
+  hosts: ["wazuh-manager:5044"]

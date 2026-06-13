@@ -1,0 +1,39 @@
+---
+# File: infra/kind/audit-policy.yaml
+# Description: Stratégie d'audit Kubernetes pour l'API Server.
+# Modified by: DevSecOps Agent — 2026-06-13
+
+apiVersion: audit.k8s.io/v1
+kind: Policy
+omitStages:
+  - "RequestReceived"
+rules:
+  # Ne pas enregistrer les requêtes lues par les composants
+  # internes pour éviter le bruit
+  - level: None
+    users: 
+      - "system:kube-proxy"
+      - "system:apiserver"
+      - "system:kube-controller-manager"
+      - "system:kube-scheduler"
+  - level: None
+    userGroups: ["system:nodes"]
+
+  # Enregistrer RequestResponse pour les secrets, configmaps et pods
+  - level: RequestResponse
+    resources:
+      - group: ""
+        resources: ["secrets", "configmaps", "pods", "serviceaccounts"]
+
+  # Enregistrer RequestResponse pour les modifications RBAC
+  - level: RequestResponse
+    resources:
+      - group: "rbac.authorization.k8s.io"
+        resources: 
+          - "roles"
+          - "rolebindings"
+          - "clusterroles"
+          - "clusterrolebindings"
+
+  # Niveau Metadata pour tout le reste
+  - level: Metadata

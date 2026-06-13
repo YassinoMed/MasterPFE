@@ -1,0 +1,36 @@
+---
+# File: infra/k8s/kyverno/mutate-pod-security.yaml
+# Description: ClusterPolicy Kyverno pour muter les pods (ex: runAsNonRoot).
+# Modified by: DevSecOps Agent — 2026-06-13
+
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: mutate-pod-security
+  labels:
+    app.kubernetes.io/managed-by: devsecops-agent
+    app.kubernetes.io/part-of: securerag-hub
+spec:
+  rules:
+    - name: set-run-as-non-root
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+      mutate:
+        patchStrategicMerge:
+          spec:
+            securityContext:
+              +(runAsNonRoot): true
+            containers:
+              - (name): "*"
+                securityContext:
+                  +(allowPrivilegeEscalation): false
+                resources:
+                  limits:
+                    +(memory): "512Mi"
+                    +(cpu): "500m"
+                  requests:
+                    +(memory): "128Mi"
+                    +(cpu): "100m"

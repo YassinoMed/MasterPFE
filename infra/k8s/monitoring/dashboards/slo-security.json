@@ -1,0 +1,33 @@
+{
+  "title": "SecureRAG — Security SLOs",
+  "uid": "slo-security",
+  "schemaVersion": 38,
+  "version": 1,
+  "refresh": "30s",
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "panels": [
+    {
+      "id": 1,
+      "type": "stat",
+      "title": "Auth Failures Burn Rate",
+      "gridPos": { "x": 0, "y": 0, "w": 12, "h": 6 },
+      "targets": [{
+        "expr": "sum(rate(http_requests_total{status=~\"401|403\"}[1h])) / sum(rate(http_requests_total[1h]))",
+        "refId": "A"
+      }]
+    },
+    {
+      "id": 2,
+      "type": "stat",
+      "title": "Falco Alerts Rate (1h)",
+      "gridPos": { "x": 12, "y": 0, "w": 12, "h": 6 },
+      "targets": [{
+        "expr": "sum(rate(falco_events_total{priority=~\"critical|emergency\"}[1h]))",
+        "refId": "A"
+      }]
+    }
+  ]
+}

@@ -16,3 +16,5 @@ Route::get('/chat', [DashboardController::class, 'chat'])->name('portal.chat');
 Route::get('/history', [DashboardController::class, 'history'])->name('portal.history');
 Route::get('/security', [DashboardController::class, 'security'])->name('portal.security');
 Route::get('/devsecops', [DashboardController::class, 'devsecops'])->name('portal.devsecops');
+
+\SecureRag\LaravelSecurity\Http\Middleware\PrometheusMetricsMiddleware::registerRoutes();

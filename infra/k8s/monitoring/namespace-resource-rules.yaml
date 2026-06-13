@@ -1,0 +1,20 @@
+---
+# Fichier : infra/k8s/monitoring/namespace-resource-rules.yaml
+# Règles d'enregistrement pour le suivi des ressources par namespace.
+
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: namespace-resource-rules
+  namespace: monitoring
+  labels:
+    app.kubernetes.io/part-of: securerag-hub
+spec:
+  groups:
+    - name: namespace.resource.rules
+      rules:
+        - record: namespace:cpu_usage:rate5m
+          expr: sum(rate(container_cpu_usage_seconds_total[5m])) by (namespace)
+
+        - record: namespace:memory_usage_bytes
+          expr: sum(container_memory_working_set_bytes) by (namespace)

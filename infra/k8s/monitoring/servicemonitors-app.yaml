@@ -1,0 +1,28 @@
+---
+# Fichier : infra/k8s/monitoring/servicemonitors-app.yaml
+# ServiceMonitor pour les services Laravel et FastAPI de SecureRAG Hub.
+
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: servicemonitor-apps
+  namespace: monitoring
+  labels:
+    app.kubernetes.io/part-of: securerag-hub
+spec:
+  selector:
+    matchExpressions:
+      - key: app.kubernetes.io/component
+        operator: In
+        values:
+          - api-gateway
+          - auth-service
+          - rag-service
+          - admin-panel
+  namespaceSelector:
+    matchNames:
+      - securerag-prod
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 15s

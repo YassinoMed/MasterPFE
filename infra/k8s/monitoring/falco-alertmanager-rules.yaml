@@ -1,0 +1,53 @@
+---
+# File: infra/k8s/monitoring/falco-alertmanager-rules.yaml
+# Description: Règles Prometheus pour les alertes Falco par priorité.
+# Modified by: DevSecOps Agent — 2026-06-13
+
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: falco-rules
+  namespace: observability
+  labels:
+    app.kubernetes.io/managed-by: devsecops-agent
+    app.kubernetes.io/part-of: securerag-hub
+    prometheus: k8s
+spec:
+  groups:
+    - name: falco.rules
+      rules:
+        - alert: FalcoCriticalEvent
+          expr: sum(increase(falco_events_total{priority="CRITICAL"}[5m])) > 0
+          for: 1m
+          labels:
+            severity: critical
+            component: security
+          annotations:
+            summary: "Événement de sécurité Falco CRITIQUE détecté"
+            description: >
+              Au moins un événement Falco de priorité CRITICAL
+              a été détecté dans les 5 dernières minutes.
+
+        - alert: FalcoErrorEvent
+          expr: sum(increase(falco_events_total{priority="ERROR"}[5m])) > 0
+          for: 1m
+          labels:
+            severity: high
+            component: security
+          annotations:
+            summary: "Événement de sécurité Falco ERROR détecté"
+            description: >
+              Au moins un événement Falco de priorité ERROR
+              a été détecté dans les 5 dernières minutes.
+
+        - alert: FalcoWarningEvent
+          expr: sum(increase(falco_events_total{priority="WARNING"}[15m])) > 5
+          for: 5m
+          labels:
+            severity: warning
+            component: security
+          annotations:
+            summary: "Plusieurs événements de sécurité Falco WARNING détectés"
+            description: >
+              Plus de 5 événements Falco de priorité WARNING
+              ont été détectés dans les 15 dernières minutes.

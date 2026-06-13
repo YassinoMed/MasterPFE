@@ -1,0 +1,22 @@
+---
+# Fichier : infra/k8s/monitoring/rate-limit-alerts.yaml
+# Alertes sur le throttling de l'API Gateway.
+
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: rate-limit-alerts
+  namespace: monitoring
+  labels:
+    app.kubernetes.io/part-of: securerag-hub
+spec:
+  groups:
+    - name: rate-limit.alerts
+      rules:
+        - alert: HighRateLimitRejections
+          expr: sum(rate(api_rate_limit_rejections_total[5m])) by (endpoint) > 5
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Endpoint {{ $labels.endpoint }} rejette plus de 5 requêtes/s par throttling — usage anormal possible"

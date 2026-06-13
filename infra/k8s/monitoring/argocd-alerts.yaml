@@ -1,0 +1,78 @@
+---
+# Fichier : infra/k8s/monitoring/argocd-alerts.yaml
+# Alertes de dérive et d'état pour Argo CD.
+
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: argocd-alerts
+  namespace: monitoring
+  labels:
+    app.kubernetes.io/part-of: securerag-hub
+spec:
+  groups:
+    - name: argocd.alerts
+      rules:
+        - alert: ArgoCDAppOutOfSync
+          expr: argocd_app_info{sync_status!="Synced"} == 1
+          for: 10m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Application {{ $labels.name }} en derive (OutOfSync) depuis plus de 10 minutes"
+
+        - alert: ArgoCDAppDegraded
+          expr: argocd_app_info{health_status="Degraded"} == 1
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Application {{ $labels.name }} degradee (Degraded)"
+
+        - alert: ArgoCDSyncFailureRate
+          expr: increase(argocd_app_sync_total{phase="Failed"}[1h]) > 2
+          for: 0m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Taux d'echec de synchronisation Argo CD eleve (> 2/h)"
+
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: argocd-metrics
+  namespace: monitoring
+  labels:
+    app.kubernetes.io/part-of: securerag-hub
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: argocd-metrics
+  namespaceSelector:
+    matchNames:
+      - argocd
+  endpoints:
+    - port: metrics
+      path: /metrics
+      interval: 30s
+
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: argocd-server-metrics
+  namespace: monitoring
+  labels:
+    app.kubernetes.io/part-of: securerag-hub
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: argocd-server-metrics
+  namespaceSelector:
+    matchNames:
+      - argocd
+  endpoints:
+    - port: metrics
+      path: /metrics
+      interval: 30s

@@ -1,0 +1,22 @@
+---
+# Fichier : infra/k8s/monitoring/vectordb-alerts.yaml
+# Alertes sur l'évolution de la base vectorielle.
+
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: vectordb-alerts
+  namespace: monitoring
+  labels:
+    app.kubernetes.io/part-of: securerag-hub
+spec:
+  groups:
+    - name: vectordb.alerts
+      rules:
+        - alert: VectorDBCollectionGrowthRate
+          expr: deriv(vectordb_collection_size_vectors[1h]) > 1000
+          for: 0m
+          labels:
+            severity: info
+          annotations:
+            summary: "Croissance rapide de la base vectorielle (> 1000 vecteurs/h)"

@@ -1,0 +1,23 @@
+---
+# Fichier : infra/k8s/monitoring/servicemonitor-harbor.yaml
+# Configuration du scraping de Harbor Core.
+
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: servicemonitor-harbor
+  namespace: monitoring
+  labels:
+    app.kubernetes.io/part-of: securerag-hub
+spec:
+  selector:
+    matchLabels:
+      app: harbor
+      component: core
+  namespaceSelector:
+    matchNames:
+      - harbor
+  endpoints:
+    - port: metrics
+      path: /api/v2.0/metrics
+      interval: 15s

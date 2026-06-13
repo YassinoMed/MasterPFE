@@ -1,0 +1,49 @@
+---
+# File: infra/helm/prometheus/alerts/slo-alerts.yaml
+# Description: Alertes Prometheus pour le taux de combustion (burn-rate)
+# des SLOs de sécurité.
+# Modified by: DevSecOps Agent — 2026-06-13
+
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: security-slo-burn-rate
+  namespace: securerag-hub
+  labels:
+    app.kubernetes.io/managed-by: devsecops-agent
+    app.kubernetes.io/part-of: securerag-hub
+spec:
+  groups:
+    - name: SecuritySLOBurnRate
+      rules:
+        # Alerte si le taux de requêtes 401/403 dépasse 5% du budget d'erreur
+        # sur 1 heure
+        - alert: HighAuthFailureBurnRate
+          expr: |
+            sum(rate(http_requests_total{status=~"401|403"}[1h]))
+            /
+            sum(rate(http_requests_total[1h])) > 0.05
+          for: 5m
+          labels:
+            severity: warning
+            slo: "true"
+          annotations:
+            summary: "Taux d'échecs d'authentification élevé (burn-rate > 5%)"
+            description: |
+              Le taux de requêtes HTTP retournant 401 ou 403 a dépassé 5%
+              du trafic total sur la dernière heure.
+
+        # Alerte si les alertes Falco critiques augmentent soudainement
+        # (burn-rate synthétique)
+        - alert: HighFalcoAlertBurnRate
+          expr: |
+            sum(rate(falco_events_total{priority=~"critical|emergency"}[1h])) > 0.1
+          for: 5m
+          labels:
+            severity: critical
+            slo: "true"
+          annotations:
+            summary: "Pic d'alertes Falco critiques/urgentes"
+            description: |
+              Le système génère plus de 0.1 alertes critiques Falco
+              par seconde sur 1h.

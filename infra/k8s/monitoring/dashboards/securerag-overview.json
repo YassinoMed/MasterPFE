@@ -1,0 +1,337 @@
+{
+  "title": "SecureRAG Hub — Overview",
+  "uid": "securerag-overview",
+  "schemaVersion": 38,
+  "version": 1,
+  "refresh": "30s",
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "panels": [
+    {
+      "id": 1,
+      "type": "row",
+      "title": "RAG / IA",
+      "gridPos": { "x": 0, "y": 0, "w": 24, "h": 1 }
+    },
+    {
+      "id": 2,
+      "type": "timeseries",
+      "title": "Embedding Latency (Avg)",
+      "gridPos": { "x": 0, "y": 1, "w": 8, "h": 6 },
+      "targets": [{
+        "expr": "sum(rate(rag_embedding_duration_seconds_sum[5m])) by (model_name) / sum(rate(rag_embedding_duration_seconds_count[5m])) by (model_name)",
+        "legendFormat": "{{model_name}}",
+        "refId": "A"
+      }]
+    },
+    {
+      "id": 3,
+      "type": "timeseries",
+      "title": "Retrieval Latency (Avg)",
+      "gridPos": { "x": 8, "y": 1, "w": 8, "h": 6 },
+      "targets": [{
+        "expr": "sum(rate(rag_retrieval_duration_seconds_sum[5m])) by (collection_name) / sum(rate(rag_retrieval_duration_seconds_count[5m])) by (collection_name)",
+        "legendFormat": "{{collection_name}}",
+        "refId": "A"
+      }]
+    },
+    {
+      "id": 4,
+      "type": "timeseries",
+      "title": "LLM Latency P95 / P99",
+      "gridPos": { "x": 16, "y": 1, "w": 8, "h": 6 },
+      "targets": [
+        {
+          "expr": "rag:llm_latency:p95",
+          "legendFormat": "p95 {{model_name}}",
+          "refId": "A"
+        },
+        {
+          "expr": "rag:llm_latency:p99",
+          "legendFormat": "p99 {{model_name}}",
+          "refId": "B"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "type": "timeseries",
+      "title": "Tokens consumed per minute",
+      "gridPos": { "x": 0, "y": 7, "w": 12, "h": 6 },
+      "targets": [{
+        "expr": "rag:tokens_per_minute",
+        "legendFormat": "{{direction}} {{model_name}}",
+        "refId": "A"
+      }]
+    },
+    {
+      "id": 6,
+      "type": "stat",
+      "title": "Semantic Cache Hit Ratio",
+      "gridPos": { "x": 12, "y": 7, "w": 12, "h": 6 },
+      "targets": [{
+        "expr": "rag:cache_hit_ratio",
+        "refId": "A"
+      }]
+    },
+    {
+      "id": 7,
+      "type": "row",
+      "title": "Applicatif",
+      "gridPos": { "x": 0, "y": 13, "w": 24, "h": 1 }
+    },
+    {
+      "id": 8,
+      "type": "timeseries",
+      "title": "HTTP Error Rate by Service",
+      "gridPos": { "x": 0, "y": 14, "w": 8, "h": 6 },
+      "targets": [{
+        "expr": "sum(rate(http_requests_total{status=~\"5..\"}[5m])) by (service) / sum(rate(http_requests_total[5m])) by (service)",
+        "legendFormat": "{{service}}",
+        "refId": "A"
+      }]
+    },
+    {
+      "id": 9,
+      "type": "timeseries",
+      "title": "Request Duration P95",
+      "gridPos": { "x": 8, "y": 14, "w": 8, "h": 6 },
+      "targets": [{
+        "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le, service))",
+        "legendFormat": "{{service}}",
+        "refId": "A"
+      }]
+    },
+    {
+      "id": 10,
+      "type": "timeseries",
+      "title": "Active DB Connections",
+      "gridPos": { "x": 16, "y": 14, "w": 8, "h": 6 },
+      "targets": [
+        {
+          "expr": "sum(db_connections_active) by (service)",
+          "legendFormat": "FastAPI {{service}}",
+          "refId": "A"
+        },
+        {
+          "expr": "sum(laravel_db_connections_active) by (service)",
+          "legendFormat": "Laravel {{service}}",
+          "refId": "B"
+        }
+      ]
+    },
+    {
+      "id": 11,
+      "type": "timeseries",
+      "title": "Process Memory Bytes",
+      "gridPos": { "x": 0, "y": 20, "w": 24, "h": 6 },
+      "targets": [{
+        "expr": "sum(process_memory_bytes) by (service)",
+        "legendFormat": "{{service}}",
+        "refId": "A"
+      }]
+    },
+    {
+      "id": 12,
+      "type": "row",
+      "title": "Sécurité",
+      "gridPos": { "x": 0, "y": 26, "w": 24, "h": 1 }
+    },
+    {
+      "id": 13,
+      "type": "stat",
+      "title": "Vault Seal Status",
+      "gridPos": { "x": 0, "y": 27, "w": 4, "h": 6 },
+      "targets": [{
+        "expr": "vault_core_unsealed",
+        "refId": "A"
+      }]
+    },
+    {
+      "id": 14,
+      "type": "timeseries",
+      "title": "Kyverno Rejections Rate",
+      "gridPos": { "x": 4, "y": 27, "w": 8, "h": 6 },
+      "targets": [{
+        "expr": "sum(rate(kyverno_admission_requests_rejected_total[15m]))",
+        "refId": "A"
+      }]
+    },
+    {
+      "id": 15,
+      "type": "timeseries",
+      "title": "Falco Events by Priority",
+      "gridPos": { "x": 12, "y": 27, "w": 8, "h": 6 },
+      "targets": [{
+        "expr": "sum by (priority) (rate(falco_events_total[5m]))",
+        "legendFormat": "{{priority}}",
+        "refId": "A"
+      }]
+    },
+    {
+      "id": 16,
+      "type": "stat",
+      "title": "Cosign Key Age (Days)",
+      "gridPos": { "x": 20, "y": 27, "w": 4, "h": 6 },
+      "targets": [{
+        "expr": "cosign_key_age_days",
+        "refId": "A"
+      }]
+    },
+    {
+      "id": 17,
+      "type": "row",
+      "title": "Supply chain & CI/CD",
+      "gridPos": { "x": 0, "y": 33, "w": 24, "h": 1 }
+    },
+    {
+      "id": 18,
+      "type": "timeseries",
+      "title": "Harbor Critical Vulnerabilities",
+      "gridPos": { "x": 0, "y": 34, "w": 8, "h": 6 },
+      "targets": [{
+        "expr": "sum(harbor_scan_vulnerability_total{severity=\"Critical\"}) by (project)",
+        "legendFormat": "{{project}}",
+        "refId": "A"
+      }]
+    },
+    {
+      "id": 19,
+      "type": "gauge",
+      "title": "Harbor Storage Quota Usage",
+      "gridPos": { "x": 8, "y": 34, "w": 8, "h": 6 },
+      "targets": [{
+        "expr": "harbor_project_quota_usage_bytes / harbor_project_quota_hard_bytes",
+        "refId": "A"
+      }]
+    },
+    {
+      "id": 20,
+      "type": "timeseries",
+      "title": "Jenkins Pipeline Duration P95",
+      "gridPos": { "x": 16, "y": 34, "w": 4, "h": 6 },
+      "targets": [{
+        "expr": "jenkins:pipeline_duration:p95",
+        "legendFormat": "{{jenkins_job}}",
+        "refId": "A"
+      }]
+    },
+    {
+      "id": 21,
+      "type": "timeseries",
+      "title": "Jenkins Failure Rate",
+      "gridPos": { "x": 20, "y": 34, "w": 4, "h": 6 },
+      "targets": [{
+        "expr": "sum(rate(jenkins_builds_failed_build_count[1h])) by (jenkins_job) / sum(rate(jenkins_builds_last_build_count[1h])) by (jenkins_job)",
+        "legendFormat": "{{jenkins_job}}",
+        "refId": "A"
+      }]
+    },
+    {
+      "id": 22,
+      "type": "row",
+      "title": "Infrastructure",
+      "gridPos": { "x": 0, "y": 40, "w": 24, "h": 1 }
+    },
+    {
+      "id": 23,
+      "type": "gauge",
+      "title": "Disk Usage (Root)",
+      "gridPos": { "x": 0, "y": 41, "w": 4, "h": 6 },
+      "targets": [{
+        "expr": "1 - (node_filesystem_avail_bytes{mountpoint=\"/\"} / node_filesystem_size_bytes{mountpoint=\"/\"})",
+        "refId": "A"
+      }]
+    },
+    {
+      "id": 24,
+      "type": "gauge",
+      "title": "Disk Inodes Usage (Root)",
+      "gridPos": { "x": 4, "y": 41, "w": 4, "h": 6 },
+      "targets": [{
+        "expr": "1 - (node_filesystem_files_free{mountpoint=\"/\"} / node_filesystem_files{mountpoint=\"/\"})",
+        "refId": "A"
+      }]
+    },
+    {
+      "id": 25,
+      "type": "stat",
+      "title": "Pod OOMKilled Count (24h)",
+      "gridPos": { "x": 8, "y": 41, "w": 4, "h": 6 },
+      "targets": [{
+        "expr": "sum(increase(kube_pod_container_status_last_terminated_reason{reason=\"OOMKilled\"}[24h]))",
+        "refId": "A"
+      }]
+    },
+    {
+      "id": 26,
+      "type": "timeseries",
+      "title": "Network Bandwidth",
+      "gridPos": { "x": 12, "y": 41, "w": 6, "h": 6 },
+      "targets": [
+        {
+          "expr": "sum(rate(node_network_receive_bytes_total{device!=\"lo\"}[5m]))",
+          "legendFormat": "Rx",
+          "refId": "A"
+        },
+        {
+          "expr": "sum(rate(node_network_transmit_bytes_total{device!=\"lo\"}[5m]))",
+          "legendFormat": "Tx",
+          "refId": "B"
+        }
+      ]
+    },
+    {
+      "id": 27,
+      "type": "stat",
+      "title": "Wazuh Agents Active/Total",
+      "gridPos": { "x": 18, "y": 41, "w": 6, "h": 6 },
+      "targets": [
+        {
+          "expr": "wazuh_agents_active",
+          "legendFormat": "Active",
+          "refId": "A"
+        },
+        {
+          "expr": "wazuh_agents_total",
+          "legendFormat": "Total",
+          "refId": "B"
+        }
+      ]
+    },
+    {
+      "id": 28,
+      "type": "timeseries",
+      "title": "PostgreSQL Backup Freshness",
+      "gridPos": { "x": 0, "y": 47, "w": 8, "h": 6 },
+      "targets": [{
+        "expr": "time() - pg_backup_last_success_timestamp",
+        "refId": "A"
+      }]
+    },
+    {
+      "id": 29,
+      "type": "timeseries",
+      "title": "Vector DB Collection Size",
+      "gridPos": { "x": 8, "y": 47, "w": 8, "h": 6 },
+      "targets": [{
+        "expr": "sum(vectordb_collection_size_vectors) by (collection_name)",
+        "legendFormat": "{{collection_name}}",
+        "refId": "A"
+      }]
+    },
+    {
+      "id": 30,
+      "type": "timeseries",
+      "title": "API Rate Limit Rejections",
+      "gridPos": { "x": 16, "y": 47, "w": 8, "h": 6 },
+      "targets": [{
+        "expr": "sum(rate(api_rate_limit_rejections_total[5m])) by (endpoint)",
+        "legendFormat": "{{endpoint}}",
+        "refId": "A"
+      }]
+    }
+  ]
+}

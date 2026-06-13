@@ -1,0 +1,24 @@
+{
+  "title": "Kubernetes Audit & Argo CD Drift",
+  "uid": "k8s-audit-dashboard",
+  "schemaVersion": 38,
+  "version": 1,
+  "refresh": "30s",
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "panels": [
+    {
+      "id": 1,
+      "type": "state-timeline",
+      "title": "Argo CD App Sync Status",
+      "gridPos": { "x": 0, "y": 0, "w": 24, "h": 8 },
+      "targets": [{
+        "expr": "argocd_app_info",
+        "legendFormat": "{{name}} : {{sync_status}}",
+        "refId": "A"
+      }]
+    }
+  ]
+}

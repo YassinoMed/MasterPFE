@@ -9,3 +9,5 @@ Route::get('/', function () {
         'api' => '/api/v1',
     ]);
 });
+
+\SecureRag\LaravelSecurity\Http\Middleware\PrometheusMetricsMiddleware::registerRoutes();

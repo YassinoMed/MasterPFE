@@ -1,0 +1,28 @@
+---
+# Fichier : infra/k8s/monitoring/servicemonitor-vault.yaml
+# Scraping des métriques Prometheus de HashiCorp Vault.
+
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: servicemonitor-vault
+  namespace: monitoring
+  labels:
+    app.kubernetes.io/part-of: securerag-hub
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: vault
+  namespaceSelector:
+    matchNames:
+      - vault
+  endpoints:
+    - port: http
+      path: /v1/sys/metrics
+      params:
+        format:
+          - prometheus
+      interval: 15s
+      bearerTokenSecret:
+        name: vault-metrics-token
+        key: token

@@ -20,4 +20,5 @@ timestamper
 ws-cleanup
 matrix-auth
 role-strategy
+prometheus
 

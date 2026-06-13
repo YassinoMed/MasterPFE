@@ -1,0 +1,22 @@
+---
+# Fichier : infra/k8s/monitoring/servicemonitor-rag.yaml
+# Configuration du scraping de rag-service dans securerag-prod.
+
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: servicemonitor-rag
+  namespace: monitoring
+  labels:
+    app.kubernetes.io/part-of: securerag-hub
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: rag-service
+  namespaceSelector:
+    matchNames:
+      - securerag-prod
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 15s

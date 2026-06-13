@@ -1,0 +1,41 @@
+---
+# File: infra/k8s/monitoring/wazuh-network-policy.yaml
+# Description: Stratégie réseau limitant le trafic sortant des agents Wazuh
+# uniquement vers le manager Wazuh.
+# Modified by: DevSecOps Agent — 2026-06-13
+
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: wazuh-agent-egress
+  namespace: securerag-hub
+  labels:
+    app.kubernetes.io/managed-by: devsecops-agent
+    app.kubernetes.io/part-of: securerag-hub
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: wazuh-agent
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: wazuh-manager
+      ports:
+        - protocol: TCP
+          port: 1514
+        - protocol: TCP
+          port: 1515
+    # Permet la résolution DNS pour joindre le service Wazuh manager
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - protocol: UDP
+          port: 53

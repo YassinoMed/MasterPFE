@@ -45,7 +45,7 @@ pipeline {
     )
     booleanParam(
       name: 'RUN_DAST',
-      defaultValue: false,
+      defaultValue: true,
       description: 'Run OWASP ZAP DAST baseline scan against the deployed portal. Requires Docker and a running portal-web service.'
     )
     string(
@@ -181,6 +181,32 @@ pipeline {
       }
     }
 
+    stage('SBOM Analysis — Grype') {
+      steps {
+        sh '''
+          set -euo pipefail
+          echo "[INFO] Running Grype on generated SBOMs"
+          
+          fail=0
+          for sbom in "${SBOM_DIR}"/*.cyclonedx.json; do
+            [ -e "$sbom" ] || continue
+            echo "Scanning $sbom..."
+            grype "sbom:$sbom" --fail-on high,critical -o json > "${sbom}.grype.json" || fail=1
+          done
+          
+          if [ $fail -eq 1 ]; then
+            echo "[ERROR] Grype found High or Critical vulnerabilities in SBOMs."
+            exit 1
+          fi
+        '''
+      }
+      post {
+        always {
+          archiveArtifacts allowEmptyArchive: true, artifacts: '${SBOM_DIR}/*.grype.json'
+        }
+      }
+    }
+
     stage('Attest SBOMs') {
       steps {
         withCredentials([
@@ -285,6 +311,22 @@ pipeline {
       }
     }
 
+    stage('Helm Security Scan') {
+      steps {
+        sh '''
+          set -euo pipefail
+          echo "[INFO] Running Checkov against Helm charts"
+          checkov -d infra/helm/securerag/ --config-file security/checkov-config.yaml -o junitxml > artifacts/release/checkov-helm-cd.xml || true
+        '''
+      }
+      post {
+        always {
+          junit allowEmptyResults: true, testResults: 'artifacts/release/checkov-*.xml'
+          archiveArtifacts allowEmptyArchive: true, artifacts: 'artifacts/release/checkov-*.xml'
+        }
+      }
+    }
+
     stage('Deploy to kind') {
       when {
         expression { return params.RUN_DEPLOY_KIND }
@@ -372,52 +414,32 @@ pipeline {
       }
     }
 
-    stage('CD_DAST - OWASP ZAP Baseline') {
+    stage('DAST — OWASP ZAP') {
       when {
-        expression { return params.RUN_DEPLOY_KIND && params.RUN_DAST }
+        expression { return params.RUN_DAST }
       }
       steps {
         sh '''
           set -euo pipefail
-          mkdir -p artifacts/dast
-
-          # Resolve the portal ClusterIP from the deployed service
-          PORTAL_IP=$(kubectl get svc portal-web -n securerag-hub \
-            -o jsonpath='{.spec.clusterIP}' 2>/dev/null || true)
-          PORTAL_PORT=$(kubectl get svc portal-web -n securerag-hub \
-            -o jsonpath='{.spec.ports[0].port}' 2>/dev/null || echo '8000')
-
-          if [ -z "${PORTAL_IP}" ]; then
-            echo "[WARN] portal-web service not found; skipping DAST scan"
-            echo "DAST_STATUS=SKIPPED" > artifacts/dast/dast-status.env
-            exit 0
-          fi
-
-          PORTAL_URL="http://${PORTAL_IP}:${PORTAL_PORT}"
-          echo "[INFO] Running OWASP ZAP baseline scan against ${PORTAL_URL}"
-
-          # ZAP baseline scan — non-blocking (exit 0/1/2):
-          #   0 = no alerts, 1 = alerts found, 2 = scan error
+          mkdir -p reports
+          echo "[INFO] Running OWASP ZAP API scan against staging"
           docker run --rm --network host \
-            -v "$(pwd)/artifacts/dast:/zap/wrk:rw" \
-            -t ghcr.io/zaproxy/zaproxy:2.15.0 zap-baseline.py \
-            -t "${PORTAL_URL}" \
-            -r dast-baseline-report.html \
-            -J dast-baseline-report.json \
-            -l WARN || dast_rc=$?
-
-          echo "DAST_EXIT_CODE=${dast_rc:-0}" > artifacts/dast/dast-status.env
-
-          # Validate the DAST report if the validation script exists
-          if [ -f scripts/validate/validate-dast-report.sh ]; then
-            bash scripts/validate/validate-dast-report.sh || true
-          fi
+            -v "$(pwd)/reports:/zap/wrk:rw" \
+            -e ZAP_FAIL_ON_RISK=High \
+            ghcr.io/zaproxy/zaproxy:2.15.0@sha256:d8bd58f01b7a2d36ab2da5744275143a41b12658de3bb30eef794e77241cfd74 \
+            zap-api-scan.py \
+            -t http://staging.securerag.local/api/docs.json \
+            -f openapi \
+            -r zap-report.html \
+            -J zap-report.json || true
+          
+          # Validation with the produced script
+          bash scripts/zap-quality-gate.sh reports/zap-report.json
         '''
       }
       post {
         always {
-          archiveArtifacts allowEmptyArchive: true,
-            artifacts: 'artifacts/dast/**'
+          archiveArtifacts allowEmptyArchive: true, artifacts: 'reports/zap-report.html,reports/zap-report.json'
         }
       }
     }

@@ -1,0 +1,22 @@
+---
+# Fichier : infra/k8s/monitoring/servicemonitor-vectordb.yaml
+# Scraping des métriques Prometheus de la base de données vectorielle Qdrant.
+
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: servicemonitor-vectordb
+  namespace: monitoring
+  labels:
+    app.kubernetes.io/part-of: securerag-hub
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: qdrant
+  namespaceSelector:
+    matchNames:
+      - securerag-prod
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 15s

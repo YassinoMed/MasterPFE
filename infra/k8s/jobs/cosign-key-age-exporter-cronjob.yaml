@@ -1,0 +1,116 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cosign-exporter-script
+  namespace: monitoring
+data:
+  export-cosign-key-age.sh: |
+    #!/usr/bin/env bash
+    set -euo pipefail
+
+    VAULT_ADDR="${VAULT_ADDR:-http://vault.vault.svc.cluster.local:8200}"
+    VAULT_TOKEN="${VAULT_TOKEN:-}"
+    PUSHGATEWAY_URL="${PUSHGATEWAY_URL:-http://pushgateway.monitoring.svc.cluster.local:9091}"
+    HARBOR_ADDR="${HARBOR_ADDR:-http://harbor-core.harbor.svc.cluster.local}"
+    HARBOR_USER="${HARBOR_USER:-admin}"
+    HARBOR_PASSWORD="${HARBOR_PASSWORD:-}"
+
+    if [[ -z "${VAULT_TOKEN}" ]]; then
+      echo "Erreur : VAULT_TOKEN n'est pas defini."
+      exit 1
+    fi
+
+    echo "Lecture des metadonnees de la cle Cosign dans Vault..."
+    RESPONSE=$(curl -s -f -H "X-Vault-Token: ${VAULT_TOKEN}" "${VAULT_ADDR}/v1/secret/metadata/cosign/public-key")
+    CREATED_AT=$(echo "${RESPONSE}" | jq -r '.data.created_time')
+
+    if [[ -z "${CREATED_AT}" || "${CREATED_AT}" == "null" ]]; then
+      echo "Erreur : Impossible de recuperer created_time de la cle."
+      exit 1
+    fi
+
+    CREATED_EPOCH=$(date -d "${CREATED_AT}" +%s)
+    NOW_EPOCH=$(date +%s)
+    AGE_DAYS=$(( (NOW_EPOCH - CREATED_EPOCH) / 86400 ))
+
+    echo "Age de la cle Cosign : ${AGE_DAYS} jours."
+
+    echo "Requete de l'API Harbor pour verifier les signatures des images..."
+    OUTDATED_SIGNATURES=0
+
+    if [[ -n "${HARBOR_PASSWORD}" ]]; then
+      PROJECTS=$(curl -s -f -u "${HARBOR_USER}:${HARBOR_PASSWORD}" "${HARBOR_ADDR}/api/v2.0/projects" | jq -r '.[].name')
+      for PROJECT in ${PROJECTS}; do
+        REPOS=$(curl -s -f -u "${HARBOR_USER}:${HARBOR_PASSWORD}" "${HARBOR_ADDR}/api/v2.0/projects/${PROJECT}/repositories" | jq -r '.[].name')
+        for REPO in ${REPOS}; do
+          REPO_CLEANED=${REPO#*/}
+          ARTIFACTS=$(curl -s -f -u "${HARBOR_USER}:${HARBOR_PASSWORD}" "${HARBOR_ADDR}/api/v2.0/projects/${PROJECT}/repositories/${REPO_CLEANED}/artifacts")
+          UNSIGNED_COUNT=$(echo "${ARTIFACTS}" | jq '[.[] | select(.signed != true)] | length')
+          OUTDATED_SIGNATURES=$((OUTDATED_SIGNATURES + UNSIGNED_COUNT))
+        done
+      done
+    fi
+
+    echo "Images sans signature valide : ${OUTDATED_SIGNATURES}."
+
+    echo "Envoi des metriques a Pushgateway..."
+    cat <<EOF | curl -s --data-binary @- "${PUSHGATEWAY_URL}/metrics/job/cosign-rotation"
+    # HELP cosign_key_age_days Age en jours de la cle publique de signature Cosign.
+    # TYPE cosign_key_age_days gauge
+    cosign_key_age_days ${AGE_DAYS}
+    # HELP cosign_images_outdated_signature_total Nombre d'images Harbor sans signature Cosign valide.
+    # TYPE cosign_images_outdated_signature_total gauge
+    cosign_images_outdated_signature_total ${OUTDATED_SIGNATURES}
+    EOF
+
+    echo "Metriques envoyees avec succes."
+
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: cosign-key-age-exporter
+  namespace: monitoring
+  labels:
+    app.kubernetes.io/part-of: securerag-hub
+spec:
+  schedule: "0 * * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: exporter
+              image: alpine:3.19
+              command:
+                - /bin/sh
+                - -c
+                - |
+                  apk add --no-cache curl jq bash
+                  /scripts/export-cosign-key-age.sh
+              env:
+                - name: VAULT_TOKEN
+                  valueFrom:
+                    secretKeyRef:
+                      name: vault-token
+                      key: token
+                      optional: true
+                - name: HARBOR_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: harbor-credentials
+                      key: password
+                      optional: true
+              volumeMounts:
+                - name: script-volume
+                  mountPath: /scripts
+          volumes:
+            - name: script-volume
+              configMap:
+                name: cosign-exporter-script
+                defaultMode: 0755

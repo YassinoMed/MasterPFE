@@ -1,0 +1,42 @@
+---
+# File: infra/k8s/network-policies/02-allow-db-redis.yaml
+# Description: Stratégie NetworkPolicy autorisant l'accès aux bases de données
+# Postgres et Redis pour les applications.
+# Modified by: DevSecOps Agent — 2026-06-13
+
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-db-redis-egress
+  namespace: securerag-hub
+  labels:
+    app.kubernetes.io/managed-by: devsecops-agent
+    app.kubernetes.io/part-of: securerag-hub
+spec:
+  podSelector:
+    matchExpressions:
+      - key: app.kubernetes.io/name
+        operator: In
+        values:
+          - portal-web
+          - auth-users
+          - chatbot-manager
+          - conversation-service
+          - audit-security-service
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: postgresql
+      ports:
+        - protocol: TCP
+          port: 5432
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: redis
+      ports:
+        - protocol: TCP
+          port: 6379

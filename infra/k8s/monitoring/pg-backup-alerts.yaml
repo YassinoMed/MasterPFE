@@ -1,0 +1,22 @@
+---
+# Fichier : infra/k8s/monitoring/pg-backup-alerts.yaml
+# Alertes sur l'état de sauvegarde PostgreSQL.
+
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: pg-backup-alerts
+  namespace: monitoring
+  labels:
+    app.kubernetes.io/part-of: securerag-hub
+spec:
+  groups:
+    - name: pg-backup.alerts
+      rules:
+        - alert: PostgresBackupStale
+          expr: (time() - pg_backup_last_success_timestamp) > 90000
+          for: 0m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Aucune sauvegarde PostgreSQL réussie depuis plus de 25 heures"

@@ -1,0 +1,23 @@
+---
+# Fichier : infra/k8s/monitoring/servicemonitor-certmanager.yaml
+# Scraping des métriques Prometheus de cert-manager.
+
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: servicemonitor-certmanager
+  namespace: monitoring
+  labels:
+    app.kubernetes.io/part-of: securerag-hub
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: controller
+      app.kubernetes.io/name: cert-manager
+  namespaceSelector:
+    matchNames:
+      - cert-manager
+  endpoints:
+    - port: tcp-metrics
+      path: /metrics
+      interval: 15s

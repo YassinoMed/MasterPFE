@@ -1,0 +1,50 @@
+---
+# Fichier : infra/k8s/monitoring/jenkins-pipeline-rules.yaml
+# Configuration du scraping Jenkins et alertes associées.
+
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: servicemonitor-jenkins
+  namespace: monitoring
+  labels:
+    app.kubernetes.io/part-of: securerag-hub
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: jenkins-master
+  namespaceSelector:
+    matchNames:
+      - jenkins
+  endpoints:
+    - port: http
+      path: /prometheus
+      interval: 30s
+
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: jenkins-pipeline-rules
+  namespace: monitoring
+  labels:
+    app.kubernetes.io/part-of: securerag-hub
+spec:
+  groups:
+    - name: jenkins.rules
+      rules:
+        - record: jenkins:pipeline_duration:p95
+          expr: >-
+            histogram_quantile(0.95,
+            sum(rate(jenkins_builds_duration_milliseconds_summary_bucket[1h])) by (le, jenkins_job))
+
+        - alert: JenkinsPipelineFailureRateHigh
+          expr: >-
+            sum(rate(jenkins_builds_failed_build_count[1h])) by (jenkins_job)
+            /
+            sum(rate(jenkins_builds_last_build_count[1h])) by (jenkins_job) > 0.3
+          for: 30m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Taux d'échec élevé (> 30%) sur le pipeline Jenkins {{ $labels.jenkins_job }}"

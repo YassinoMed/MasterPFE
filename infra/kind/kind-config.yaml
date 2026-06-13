@@ -1,0 +1,76 @@
+---
+# File: infra/kind/kind-config.yaml
+# Description: Configuration du cluster Kind (On-Premise) avec journalisation
+# d'audit activée.
+# Modified by: DevSecOps Agent — 2026-06-13
+
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+name: securerag-prod
+networking:
+  apiServerAddress: "127.0.0.1"
+  apiServerPort: 6444
+containerdConfigPatches:
+  - |-
+    [plugins."io.containerd.grpc.v1.cri".registry.mirrors."localhost:5001"]
+      endpoint = ["http://kind-registry:5000"]
+nodes:
+  - role: control-plane
+    image: kindest/node:v1.33.1
+    labels:
+      securerag.io/node-pool: control-plane
+    # Montage de la politique d'audit depuis la machine hôte vers le nœud Kind
+    extraMounts:
+      - hostPath: ./infra/kind/audit-policy.yaml
+        containerPath: /etc/kubernetes/audit-policy.yaml
+        readOnly: true
+    # Configuration du serveur d'API pour l'audit
+    kubeadmConfigPatches:
+      - |
+        kind: ClusterConfiguration
+        apiServer:
+          extraArgs:
+            audit-policy-file: /etc/kubernetes/audit-policy.yaml
+            audit-log-path: /var/log/kube-apiserver-audit.log
+            audit-log-maxage: "30"
+            audit-log-maxbackup: "10"
+            audit-log-maxsize: "100"
+          extraVolumes:
+            - name: audit-policy
+              hostPath: /etc/kubernetes/audit-policy.yaml
+              mountPath: /etc/kubernetes/audit-policy.yaml
+              readOnly: true
+              pathType: File
+            - name: audit-log-dir
+              hostPath: /var/log
+              mountPath: /var/log
+              readOnly: false
+              pathType: DirectoryOrCreate
+    extraPortMappings:
+      - containerPort: 30080
+        hostPort: 8080
+        listenAddress: "127.0.0.1"
+        protocol: TCP
+      - containerPort: 30081
+        hostPort: 8081
+        listenAddress: "127.0.0.1"
+        protocol: TCP
+      - containerPort: 30443
+        hostPort: 8443
+        listenAddress: "127.0.0.1"
+        protocol: TCP
+  - role: worker
+    image: kindest/node:v1.33.1
+    labels:
+      securerag.io/node-pool: app
+      topology.kubernetes.io/zone: local-a
+  - role: worker
+    image: kindest/node:v1.33.1
+    labels:
+      securerag.io/node-pool: app
+      topology.kubernetes.io/zone: local-b
+  - role: worker
+    image: kindest/node:v1.33.1
+    labels:
+      securerag.io/node-pool: app
+      topology.kubernetes.io/zone: local-c

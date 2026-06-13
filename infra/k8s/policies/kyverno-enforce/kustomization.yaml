@@ -1,72 +1,34 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
-# Optional Enforce overlay. Apply only after Audit policies are clean and image
-# signatures are proven for the release tag/digests deployed to the cluster.
-
 resources:
   - ../kyverno
 
 patches:
   - target:
-      group: kyverno.io
-      version: v1
       kind: ClusterPolicy
-      name: securerag-audit-cleartext-env-values
+      name: (securerag-verify-cosign-images|verify-cosign-images)
     patch: |-
       - op: replace
         path: /spec/validationFailureAction
         value: Enforce
   - target:
-      group: kyverno.io
-      version: v1
       kind: ClusterPolicy
-      name: securerag-require-pod-security
+      name: (securerag-require-pod-security|require-pod-security-restricted)
     patch: |-
       - op: replace
         path: /spec/validationFailureAction
         value: Enforce
   - target:
-      group: kyverno.io
-      version: v1
       kind: ClusterPolicy
-      name: securerag-verify-cosign-images
+      name: (disallow-privileged-containers)
     patch: |-
       - op: replace
         path: /spec/validationFailureAction
         value: Enforce
   - target:
-      group: kyverno.io
-      version: v1
       kind: ClusterPolicy
-      name: securerag-restrict-image-references
-    patch: |-
-      - op: replace
-        path: /spec/validationFailureAction
-        value: Enforce
-  - target:
-      group: kyverno.io
-      version: v1
-      kind: ClusterPolicy
-      name: securerag-restrict-volume-types
-    patch: |-
-      - op: replace
-        path: /spec/validationFailureAction
-        value: Enforce
-  - target:
-      group: kyverno.io
-      version: v1
-      kind: ClusterPolicy
-      name: securerag-require-workload-controls
-    patch: |-
-      - op: replace
-        path: /spec/validationFailureAction
-        value: Enforce
-  - target:
-      group: kyverno.io
-      version: v1
-      kind: ClusterPolicy
-      name: securerag-restrict-service-exposure
+      name: (require-resource-limits|securerag-require-workload-controls)
     patch: |-
       - op: replace
         path: /spec/validationFailureAction

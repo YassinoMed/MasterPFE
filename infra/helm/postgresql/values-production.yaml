@@ -1,0 +1,39 @@
+---
+# File: infra/helm/postgresql/values-production.yaml
+# Description: Configuration de production PostgreSQL (Bitnami) avec WAL
+# et sécurité renforcée.
+# Modified by: DevSecOps Agent — 2026-06-13
+
+auth:
+  # Utilisation exclusive de scram-sha-256 (pas de md5 ou clear-text)
+  secretKeys:
+    adminPasswordKey: postgres-password
+    userPasswordKey: password
+    replicationPasswordKey: replication-password
+  postgresPassword: ""  # Géré via ExternalSecrets
+
+primary:
+  extraEnvVars:
+    - name: POSTGRESQL_PASSWORD_ENCRYPTION
+      value: "scram-sha-256"
+  configuration: |
+    # Configuration WAL et réplication
+    wal_level = replica
+    max_wal_senders = 10
+    max_replication_slots = 10
+    archive_mode = on
+    archive_command = 'test ! -f /mnt/wal/%f && cp %p /mnt/wal/%f'
+    archive_timeout = 60s
+    password_encryption = scram-sha-256
+
+  extraVolumeMounts:
+    - name: wal-archive
+      mountPath: /mnt/wal_archive
+
+  extraVolumes:
+    - name: wal-archive
+      persistentVolumeClaim:
+        claimName: postgresql-wal-pvc
+
+readReplicas:
+  replicaCount: 2

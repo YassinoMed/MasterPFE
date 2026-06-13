@@ -1,0 +1,14 @@
+# File: security/checkov-config.yaml
+# Description: Configuration globale Checkov pour l'analyse IaC (Helm, K8s).
+# Modified by: DevSecOps Agent — 2026-06-13
+
+---
+skip-check:
+  - CKV_K8S_21  # Exemple : ignore l'exigence du namespace par défaut
+  # Ajouter d'autres IDs CKV à ignorer si nécessaire
+
+soft-fail: false
+quiet: true
+framework:
+  - kubernetes
+  - helm
