@@ -10,6 +10,7 @@ ARG SYFT_VERSION=v1.42.3
 ARG TRIVY_VERSION=0.69.3
 ARG KUBE_SCORE_VERSION=1.18.0
 ARG SONAR_SCANNER_VERSION=5.0.1.3006
+ARG KYVERNO_VERSION=v1.16.2
 
 # Install gnupg first (not present in base image), then add Docker official repo
 RUN apt-get update && \
@@ -54,8 +55,8 @@ RUN jenkins-plugin-cli --plugin-file /usr/share/jenkins/ref/plugins.txt
 
 RUN set -eux; \
     case "${TARGETARCH}" in \
-      amd64) KUBE_ARCH=amd64; OCI_ARCH=amd64; SYFT_ARCH=amd64; TRIVY_ARCH=64bit; KS_ARCH=amd64 ;; \
-      arm64) KUBE_ARCH=arm64; OCI_ARCH=arm64; SYFT_ARCH=arm64; TRIVY_ARCH=ARM64; KS_ARCH=arm64 ;; \
+      amd64) KUBE_ARCH=amd64; OCI_ARCH=amd64; SYFT_ARCH=amd64; TRIVY_ARCH=64bit; KS_ARCH=amd64; KYVERNO_ARCH=x86_64 ;; \
+      arm64) KUBE_ARCH=arm64; OCI_ARCH=arm64; SYFT_ARCH=arm64; TRIVY_ARCH=ARM64; KS_ARCH=arm64; KYVERNO_ARCH=arm64 ;; \
       *) echo "Unsupported TARGETARCH=${TARGETARCH}"; exit 1 ;; \
     esac; \
     curl -fsSLo /usr/local/bin/kubectl \
@@ -82,6 +83,11 @@ RUN set -eux; \
     tar -xzf /tmp/kube-score.tar.gz -C /tmp kube-score; \
     install -m 0755 /tmp/kube-score /usr/local/bin/kube-score; \
     rm -f /tmp/kube-score.tar.gz /tmp/kube-score; \
+    curl -fsSLo /tmp/kyverno.tar.gz \
+      "https://github.com/kyverno/kyverno/releases/download/${KYVERNO_VERSION}/kyverno-cli_${KYVERNO_VERSION}_linux_${KYVERNO_ARCH}.tar.gz"; \
+    tar -xzf /tmp/kyverno.tar.gz -C /tmp kyverno; \
+    install -m 0755 /tmp/kyverno /usr/local/bin/kyverno; \
+    rm -f /tmp/kyverno.tar.gz /tmp/kyverno; \
     curl -fsSLo /tmp/sonar-scanner.zip \
       "https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-${SONAR_SCANNER_VERSION}-linux.zip"; \
     unzip -q /tmp/sonar-scanner.zip -d /opt; \
