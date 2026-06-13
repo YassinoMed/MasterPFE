@@ -27,4 +27,4 @@ ui:
   enabled: false
 
 injector:
-  enabled: false
+  enabled: true

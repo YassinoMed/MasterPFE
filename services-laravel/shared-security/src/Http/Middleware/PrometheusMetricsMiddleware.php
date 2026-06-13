@@ -24,7 +24,11 @@ class PrometheusMetricsMiddleware
         if (self::$registry === null) {
             $storage = null;
             if (extension_loaded('apcu') && ini_get('apc.enabled')) {
-                $storage = new \Prometheus\Storage\APC();
+                if (class_exists('\Prometheus\Storage\APCu')) {
+                    $storage = new \Prometheus\Storage\APCu();
+                } else {
+                    $storage = new \Prometheus\Storage\APC();
+                }
             } elseif (class_exists('Redis') && config('database.redis.default')) {
                 try {
                     $storage = new \Prometheus\Storage\Redis([
