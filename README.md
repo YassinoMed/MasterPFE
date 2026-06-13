@@ -83,6 +83,9 @@ scan images → signature → vérification tag → promotion digest → SBOM �
 build → image scan → sign → verify → promote by digest → sbom → sbom attest → evidence gate → deploy → validate
 ```
 
+### 📧 Notifications d'échec (SMTP Gmail)
+- Les deux pipelines (`securerag-hub-ci` et `securerag-hub-recette`) prennent en charge le paramètre optionnel `NOTIFICATION_EMAIL`. En cas d'échec de la pipeline, un e-mail d'alerte sera automatiquement envoyé à l'adresse spécifiée.
+
 **Principe clé** : Aucune reconstruction d'image au déploiement.
 
 Le déploiement Kubernetes force un rollout contrôlé par défaut et archive une preuve `runtime-image-rollout-proof` afin de vérifier que les pods Ready utilisent réellement les images attendues. En mode release, `REQUIRE_DIGEST_DEPLOY=true` interdit le fallback silencieux par tag si les digests promus sont absents.
