@@ -442,26 +442,288 @@ pipeline {
       echo 'SecureRAG Hub CD pipeline failed. Inspect release and deployment reports.'
       script {
         if (params.NOTIFICATION_EMAIL && params.NOTIFICATION_EMAIL.trim() != '') {
+          def gitCommitShort = env.GIT_COMMIT ? env.GIT_COMMIT.take(7) : 'N/A'
+          def buildDuration = currentBuild.durationString ?: 'N/A'
+          def buildUrl = env.BUILD_URL
+          def consoleUrl = "${env.BUILD_URL}console"
+          def jobName = env.JOB_NAME
+          def buildNumber = env.BUILD_NUMBER
+          def gitBranch = env.GIT_BRANCH ?: 'N/A'
+
+          def htmlBody = """
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Build Failed</title>
+  <style>
+    @keyframes pulse {
+      0% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+      }
+      70% {
+        transform: scale(1);
+        box-shadow: 0 0 0 6px rgba(239, 68, 68, 0);
+      }
+      100% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+      }
+    }
+    body {
+      background-color: #0f172a;
+      color: #f8fafc;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      -webkit-font-smoothing: antialiased;
+    }
+    .container {
+      max-width: 600px;
+      margin: 40px auto;
+      background-color: #0f172a;
+      border: 1px solid #1e293b;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+    }
+    .header {
+      background: linear-gradient(135deg, #0f172a 0%, #450a0a 100%);
+      padding: 35px 30px;
+      text-align: center;
+      position: relative;
+      border-bottom: 2px solid #ef4444;
+      box-shadow: inset 0 0 40px rgba(239, 68, 68, 0.15);
+    }
+    .badge-container {
+      display: inline-block;
+      margin-bottom: 12px;
+    }
+    .badge {
+      background-color: #991b1b;
+      color: #fca5a5;
+      padding: 6px 14px;
+      border-radius: 9999px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      display: inline-flex;
+      align-items: center;
+    }
+    .dot {
+      width: 8px;
+      height: 8px;
+      background-color: #ef4444;
+      border-radius: 50%;
+      margin-right: 8px;
+      display: inline-block;
+      animation: pulse 2s infinite;
+    }
+    .title {
+      font-size: 24px;
+      font-weight: 800;
+      margin: 0;
+      color: #ffffff;
+      letter-spacing: -0.025em;
+    }
+    .content {
+      padding: 30px;
+    }
+    .intro {
+      font-size: 15px;
+      color: #94a3b8;
+      line-height: 1.6;
+      margin-top: 0;
+      margin-bottom: 24px;
+    }
+    .grid-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 8px;
+      margin-bottom: 24px;
+    }
+    .card {
+      background-color: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 8px;
+      padding: 12px 16px;
+      width: 50%;
+    }
+    .card-label {
+      font-size: 11px;
+      color: #64748b;
+      text-transform: uppercase;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      margin-bottom: 4px;
+    }
+    .card-value {
+      font-size: 14px;
+      font-weight: 700;
+      color: #e2e8f0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .card-value.highlight-red {
+      color: #ef4444;
+    }
+    .card-value.highlight-blue {
+      color: #3b82f6;
+    }
+    .section-title {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #475569;
+      margin-bottom: 12px;
+      border-bottom: 1px solid #1e293b;
+      padding-bottom: 6px;
+    }
+    .tags-container {
+      margin-bottom: 30px;
+      line-height: 2.2;
+    }
+    .tag {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      margin-right: 6px;
+    }
+    .tag-sec {
+      background-color: #172554;
+      color: #93c5fd;
+      border: 1px solid #1e3a8a;
+    }
+    .tag-scanner {
+      background-color: #450a0a;
+      color: #fca5a5;
+      border: 1px solid #7f1d1d;
+    }
+    .tag-gate {
+      background-color: #064e3b;
+      color: #6ee7b7;
+      border: 1px solid #065f46;
+    }
+    .tag-audit {
+      background-color: #3b0764;
+      color: #d8b4fe;
+      border: 1px solid #581c87;
+    }
+    .actions {
+      text-align: center;
+      margin-bottom: 10px;
+    }
+    .btn {
+      display: inline-block;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 700;
+      text-decoration: none;
+      margin: 0 8px;
+    }
+    .btn-primary {
+      background-color: #ef4444;
+      color: #ffffff;
+      border: 1px solid #ef4444;
+    }
+    .btn-secondary {
+      background-color: transparent;
+      color: #ffffff;
+      border: 1px solid #475569;
+    }
+    .footer {
+      background-color: #020617;
+      padding: 24px;
+      text-align: center;
+      border-top: 1px solid #1e293b;
+    }
+    .footer-text {
+      font-size: 12px;
+      color: #64748b;
+      margin: 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="badge-container">
+        <span class="badge"><span class="dot"></span>Build Failed</span>
+      </div>
+      <h1 class="title">SecureRAG Hub — CD Alert</h1>
+    </div>
+    <div class="content">
+      <p class="intro">Bonjour, le build de la pipeline de déploiement continu (CD) a échoué. Vous trouverez ci-dessous les détails du build ainsi que les outils de sécurité impliqués.</p>
+      
+      <table class="grid-table">
+        <tr>
+          <td class="card">
+            <div class="card-label">Pipeline</div>
+            <div class="card-value">${jobName}</div>
+          </td>
+          <td class="card">
+            <div class="card-label">Build N°</div>
+            <div class="card-value highlight-red">#${buildNumber}</div>
+          </td>
+        </tr>
+        <tr>
+          <td class="card">
+            <div class="card-label">Branche Git</div>
+            <div class="card-value highlight-blue">${gitBranch}</div>
+          </td>
+          <td class="card">
+            <div class="card-label">Commit SHA</div>
+            <div class="card-value">${gitCommitShort}</div>
+          </td>
+        </tr>
+        <tr>
+          <td class="card">
+            <div class="card-label">Durée</div>
+            <div class="card-value">${buildDuration}</div>
+          </td>
+          <td class="card">
+            <div class="card-label">Environnement</div>
+            <div class="card-value">DevSecOps CD</div>
+          </td>
+        </tr>
+      </table>
+
+      <div class="section-title">Outils de sécurité CD actifs</div>
+      <div class="tags-container">
+        <span class="tag tag-scanner">Trivy Image Scan</span>
+        <span class="tag tag-sec">Cosign Signing</span>
+        <span class="tag tag-sec">Cosign Verification</span>
+        <span class="tag tag-scanner">Syft SBOM</span>
+        <span class="tag tag-gate">Supply Chain Gate</span>
+        <span class="tag tag-gate">Release Attestation</span>
+        <span class="tag tag-gate">SLSA Provenance</span>
+        <span class="tag tag-audit">OWASP ZAP DAST</span>
+      </div>
+
+      <div class="actions">
+        <a href="${consoleUrl}" class="btn btn-primary">Voir la console</a>
+        <a href="${buildUrl}" class="btn btn-secondary">Détails du build</a>
+      </div>
+    </div>
+    <div class="footer">
+      <p class="footer-text">SecureRAG Hub — Système d'Intégration et de Déploiement Continus</p>
+    </div>
+  </div>
+</body>
+</html>
+"""
+
           mail to: params.NOTIFICATION_EMAIL,
+               mimeType: 'text/html',
                subject: "🔴 [Jenkins] Échec du build : ${env.JOB_NAME} #${env.BUILD_NUMBER}",
-               body: """Bonjour,
-
-Le build de la pipeline ${env.JOB_NAME} (#${env.BUILD_NUMBER}) a échoué.
-
-Détails du build :
---------------------------------------------------
-📌 Pipeline : ${env.JOB_NAME}
-🔢 Build : #${env.BUILD_NUMBER}
-🌿 Branche Git : ${env.GIT_BRANCH ?: 'N/A'}
-💾 Commit SHA : ${env.GIT_COMMIT ?: 'N/A'}
-🔗 URL du build : ${env.BUILD_URL}
-💻 Console de log : ${env.BUILD_URL}console
---------------------------------------------------
-
-Veuillez inspecter les résultats des tests, la console et les artefacts de sécurité associés à ce build pour identifier la cause de l'erreur.
-
-Cordialement,
-Service de notification Jenkins SecureRAG Hub."""
+               body: htmlBody
         }
       }
     }
