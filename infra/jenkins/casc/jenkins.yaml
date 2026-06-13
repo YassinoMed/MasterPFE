@@ -46,10 +46,10 @@ unclassified:
     smtpPort: "587"
     useSsl: false
     useTls: true
+    useSMTPAuth: true
+    smtpAuthUserName: "${readFileOrDefault:/run/jenkins-secrets/gmail-user:}"
+    smtpAuthPasswordSecret: "${readFileOrDefault:/run/jenkins-secrets/gmail-app-password:}"
     replyToAddress: "${readFileOrDefault:/run/jenkins-secrets/gmail-user:}"
-    authentication:
-      username: "${readFileOrDefault:/run/jenkins-secrets/gmail-user:}"
-      password: "${readFileOrDefault:/run/jenkins-secrets/gmail-app-password:}"
 
 jobs:
   - file: /var/jenkins_home/job_dsl/securerag-hub-ci.groovy
