@@ -33,12 +33,12 @@ credentials:
               description: "SSH deploy key for recette machine (63.250.59.72)"
               privateKeySource:
                 directEntry:
-                  privateKey: "${readFileOrDefault:/run/jenkins-secrets/recette-deploy-key:}"
+                  privateKey: "${readFile:/run/jenkins-secrets/recette-deploy-key}"
 
 unclassified:
   location:
     url: "${JENKINS_URL}"
-    adminAddress: "${readFileOrDefault:/run/jenkins-secrets/gmail-user:}"
+    adminAddress: "${readFile:/run/jenkins-secrets/gmail-user}"
   timestamper:
     allPipelines: true
   mailer:
@@ -46,10 +46,10 @@ unclassified:
     smtpPort: "587"
     useSsl: false
     useTls: true
-    useSMTPAuth: true
-    smtpAuthUserName: "${readFileOrDefault:/run/jenkins-secrets/gmail-user:}"
-    smtpAuthPasswordSecret: "${readFileOrDefault:/run/jenkins-secrets/gmail-app-password:}"
-    replyToAddress: "${readFileOrDefault:/run/jenkins-secrets/gmail-user:}"
+    authentication:
+      username: "${readFile:/run/jenkins-secrets/gmail-user}"
+      password: "${readFile:/run/jenkins-secrets/gmail-app-password}"
+    replyToAddress: "${readFile:/run/jenkins-secrets/gmail-user}"
 
 jobs:
   - file: /var/jenkins_home/job_dsl/securerag-hub-ci.groovy

@@ -23,6 +23,7 @@ pipelineJob('securerag-hub-cd') {
         stringParam('TARGET_IMAGE_TAG', 'release-local', 'Promoted image tag deployed after verification.')
         booleanParam('RUN_DEPLOY_KIND', true, 'Deploy the promoted images to the local kind cluster.')
         booleanParam('RUN_POSTDEPLOY_VALIDATION', true, 'Run post-deployment validation after deployment.')
+        stringParam('NOTIFICATION_EMAIL', 'med.yassine.bouneb@proton.me', 'Email address to notify on build failures. Leave empty to disable.')
     }
     logRotator {
         numToKeep(20)

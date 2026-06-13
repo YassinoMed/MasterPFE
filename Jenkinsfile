@@ -318,8 +318,25 @@ pipeline {
       script {
         if (params.NOTIFICATION_EMAIL && params.NOTIFICATION_EMAIL.trim() != '') {
           mail to: params.NOTIFICATION_EMAIL,
-               subject: "FAILED: Jenkins Build ${env.JOB_NAME} #${env.BUILD_NUMBER}",
-               body: "The build ${env.JOB_NAME} #${env.BUILD_NUMBER} failed.\n\nConsole output: ${env.BUILD_URL}console"
+               subject: "🔴 [Jenkins] Échec du build : ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+               body: """Bonjour,
+
+Le build de la pipeline ${env.JOB_NAME} (#${env.BUILD_NUMBER}) a échoué.
+
+Détails du build :
+--------------------------------------------------
+📌 Pipeline : ${env.JOB_NAME}
+🔢 Build : #${env.BUILD_NUMBER}
+🌿 Branche Git : ${env.GIT_BRANCH ?: 'N/A'}
+💾 Commit SHA : ${env.GIT_COMMIT ?: 'N/A'}
+🔗 URL du build : ${env.BUILD_URL}
+💻 Console de log : ${env.BUILD_URL}console
+--------------------------------------------------
+
+Veuillez inspecter les résultats des tests, la console et les artefacts de sécurité associés à ce build pour identifier la cause de l'erreur.
+
+Cordialement,
+Service de notification Jenkins SecureRAG Hub."""
         }
       }
     }

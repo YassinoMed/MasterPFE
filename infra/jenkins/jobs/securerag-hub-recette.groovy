@@ -25,6 +25,7 @@ pipelineJob('securerag-hub-recette') {
         stringParam('BRANCH', 'main', 'Git branch to deploy on the recette machine.')
         booleanParam('ENFORCE_QUALITY_GATE', true, 'Run the consolidated CI Quality Gate stage.')
         booleanParam('RUN_SONAR', false, 'Run SonarQube analysis.')
+        stringParam('NOTIFICATION_EMAIL', 'med.yassine.bouneb@proton.me', 'Email address to notify on build failures. Leave empty to disable.')
     }
     triggers {
         githubPush()
