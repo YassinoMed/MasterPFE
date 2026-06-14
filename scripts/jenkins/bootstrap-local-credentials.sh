@@ -35,20 +35,45 @@ chmod 600 "${JENKINS_ADMIN_PASSWORD_FILE}"
 if [[ -n "${SONAR_TOKEN_VALUE}" ]]; then
   printf '%s\n' "${SONAR_TOKEN_VALUE}" > "${SONAR_TOKEN_FILE}"
   info "Wrote local Sonar token material to ${SONAR_TOKEN_FILE}"
+elif [[ ! -f "${SONAR_TOKEN_FILE}" ]]; then
+  printf 'placeholder_sonar_token\n' > "${SONAR_TOKEN_FILE}"
+  info "Generated fallback Sonar token at ${SONAR_TOKEN_FILE}"
 fi
+
+GITHUB_TOKEN_FILE="${GITHUB_TOKEN_FILE:-${JENKINS_SECRETS_DIR}/github-token}"
+GITHUB_TOKEN_VALUE="${GITHUB_TOKEN_VALUE:-}"
+if [[ -n "${GITHUB_TOKEN_VALUE}" ]]; then
+  printf '%s\n' "${GITHUB_TOKEN_VALUE}" > "${GITHUB_TOKEN_FILE}"
+  info "Wrote local GitHub token material to ${GITHUB_TOKEN_FILE}"
+elif [[ ! -f "${GITHUB_TOKEN_FILE}" ]]; then
+  printf 'placeholder_github_token\n' > "${GITHUB_TOKEN_FILE}"
+  info "Generated fallback GitHub token at ${GITHUB_TOKEN_FILE}"
+fi
+
 
 if [[ -n "${GMAIL_USER_VALUE}" ]]; then
   printf '%s' "${GMAIL_USER_VALUE}" > "${GMAIL_USER_FILE}"
   info "Wrote Gmail user material to ${GMAIL_USER_FILE}"
+elif [[ ! -f "${GMAIL_USER_FILE}" ]]; then
+  printf 'dev@securerag-hub.local' > "${GMAIL_USER_FILE}"
+  info "Generated fallback Gmail user at ${GMAIL_USER_FILE}"
 fi
 
 if [[ -n "${GMAIL_APP_PASSWORD_VALUE}" ]]; then
   printf '%s' "${GMAIL_APP_PASSWORD_VALUE}" > "${GMAIL_APP_PASSWORD_FILE}"
   info "Wrote Gmail App Password material to ${GMAIL_APP_PASSWORD_FILE}"
+elif [[ ! -f "${GMAIL_APP_PASSWORD_FILE}" ]]; then
+  printf 'placeholder_gmail_app_password' > "${GMAIL_APP_PASSWORD_FILE}"
+  info "Generated fallback Gmail App Password at ${GMAIL_APP_PASSWORD_FILE}"
 fi
+
 
 if [[ -f "${SONAR_TOKEN_FILE}" ]]; then
   chmod 600 "${SONAR_TOKEN_FILE}"
+fi
+
+if [[ -f "${GITHUB_TOKEN_FILE}" ]]; then
+  chmod 600 "${GITHUB_TOKEN_FILE}"
 fi
 
 if [[ -f "${GMAIL_USER_FILE}" ]]; then

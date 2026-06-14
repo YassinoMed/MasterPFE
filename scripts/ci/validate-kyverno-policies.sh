@@ -2,6 +2,8 @@
 
 set -euo pipefail
 
+export KUBECONFIG=""
+
 REPORT_DIR="${REPORT_DIR:-artifacts/security}"
 REPORT_FILE="${REPORT_FILE:-${REPORT_DIR}/kyverno-policy-validation.md}"
 REQUIRE_KYVERNO_CLI="${REQUIRE_KYVERNO_CLI:-false}"

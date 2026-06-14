@@ -85,4 +85,17 @@ if (Files.exists(sonarTokenPath)) {
     )
 }
 
+def githubTokenPath = secretsDir.resolve('github-token')
+if (Files.exists(githubTokenPath)) {
+    upsertCredential(
+        new StringCredentialsImpl(
+            CredentialsScope.GLOBAL,
+            'github-token-secret',
+            'SecureRAG Hub GitHub API Token',
+            Secret.fromString(Files.readString(githubTokenPath).trim())
+        ),
+        'github-token-secret'
+    )
+}
+
 provider.save()
