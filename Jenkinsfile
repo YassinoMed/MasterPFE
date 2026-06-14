@@ -95,6 +95,10 @@ pipeline {
             if [ -f "${app}/package-lock.json" ]; then
               echo "[INFO] Installing npm dependencies for ${app}"
               (cd "${app}" && npm ci --ignore-scripts)
+              if grep -q '"build":' "${app}/package.json"; then
+                echo "[INFO] Building frontend assets for ${app}"
+                (cd "${app}" && npm run build)
+              fi
             fi
           done
         '''
