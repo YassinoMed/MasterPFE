@@ -19,5 +19,7 @@ paths = [
 ]
 regexes = [
   '''(?i)example[_-]?(token|secret|key|password)''',
-  '''(?i)(dummy|fake|sample|test|changeme|not[-_]?real)[_-]?(token|secret|key|password)?'''
+  '''(?i)(dummy|fake|sample|test|changeme|not[-_]?real)[_-]?(token|secret|key|password)?''',
+  # Placeholder générique dans la config Alertmanager, ne correspond à aucun webhook réel — voir alertmanager.yaml ligne 10
+  '''https://hooks\.slack\.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX'''
 ]

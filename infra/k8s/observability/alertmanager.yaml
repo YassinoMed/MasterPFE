@@ -1,3 +1,4 @@
+---
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -7,7 +8,8 @@ data:
   alertmanager.yml: |
     global:
       resolve_timeout: 5m
-      slack_api_url: "https://hooks.slack.com/services/T_YOUR_WORKSPACE_ID/B_YOUR_CHANNEL_ID/YOUR_TOKEN_VALUE"
+      slack_api_url: >-
+        https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX
     route:
       receiver: securerag-default
       group_by: [alertname, namespace, service]
@@ -25,7 +27,8 @@ data:
     receivers:
       - name: securerag-default
         webhook_configs:
-          - url: "http://alertmanager-webhook.securerag-monitoring.svc.cluster.local:9095/alert"
+          - url: >-
+              http://alertmanager-webhook.securerag-monitoring.svc.cluster.local:9095/alert
             send_resolved: true
             max_alerts: 10
         slack_configs:
@@ -35,7 +38,8 @@ data:
             send_resolved: true
       - name: securerag-critical
         webhook_configs:
-          - url: "http://alertmanager-webhook.securerag-monitoring.svc.cluster.local:9095/critical"
+          - url: >-
+              http://alertmanager-webhook.securerag-monitoring.svc.cluster.local:9095/critical
             send_resolved: true
         slack_configs:
           - channel: "#securerag-critical"
@@ -44,11 +48,13 @@ data:
             send_resolved: true
       - name: securerag-runtime
         webhook_configs:
-          - url: "http://alertmanager-webhook.securerag-monitoring.svc.cluster.local:9095/runtime"
+          - url: >-
+              http://alertmanager-webhook.securerag-monitoring.svc.cluster.local:9095/runtime
             send_resolved: true
       - name: securerag-admission
         webhook_configs:
-          - url: "http://alertmanager-webhook.securerag-monitoring.svc.cluster.local:9095/admission"
+          - url: >-
+              http://alertmanager-webhook.securerag-monitoring.svc.cluster.local:9095/admission
             send_resolved: true
     inhibit_rules:
       - source_matchers: [severity="critical"]
@@ -63,37 +69,54 @@ metadata:
 spec:
   replicas: 1
   selector:
-    matchLabels: { app.kubernetes.io/name: alertmanager }
+    matchLabels:
+      app.kubernetes.io/name: alertmanager
   template:
     metadata:
-      labels: { app.kubernetes.io/name: alertmanager }
+      labels:
+        app.kubernetes.io/name: alertmanager
     spec:
       securityContext:
         runAsNonRoot: true
         runAsUser: 65534
         fsGroup: 65534
-        seccompProfile: { type: RuntimeDefault }
+        seccompProfile:
+          type: RuntimeDefault
       containers:
         - name: alertmanager
           image: prom/alertmanager:v0.27.0
           args:
             - --config.file=/etc/alertmanager/alertmanager.yml
             - --storage.path=/alertmanager
-          ports: [{ name: http, containerPort: 9093 }]
+          ports:
+            - name: http
+              containerPort: 9093
           resources:
-            requests: { cpu: 50m, memory: 64Mi }
-            limits: { cpu: 200m, memory: 256Mi }
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 256Mi
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
-            capabilities: { drop: [ALL] }
+            capabilities:
+              drop:
+                - ALL
           volumeMounts:
-            - { name: config, mountPath: /etc/alertmanager }
-            - { name: data, mountPath: /alertmanager }
+            - name: config
+              mountPath: /etc/alertmanager
+            - name: data
+              mountPath: /alertmanager
           readinessProbe:
-            httpGet: { path: /-/ready, port: http }
+            httpGet:
+              path: /-/ready
+              port: http
       volumes:
-        - { name: config, configMap: { name: alertmanager-config } }
+        - name: config
+          configMap:
+            name: alertmanager-config
         - name: data
           emptyDir: {}
 ---
@@ -104,5 +127,9 @@ metadata:
   namespace: securerag-monitoring
 spec:
   type: ClusterIP
-  selector: { app.kubernetes.io/name: alertmanager }
-  ports: [{ name: http, port: 9093, targetPort: 9093 }]
+  selector:
+    app.kubernetes.io/name: alertmanager
+  ports:
+    - name: http
+      port: 9093
+      targetPort: 9093
