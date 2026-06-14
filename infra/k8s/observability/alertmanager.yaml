@@ -7,7 +7,7 @@ data:
   alertmanager.yml: |
     global:
       resolve_timeout: 5m
-      slack_api_url: "https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX"
+      slack_api_url: "https://hooks.slack.com/services/T_YOUR_WORKSPACE_ID/B_YOUR_CHANNEL_ID/YOUR_TOKEN_VALUE"
     route:
       receiver: securerag-default
       group_by: [alertname, namespace, service]
