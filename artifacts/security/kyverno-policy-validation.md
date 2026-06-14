@@ -1,6 +1,6 @@
 # Kyverno Policy Validation - SecureRAG Hub
 
-- Generated at UTC: `2026-06-14T17:42:51Z`
+- Generated at UTC: `2026-06-14T17:53:27Z`
 - Policy overlay: `infra/k8s/policies/kyverno`
 - Resource overlay: `infra/k8s/overlays/demo`
 - Static hardening validation: `TERMINÉ`

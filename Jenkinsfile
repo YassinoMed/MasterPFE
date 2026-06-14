@@ -178,31 +178,33 @@ pipeline {
             --output security/reports/semgrep.json \
             --error
 
-          JENKINS_SOURCE=$(docker inspect securerag-jenkins --format='{{range .Mounts}}{{if eq .Destination "/var/jenkins_home"}}{{or .Name .Source}}{{end}}{{end}}' 2>/dev/null || echo "")
+          CONTAINER_ID=$(hostname)
+          MOUNTS=$(docker inspect "${CONTAINER_ID}" --format='{{range .Mounts}}{{.Destination}}:{{.Source}} {{end}}' 2>/dev/null || \
+                   docker inspect securerag-jenkins --format='{{range .Mounts}}{{.Destination}}:{{.Source}} {{end}}' 2>/dev/null || echo "")
 
-          if [ -n "${JENKINS_SOURCE}" ]; then
-            docker run --rm \
-              -v "${JENKINS_SOURCE}:/var/jenkins_home" \
-              -w "$PWD" \
-              "${GITLEAKS_IMAGE}" \
-              dir "$PWD" \
-              --config .gitleaks.toml \
-              --report-format json \
-              --report-path security/reports/gitleaks.json
-          else
-            WORKSPACE_HOST_PATH=$(docker inspect securerag-jenkins --format='{{range .Mounts}}{{if eq .Destination "/workspace"}}{{.Source}}{{end}}{{end}}' 2>/dev/null || echo "$PWD")
-            if [ -z "${WORKSPACE_HOST_PATH}" ]; then
-              WORKSPACE_HOST_PATH="$PWD"
+          HOST_PWD=""
+          for m in ${MOUNTS}; do
+            dest="${m%%:*}"
+            src="${m#*:}"
+            if [ -n "${dest}" ] && [[ "$PWD" == "${dest}"* ]]; then
+              rel="${PWD#${dest}}"
+              HOST_PWD="${src}${rel}"
+              break
             fi
-            docker run --rm \
-              -v "${WORKSPACE_HOST_PATH}:/repo" \
-              -w /repo \
-              "${GITLEAKS_IMAGE}" \
-              dir /repo \
-              --config .gitleaks.toml \
-              --report-format json \
-              --report-path security/reports/gitleaks.json
+          done
+
+          if [ -z "${HOST_PWD}" ]; then
+            HOST_PWD="$PWD"
           fi
+
+          docker run --rm \
+            -v "${HOST_PWD}:/repo" \
+            -w /repo \
+            "${GITLEAKS_IMAGE}" \
+            dir /repo \
+            --config .gitleaks.toml \
+            --report-format json \
+            --report-path security/reports/gitleaks.json
 
           trivy fs \
             --config security/trivy/trivy.yaml \

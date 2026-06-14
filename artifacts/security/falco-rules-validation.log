@@ -1,15 +1,17 @@
-[OK] ConfigMap YAML well-formed: /Users/mohamedyassine/Desktop/PFE/Master/.claude/worktrees/festive-moore-d50050/infra/k8s/runtime-detection/configmap-rules.yaml
-[OK]   /Users/mohamedyassine/Desktop/PFE/Master/.claude/worktrees/festive-moore-d50050/infra/k8s/runtime-detection/configmap-rules.yaml (YAML)
+[OK] ConfigMap YAML well-formed: /root/MasterPFE/infra/k8s/runtime-detection/configmap-rules.yaml
+[OK]   /root/MasterPFE/infra/k8s/runtime-detection/configmap-rules.yaml (YAML)
 [INFO] Validating Falco rules via falcosecurity/falco container
-[INFO] -> /Users/mohamedyassine/Desktop/PFE/Master/.claude/worktrees/festive-moore-d50050/security/falco/custom-rules.yaml
-2026-04-30T12:32:34+0000: Falco version: 0.38.2 (aarch64)
-2026-04-30T12:32:34+0000: Falco initialized with configuration files:
-2026-04-30T12:32:34+0000:    /etc/falco/falco.yaml
-2026-04-30T12:32:34+0000: System info: Linux version 6.12.76-linuxkit (root@buildkitsandbox) (gcc (Alpine 15.2.0) 15.2.0, GNU ld (GNU Binutils) 2.45.1) #1 SMP Sun Mar  8 14:41:59 UTC 2026
-2026-04-30T12:32:34+0000: Validating rules file(s):
-2026-04-30T12:32:34+0000:    /etc/falco/falco_rules.yaml
-2026-04-30T12:32:34+0000:    /rules.yaml
-2026-04-30T12:32:34+0000: /rules.yaml: Ok, with warnings
+[INFO] -> /root/MasterPFE/security/falco/custom-rules.yaml
+2026-06-14T17:56:30+0000: Falco version: 0.38.2 (x86_64)
+2026-06-14T17:56:30+0000: Falco initialized with configuration files:
+2026-06-14T17:56:30+0000:    /etc/falco/falco.yaml
+2026-06-14T17:56:30+0000: System info: Linux version 6.8.0-124-generic (buildd@lcy02-amd64-019) (x86_64-linux-gnu-gcc-13 (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0, GNU ld (GNU Binutils for Ubuntu) 2.42) #124-Ubuntu SMP PREEMPT_DYNAMIC Tue May 26 13:00:45 UTC 2026
+2026-06-14T17:56:30+0000: Validating rules file(s):
+2026-06-14T17:56:30+0000:    /etc/falco/falco_rules.yaml
+2026-06-14T17:56:30+0000:    /rules.yaml
+/etc/falco/falco_rules.yaml: Ok
+/rules.yaml: Ok, with warnings
+2026-06-14T17:56:30+0000: /rules.yaml: Ok, with warnings
 2 Warnings:
 In rules content: (/rules.yaml:0:0)
     rule 'SecureRAG Suspicious K8s API Verb': (/rules.yaml:178:2)
@@ -25,6 +27,4 @@ In rules content: (/rules.yaml:0:0)
   ^
 ------
 LOAD_UNUSED_MACRO (Unused macro): Macro not referred to by any other rule/macro
-/etc/falco/falco_rules.yaml: Ok
-/rules.yaml: Ok, with warnings
-[OK]   /Users/mohamedyassine/Desktop/PFE/Master/.claude/worktrees/festive-moore-d50050/security/falco/custom-rules.yaml
+[OK]   /root/MasterPFE/security/falco/custom-rules.yaml

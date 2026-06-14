@@ -1,9 +1,12 @@
-# kube-score validation — Status: `PRÊT_NON_EXÉCUTÉ`
+# kube-score validation — Status: `TERMINÉ`
 
-`kube-score` binary is not present in this CI agent. Install:
+| Overlay | CRITICAL | WARNING |
+|---------|---------:|--------:|
+| `infra/k8s/overlays/demo` | 0 | 0 |
+| `infra/k8s/overlays/production` | 0 | 0 |
 
-```
-go install github.com/zegl/kube-score/cmd/kube-score@latest
-# or
-brew install kube-score
-```
+**Seuils :** CRITICAL ≤ 0 · WARNING ≤ 0 · STRICT_KUBE_SCORE=true
+
+Aucun dépassement de seuil.
+
+Detailed log: `artifacts/security/kube-score-raw.txt`.

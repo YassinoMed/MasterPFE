@@ -37,20 +37,28 @@ if [ "${SKIP_FALCO_DOCKER:-false}" = "false" ] && command -v docker >/dev/null 2
   echo "[INFO] -> ${RULES_FILE}" | tee -a "${LOG}"
 
   CONTAINER_ID=$(hostname)
-  JENKINS_SOURCE=$(docker inspect "${CONTAINER_ID}" --format='{{range .Mounts}}{{if eq .Destination "/var/jenkins_home"}}{{or .Name .Source}}{{end}}{{end}}' 2>/dev/null || echo "")
-  if [ -z "${JENKINS_SOURCE}" ]; then
-    JENKINS_SOURCE=$(docker inspect securerag-jenkins --format='{{range .Mounts}}{{if eq .Destination "/var/jenkins_home"}}{{or .Name .Source}}{{end}}{{end}}' 2>/dev/null || echo "")
+  MOUNTS=$(docker inspect "${CONTAINER_ID}" --format='{{range .Mounts}}{{.Destination}}:{{.Source}} {{end}}' 2>/dev/null || \
+           docker inspect securerag-jenkins --format='{{range .Mounts}}{{.Destination}}:{{.Source}} {{end}}' 2>/dev/null || echo "")
+
+  HOST_RULES_FILE=""
+  for m in ${MOUNTS}; do
+    dest="${m%%:*}"
+    src="${m#*:}"
+    if [ -n "${dest}" ] && [[ "${RULES_FILE}" == "${dest}"* ]]; then
+      rel="${RULES_FILE#${dest}}"
+      HOST_RULES_FILE="${src}${rel}"
+      break
+    fi
+  done
+
+  if [ -n "${HOST_RULES_FILE}" ]; then
+    echo "[INFO] Using Docker-in-Docker path translation: ${RULES_FILE} -> ${HOST_RULES_FILE}" | tee -a "${LOG}"
+  else
+    HOST_RULES_FILE="${RULES_FILE}"
   fi
 
-  docker_args=()
-  if [ -n "${JENKINS_SOURCE}" ]; then
-    echo "[INFO] Running in Jenkins container. Using Docker-in-Docker path translation." | tee -a "${LOG}"
-    docker_args+=("-v" "${JENKINS_SOURCE}:/var/jenkins_home:ro")
-    validate_target="${RULES_FILE}"
-  else
-    docker_args+=("-v" "${RULES_FILE}:/rules.yaml:ro")
-    validate_target="/rules.yaml"
-  fi
+  docker_args=("-v" "${HOST_RULES_FILE}:/rules.yaml:ro")
+  validate_target="/rules.yaml"
 
   # falco-no-driver skips kmod build. Load bundled rules so built-in macros
   # (container, spawned_process, outbound, open_read, ...) resolve.

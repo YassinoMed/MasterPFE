@@ -375,9 +375,30 @@ pipeline {
         sh '''
           set -euo pipefail
           mkdir -p reports
+
+          CONTAINER_ID=$(hostname)
+          MOUNTS=$(docker inspect "${CONTAINER_ID}" --format='{{range .Mounts}}{{.Destination}}:{{.Source}} {{end}}' 2>/dev/null || \
+                   docker inspect securerag-jenkins --format='{{range .Mounts}}{{.Destination}}:{{.Source}} {{end}}' 2>/dev/null || echo "")
+
+          HOST_REPORTS_DIR=""
+          TARGET_DIR="$(pwd)/reports"
+          for m in ${MOUNTS}; do
+            dest="${m%%:*}"
+            src="${m#*:}"
+            if [ -n "${dest}" ] && [[ "${TARGET_DIR}" == "${dest}"* ]]; then
+              rel="${TARGET_DIR#${dest}}"
+              HOST_REPORTS_DIR="${src}${rel}"
+              break
+            fi
+          done
+
+          if [ -z "${HOST_REPORTS_DIR}" ]; then
+            HOST_REPORTS_DIR="${TARGET_DIR}"
+          fi
+
           echo "[INFO] Running OWASP ZAP API scan against staging"
           docker run --rm --network host \
-            -v "$(pwd)/reports:/zap/wrk:rw" \
+            -v "${HOST_REPORTS_DIR}:/zap/wrk:rw" \
             -e ZAP_FAIL_ON_RISK=High \
             ghcr.io/zaproxy/zaproxy:2.15.0@sha256:d8bd58f01b7a2d36ab2da5744275143a41b12658de3bb30eef794e77241cfd74 \
             zap-api-scan.py \
