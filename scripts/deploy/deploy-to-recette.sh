@@ -194,6 +194,9 @@ else
   echo "[RECETTE] Skipping image build (SKIP_BUILD=true)"
 fi
 
+echo "[RECETTE] Installing Kyverno (Required for ClusterPolicies)"
+bash scripts/deploy/install-kyverno.sh
+
 echo "[RECETTE] Deploying via Kustomize overlay: ${KUSTOMIZE_OVERLAY}"
 REGISTRY_HOST="${REGISTRY_HOST}" \
 IMAGE_PREFIX="${IMAGE_PREFIX}" \
