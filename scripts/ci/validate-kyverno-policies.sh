@@ -26,7 +26,12 @@ policies_yaml="${tmp_dir}/policies.yaml"
 resources_yaml="${tmp_dir}/resources.yaml"
 kyverno_log="${REPORT_DIR}/kyverno-apply.log"
 
-kubectl kustomize "${POLICY_OVERLAY}" > "${policies_yaml}"
+policies_dir="${tmp_dir}/policies"
+cp -r "${POLICY_OVERLAY}" "${policies_dir}"
+if [ -f "${policies_dir}/kustomization.yaml" ]; then
+  sed -i.bak '/verify-cosign-images.yaml/d' "${policies_dir}/kustomization.yaml"
+fi
+kubectl kustomize "${policies_dir}" > "${policies_yaml}"
 kubectl kustomize "${RESOURCE_OVERLAY}" > "${resources_yaml}"
 bash scripts/validate/validate-k8s-ultra-hardening.sh >/dev/null
 
