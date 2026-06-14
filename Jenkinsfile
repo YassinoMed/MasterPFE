@@ -217,8 +217,12 @@ pipeline {
           set -euo pipefail
 
           # Checkov
-          checkov -d infra/k8s/ --config-file security/checkov-config.yaml -o junitxml > security/reports/checkov-k8s.xml || true
-          checkov -d infra/helm/ --config-file security/checkov-config.yaml -o junitxml > security/reports/checkov-helm.xml || true
+          if command -v checkov >/dev/null 2>&1; then
+            checkov -d infra/k8s/ --config-file security/checkov-config.yaml -o junitxml > security/reports/checkov-k8s.xml || true
+            checkov -d infra/helm/ --config-file security/checkov-config.yaml -o junitxml > security/reports/checkov-helm.xml || true
+          else
+            echo "[WARN] checkov is not installed; skipping IaC scan"
+          fi
 
           # Trivy fs scan
           trivy fs . --scanners vuln,config,secret \

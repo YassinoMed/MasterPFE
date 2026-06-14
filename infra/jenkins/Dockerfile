@@ -96,6 +96,8 @@ RUN set -eux; \
 
 ENV PIP_DISABLE_PIP_VERSION_CHECK=1
 
+RUN python3 -m pip install --no-cache-dir checkov --break-system-packages
+
 COPY entrypoint.sh /usr/local/bin/securerag-jenkins-entrypoint.sh
 RUN chmod +x /usr/local/bin/securerag-jenkins-entrypoint.sh
 
