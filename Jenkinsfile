@@ -92,9 +92,9 @@ pipeline {
           for app in ${LARAVEL_APPS}; do
             echo "[INFO] Installing Composer dependencies for ${app}"
             (cd "${app}" && composer install --no-interaction --prefer-dist --no-progress)
-            if [ -f "${app}/package-lock.json" ]; then
+            if [ -f "${app}/package.json" ]; then
               echo "[INFO] Installing npm dependencies for ${app}"
-              (cd "${app}" && npm ci --ignore-scripts)
+              (cd "${app}" && npm install --no-fund --no-audit)
               if grep -q '"build":' "${app}/package.json"; then
                 echo "[INFO] Building frontend assets for ${app}"
                 (cd "${app}" && npm run build)
