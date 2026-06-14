@@ -7,28 +7,6 @@ resources:
 patches:
   - target:
       kind: ClusterPolicy
-      name: (securerag-verify-cosign-images|verify-cosign-images)
-    patch: |-
-      - op: replace
-        path: /spec/validationFailureAction
-        value: Enforce
-  - target:
-      kind: ClusterPolicy
-      name: (securerag-require-pod-security|require-pod-security-restricted)
-    patch: |-
-      - op: replace
-        path: /spec/validationFailureAction
-        value: Enforce
-  - target:
-      kind: ClusterPolicy
-      name: (disallow-privileged-containers)
-    patch: |-
-      - op: replace
-        path: /spec/validationFailureAction
-        value: Enforce
-  - target:
-      kind: ClusterPolicy
-      name: (require-resource-limits|securerag-require-workload-controls)
     patch: |-
       - op: replace
         path: /spec/validationFailureAction

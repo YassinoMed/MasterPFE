@@ -1,6 +1,6 @@
 # SBOM CycloneDX Validation - SecureRAG Hub
 
-- Generated at UTC: `2026-06-10T21:14:58Z`
+- Generated at UTC: `2026-06-14T08:08:36Z`
 - Status: `PRÊT_NON_EXÉCUTÉ`
 - SBOM directory: `artifacts/sbom`
 
