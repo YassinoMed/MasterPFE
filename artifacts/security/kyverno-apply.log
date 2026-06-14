@@ -1,0 +1,18 @@
+
+Applying 18 policy rule(s) to 41 resource(s)...
+policy securerag-restrict-service-exposure -> resource securerag-hub/Service/postgres-auth failed:
+1 - allow-nodeport-only-for-portal-web Only portal-web may use NodePort in the local demo overlay; LoadBalancer is forbidden.
+policy securerag-require-workload-controls -> resource securerag-hub/Deployment/audit-security-service failed:
+1 - require-container-health-probes validation failure: validation error: Every SecureRAG deployment container must declare readiness, liveness and startup probes. rule require-container-health-probes failed at path /livenessProbe/
+policy securerag-require-workload-controls -> resource securerag-hub/Deployment/auth-users failed:
+1 - require-container-health-probes validation failure: validation error: Every SecureRAG deployment container must declare readiness, liveness and startup probes. rule require-container-health-probes failed at path /livenessProbe/
+policy securerag-require-workload-controls -> resource securerag-hub/Deployment/chatbot-manager failed:
+1 - require-container-health-probes validation failure: validation error: Every SecureRAG deployment container must declare readiness, liveness and startup probes. rule require-container-health-probes failed at path /livenessProbe/
+policy securerag-require-workload-controls -> resource securerag-hub/Deployment/conversation-service failed:
+1 - require-container-health-probes validation failure: validation error: Every SecureRAG deployment container must declare readiness, liveness and startup probes. rule require-container-health-probes failed at path /livenessProbe/
+policy securerag-require-workload-controls -> resource securerag-hub/Deployment/portal-web failed:
+1 - require-container-health-probes validation failure: validation error: Every SecureRAG deployment container must declare readiness, liveness and startup probes. rule require-container-health-probes failed at path /livenessProbe/
+policy securerag-require-workload-controls -> resource securerag-hub/Deployment/postgres-auth failed:
+1 - require-container-health-probes validation failure: validation error: Every SecureRAG deployment container must declare readiness, liveness and startup probes. rule require-container-health-probes failed at path /livenessProbe/
+
+pass: 35, fail: 7, warn: 0, error: 0, skip: 0 

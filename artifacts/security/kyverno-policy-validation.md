@@ -1,12 +1,13 @@
 # Kyverno Policy Validation - SecureRAG Hub
 
-- Generated at UTC: `2026-04-20T04:50:12Z`
+- Generated at UTC: `2026-06-14T17:42:51Z`
 - Policy overlay: `infra/k8s/policies/kyverno`
 - Resource overlay: `infra/k8s/overlays/demo`
 - Static hardening validation: `TERMINÉ`
-- Kyverno CLI: `absent`
-- Status: `PRÊT_NON_EXÉCUTÉ`
+- Kyverno CLI: `present`
+- kyverno apply log: `artifacts/security/kyverno-apply.log`
+- Status: `FAIL`
 
 ## Interpretation
 
-Kyverno manifests render correctly and static hardening checks pass. Install the Kyverno CLI to execute `kyverno apply` without a cluster.
+`kyverno apply` reported policy failures. Inspect `artifacts/security/kyverno-apply.log`.
