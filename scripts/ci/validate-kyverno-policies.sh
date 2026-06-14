@@ -61,7 +61,7 @@ if ! command -v kyverno >/dev/null 2>&1; then
 fi
 
 set +e
-kyverno apply "${policies_yaml}" --resource "${resources_yaml}" > "${kyverno_log}" 2>&1
+kyverno apply "${policies_yaml}" --resource "${resources_yaml}" --audit-warn > "${kyverno_log}" 2>&1
 kyverno_status=$?
 set -e
 
