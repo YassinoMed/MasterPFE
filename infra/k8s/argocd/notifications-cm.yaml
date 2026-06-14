@@ -86,13 +86,4 @@ data:
         - on-sync-failed
         - on-health-degraded
         - on-deployed
----
-apiVersion: v1
-kind: Secret
-metadata:
-  name: argocd-notifications-secret
-  namespace: argocd
-type: Opaque
-stringData:
-  # ⚠️ À encrypter via SOPS avant commit. Placeholder ici pour la doc.
-  slack-webhook-url: "https://hooks.slack.com/services/REPLACE/ME/PLACEHOLDER"
+

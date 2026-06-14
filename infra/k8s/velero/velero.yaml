@@ -1,0 +1,40 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: velero
+  labels:
+    app.kubernetes.io/name: velero
+---
+# Ce fichier est un squelette pour l'installation Velero via Helm ou kubectl.
+# Pour installer Velero avec Minio local (pour la recette) :
+# velero install \
+#   --provider aws \
+#   --plugins velero/velero-plugin-for-aws:v1.7.0 \
+#   --bucket velero-backups \
+#   --secret-file credentials-velero \
+#   --use-volume-snapshots=false \
+#   --backup-location-config region=minio,s3ForcePathStyle="true",s3Url=http://minio.velero.svc:9000
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: velero-daily-backup
+  namespace: velero
+spec:
+  schedule: "0 2 * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          serviceAccountName: velero
+          containers:
+          - name: velero
+            image: velero/velero:v1.11.1
+            command:
+            - /velero
+            - backup
+            - create
+            - daily-backup-$(date +\%Y\%m\%d)
+            - --include-namespaces=securerag-hub,securerag-monitoring,falco
+            - --default-volumes-to-fs-backup
+          restartPolicy: OnFailure

@@ -40,3 +40,8 @@ spec:
                       MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEGcgrdP3tSi/L/aFyN+bgiAuZmXsu
                       90qp08CJeIPDZLlTC6mvehJmxdZozuw692DnWByovXjlN+wXKq6bfWTZeA==
                       -----END PUBLIC KEY-----
+                - keyless:
+                    subject: "https://github.com/YassinoMed/MasterPFE/*"
+                    issuer: "https://token.actions.githubusercontent.com"
+                    rekor:
+                      url: "https://rekor.sigstore.dev"

@@ -23,6 +23,11 @@ data:
       checkcert: false
       expireafter: 0
       extralabels: "category:runtime,source:falco"
+    syslog:
+      host: "wazuh-manager.wazuh.svc.cluster.local"
+      port: 514
+      protocol: "udp"
+      format: "json"
 ---
 apiVersion: apps/v1
 kind: Deployment

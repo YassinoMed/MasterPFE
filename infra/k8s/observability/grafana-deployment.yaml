@@ -128,13 +128,4 @@ spec:
   type: ClusterIP
   selector: { app.kubernetes.io/name: grafana }
   ports: [{ name: http, port: 3000, targetPort: 3000 }]
----
-apiVersion: v1
-kind: Secret
-metadata:
-  name: grafana-admin
-  namespace: securerag-monitoring
-type: Opaque
-stringData:
-  # NOTE: rotate via SOPS/age or External Secrets Operator before production.
-  password: "change-me-securerag-grafana"
+

@@ -34,6 +34,7 @@ services:
       - wazuh-manager-logs:/var/ossec/logs
       - wazuh-manager-etc:/var/ossec/etc
       - ./decoders:/var/ossec/etc/decoders/custom
+      - ./rules:/var/ossec/etc/rules/custom
     depends_on:
       - wazuh-indexer
 

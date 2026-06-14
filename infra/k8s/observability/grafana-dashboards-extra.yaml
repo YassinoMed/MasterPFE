@@ -1,0 +1,69 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-dashboard-extra
+  namespace: securerag-monitoring
+  labels:
+    grafana_dashboard: "1"
+    app.kubernetes.io/category: extra
+data:
+  jenkins.json: |
+    {
+      "title": "Jenkins CI/CD",
+      "uid": "securerag-jenkins",
+      "schemaVersion": 38,
+      "version": 1,
+      "refresh": "30s",
+      "time": { "from": "now-24h", "to": "now" },
+      "panels": [
+        {
+          "id": 1, "type": "stat",
+          "title": "Jenkins Builds (24h)",
+          "gridPos": { "x": 0, "y": 0, "w": 6, "h": 4 },
+          "targets": [{
+            "expr": "sum(increase(jenkins_builds_total[24h]))",
+            "refId": "A"
+          }]
+        }
+      ]
+    }
+  wazuh.json: |
+    {
+      "title": "Wazuh SIEM",
+      "uid": "securerag-wazuh",
+      "schemaVersion": 38,
+      "version": 1,
+      "refresh": "30s",
+      "time": { "from": "now-24h", "to": "now" },
+      "panels": [
+        {
+          "id": 1, "type": "stat",
+          "title": "Wazuh Active Agents",
+          "gridPos": { "x": 0, "y": 0, "w": 6, "h": 4 },
+          "targets": [{
+            "expr": "sum(wazuh_active_agents)",
+            "refId": "A"
+          }]
+        }
+      ]
+    }
+  trivy.json: |
+    {
+      "title": "Trivy Vulnerabilities",
+      "uid": "securerag-trivy",
+      "schemaVersion": 38,
+      "version": 1,
+      "refresh": "30s",
+      "time": { "from": "now-24h", "to": "now" },
+      "panels": [
+        {
+          "id": 1, "type": "stat",
+          "title": "Critical CVEs",
+          "gridPos": { "x": 0, "y": 0, "w": 6, "h": 4 },
+          "targets": [{
+            "expr": "sum(trivy_vulnerabilities{severity=\"CRITICAL\"})",
+            "refId": "A"
+          }]
+        }
+      ]
+    }

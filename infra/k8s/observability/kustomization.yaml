@@ -10,6 +10,7 @@ resources:
   - prometheus-deployment.yaml
   - grafana-deployment.yaml
   - grafana-dashboards.yaml             # P1-14 dashboards SRE/Sécurité
+  - grafana-dashboards-extra.yaml
   - loki-deployment.yaml
   - alertmanager.yaml
   - networkpolicy.yaml

@@ -234,6 +234,8 @@ pipeline {
           if command -v checkov >/dev/null 2>&1; then
             checkov -d infra/k8s/ --config-file security/checkov-config.yaml -o junitxml > security/reports/checkov-k8s.xml || true
             checkov -d infra/helm/ --config-file security/checkov-config.yaml -o junitxml > security/reports/checkov-helm.xml || true
+            checkov -d platform/ --config-file security/checkov-config.yaml -o junitxml > security/reports/checkov-docker-platform.xml || true
+            checkov -d services-laravel/ --config-file security/checkov-config.yaml -o junitxml > security/reports/checkov-docker-services.xml || true
           else
             echo "[WARN] checkov is not installed; skipping IaC scan"
           fi

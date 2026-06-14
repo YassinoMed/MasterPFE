@@ -101,16 +101,43 @@ pipeline {
         expression { return params.SIGN_RELEASE_CANDIDATES }
       }
       steps {
-        withCredentials([
-          file(credentialsId: 'cosign-private-key', variable: 'COSIGN_KEY'),
-          string(credentialsId: 'cosign-password', variable: 'COSIGN_PASSWORD')
-        ]) {
-          sh '''
-            set -euo pipefail
-            REGISTRY_HOST="${REGISTRY_HOST}" IMAGE_PREFIX="${IMAGE_PREFIX}" IMAGE_TAG="${SOURCE_IMAGE_TAG}" \
-            REPORT_DIR="${REPORT_DIR}" COSIGN_KEY="${COSIGN_KEY}" FAIL_FAST="true" \
-            bash scripts/release/sign-images.sh
-          '''
+        script {
+          def useKeyless = false
+          try {
+            withCredentials([string(credentialsId: 'jenkins-oidc-token', variable: 'TEST_OIDC')]) {
+              useKeyless = true
+            }
+          } catch (Exception e) {
+            echo "[INFO] OIDC Token credential not found. Will use fallback key-pair."
+          }
+
+          if (useKeyless) {
+            withCredentials([string(credentialsId: 'jenkins-oidc-token', variable: 'OIDC_TOKEN')]) {
+              sh '''
+                set -euo pipefail
+                echo "[INFO] Using Sigstore Keyless signing."
+                export REGISTRY_HOST="${REGISTRY_HOST}" IMAGE_PREFIX="${IMAGE_PREFIX}" IMAGE_TAG="${SOURCE_IMAGE_TAG}"
+                export REPORT_DIR="${REPORT_DIR}" FAIL_FAST="true"
+                export COSIGN_EXPERIMENTAL=1
+                export COSIGN_IDENTITY_TOKEN="${OIDC_TOKEN}"
+                bash scripts/release/sign-images.sh
+              '''
+            }
+          } else {
+            withCredentials([
+              file(credentialsId: 'cosign-private-key', variable: 'COSIGN_KEY'),
+              string(credentialsId: 'cosign-password', variable: 'COSIGN_PASSWORD')
+            ]) {
+              sh '''
+                set -euo pipefail
+                echo "[INFO] Using classic key-pair signing."
+                export REGISTRY_HOST="${REGISTRY_HOST}" IMAGE_PREFIX="${IMAGE_PREFIX}" IMAGE_TAG="${SOURCE_IMAGE_TAG}"
+                export REPORT_DIR="${REPORT_DIR}" FAIL_FAST="true"
+                export COSIGN_KEY="${COSIGN_KEY}"
+                bash scripts/release/sign-images.sh
+              '''
+            }
+          }
         }
       }
       post {
@@ -122,15 +149,40 @@ pipeline {
 
     stage('Verify Release Candidate Signatures') {
       steps {
-        withCredentials([
-          file(credentialsId: 'cosign-public-key', variable: 'COSIGN_PUBLIC_KEY')
-        ]) {
-          sh '''
-            set -euo pipefail
-            REGISTRY_HOST="${REGISTRY_HOST}" IMAGE_PREFIX="${IMAGE_PREFIX}" IMAGE_TAG="${SOURCE_IMAGE_TAG}" \
-            REPORT_DIR="${REPORT_DIR}" COSIGN_PUBLIC_KEY="${COSIGN_PUBLIC_KEY}" \
-            bash scripts/release/verify-signatures.sh
-          '''
+        script {
+          def useKeyless = false
+          try {
+            withCredentials([string(credentialsId: 'jenkins-oidc-token', variable: 'TEST_OIDC')]) {
+              useKeyless = true
+            }
+          } catch (Exception e) {
+            echo "[INFO] OIDC Token credential not found. Will use fallback key-pair."
+          }
+
+          if (useKeyless) {
+            sh '''
+              set -euo pipefail
+              echo "[INFO] Verifying Sigstore Keyless signatures."
+              export REGISTRY_HOST="${REGISTRY_HOST}" IMAGE_PREFIX="${IMAGE_PREFIX}" IMAGE_TAG="${SOURCE_IMAGE_TAG}"
+              export REPORT_DIR="${REPORT_DIR}" FAIL_FAST="true"
+              # When COSIGN_PUBLIC_KEY is absent, the script uses Keyless verification 
+              # and checks COSIGN_CERTIFICATE_IDENTITY or repo defaults.
+              bash scripts/release/verify-signatures.sh
+            '''
+          } else {
+            withCredentials([
+              file(credentialsId: 'cosign-public-key', variable: 'COSIGN_PUBLIC_KEY')
+            ]) {
+              sh '''
+                set -euo pipefail
+                echo "[INFO] Verifying classic key-pair signatures."
+                export REGISTRY_HOST="${REGISTRY_HOST}" IMAGE_PREFIX="${IMAGE_PREFIX}" IMAGE_TAG="${SOURCE_IMAGE_TAG}"
+                export REPORT_DIR="${REPORT_DIR}" FAIL_FAST="true"
+                export COSIGN_PUBLIC_KEY="${COSIGN_PUBLIC_KEY}"
+                bash scripts/release/verify-signatures.sh
+              '''
+            }
+          }
         }
       }
       post {

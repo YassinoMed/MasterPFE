@@ -1,0 +1,15 @@
+<group name="falco,">
+  <rule id="100001" level="8">
+    <decoded_as>falco-json</decoded_as>
+    <field name="priority">Emergency|Alert|Critical|Error|Warning|Notice</field>
+    <description>Falco Alert: $(rule)</description>
+  </rule>
+
+  <!-- Exemple de règle de corrélation Wazuh pour des actions shell suspectes dans un pod -->
+  <rule id="100002" level="12">
+    <if_sid>100001</if_sid>
+    <field name="rule">Terminal shell in container</field>
+    <description>Critical Falco Alert: Terminal shell opened in container $(k8s.pod.name)</description>
+    <group>pci_dss_11.4,gdpr_IV_35.7.d,</group>
+  </rule>
+</group>

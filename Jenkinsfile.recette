@@ -237,6 +237,11 @@ pipeline {
             --report-format json \
             --report-path security/reports/gitleaks.json
 
+          checkov -d infra/k8s/ --config-file security/checkov-config.yaml -o junitxml > security/reports/checkov-k8s.xml || true
+          checkov -d infra/helm/ --config-file security/checkov-config.yaml -o junitxml > security/reports/checkov-helm.xml || true
+          checkov -d platform/ --config-file security/checkov-config.yaml -o junitxml > security/reports/checkov-docker-platform.xml || true
+          checkov -d services-laravel/ --config-file security/checkov-config.yaml -o junitxml > security/reports/checkov-docker-services.xml || true
+
           trivy fs \
             --config security/trivy/trivy.yaml \
             --ignorefile .trivyignore \
@@ -369,7 +374,7 @@ REMOTE_UPDATE
               REGISTRY_HOST="localhost:5001" \
               IMAGE_PREFIX="securerag-hub" \
               IMAGE_TAG="${IMAGE_TAG}" \
-              KUSTOMIZE_OVERLAY="infra/k8s/overlays/demo" \
+              KUSTOMIZE_OVERLAY="infra/k8s/overlays/recette" \
                 bash scripts/deploy/deploy-kind.sh
 
               # Restart pods
