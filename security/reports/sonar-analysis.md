@@ -1,6 +1,6 @@
 # Sonar Analysis - SecureRAG Hub
 
-- Generated at UTC: `2026-04-17T05:14:55Z`
+- Generated at UTC: `2026-06-14T21:30:24Z`
 - Status: `PRÊT_NON_EXÉCUTÉ`
 - Detail: sonar-scanner is not installed
 - Scanner log: `security/reports/sonar-scanner.log`
