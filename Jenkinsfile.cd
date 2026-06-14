@@ -385,10 +385,14 @@ pipeline {
           for m in ${MOUNTS}; do
             dest="${m%%:*}"
             src="${m#*:}"
-            if [ -n "${dest}" ] && [[ "${TARGET_DIR}" == "${dest}"* ]]; then
-              rel="${TARGET_DIR#${dest}}"
-              HOST_REPORTS_DIR="${src}${rel}"
-              break
+            if [ -n "${dest}" ]; then
+              case "${TARGET_DIR}" in
+                "${dest}"*)
+                  rel="${TARGET_DIR#${dest}}"
+                  HOST_REPORTS_DIR="${src}${rel}"
+                  break
+                  ;;
+              esac
             fi
           done
 

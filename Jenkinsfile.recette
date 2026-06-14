@@ -213,10 +213,14 @@ pipeline {
           for m in ${MOUNTS}; do
             dest="${m%%:*}"
             src="${m#*:}"
-            if [ -n "${dest}" ] && [[ "$PWD" == "${dest}"* ]]; then
-              rel="${PWD#${dest}}"
-              HOST_PWD="${src}${rel}"
-              break
+            if [ -n "${dest}" ]; then
+              case "$PWD" in
+                "$dest"*)
+                  rel="${PWD#${dest}}"
+                  HOST_PWD="${src}${rel}"
+                  break
+                  ;;
+              esac
             fi
           done
 
