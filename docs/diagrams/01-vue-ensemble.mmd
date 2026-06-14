@@ -1,0 +1,49 @@
+flowchart LR
+    subgraph "Source"
+        github["Dépôt GitHub"]
+        gitleaks["Gitleaks pre-commit"]
+    end
+
+    subgraph "CI — Jenkins"
+        ci_tests["Lint & Tests"]
+        ci_scans["SAST, SCA, IaC"]
+        ci_qg["Quality Gate"]
+    end
+
+    subgraph "CD — Jenkins"
+        cd_build["Build & Scan"]
+        cd_sign["Sign & SBOM"]
+        cd_dast["DAST ZAP & Promote"]
+    end
+
+    subgraph "Runtime K8s"
+        k8s_sync["Argo CD & Admission"]
+        k8s_pods["Pods PSS & Falco"]
+    end
+
+    obs["Prometheus, Grafana, Loki, Alertmanager, Wazuh, Vault"]
+
+    github --> gitleaks
+    gitleaks --> ci_tests
+    ci_tests --> ci_scans
+    ci_scans --> ci_qg
+    ci_qg --> cd_build
+    cd_build --> cd_sign
+    cd_sign --> cd_dast
+    cd_dast --> k8s_sync
+    k8s_sync --> k8s_pods
+
+    gitleaks -.->|"logs"| obs
+    ci_qg -.->|"métriques"| obs
+    cd_dast -.->|"rapports"| obs
+    k8s_pods -.->|"métriques & alertes"| obs
+
+    classDef source fill:#F1EFE8,stroke:#5F5E5A
+    classDef pipeline fill:#E1F5EE,stroke:#0F6E56
+    classDef runtime fill:#FAECE7,stroke:#993C1D
+    classDef obs fill:#EEEDFE,stroke:#534AB7
+
+    class github,gitleaks source
+    class ci_tests,ci_scans,ci_qg,cd_build,cd_sign,cd_dast pipeline
+    class k8s_sync,k8s_pods runtime
+    class obs obs

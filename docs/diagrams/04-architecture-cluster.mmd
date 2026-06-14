@@ -1,0 +1,48 @@
+flowchart TB
+    subgraph "Cluster Kubernetes (Kind / k3s — OVH VPS)"
+        subgraph "ns: securerag-prod"
+            app_nodes["api-gateway, rag-service, auth-users, services-laravel (PSS Restricted)"]
+        end
+        subgraph "ns: security"
+            falco["Falco DaemonSet & falcosidekick"]
+            wazuh_agent["Wazuh agent"]
+        end
+        subgraph "ns: vault"
+            vault["Vault & External Secrets Operator"]
+        end
+        subgraph "ns: harbor"
+            harbor["Harbor core & Trivy"]
+        end
+        subgraph "ns: jenkins"
+            jenkins["Jenkins controller"]
+        end
+        subgraph "ns: argocd"
+            argocd["Argo CD server & repo-server"]
+        end
+        subgraph "ns: monitoring"
+            monitoring["Prometheus, Grafana, Loki, Alertmanager, Pushgateway"]
+        end
+    end
+
+    vps_wazuh["VPS host — Docker Compose: Wazuh manager"]
+
+    argocd -.->|"sync"| app_nodes
+    falco -->|"audit syscalls"| app_nodes
+    falco -.->|"events"| monitoring
+    wazuh_agent -.->|"events"| vps_wazuh
+    vault -->|"secrets"| app_nodes
+    harbor -->|"images signées"| app_nodes
+    jenkins -->|"deploy via Argo CD"| argocd
+    monitoring -.->|"scrape /metrics"| app_nodes
+
+    classDef app fill:#E1F5EE,stroke:#0F6E56
+    classDef sec fill:#FAECE7,stroke:#993C1D
+    classDef platform fill:#EEEDFE,stroke:#534AB7
+    classDef obs fill:#F1EFE8,stroke:#5F5E5A
+
+    class app_nodes app
+    class falco,wazuh_agent sec
+    class vault,harbor,jenkins,argocd platform
+    class monitoring,vps_wazuh obs
+
+    style vps_wazuh stroke-dasharray: 5 5

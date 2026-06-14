@@ -1,0 +1,45 @@
+flowchart TD
+    subgraph "Scenario C — CI Pre-merge"
+        c1["Secret détecté dans un commit"]
+        c2["Gitleaks (CI, pre-merge)"]
+        c3["Pipeline bloqué — pas de build"]
+        c1 --> c2 -->|"Bloque la PR"| c3
+    end
+
+    subgraph "Scenario A — Admission"
+        a1["Image non signée ou non conforme"]
+        a2["Kyverno — contrôle admission (Enforce)"]
+        a3["Admission refusée"]
+        a4["Événement Kubernetes (rejected)"]
+        a5["Promtail / audit log"]
+        a1 --> a2 -->|"Rejet"| a3 --> a4 --> a5
+    end
+
+    subgraph "Scenario B — Runtime"
+        b1["Pod compromis (ex: exec shell inattendu)"]
+        b2["Falco — règle déclenchée"]
+        b3["falcosidekick"]
+        b4["Corrélation SIEM"]
+        b1 --> b2 --> b3
+        b3 -.->|"événement"| shared_wazuh
+        shared_wazuh --> b4
+    end
+
+    shared_loki["Loki"]
+    shared_am["Alertmanager"]
+    shared_slack["Slack #devsecops-alerts"]
+    shared_wazuh["Wazuh (VPS)"]
+
+    a5 --> shared_loki --> shared_am
+    b3 -->|"webhook"| shared_am
+    shared_am -->|"sévérité élevée"| shared_slack
+
+    classDef trigger fill:#FCEBEB,stroke:#A32D2D
+    classDef control fill:#FAEEDA,stroke:#854F0B
+    classDef sink fill:#EEEDFE,stroke:#534AB7
+    classDef blocked fill:#FCEBEB,stroke:#A32D2D
+
+    class c1,a1,b1 trigger
+    class c2,a2,b2 control
+    class shared_loki,shared_am,shared_slack,shared_wazuh,a4,a5,b3,b4 sink
+    class c3,a3 blocked

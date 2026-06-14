@@ -1,0 +1,50 @@
+flowchart TD
+    subgraph "Jenkins CI"
+        ci1["Checkout & Prepare"]
+        ci2["LINT & TESTS"]
+        ci3["SECURITY STATIC (SAST, Secrets, SCA)"]
+        ci4["IaC & K8S POLICY"]
+        ci5["SONAR QUALITY GATE"]
+        ci6{"QUALITY GATE"}
+        ci_fail["Pipeline bloqué + mail"]
+        
+        ci1 --> ci2 --> ci3 --> ci4 --> ci5 --> ci6
+        ci6 -->|Échec| ci_fail
+    end
+
+    subgraph "Jenkins CD"
+        cd1["Build & Trivy image"]
+        cd2["Signature Cosign (keyless)"]
+        cd3["SBOM Syft & Grype"]
+        cd4["Supply Chain Evidence"]
+        cd5{"DAST ZAP"}
+        cd_fail["Pipeline bloqué"]
+        cd6["Promote Digest vers Harbor"]
+        
+        ci6 -->|Succès| cd1
+        cd1 --> cd2 --> cd3 --> cd4 --> cd5
+        cd5 -->|Échec| cd_fail
+        cd5 -->|Succès| cd6
+    end
+
+    subgraph "Cluster"
+        k8s1["Argo CD sync"]
+        k8s2{"Admission Kyverno"}
+        k8s_fail["Rejet + alerte"]
+        k8s3["Déploiement PSS Restricted + Falco"]
+        
+        cd6 --> k8s1
+        k8s1 --> k8s2
+        k8s2 -->|Non conforme| k8s_fail
+        k8s2 -->|Conforme| k8s3
+    end
+
+    classDef pipeline fill:#E1F5EE,stroke:#0F6E56
+    classDef runtime fill:#FAECE7,stroke:#993C1D
+    classDef blocked fill:#FCEBEB,stroke:#A32D2D
+    classDef planned fill:#E1F5EE,stroke:#0F6E56,stroke-dasharray: 5 5
+
+    class ci1,ci2,ci3,ci4,ci6,cd1,cd2,cd3,cd4,cd5,cd6 pipeline
+    class k8s1,k8s2,k8s3 runtime
+    class ci_fail,cd_fail,k8s_fail blocked
+    class ci5 planned

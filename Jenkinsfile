@@ -1,6 +1,10 @@
 pipeline {
   agent any
 
+  triggers {
+    githubPush()
+  }
+
   options {
     timestamps()
     disableConcurrentBuilds()
@@ -347,6 +351,18 @@ pipeline {
     failure {
       echo 'SecureRAG Hub CI pipeline failed. Inspect tests and security reports.'
       script {
+        if (env.BRANCH_NAME == 'main' || env.BRANCH_NAME == null) {
+          withCredentials([string(credentialsId: 'github-token-secret', variable: 'GITHUB_TOKEN')]) {
+            sh '''
+              bash scripts/ci/notify-security-backlog.sh \
+                "${JOB_NAME}" \
+                "${BUILD_URL}" \
+                "YassinoMed/MasterPFE" \
+                "${GITHUB_TOKEN}" \
+                "${BUILD_NUMBER}"
+            '''
+          }
+        }
         if (params.NOTIFICATION_EMAIL && params.NOTIFICATION_EMAIL.trim() != '') {
           def gitCommitShort = env.GIT_COMMIT ? env.GIT_COMMIT.take(7) : 'N/A'
           def buildDuration = currentBuild.durationString ?: 'N/A'

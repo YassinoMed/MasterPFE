@@ -28,7 +28,9 @@ spec:
     server: https://kubernetes.default.svc
     namespace: securerag-hub
   syncPolicy:
-    # Pas d'automated{} : sync manuel requis sur production.
+    automated:
+      prune: true
+      selfHeal: true
     syncOptions:
       - CreateNamespace=true
       - ApplyOutOfSyncOnly=true

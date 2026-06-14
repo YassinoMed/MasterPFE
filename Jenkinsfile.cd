@@ -29,9 +29,9 @@ pipeline {
       description: 'Promoted image tag deployed after verification.'
     )
     booleanParam(
-      name: 'RUN_DEPLOY_KIND',
+      name: 'RUN_GITOPS_SYNC',
       defaultValue: true,
-      description: 'Deploy the verified images to the local kind cluster.'
+      description: 'Update Kustomize manifests with new image digests and push to Git.'
     )
     booleanParam(
       name: 'SIGN_RELEASE_CANDIDATES',
@@ -327,90 +327,43 @@ pipeline {
       }
     }
 
-    stage('Deploy to kind') {
+    stage('Pre-flight Kyverno') {
       when {
-        expression { return params.RUN_DEPLOY_KIND }
+        expression { return params.RUN_GITOPS_SYNC }
       }
       steps {
-        withCredentials([
-          file(credentialsId: 'cosign-public-key', variable: 'COSIGN_PUBLIC_KEY')
-        ]) {
-          sh '''
-            set -euo pipefail
-            REGISTRY_HOST="${REGISTRY_HOST}" IMAGE_PREFIX="${IMAGE_PREFIX}" IMAGE_TAG="${TARGET_IMAGE_TAG}" \
-            REPORT_DIR="${REPORT_DIR}" IMAGE_DIGEST_FILE="${REPORT_DIR}/promotion-digests.txt" COSIGN_PUBLIC_KEY="${COSIGN_PUBLIC_KEY}" \
-            RUN_POSTDEPLOY_VALIDATION="false" ENSURE_KIND_CLUSTER="true" REQUIRE_DIGEST_DEPLOY="true" \
-            FORCE_WORKLOAD_ROLLOUT="true" STRICT_RUNTIME_IMAGE_PROOF="true" \
-            DEPLOY_EVIDENCE_FILE="${REPORT_DIR}/no-rebuild-deploy-summary.md" \
-            RUNTIME_IMAGE_PROOF_FILE="${REPORT_DIR}/runtime-image-rollout-proof.md" \
-            bash scripts/deploy/verify-and-deploy-kind.sh
-          '''
-        }
-      }
-      post {
-        failure {
-          sh '''
-            echo "[ROLLBACK] Deployment failed — initiating automatic rollback"
-            NS="securerag-hub"
-            for deploy in portal-web auth-users chatbot-manager conversation-service audit-security-service; do
-              echo "[ROLLBACK] Rolling back deployment/${deploy}"
-              kubectl rollout undo "deployment/${deploy}" -n "${NS}" 2>/dev/null || true
-            done
-            mkdir -p artifacts/validation
-            {
-              printf '# Rollback Evidence - SecureRAG Hub\n\n'
-              printf -- '- Trigger: Deploy stage failure\n'
-              printf -- '- Timestamp (UTC): `%s`\n\n' "$(date -u '+%Y-%m-%dT%H:%M:%SZ')"
-              printf '## Rolled-back deployments\n\n'
-              for deploy in portal-web auth-users chatbot-manager conversation-service audit-security-service; do
-                printf -- '- `%s`: rollback issued\n' "${deploy}"
-              done
-              printf '\n## Post-rollback state\n\n```text\n'
-              kubectl get deploy -n "${NS}" -o wide 2>/dev/null || true
-              printf '```\n'
-            } > artifacts/validation/rollback-evidence.md
-          '''
-        }
-        always {
-          archiveArtifacts allowEmptyArchive: true, artifacts: 'artifacts/release/no-rebuild-deploy-summary.md,artifacts/release/runtime-image-rollout-proof.*,artifacts/validation/rollback-evidence.md'
-        }
+        sh '''
+          set -euo pipefail
+          echo "[INFO] Running Pre-flight validation against production overlay..."
+          bash scripts/security/preflight-kyverno.sh infra/k8s/overlays/production
+        '''
       }
     }
 
-    stage('Post-deploy Validation') {
+    stage('Update GitOps Manifests') {
       when {
-        expression { return params.RUN_DEPLOY_KIND && params.RUN_POSTDEPLOY_VALIDATION }
+        expression { return params.RUN_GITOPS_SYNC }
       }
       steps {
-        sh 'make post-deploy-validation'
-      }
-      post {
-        failure {
-          sh '''
-            echo "[ROLLBACK] Post-deploy validation failed — initiating automatic rollback"
-            NS="securerag-hub"
-            for deploy in portal-web auth-users chatbot-manager conversation-service audit-security-service; do
-              echo "[ROLLBACK] Rolling back deployment/${deploy}"
-              kubectl rollout undo "deployment/${deploy}" -n "${NS}" 2>/dev/null || true
-            done
-            mkdir -p artifacts/validation
-            {
-              printf '# Rollback Evidence - SecureRAG Hub\n\n'
-              printf -- '- Trigger: Post-deploy validation failure\n'
-              printf -- '- Timestamp (UTC): `%s`\n\n' "$(date -u '+%Y-%m-%dT%H:%M:%SZ')"
-              printf '## Rolled-back deployments\n\n'
-              for deploy in portal-web auth-users chatbot-manager conversation-service audit-security-service; do
-                printf -- '- `%s`: rollback issued\n' "${deploy}"
-              done
-              printf '\n## Post-rollback state\n\n```text\n'
-              kubectl get deploy -n "${NS}" -o wide 2>/dev/null || true
-              printf '```\n'
-            } > artifacts/validation/rollback-evidence.md
-          '''
-        }
-        always {
-          archiveArtifacts allowEmptyArchive: true, artifacts: 'reports/postdeploy/**,artifacts/validation/**'
-        }
+        sh '''
+          set -euo pipefail
+          DIGEST_RECORD_FILE="${REPORT_DIR}/promotion-digests.txt"
+          
+          if [ -f "$DIGEST_RECORD_FILE" ]; then
+            echo "[INFO] Found digest record file, updating GitOps manifests..."
+            # Configuration Git temporaire pour Jenkins
+            git config --global user.email "jenkins@securerag.local"
+            git config --global user.name "Jenkins GitOps Bot"
+            
+            while IFS='|' read -r service _ _ digest; do
+              if [ -n "$service" ] && [ -n "$digest" ]; then
+                bash scripts/gitops/update-image-digest.sh production "$service" "$digest"
+              fi
+            done < "$DIGEST_RECORD_FILE"
+          else
+            echo "[INFO] No digest record file found at $DIGEST_RECORD_FILE. Skipping GitOps update."
+          fi
+        '''
       }
     }
 
