@@ -8,9 +8,6 @@ import requests
 import urllib3
 from prometheus_client import Gauge, start_http_server
 
-# Désactive les alertes SSL pour les certificats auto-signés
-urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
-
 # Définition des métriques
 wazuh_agents_active = Gauge(
     "wazuh_agents_active",
@@ -27,6 +24,16 @@ WAZUH_PASSWORD = os.getenv("WAZUH_PASSWORD", "SecretPassword")
 POLL_INTERVAL = int(os.getenv("POLL_INTERVAL", "60"))
 PORT = int(os.getenv("PORT", "9200"))
 
+# Configuration de la validation des certificats SSL/TLS
+WAZUH_VERIFY_SSL = os.getenv("WAZUH_VERIFY_SSL", "true")
+if WAZUH_VERIFY_SSL.lower() in ("false", "0"):
+    VERIFY_SSL = False
+    urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+elif WAZUH_VERIFY_SSL.lower() in ("true", "1"):
+    VERIFY_SSL = True
+else:
+    VERIFY_SSL = WAZUH_VERIFY_SSL
+
 
 def get_token() -> str:
     """Authentifie et recupere le jeton JWT de l'API Wazuh."""
@@ -34,7 +41,7 @@ def get_token() -> str:
     res = requests.post(
         url,
         auth=(WAZUH_USER, WAZUH_PASSWORD),
-        verify=False,
+        verify=VERIFY_SSL,
         timeout=10
     )
     res.raise_for_status()
@@ -49,7 +56,7 @@ def collect_metrics(token: str) -> None:
     res_active = requests.get(
         f"{WAZUH_URL}/agents?status=active",
         headers=headers,
-        verify=False,
+        verify=VERIFY_SSL,
         timeout=10
     )
     res_active.raise_for_status()
@@ -60,7 +67,7 @@ def collect_metrics(token: str) -> None:
     res_total = requests.get(
         f"{WAZUH_URL}/agents",
         headers=headers,
-        verify=False,
+        verify=VERIFY_SSL,
         timeout=10
     )
     res_total.raise_for_status()
