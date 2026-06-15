@@ -29,9 +29,9 @@ spec:
           - list: "request.object.spec.template.spec.containers"
             pattern:
               name: "?*"
-              readinessProbe: "?*"
-              livenessProbe: "?*"
-              startupProbe: "?*"
+              livenessProbe: {}
+              readinessProbe: {}
+              startupProbe: {}
     - name: require-pod-template-service-account-token-disabled
       match:
         any:
