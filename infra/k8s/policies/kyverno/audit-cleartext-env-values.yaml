@@ -23,6 +23,9 @@ spec:
                 - Pod
               namespaces:
                 - securerag-hub
+              operations:
+                - CREATE
+                - UPDATE
       validate:
         message: >-
           Literal clear-text HTTP environment URLs require the annotation
