@@ -62,7 +62,6 @@ fail_or_skip() {
 
 bash scripts/ci/validate-sonar-cpd-scope.sh
 
-command -v sonar-scanner >/dev/null 2>&1 || fail_or_skip "sonar-scanner is not installed"
 [[ -n "${SONAR_HOST_URL}" ]] || fail_or_skip "SONAR_HOST_URL is not configured"
 [[ -n "${SONAR_TOKEN}" ]] || fail_or_skip "SONAR_TOKEN is not configured"
 
@@ -79,8 +78,48 @@ if is_true "${SONAR_QUALITY_GATE_WAIT}"; then
 fi
 
 set +e
-sonar-scanner "${scanner_args[@]}" > "${SCANNER_LOG}" 2>&1
-scanner_status=$?
+
+if command -v sonar-scanner >/dev/null 2>&1; then
+  echo "[INFO] Running local sonar-scanner..."
+  sonar-scanner "${scanner_args[@]}" > "${SCANNER_LOG}" 2>&1
+  scanner_status=$?
+elif command -v docker >/dev/null 2>&1 && docker info >/dev/null 2>&1; then
+  echo "[INFO] sonar-scanner not found. Attempting to run via Docker..."
+  
+  # Resolve host path in case of Docker-in-Docker (e.g. Jenkins)
+  CONTAINER_ID=$(hostname)
+  MOUNTS=$(docker inspect "${CONTAINER_ID}" --format='{{range .Mounts}}{{.Destination}}:{{.Source}} {{end}}' 2>/dev/null || \
+           docker inspect securerag-jenkins --format='{{range .Mounts}}{{.Destination}}:{{.Source}} {{end}}' 2>/dev/null || echo "")
+
+  HOST_PWD=""
+  for m in ${MOUNTS}; do
+    dest="${m%%:*}"
+    src="${m#*:}"
+    if [ -n "${dest}" ]; then
+      case "$PWD" in
+        "$dest"*)
+          rel="${PWD#${dest}}"
+          HOST_PWD="${src}${rel}"
+          break
+          ;;
+      esac
+    fi
+  done
+
+  if [ -z "${HOST_PWD}" ]; then
+    HOST_PWD="$PWD"
+  fi
+
+  docker run --rm \
+    -v "${HOST_PWD}:/usr/src" \
+    --network host \
+    sonarsource/sonar-scanner-cli:5.0.1 \
+    "${scanner_args[@]}" > "${SCANNER_LOG}" 2>&1
+  scanner_status=$?
+else
+  fail_or_skip "Neither sonar-scanner nor docker is available to run Sonar analysis"
+fi
+
 set -e
 
 if [[ "${scanner_status}" -ne 0 ]]; then
@@ -123,7 +162,7 @@ with open(sys.argv[1], encoding="utf-8") as handle:
 PY
 )"
 
-if is_true "${SONAR_QUALITY_GATE_WAIT}" && [[ "${quality_status}" != "OK" && "${quality_status}" != "UNKNOWN" ]]; then
+if is_true "${SONAR_QUALITY_GATE_WAIT}" && [[ "${quality_status}" != "OK" && "${quality_status}" != "PASSED" && "${quality_status}" != "UNKNOWN" ]]; then
   write_status "FAIL" "Sonar quality gate status is ${quality_status}"
   exit 1
 fi
