@@ -23,7 +23,7 @@ RUN pip install --no-cache-dir --upgrade pip setuptools wheel \
 # ==========================================
 # Étape 2 : Image de production finale (runtime)
 # ==========================================
-FROM gcr.io/distroless/python3-debian12:latest
+FROM gcr.io/distroless/python3-debian12:nonroot
 WORKDIR /app
 
 # Ajouter les LABEL OCI standard
