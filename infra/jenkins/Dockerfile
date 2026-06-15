@@ -96,7 +96,9 @@ RUN set -eux; \
 
 ENV PIP_DISABLE_PIP_VERSION_CHECK=1
 
-RUN python3 -m pip install --no-cache-dir checkov --break-system-packages
+RUN python3 -m venv /opt/checkov-venv && \
+    /opt/checkov-venv/bin/pip install --no-cache-dir checkov && \
+    ln -s /opt/checkov-venv/bin/checkov /usr/local/bin/checkov
 
 COPY entrypoint.sh /usr/local/bin/securerag-jenkins-entrypoint.sh
 RUN chmod +x /usr/local/bin/securerag-jenkins-entrypoint.sh
