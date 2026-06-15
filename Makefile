@@ -54,6 +54,12 @@ laravel-test: ## Run Blade portal and Laravel business microservice tests
 sonar-analysis: ## Run Sonar analysis and quality gate when SONAR_HOST_URL/SONAR_TOKEN are configured
 	@bash scripts/ci/run-sonar-analysis.sh
 
+sonarqube-up: ## Démarrer l'infrastructure SonarQube privée en local
+	@bash scripts/deploy/start-sonarqube.sh
+
+sonarqube-down: ## Arrêter l'infrastructure SonarQube privée en local
+	@docker compose -f infra/sonarqube/docker-compose.sonarqube.yml down
+
 kyverno-policy-check: ## Validate Kyverno policies against rendered Kubernetes resources without requiring a cluster
 	@bash scripts/ci/validate-kyverno-policies.sh
 
