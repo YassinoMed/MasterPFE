@@ -370,6 +370,9 @@ REMOTE_UPDATE
               IMAGE_TAG="${IMAGE_TAG}" \
                 bash scripts/deploy/build-local-images.sh
 
+              # Install Kyverno (Required for ClusterPolicies in the recette overlay)
+              bash scripts/deploy/install-kyverno.sh
+
               # Deploy
               REGISTRY_HOST="localhost:5001" \
               IMAGE_PREFIX="securerag-hub" \
