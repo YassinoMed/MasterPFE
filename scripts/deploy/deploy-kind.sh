@@ -95,6 +95,9 @@ PY
 overlay_path="${temp_root}/k8s/${OVERLAY_RELATIVE_PATH}"
 deploy_started_at="$(date -u '+%Y-%m-%dT%H:%M:%SZ')"
 
+# Invalidate discovery cache to prevent "no matches for kind" errors for newly installed CRDs (like Kyverno)
+kubectl api-resources --invalidate-cache >/dev/null 2>&1 || true
+
 kubectl apply -k "${overlay_path}"
 
 if is_true "${FORCE_WORKLOAD_ROLLOUT}"; then
