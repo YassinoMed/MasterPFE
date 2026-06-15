@@ -1,0 +1,66 @@
+# security/vault/vault-values.yaml
+# Helm configuration for HashiCorp Vault on Kind / Kubernetes.
+# Hardened for PSS Restricted compliance.
+
+server:
+  enabled: true
+  # Enable High Availability (HA) mode to configure Raft storage
+  ha:
+    enabled: true
+    replicas: 1
+    raft:
+      enabled: true
+      setNodeId: true
+      config: |
+        ui = true
+        listener "tcp" {
+          tls_disable = 0
+          address     = "0.0.0.0:8200"
+          cluster_address = "0.0.0.0:8201"
+          tls_cert_file = "/vault/userconfig/vault-tls/tls.crt"
+          tls_key_file  = "/vault/userconfig/vault-tls/tls.key"
+        }
+        storage "raft" {
+          path    = "/vault/data"
+          node_id = "vault-0"
+        }
+
+  # Mount the TLS certificate secret
+  extraVolumes:
+    - name: vault-tls
+      secret:
+        secretName: vault-tls-secret
+  volumeMounts:
+    - name: vault-tls
+      mountPath: /vault/userconfig/vault-tls
+      readOnly: true
+
+  # Hardening pod security context to comply with PSS Restricted
+  securityContext:
+    runAsNonRoot: true
+    runAsGroup: 10001
+    runAsUser: 10001
+    fsGroup: 10001
+
+  containerSecurityContext:
+    allowPrivilegeEscalation: false
+    readOnlyRootFilesystem: false  # Must write to Raft /vault/data and logs
+    capabilities:
+      drop:
+        - ALL
+
+# Vault Agent Injector configuration
+injector:
+  enabled: true
+  # Hardening injector deployment pod security context
+  securityContext:
+    runAsNonRoot: true
+    runAsGroup: 10001
+    runAsUser: 10001
+    fsGroup: 10001
+
+  # Ensure the injected sidecars run under non-root PSS Restricted settings by default
+  agentDefaults:
+    runAsUser: 10001
+    runAsGroup: 10001
+    fsGroup: 10001

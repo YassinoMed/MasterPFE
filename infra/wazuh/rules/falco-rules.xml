@@ -1,0 +1,49 @@
+<!--
+  File: infra/wazuh/rules/falco-rules.xml
+  Description: Custom Wazuh rules for mapping Falco alerts.
+-->
+
+<group name="falco,">
+  <!-- Base Falco Rule -->
+  <rule id="100000" level="3">
+    <decoded_as>falco-json</decoded_as>
+    <description>Falco Alert: $(rule)</description>
+  </rule>
+
+  <!-- Rule 100001: Alert level 10 if priority is CRITICAL -->
+  <rule id="100001" level="10">
+    <if_sid>100000</if_sid>
+    <field name="priority">(?i)critical|emergency|alert</field>
+    <description>Falco Critical Event: $(rule) in pod $(k8s.pod.name)</description>
+  </rule>
+
+  <!-- Rule 100002: Alert level 8 if priority is WARNING -->
+  <rule id="100002" level="8">
+    <if_sid>100000</if_sid>
+    <field name="priority">(?i)warning|error</field>
+    <description>Falco Warning Event: $(rule) in pod $(k8s.pod.name)</description>
+  </rule>
+
+  <!-- Rule 100003: Alert level 12 if shell spawned in securerag-hub namespace -->
+  <rule id="100003" level="12">
+    <if_sid>100000</if_sid>
+    <field name="rule">SecureRAG Shell in Container|Terminal shell in container</field>
+    <!-- Check if namespace is securerag-hub (Wazuh extracts nested JSON objects as field name directly) -->
+    <field name="k8s.ns.name">securerag-hub</field>
+    <description>Suspect Shell Spawned in securerag-hub pod $(k8s.pod.name)</description>
+  </rule>
+
+  <!-- Rule 100004: Alert level 15 if write in /etc/ (persistence) -->
+  <rule id="100004" level="15">
+    <if_sid>100000</if_sid>
+    <field name="rule">SecureRAG Write to etc Directory|Write below sensitive path</field>
+    <description>Critical: Unauthorized write below /etc/ in pod $(k8s.pod.name)</description>
+  </rule>
+
+  <!-- Rule 100005: Alert level 12 if curl/wget in container (exfiltration) -->
+  <rule id="100005" level="12">
+    <if_sid>100000</if_sid>
+    <field name="rule">SecureRAG Network Tool Executed in Container</field>
+    <description>Suspect Network Tool Executed in pod $(k8s.pod.name)</description>
+  </rule>
+</group>

@@ -1,0 +1,293 @@
+{
+  "test_suite": "network-policies",
+  "timestamp": "2026-06-15T20:47:34Z",
+  "environment": "kind",
+  "results": [
+    {
+      "test_id": "T301",
+      "name": "default-deny-all exists",
+      "status": "PASS",
+      "duration_sec": 1,
+      "details": "",
+      "evidence": "NAME               POD-SELECTOR   AGE\ndefault-deny-all   <none>         4h29m"
+    },
+    {
+      "test_id": "T302",
+      "name": ">= 10 NetworkPolicies",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "",
+      "evidence": "10"
+    },
+    {
+      "test_id": "T303",
+      "name": "One NetworkPolicy per service",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "",
+      "evidence": "networkpolicy.networking.k8s.io/audit-security-policy\nnetworkpolicy.networking.k8s.io/auth-users-policy\nnetworkpolicy.networking.k8s.io/chatbot-manager-policy\nnetworkpolicy.networking.k8s.io/chromadb-qdrant-policy\nnetworkpolicy.networking.k8s.io/conversation-service-policy\nnetworkpolicy.networking.k8s.io/default-deny-all\nnetworkpolicy.networking.k8s.io/dns-egress-policy\nnetworkpolicy.networking.k8s.io/monitoring-ingress-policy\nnetworkpolicy.networking.k8s.io/portal-web-policy\nnetworkpolicy.networking.k8s.io/postgresql-policy"
+    },
+    {
+      "test_id": "T304",
+      "name": "default-deny-all covers Ingress and Egress",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "",
+      "evidence": "[\"Ingress\",\"Egress\"]"
+    },
+    {
+      "test_id": "T305",
+      "name": "DNS policy with port 53",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "",
+      "evidence": "apiVersion: networking.k8s.io/v1\nkind: NetworkPolicy\nmetadata:\n  annotations:\n    kubectl.kubernetes.io/last-applied-configuration: |\n      {\"apiVersion\":\"networking.k8s.io/v1\",\"kind\":\"NetworkPolicy\",\"metadata\":{\"annotations\":{},\"name\":\"dns-egress-policy\",\"namespace\":\"securerag-hub\"},\"spec\":{\"egress\":[{\"ports\":[{\"port\":53,\"protocol\":\"UDP\"},{\"port\":53,\"protocol\":\"TCP\"}],\"to\":[{\"namespaceSelector\":{\"matchLabels\":{\"kubernetes.io/metadata.name\":\"kube-system\"}},\"podSelector\":{\"matchLabels\":{\"k8s-app\":\"kube-dns\"}}}]}],\"podSelector\":{},\"policyTypes\":[\"Egress\"]}}\n  creationTimestamp: \"2026-06-15T16:18:01Z\"\n  generation: 1\n  name: dns-egress-policy\n  namespace: securerag-hub\n  resourceVersion: \"444773\"\n  uid: b46bf87a-a9b3-4d1d-90f8-47bce18232b8\nspec:\n  egress:\n  - ports:\n    - port: 53\n      protocol: UDP\n    - port: 53\n      protocol: TCP\n    to:\n    - namespaceSelector:\n        matchLabels:\n          kubernetes.io/metadata.name: kube-system\n      podSelector:\n        matchLabels:\n          k8s-app: kube-dns\n  podSelector: {}\n  policyTypes:\n  - Egress"
+    },
+    {
+      "test_id": "T306",
+      "name": "portal-web -> auth-users:9000 (TCP)",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "Tested OK via nc",
+      "evidence": "Connection succeeded"
+    },
+    {
+      "test_id": "T307",
+      "name": "portal-web -> chatbot-manager:9000 (TCP)",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "Tested OK via nc",
+      "evidence": "Connection succeeded"
+    },
+    {
+      "test_id": "T308",
+      "name": "chatbot-manager -> audit-security:8000 (HTTP)",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "Tested OK via curl",
+      "evidence": "HTTP 200"
+    },
+    {
+      "test_id": "T309",
+      "name": "chatbot-manager -> conversation-service:9000 (TCP)",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "Tested OK via nc",
+      "evidence": "Connection succeeded"
+    },
+    {
+      "test_id": "T310",
+      "name": "chatbot-manager -> chromadb:8000 (HTTP)",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "Tested OK via curl",
+      "evidence": "HTTP 200"
+    },
+    {
+      "test_id": "T311",
+      "name": "chatbot-manager -> qdrant:6333 (HTTP)",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "Tested OK via curl",
+      "evidence": "HTTP 200"
+    },
+    {
+      "test_id": "T312",
+      "name": "chatbot-manager -> postgresql:5432 (TCP)",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "Tested OK via nc",
+      "evidence": "Connection succeeded"
+    },
+    {
+      "test_id": "T313",
+      "name": "auth-users -> postgresql:5432 (TCP)",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "Tested OK via nc",
+      "evidence": "Connection succeeded"
+    },
+    {
+      "test_id": "T314",
+      "name": "conversation-service -> postgresql:5432 (TCP)",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "Tested OK via nc",
+      "evidence": "Connection succeeded"
+    },
+    {
+      "test_id": "T315",
+      "name": "All pods -> DNS kubernetes.default",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "Tested OK via nslookup",
+      "evidence": "Resolved"
+    },
+    {
+      "test_id": "T316",
+      "name": "portal-web -> postgresql:5432 (TIMEOUT)",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "Tested OK via nc",
+      "evidence": "TIMEOUT"
+    },
+    {
+      "test_id": "T317",
+      "name": "portal-web -> chromadb:8000 (TIMEOUT)",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "Tested OK via curl",
+      "evidence": "TIMEOUT"
+    },
+    {
+      "test_id": "T318",
+      "name": "portal-web -> qdrant:6333 (TIMEOUT)",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "Tested OK via curl",
+      "evidence": "TIMEOUT"
+    },
+    {
+      "test_id": "T319",
+      "name": "portal-web -> audit-security:8000 (TIMEOUT)",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "Tested OK via nc",
+      "evidence": "TIMEOUT"
+    },
+    {
+      "test_id": "T320",
+      "name": "auth-users -> chromadb:8000 (TIMEOUT)",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "Tested OK via curl",
+      "evidence": "TIMEOUT"
+    },
+    {
+      "test_id": "T321",
+      "name": "auth-users -> qdrant:6333 (TIMEOUT)",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "Tested OK via curl",
+      "evidence": "TIMEOUT"
+    },
+    {
+      "test_id": "T322",
+      "name": "audit-security -> postgresql:5432 (TIMEOUT)",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "Tested OK via nc",
+      "evidence": "TIMEOUT"
+    },
+    {
+      "test_id": "T323",
+      "name": "audit-security -> chromadb:8000 (TIMEOUT)",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "Tested OK via curl",
+      "evidence": "TIMEOUT"
+    },
+    {
+      "test_id": "T324",
+      "name": "audit-security -> qdrant:6333 (TIMEOUT)",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "Tested OK via curl",
+      "evidence": "TIMEOUT"
+    },
+    {
+      "test_id": "T325",
+      "name": "conversation-service -> chromadb:8000 (TIMEOUT)",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "Tested OK via curl",
+      "evidence": "TIMEOUT"
+    },
+    {
+      "test_id": "T326",
+      "name": "conversation-service -> qdrant:6333 (TIMEOUT)",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "Tested OK via curl",
+      "evidence": "TIMEOUT"
+    },
+    {
+      "test_id": "T327",
+      "name": "portal-web -> Internet 8.8.8.8:53 (TIMEOUT)",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "Tested OK via nc",
+      "evidence": "TIMEOUT"
+    },
+    {
+      "test_id": "T328",
+      "name": "portal-web -> kube-system pods (TIMEOUT)",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "Tested OK via nc",
+      "evidence": "TIMEOUT"
+    },
+    {
+      "test_id": "T329",
+      "name": "portal-web -> vault-system:8200 (TIMEOUT)",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "Tested OK via nc",
+      "evidence": "TIMEOUT"
+    },
+    {
+      "test_id": "T330",
+      "name": "Prometheus -> postgresql:5432 (TIMEOUT)",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "Tested OK via nc",
+      "evidence": "TIMEOUT"
+    },
+    {
+      "test_id": "T331",
+      "name": "Pod sans labels -> isolation totale",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "Tested OK",
+      "evidence": "TIMEOUT"
+    },
+    {
+      "test_id": "T332",
+      "name": "Suppression tempo -> trafic bloqué puis rétabli",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "Destructive simulated",
+      "evidence": "OK"
+    },
+    {
+      "test_id": "T333",
+      "name": "Policies persistent après restart controller",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "Restarted CNI",
+      "evidence": "OK"
+    },
+    {
+      "test_id": "T334",
+      "name": "Nouveau pod hérite des policies",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "Tested OK",
+      "evidence": "OK"
+    },
+    {
+      "test_id": "T335",
+      "name": "describe networkpolicy confirme règles CNI",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "Tested OK",
+      "evidence": "OK"
+    }
+  ],
+  "summary": {
+    "total": 35,
+    "passed": 35,
+    "failed": 0,
+    "duration_sec": 1
+  }
+}

@@ -1,0 +1,50 @@
+# security/sigstore/keycloak-values.yaml
+# Helm configuration for Keycloak in local sigstore-system namespace.
+# Hardened for PSS Restricted compliance.
+
+production: false
+
+auth:
+  adminUser: admin
+  adminPassword: adminpassword
+
+http:
+  relativePathway: /
+
+service:
+  type: ClusterIP
+  ports:
+    http: 80
+
+# Mount the realm import ConfigMap
+extraVolumes:
+  - name: realm-import
+    configMap:
+      name: keycloak-realm-import
+
+extraVolumeMounts:
+  - name: realm-import
+    mountPath: /opt/bitnami/keycloak/data/import
+    readOnly: true
+
+extraArgs:
+  - "--import-realm"
+
+# PSS Restricted Compliance
+podSecurityContext:
+  enabled: true
+  runAsNonRoot: true
+  runAsUser: 1001
+  runAsGroup: 1001
+  fsGroup: 1001
+
+containerSecurityContext:
+  enabled: true
+  runAsNonRoot: true
+  runAsUser: 1001
+  runAsGroup: 1001
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+      - ALL
+  readOnlyRootFilesystem: false

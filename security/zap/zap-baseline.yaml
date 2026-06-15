@@ -1,0 +1,33 @@
+env:
+  contexts:
+    - name: portal-web
+      urls:
+        - http://staging.portal.securerag.local
+      excludePaths:
+        - ".*logout.*"
+        - ".*delete.*"
+        - ".*destroy.*"
+  parameters:
+    failOnError: true
+    failOnWarning: false
+jobs:
+  - type: spider
+    parameters:
+      context: portal-web
+      maxDuration: 2
+  - type: passiveScan-config
+    parameters:
+      rulesFile: /zap/wrk/security/zap/zap-rules-config.tsv
+  - type: passiveScan-wait
+    parameters:
+      maxDuration: 5
+  - type: report
+    parameters:
+      template: traditional-html
+      reportDir: /zap/wrk
+      reportFile: zap-baseline-report
+  - type: report
+    parameters:
+      template: traditional-json
+      reportDir: /zap/wrk
+      reportFile: zap-baseline-report

@@ -1,0 +1,18 @@
+# File: security/falco/falco-values.yaml
+# Description: Helm values configuration for Falco to enable JSON output and forward events to Falcosidekick.
+
+driver:
+  kind: modern_ebpf
+
+falco:
+  json_output: true
+  json_include_output_property: true
+  stdout_output:
+    enabled: false
+  http_output:
+    enabled: true
+    url: "http://falcosidekick.falco.svc.cluster.local:2801"
+  
+  # Kubernetes metadata configuration
+  k8s_metadata:
+    enabled: true

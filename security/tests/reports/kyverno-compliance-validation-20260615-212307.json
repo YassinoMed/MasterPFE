@@ -1,0 +1,21 @@
+{
+  "test_suite": "kyverno-compliance-validation",
+  "timestamp": "2026-06-15T19:23:08Z",
+  "environment": "kind",
+  "results": [
+    {
+      "test_id": "KYV-00",
+      "name": "Kyverno Admission Controller is running",
+      "status": "FAIL",
+      "duration_sec": 1,
+      "details": "Kyverno deployment not found in kyverno namespace.",
+      "evidence": ""
+    }
+  ],
+  "summary": {
+    "total": 1,
+    "passed": 0,
+    "failed": 1,
+    "duration_sec": 1
+  }
+}

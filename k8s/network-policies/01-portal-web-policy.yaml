@@ -1,0 +1,34 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: portal-web-policy
+  namespace: securerag-hub
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: portal-web
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    # Allow traffic from ingress controllers on HTTP and FPM ports
+    - ports:
+        - protocol: TCP
+          port: 8000
+        - protocol: TCP
+          port: 9000
+  egress:
+    # Allow connection to auth-users and chatbot-manager services
+    - to:
+        - podSelector:
+            matchExpressions:
+              - key: app.kubernetes.io/name
+                operator: In
+                values:
+                  - auth-users
+                  - chatbot-manager
+      ports:
+        - protocol: TCP
+          port: 8000
+        - protocol: TCP
+          port: 9000

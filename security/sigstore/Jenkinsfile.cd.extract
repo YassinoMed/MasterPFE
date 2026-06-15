@@ -1,0 +1,47 @@
+    stage('Sign Release Candidate Images') {
+      when {
+        expression { return params.SIGN_RELEASE_CANDIDATES }
+      }
+      steps {
+        script {
+          sh '''
+            set -euo pipefail
+            echo "[INFO] Using Sigstore Keyless signing via local OIDC provider..."
+            
+            # 1. Obtain OIDC ID token from Keycloak
+            TOKEN=$(curl -s -X POST \
+              http://keycloak.sigstore-system/realms/securerag-cicd/protocol/openid-connect/token \
+              -d "client_id=jenkins-cosign&client_secret=jenkins-cosign-secret&grant_type=client_credentials" \
+              | jq -r .access_token)
+            
+            if [ -z "${TOKEN}" ] || [ "${TOKEN}" = "null" ]; then
+              echo "[ERROR] Failed to obtain OIDC token from Keycloak."
+              exit 1
+            fi
+            
+            # 2. Export environment variables for the signing script
+            export REGISTRY_HOST="${REGISTRY_HOST}"
+            export IMAGE_PREFIX="${IMAGE_PREFIX}"
+            export IMAGE_TAG="${SOURCE_IMAGE_TAG}"
+            export REPORT_DIR="${REPORT_DIR}"
+            export FAIL_FAST="true"
+            
+            # Override Cosign configuration for local keyless signature
+            export COSIGN_EXPERIMENTAL=1
+            export COSIGN_FULCIO_URL="http://fulcio.sigstore-system"
+            export COSIGN_REKOR_URL="http://rekor.sigstore-system"
+            export COSIGN_IDENTITY_TOKEN="${TOKEN}"
+            export COSIGN_OIDC_ISSUER="http://keycloak.sigstore-system/realms/securerag-cicd"
+            export COSIGN_ALLOW_INSECURE_REGISTRY="true" # Required for local registry
+            
+            # Run the signing script (it will pick up keyless mode automatically when COSIGN_KEY is unset)
+            bash scripts/release/sign-images.sh
+          '''
+        }
+      }
+      post {
+        always {
+          archiveArtifacts allowEmptyArchive: true, artifacts: 'artifacts/release/sign-summary.txt,artifacts/release/sign-summary.md,artifacts/release/sign-index.json,artifacts/release/*-sign.log'
+        }
+      }
+    }

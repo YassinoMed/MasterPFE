@@ -1,0 +1,61 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: chatbot-manager-policy
+  namespace: securerag-hub
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: chatbot-manager
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    # Allow incoming traffic from portal-web
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: portal-web
+      ports:
+        - protocol: TCP
+          port: 8000
+        - protocol: TCP
+          port: 9000
+  egress:
+    # Allow outgoing traffic to conversation-service and audit-security-service
+    - to:
+        - podSelector:
+            matchExpressions:
+              - key: app.kubernetes.io/name
+                operator: In
+                values:
+                  - conversation-service
+                  - audit-security-service
+                  - security-auditor
+      ports:
+        - protocol: TCP
+          port: 8000
+        - protocol: TCP
+          port: 9000
+    # Allow outgoing database traffic to postgres-auth
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: postgres-auth
+      ports:
+        - protocol: TCP
+          port: 5432
+    # Allow outgoing traffic to ChromaDB and Qdrant
+    - to:
+        - podSelector:
+            matchExpressions:
+              - key: app.kubernetes.io/name
+                operator: In
+                values:
+                  - chromadb
+                  - qdrant
+      ports:
+        - protocol: TCP
+          port: 8000
+        - protocol: TCP
+          port: 6333

@@ -1,5 +1,8 @@
 # Final Validation Summary - SecureRAG Hub
 
+- Generated at UTC: `2026-06-15T19:14:04Z`
+- Status: `PARTIEL`
+
 ## 1. Official scenario
 
 - Official mode: `demo`
@@ -7,7 +10,7 @@
 - GitHub Actions status: legacy / historical workflows
 - Promotion policy: digest-first
 - Dry-run status: accepted as preparatory evidence
-- Execute status: environment-dependent
+- Execute status: `PARTIEL`
 
 ## 2. CI results
 
@@ -24,31 +27,34 @@
 
 | Check | Status |
 |---|---|
-| Jenkins reachable | ok |
-| Kubernetes namespace | ok |
-| Portal Web health | ok |
+| Jenkins / CD gates (job: `securerag-hub-ci`) | TERMINÉ |
+| Kubernetes runtime | TERMINÉ |
+| Portal Web health | PARTIEL |
+| Digest-pinned runtime (registry: `securerag-registry:5000`) | DÉPENDANT_DE_L_ENVIRONNEMENT |
 
 ## 4. Evidence files
 
 | Evidence | Status |
 |---|---|
-| `artifacts/final/reference-campaign-summary.md` | present |
-| `artifacts/final/final-proof-check.txt` | present |
-| `artifacts/release/release-evidence.md` | present |
-| `artifacts/release/supply-chain-evidence.md` | present |
-| `artifacts/release/supply-chain-gate-report.md` | present |
-| `artifacts/release/no-rebuild-deploy-summary.md` | present |
-| `artifacts/release/release-attestation.json` | present |
-| `artifacts/observability/observability-snapshot.md` | present |
-| `artifacts/security/runtime-security-postdeploy.md` | present |
-| `artifacts/validation/kyverno-local-registry-enforce-blocker.md` | present |
-| `artifacts/application/portal-service-connectivity.md` | present |
-| `artifacts/final/global-project-status.md` | present |
-| `artifacts/final/missing-phases-closure.md` | present |
-| `artifacts/final/devsecops-readiness-report.md` | present |
-| `artifacts/jenkins/github-webhook-validation.md` | present |
-| `artifacts/jenkins/ci-push-trigger-proof.md` | present |
-| Latest support pack | artifacts/support-pack/20260422T174109Z.tar.gz |
+| `artifacts/final/reference-campaign-summary.md` | TERMINÉ |
+| `artifacts/final/final-proof-check.txt` | TERMINÉ |
+| `artifacts/release/release-evidence.md` | TERMINÉ |
+| `artifacts/release/supply-chain-evidence.md` | TERMINÉ |
+| `artifacts/release/supply-chain-gate-report.md` | DÉPENDANT_DE_L_ENVIRONNEMENT |
+| `artifacts/release/no-rebuild-deploy-summary.md` | TERMINÉ |
+| `artifacts/release/release-attestation.json` | PARTIEL |
+| `artifacts/observability/observability-snapshot.md` | TERMINÉ |
+| `artifacts/security/production-external-db-readiness.md` | PRÊT_NON_EXÉCUTÉ |
+| `artifacts/security/runtime-security-postdeploy.md` | TERMINÉ |
+| `artifacts/security/external-secrets-runtime.md` | PRÊT_NON_EXÉCUTÉ |
+| `artifacts/validation/kyverno-local-registry-enforce-blocker.md` | DÉPENDANT_DE_L_ENVIRONNEMENT |
+| `artifacts/application/portal-service-connectivity.md` | PARTIEL |
+| `artifacts/final/global-project-status.md` | TERMINÉ |
+| `artifacts/final/missing-phases-closure.md` | PARTIEL |
+| `artifacts/final/devsecops-readiness-report.md` | PARTIEL |
+| `artifacts/jenkins/github-webhook-validation.md` | PRÊT_NON_EXÉCUTÉ |
+| `artifacts/jenkins/ci-push-trigger-proof.md` | PRÊT_NON_EXÉCUTÉ |
+| Latest support pack | artifacts/support-pack/support-demo-20260411T144030Z.tar.gz |
 
 ## 5. Honest limits
 
@@ -60,4 +66,4 @@
 
 ## 6. Conclusion
 
-SecureRAG Hub is demonstrable in the official `demo` mode with Jenkins as the CI/CD authority, a Laravel-first Kubernetes runtime, archived evidence, and an explicit distinction between dry-run preparation and environment-dependent execute mode.
+SecureRAG Hub is demonstrable in the official `demo` mode with Jenkins as the CI/CD authority, a Laravel-first Kubernetes runtime, archived evidence, and an explicit distinction between fully proven controls, partial runtime policy findings, and environment-dependent items that remain intentionally unexecuted.

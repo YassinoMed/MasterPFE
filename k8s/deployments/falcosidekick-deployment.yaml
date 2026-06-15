@@ -1,0 +1,90 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: falcosidekick-config
+  namespace: falco
+data:
+  config.yaml: |
+    debug: false
+    customfields: "cluster:securerag-hub,env:production"
+    syslog:
+      host: "wazuh-manager.wazuh.svc.cluster.local"
+      port: 514
+      protocol: "udp"
+      format: "json"
+      minimumpriority: "warning"
+    slack:
+      webhookurl: "https://hooks.slack.com/services/TXXXXX/BXXXXX/XXXXXXXX"
+      channel: "#securerag-alerts"
+      minimumpriority: "critical"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: falcosidekick
+  namespace: falco
+  labels:
+    app.kubernetes.io/name: falcosidekick
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: falcosidekick
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: falcosidekick
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65532
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: falcosidekick
+          image: falcosecurity/falcosidekick:2.30.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 2801
+          env:
+            - name: CONFIG_FILE
+              value: /etc/falcosidekick/config.yaml
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 128Mi
+          readinessProbe:
+            httpGet:
+              path: /ping
+              port: http
+          volumeMounts:
+            - name: cfg
+              mountPath: /etc/falcosidekick
+      volumes:
+        - name: cfg
+          configMap:
+            name: falcosidekick-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: falcosidekick
+  namespace: falco
+spec:
+  selector:
+    app.kubernetes.io/name: falcosidekick
+  ports:
+    - name: http
+      port: 2801
+      targetPort: http

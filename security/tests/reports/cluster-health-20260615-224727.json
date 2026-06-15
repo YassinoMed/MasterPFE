@@ -1,0 +1,213 @@
+{
+  "test_suite": "cluster-health",
+  "timestamp": "2026-06-15T20:47:32Z",
+  "environment": "kind",
+  "results": [
+    {
+      "test_id": "T001",
+      "name": "All Kind nodes Ready",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "",
+      "evidence": "True True"
+    },
+    {
+      "test_id": "T002",
+      "name": "K8s Version >= v1.29.0",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "",
+      "evidence": "v1.33.1"
+    },
+    {
+      "test_id": "T003",
+      "name": "System components healthy",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "",
+      "evidence": "NAME                                                  READY   STATUS    RESTARTS   AGE\ncoredns-674b8bbfcf-lq867                              1/1     Running   0          2d21h\ncoredns-674b8bbfcf-qdr4l                              1/1     Running   0          2d21h\netcd-securerag-dev-control-plane                      1/1     Running   0          2d21h\nkindnet-7dtl6                                         1/1     Running   0          2d21h\nkindnet-d2w28                                         1/1     Running   0          2d21h\nkube-apiserver-securerag-dev-control-plane            1/1     Running   0          2d21h\nkube-controller-manager-securerag-dev-control-plane   1/1     Running   0          2d21h\nkube-proxy-ns2cm                                      1/1     Running   0          2d21h\nkube-proxy-t6w6g                                      1/1     Running   0          2d21h\nkube-scheduler-securerag-dev-control-plane            1/1     Running   0          2d21h"
+    },
+    {
+      "test_id": "T004",
+      "name": "No kube-system pods in CrashLoopBackOff",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "",
+      "evidence": "No CrashLoopBackOff"
+    },
+    {
+      "test_id": "T005",
+      "name": "CoreDNS resolves kubernetes.default",
+      "status": "PASS",
+      "duration_sec": 3,
+      "details": "",
+      "evidence": "Server:    10.96.0.10\nAddress 1: 10.96.0.10 kube-dns.kube-system.svc.cluster.local\n\nName:      kubernetes.default.svc.cluster.local\nAddress 1: 10.96.0.1 kubernetes.default.svc.cluster.local\npod \"test-dns\" deleted from default namespace"
+    },
+    {
+      "test_id": "T006",
+      "name": "All required namespaces Active",
+      "status": "FAIL",
+      "duration_sec": 0,
+      "details": "",
+      "evidence": "Active Active ActiveError from server (NotFound): namespaces \"vault-system\" not found\nError from server (NotFound): namespaces \"monitoring\" not found\nError from server (NotFound): namespaces \"falco-system\" not found\nError from server (NotFound): namespaces \"argocd\" not found\nError from server (NotFound): namespaces \"jenkins\" not found"
+    },
+    {
+      "test_id": "T007",
+      "name": "ResourceQuota defined in securerag-hub",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "",
+      "evidence": "NAME                  REQUEST                                                                                                                                                                       LIMIT                                                                                AGE\nsecurerag-hub-quota   persistentvolumeclaims: 0/10, pods: 6/30, requests.cpu: 600m/3, requests.ephemeral-storage: 896Mi/4Gi, requests.memory: 768Mi/3Gi, requests.storage: 0/40Gi, services: 6/20   limits.cpu: 2100m/8, limits.ephemeral-storage: 3584Mi/12Gi, limits.memory: 2Gi/8Gi   2d21h"
+    },
+    {
+      "test_id": "T008",
+      "name": "LimitRange defined in securerag-hub",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "",
+      "evidence": "NAME                     CREATED AT\nsecurerag-hub-defaults   2026-06-12T23:25:46Z"
+    },
+    {
+      "test_id": "T009",
+      "name": "No namespace in Terminating state",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "",
+      "evidence": "OK"
+    },
+    {
+      "test_id": "T010",
+      "name": "PSS labels present on securerag-hub",
+      "status": "PASS",
+      "duration_sec": 1,
+      "details": "",
+      "evidence": "NAME            STATUS   AGE     LABELS\nsecurerag-hub   Active   2d21h   app.kubernetes.io/part-of=securerag-hub,kubernetes.io/metadata.name=securerag-hub,pod-security.kubernetes.io/audit-version=latest,pod-security.kubernetes.io/audit=restricted,pod-security.kubernetes.io/enforce-version=latest,pod-security.kubernetes.io/enforce=restricted,pod-security.kubernetes.io/warn-version=latest,pod-security.kubernetes.io/warn=restricted"
+    },
+    {
+      "test_id": "T011",
+      "name": "All pods in securerag-hub Running",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "",
+      "evidence": "Running Running Running Running Running Running"
+    },
+    {
+      "test_id": "T012",
+      "name": "All pods READY N/N",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "",
+      "evidence": "OK"
+    },
+    {
+      "test_id": "T013",
+      "name": "No pod with >3 restarts",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "",
+      "evidence": "0 0 0 0 0 0"
+    },
+    {
+      "test_id": "T014",
+      "name": "Core services have >= 2 replicas",
+      "status": "WARN",
+      "duration_sec": 0,
+      "details": "",
+      "evidence": "1 1Error from server (NotFound): deployments.apps \"chatbot-manager-service\" not found\nError from server (NotFound): deployments.apps \"auth-users-service\" not found"
+    },
+    {
+      "test_id": "T015",
+      "name": "audit-security-service >= 1 replica",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "",
+      "evidence": "1"
+    },
+    {
+      "test_id": "T016",
+      "name": "PostgreSQL Running and READY",
+      "status": "FAIL",
+      "duration_sec": 0,
+      "details": "",
+      "evidence": "Error from server (NotFound): statefulsets.apps \"postgresql\" not found"
+    },
+    {
+      "test_id": "T017",
+      "name": "Qdrant health HTTP 200",
+      "status": "WARN",
+      "duration_sec": 0,
+      "details": "",
+      "evidence": "000command terminated with exit code 6"
+    },
+    {
+      "test_id": "T018",
+      "name": "ChromaDB heartbeat HTTP 200",
+      "status": "WARN",
+      "duration_sec": 1,
+      "details": "",
+      "evidence": "000command terminated with exit code 6"
+    },
+    {
+      "test_id": "T019",
+      "name": "PVCs Bound",
+      "status": "FAIL",
+      "duration_sec": 0,
+      "details": "",
+      "evidence": ""
+    },
+    {
+      "test_id": "T020",
+      "name": "HPA active without unknown",
+      "status": "WARN",
+      "duration_sec": 0,
+      "details": "",
+      "evidence": "Error from server (NotFound): horizontalpodautoscalers.autoscaling \"chatbot-manager-service\" not found"
+    },
+    {
+      "test_id": "T021",
+      "name": "Kyverno pods Running",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "",
+      "evidence": "Running Running Running Running"
+    },
+    {
+      "test_id": "T022",
+      "name": "Falco DaemonSet Ready",
+      "status": "FAIL",
+      "duration_sec": 0,
+      "details": "",
+      "evidence": "Error from server (NotFound): namespaces \"falco-system\" not found"
+    },
+    {
+      "test_id": "T023",
+      "name": "Vault initialized and unsealed",
+      "status": "FAIL",
+      "duration_sec": 0,
+      "details": "",
+      "evidence": "Error from server (NotFound): namespaces \"vault-system\" not found"
+    },
+    {
+      "test_id": "T024",
+      "name": "Argo CD pods Running",
+      "status": "FAIL",
+      "duration_sec": 0,
+      "details": "",
+      "evidence": ""
+    },
+    {
+      "test_id": "T025",
+      "name": "Jenkins pod Running",
+      "status": "WARN",
+      "duration_sec": 0,
+      "details": "",
+      "evidence": ""
+    }
+  ],
+  "summary": {
+    "total": 25,
+    "passed": 14,
+    "failed": 11,
+    "duration_sec": 5
+  }
+}

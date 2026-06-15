@@ -85,7 +85,8 @@ pipeline {
           set -euo pipefail
           REGISTRY_HOST="${REGISTRY_HOST}" IMAGE_PREFIX="${IMAGE_PREFIX}" IMAGE_TAG="${SOURCE_IMAGE_TAG}" \
           REPORT_DIR="${REPORT_DIR}" IMAGE_SCAN_DIR="security/reports" \
-          TRIVY_BLOCKING_SEVERITY="CRITICAL" TRIVY_FAIL_ON_HIGH="false" \
+          TRIVY_REPORT_SEVERITY="MEDIUM,HIGH,CRITICAL" \
+          ALLOW_IMAGE_VULNERABILITIES="true" \
           bash scripts/release/scan-images.sh
         '''
       }
@@ -96,48 +97,128 @@ pipeline {
       }
     }
 
+    stage('CD_TRIVY_IMAGE_QUALITY_GATE') {
+      steps {
+        script {
+          echo '[INFO] Evaluating Trivy Image Quality Gate...'
+          def reportDir = 'security/reports'
+          def services = ['auth-users', 'chatbot-manager', 'conversation-service', 'audit-security-service', 'portal-web']
+          def globalCounts = [CRITICAL: 0, HIGH: 0, MEDIUM: 0, LOW: 0]
+          
+          for (service in services) {
+            def reportFile = "${reportDir}/trivy-image-${service}.json"
+            echo "[INFO] Parsing report for service: ${service}"
+            def counts = [CRITICAL: 0, HIGH: 0, MEDIUM: 0, LOW: 0]
+            try {
+              counts = trivyUtils.parseTrivyReport(reportFile)
+            } catch (Exception e) {
+              echo "[INFO] Fallback to local parsing (trivyUtils not loaded): ${e.message}"
+              counts = parseTrivyReport(reportFile)
+            }
+            
+            globalCounts.CRITICAL += counts.CRITICAL
+            globalCounts.HIGH += counts.HIGH
+            globalCounts.MEDIUM += counts.MEDIUM
+            globalCounts.LOW += counts.LOW
+          }
+
+          // Afficher le tableau résumé global dans les logs
+          echo "┌──────────┬───────┬────────┐"
+          echo "│ Sévérité │ Count │ Seuil  │"
+          echo "├──────────┼───────┼────────┤"
+          echo "│ CRITICAL │   ${globalCounts.CRITICAL.toString().padRight(3)} │  0 max │"
+          echo "│ HIGH     │   ${globalCounts.HIGH.toString().padRight(3)} │  3 max │"
+          echo "└──────────┴───────┴────────┘"
+
+          if (globalCounts.MEDIUM > 0) {
+            echo "[WARN] Warnings found: ${globalCounts.MEDIUM} MEDIUM vulnerabilities detected across all images."
+          }
+
+          def failed = false
+          def reason = ""
+          
+          if (globalCounts.CRITICAL > 0) {
+            failed = true
+            reason += "CRITICAL count (${globalCounts.CRITICAL}) > 0; "
+          }
+          if (globalCounts.HIGH > 3) {
+            failed = true
+            reason += "HIGH count (${globalCounts.HIGH}) > 3; "
+          }
+
+          archiveArtifacts allowEmptyArchive: true, artifacts: 'security/reports/trivy-image-*.json'
+          
+          try {
+            publishHTML([
+              allowMissing: true,
+              alwaysLinkToLastBuild: true,
+              keepAll: true,
+              reportDir: 'artifacts/release',
+              reportFiles: 'image-scan-summary.md',
+              reportName: 'Trivy Image Scan Summary',
+              reportTitles: 'Trivy Image Scan Summary'
+            ])
+          } catch (Exception ex) {
+            echo "[WARN] HTML Publisher not available: ${ex.message}"
+          }
+
+          if (failed) {
+            echo "[FAIL] Quality Gate Failed: ${reason}"
+            try {
+              slackSend channel: '#security-alerts',
+                        color: '#FF0000',
+                        message: "SecureRAG Hub Quality Gate Failed (Image Scan)! Reason: ${reason}",
+                        webhookUrl: '<SLACK_WEBHOOK_URL>'
+            } catch (Exception slackEx) {
+              echo "[WARN] Slack notification failed: ${slackEx.message}"
+            }
+            error("Trivy Image Quality Gate Failed: ${reason}")
+          } else {
+            echo "[PASS] Trivy Image Quality Gate Passed."
+          }
+        }
+      }
+    }
+
     stage('Sign Release Candidate Images') {
       when {
         expression { return params.SIGN_RELEASE_CANDIDATES }
       }
       steps {
         script {
-          def useKeyless = false
-          try {
-            withCredentials([string(credentialsId: 'jenkins-oidc-token', variable: 'TEST_OIDC')]) {
-              useKeyless = true
-            }
-          } catch (Exception e) {
-            echo "[INFO] OIDC Token credential not found. Will use fallback key-pair."
-          }
-
-          if (useKeyless) {
-            withCredentials([string(credentialsId: 'jenkins-oidc-token', variable: 'OIDC_TOKEN')]) {
-              sh '''
-                set -euo pipefail
-                echo "[INFO] Using Sigstore Keyless signing."
-                export REGISTRY_HOST="${REGISTRY_HOST}" IMAGE_PREFIX="${IMAGE_PREFIX}" IMAGE_TAG="${SOURCE_IMAGE_TAG}"
-                export REPORT_DIR="${REPORT_DIR}" FAIL_FAST="true"
-                export COSIGN_EXPERIMENTAL=1
-                export COSIGN_IDENTITY_TOKEN="${OIDC_TOKEN}"
-                bash scripts/release/sign-images.sh
-              '''
-            }
-          } else {
-            withCredentials([
-              file(credentialsId: 'cosign-private-key', variable: 'COSIGN_KEY'),
-              string(credentialsId: 'cosign-password', variable: 'COSIGN_PASSWORD')
-            ]) {
-              sh '''
-                set -euo pipefail
-                echo "[INFO] Using classic key-pair signing."
-                export REGISTRY_HOST="${REGISTRY_HOST}" IMAGE_PREFIX="${IMAGE_PREFIX}" IMAGE_TAG="${SOURCE_IMAGE_TAG}"
-                export REPORT_DIR="${REPORT_DIR}" FAIL_FAST="true"
-                export COSIGN_KEY="${COSIGN_KEY}"
-                bash scripts/release/sign-images.sh
-              '''
-            }
-          }
+          sh '''
+            set -euo pipefail
+            echo "[INFO] Using Sigstore Keyless signing via local OIDC provider..."
+            
+            # 1. Obtain OIDC ID token from Keycloak
+            TOKEN=$(curl -s -X POST \
+              http://keycloak.sigstore-system/realms/securerag-cicd/protocol/openid-connect/token \
+              -d "client_id=jenkins-cosign&client_secret=jenkins-cosign-secret&grant_type=client_credentials" \
+              | jq -r .access_token)
+            
+            if [ -z "${TOKEN}" ] || [ "${TOKEN}" = "null" ]; then
+              echo "[ERROR] Failed to obtain OIDC token from Keycloak."
+              exit 1
+            fi
+            
+            # 2. Export environment variables for the signing script
+            export REGISTRY_HOST="${REGISTRY_HOST}"
+            export IMAGE_PREFIX="${IMAGE_PREFIX}"
+            export IMAGE_TAG="${SOURCE_IMAGE_TAG}"
+            export REPORT_DIR="${REPORT_DIR}"
+            export FAIL_FAST="true"
+            
+            # Override Cosign configuration for local keyless signature
+            export COSIGN_EXPERIMENTAL=1
+            export COSIGN_FULCIO_URL="http://fulcio.sigstore-system"
+            export COSIGN_REKOR_URL="http://rekor.sigstore-system"
+            export COSIGN_IDENTITY_TOKEN="${TOKEN}"
+            export COSIGN_OIDC_ISSUER="http://keycloak.sigstore-system/realms/securerag-cicd"
+            export COSIGN_ALLOW_INSECURE_REGISTRY="true" # Required for local registry
+            
+            # Run the signing script (it will pick up keyless mode automatically when COSIGN_KEY is unset)
+            bash scripts/release/sign-images.sh
+          '''
         }
       }
       post {
@@ -150,39 +231,24 @@ pipeline {
     stage('Verify Release Candidate Signatures') {
       steps {
         script {
-          def useKeyless = false
-          try {
-            withCredentials([string(credentialsId: 'jenkins-oidc-token', variable: 'TEST_OIDC')]) {
-              useKeyless = true
-            }
-          } catch (Exception e) {
-            echo "[INFO] OIDC Token credential not found. Will use fallback key-pair."
-          }
-
-          if (useKeyless) {
-            sh '''
-              set -euo pipefail
-              echo "[INFO] Verifying Sigstore Keyless signatures."
-              export REGISTRY_HOST="${REGISTRY_HOST}" IMAGE_PREFIX="${IMAGE_PREFIX}" IMAGE_TAG="${SOURCE_IMAGE_TAG}"
-              export REPORT_DIR="${REPORT_DIR}" FAIL_FAST="true"
-              # When COSIGN_PUBLIC_KEY is absent, the script uses Keyless verification 
-              # and checks COSIGN_CERTIFICATE_IDENTITY or repo defaults.
-              bash scripts/release/verify-signatures.sh
-            '''
-          } else {
-            withCredentials([
-              file(credentialsId: 'cosign-public-key', variable: 'COSIGN_PUBLIC_KEY')
-            ]) {
-              sh '''
-                set -euo pipefail
-                echo "[INFO] Verifying classic key-pair signatures."
-                export REGISTRY_HOST="${REGISTRY_HOST}" IMAGE_PREFIX="${IMAGE_PREFIX}" IMAGE_TAG="${SOURCE_IMAGE_TAG}"
-                export REPORT_DIR="${REPORT_DIR}" FAIL_FAST="true"
-                export COSIGN_PUBLIC_KEY="${COSIGN_PUBLIC_KEY}"
-                bash scripts/release/verify-signatures.sh
-              '''
-            }
-          }
+          sh '''
+            set -euo pipefail
+            echo "[INFO] Verifying Sigstore Keyless signatures via local Rekor..."
+            export REGISTRY_HOST="${REGISTRY_HOST}"
+            export IMAGE_PREFIX="${IMAGE_PREFIX}"
+            export IMAGE_TAG="${SOURCE_IMAGE_TAG}"
+            export REPORT_DIR="${REPORT_DIR}"
+            export FAIL_FAST="true"
+            
+            # Keyless verification env vars
+            export COSIGN_EXPERIMENTAL=1
+            export COSIGN_REKOR_URL="http://rekor.sigstore-system"
+            export COSIGN_CERTIFICATE_IDENTITY="jenkins-cosign@securerag.local"
+            export COSIGN_CERTIFICATE_OIDC_ISSUER="http://keycloak.sigstore-system/realms/securerag-cicd"
+            export COSIGN_ALLOW_INSECURE_REGISTRY="true"
+            
+            bash scripts/release/verify-signatures.sh
+          '''
         }
       }
       post {
@@ -261,16 +327,35 @@ pipeline {
 
     stage('Attest SBOMs') {
       steps {
-        withCredentials([
-          file(credentialsId: 'cosign-private-key', variable: 'COSIGN_KEY'),
-          string(credentialsId: 'cosign-password', variable: 'COSIGN_PASSWORD')
-        ]) {
-          sh '''
-            set -euo pipefail
-            REGISTRY_HOST="${REGISTRY_HOST}" IMAGE_PREFIX="${IMAGE_PREFIX}" IMAGE_TAG="${TARGET_IMAGE_TAG}" \
-            SBOM_DIR="${SBOM_DIR}" REPORT_DIR="${REPORT_DIR}" COSIGN_KEY="${COSIGN_KEY}" \
-            bash scripts/release/attest-sboms.sh
-          '''
+        script {
+          def vaultSecrets = [
+            [path: 'secret/data/jenkins/cosign', engineVersion: 2, secretValues: [
+              [envVar: 'COSIGN_KEY_CONTENT', vaultKey: 'private-key'],
+              [envVar: 'COSIGN_PASSWORD', vaultKey: 'password']
+            ]]
+          ]
+          withVault(vaultSecrets: vaultSecrets) {
+            sh '''
+              set -euo pipefail
+              echo "[INFO] Attesting SBOMs using keys retrieved from HashiCorp Vault."
+              
+              # Write private key content to a temporary location
+              COSIGN_KEY_FILE=$(mktemp)
+              echo "${COSIGN_KEY_CONTENT}" > "${COSIGN_KEY_FILE}"
+              
+              export REGISTRY_HOST="${REGISTRY_HOST}"
+              export IMAGE_PREFIX="${IMAGE_PREFIX}"
+              export IMAGE_TAG="${TARGET_IMAGE_TAG}"
+              export SBOM_DIR="${SBOM_DIR}"
+              export REPORT_DIR="${REPORT_DIR}"
+              export COSIGN_KEY="${COSIGN_KEY_FILE}"
+              
+              bash scripts/release/attest-sboms.sh
+              
+              # Secure cleanup
+              rm -f "${COSIGN_KEY_FILE}"
+            '''
+          }
         }
       }
       post {
@@ -783,4 +868,30 @@ pipeline {
       archiveArtifacts allowEmptyArchive: true, artifacts: 'artifacts/sbom/**,artifacts/release/**,artifacts/validation/**,artifacts/support-pack/**'
     }
   }
+}
+
+def parseTrivyReport(String filePath) {
+    def counts = [CRITICAL: 0, HIGH: 0, MEDIUM: 0, LOW: 0]
+    if (!fileExists(filePath)) {
+        echo "[WARN] Trivy report file not found at: ${filePath}"
+        return counts
+    }
+    try {
+        def report = readJSON file: filePath
+        if (report && report.Results) {
+            for (result in report.Results) {
+                if (result.Vulnerabilities) {
+                    for (vuln in result.Vulnerabilities) {
+                        def severity = vuln.Severity ? vuln.Severity.toUpperCase() : ""
+                        if (counts.containsKey(severity)) {
+                            counts[severity] = counts[severity] + 1
+                        }
+                    }
+                }
+            }
+        }
+    } catch (Exception e) {
+        echo "[ERROR] Failed to parse Trivy JSON report at ${filePath}: ${e.getMessage()}"
+    }
+    return counts
 }

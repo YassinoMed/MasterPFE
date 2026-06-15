@@ -1,0 +1,30 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: audit-security-policy
+  namespace: securerag-hub
+spec:
+  # Select the service under either name
+  podSelector:
+    matchExpressions:
+      - key: app.kubernetes.io/name
+        operator: In
+        values:
+          - audit-security-service
+          - security-auditor
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    # Allow incoming traffic from chatbot-manager
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: chatbot-manager
+      ports:
+        - protocol: TCP
+          port: 8000
+        - protocol: TCP
+          port: 9000
+  # No egress allowed (leaf service)
+  egress: []

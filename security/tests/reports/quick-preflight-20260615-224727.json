@@ -1,0 +1,45 @@
+{
+  "test_suite": "quick-preflight",
+  "timestamp": "2026-06-15T20:47:27Z",
+  "environment": "kind",
+  "results": [
+    {
+      "test_id": "T00-01",
+      "name": "kubectl connected to kind-securerag-cluster",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "Connected successfully",
+      "evidence": "Kubernetes control plane is running at https://127.0.0.1:6445\nCoreDNS is running at https://127.0.0.1:6445/api/v1/namespaces/kube-system/services/kube-dns:dns/proxy\n\nTo further debug and diagnose cluster problems, use 'kubectl cluster-info dump'."
+    },
+    {
+      "test_id": "T00-02",
+      "name": "Namespace securerag-hub is Active",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "Namespace is Active",
+      "evidence": "Active"
+    },
+    {
+      "test_id": "T00-03",
+      "name": "At least 1 pod Running in securerag-hub",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "Running pod found",
+      "evidence": "NAME                                      READY   STATUS    RESTARTS   AGE\naudit-security-service-6cc4d4bb96-5rq4s   1/1     Running   0          26h\nauth-users-5979c684b7-b69x4               1/1     Running   0          26h\nchatbot-manager-57dfbfcdcc-nvjmn          1/1     Running   0          26h\nconversation-service-779ccf85-64fzh       1/1     Running   0          26h\nportal-web-556d6b6b9f-488nl               1/1     Running   0          26h\npostgres-auth-68d59c77df-w8wc5            1/1     Running   0          26h"
+    },
+    {
+      "test_id": "T00-04",
+      "name": "Vault is unsealed",
+      "status": "FAIL",
+      "duration_sec": 0,
+      "details": "Vault is sealed or inaccessible",
+      "evidence": "Error from server (NotFound): namespaces \"vault-system\" not found"
+    }
+  ],
+  "summary": {
+    "total": 4,
+    "passed": 3,
+    "failed": 1,
+    "duration_sec": 0
+  }
+}

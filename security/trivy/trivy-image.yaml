@@ -1,0 +1,9 @@
+timeout: 5m0s
+exit-code: 0
+ignore-unfixed: true
+severity:
+  - MEDIUM
+  - HIGH
+  - CRITICAL
+scanners:
+  - vuln

@@ -1,0 +1,27 @@
+env:
+  contexts:
+    - name: authenticated-context
+      urls:
+        - http://staging.portal.securerag.local
+      excludePaths:
+        - ".*logout.*"
+        - ".*delete.*"
+        - ".*destroy.*"
+      authentication:
+        method: form
+        parameters:
+          loginPageUrl: http://staging.portal.securerag.local/login
+          loginRequestUrl: http://staging.portal.securerag.local/login
+          loginRequestBody: email={%username%}&password={%password%}&_token={%session_token%}
+        users:
+          - name: test_user
+            enabled: true
+            credentials:
+              username: ${ZAP_USER}
+              password: ${ZAP_PASSWORD}
+      sessionManagement:
+        method: cookie
+      verification:
+        method: response
+        loggedOutRegex: ".*login.*"
+        loggedInRegex: ".*dashboard.*|.*logout.*"

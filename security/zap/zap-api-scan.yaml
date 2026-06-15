@@ -1,0 +1,51 @@
+env:
+  contexts:
+    - name: chatbot-api
+      urls:
+        - http://staging.chatbot.securerag.local/api
+      excludePaths:
+        - ".*logout.*"
+        - ".*delete.*"
+        - ".*destroy.*"
+    - name: auth-api
+      urls:
+        - http://staging.auth.securerag.local/api
+      excludePaths:
+        - ".*logout.*"
+        - ".*delete.*"
+        - ".*destroy.*"
+  parameters:
+    failOnError: true
+    failOnWarning: false
+jobs:
+  - type: openapi
+    parameters:
+      apiFile: /zap/wrk/docs/openapi/chatbot-manager-service.yaml
+      targetUrl: http://staging.chatbot.securerag.local/api
+      context: chatbot-api
+  - type: openapi
+    parameters:
+      apiFile: /zap/wrk/docs/openapi/auth-users-service.yaml
+      targetUrl: http://staging.auth.securerag.local/api
+      context: auth-api
+  - type: passiveScan-config
+    parameters:
+      rulesFile: /zap/wrk/security/zap/zap-rules-config.tsv
+  - type: activeScan
+    parameters:
+      context: chatbot-api
+      maxDurationInMins: 5
+  - type: activeScan
+    parameters:
+      context: auth-api
+      maxDurationInMins: 5
+  - type: report
+    parameters:
+      template: traditional-html
+      reportDir: /zap/wrk
+      reportFile: zap-api-report
+  - type: report
+    parameters:
+      template: traditional-json
+      reportDir: /zap/wrk
+      reportFile: zap-api-report

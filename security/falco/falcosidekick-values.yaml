@@ -1,0 +1,19 @@
+# File: security/falco/falcosidekick-values.yaml
+# Description: Helm values configuration for Falcosidekick to route alerts to Wazuh (Syslog) and Slack.
+
+config:
+  customfields: "cluster:securerag-hub,env:production"
+  
+  syslog:
+    enabled: true
+    host: "wazuh-manager.wazuh.svc.cluster.local"
+    port: 514
+    protocol: "udp"
+    format: "json"
+    minimumpriority: "warning"
+  
+  slack:
+    enabled: true
+    webhookurl: "https://hooks.slack.com/services/TXXXXX/BXXXXX/XXXXXXXX"
+    channel: "#securerag-alerts"
+    minimumpriority: "critical"

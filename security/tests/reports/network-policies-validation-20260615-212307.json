@@ -1,0 +1,21 @@
+{
+  "test_suite": "network-policies-validation",
+  "timestamp": "2026-06-15T19:23:07Z",
+  "environment": "kind",
+  "results": [
+    {
+      "test_id": "NET-00",
+      "name": "Namespace securerag-hub exists",
+      "status": "FAIL",
+      "duration_sec": 0,
+      "details": "Namespace not found, skipping active tests.",
+      "evidence": ""
+    }
+  ],
+  "summary": {
+    "total": 1,
+    "passed": 0,
+    "failed": 1,
+    "duration_sec": 0
+  }
+}

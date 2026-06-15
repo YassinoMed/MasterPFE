@@ -1,0 +1,20 @@
+timeout: 5m0s
+exit-code: 0
+ignore-unfixed: true
+severity:
+  - MEDIUM
+  - HIGH
+  - CRITICAL
+scanners:
+  - vuln
+  - misconfig
+skip-dirs:
+  - .git
+  - .coverage-artifacts
+  - docs
+  - security/reports
+  - infra/jenkins/secrets
+skip-files:
+  - .gitleaks.toml
+  - infra/jenkins/secrets/cosign.key
+  - infra/jenkins/secrets/recette-deploy-key

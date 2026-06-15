@@ -211,7 +211,7 @@ pipeline {
             --report-path security/reports/gitleaks.json
 
           trivy fs \
-            --config security/trivy/trivy.yaml \
+            --config security/trivy/trivy-fs.yaml \
             --ignorefile .trivyignore \
             --format json \
             --output security/reports/trivy-fs.json \
@@ -221,6 +221,78 @@ pipeline {
       post {
         always {
           archiveArtifacts allowEmptyArchive: true, artifacts: 'security/reports/**'
+        }
+      }
+    }
+
+    stage('CI_TRIVY_FS_QUALITY_GATE') {
+      steps {
+        script {
+          echo '[INFO] Evaluating Trivy FS Quality Gate...'
+          def reportFile = 'security/reports/trivy-fs.json'
+          def counts = [CRITICAL: 0, HIGH: 0, MEDIUM: 0, LOW: 0]
+          
+          try {
+            counts = trivyUtils.parseTrivyReport(reportFile)
+          } catch (Exception e) {
+            echo "[INFO] Fallback to local parsing (trivyUtils not loaded): ${e.message}"
+            counts = parseTrivyReport(reportFile)
+          }
+
+          // Afficher le tableau résumé dans les logs
+          echo "┌──────────┬───────┬────────┐"
+          echo "│ Sévérité │ Count │ Seuil  │"
+          echo "├──────────┼───────┼────────┤"
+          echo "│ CRITICAL │   ${counts.CRITICAL.toString().padRight(3)} │  0 max │"
+          echo "│ HIGH     │   ${counts.HIGH.toString().padRight(3)} │  3 max │"
+          echo "└──────────┴───────┴────────┘"
+
+          if (counts.MEDIUM > 0) {
+            echo "[WARN] Warnings found: ${counts.MEDIUM} MEDIUM vulnerabilities detected."
+          }
+
+          def failed = false
+          def reason = ""
+          
+          if (counts.CRITICAL > 0) {
+            failed = true
+            reason += "CRITICAL count (${counts.CRITICAL}) > 0; "
+          }
+          if (counts.HIGH > 3) {
+            failed = true
+            reason += "HIGH count (${counts.HIGH}) > 3; "
+          }
+
+          archiveArtifacts allowEmptyArchive: true, artifacts: reportFile
+          
+          try {
+            publishHTML([
+              allowMissing: true,
+              alwaysLinkToLastBuild: true,
+              keepAll: true,
+              reportDir: 'security/reports',
+              reportFiles: 'trivy-fs.json',
+              reportName: 'Trivy FS Scan Report',
+              reportTitles: 'Trivy FS Scan Report'
+            ])
+          } catch (Exception ex) {
+            echo "[WARN] HTML Publisher not available: ${ex.message}"
+          }
+
+          if (failed) {
+            echo "[FAIL] Quality Gate Failed: ${reason}"
+            try {
+              slackSend channel: '#security-alerts',
+                        color: '#FF0000',
+                        message: "SecureRAG Hub Quality Gate Failed (FS Scan)! Reason: ${reason}",
+                        webhookUrl: '<SLACK_WEBHOOK_URL>'
+            } catch (Exception slackEx) {
+              echo "[WARN] Slack notification failed: ${slackEx.message}"
+            }
+            error("Trivy FS Quality Gate Failed: ${reason}")
+          } else {
+            echo "[PASS] Trivy FS Quality Gate Passed."
+          }
         }
       }
     }
@@ -665,4 +737,30 @@ pipeline {
       archiveArtifacts allowEmptyArchive: true, artifacts: 'security/reports/**,.coverage-artifacts/**'
     }
   }
+}
+
+def parseTrivyReport(String filePath) {
+    def counts = [CRITICAL: 0, HIGH: 0, MEDIUM: 0, LOW: 0]
+    if (!fileExists(filePath)) {
+        echo "[WARN] Trivy report file not found at: ${filePath}"
+        return counts
+    }
+    try {
+        def report = readJSON file: filePath
+        if (report && report.Results) {
+            for (result in report.Results) {
+                if (result.Vulnerabilities) {
+                    for (vuln in result.Vulnerabilities) {
+                        def severity = vuln.Severity ? vuln.Severity.toUpperCase() : ""
+                        if (counts.containsKey(severity)) {
+                            counts[severity] = counts[severity] + 1
+                        }
+                    }
+                }
+            }
+        }
+    } catch (Exception e) {
+        echo "[ERROR] Failed to parse Trivy JSON report at ${filePath}: ${e.getMessage()}"
+    }
+    return counts
 }

@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rapport d'Audit de Sécurité Kyverno</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-main: #0f172a;
+            --bg-card: #1e293b;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --color-pass: #10b981;
+            --color-fail: #ef4444;
+            --color-warn: #f59e0b;
+            --color-info: #3b82f6;
+            --border-color: #334155;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-primary);
+            line-height: 1.6;
+            padding: 2rem;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 1.5rem;
+        }
+        
+        h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #38bdf8, #818cf8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .badge {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+        
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            transition: transform 0.2s;
+        }
+        
+        .card:hover {
+            transform: translateY(-4px);
+        }
+        
+        .card-title {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .card-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+        }
+        
+        .score-gauge {
+            width: 100%;
+            height: 10px;
+            background-color: var(--border-color);
+            border-radius: 5px;
+            margin-top: 1rem;
+            overflow: hidden;
+        }
+        
+        .score-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--color-fail), var(--color-pass));
+            border-radius: 5px;
+        }
+        
+        .table-container {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 2rem;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+        
+        th {
+            background-color: rgba(51, 65, 85, 0.5);
+            padding: 1rem;
+            font-weight: 600;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+        
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.95rem;
+        }
+        
+        tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .status-fail {
+            color: var(--color-fail);
+            font-weight: 600;
+            background-color: rgba(239, 68, 68, 0.1);
+            padding: 0.25rem 0.5rem;
+            border-radius: 6px;
+            display: inline-block;
+        }
+        
+        .remediation-section {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+        }
+        
+        .remediation-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #38bdf8;
+        }
+        
+        .remediation-list {
+            list-style-position: inside;
+            color: var(--text-secondary);
+        }
+        
+        .remediation-list li {
+            margin-bottom: 0.75rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div>
+                <h1>Rapport d'Audit Kyverno</h1>
+                <p style="color: var(--text-secondary); margin-top: 0.25rem;">Simulation du mode Enforce sur les pods du cluster</p>
+            </div>
+            <div class="badge">Généré le: 2026-06-15 20:00:23</div>
+        </header>
+        
+        <div class="dashboard">
+            <div class="card">
+                <div class="card-title">Compliance Score</div>
+                <div class="card-value" style="color: var(--color-fail)">0%</div>
+                <div class="score-gauge">
+                    <div class="score-fill" style="width: 0%"></div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-title">Pods Analysés</div>
+                <div class="card-value">6</div>
+            </div>
+            <div class="card">
+                <div class="card-title">Pods Conformes</div>
+                <div class="card-value" style="color: var(--color-pass)">0</div>
+            </div>
+            <div class="card">
+                <div class="card-title">Pods Non-Conformes</div>
+                <div class="card-value" style="color: var(--color-fail)">6</div>
+            </div>
+        </div>
+        
+        <h2 style="margin-bottom: 1rem; font-weight: 600;">Détail des Violations (15)</h2>
+        
+        <div class="table-container">
+            <table><thead><tr><th>Namespace</th><th>Pod</th><th>Politique</th><th>Règle</th><th>Message d'erreur</th></tr></thead><tbody><tr>
+            <td><code>securerag-hub</code></td>
+            <td><strong>portal-web-556d6b6b9f-488nl</strong></td>
+            <td><code>securerag-no-root-containers-enforce</code></td>
+            <td><code>check-run-as-non-root</code></td>
+            <td><span class="status-fail">validation error: Pods must run as non-root (runAsNonRoot: true) and runAsUser must be >= 1000. rule check-run-as-non-root failed at path /spec/securityContext/runAsUser/</span></td>
+        </tr><tr>
+            <td><code>securerag-hub</code></td>
+            <td><strong>auth-users-5979c684b7-b69x4</strong></td>
+            <td><code>securerag-require-labels-enforce</code></td>
+            <td><code>require-labels</code></td>
+            <td><span class="status-fail">validation error: Pods must have labels 'app.kubernetes.io/name', 'app.kubernetes.io/version', and 'app.kubernetes.io/part-of' set to 'securerag-hub'. rule require-labels failed at path /metadata/labels/app.kubernetes.io/version/</span></td>
+        </tr><tr>
+            <td><code>securerag-hub</code></td>
+            <td><strong>portal-web-556d6b6b9f-488nl</strong></td>
+            <td><code>securerag-require-image-digest-enforce</code></td>
+            <td><code>require-image-digest</code></td>
+            <td><span class="status-fail">validation failure: validation error: All images must be referenced by their SHA256 digest (e.g. registry.securerag.local/image@sha256:abc123). rule require-image-digest failed at path /image/</span></td>
+        </tr><tr>
+            <td><code>securerag-hub</code></td>
+            <td><strong>postgres-auth-68d59c77df-w8wc5</strong></td>
+            <td><code>securerag-require-probes-enforce</code></td>
+            <td><code>require-probes</code></td>
+            <td><span class="status-fail">validation error: Containers must have both livenessProbe and readinessProbe configured. rule require-probes failed at path /spec/containers/0/livenessProbe/</span></td>
+        </tr><tr>
+            <td><code>securerag-hub</code></td>
+            <td><strong>chatbot-manager-57dfbfcdcc-nvjmn</strong></td>
+            <td><code>securerag-require-image-digest-enforce</code></td>
+            <td><code>require-image-digest</code></td>
+            <td><span class="status-fail">validation failure: validation error: All images must be referenced by their SHA256 digest (e.g. registry.securerag.local/image@sha256:abc123). rule require-image-digest failed at path /image/</span></td>
+        </tr><tr>
+            <td><code>securerag-hub</code></td>
+            <td><strong>chatbot-manager-57dfbfcdcc-nvjmn</strong></td>
+            <td><code>securerag-require-labels-enforce</code></td>
+            <td><code>require-labels</code></td>
+            <td><span class="status-fail">validation error: Pods must have labels 'app.kubernetes.io/name', 'app.kubernetes.io/version', and 'app.kubernetes.io/part-of' set to 'securerag-hub'. rule require-labels failed at path /metadata/labels/app.kubernetes.io/version/</span></td>
+        </tr><tr>
+            <td><code>securerag-hub</code></td>
+            <td><strong>conversation-service-779ccf85-64fzh</strong></td>
+            <td><code>securerag-require-labels-enforce</code></td>
+            <td><code>require-labels</code></td>
+            <td><span class="status-fail">validation error: Pods must have labels 'app.kubernetes.io/name', 'app.kubernetes.io/version', and 'app.kubernetes.io/part-of' set to 'securerag-hub'. rule require-labels failed at path /metadata/labels/app.kubernetes.io/version/</span></td>
+        </tr><tr>
+            <td><code>securerag-hub</code></td>
+            <td><strong>audit-security-service-6cc4d4bb96-5rq4s</strong></td>
+            <td><code>securerag-require-image-digest-enforce</code></td>
+            <td><code>require-image-digest</code></td>
+            <td><span class="status-fail">validation failure: validation error: All images must be referenced by their SHA256 digest (e.g. registry.securerag.local/image@sha256:abc123). rule require-image-digest failed at path /image/</span></td>
+        </tr><tr>
+            <td><code>securerag-hub</code></td>
+            <td><strong>conversation-service-779ccf85-64fzh</strong></td>
+            <td><code>securerag-require-image-digest-enforce</code></td>
+            <td><code>require-image-digest</code></td>
+            <td><span class="status-fail">validation failure: validation error: All images must be referenced by their SHA256 digest (e.g. registry.securerag.local/image@sha256:abc123). rule require-image-digest failed at path /image/</span></td>
+        </tr><tr>
+            <td><code>securerag-hub</code></td>
+            <td><strong>portal-web-556d6b6b9f-488nl</strong></td>
+            <td><code>securerag-require-labels-enforce</code></td>
+            <td><code>require-labels</code></td>
+            <td><span class="status-fail">validation error: Pods must have labels 'app.kubernetes.io/name', 'app.kubernetes.io/version', and 'app.kubernetes.io/part-of' set to 'securerag-hub'. rule require-labels failed at path /metadata/labels/app.kubernetes.io/version/</span></td>
+        </tr><tr>
+            <td><code>securerag-hub</code></td>
+            <td><strong>audit-security-service-6cc4d4bb96-5rq4s</strong></td>
+            <td><code>securerag-require-labels-enforce</code></td>
+            <td><code>require-labels</code></td>
+            <td><span class="status-fail">validation error: Pods must have labels 'app.kubernetes.io/name', 'app.kubernetes.io/version', and 'app.kubernetes.io/part-of' set to 'securerag-hub'. rule require-labels failed at path /metadata/labels/app.kubernetes.io/version/</span></td>
+        </tr><tr>
+            <td><code>securerag-hub</code></td>
+            <td><strong>postgres-auth-68d59c77df-w8wc5</strong></td>
+            <td><code>securerag-no-root-containers-enforce</code></td>
+            <td><code>check-run-as-non-root</code></td>
+            <td><span class="status-fail">validation error: Pods must run as non-root (runAsNonRoot: true) and runAsUser must be >= 1000. rule check-run-as-non-root failed at path /spec/securityContext/runAsUser/</span></td>
+        </tr><tr>
+            <td><code>securerag-hub</code></td>
+            <td><strong>postgres-auth-68d59c77df-w8wc5</strong></td>
+            <td><code>securerag-require-labels-enforce</code></td>
+            <td><code>require-labels</code></td>
+            <td><span class="status-fail">validation error: Pods must have labels 'app.kubernetes.io/name', 'app.kubernetes.io/version', and 'app.kubernetes.io/part-of' set to 'securerag-hub'. rule require-labels failed at path /metadata/labels/app.kubernetes.io/version/</span></td>
+        </tr><tr>
+            <td><code>securerag-hub</code></td>
+            <td><strong>postgres-auth-68d59c77df-w8wc5</strong></td>
+            <td><code>securerag-require-image-digest-enforce</code></td>
+            <td><code>require-image-digest</code></td>
+            <td><span class="status-fail">validation failure: validation error: All images must be referenced by their SHA256 digest (e.g. registry.securerag.local/image@sha256:abc123). rule require-image-digest failed at path /image/</span></td>
+        </tr><tr>
+            <td><code>securerag-hub</code></td>
+            <td><strong>auth-users-5979c684b7-b69x4</strong></td>
+            <td><code>securerag-require-image-digest-enforce</code></td>
+            <td><code>require-image-digest</code></td>
+            <td><span class="status-fail">validation failure: validation error: All images must be referenced by their SHA256 digest (e.g. registry.securerag.local/image@sha256:abc123). rule require-image-digest failed at path /image/</span></td>
+        </tr></tbody></table>
+        </div>
+        
+        <div class="remediation-section">
+            <div class="remediation-title">Plan d'Action de Remédiation Recommandé</div>
+            <ul class="remediation-list">
+                <li><strong>POLICY 1 (Root Containers)</strong> : Modifier les templates de Pods dans les charts Helm/Kustomize pour ajouter <code>securityContext.runAsNonRoot: true</code> et <code>securityContext.runAsUser: 10001</code>.</li>
+                <li><strong>POLICY 3 (Digest SHA256)</strong> : Modifier la pipeline de release pour pousser les manifests avec des digests d'images plutôt que des tags mutables.</li>
+                <li><strong>POLICY 4 (Ressources CPU/Mem)</strong> : Ajouter des blocks <code>resources.requests</code> et <code>resources.limits</code> sur chaque conteneur.</li>
+                <li><strong>POLICY 8 (Labels)</strong> : Mettre à jour les metadata de vos déploiements pour injecter les labels standards exigés.</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

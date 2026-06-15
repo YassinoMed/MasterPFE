@@ -1,0 +1,28 @@
+# Configuration de l'Authentification ChromaDB (Token-Based Auth)
+# Ce fichier sert de référence pour configurer le serveur ChromaDB en production
+# avec l'authentification par jeton statique activée.
+
+# 1. Activation du fournisseur d'authentification par token
+chroma_server_auth_provider: "chromadb.auth.token.TokenAuthServerProvider"
+
+# 2. Configuration du fournisseur de credentials statiques
+chroma_server_auth_credentials_provider: "chromadb.auth.token.TokenAuthStaticCredentialsProvider"
+
+# 3. Spécification de l'en-tête de transport du jeton
+# Par défaut : "Authorization" (Bearer Token) ou un en-tête personnalisé.
+chroma_server_auth_token_transport_header: "X-Chroma-Token"
+
+# 4. Liste des jetons statiques autorisés et leurs rôles associés
+# En production, ces valeurs doivent être injectées dynamiquement via des secrets K8s
+# (ou synchronisées via Vault) et non stockées en clair dans Git.
+chroma_server_auth_credentials:
+  - token: "sec-token-chatbot-manager-44a56b7c"
+    role: "admin"
+  - token: "sec-token-knowledge-hub-91f82c4d"
+    role: "writer"
+  - token: "sec-token-read-only-332e18fa"
+    role: "reader"
+
+# 5. Configuration additionnelle de sécurité
+# Autoriser le trafic non authentifié uniquement pour le endpoint de health check
+chroma_server_auth_allow_unauthenticated_health: true

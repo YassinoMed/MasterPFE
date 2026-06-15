@@ -1,0 +1,28 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: postgresql-policy
+  namespace: securerag-hub
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: postgres-auth
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    # Allow incoming connection on port 5432 from the three consuming microservices
+    - from:
+        - podSelector:
+            matchExpressions:
+              - key: app.kubernetes.io/name
+                operator: In
+                values:
+                  - chatbot-manager
+                  - auth-users
+                  - conversation-service
+      ports:
+        - protocol: TCP
+          port: 5432
+  # Database does not initiate outbound connections (leaf service)
+  egress: []

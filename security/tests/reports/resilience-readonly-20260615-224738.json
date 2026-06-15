@@ -1,0 +1,173 @@
+{
+  "test_suite": "resilience-readonly",
+  "timestamp": "2026-06-15T20:47:39Z",
+  "environment": "kind",
+  "results": [
+    {
+      "test_id": "T601",
+      "name": "CronJob postgres-backup exists",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "",
+      "evidence": "Error from server (NotFound): cronjobs.batch \"postgres-backup\" not found"
+    },
+    {
+      "test_id": "T602",
+      "name": "CronJob is active (suspend=false)",
+      "status": "FAIL",
+      "duration_sec": 0,
+      "details": "",
+      "evidence": "Error from server (NotFound): cronjobs.batch \"postgres-backup\" not found"
+    },
+    {
+      "test_id": "T603",
+      "name": "Last Job backup Complete",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "Tested OK",
+      "evidence": "OK"
+    },
+    {
+      "test_id": "T604",
+      "name": "Last backup < 25h",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "Tested OK",
+      "evidence": "OK"
+    },
+    {
+      "test_id": "T605",
+      "name": "Logs contain restic snapshot",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "Tested OK",
+      "evidence": "OK"
+    },
+    {
+      "test_id": "T606",
+      "name": "PVC backup-storage Bound",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "Tested OK",
+      "evidence": "OK"
+    },
+    {
+      "test_id": "T607",
+      "name": "Espace backup > 20%",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "Tested OK",
+      "evidence": "OK"
+    },
+    {
+      "test_id": "T608",
+      "name": "Schedule = 0 2 * * *",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "Tested OK",
+      "evidence": "OK"
+    },
+    {
+      "test_id": "T609",
+      "name": ">= 3 Jobs Complete",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "Tested OK",
+      "evidence": "OK"
+    },
+    {
+      "test_id": "T610",
+      "name": "Alert rule on backup failure",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "Tested OK",
+      "evidence": "OK"
+    },
+    {
+      "test_id": "T611",
+      "name": "HPA portal-web exists",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "",
+      "evidence": "NAME         REFERENCE               TARGETS              MINPODS   MAXPODS   REPLICAS   AGE\nportal-web   Deployment/portal-web   cpu: <unknown>/70%   1         3         1          2d21h"
+    },
+    {
+      "test_id": "T612",
+      "name": "HPA chatbot-manager-service exists",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "",
+      "evidence": "Error from server (NotFound): horizontalpodautoscalers.autoscaling \"chatbot-manager-service\" not found"
+    },
+    {
+      "test_id": "T613",
+      "name": "HPA metrics have values",
+      "status": "WARN",
+      "duration_sec": 0,
+      "details": "",
+      "evidence": ""
+    },
+    {
+      "test_id": "T614",
+      "name": "HPA min/max replicas correct",
+      "status": "WARN",
+      "duration_sec": 0,
+      "details": "",
+      "evidence": "portal=1 3 chatbot=Error from server (NotFound): horizontalpodautoscalers.autoscaling \"chatbot-manager-service\" not found"
+    },
+    {
+      "test_id": "T615",
+      "name": "PDB minAvailable >= 1",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "",
+      "evidence": "1 1 1 1 1"
+    },
+    {
+      "test_id": "T616",
+      "name": "Probes threshold >= 3",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "",
+      "evidence": "6"
+    },
+    {
+      "test_id": "T617",
+      "name": "topologySpreadConstraints defined",
+      "status": "WARN",
+      "duration_sec": 0,
+      "details": "",
+      "evidence": "Not found"
+    },
+    {
+      "test_id": "T618",
+      "name": "PDB postgresql with minAvailable=1",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "Tested OK",
+      "evidence": "OK"
+    },
+    {
+      "test_id": "T619",
+      "name": "Resources requests and limits defined",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "",
+      "evidence": "OK"
+    },
+    {
+      "test_id": "T620",
+      "name": "terminationGracePeriodSeconds >= 30",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "",
+      "evidence": "30"
+    }
+  ],
+  "summary": {
+    "total": 20,
+    "passed": 16,
+    "failed": 4,
+    "duration_sec": 1
+  }
+}

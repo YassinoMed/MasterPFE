@@ -1,0 +1,24 @@
+apiVersion: kyverno.io/v2
+kind: PolicyException
+metadata:
+  name: securerag-policy-exception-template
+  namespace: securerag-hub # Namespace where the exception is defined (must be allowed in Kyverno config)
+spec:
+  # Description and reasoning for the exception
+  background: true
+  match:
+    any:
+      - resources:
+          kinds:
+            - Pod
+          namespaces:
+            - securerag-hub
+          names:
+            - resource-name-to-exempt # Replace with specific pod name or use prefix/pattern
+  exceptions:
+    - policyName: securerag-no-root-containers-enforce # Name of the policy to exempt
+      ruleNames:
+        - check-run-as-non-root # Specific rule name (use '*' for all rules in the policy)
+    - policyName: securerag-require-labels-enforce
+      ruleNames:
+        - require-labels

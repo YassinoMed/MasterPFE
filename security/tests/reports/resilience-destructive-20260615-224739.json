@@ -1,0 +1,21 @@
+{
+  "test_suite": "resilience-destructive",
+  "timestamp": "2026-06-15T20:47:39Z",
+  "environment": "kind",
+  "results": [
+    {
+      "test_id": "T621-T630",
+      "name": "Destructive tests skipped",
+      "status": "WARN",
+      "duration_sec": 0,
+      "details": "SKIP_DESTRUCTIVE=1",
+      "evidence": "Skipped"
+    }
+  ],
+  "summary": {
+    "total": 1,
+    "passed": 0,
+    "failed": 1,
+    "duration_sec": 0
+  }
+}

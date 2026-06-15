@@ -1,6 +1,6 @@
 # Expert Readiness Report — SecureRAG Hub
 
-- Generated UTC: `2026-04-27T20:00:23Z`
+- Generated UTC: `2026-06-15T19:14:05Z`
 - Global status: `PRÊT_NON_EXÉCUTÉ`
 - Scope reference: `docs/architecture/official-scope.md`
 

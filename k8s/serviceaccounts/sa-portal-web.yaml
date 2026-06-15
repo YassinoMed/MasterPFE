@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: sa-portal-web
+  namespace: securerag-hub
+  annotations:
+    # IRSA-style role binding for AWS EKS / local Kind compatibility
+    eks.amazonaws.com/role-arn: "arn:aws:iam::<PLACEHOLDER_AWS_ACCOUNT_ID>:role/securerag-portal-web-role"

@@ -1,0 +1,31 @@
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: securerag-require-probes-audit
+  annotations:
+    policies.kyverno.io/title: Require Liveness and Readiness Probes (Audit)
+    policies.kyverno.io/category: Best Practices
+    policies.kyverno.io/severity: medium
+    policies.kyverno.io/subject: Pod
+    policies.kyverno.io/description: >-
+      Pods must have both liveness and readiness probes defined for all application containers.
+spec:
+  validationFailureAction: Audit
+  background: true
+  rules:
+    - name: require-probes
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+              namespaces:
+                - securerag-hub
+                - recette
+      validate:
+        message: "Containers must have both livenessProbe and readinessProbe configured."
+        pattern:
+          spec:
+            containers:
+              - livenessProbe: {}
+                readinessProbe: {}

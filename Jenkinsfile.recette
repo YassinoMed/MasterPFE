@@ -475,6 +475,82 @@ REMOTE_SMOKE
         }
       }
     }
+
+    stage('DAST') {
+      when {
+        expression { return params.DEPLOY_TO_RECETTE }
+      }
+      steps {
+        script {
+          def sshOpts = "-i /run/jenkins-secrets/recette-deploy-key -o StrictHostKeyChecking=no -o ConnectTimeout=30"
+          
+          // 1. Run ZAP Baseline Scan on remote VM
+          echo "[INFO] Running ZAP Baseline scan on remote Recette machine..."
+          sh """
+            ssh ${sshOpts} ${params.RECETTE_USER}@${params.RECETTE_HOST} bash -s <<'REMOTE_DAST'
+              set -euo pipefail
+              cd /MasterPFE
+              
+              # Wait for portal-web to be healthy
+              echo "[INFO] Waiting for portal-web to be healthy..."
+              for i in \$(seq 1 30); do
+                HTTP_CODE=\$(curl -s -o /dev/null -w "%{http_code}" --max-time 15 "http://127.0.0.1:9081/health" || echo "000")
+                if [ "\${HTTP_CODE}" = "200" ]; then
+                  echo "[OK] portal-web is healthy!"
+                  break
+                fi
+                echo "[WAIT] portal-web not healthy yet (HTTP \${HTTP_CODE}). Retrying in 10s..."
+                sleep 10
+              done
+              
+              mkdir -p security/reports
+              
+              echo "[INFO] Running ZAP DAST scan against http://staging.portal.securerag.local..."
+              docker run --rm --network host \
+                -v "/MasterPFE/security/reports:/zap/wrk:rw" \
+                ghcr.io/zaproxy/zaproxy:2.15.0 \
+                zap.sh -cmd -autorun /zap/wrk/security/zap/zap-baseline.yaml || true
+REMOTE_DAST
+          """
+          
+          // 2. Retrieve reports from remote host
+          echo "[INFO] Retrieving ZAP reports from remote host..."
+          sh """
+            mkdir -p security/reports
+            scp ${sshOpts} ${params.RECETTE_USER}@${params.RECETTE_HOST}:/MasterPFE/security/reports/zap-baseline-report.* security/reports/
+          """
+          
+          // 3. Evaluate Quality Gate via parse-zap-report.groovy
+          def zapParser = load 'security/zap/parse-zap-report.groovy'
+          def qgPassed = zapParser.parseZapReport('security/reports/zap-baseline-report.json', 0, 0)
+          
+          // 4. Publish HTML report
+          try {
+            publishHTML([
+              allowMissing: false,
+              alwaysLinkToLastBuild: true,
+              keepAll: true,
+              reportDir: 'security/reports',
+              reportFiles: 'zap-baseline-report.html',
+              reportName: 'ZAP DAST Baseline Report',
+              reportTitles: 'ZAP DAST Baseline Report'
+            ])
+          } catch (Exception ex) {
+            echo "[WARN] Failed to publish HTML report in Jenkins: ${ex.message}"
+          }
+          
+          // 5. Fail stage if quality gate failed
+          if (!qgPassed) {
+            error("ZAP DAST Baseline Quality Gate Failed (High or Critical alerts found)")
+          }
+        }
+      }
+      post {
+        always {
+          archiveArtifacts allowEmptyArchive: true, artifacts: 'security/reports/zap-baseline-report.json'
+        }
+      }
+    }
   }
 
   post {

@@ -205,7 +205,9 @@ for service in "${SERVICES_ARRAY[@]}"; do
     --exit-code 0
   )
 
-  if [[ -f security/trivy/trivy.yaml ]]; then
+  if [[ -f security/trivy/trivy-image.yaml ]]; then
+    trivy_args+=(--config security/trivy/trivy-image.yaml)
+  elif [[ -f security/trivy/trivy.yaml ]]; then
     trivy_args+=(--config security/trivy/trivy.yaml)
   fi
 

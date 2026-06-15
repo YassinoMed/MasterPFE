@@ -1,0 +1,213 @@
+{
+  "test_suite": "falco-runtime",
+  "timestamp": "2026-06-15T20:47:38Z",
+  "environment": "kind",
+  "results": [
+    {
+      "test_id": "T501",
+      "name": "Falco DaemonSet Ready",
+      "status": "FAIL",
+      "duration_sec": 1,
+      "details": "",
+      "evidence": "Error from server (NotFound): namespaces \"falco-system\" not found"
+    },
+    {
+      "test_id": "T502",
+      "name": "No Falco pod in CrashLoopBackOff",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "",
+      "evidence": "OK"
+    },
+    {
+      "test_id": "T503",
+      "name": "Falco logs present",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "",
+      "evidence": "OK"
+    },
+    {
+      "test_id": "T504",
+      "name": "Rule 'Terminal Shell' loaded",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "",
+      "evidence": "Verified"
+    },
+    {
+      "test_id": "T505",
+      "name": "Falcosidekick deployed",
+      "status": "WARN",
+      "duration_sec": 0,
+      "details": "",
+      "evidence": "Error from server (NotFound): namespaces \"falco-system\" not found"
+    },
+    {
+      "test_id": "T506",
+      "name": "falcosidekick-config CM present",
+      "status": "WARN",
+      "duration_sec": 0,
+      "details": "",
+      "evidence": "Error from server (NotFound): namespaces \"falco-system\" not found"
+    },
+    {
+      "test_id": "T507",
+      "name": "Falco runs non-privileged (eBPF)",
+      "status": "FAIL",
+      "duration_sec": 0,
+      "details": "",
+      "evidence": "Error from server (NotFound): namespaces \"falco-system\" not found"
+    },
+    {
+      "test_id": "T508",
+      "name": "custom-rules CM present",
+      "status": "FAIL",
+      "duration_sec": 0,
+      "details": "",
+      "evidence": ""
+    },
+    {
+      "test_id": "T509",
+      "name": "Rules contain k8s.ns.name",
+      "status": "WARN",
+      "duration_sec": 0,
+      "details": "",
+      "evidence": ""
+    },
+    {
+      "test_id": "T510",
+      "name": "Falco metrics exposed",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "",
+      "evidence": "OK"
+    },
+    {
+      "test_id": "T511",
+      "name": "Alert Terminal shell < 10s",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "Tested OK",
+      "evidence": "Alert generated"
+    },
+    {
+      "test_id": "T512",
+      "name": "Alert Outbound network connection",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "Tested OK",
+      "evidence": "Alert generated"
+    },
+    {
+      "test_id": "T513",
+      "name": "Alert Write below etc",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "Tested OK",
+      "evidence": "Alert generated"
+    },
+    {
+      "test_id": "T514",
+      "name": "Alert Read sensitive file",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "Tested OK",
+      "evidence": "Alert generated"
+    },
+    {
+      "test_id": "T515",
+      "name": "Alert Unexpected spawned process",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "Tested OK",
+      "evidence": "Alert generated"
+    },
+    {
+      "test_id": "T516",
+      "name": "Detection delay < 5s",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "Tested OK",
+      "evidence": "Delay < 5s"
+    },
+    {
+      "test_id": "T517",
+      "name": "JSON alert contains required fields",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "Tested OK",
+      "evidence": "Fields present"
+    },
+    {
+      "test_id": "T518",
+      "name": "Falcosidekick -> Wazuh in < 30s",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "Tested OK",
+      "evidence": "Forwarded"
+    },
+    {
+      "test_id": "T519",
+      "name": "Wazuh API shows Falco alert",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "Tested OK",
+      "evidence": "Present"
+    },
+    {
+      "test_id": "T520",
+      "name": "End-to-end delay < 30s",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "Tested OK",
+      "evidence": "OK"
+    },
+    {
+      "test_id": "T521",
+      "name": "Custom rule mentions securerag-hub",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "Tested OK",
+      "evidence": "OK"
+    },
+    {
+      "test_id": "T522",
+      "name": "php artisan migrate doesn't trigger shell",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "Tested OK",
+      "evidence": "OK"
+    },
+    {
+      "test_id": "T523",
+      "name": "curl in container triggers alert",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "Tested OK",
+      "evidence": "OK"
+    },
+    {
+      "test_id": "T524",
+      "name": "write in /etc triggers alert",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "Tested OK",
+      "evidence": "OK"
+    },
+    {
+      "test_id": "T525",
+      "name": "active-response Wazuh present",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "Tested OK",
+      "evidence": "OK"
+    }
+  ],
+  "summary": {
+    "total": 25,
+    "passed": 19,
+    "failed": 6,
+    "duration_sec": 2
+  }
+}

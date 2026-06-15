@@ -1,0 +1,213 @@
+{
+  "test_suite": "cicd-pipeline",
+  "timestamp": "2026-06-15T20:47:39Z",
+  "environment": "kind",
+  "results": [
+    {
+      "test_id": "T701",
+      "name": "HTTP 200 on Jenkins login",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "Tested OK via curl",
+      "evidence": "HTTP 200"
+    },
+    {
+      "test_id": "T702",
+      "name": "Last trigger by webhook SCM",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "Tested OK",
+      "evidence": "OK"
+    },
+    {
+      "test_id": "T703",
+      "name": "Last build securerag-ci SUCCESS",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "Tested OK",
+      "evidence": "OK"
+    },
+    {
+      "test_id": "T704",
+      "name": "Last build securerag-cd SUCCESS",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "Tested OK",
+      "evidence": "OK"
+    },
+    {
+      "test_id": "T705",
+      "name": "Artifacts (semgrep, gitleaks, trivy) present",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "Tested OK",
+      "evidence": "OK"
+    },
+    {
+      "test_id": "T706",
+      "name": "Jenkins in DinD mode",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "Tested OK",
+      "evidence": "OK"
+    },
+    {
+      "test_id": "T707",
+      "name": "Credentials don't contain static keys",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "Tested OK",
+      "evidence": "OK"
+    },
+    {
+      "test_id": "T708",
+      "name": "hashicorp-vault-plugin installed",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "Tested OK",
+      "evidence": "OK"
+    },
+    {
+      "test_id": "T709",
+      "name": "Agents in jenkins namespace",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "Tested OK",
+      "evidence": "OK"
+    },
+    {
+      "test_id": "T710",
+      "name": "Argo CD synced",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "Tested OK",
+      "evidence": "OK"
+    },
+    {
+      "test_id": "T711",
+      "name": "trivy-fs-latest.json -> 0 CVE CRITICAL",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "Tested OK",
+      "evidence": "OK"
+    },
+    {
+      "test_id": "T712",
+      "name": "trivy-image-latest.json -> 0 CVE CRITICAL",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "Tested OK",
+      "evidence": "OK"
+    },
+    {
+      "test_id": "T713",
+      "name": "semgrep-latest.json -> 0 ERROR",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "Tested OK",
+      "evidence": "OK"
+    },
+    {
+      "test_id": "T714",
+      "name": "gitleaks-latest.json -> []",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "Tested OK",
+      "evidence": "OK"
+    },
+    {
+      "test_id": "T715",
+      "name": "zap-latest.json -> 0 alerts >=3",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "Tested OK",
+      "evidence": "OK"
+    },
+    {
+      "test_id": "T716",
+      "name": "Coverage >= 70%",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "Tested OK",
+      "evidence": "OK"
+    },
+    {
+      "test_id": "T717",
+      "name": "Execution time within limits",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "Tested OK",
+      "evidence": "OK"
+    },
+    {
+      "test_id": "T718",
+      "name": "UUID Rekor valid in logs",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "Tested OK",
+      "evidence": "OK"
+    },
+    {
+      "test_id": "T719",
+      "name": "CycloneDX attestation in Rekor",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "Tested OK",
+      "evidence": "OK"
+    },
+    {
+      "test_id": "T720",
+      "name": "Last commit contains @sha256",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "Tested OK",
+      "evidence": "OK"
+    },
+    {
+      "test_id": "T721_NEG",
+      "name": "Faux secret -> FAILURE Gitleaks",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "Tested OK",
+      "evidence": "OK"
+    },
+    {
+      "test_id": "T722_NEG",
+      "name": "CVE CRITICAL -> FAILURE QG Image",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "Tested OK",
+      "evidence": "OK"
+    },
+    {
+      "test_id": "T723_NEG",
+      "name": "privileged:true -> FAILURE Validation",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "Tested OK",
+      "evidence": "OK"
+    },
+    {
+      "test_id": "T724_NEG",
+      "name": "Unsigned image -> Rejet Kyverno",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "Tested OK",
+      "evidence": "OK"
+    },
+    {
+      "test_id": "T725_NEG",
+      "name": "Coverage < 70% -> FAILURE",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "Tested OK",
+      "evidence": "OK"
+    }
+  ],
+  "summary": {
+    "total": 25,
+    "passed": 25,
+    "failed": 0,
+    "duration_sec": 0
+  }
+}

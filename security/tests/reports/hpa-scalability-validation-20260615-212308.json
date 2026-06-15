@@ -1,0 +1,21 @@
+{
+  "test_suite": "hpa-scalability-validation",
+  "timestamp": "2026-06-15T19:23:08Z",
+  "environment": "kind",
+  "results": [
+    {
+      "test_id": "HPA-00",
+      "name": "Metrics Server API available",
+      "status": "FAIL",
+      "duration_sec": 0,
+      "details": "Metrics API not found. HPA will not function correctly.",
+      "evidence": ""
+    }
+  ],
+  "summary": {
+    "total": 1,
+    "passed": 0,
+    "failed": 1,
+    "duration_sec": 0
+  }
+}

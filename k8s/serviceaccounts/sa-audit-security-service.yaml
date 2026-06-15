@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: sa-audit-security-service
+  namespace: securerag-hub
+  annotations:
+    eks.amazonaws.com/role-arn: "arn:aws:iam::<PLACEHOLDER_AWS_ACCOUNT_ID>:role/securerag-audit-security-service-role"

@@ -1,0 +1,65 @@
+# security/sigstore/fulcio-values.yaml
+# Helm configuration for Fulcio in local sigstore-system namespace.
+# Hardened for PSS Restricted compliance.
+
+config:
+  contents:
+    OIDCIssuers:
+      "http://keycloak.sigstore-system/realms/securerag-cicd":
+        IssuerURL: "http://keycloak.sigstore-system/realms/securerag-cicd"
+        ClientID: "jenkins-cosign"
+        Type: "email"
+
+# PSS Restricted Compliance for Fulcio
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 65533
+  runAsGroup: 65533
+  fsGroup: 65533
+
+server:
+  fullnameOverride: fulcio
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 65533
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+        - ALL
+    readOnlyRootFilesystem: true
+
+# Enable and configure CTLog dependency inside the Fulcio chart
+ctlog:
+  enabled: true
+  fullnameOverride: ctlog
+  createctconfig:
+    fulcioURL: "http://fulcio.sigstore-system"
+  # Hardening ctlog pods
+  podSecurityContext:
+    runAsNonRoot: true
+    runAsUser: 65533
+    runAsGroup: 65533
+    fsGroup: 65533
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 65533
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+        - ALL
+
+# Hardening createcerts pods
+createcerts:
+  enabled: true
+  podSecurityContext:
+    runAsNonRoot: true
+    runAsUser: 65533
+    runAsGroup: 65533
+    fsGroup: 65533
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 65533
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+        - ALL

@@ -1,11 +1,10 @@
 <!--
   File: infra/wazuh/decoders/falco-decoder.xml
-  Description: Décodeur Wazuh pour parser les alertes Falco envoyées via le webhook Falcosidekick.
-  Modified by: DevSecOps Agent — 2026-06-13
+  Description: Wazuh decoder to parse Falco JSON alerts sent by Falcosidekick.
 -->
 
 <decoder name="falco">
-  <prematch>^{"output":"</prematch>
+  <prematch>^{"output":"|^{"uuid":"</prematch>
 </decoder>
 
 <decoder name="falco-json">

@@ -1,0 +1,141 @@
+{
+  "test_suite": "image-security",
+  "timestamp": "2026-06-15T20:47:33Z",
+  "environment": "kind",
+  "results": [
+    {
+      "test_id": "T101",
+      "name": "No :latest tag in production",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "",
+      "evidence": "No latest tag"
+    },
+    {
+      "test_id": "T102",
+      "name": "All images contain @sha256:",
+      "status": "FAIL",
+      "duration_sec": 1,
+      "details": "",
+      "evidence": "localhost:5001/securerag-hub-audit-security-service:demo\nlocalhost:5001/securerag-hub-auth-users:demo\nlocalhost:5001/securerag-hub-chatbot-manager:demo\nlocalhost:5001/securerag-hub-conversation-service:demo\nlocalhost:5001/securerag-hub-portal-web:demo\npostgres:16-alpine"
+    },
+    {
+      "test_id": "T103",
+      "name": "ImageID matches manifest digest",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "Verified internally by kubelet",
+      "evidence": "Checked imageIDs"
+    },
+    {
+      "test_id": "T104",
+      "name": "Only allowed registries used",
+      "status": "FAIL",
+      "duration_sec": 0,
+      "details": "Found unauthorized registry",
+      "evidence": "localhost:5001/securerag-hub-audit-security-service:demo\nlocalhost:5001/securerag-hub-auth-users:demo\nlocalhost:5001/securerag-hub-chatbot-manager:demo\nlocalhost:5001/securerag-hub-conversation-service:demo\nlocalhost:5001/securerag-hub-portal-web:demo\npostgres:16-alpine"
+    },
+    {
+      "test_id": "T105",
+      "name": "Init containers use @sha256:",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "",
+      "evidence": "OK"
+    },
+    {
+      "test_id": "T106-T110",
+      "name": "Signatures verifiable (cosign verify)",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "Checked via Kyverno/Cosign",
+      "evidence": "Verified OK"
+    },
+    {
+      "test_id": "T111",
+      "name": "Rekor entries valid",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "",
+      "evidence": "Rekor entries exist"
+    },
+    {
+      "test_id": "T112",
+      "name": "SBOM CycloneDX attestation present",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "",
+      "evidence": "bomFormat=CycloneDX"
+    },
+    {
+      "test_id": "T113",
+      "name": "SLSA provenance attestation present",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "",
+      "evidence": "builder.id contains jenkins"
+    },
+    {
+      "test_id": "T114",
+      "name": "Kyverno rejects unsigned image",
+      "status": "FAIL",
+      "duration_sec": 0,
+      "details": "Failed to reject",
+      "evidence": "Error from server (Forbidden): pods \"test-unsigned\" is forbidden: violates PodSecurity \"restricted:latest\": allowPrivilegeEscalation != false (container \"test-unsigned\" must set securityContext.allowPrivilegeEscalation=false), unrestricted capabilities (container \"test-unsigned\" must set securityContext.capabilities.drop=[\"ALL\"]), runAsNonRoot != true (pod or container \"test-unsigned\" must set securityContext.runAsNonRoot=true), seccompProfile (pod or container \"test-unsigned\" must set securityContext.seccompProfile.type to \"RuntimeDefault\" or \"Localhost\")"
+    },
+    {
+      "test_id": "T115",
+      "name": "Kyverno rejects image without digest",
+      "status": "FAIL",
+      "duration_sec": 0,
+      "details": "Failed to reject",
+      "evidence": "Error from server (Forbidden): pods \"test-nodigest\" is forbidden: violates PodSecurity \"restricted:latest\": allowPrivilegeEscalation != false (container \"test-nodigest\" must set securityContext.allowPrivilegeEscalation=false), unrestricted capabilities (container \"test-nodigest\" must set securityContext.capabilities.drop=[\"ALL\"]), runAsNonRoot != true (pod or container \"test-nodigest\" must set securityContext.runAsNonRoot=true), seccompProfile (pod or container \"test-nodigest\" must set securityContext.seccompProfile.type to \"RuntimeDefault\" or \"Localhost\")"
+    },
+    {
+      "test_id": "T116",
+      "name": "0 CVE CRITICAL in portal-web",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "",
+      "evidence": "0 CRITICAL CVEs"
+    },
+    {
+      "test_id": "T117",
+      "name": "0 CVE CRITICAL in audit-security-service",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "",
+      "evidence": "0 CRITICAL CVEs"
+    },
+    {
+      "test_id": "T118",
+      "name": "Images based on Distroless",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "",
+      "evidence": "distroless base detected"
+    },
+    {
+      "test_id": "T119",
+      "name": "No shell in production images",
+      "status": "FAIL",
+      "duration_sec": 0,
+      "details": "Shell found!",
+      "evidence": "test"
+    },
+    {
+      "test_id": "T120",
+      "name": "SBOM contains laravel/framework",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "",
+      "evidence": "SBOM laravel/framework OK"
+    }
+  ],
+  "summary": {
+    "total": 16,
+    "passed": 11,
+    "failed": 5,
+    "duration_sec": 1
+  }
+}

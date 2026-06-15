@@ -1,0 +1,83 @@
+# security/sigstore/rekor-values.yaml
+# Helm configuration for Rekor in local sigstore-system namespace.
+# Hardened for PSS Restricted compliance.
+
+server:
+  fullnameOverride: rekor
+  persistentVolume:
+    enabled: true
+    storageClass: "standard"
+    size: 5Gi
+
+  # PSS Restricted Compliance for Rekor Server
+  podSecurityContext:
+    enabled: true
+    runAsNonRoot: true
+    runAsUser: 65533
+    runAsGroup: 65533
+    fsGroup: 65533
+
+  securityContext:
+    enabled: true
+    runAsNonRoot: true
+    runAsUser: 65533
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+        - ALL
+    readOnlyRootFilesystem: true
+
+# Enable and configure Trillian dependency
+trillian:
+  enabled: true
+  fullnameOverride: trillian
+  
+  # Configure mysql subchart dependency of Trillian
+  mysql:
+    persistence:
+      enabled: false  # Use emptyDir for local dev
+    primary:
+      podSecurityContext:
+        enabled: true
+        runAsNonRoot: true
+        runAsUser: 1001
+        runAsGroup: 1001
+        fsGroup: 1001
+      containerSecurityContext:
+        enabled: true
+        runAsNonRoot: true
+        runAsUser: 1001
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop:
+            - ALL
+
+  # Trillian LogServer hardening
+  logServer:
+    podSecurityContext:
+      runAsNonRoot: true
+      runAsUser: 65533
+      runAsGroup: 65533
+      fsGroup: 65533
+    securityContext:
+      runAsNonRoot: true
+      runAsUser: 65533
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+          - ALL
+
+  # Trillian LogSigner hardening
+  logSigner:
+    podSecurityContext:
+      runAsNonRoot: true
+      runAsUser: 65533
+      runAsGroup: 65533
+      fsGroup: 65533
+    securityContext:
+      runAsNonRoot: true
+      runAsUser: 65533
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+          - ALL

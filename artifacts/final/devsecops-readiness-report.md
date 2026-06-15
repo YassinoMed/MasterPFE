@@ -2,7 +2,7 @@
 
 ## 1. Contexte
 
-- Généré le : `2026-04-16T20:28:49Z`
+- Généré le : `2026-06-15T19:14:05Z`
 - Scénario officiel : `demo`
 - Autorité CI/CD officielle : Jenkins
 - Namespace Kubernetes : `securerag-hub`
@@ -12,13 +12,13 @@
 
 | Composant | État | Preuve observée |
 |---|---:|---|
-| Jenkins | PARTIEL | `http://localhost:8085/login` |
-| Portal Web | PARTIEL | `http://localhost:8081/health` |
-| Namespace Kubernetes | PARTIEL | `kubectl get ns securerag-hub` |
-| Pods applicatifs | PARTIEL | `kubectl get pods -n securerag-hub` |
-| HPA | PARTIEL | `kubectl get hpa -n securerag-hub` |
+| Jenkins | OK | `http://localhost:8085/login` |
+| Portal Web | OK | `http://localhost:8081/health` |
+| Namespace Kubernetes | OK | `kubectl get ns securerag-hub` |
+| Pods applicatifs | OK | `kubectl get pods -n securerag-hub` |
+| HPA | OK | `kubectl get hpa -n securerag-hub` |
 | Metrics API | PARTIEL | `kubectl get apiservice v1beta1.metrics.k8s.io` |
-| Kyverno CRD | PARTIEL | `kubectl get crd clusterpolicies.kyverno.io` |
+| Kyverno CRD | OK | `kubectl get crd clusterpolicies.kyverno.io` |
 
 ## 3. Preuves DevSecOps
 
@@ -35,7 +35,7 @@
 | Evidence supply chain | OK | `artifacts/release/supply-chain-evidence.md` |
 | Addons sécurité cluster | PARTIEL | `artifacts/validation/cluster-security-addons.md` |
 | Résumé final | OK | `artifacts/final/final-validation-summary.md` |
-| Support pack | OK | `artifacts/support-pack/support-demo-20260416T202515Z.tar.gz` |
+| Support pack | OK | `artifacts/support-pack/support-demo-20260411T144030Z.tar.gz` |
 
 ## 4. Lecture soutenance
 

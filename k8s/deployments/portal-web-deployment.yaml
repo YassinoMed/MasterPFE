@@ -1,0 +1,147 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: portal-web
+  namespace: securerag-hub
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: portal-web
+  template:
+    metadata:
+      annotations:
+        security.securerag.dev/internal-cleartext-scope: cluster-only-networkpolicy
+        security.securerag.dev/internal-cleartext-justification: Internal ClusterIP service calls only; egress is restricted by NetworkPolicies.
+        
+        # Vault Agent Injector Annotations
+        vault.hashicorp.com/agent-inject: "true"
+        vault.hashicorp.com/role: "securerag-portal-web"
+        vault.hashicorp.com/agent-inject-status: "update"
+        
+        # PSS Restricted Compliance for Vault Agent Sidecar
+        vault.hashicorp.com/agent-run-as-same-user: "true"
+        
+        # Injection of portal-web Laravel secrets
+        vault.hashicorp.com/agent-inject-secret-laravel-env: "secret/data/portal-web"
+        vault.hashicorp.com/agent-inject-template-laravel-env: |
+          {{- with secret "secret/data/portal-web" -}}
+          DB_HOST="{{ .Data.data.DB_HOST }}"
+          DB_PORT="{{ .Data.data.DB_PORT }}"
+          DB_DATABASE="{{ .Data.data.DB_DATABASE }}"
+          DB_USERNAME="{{ .Data.data.DB_USERNAME }}"
+          DB_PASSWORD="{{ .Data.data.DB_PASSWORD }}"
+          APP_KEY="{{ .Data.data.APP_KEY }}"
+          {{- end -}}
+      labels:
+        app.kubernetes.io/name: portal-web
+    spec:
+      serviceAccountName: sa-portal-web
+      automountServiceAccountToken: true  # Required for Kubernetes Auth method token exchange
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        fsGroup: 10001
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: portal-web
+          image: ghcr.io/example/securerag-hub-portal-web:dev
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8000
+          envFrom:
+            - configMapRef:
+                name: securerag-common-config
+            - secretRef:
+                name: securerag-common-secrets
+                optional: true
+          env:
+            - name: APP_ENV
+              value: production
+            - name: APP_DEBUG
+              value: "false"
+            - name: INTERNAL_SERVICE_SCHEME
+              value: http
+            - name: APP_URL
+              value: $(INTERNAL_SERVICE_SCHEME)://portal-web:8000
+            
+            # Instruct Laravel config/bootstrap to load secrets from the injected Vault file
+            - name: DB_CONNECTION
+              value: sqlite
+            - name: DB_DATABASE
+              value: /tmp/securerag-runtime/database/database.sqlite
+            - name: SESSION_DRIVER
+              value: file
+            - name: CACHE_STORE
+              value: file
+            - name: LOG_CHANNEL
+              value: stderr
+            - name: CREATE_DOTENV
+              value: "false"
+            - name: QUEUE_CONNECTION
+              value: sync
+            - name: SECURERAG_PORTAL_BACKEND_MODE
+              value: auto
+            - name: AUTH_USERS_BASE_URL
+              value: $(INTERNAL_SERVICE_SCHEME)://auth-users:8000
+            - name: CHATBOT_MANAGER_BASE_URL
+              value: $(INTERNAL_SERVICE_SCHEME)://chatbot-manager:8000
+            - name: CONVERSATION_BASE_URL
+              value: $(INTERNAL_SERVICE_SCHEME)://conversation-service:8000
+            - name: AUDIT_SECURITY_BASE_URL
+              value: $(INTERNAL_SERVICE_SCHEME)://audit-security-service:8000
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 6
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 20
+            timeoutSeconds: 3
+            failureThreshold: 3
+          startupProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 18
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+              ephemeral-storage: 256Mi
+            limits:
+              cpu: 400m
+              memory: 512Mi
+              ephemeral-storage: 1Gi
+          volumeMounts:
+            - name: app-storage
+              mountPath: /var/www/html/storage
+            - name: app-cache
+              mountPath: /var/www/html/bootstrap/cache
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: app-storage
+          emptyDir: {}
+        - name: app-cache
+          emptyDir: {}
+        - name: tmp
+          emptyDir: {}

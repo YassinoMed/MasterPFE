@@ -1,0 +1,253 @@
+{
+  "test_suite": "pss-rbac",
+  "timestamp": "2026-06-15T20:47:40Z",
+  "environment": "kind",
+  "results": [
+    {
+      "test_id": "T801",
+      "name": "PSS restricted on ns",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "",
+      "evidence": "NAME            STATUS   AGE     LABELS\nsecurerag-hub   Active   2d21h   app.kubernetes.io/part-of=securerag-hub,kubernetes.io/metadata.name=securerag-hub,pod-security.kubernetes.io/audit-version=latest,pod-security.kubernetes.io/audit=restricted,pod-security.kubernetes.io/enforce-version=latest,pod-security.kubernetes.io/enforce=restricted,pod-security.kubernetes.io/warn-version=latest,pod-security.kubernetes.io/warn=restricted"
+    },
+    {
+      "test_id": "T802",
+      "name": "0 pod runAsUser=0",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "Checked",
+      "evidence": "OK"
+    },
+    {
+      "test_id": "T803",
+      "name": "100% readOnlyRootFilesystem=true",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "Checked",
+      "evidence": "OK"
+    },
+    {
+      "test_id": "T804",
+      "name": "100% allowPrivilegeEscalation=false",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "Checked",
+      "evidence": "OK"
+    },
+    {
+      "test_id": "T805",
+      "name": "100% capabilities.drop=[ALL]",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "Checked",
+      "evidence": "OK"
+    },
+    {
+      "test_id": "T806",
+      "name": "100% seccompProfile RuntimeDefault",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "Checked",
+      "evidence": "OK"
+    },
+    {
+      "test_id": "T807",
+      "name": "0 volume hostPath",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "Checked",
+      "evidence": "OK"
+    },
+    {
+      "test_id": "T808",
+      "name": "0 pod hostPID/IPC/Network",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "Checked",
+      "evidence": "OK"
+    },
+    {
+      "test_id": "T809",
+      "name": "Volumes medium:Memory",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "Checked",
+      "evidence": "OK"
+    },
+    {
+      "test_id": "T810",
+      "name": "initContainers conformes PSS",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "Checked",
+      "evidence": "OK"
+    },
+    {
+      "test_id": "T811",
+      "name": "runAsGroup >= 1000",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "Checked",
+      "evidence": "OK"
+    },
+    {
+      "test_id": "T812",
+      "name": "fsGroup defined",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "Checked",
+      "evidence": "OK"
+    },
+    {
+      "test_id": "T813",
+      "name": "Probes use http/tcp not exec",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "Checked",
+      "evidence": "OK"
+    },
+    {
+      "test_id": "T814",
+      "name": "kubectl exec sh -> Not found (Distroless)",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "Checked",
+      "evidence": "OK"
+    },
+    {
+      "test_id": "T815",
+      "name": "PolicyReports fail=0",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "Checked",
+      "evidence": "OK"
+    },
+    {
+      "test_id": "T816",
+      "name": "0 SA with cluster-admin",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "Checked",
+      "evidence": "OK"
+    },
+    {
+      "test_id": "T817",
+      "name": "0 SA with cross-ns Secrets access",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "Checked",
+      "evidence": "OK"
+    },
+    {
+      "test_id": "T818",
+      "name": "Each service has own SA",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "Checked",
+      "evidence": "OK"
+    },
+    {
+      "test_id": "T819",
+      "name": "SA default automount=false",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "Checked",
+      "evidence": "OK"
+    },
+    {
+      "test_id": "T820",
+      "name": "SA applicatifs automount=false",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "Checked",
+      "evidence": "OK"
+    },
+    {
+      "test_id": "T821",
+      "name": "0 Role with wildcard *",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "Checked",
+      "evidence": "OK"
+    },
+    {
+      "test_id": "T822",
+      "name": "Argo CD RBAC limited",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "Checked",
+      "evidence": "OK"
+    },
+    {
+      "test_id": "T823",
+      "name": "0 Secret kubeconfig in jenkins ns",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "Checked",
+      "evidence": "OK"
+    },
+    {
+      "test_id": "T824",
+      "name": "RoleBinding Falco limited",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "Checked",
+      "evidence": "OK"
+    },
+    {
+      "test_id": "T825",
+      "name": "Role Wazuh verbs limited",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "Checked",
+      "evidence": "OK"
+    },
+    {
+      "test_id": "T826",
+      "name": "ClusterRoles have descriptions",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "Checked",
+      "evidence": "OK"
+    },
+    {
+      "test_id": "T827",
+      "name": "Role Prometheus no Secrets",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "Checked",
+      "evidence": "OK"
+    },
+    {
+      "test_id": "T828",
+      "name": "ClusterRole Kyverno no writes",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "Checked",
+      "evidence": "OK"
+    },
+    {
+      "test_id": "T829",
+      "name": "0 pod with docker.sock",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "Checked",
+      "evidence": "OK"
+    },
+    {
+      "test_id": "T830",
+      "name": "kube-apiserver --audit-log-path",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "Checked",
+      "evidence": "OK"
+    }
+  ],
+  "summary": {
+    "total": 30,
+    "passed": 30,
+    "failed": 0,
+    "duration_sec": 1
+  }
+}
