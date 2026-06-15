@@ -38,7 +38,7 @@ apply_policies_with_retry() {
 
   for attempt in $(seq 1 "${KYVERNO_POLICY_APPLY_ATTEMPTS}"); do
     info "Server-side dry-run for Kyverno policies from ${policy_path} (${attempt}/${KYVERNO_POLICY_APPLY_ATTEMPTS})"
-    if kubectl apply --server-side --dry-run=server -k "${policy_path}" >/dev/null; then
+    if kubectl apply --server-side --force-conflicts --dry-run=server -k "${policy_path}" >/dev/null; then
       info "Applying Kyverno policies from ${policy_path}"
       if kubectl apply --server-side --force-conflicts -k "${policy_path}"; then
         return 0
