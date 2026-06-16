@@ -100,7 +100,7 @@ rules:
         - docker
       exception:
         - infra/jenkins/Dockerfile uses root only during image build and switches back to USER jenkins for runtime.
-     paths:
+    paths:
       exclude:
         - /infra/jenkins/Dockerfile
         - /infra/jenkins/agents/sonar/Dockerfile
