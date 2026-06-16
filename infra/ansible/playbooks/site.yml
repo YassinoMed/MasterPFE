@@ -1,0 +1,4 @@
+# Site playbook — SecureRAG Hub
+# Exécute tous les playbooks dans l'ordre.
+- import_playbook: kubernetes-prerequisites.yml
+- import_playbook: cis-node-hardening.yml

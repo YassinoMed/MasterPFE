@@ -1,0 +1,39 @@
+# Harbor — Application ArgoCD (via Helm)
+# Déploie Harbor comme registry OCI privé pour SecureRAG Hub.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: securerag-harbor
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "25"
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: securerag-hub
+  source:
+    repoURL: https://helm.harbor.io
+    targetRevision: 1.16.0
+    chart: harbor
+    helm:
+      values: |
+        expose:
+          type: clusterIP
+          tls:
+            enabled: false
+        externalURL: http://harbor.securerag-hub.svc
+        harborAdminPassword: "Harbor12345"
+        persistence:
+          enabled: false
+        database:
+          internal:
+            password: "changeit"
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: harbor
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

@@ -1,0 +1,64 @@
+# Velero — Application ArgoCD (via Helm)
+# Déploie Velero pour les sauvegardes et le disaster recovery.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: securerag-velero
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "35"
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: securerag-hub
+  source:
+    repoURL: https://vmware-tanzu.github.io/helm-charts
+    targetRevision: 8.1.0
+    chart: velero
+    helm:
+      values: |
+        configuration:
+          backupStorageLocation:
+            - name: default
+              provider: aws
+              bucket: securerag-velero-backups
+              config:
+                region: us-east-1
+                s3ForcePathStyle: "true"
+                s3Url: http://minio.securerag-hub.svc:9000
+          volumeSnapshotLocation:
+            - name: default
+              provider: aws
+              config:
+                region: us-east-1
+        credentials:
+          secretContents:
+            cloud: |
+              [default]
+              aws_access_key_id=minioadmin
+              aws_secret_access_key=minioadmin
+        schedules:
+          daily-backup:
+            schedule: "0 2 * * *"
+            template:
+              includedNamespaces:
+                - securerag-hub
+                - securerag-monitoring
+                - falco
+                - securerag-backup
+              ttl: 720h0m0s
+              storageLocation: default
+              snapshotVolumes: true
+        deployNodeAgent: true
+        metrics:
+          enabled: true
+          scrapeInterval: 30s
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: velero
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

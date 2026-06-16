@@ -1,0 +1,48 @@
+# ApplicationSet — Observability (Prometheus, Grafana, Loki, Alertmanager)
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: securerag-observability
+  namespace: argocd
+spec:
+  generators:
+    - list:
+        elements:
+          - name: observability-stack
+            path: infra/k8s/observability
+            namespace: securerag-monitoring
+            wave: "30"
+          - name: observability-dashboards
+            path: infra/k8s/monitoring/dashboards
+            namespace: securerag-monitoring
+            wave: "35"
+  template:
+    metadata:
+      name: 'securerag-{{name}}'
+      annotations:
+        argocd.argoproj.io/sync-wave: '{{wave}}'
+      finalizers:
+        - resources-finalizer.argocd.argoproj.io
+    spec:
+      project: securerag-hub
+      source:
+        repoURL: https://github.com/YassinoMed/MasterPFE.git
+        targetRevision: main
+        path: '{{path}}'
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: '{{namespace}}'
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
+          - ApplyOutOfSyncOnly=true
+          - ServerSideApply=true
+        retry:
+          limit: 10
+          backoff:
+            duration: 10s
+            factor: 2
+            maxDuration: 3m

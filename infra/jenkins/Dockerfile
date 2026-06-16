@@ -51,10 +51,22 @@ RUN apt-get update && \
       unzip && \
     rm -rf /var/lib/apt/lists/*
 
-# Enable Xdebug for code coverage
+# Enable Xdebug for code coverage — robust path detection
 RUN PHP_VERSION=$(php -r 'echo PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION;') && \
-    echo "zend_extension=xdebug.so" > /etc/php/${PHP_VERSION}/cli/conf.d/20-xdebug.ini && \
-    echo "xdebug.mode=coverage" >> /etc/php/${PHP_VERSION}/cli/conf.d/20-xdebug.ini
+    PHP_INI_DIR=$(php -r 'echo PHP_CONFIG_FILE_SCAN_DIR;' 2>/dev/null || echo "/etc/php/${PHP_VERSION}/cli/conf.d") && \
+    mkdir -p "${PHP_INI_DIR}" && \
+    if ! php -m 2>/dev/null | grep -qi xdebug; then \
+      echo "zend_extension=xdebug.so" > "${PHP_INI_DIR}/20-xdebug.ini"; \
+    fi && \
+    cat > "${PHP_INI_DIR}/20-xdebug.ini" <<'XDEBUGEOF'
+zend_extension=xdebug.so
+xdebug.mode=coverage
+xdebug.start_with_request=no
+xdebug.output_dir=/tmp
+XDEBUGEOF
+    echo "[BUILD] Xdebug INI written to ${PHP_INI_DIR}/20-xdebug.ini" && \
+    php -m 2>/dev/null | grep -i xdebug && echo "[BUILD] Xdebug module detected" || echo "[BUILD] WARNING: Xdebug NOT detected" && \
+    php --ri xdebug 2>/dev/null | head -5 || true
 
 COPY plugins.txt /usr/share/jenkins/ref/plugins.txt
 RUN jenkins-plugin-cli --plugin-file /usr/share/jenkins/ref/plugins.txt

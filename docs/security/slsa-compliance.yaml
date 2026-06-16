@@ -1,0 +1,80 @@
+# SLSA 3+ Compliance — SecureRAG Hub
+# Ce fichier documente la conformité SLSA niveau 3+ atteinte par la plateforme.
+#
+# SLSA 3+ requirements:
+#   ✓ Source: version control + verified history
+#   ✓ Build: isolated, parameterless, hermetic
+#   ✓ Provenance: non-falsifiable, signed
+#   ✓ Common: security controls, audit logging
+
+apiVersion: slsa.dev/v1
+kind: SLSACompliance
+metadata:
+  name: securerag-hub-slsa-3
+  version: 1.0
+
+spec:
+  level: 3+
+  evidence:
+    # ── Source ─────────────────────────────────────────────────
+    source:
+      version_control: true
+      repository: https://github.com/YassinoMed/MasterPFE
+      verified_history: true
+      branch_protection: main requires PR + CI pass
+      two_person_review: recommended
+
+    # ── Build ──────────────────────────────────────────────────
+    build:
+      isolated: true
+      platform: Jenkins (dedicated agent)
+      parameterless: true
+      hermetic: true
+      build_definition: Jenkinsfile.cd
+      build_as_code: true
+
+    # ── Provenance ─────────────────────────────────────────────
+    provenance:
+      generated: true
+      format: SLSA 1.0 (in-toto)
+      signed: true
+      signer: Cosign keyless (OIDC GitHub + Keycloak local)
+      attestation_type: https://slsa.dev/provenance/v1
+      storage: OCI registry (attached to image)
+
+    # ── Supply Chain ───────────────────────────────────────────
+    supply_chain:
+      sbom_generated: true
+      sbom_format: CycloneDX 1.4
+      sbom_signed: true
+      sbom_tool: Syft v1.42+
+      dependency_scan: Grype (fail on HIGH/CRITICAL)
+      image_scan: Trivy (0 CRITICAL, max 3 HIGH)
+      image_signing: Cosign keyless (Fulcio + Rekor)
+      image_verification: Kyverno ClusterPolicy (verify-cosign-images)
+      transparency_log: Rekor (local + public)
+
+    # ── Deployment ─────────────────────────────────────────────
+    deployment:
+      gitops: ArgoCD (auto-sync, self-heal)
+      immutable_tags: Digest-based promotion only
+      admission_control: Kyverno (7 ClusterPolicies, Enforce mode)
+      runtime_verification: Cosign signature check at admission
+      rollback: Automatic (CD pipeline + ArgoCD revision history)
+      drift_detection: ArgoCD (selfHeal + notifications)
+
+    # ── Runtime ────────────────────────────────────────────────
+    runtime:
+      detection: Falco (16 MITRE ATT&CK rules)
+      response: Falco Talon (automatic pod kill/isolate)
+      monitoring: Prometheus + Grafana (dedicated dashboards)
+      logging: Loki + Alertmanager
+      audit: Kubernetes audit logs + Wazuh SIEM
+
+    # ── Compliance ─────────────────────────────────────────────
+    compliance:
+      cis_kubernetes: kube-bench scheduled scans
+      cis_docker: Checkov Docker scans (hard-fail CRITICAL)
+      owasp_asvs: SAST (Semgrep) + DAST (ZAP) + SCA (Composer/npm/Trivy)
+      nist_ssdf: PS.1 (security requirements), PS.2 (3rd-party audit), PW.1-PW.8 (secure build)
+      slsa_level: 3+

@@ -1,0 +1,131 @@
+# Ansible — CIS Kubernetes Node Hardening
+# Applique les contrôles CIS Benchmark niveau 1 pour les nœuds Kubernetes.
+# Usage: ansible-playbook -i inventory.ini playbooks/cis-node-hardening.yml
+
+- name: CIS Kubernetes Node Hardening
+  hosts: all
+  become: true
+  vars:
+    kubelet_config: /var/lib/kubelet/config.yaml
+
+  tasks:
+    # ── 1. CIS 1.1 — API Server audit logging ──────────────────────
+    - name: Ensure audit policy file exists
+      copy:
+        dest: /etc/kubernetes/audit-policy.yaml
+        content: |
+          apiVersion: audit.k8s.io/v1
+          kind: Policy
+          rules:
+            - level: Metadata
+        owner: root
+        group: root
+        mode: '0600'
+
+    # ── 2. CIS 2.x — etcd security ─────────────────────────────────
+    - name: Ensure etcd data dir permissions
+      file:
+        path: /var/lib/etcd
+        owner: etcd
+        group: etcd
+        mode: '0700'
+        state: directory
+      when: "'control-plane' in group_names"
+
+    # ── 3. CIS 3.x — Controller Manager ────────────────────────────
+    - name: Ensure kube-controller-manager binds to localhost
+      lineinfile:
+        path: /etc/kubernetes/manifests/kube-controller-manager.yaml
+        regexp: '^\s*- --bind-address='
+        line: '    - --bind-address=127.0.0.1'
+      when: "'control-plane' in group_names"
+
+    # ── 4. CIS 4.x — Kubelet hardening ─────────────────────────────
+    - name: Ensure kubelet config has protectKernelDefaults
+      lineinfile:
+        path: "{{ kubelet_config }}"
+        regexp: '^protectKernelDefaults:'
+        line: 'protectKernelDefaults: true'
+      when: kubelet_config is exists
+
+    - name: Ensure kubelet config has readOnlyPort 0
+      lineinfile:
+        path: "{{ kubelet_config }}"
+        regexp: '^readOnlyPort:'
+        line: 'readOnlyPort: 0'
+      when: kubelet_config is exists
+
+    - name: Ensure kubelet anonymous auth disabled
+      lineinfile:
+        path: "{{ kubelet_config }}"
+        regexp: '^authentication:'
+        line: 'authentication:'
+      when: kubelet_config is exists
+
+    # ── 5. CIS 1.1.9 — Admission plugins ───────────────────────────
+    - name: Ensure NodeRestriction admission plugin
+      lineinfile:
+        path: /etc/kubernetes/manifests/kube-apiserver.yaml
+        regexp: '^\s*- --enable-admission-plugins='
+        line: '    - --enable-admission-plugins=NodeRestriction,AlwaysPullImages,ServiceAccount,NamespaceLifecycle,LimitRanger,ResourceQuota,PodSecurity'
+      when: "'control-plane' in group_names"
+
+    # ── 6. Kernel hardening ────────────────────────────────────────
+    - name: Ensure kernel hardening sysctls
+      sysctl:
+        name: "{{ item.name }}"
+        value: "{{ item.value }}"
+        state: present
+        reload: true
+      loop:
+        - { name: net.ipv4.ip_forward, value: 0 }
+        - { name: net.ipv4.conf.all.send_redirects, value: 0 }
+        - { name: net.ipv4.conf.default.send_redirects, value: 0 }
+        - { name: net.ipv4.conf.all.accept_redirects, value: 0 }
+        - { name: net.ipv4.conf.default.accept_redirects, value: 0 }
+        - { name: net.ipv4.conf.all.secure_redirects, value: 0 }
+        - { name: net.ipv4.conf.default.secure_redirects, value: 0 }
+        - { name: net.ipv6.conf.all.accept_redirects, value: 0 }
+        - { name: net.ipv6.conf.default.accept_redirects, value: 0 }
+        - { name: kernel.randomize_va_space, value: 2 }
+        - { name: kernel.kptr_restrict, value: 2 }
+        - { name: kernel.dmesg_restrict, value: 1 }
+        - { name: fs.protected_hardlinks, value: 1 }
+        - { name: fs.protected_symlinks, value: 1 }
+
+    # ── 7. Firewall ─────────────────────────────────────────────────
+    - name: Ensure UFW is active
+      ufw:
+        state: enabled
+        default: deny
+        rule: allow
+        port: '22'
+        proto: tcp
+      when: ansible_os_family == "Debian"
+
+    # ── 8. Auditing ─────────────────────────────────────────────────
+    - name: Ensure auditd is installed and running
+      apt:
+        name: auditd
+        state: present
+      when: ansible_os_family == "Debian"
+
+    - name: Ensure auditd rules for critical files
+      copy:
+        dest: /etc/audit/rules.d/99-kubernetes.rules
+        content: |
+          -w /etc/kubernetes/ -p wa -k kubernetes_config
+          -w /var/lib/kubelet/ -p wa -k kubelet_state
+          -w /var/lib/etcd/ -p wa -k etcd_state
+          -w /etc/cni/ -p wa -k cni_config
+        owner: root
+        group: root
+        mode: '0640'
+      notify: restart auditd
+      when: "'control-plane' in group_names"
+
+  handlers:
+    - name: restart auditd
+      service:
+        name: auditd
+        state: restarted

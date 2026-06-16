@@ -1,0 +1,59 @@
+{
+  "title": "SecureRAG Hub — Security Overview",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "30s",
+  "tags": ["securerag", "security"],
+  "panels": [
+    {
+      "id": 1, "type": "stat", "title": "Falco Alerts (5m)",
+      "targets": [{ "expr": "sum(rate(falco_events_total{priority=~\"Critical|Error\"}[5m]))" }],
+      "gridPos": { "x": 0, "y": 0, "w": 4, "h": 4 },
+      "fieldConfig": { "defaults": { "thresholds": { "steps": [{ "color": "green", "value": null }, { "color": "red", "value": 1 }] } } }
+    },
+    {
+      "id": 2, "type": "stat", "title": "Kyverno Policy Violations",
+      "targets": [{ "expr": "sum(kyverno_policy_results_total{status=\"fail\"})" }],
+      "gridPos": { "x": 4, "y": 0, "w": 4, "h": 4 },
+      "fieldConfig": { "defaults": { "thresholds": { "steps": [{ "color": "green", "value": null }, { "color": "red", "value": 1 }] } } }
+    },
+    {
+      "id": 3, "type": "stat", "title": "ZAP High/Critical Alerts",
+      "targets": [{ "expr": "zap_alerts_total{risk=~\"High|Critical\"}" }],
+      "gridPos": { "x": 8, "y": 0, "w": 4, "h": 4 }
+    },
+    {
+      "id": 4, "type": "stat", "title": "Trivy CRITICAL CVEs",
+      "targets": [{ "expr": "trivy_vulnerabilities_total{severity=\"CRITICAL\"}" }],
+      "gridPos": { "x": 12, "y": 0, "w": 4, "h": 4 }
+    },
+    {
+      "id": 5, "type": "timeseries", "title": "Falco Events by Priority",
+      "targets": [
+        { "expr": "sum(rate(falco_events_total[5m])) by (priority)", "legendFormat": "{{priority}}" }
+      ],
+      "gridPos": { "x": 0, "y": 4, "w": 12, "h": 8 }
+    },
+    {
+      "id": 6, "type": "timeseries", "title": "Kyverno Policy Results",
+      "targets": [
+        { "expr": "sum(rate(kyverno_policy_results_total[5m])) by (status)", "legendFormat": "{{status}}" }
+      ],
+      "gridPos": { "x": 12, "y": 4, "w": 12, "h": 8 }
+    },
+    {
+      "id": 7, "type": "table", "title": "Pod Security Violations",
+      "targets": [
+        { "expr": "kyverno_policy_results_total{status=\"fail\"} > 0", "format": "table" }
+      ],
+      "gridPos": { "x": 0, "y": 12, "w": 12, "h": 6 }
+    },
+    {
+      "id": 8, "type": "table", "title": "Cosign Verification Failures",
+      "targets": [
+        { "expr": "cosign_verification_failures_total > 0", "format": "table" }
+      ],
+      "gridPos": { "x": 12, "y": 12, "w": 12, "h": 6 }
+    }
+  ]
+}

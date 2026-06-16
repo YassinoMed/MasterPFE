@@ -19,6 +19,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        \SecureRag\LaravelSecurity\Http\Middleware\PrometheusMetricsMiddleware::bootQueueTracking();
+        if (class_exists(\SecureRag\LaravelSecurity\Http\Middleware\PrometheusMetricsMiddleware::class)) {
+            \SecureRag\LaravelSecurity\Http\Middleware\PrometheusMetricsMiddleware::bootQueueTracking();
+        }
     }
 }

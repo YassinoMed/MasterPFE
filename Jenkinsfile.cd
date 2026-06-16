@@ -48,6 +48,21 @@ pipeline {
       defaultValue: true,
       description: 'Run OWASP ZAP DAST baseline scan against the deployed portal. Requires Docker and a running portal-web service.'
     )
+    booleanParam(
+      name: 'DEPLOY_TO_PRODUCTION',
+      defaultValue: false,
+      description: 'Trigger ArgoCD sync and deploy to production after GitOps update. Safety gate: disabled by default.'
+    )
+    string(
+      name: 'ARGOCD_SERVER',
+      defaultValue: 'argocd-server.argocd.svc:443',
+      description: 'ArgoCD server address (in-cluster service DNS).'
+    )
+    string(
+      name: 'ARGOCD_APP',
+      defaultValue: 'securerag-production',
+      description: 'ArgoCD Application to sync after GitOps update.'
+    )
     string(
       name: 'NOTIFICATION_EMAIL',
       defaultValue: 'med.yassine.bouneb@proton.me',
@@ -501,6 +516,96 @@ pipeline {
             echo "[INFO] No digest record file found at $DIGEST_RECORD_FILE. Skipping GitOps update."
           fi
         '''
+      }
+    }
+
+    stage('Trigger ArgoCD Sync') {
+      when {
+        expression { return params.DEPLOY_TO_PRODUCTION && params.RUN_GITOPS_SYNC }
+      }
+      steps {
+        script {
+          def appName = params.ARGOCD_APP
+          echo "[INFO] Triggering ArgoCD sync for application: ${appName}"
+
+          sh """
+            set -euo pipefail
+            # Attendre que le commit GitOps soit visible par ArgoCD
+            sleep 10
+
+            # Vérifier l'état actuel
+            kubectl get application "${appName}" -n argocd \
+              -o jsonpath='{.status.sync.status}' 2>/dev/null || echo "unknown"
+
+            # Forcer le refresh (ArgoCD auto-sync fera le reste)
+            kubectl annotate application "${appName}" -n argocd \
+              argocd.argoproj.io/refresh=normal --overwrite 2>/dev/null || \
+              echo "[WARN] Could not annotate ArgoCD app (may not be installed on this cluster)"
+          """
+        }
+      }
+    }
+
+    stage('Wait for Rollout — Health Check') {
+      when {
+        expression { return params.DEPLOY_TO_PRODUCTION && params.RUN_GITOPS_SYNC }
+      }
+      steps {
+        sh '''
+          set -euo pipefail
+          NS="securerag-hub"
+          TIMEOUT=300
+          echo "[INFO] Waiting for all deployments in ${NS} to be ready (timeout=${TIMEOUT}s)..."
+
+          for deploy in portal-web auth-users chatbot-manager conversation-service audit-security-service; do
+            echo "[INFO]   Waiting for deployment/${deploy}..."
+            if ! kubectl rollout status "deployment/${deploy}" -n "${NS}" --timeout="${TIMEOUT}s"; then
+              echo "[FAIL] Deployment ${deploy} failed to roll out."
+              exit 1
+            fi
+            echo "[OK]   deployment/${deploy} is ready."
+          done
+
+          echo "[INFO] All deployments healthy."
+        '''
+      }
+      post {
+        failure {
+          script {
+            echo '[FAIL] Rollout failed. Initiating automatic rollback...'
+            sh '''
+              set -euo pipefail
+              NAMESPACE=securerag-hub \
+              DIGEST_RECORD="${REPORT_DIR}/promotion-digests.txt" \
+              REPORT_DIR="${REPORT_DIR}" \
+              bash scripts/gitops/rollback-deployment.sh
+            '''
+            error("Deployment health check failed after ArgoCD sync. Automatic rollback executed.")
+          }
+        }
+      }
+    }
+
+    stage('Smoke Tests — Production') {
+      when {
+        expression { return params.DEPLOY_TO_PRODUCTION && params.RUN_GITOPS_SYNC }
+      }
+      steps {
+        sh '''
+          set -euo pipefail
+          bash scripts/validate/validate-deployment-health.sh
+        '''
+      }
+      post {
+        failure {
+          script {
+            echo '[FAIL] Deployment health validation failed.'
+            sh '''
+              NAMESPACE=securerag-hub bash scripts/gitops/rollback-deployment.sh
+            '''
+            error("Deployment health validation failed. Automatic rollback executed.")
+          }
+        }
       }
     }
 

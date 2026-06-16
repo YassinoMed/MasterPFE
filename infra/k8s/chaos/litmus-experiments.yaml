@@ -1,0 +1,105 @@
+# Litmus Chaos Engineering — SecureRAG Hub
+# Déploie Litmus ChaosCenter pour les expériences de chaos.
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: litmus
+  labels:
+    pod-security.kubernetes.io/enforce: privileged
+---
+# Pod-delete experiment — teste l'auto-réparation des déploiements
+apiVersion: litmuschaos.io/v1alpha1
+kind: ChaosEngine
+metadata:
+  name: securerag-pod-delete
+  namespace: securerag-hub
+spec:
+  appinfo:
+    appns: securerag-hub
+    applabel: app.kubernetes.io/name=portal-web
+    appkind: deployment
+  chaosServiceAccount: litmus-cluster-scope
+  experiments:
+    - name: pod-delete
+      spec:
+        components:
+          env:
+            - name: TOTAL_CHAOS_DURATION
+              value: "60"
+            - name: CHAOS_INTERVAL
+              value: "10"
+            - name: FORCE
+              value: "true"
+            - name: PODS_AFFECTED_PERC
+              value: "100"
+---
+# Node-cpu-hog experiment — teste HPA
+apiVersion: litmuschaos.io/v1alpha1
+kind: ChaosEngine
+metadata:
+  name: securerag-cpu-hog
+  namespace: securerag-hub
+spec:
+  appinfo:
+    appns: securerag-hub
+    applabel: app.kubernetes.io/name=portal-web
+    appkind: deployment
+  chaosServiceAccount: litmus-cluster-scope
+  experiments:
+    - name: pod-cpu-hog
+      spec:
+        components:
+          env:
+            - name: TOTAL_CHAOS_DURATION
+              value: "120"
+            - name: CPU_CORES
+              value: "1"
+            - name: PODS_AFFECTED_PERC
+              value: "50"
+---
+# Network-loss experiment — teste NetworkPolicies et résilience
+apiVersion: litmuschaos.io/v1alpha1
+kind: ChaosEngine
+metadata:
+  name: securerag-network-loss
+  namespace: securerag-hub
+spec:
+  appinfo:
+    appns: securerag-hub
+    applabel: app.kubernetes.io/name=auth-users
+    appkind: deployment
+  chaosServiceAccount: litmus-cluster-scope
+  experiments:
+    - name: pod-network-loss
+      spec:
+        components:
+          env:
+            - name: TOTAL_CHAOS_DURATION
+              value: "60"
+            - name: NETWORK_PACKET_LOSS_PERCENTAGE
+              value: "100"
+            - name: PODS_AFFECTED_PERC
+              value: "100"
+---
+# PostgreSQL pod-kill experiment — teste le recovery de la BDD
+apiVersion: litmuschaos.io/v1alpha1
+kind: ChaosEngine
+metadata:
+  name: securerag-postgres-kill
+  namespace: securerag-hub
+spec:
+  appinfo:
+    appns: securerag-hub
+    applabel: app.kubernetes.io/name=postgres-auth
+    appkind: deployment
+  chaosServiceAccount: litmus-cluster-scope
+  experiments:
+    - name: pod-delete
+      spec:
+        components:
+          env:
+            - name: TOTAL_CHAOS_DURATION
+              value: "30"
+            - name: FORCE
+              value: "true"

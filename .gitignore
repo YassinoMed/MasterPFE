@@ -9,6 +9,9 @@ venv/
 .tools/
 .coverage
 .coverage-artifacts/
+# Generated coverage artifacts (per-app)
+**/coverage.xml
+**/coverage-report/
 .trivycache/
 artifacts/validation/
 artifacts/jenkins/

@@ -56,6 +56,38 @@ spec:
             runAsNonRoot: true
             capabilities:
               drop: ["ALL"]
+          readinessProbe:
+            exec:
+              command:
+                - pg_isready
+                - -U
+                - securerag
+                - -d
+                - auth_users
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 6
+          livenessProbe:
+            exec:
+              command:
+                - pg_isready
+                - -U
+                - securerag
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+          startupProbe:
+            exec:
+              command:
+                - pg_isready
+                - -U
+                - securerag
+            initialDelaySeconds: 5
+            periodSeconds: 3
+            timeoutSeconds: 3
+            failureThreshold: 20
           volumeMounts:
             - name: pgdata
               mountPath: /var/lib/postgresql/data

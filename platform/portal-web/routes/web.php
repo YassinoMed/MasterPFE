@@ -17,4 +17,6 @@ Route::get('/history', [DashboardController::class, 'history'])->name('portal.hi
 Route::get('/security', [DashboardController::class, 'security'])->name('portal.security');
 Route::get('/devsecops', [DashboardController::class, 'devsecops'])->name('portal.devsecops');
 
-\SecureRag\LaravelSecurity\Http\Middleware\PrometheusMetricsMiddleware::registerRoutes();
+if (class_exists(\SecureRag\LaravelSecurity\Http\Middleware\PrometheusMetricsMiddleware::class)) {
+    \SecureRag\LaravelSecurity\Http\Middleware\PrometheusMetricsMiddleware::registerRoutes();
+}

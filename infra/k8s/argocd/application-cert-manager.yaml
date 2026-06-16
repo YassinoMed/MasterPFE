@@ -1,0 +1,38 @@
+# cert-manager — Application ArgoCD (via Helm)
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: securerag-cert-manager
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "3"
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: securerag-hub
+  source:
+    repoURL: https://charts.jetstack.io
+    targetRevision: v1.16.0
+    chart: cert-manager
+    helm:
+      values: |
+        installCRDs: true
+        prometheus:
+          enabled: true
+          servicemonitor:
+            enabled: true
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: cert-manager
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+    retry:
+      limit: 10
+      backoff:
+        duration: 10s
+        factor: 2
+        maxDuration: 3m

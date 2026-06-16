@@ -1,0 +1,45 @@
+{
+  "title": "SecureRAG Hub — Kyverno Policy Engine",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "30s",
+  "tags": ["securerag", "kyverno", "policy"],
+  "panels": [
+    {
+      "id": 1, "type": "stat", "title": "Total Policies",
+      "targets": [{ "expr": "count(kyverno_policy_results_total)" }],
+      "gridPos": { "x": 0, "y": 0, "w": 3, "h": 3 }
+    },
+    {
+      "id": 2, "type": "stat", "title": "Pass",
+      "targets": [{ "expr": "sum(kyverno_policy_results_total{status=\"pass\"})" }],
+      "gridPos": { "x": 3, "y": 0, "w": 3, "h": 3 },
+      "fieldConfig": { "defaults": { "color": { "fixedColor": "green" } } }
+    },
+    {
+      "id": 3, "type": "stat", "title": "Fail",
+      "targets": [{ "expr": "sum(kyverno_policy_results_total{status=\"fail\"})" }],
+      "gridPos": { "x": 6, "y": 0, "w": 3, "h": 3 },
+      "fieldConfig": { "defaults": { "color": { "fixedColor": "red" } } }
+    },
+    {
+      "id": 4, "type": "stat", "title": "Warn",
+      "targets": [{ "expr": "sum(kyverno_policy_results_total{status=\"warn\"})" }],
+      "gridPos": { "x": 9, "y": 0, "w": 3, "h": 3 },
+      "fieldConfig": { "defaults": { "color": { "fixedColor": "orange" } } }
+    },
+    {
+      "id": 10, "type": "timeseries", "title": "Policy Results by Policy",
+      "targets": [
+        { "expr": "sum(rate(kyverno_policy_results_total{status=\"fail\"}[5m])) by (policy_name)", "legendFormat": "FAIL {{policy_name}}" },
+        { "expr": "sum(rate(kyverno_policy_results_total{status=\"pass\"}[5m])) by (policy_name)", "legendFormat": "PASS {{policy_name}}" }
+      ],
+      "gridPos": { "x": 0, "y": 3, "w": 24, "h": 8 }
+    },
+    {
+      "id": 11, "type": "table", "title": "Failing Policies Detail",
+      "targets": [{ "expr": "kyverno_policy_results_total{status=\"fail\"} > 0", "format": "table" }],
+      "gridPos": { "x": 0, "y": 11, "w": 24, "h": 8 }
+    }
+  ]
+}

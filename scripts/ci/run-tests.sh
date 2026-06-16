@@ -1,9 +1,20 @@
 #!/usr/bin/env bash
+# run-tests.sh — SecureRAG Hub
+# Exécute les tests Laravel pour les 5 applications et collecte les rapports
+# JUnit + Clover. Échoue si le driver de couverture est absent.
+#
+# Prérequis : Xdebug ou PCOV installé et activé (mode coverage).
+# Sorties :
+#   .coverage-artifacts/junit-*.xml     (JUnit par application)
+#   .coverage-artifacts/coverage-*.xml  (Clover par application)
 
 set -euo pipefail
 
-mkdir -p .coverage-artifacts
-rm -f .coverage-artifacts/junit-*.xml .coverage-artifacts/junit.xml .coverage-artifacts/coverage.xml .coverage-artifacts/coverage-summary.txt
+REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
+ARTIFACT_DIR="${REPO_ROOT}/.coverage-artifacts"
+
+mkdir -p "${ARTIFACT_DIR}"
+rm -f "${ARTIFACT_DIR}"/junit-*.xml "${ARTIFACT_DIR}"/junit.xml "${ARTIFACT_DIR}"/coverage-*.xml "${ARTIFACT_DIR}"/coverage.xml "${ARTIFACT_DIR}"/coverage-summary.txt
 
 apps=(
   platform/portal-web
@@ -13,24 +24,30 @@ apps=(
   services-laravel/audit-security-service
 )
 
-# Coverage gate threshold — enforced by collect-coverage.sh
-COVERAGE_MIN="${COVERAGE_MIN:-70}"
-ENFORCE_COVERAGE_GATE="${ENFORCE_COVERAGE_GATE:-true}"
-
-summary=".coverage-artifacts/laravel-test-summary.txt"
+summary="${ARTIFACT_DIR}/laravel-test-summary.txt"
 : > "${summary}"
 
-# Detect coverage driver availability (Xdebug or PCOV)
+# ── 1. Vérification OBLIGATOIRE du driver de couverture ────────────────
+
 coverage_driver_available=false
 if php -m 2>/dev/null | grep -qiE '^(xdebug|pcov)$'; then
   coverage_driver_available=true
-  echo "[INFO] Coverage driver detected; coverage reports will be generated" | tee -a "${summary}"
+  echo "[INFO] Coverage driver detected: $(php -m 2>/dev/null | grep -iE '^(xdebug|pcov)$' | head -1)" | tee -a "${summary}"
 else
-  echo "[WARN] No coverage driver (Xdebug/PCOV) detected; coverage reports will be skipped" | tee -a "${summary}"
+  echo "[FATAL] No coverage driver (Xdebug or PCOV) detected." | tee -a "${summary}"
+  echo "[FATAL] Install php-xdebug or php-pcov and configure: xdebug.mode=coverage" | tee -a "${summary}"
+  exit 1
 fi
 
+# Afficher la version du driver
+php --ri xdebug 2>/dev/null | head -3 | tee -a "${summary}" || php --ri pcov 2>/dev/null | head -3 | tee -a "${summary}" || true
+
+# ── 2. Exécuter les tests pour chaque application ───────────────────────
+
+total_failures=0
+
 for app in "${apps[@]}"; do
-  if [[ ! -f "${app}/artisan" ]]; then
+  if [[ ! -f "${REPO_ROOT}/${app}/artisan" ]]; then
     echo "[FAIL] Missing Laravel artisan entrypoint: ${app}" | tee -a "${summary}"
     exit 1
   fi
@@ -38,32 +55,64 @@ for app in "${apps[@]}"; do
   report_name="$(printf '%s' "${app}" | tr '/-' '__')"
   echo "[INFO] Running Laravel tests for ${app}" | tee -a "${summary}"
 
-  coverage_args=()
-  if [[ "${coverage_driver_available}" == "true" ]]; then
-    coverage_args=(--coverage-clover "../../.coverage-artifacts/coverage-${report_name}.xml")
-  fi
-
+  # Les sorties sont gérées par php artisan test avec les flags CLI.
+  # Le fichier coverage.xml défini dans phpunit.xml (<clover outputFile="coverage.xml"/>)
+  # est écrit dans le répertoire courant de l'application. On le déplace ensuite.
+  set +e
   (
-    cd "${app}"
+    cd "${REPO_ROOT}/${app}"
     php artisan config:clear --ansi
     php artisan test \
-      --log-junit "../../.coverage-artifacts/junit-${report_name}.xml" \
-      "${coverage_args[@]+"${coverage_args[@]}"}"
+      --log-junit "${ARTIFACT_DIR}/junit-${report_name}.xml" \
+      --coverage-clover "${ARTIFACT_DIR}/coverage-${report_name}.xml" \
+      --coverage-html "${ARTIFACT_DIR}/coverage-html-${report_name}"
+    exit_code=$?
+    exit "${exit_code}"
   )
+  app_exit=$?
+  set -e
+
+  if [[ "${app_exit}" -ne 0 ]]; then
+    echo "[FAIL] Tests failed for ${app} (exit code ${app_exit})" | tee -a "${summary}"
+    total_failures=$((total_failures + 1))
+  else
+    echo "[PASS] Tests passed for ${app}" | tee -a "${summary}"
+  fi
+
+  # Vérifier que le coverage.xml a bien été généré
+  if [[ -s "${ARTIFACT_DIR}/coverage-${report_name}.xml" ]]; then
+    lines=$(grep -o 'line-rate="[0-9.]*"' "${ARTIFACT_DIR}/coverage-${report_name}.xml" | head -1 | grep -o '[0-9.]*' || echo "0")
+    if [[ -n "${lines}" ]]; then
+      cov_pct=$(python3 -c "print(round(float(${lines}) * 100, 2))" 2>/dev/null || echo "?")
+      echo "  Coverage: ${cov_pct}%" | tee -a "${summary}"
+    fi
+  else
+    echo "[FAIL] No coverage report generated for ${app}" | tee -a "${summary}"
+    total_failures=$((total_failures + 1))
+  fi
 done
 
-# Merge per-app coverage reports into a single coverage.xml for collect-coverage.sh
-if [[ "${coverage_driver_available}" == "true" ]]; then
-  coverage_files=(.coverage-artifacts/coverage-*.xml)
-  if [[ ${#coverage_files[@]} -gt 0 && -f "${coverage_files[0]}" ]]; then
-    # Use the portal-web coverage as baseline (largest app)
-    if [[ -f ".coverage-artifacts/coverage-platform__portal_web.xml" ]]; then
-      cp ".coverage-artifacts/coverage-platform__portal_web.xml" ".coverage-artifacts/coverage.xml"
-    else
-      cp "${coverage_files[0]}" ".coverage-artifacts/coverage.xml"
-    fi
-    echo "[INFO] Coverage report merged to .coverage-artifacts/coverage.xml" | tee -a "${summary}"
+# ── 3. Vérification finale ─────────────────────────────────────────────
+
+summary_files_exist=0
+for app in "${apps[@]}"; do
+  report_name="$(printf '%s' "${app}" | tr '/-' '__')"
+  if [[ -s "${ARTIFACT_DIR}/coverage-${report_name}.xml" ]]; then
+    summary_files_exist=$((summary_files_exist + 1))
   fi
+done
+
+echo "[INFO] Coverage files found: ${summary_files_exist}/5" | tee -a "${summary}"
+
+if [[ "${summary_files_exist}" -eq 0 ]]; then
+  echo "[FATAL] No coverage files were generated for any application." | tee -a "${summary}"
+  exit 1
 fi
 
-echo "[INFO] Laravel test suite completed" | tee -a "${summary}"
+if [[ "${total_failures}" -gt 0 ]]; then
+  echo "[FAIL] ${total_failures} application(s) failed tests or coverage." | tee -a "${summary}"
+  exit 1
+fi
+
+echo "[INFO] Laravel test suite completed. ${summary_files_exist}/5 apps with coverage." | tee -a "${summary}"
+exit 0

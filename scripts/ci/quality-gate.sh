@@ -28,7 +28,7 @@ mkdir -p "${ART_DIR}"
 
 QG_REQUIRE_SONAR="${QG_REQUIRE_SONAR:-false}"
 QG_REQUIRE_COSIGN="${QG_REQUIRE_COSIGN:-false}"
-QG_COVERAGE_MIN="${QG_COVERAGE_MIN:-70}"
+QG_COVERAGE_MIN="${QG_COVERAGE_MIN:-100}"
 
 MD="${ART_DIR}/quality-gate-summary.md"
 JSON="${ART_DIR}/quality-gate-summary.json"
@@ -121,9 +121,9 @@ if [ -n "${cov_pct}" ]; then
     emit "coverage" "FAIL" "true" "${cov_pct}% < ${QG_COVERAGE_MIN}%"
   fi
 elif [ -s "${cov_summary}" ] || [ -s "${cov_xml}" ]; then
-  emit "coverage" "PARTIEL" "true" "report present but pct unparseable"
+  emit "coverage" "PARTIEL" "true" "report present but percentage unparseable"
 else
-  emit "coverage" "PARTIEL" "true" "no coverage-summary.txt nor coverage.xml"
+  emit "coverage" "FAIL" "true" "no coverage-summary.txt nor coverage.xml — run-tests.sh or collect-coverage.sh did not produce output"
 fi
 
 # ── 2. Semgrep SAST ─────────────────────────────────────────

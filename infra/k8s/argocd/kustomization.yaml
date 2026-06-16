@@ -1,15 +1,18 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 # Déploiement Argo CD pour SecureRAG Hub.
-# 1. Installer le contrôleur Argo CD (v2.10+) avant d'appliquer ce kustomize.
-# 2. Puis: kubectl apply -k infra/k8s/argocd
+# Appliqué automatiquement par la Root Application (app-of-apps).
 namespace: argocd
 resources:
   - namespace.yaml
   - project.yaml
+  - application-root.yaml
   - application-demo.yaml
   - application-production.yaml
   - applicationset-platform.yaml
+  - application-harbor.yaml
+  - application-vault.yaml
+  - application-velero.yaml
   - notifications-cm.yaml         # P1-15 drift notifications
 commonLabels:
   app.kubernetes.io/part-of: securerag-hub

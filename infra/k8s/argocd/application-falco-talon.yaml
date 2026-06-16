@@ -1,0 +1,32 @@
+# Falco Talon — réponse automatique aux incidents
+# Exécute des actions (kill pod, taint node, notify) sur alertes Falco.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: securerag-falco-talon
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "55"
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: securerag-hub
+  source:
+    repoURL: https://github.com/YassinoMed/MasterPFE.git
+    targetRevision: main
+    path: infra/k8s/falco-talon
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: falco
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+    retry:
+      limit: 10
+      backoff:
+        duration: 10s
+        factor: 2
+        maxDuration: 3m

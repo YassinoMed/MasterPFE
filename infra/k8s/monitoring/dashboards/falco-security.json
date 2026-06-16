@@ -1,0 +1,63 @@
+{
+  "title": "SecureRAG Hub — Falco Runtime Security",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "10s",
+  "tags": ["securerag", "falco", "runtime"],
+  "panels": [
+    {
+      "id": 1, "type": "stat", "title": "Falco Pods Running",
+      "targets": [{ "expr": "count(kube_pod_info{namespace=\"falco\", pod=~\"falco.*\"})" }],
+      "gridPos": { "x": 0, "y": 0, "w": 3, "h": 3 }
+    },
+    {
+      "id": 2, "type": "stat", "title": "Critical Events (5m)",
+      "targets": [{ "expr": "sum(rate(falco_events_total{priority=\"Critical\"}[5m]))" }],
+      "gridPos": { "x": 3, "y": 0, "w": 3, "h": 3 },
+      "fieldConfig": { "defaults": { "thresholds": { "steps": [{ "color": "green", "value": null }, { "color": "orange", "value": 0.1 }, { "color": "red", "value": 1 }] } } }
+    },
+    {
+      "id": 3, "type": "stat", "title": "Error Events (5m)",
+      "targets": [{ "expr": "sum(rate(falco_events_total{priority=\"Error\"}[5m]))" }],
+      "gridPos": { "x": 6, "y": 0, "w": 3, "h": 3 }
+    },
+    {
+      "id": 4, "type": "stat", "title": "Warning Events (5m)",
+      "targets": [{ "expr": "sum(rate(falco_events_total{priority=\"Warning\"}[5m]))" }],
+      "gridPos": { "x": 9, "y": 0, "w": 3, "h": 3 }
+    },
+    {
+      "id": 5, "type": "stat", "title": "Talon Actions (5m)",
+      "targets": [{ "expr": "sum(rate(falco_talon_actions_total[5m]))" }],
+      "gridPos": { "x": 12, "y": 0, "w": 3, "h": 3 }
+    },
+    {
+      "id": 10, "type": "timeseries", "title": "Events by MITRE Tactic",
+      "targets": [
+        { "expr": "sum(rate(falco_events_total[5m])) by (tags)", "legendFormat": "{{tags}}" }
+      ],
+      "gridPos": { "x": 0, "y": 3, "w": 12, "h": 8 }
+    },
+    {
+      "id": 11, "type": "timeseries", "title": "Events by Rule",
+      "targets": [
+        { "expr": "sum(rate(falco_events_total[5m])) by (rule)", "legendFormat": "{{rule}}" }
+      ],
+      "gridPos": { "x": 12, "y": 3, "w": 12, "h": 8 }
+    },
+    {
+      "id": 20, "type": "timeseries", "title": "Events by Namespace",
+      "targets": [
+        { "expr": "sum(rate(falco_events_total[5m])) by (k8s_ns_name)", "legendFormat": "{{k8s_ns_name}}" }
+      ],
+      "gridPos": { "x": 0, "y": 11, "w": 12, "h": 6 }
+    },
+    {
+      "id": 21, "type": "timeseries", "title": "Events by Pod",
+      "targets": [
+        { "expr": "topk(10, sum(rate(falco_events_total[5m])) by (k8s_pod_name))", "legendFormat": "{{k8s_pod_name}}" }
+      ],
+      "gridPos": { "x": 12, "y": 11, "w": 12, "h": 6 }
+    }
+  ]
+}

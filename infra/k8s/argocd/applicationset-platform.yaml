@@ -22,6 +22,22 @@ spec:
             path: infra/k8s/runtime-detection
             namespace: falco
             wave: "50"
+          - name: kyverno
+            path: infra/k8s/addons/kyverno
+            namespace: kyverno
+            wave: "5"
+          - name: kyverno-policies
+            path: infra/k8s/policies/kyverno
+            namespace: kyverno
+            wave: "6"
+          - name: metrics-server
+            path: infra/k8s/addons/metrics-server
+            namespace: kube-system
+            wave: "10"
+          - name: secrets
+            path: infra/k8s/secrets
+            namespace: external-secrets
+            wave: "15"
   template:
     metadata:
       name: 'securerag-{{name}}'

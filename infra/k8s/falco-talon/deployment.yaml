@@ -1,0 +1,206 @@
+# Falco Talon — Réponse automatique aux incidents de sécurité
+# Déploie Falco Talon pour exécuter des actions automatiques
+# en réponse aux alertes Falco (kill pod, taint node, notify).
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: falco-talon
+  namespace: falco
+  labels:
+    app.kubernetes.io/name: falco-talon
+    app.kubernetes.io/part-of: securerag-hub
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: falco-talon
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: falco-talon
+    spec:
+      serviceAccountName: falco-talon
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: falco-talon
+          image: issif/falco-talon:latest
+          imagePullPolicy: IfNotPresent
+          args:
+            - -c
+            - /etc/falco-talon/config.yaml
+          ports:
+            - name: http
+              containerPort: 2803
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 6
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 15
+            periodSeconds: 20
+            timeoutSeconds: 3
+            failureThreshold: 3
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: [ALL]
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 128Mi
+          volumeMounts:
+            - name: config
+              mountPath: /etc/falco-talon
+              readOnly: true
+      volumes:
+        - name: config
+          configMap:
+            name: falco-talon-config
+
+---
+# ConfigMap — Règles Falco Talon
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: falco-talon-config
+  namespace: falco
+data:
+  config.yaml: |
+    listen:
+      address: "0.0.0.0"
+      port: 2803
+
+    defaultNotifiers:
+      - slack
+      - loki
+
+    notifiers:
+      slack:
+        webhookUrl: ""
+      loki:
+        host: http://loki.securerag-monitoring.svc:3100
+        tenant: falco
+
+    rules:
+      # T1059 — Shell spawned in container → kill pod
+      - name: kill_shell_container
+        match:
+          priority: ">=Warning"
+          rule: "SecureRAG Shell in Container"
+        actions:
+          - action: kubernetes:terminate
+            parameters:
+              gracePeriodSeconds: 5
+          - action: slack:message
+            parameters:
+              text: "POD KILLED: Shell detected in container."
+
+      # T1611 — Privilege escalation → kill + taint
+      - name: kill_privileged_escalation
+        match:
+          priority: ">=Critical"
+          rule: "SecureRAG Privilege Escalation Attempt"
+        actions:
+          - action: kubernetes:terminate
+            parameters:
+              gracePeriodSeconds: 0
+          - action: kubernetes:label
+            parameters:
+              label: "security.securerag.dev/tainted=true"
+          - action: slack:message
+            parameters:
+              text: "CRITICAL: Privilege escalation attempt detected and neutralized."
+
+      # T1136 — User account mutation → notify
+      - name: notify_user_mutation
+        match:
+          rule: "SecureRAG User Account Mutation"
+        actions:
+          - action: slack:message
+            parameters:
+              text: "ALERT: Local user mutation detected in SecureRAG pod."
+
+      # TA0011 — Unexpected egress → network isolation
+      - name: isolate_unexpected_egress
+        match:
+          priority: ">=Warning"
+          rule: "SecureRAG Outbound Unexpected Port"
+        actions:
+          - action: kubernetes:networkpolicy
+            parameters:
+              action: deny-all
+
+      # T1070 — Log tampering → notify
+      - name: notify_log_tampering
+        match:
+          rule: "SecureRAG Log Tampering"
+        actions:
+          - action: slack:message
+            parameters:
+              text: "ALERT: Log tampering detected in SecureRAG pod."
+
+      # T1552 — Sensitive file read → kill + notify
+      - name: kill_sensitive_read
+        match:
+          priority: ">=Error"
+          rule: "SecureRAG Sensitive File Read"
+        actions:
+          - action: kubernetes:terminate
+            parameters:
+              gracePeriodSeconds: 3
+          - action: slack:message
+            parameters:
+              text: "POD KILLED: Sensitive file access detected."
+
+---
+# RBAC
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: falco-talon
+  namespace: falco
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: falco-talon
+rules:
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get", "list", "delete"]
+  - apiGroups: [""]
+    resources: ["nodes"]
+    verbs: ["get", "list", "patch"]
+  - apiGroups: ["networking.k8s.io"]
+    resources: ["networkpolicies"]
+    verbs: ["get", "list", "create", "update", "patch"]
+  - apiGroups: [""]
+    resources: ["events"]
+    verbs: ["create"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: falco-talon
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: falco-talon
+subjects:
+  - kind: ServiceAccount
+    name: falco-talon
+    namespace: falco

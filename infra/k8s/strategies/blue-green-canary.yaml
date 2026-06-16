@@ -1,0 +1,151 @@
+# Blue/Green Deployment Strategy — SecureRAG Hub
+#
+# Stratégie Blue/Green pour les 5 services Laravel.
+# Utilise deux ensembles de Deployments (blue/green) avec un Service selector
+# basculé par le pipeline CD après validation.
+#
+# Principe :
+#   - Le Service pointe vers "color: blue" (actif)
+#   - Le CD déploie la nouvelle version avec "color: green" (inactif)
+#   - Smoke tests sur green
+#   - Si OK → bascule du Service vers "color: green"
+#   - Si FAIL → suppression du green, blue inchangé
+#
+# Utilisation dans le CD :
+#   1. Déployer green
+#   2. Attendre rollout green
+#   3. Smoke tests green
+#   4. Patch Service selector: color=green
+#   5. Scale down blue (garder en backup)
+#   6. Si rollback → patch Service selector: color=blue
+
+---
+# ── BLUE (actif) — inchangé, référence de production ──────
+# Les deployments existants dans infra/k8s/base/*/deployment.yaml
+# sont le "blue". On ajoute juste le label color: blue.
+
+# ── GREEN (nouvelle version) ────────────────────────────────
+# Exemple pour portal-web. Dupliquer pour les 4 autres services.
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: portal-web-green
+  namespace: securerag-hub
+  labels:
+    app.kubernetes.io/name: portal-web
+    color: green
+    deployment-strategy: blue-green
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: portal-web
+      color: green
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: portal-web
+        color: green
+        deployment-strategy: blue-green
+    spec:
+      serviceAccountName: sa-portal-web
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        fsGroup: 10001
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: portal-web
+          image: ghcr.io/example/securerag-hub-portal-web:green
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8081
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 6
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 20
+            timeoutSeconds: 3
+            failureThreshold: 3
+          startupProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 18
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: [ALL]
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: tmp
+          emptyDir: {}
+
+---
+# ── Service Blue/Green switcher ──────────────────────────────
+# Ce script est appelé par le pipeline CD pour basculer.
+# Usage: kubectl patch svc portal-web -n securerag-hub \
+#          -p '{"spec":{"selector":{"color":"green"}}}'
+
+---
+# ── Canary Deployment Strategy ────────────────────────────────
+# Alternative : Canary pour déploiement progressif.
+#
+# Principe :
+#   - Service pointe vers app.kubernetes.io/name (stable + canary)
+#   - Canary = X% des replicas
+#   - Stable = (100-X)% des replicas
+#   - Augmenter progressivement le canary
+#   - Si OK → promouvoir canary → stable
+#   - Si FAIL → supprimer canary
+#
+# Exemple : Ingress Canary avec weight
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: portal-web-canary
+  namespace: securerag-hub
+  annotations:
+    nginx.ingress.kubernetes.io/canary: "true"
+    nginx.ingress.kubernetes.io/canary-weight: "10"
+    nginx.ingress.kubernetes.io/canary-by-header: "X-Canary"
+spec:
+  rules:
+    - host: portal.securerag.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: portal-web-canary
+                port:
+                  name: http

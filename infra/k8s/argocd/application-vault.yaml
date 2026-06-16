@@ -1,0 +1,43 @@
+# Vault — Application ArgoCD (via Helm)
+# Déploie HashiCorp Vault pour la gestion des secrets.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: securerag-vault
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "20"
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: securerag-hub
+  source:
+    repoURL: https://helm.releases.hashicorp.com
+    targetRevision: 0.29.0
+    chart: vault
+    helm:
+      values: |
+        server:
+          dev:
+            enabled: true
+          dataStorage:
+            enabled: false
+          service:
+            enabled: true
+            type: ClusterIP
+          ingress:
+            enabled: false
+        injector:
+          enabled: true
+        ui:
+          enabled: true
+          serviceType: ClusterIP
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: vault
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
