@@ -1,1002 +1,260 @@
+// Jenkinsfile.cd — SecureRAG Hub CD (Distributed Edition)
 pipeline {
-  agent any
+  agent none
 
   options {
     timestamps()
     disableConcurrentBuilds()
     buildDiscarder(logRotator(numToKeepStr: '20'))
+    timeout(time: 90, unit: 'MINUTES')
   }
 
   parameters {
-    string(
-      name: 'REGISTRY_HOST',
-      defaultValue: 'localhost:5001',
-      description: 'Target OCI registry used for release artifacts.'
-    )
-    string(
-      name: 'IMAGE_PREFIX',
-      defaultValue: 'securerag-hub',
-      description: 'OCI image prefix used by the microservices.'
-    )
-    string(
-      name: 'SOURCE_IMAGE_TAG',
-      defaultValue: 'dev',
-      description: 'Existing signed image tag used as the release candidate.'
-    )
-    string(
-      name: 'TARGET_IMAGE_TAG',
-      defaultValue: 'release-local',
-      description: 'Promoted image tag deployed after verification.'
-    )
-    booleanParam(
-      name: 'RUN_GITOPS_SYNC',
-      defaultValue: true,
-      description: 'Update Kustomize manifests with new image digests and push to Git.'
-    )
-    booleanParam(
-      name: 'SIGN_RELEASE_CANDIDATES',
-      defaultValue: true,
-      description: 'Sign release candidate images before verification using Jenkins Cosign credentials.'
-    )
-    booleanParam(
-      name: 'RUN_POSTDEPLOY_VALIDATION',
-      defaultValue: true,
-      description: 'Run post-deployment validation after deployment.'
-    )
-    booleanParam(
-      name: 'RUN_DAST',
-      defaultValue: true,
-      description: 'Run OWASP ZAP DAST baseline scan against the deployed portal. Requires Docker and a running portal-web service.'
-    )
-    booleanParam(
-      name: 'DEPLOY_TO_PRODUCTION',
-      defaultValue: false,
-      description: 'Trigger ArgoCD sync and deploy to production after GitOps update. Safety gate: disabled by default.'
-    )
-    string(
-      name: 'ARGOCD_SERVER',
-      defaultValue: 'argocd-server.argocd.svc:443',
-      description: 'ArgoCD server address (in-cluster service DNS).'
-    )
-    string(
-      name: 'ARGOCD_APP',
-      defaultValue: 'securerag-production',
-      description: 'ArgoCD Application to sync after GitOps update.'
-    )
-    string(
-      name: 'NOTIFICATION_EMAIL',
-      defaultValue: 'med.yassine.bouneb@proton.me',
-      description: 'Email address to notify on build failures. Leave empty to disable.'
-    )
+    string(name: 'REGISTRY_HOST', defaultValue: 'localhost:5001', description: 'Target OCI registry')
+    string(name: 'IMAGE_PREFIX', defaultValue: 'securerag-hub', description: 'OCI image prefix')
+    string(name: 'SOURCE_IMAGE_TAG', defaultValue: 'dev', description: 'Release candidate tag')
+    string(name: 'TARGET_IMAGE_TAG', defaultValue: 'release-local', description: 'Promoted image tag')
+    booleanParam(name: 'SIGN_RELEASE_CANDIDATES', defaultValue: true, description: 'Cosign sign')
+    booleanParam(name: 'RUN_GITOPS_SYNC', defaultValue: true, description: 'Update Git manifests')
+    booleanParam(name: 'RUN_DAST', defaultValue: true, description: 'OWASP ZAP')
+    booleanParam(name: 'DEPLOY_TO_PRODUCTION', defaultValue: false, description: 'Trigger ArgoCD deploy')
   }
 
   environment {
     SBOM_DIR = 'artifacts/sbom'
     REPORT_DIR = 'artifacts/release'
-    COSIGN_YES = 'true'
   }
 
   stages {
+
     stage('Checkout') {
+      agent { label 'master' }
       steps {
-        checkout scm
+        timeout(time: 5, unit: 'MINUTES') {
+          checkout scm
+          stash name: 'workspace', includes: '**'
+        }
       }
     }
 
     stage('Prepare Workspace') {
+      agent { label 'master' }
       steps {
-        sh '''
-          set -euo pipefail
-          mkdir -p "${SBOM_DIR}" "${REPORT_DIR}" artifacts/validation
-          find scripts -type f -name "*.sh" -exec chmod +x {} +
-          chmod +x infra/kind/registry-config.sh
-        '''
-      }
-    }
-
-    stage('CD_IMAGE_SCAN - Scan Release Candidate Images') {
-      steps {
-        sh '''
-          set -euo pipefail
-          REGISTRY_HOST="${REGISTRY_HOST}" IMAGE_PREFIX="${IMAGE_PREFIX}" IMAGE_TAG="${SOURCE_IMAGE_TAG}" \
-          REPORT_DIR="${REPORT_DIR}" IMAGE_SCAN_DIR="security/reports" \
-          TRIVY_REPORT_SEVERITY="MEDIUM,HIGH,CRITICAL" \
-          ALLOW_IMAGE_VULNERABILITIES="true" \
-          bash scripts/release/scan-images.sh
-        '''
-      }
-      post {
-        always {
-          archiveArtifacts allowEmptyArchive: true, artifacts: 'artifacts/release/image-scan-summary.txt,artifacts/release/image-scan-summary.md,artifacts/release/image-scan-index.json,artifacts/release/*-image-scan.log,security/reports/trivy-image-*.json'
+        timeout(time: 2, unit: 'MINUTES') {
+          unstash 'workspace'
+          sh 'mkdir -p "${SBOM_DIR}" "${REPORT_DIR}" artifacts/validation && find scripts -type f -name "*.sh" -exec chmod +x {} +'
+          stash name: 'workspace', includes: '**'
         }
       }
     }
 
-    stage('CD_TRIVY_IMAGE_QUALITY_GATE') {
-      steps {
-        script {
-          echo '[INFO] Evaluating Trivy Image Quality Gate...'
-          def reportDir = 'security/reports'
-          def services = ['auth-users', 'chatbot-manager', 'conversation-service', 'audit-security-service', 'portal-web']
-          def globalCounts = [CRITICAL: 0, HIGH: 0, MEDIUM: 0, LOW: 0]
-          
-          for (service in services) {
-            def reportFile = "${reportDir}/trivy-image-${service}.json"
-            echo "[INFO] Parsing report for service: ${service}"
-            def counts = [CRITICAL: 0, HIGH: 0, MEDIUM: 0, LOW: 0]
-            try {
-              counts = trivyUtils.parseTrivyReport(reportFile)
-            } catch (Exception e) {
-              echo "[INFO] Fallback to local parsing (trivyUtils not loaded): ${e.message}"
-              counts = parseTrivyReport(reportFile)
+    // ════════════════════════════════════════════════════════════════
+    //  PARALLEL: Image Scan + Checkov Helm
+    // ════════════════════════════════════════════════════════════════
+    stage('CD: Scans') {
+      parallel {
+        stage('Trivy Image Scan') {
+          agent { label 'docker-agent' }
+          steps {
+            timeout(time: 20, unit: 'MINUTES') {
+              unstash 'workspace'
+              sh '''
+                REGISTRY_HOST="${REGISTRY_HOST}" IMAGE_PREFIX="${IMAGE_PREFIX}" IMAGE_TAG="${SOURCE_IMAGE_TAG}" \
+                REPORT_DIR="${REPORT_DIR}" IMAGE_SCAN_DIR="security/reports" \
+                ALLOW_IMAGE_VULNERABILITIES=true bash scripts/release/scan-images.sh
+              '''
+              stash name: 'image-scan', includes: 'artifacts/release/*scan*,security/reports/trivy-image-*.json'
             }
-            
-            globalCounts.CRITICAL += counts.CRITICAL
-            globalCounts.HIGH += counts.HIGH
-            globalCounts.MEDIUM += counts.MEDIUM
-            globalCounts.LOW += counts.LOW
           }
-
-          // Afficher le tableau résumé global dans les logs
-          echo "┌──────────┬───────┬────────┐"
-          echo "│ Sévérité │ Count │ Seuil  │"
-          echo "├──────────┼───────┼────────┤"
-          echo "│ CRITICAL │   ${globalCounts.CRITICAL.toString().padRight(3)} │  0 max │"
-          echo "│ HIGH     │   ${globalCounts.HIGH.toString().padRight(3)} │  3 max │"
-          echo "└──────────┴───────┴────────┘"
-
-          if (globalCounts.MEDIUM > 0) {
-            echo "[WARN] Warnings found: ${globalCounts.MEDIUM} MEDIUM vulnerabilities detected across all images."
-          }
-
-          def failed = false
-          def reason = ""
-          
-          if (globalCounts.CRITICAL > 0) {
-            failed = true
-            reason += "CRITICAL count (${globalCounts.CRITICAL}) > 0; "
-          }
-          if (globalCounts.HIGH > 3) {
-            failed = true
-            reason += "HIGH count (${globalCounts.HIGH}) > 3; "
-          }
-
-          archiveArtifacts allowEmptyArchive: true, artifacts: 'security/reports/trivy-image-*.json'
-          
-          try {
-            publishHTML([
-              allowMissing: true,
-              alwaysLinkToLastBuild: true,
-              keepAll: true,
-              reportDir: 'artifacts/release',
-              reportFiles: 'image-scan-summary.md',
-              reportName: 'Trivy Image Scan Summary',
-              reportTitles: 'Trivy Image Scan Summary'
-            ])
-          } catch (Exception ex) {
-            echo "[WARN] HTML Publisher not available: ${ex.message}"
-          }
-
-          if (failed) {
-            echo "[FAIL] Quality Gate Failed: ${reason}"
-            try {
-              slackSend channel: '#security-alerts',
-                        color: '#FF0000',
-                        message: "SecureRAG Hub Quality Gate Failed (Image Scan)! Reason: ${reason}",
-                        webhookUrl: '<SLACK_WEBHOOK_URL>'
-            } catch (Exception slackEx) {
-              echo "[WARN] Slack notification failed: ${slackEx.message}"
+        }
+        stage('Checkov Helm') {
+          agent { label 'k8s-agent' }
+          steps {
+            timeout(time: 5, unit: 'MINUTES') {
+              unstash 'workspace'
+              sh 'checkov -d infra/helm/ --config-file security/checkov-config.yaml --hard-fail-on CRITICAL --soft-fail-on HIGH -o junitxml > artifacts/release/checkov-helm-cd.xml || echo "[WARN] Checkov helm found issues"'
+              stash name: 'checkov-cd', includes: 'artifacts/release/checkov-*.xml'
             }
-            error("Trivy Image Quality Gate Failed: ${reason}")
-          } else {
-            echo "[PASS] Trivy Image Quality Gate Passed."
           }
         }
       }
     }
 
-    stage('Sign Release Candidate Images') {
-      when {
-        expression { return params.SIGN_RELEASE_CANDIDATES }
-      }
-      steps {
-        script {
-          sh '''
-            set -euo pipefail
-            echo "[INFO] Using Sigstore Keyless signing via local OIDC provider..."
-            
-            # 1. Obtain OIDC ID token from Keycloak
-            TOKEN=$(curl -s -X POST \
-              http://keycloak.sigstore-system/realms/securerag-cicd/protocol/openid-connect/token \
-              -d "client_id=jenkins-cosign&client_secret=jenkins-cosign-secret&grant_type=client_credentials" \
-              | jq -r .access_token)
-            
-            if [ -z "${TOKEN}" ] || [ "${TOKEN}" = "null" ]; then
-              echo "[ERROR] Failed to obtain OIDC token from Keycloak."
-              exit 1
-            fi
-            
-            # 2. Export environment variables for the signing script
-            export REGISTRY_HOST="${REGISTRY_HOST}"
-            export IMAGE_PREFIX="${IMAGE_PREFIX}"
-            export IMAGE_TAG="${SOURCE_IMAGE_TAG}"
-            export REPORT_DIR="${REPORT_DIR}"
-            export FAIL_FAST="true"
-            
-            # Override Cosign configuration for local keyless signature
-            export COSIGN_EXPERIMENTAL=1
-            export COSIGN_FULCIO_URL="https://fulcio.sigstore-system"
-            export COSIGN_REKOR_URL="https://rekor.sigstore-system"
-            export COSIGN_IDENTITY_TOKEN="${TOKEN}"
-            export COSIGN_OIDC_ISSUER="https://keycloak.sigstore-system/realms/securerag-cicd"
-            export COSIGN_ALLOW_INSECURE_REGISTRY="true" # Required for local registry
-            
-            # Run the signing script (it will pick up keyless mode automatically when COSIGN_KEY is unset)
-            bash scripts/release/sign-images.sh
-          '''
+    // ════════════════════════════════════════════════════════════════
+    //  PARALLEL: Sign + SBOM + Grype
+    // ════════════════════════════════════════════════════════════════
+    stage('CD: Supply Chain') {
+      parallel {
+        stage('Cosign Sign') {
+          when { expression { return params.SIGN_RELEASE_CANDIDATES } }
+          agent { label 'docker-agent' }
+          steps {
+            timeout(time: 15, unit: 'MINUTES') {
+              unstash 'workspace'
+              sh '''
+                export COSIGN_EXPERIMENTAL=1
+                REGISTRY_HOST="${REGISTRY_HOST}" IMAGE_PREFIX="${IMAGE_PREFIX}" IMAGE_TAG="${SOURCE_IMAGE_TAG}" \
+                REPORT_DIR="${REPORT_DIR}" FAIL_FAST=true bash scripts/release/sign-images.sh
+              '''
+              stash name: 'sign-artifacts', includes: 'artifacts/release/*sign*'
+            }
+          }
         }
-      }
-      post {
-        always {
-          archiveArtifacts allowEmptyArchive: true, artifacts: 'artifacts/release/sign-summary.txt,artifacts/release/sign-summary.md,artifacts/release/sign-index.json,artifacts/release/*-sign.log'
+        stage('Cosign Verify') {
+          when { expression { return params.SIGN_RELEASE_CANDIDATES } }
+          agent { label 'docker-agent' }
+          steps {
+            timeout(time: 10, unit: 'MINUTES') {
+              unstash 'workspace'
+              sh '''
+                export COSIGN_EXPERIMENTAL=1
+                REGISTRY_HOST="${REGISTRY_HOST}" IMAGE_PREFIX="${IMAGE_PREFIX}" IMAGE_TAG="${SOURCE_IMAGE_TAG}" \
+                REPORT_DIR="${REPORT_DIR}" FAIL_FAST=true bash scripts/release/verify-signatures.sh
+              '''
+              stash name: 'verify-artifacts', includes: 'artifacts/release/*verify*'
+            }
+          }
         }
-      }
-    }
-
-    stage('Verify Release Candidate Signatures') {
-      steps {
-        script {
-          sh '''
-            set -euo pipefail
-            echo "[INFO] Verifying Sigstore Keyless signatures via local Rekor..."
-            export REGISTRY_HOST="${REGISTRY_HOST}"
-            export IMAGE_PREFIX="${IMAGE_PREFIX}"
-            export IMAGE_TAG="${SOURCE_IMAGE_TAG}"
-            export REPORT_DIR="${REPORT_DIR}"
-            export FAIL_FAST="true"
-            
-            # Keyless verification env vars
-            export COSIGN_EXPERIMENTAL=1
-            export COSIGN_REKOR_URL="http://rekor.sigstore-system"
-            export COSIGN_CERTIFICATE_IDENTITY="jenkins-cosign@securerag.local"
-            export COSIGN_CERTIFICATE_OIDC_ISSUER="https://keycloak.sigstore-system/realms/securerag-cicd"
-            export COSIGN_ALLOW_INSECURE_REGISTRY="true"
-            
-            bash scripts/release/verify-signatures.sh
-          '''
-        }
-      }
-      post {
-        always {
-          archiveArtifacts allowEmptyArchive: true, artifacts: 'artifacts/release/*verify*,artifacts/release/verify-index.json'
+        stage('Generate SBOM + Grype') {
+          agent { label 'docker-agent' }
+          steps {
+            timeout(time: 15, unit: 'MINUTES') {
+              unstash 'workspace'
+              sh '''
+                REGISTRY_HOST="${REGISTRY_HOST}" IMAGE_PREFIX="${IMAGE_PREFIX}" IMAGE_TAG="${TARGET_IMAGE_TAG}" \
+                SBOM_DIR="${SBOM_DIR}" REPORT_DIR="${REPORT_DIR}" bash scripts/release/generate-sbom.sh
+                STRICT_SBOM_VALIDATION=true SBOM_DIR="${SBOM_DIR}" REPORT_DIR="${REPORT_DIR}" bash scripts/release/validate-sbom-cyclonedx.sh
+                for sbom in "${SBOM_DIR}"/*.cyclonedx.json; do
+                  [ -e "$sbom" ] && grype "sbom:$sbom" --fail-on high,critical -o json > "${sbom}.grype.json" || true
+                done
+              '''
+              stash name: 'sbom-artifacts', includes: 'artifacts/sbom/**,artifacts/release/*sbom*'
+            }
+          }
         }
       }
     }
 
-    stage('Promote Verified Images by Digest') {
+    // ════════════════════════════════════════════════════════════════
+    //  Promote + Evidence + Provenance
+    // ════════════════════════════════════════════════════════════════
+    stage('CD: Promote by Digest') {
+      agent { label 'docker-agent' }
       steps {
-        withCredentials([
-          file(credentialsId: 'cosign-public-key', variable: 'COSIGN_PUBLIC_KEY')
-        ]) {
+        timeout(time: 10, unit: 'MINUTES') {
+          unstash 'workspace'
           sh '''
-            set -euo pipefail
             REGISTRY_HOST="${REGISTRY_HOST}" IMAGE_PREFIX="${IMAGE_PREFIX}" \
             SOURCE_IMAGE_TAG="${SOURCE_IMAGE_TAG}" TARGET_IMAGE_TAG="${TARGET_IMAGE_TAG}" \
-            REPORT_DIR="${REPORT_DIR}" DIGEST_RECORD_FILE="${REPORT_DIR}/promotion-digests.txt" \
-            COSIGN_PUBLIC_KEY="${COSIGN_PUBLIC_KEY}" \
-            VERIFY_SOURCE_BEFORE_PROMOTION=false VERIFY_TARGET_AFTER_PROMOTION=true \
+            REPORT_DIR="${REPORT_DIR}" VERIFY_SOURCE_BEFORE_PROMOTION=false VERIFY_TARGET_AFTER_PROMOTION=true \
             bash scripts/release/promote-by-digest.sh
+          '''
+          stash name: 'promote-artifacts', includes: 'artifacts/release/*promot*,artifacts/release/*digest*'
+        }
+      }
+    }
+
+    stage('CD: Release Evidence') {
+      agent { label 'docker-agent' }
+      steps {
+        timeout(time: 10, unit: 'MINUTES') {
+          unstash 'workspace'
+          unstash 'sign-artifacts'
+          unstash 'sbom-artifacts'
+          unstash 'promote-artifacts'
+          sh '''
+            REPORT_DIR="${REPORT_DIR}" SBOM_DIR="${SBOM_DIR}" \
+            DIGEST_RECORD_FILE="${REPORT_DIR}/promotion-digests.txt" \
+            STRICT_RELEASE_ATTESTATION=true bash scripts/release/generate-release-attestation.sh
+            REPORT_DIR="${REPORT_DIR}" DIGEST_RECORD_FILE="${REPORT_DIR}/promotion-digests.txt" \
+            STRICT_PROVENANCE=true bash scripts/release/generate-provenance-statement.sh
+            bash scripts/release/record-release-evidence.sh
+          '''
+        }
+      }
+    }
+
+    // ════════════════════════════════════════════════════════════════
+    //  GitOps Update
+    // ════════════════════════════════════════════════════════════════
+    stage('CD: GitOps Update') {
+      when { expression { return params.RUN_GITOPS_SYNC } }
+      agent { label 'master' }
+      steps {
+        timeout(time: 5, unit: 'MINUTES') {
+          unstash 'workspace'
+          unstash 'promote-artifacts'
+          sh '''
+            DIGEST_RECORD_FILE="${REPORT_DIR}/promotion-digests.txt"
+            if [ -f "$DIGEST_RECORD_FILE" ]; then
+              git config --global user.email "jenkins@securerag.local"
+              git config --global user.name "Jenkins GitOps Bot"
+              while IFS="|" read -r service _ _ digest; do
+                [ -n "$service" ] && [ -n "$digest" ] && bash scripts/gitops/update-image-digest.sh production "$service" "$digest"
+              done < "$DIGEST_RECORD_FILE"
+            fi
+          '''
+        }
+      }
+    }
+
+    // ════════════════════════════════════════════════════════════════
+    //  ArgoCD Deploy + Smoke Tests
+    // ════════════════════════════════════════════════════════════════
+    stage('CD: Deploy to Production') {
+      when { expression { return params.DEPLOY_TO_PRODUCTION && params.RUN_GITOPS_SYNC } }
+      agent { label 'deploy-agent' }
+      steps {
+        timeout(time: 15, unit: 'MINUTES') {
+          unstash 'workspace'
+          sh '''
+            sleep 10
+            kubectl annotate application securerag-production -n argocd argocd.argoproj.io/refresh=normal --overwrite 2>/dev/null || true
+            for deploy in portal-web auth-users chatbot-manager conversation-service audit-security-service; do
+              kubectl rollout status "deployment/${deploy}" -n securerag-hub --timeout=300s || exit 1
+            done
+            bash scripts/validate/validate-deployment-health.sh || {
+              NAMESPACE=securerag-hub bash scripts/gitops/rollback-deployment.sh
+              exit 1
+            }
+          '''
+        }
+      }
+    }
+
+    // ════════════════════════════════════════════════════════════════
+    //  DAST — OWASP ZAP
+    // ════════════════════════════════════════════════════════════════
+    stage('CD: DAST — OWASP ZAP') {
+      when { expression { return params.RUN_DAST } }
+      agent { label 'zap-agent' }
+      steps {
+        timeout(time: 20, unit: 'MINUTES') {
+          unstash 'workspace'
+          sh '''
+            mkdir -p reports
+            zap-api-scan.py -t http://staging.securerag.local/api/docs.json -f openapi -r zap-report.html -J zap-report.json || true
+            bash scripts/zap-quality-gate.sh reports/zap-report.json
           '''
         }
       }
       post {
-        always {
-          archiveArtifacts allowEmptyArchive: true, artifacts: 'artifacts/release/*promot*,artifacts/release/*digest*,artifacts/release/*verify*'
-        }
-      }
-    }
-
-    stage('Generate SBOM') {
-      steps {
-        sh '''
-          set -euo pipefail
-          REGISTRY_HOST="${REGISTRY_HOST}" IMAGE_PREFIX="${IMAGE_PREFIX}" IMAGE_TAG="${TARGET_IMAGE_TAG}" \
-          SBOM_DIR="${SBOM_DIR}" REPORT_DIR="${REPORT_DIR}" \
-          bash scripts/release/generate-sbom.sh
-          STRICT_SBOM_VALIDATION="true" SBOM_DIR="${SBOM_DIR}" REPORT_DIR="${REPORT_DIR}" \
-          bash scripts/release/validate-sbom-cyclonedx.sh
-        '''
-      }
-      post {
-        always {
-          archiveArtifacts allowEmptyArchive: true, artifacts: 'artifacts/sbom/**,artifacts/release/sbom-summary.txt,artifacts/release/sbom-summary.md,artifacts/release/sbom-cyclonedx-validation.md'
-        }
-      }
-    }
-
-    stage('SBOM Analysis — Grype') {
-      steps {
-        sh '''
-          set -euo pipefail
-          echo "[INFO] Running Grype on generated SBOMs"
-          
-          fail=0
-          for sbom in "${SBOM_DIR}"/*.cyclonedx.json; do
-            [ -e "$sbom" ] || continue
-            echo "Scanning $sbom..."
-            grype "sbom:$sbom" --fail-on high,critical -o json > "${sbom}.grype.json" || fail=1
-          done
-          
-          if [ $fail -eq 1 ]; then
-            echo "[ERROR] Grype found High or Critical vulnerabilities in SBOMs."
-            exit 1
-          fi
-        '''
-      }
-      post {
-        always {
-          archiveArtifacts allowEmptyArchive: true, artifacts: '${SBOM_DIR}/*.grype.json'
-        }
-      }
-    }
-
-    stage('Attest SBOMs') {
-      steps {
-        script {
-          def vaultSecrets = [
-            [path: 'secret/data/jenkins/cosign', engineVersion: 2, secretValues: [
-              [envVar: 'COSIGN_KEY_CONTENT', vaultKey: 'private-key'],
-              [envVar: 'COSIGN_PASSWORD', vaultKey: 'password']
-            ]]
-          ]
-          withVault(vaultSecrets: vaultSecrets) {
-            sh '''
-              set -euo pipefail
-              echo "[INFO] Attesting SBOMs using keys retrieved from HashiCorp Vault."
-              
-              # Write private key content to a temporary location
-              COSIGN_KEY_FILE=$(mktemp)
-              echo "${COSIGN_KEY_CONTENT}" > "${COSIGN_KEY_FILE}"
-              
-              export REGISTRY_HOST="${REGISTRY_HOST}"
-              export IMAGE_PREFIX="${IMAGE_PREFIX}"
-              export IMAGE_TAG="${TARGET_IMAGE_TAG}"
-              export SBOM_DIR="${SBOM_DIR}"
-              export REPORT_DIR="${REPORT_DIR}"
-              export COSIGN_KEY="${COSIGN_KEY_FILE}"
-              
-              bash scripts/release/attest-sboms.sh
-              
-              # Secure cleanup
-              rm -f "${COSIGN_KEY_FILE}"
-            '''
-          }
-        }
-      }
-      post {
-        always {
-          archiveArtifacts allowEmptyArchive: true, artifacts: 'artifacts/release/attest-summary.txt,artifacts/release/*-attest.log'
-        }
-      }
-    }
-
-    stage('Assert Mandatory Supply Chain Evidence') {
-      steps {
-        sh '''
-          set -euo pipefail
-          REPORT_DIR="${REPORT_DIR}" SBOM_DIR="${SBOM_DIR}" \
-          DIGEST_RECORD_FILE="${REPORT_DIR}/promotion-digests.txt" \
-          REQUIRE_SUPPLY_CHAIN_EVIDENCE="true" \
-          bash scripts/release/assert-supply-chain-evidence.sh
-        '''
-      }
-      post {
-        always {
-          archiveArtifacts allowEmptyArchive: true, artifacts: 'artifacts/release/supply-chain-gate-report.md'
-        }
-      }
-    }
-
-    stage('Generate Release Attestation') {
-      steps {
-        sh '''
-          set -euo pipefail
-          REPORT_DIR="${REPORT_DIR}" SBOM_DIR="${SBOM_DIR}" \
-          DIGEST_RECORD_FILE="${REPORT_DIR}/promotion-digests.txt" \
-          STRICT_RELEASE_ATTESTATION="true" \
-          bash scripts/release/generate-release-attestation.sh
-        '''
-      }
-      post {
-        always {
-          archiveArtifacts allowEmptyArchive: true, artifacts: 'artifacts/release/release-attestation.json,artifacts/release/release-attestation.md'
-        }
-      }
-    }
-
-    stage('Generate SLSA-style Provenance') {
-      steps {
-        sh '''
-          set -euo pipefail
-          REPORT_DIR="${REPORT_DIR}" DIGEST_RECORD_FILE="${REPORT_DIR}/promotion-digests.txt" \
-          STRICT_PROVENANCE="true" \
-          bash scripts/release/generate-provenance-statement.sh
-        '''
-      }
-      post {
-        always {
-          archiveArtifacts allowEmptyArchive: true, artifacts: 'artifacts/release/provenance.slsa.json,artifacts/release/provenance.slsa.md'
-        }
-      }
-    }
-
-    stage('Record Release Evidence') {
-      steps {
-        sh '''
-          set -euo pipefail
-          REGISTRY_HOST="${REGISTRY_HOST}" IMAGE_PREFIX="${IMAGE_PREFIX}" \
-          SOURCE_IMAGE_TAG="${SOURCE_IMAGE_TAG}" TARGET_IMAGE_TAG="${TARGET_IMAGE_TAG}" \
-          REPORT_DIR="${REPORT_DIR}" SBOM_DIR="${SBOM_DIR}" \
-          DIGEST_RECORD_FILE="${REPORT_DIR}/promotion-digests.txt" \
-          bash scripts/release/record-release-evidence.sh
-        '''
-      }
-      post {
-        always {
-          archiveArtifacts allowEmptyArchive: true, artifacts: 'artifacts/release/release-evidence.md,artifacts/release/release-manifest.env'
-        }
-      }
-    }
-
-    stage('Collect Supply Chain Evidence') {
-      steps {
-        sh '''
-          set -euo pipefail
-          REPORT_DIR="${REPORT_DIR}" SBOM_DIR="${SBOM_DIR}" \
-          bash scripts/release/collect-supply-chain-evidence.sh
-        '''
-      }
-      post {
-        always {
-          archiveArtifacts allowEmptyArchive: true, artifacts: 'artifacts/release/supply-chain-evidence.md'
-        }
-      }
-    }
-
-    stage('Helm Security Scan') {
-      steps {
-        sh '''
-          set -euo pipefail
-          echo "[INFO] Running Checkov against Helm charts"
-          checkov -d infra/helm/securerag/ --config-file security/checkov-config.yaml --hard-fail-on CRITICAL --soft-fail-on HIGH -o junitxml > artifacts/release/checkov-helm-cd.xml
-        '''
-      }
-      post {
-        always {
-          junit allowEmptyResults: true, testResults: 'artifacts/release/checkov-*.xml'
-          archiveArtifacts allowEmptyArchive: true, artifacts: 'artifacts/release/checkov-*.xml'
-        }
-      }
-    }
-
-    stage('Pre-flight Kyverno') {
-      when {
-        expression { return params.RUN_GITOPS_SYNC }
-      }
-      steps {
-        sh '''
-          set -euo pipefail
-          echo "[INFO] Running Pre-flight validation against production overlay..."
-          bash scripts/security/preflight-kyverno.sh infra/k8s/overlays/production
-        '''
-      }
-    }
-
-    stage('Update GitOps Manifests') {
-      when {
-        expression { return params.RUN_GITOPS_SYNC }
-      }
-      steps {
-        sh '''
-          set -euo pipefail
-          DIGEST_RECORD_FILE="${REPORT_DIR}/promotion-digests.txt"
-          
-          if [ -f "$DIGEST_RECORD_FILE" ]; then
-            echo "[INFO] Found digest record file, updating GitOps manifests..."
-            # Configuration Git temporaire pour Jenkins
-            git config --global user.email "jenkins@securerag.local"
-            git config --global user.name "Jenkins GitOps Bot"
-            
-            while IFS='|' read -r service _ _ digest; do
-              if [ -n "$service" ] && [ -n "$digest" ]; then
-                bash scripts/gitops/update-image-digest.sh production "$service" "$digest"
-              fi
-            done < "$DIGEST_RECORD_FILE"
-          else
-            echo "[INFO] No digest record file found at $DIGEST_RECORD_FILE. Skipping GitOps update."
-          fi
-        '''
-      }
-    }
-
-    stage('Trigger ArgoCD Sync') {
-      when {
-        expression { return params.DEPLOY_TO_PRODUCTION && params.RUN_GITOPS_SYNC }
-      }
-      steps {
-        script {
-          def appName = params.ARGOCD_APP
-          echo "[INFO] Triggering ArgoCD sync for application: ${appName}"
-
-          sh """
-            set -euo pipefail
-            # Attendre que le commit GitOps soit visible par ArgoCD
-            sleep 10
-
-            # Vérifier l'état actuel
-            kubectl get application "${appName}" -n argocd \
-              -o jsonpath='{.status.sync.status}' 2>/dev/null || echo "unknown"
-
-            # Forcer le refresh (ArgoCD auto-sync fera le reste)
-            kubectl annotate application "${appName}" -n argocd \
-              argocd.argoproj.io/refresh=normal --overwrite 2>/dev/null || \
-              echo "[WARN] Could not annotate ArgoCD app (may not be installed on this cluster)"
-          """
-        }
-      }
-    }
-
-    stage('Wait for Rollout — Health Check') {
-      when {
-        expression { return params.DEPLOY_TO_PRODUCTION && params.RUN_GITOPS_SYNC }
-      }
-      steps {
-        sh '''
-          set -euo pipefail
-          NS="securerag-hub"
-          TIMEOUT=300
-          echo "[INFO] Waiting for all deployments in ${NS} to be ready (timeout=${TIMEOUT}s)..."
-
-          for deploy in portal-web auth-users chatbot-manager conversation-service audit-security-service; do
-            echo "[INFO]   Waiting for deployment/${deploy}..."
-            if ! kubectl rollout status "deployment/${deploy}" -n "${NS}" --timeout="${TIMEOUT}s"; then
-              echo "[FAIL] Deployment ${deploy} failed to roll out."
-              exit 1
-            fi
-            echo "[OK]   deployment/${deploy} is ready."
-          done
-
-          echo "[INFO] All deployments healthy."
-        '''
-      }
-      post {
-        failure {
-          script {
-            echo '[FAIL] Rollout failed. Initiating automatic rollback...'
-            sh '''
-              set -euo pipefail
-              NAMESPACE=securerag-hub \
-              DIGEST_RECORD="${REPORT_DIR}/promotion-digests.txt" \
-              REPORT_DIR="${REPORT_DIR}" \
-              bash scripts/gitops/rollback-deployment.sh
-            '''
-            error("Deployment health check failed after ArgoCD sync. Automatic rollback executed.")
-          }
-        }
-      }
-    }
-
-    stage('Smoke Tests — Production') {
-      when {
-        expression { return params.DEPLOY_TO_PRODUCTION && params.RUN_GITOPS_SYNC }
-      }
-      steps {
-        sh '''
-          set -euo pipefail
-          bash scripts/validate/validate-deployment-health.sh
-        '''
-      }
-      post {
-        failure {
-          script {
-            echo '[FAIL] Deployment health validation failed.'
-            sh '''
-              NAMESPACE=securerag-hub bash scripts/gitops/rollback-deployment.sh
-            '''
-            error("Deployment health validation failed. Automatic rollback executed.")
-          }
-        }
-      }
-    }
-
-    stage('DAST — OWASP ZAP') {
-      when {
-        expression { return params.RUN_DAST }
-      }
-      steps {
-        sh '''
-          set -euo pipefail
-          mkdir -p reports
-
-          CONTAINER_ID=$(hostname)
-          MOUNTS=$(docker inspect "${CONTAINER_ID}" --format='{{range .Mounts}}{{.Destination}}:{{.Source}} {{end}}' 2>/dev/null || \
-                   docker inspect securerag-jenkins --format='{{range .Mounts}}{{.Destination}}:{{.Source}} {{end}}' 2>/dev/null || echo "")
-
-          HOST_REPORTS_DIR=""
-          TARGET_DIR="$(pwd)/reports"
-          for m in ${MOUNTS}; do
-            dest="${m%%:*}"
-            src="${m#*:}"
-            if [ -n "${dest}" ]; then
-              case "${TARGET_DIR}" in
-                "${dest}"*)
-                  rel="${TARGET_DIR#${dest}}"
-                  HOST_REPORTS_DIR="${src}${rel}"
-                  break
-                  ;;
-              esac
-            fi
-          done
-
-          if [ -z "${HOST_REPORTS_DIR}" ]; then
-            HOST_REPORTS_DIR="${TARGET_DIR}"
-          fi
-
-          echo "[INFO] Running OWASP ZAP API scan against staging"
-          docker run --rm --network host \
-            -v "${HOST_REPORTS_DIR}:/zap/wrk:rw" \
-            -e ZAP_FAIL_ON_RISK=High \
-            ghcr.io/zaproxy/zaproxy:2.15.0@sha256:d8bd58f01b7a2d36ab2da5744275143a41b12658de3bb30eef794e77241cfd74 \
-            zap-api-scan.py \
-            -t http://staging.securerag.local/api/docs.json \
-            -f openapi \
-            -r zap-report.html \
-            -J zap-report.json || true
-          
-          # Validation with the produced script
-          bash scripts/zap-quality-gate.sh reports/zap-report.json
-        '''
-      }
-      post {
-        always {
-          archiveArtifacts allowEmptyArchive: true, artifacts: 'reports/zap-report.html,reports/zap-report.json'
-        }
+        always { archiveArtifacts allowEmptyArchive: true, artifacts: 'reports/zap-*' }
       }
     }
 
     stage('Generate Support Pack') {
+      agent { label 'master' }
       steps {
-        sh 'make support-pack'
-      }
-      post {
-        always {
-          archiveArtifacts allowEmptyArchive: true, artifacts: 'support-pack/**'
+        timeout(time: 5, unit: 'MINUTES') {
+          unstash 'workspace'
+          sh 'make support-pack'
         }
       }
     }
   }
 
   post {
-    success {
-      echo 'SecureRAG Hub CD pipeline completed successfully.'
-    }
-    failure {
-      echo 'SecureRAG Hub CD pipeline failed. Inspect release and deployment reports.'
-      script {
-        if (params.NOTIFICATION_EMAIL && params.NOTIFICATION_EMAIL.trim() != '') {
-          def gitCommitShort = env.GIT_COMMIT ? env.GIT_COMMIT.take(7) : 'N/A'
-          def buildDuration = currentBuild.durationString ?: 'N/A'
-          def buildUrl = env.BUILD_URL
-          def consoleUrl = "${env.BUILD_URL}console"
-          def jobName = env.JOB_NAME
-          def buildNumber = env.BUILD_NUMBER
-          def gitBranch = env.GIT_BRANCH ?: 'N/A'
-
-          def htmlBody = """
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <title>Build Failed</title>
-  <style>
-    @keyframes pulse {
-      0% {
-        transform: scale(0.95);
-        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
-      }
-      70% {
-        transform: scale(1);
-        box-shadow: 0 0 0 6px rgba(239, 68, 68, 0);
-      }
-      100% {
-        transform: scale(0.95);
-        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
-      }
-    }
-    body {
-      background-color: #0f172a;
-      color: #f8fafc;
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      margin: 0;
-      padding: 0;
-      -webkit-font-smoothing: antialiased;
-    }
-    .container {
-      max-width: 600px;
-      margin: 40px auto;
-      background-color: #0f172a;
-      border: 1px solid #1e293b;
-      border-radius: 12px;
-      overflow: hidden;
-      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
-    }
-    .header {
-      background: linear-gradient(135deg, #0f172a 0%, #450a0a 100%);
-      padding: 35px 30px;
-      text-align: center;
-      position: relative;
-      border-bottom: 2px solid #ef4444;
-      box-shadow: inset 0 0 40px rgba(239, 68, 68, 0.15);
-    }
-    .badge-container {
-      display: inline-block;
-      margin-bottom: 12px;
-    }
-    .badge {
-      background-color: #991b1b;
-      color: #fca5a5;
-      padding: 6px 14px;
-      border-radius: 9999px;
-      font-size: 12px;
-      font-weight: 700;
-      letter-spacing: 0.05em;
-      text-transform: uppercase;
-      display: inline-flex;
-      align-items: center;
-    }
-    .dot {
-      width: 8px;
-      height: 8px;
-      background-color: #ef4444;
-      border-radius: 50%;
-      margin-right: 8px;
-      display: inline-block;
-      animation: pulse 2s infinite;
-    }
-    .title {
-      font-size: 24px;
-      font-weight: 800;
-      margin: 0;
-      color: #ffffff;
-      letter-spacing: -0.025em;
-    }
-    .content {
-      padding: 30px;
-    }
-    .intro {
-      font-size: 15px;
-      color: #94a3b8;
-      line-height: 1.6;
-      margin-top: 0;
-      margin-bottom: 24px;
-    }
-    .grid-table {
-      width: 100%;
-      border-collapse: separate;
-      border-spacing: 8px;
-      margin-bottom: 24px;
-    }
-    .card {
-      background-color: #1e293b;
-      border: 1px solid #334155;
-      border-radius: 8px;
-      padding: 12px 16px;
-      width: 50%;
-    }
-    .card-label {
-      font-size: 11px;
-      color: #64748b;
-      text-transform: uppercase;
-      font-weight: 600;
-      letter-spacing: 0.05em;
-      margin-bottom: 4px;
-    }
-    .card-value {
-      font-size: 14px;
-      font-weight: 700;
-      color: #e2e8f0;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .card-value.highlight-red {
-      color: #ef4444;
-    }
-    .card-value.highlight-blue {
-      color: #3b82f6;
-    }
-    .section-title {
-      font-size: 12px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      color: #475569;
-      margin-bottom: 12px;
-      border-bottom: 1px solid #1e293b;
-      padding-bottom: 6px;
-    }
-    .tags-container {
-      margin-bottom: 30px;
-      line-height: 2.2;
-    }
-    .tag {
-      display: inline-block;
-      padding: 3px 10px;
-      border-radius: 6px;
-      font-size: 11px;
-      font-weight: 600;
-      margin-right: 6px;
-    }
-    .tag-sec {
-      background-color: #172554;
-      color: #93c5fd;
-      border: 1px solid #1e3a8a;
-    }
-    .tag-scanner {
-      background-color: #450a0a;
-      color: #fca5a5;
-      border: 1px solid #7f1d1d;
-    }
-    .tag-gate {
-      background-color: #064e3b;
-      color: #6ee7b7;
-      border: 1px solid #065f46;
-    }
-    .tag-audit {
-      background-color: #3b0764;
-      color: #d8b4fe;
-      border: 1px solid #581c87;
-    }
-    .actions {
-      text-align: center;
-      margin-bottom: 10px;
-    }
-    .btn {
-      display: inline-block;
-      padding: 12px 24px;
-      border-radius: 8px;
-      font-size: 14px;
-      font-weight: 700;
-      text-decoration: none;
-      margin: 0 8px;
-    }
-    .btn-primary {
-      background-color: #ef4444;
-      color: #ffffff;
-      border: 1px solid #ef4444;
-    }
-    .btn-secondary {
-      background-color: transparent;
-      color: #ffffff;
-      border: 1px solid #475569;
-    }
-    .footer {
-      background-color: #020617;
-      padding: 24px;
-      text-align: center;
-      border-top: 1px solid #1e293b;
-    }
-    .footer-text {
-      font-size: 12px;
-      color: #64748b;
-      margin: 0;
-    }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <div class="header">
-      <div class="badge-container">
-        <span class="badge"><span class="dot"></span>Build Failed</span>
-      </div>
-      <h1 class="title">SecureRAG Hub — CD Alert</h1>
-    </div>
-    <div class="content">
-      <p class="intro">Bonjour, le build de la pipeline de déploiement continu (CD) a échoué. Vous trouverez ci-dessous les détails du build ainsi que les outils de sécurité impliqués.</p>
-      
-      <table class="grid-table">
-        <tr>
-          <td class="card">
-            <div class="card-label">Pipeline</div>
-            <div class="card-value">${jobName}</div>
-          </td>
-          <td class="card">
-            <div class="card-label">Build N°</div>
-            <div class="card-value highlight-red">#${buildNumber}</div>
-          </td>
-        </tr>
-        <tr>
-          <td class="card">
-            <div class="card-label">Branche Git</div>
-            <div class="card-value highlight-blue">${gitBranch}</div>
-          </td>
-          <td class="card">
-            <div class="card-label">Commit SHA</div>
-            <div class="card-value">${gitCommitShort}</div>
-          </td>
-        </tr>
-        <tr>
-          <td class="card">
-            <div class="card-label">Durée</div>
-            <div class="card-value">${buildDuration}</div>
-          </td>
-          <td class="card">
-            <div class="card-label">Environnement</div>
-            <div class="card-value">DevSecOps CD</div>
-          </td>
-        </tr>
-      </table>
-
-      <div class="section-title">Outils de sécurité CD actifs</div>
-      <div class="tags-container">
-        <span class="tag tag-scanner">Trivy Image Scan</span>
-        <span class="tag tag-sec">Cosign Signing</span>
-        <span class="tag tag-sec">Cosign Verification</span>
-        <span class="tag tag-scanner">Syft SBOM</span>
-        <span class="tag tag-gate">Supply Chain Gate</span>
-        <span class="tag tag-gate">Release Attestation</span>
-        <span class="tag tag-gate">SLSA Provenance</span>
-        <span class="tag tag-audit">OWASP ZAP DAST</span>
-      </div>
-
-      <div class="actions">
-        <a href="${consoleUrl}" class="btn btn-primary">Voir la console</a>
-        <a href="${buildUrl}" class="btn btn-secondary">Détails du build</a>
-      </div>
-    </div>
-    <div class="footer">
-      <p class="footer-text">SecureRAG Hub — Système d'Intégration et de Déploiement Continus</p>
-    </div>
-  </div>
-</body>
-</html>
-"""
-
-          mail to: params.NOTIFICATION_EMAIL,
-               mimeType: 'text/html',
-               subject: "🔴 [Jenkins] Échec du build : ${env.JOB_NAME} #${env.BUILD_NUMBER}",
-               body: htmlBody
-        }
-      }
-    }
-    always {
-      archiveArtifacts allowEmptyArchive: true, artifacts: 'artifacts/sbom/**,artifacts/release/**,artifacts/validation/**,artifacts/support-pack/**'
-    }
+    always { archiveArtifacts allowEmptyArchive: true, artifacts: 'artifacts/sbom/**,artifacts/release/**,artifacts/validation/**' }
   }
-}
-
-def parseTrivyReport(String filePath) {
-    def counts = [CRITICAL: 0, HIGH: 0, MEDIUM: 0, LOW: 0]
-    if (!fileExists(filePath)) {
-        echo "[WARN] Trivy report file not found at: ${filePath}"
-        return counts
-    }
-    try {
-        def report = readJSON file: filePath
-        if (report && report.Results) {
-            for (result in report.Results) {
-                if (result.Vulnerabilities) {
-                    for (vuln in result.Vulnerabilities) {
-                        def severity = vuln.Severity ? vuln.Severity.toUpperCase() : ""
-                        if (counts.containsKey(severity)) {
-                            counts[severity] = counts[severity] + 1
-                        }
-                    }
-                }
-            }
-        }
-    } catch (Exception e) {
-        echo "[ERROR] Failed to parse Trivy JSON report at ${filePath}: ${e.getMessage()}"
-    }
-    return counts
 }

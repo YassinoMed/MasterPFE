@@ -1,0 +1,180 @@
+# Jenkins Kubernetes Plugin — Pod Templates
+# Fichier inclus dans jenkins.yaml (CasC)
+# Définit 7 pod templates pour les agents spécialisés.
+
+jenkins:
+  clouds:
+    - kubernetes:
+        name: "securerag-k8s"
+        namespace: "jenkins-agents"
+        serverUrl: "https://kubernetes.default.svc"
+        skipTlsVerify: true
+        jenkinsUrl: "http://jenkins.securerag-hub.svc:8080"
+        jenkinsTunnel: "jenkins-agent.securerag-hub.svc:50000"
+        containerCapStr: "10"
+        maxRequestsPerHostStr: "32"
+        waitForPodSec: "600"
+        podRetention: "never()"
+        templates:
+          # ── 1. test-agent ──────────────────────────────────────────
+          - name: "test-agent"
+            label: "test-agent"
+            nodeUsageMode: EXCLUSIVE
+            containers:
+              - name: "php"
+                image: "localhost:5001/securerag-hub-test-agent:latest"
+                command: "sleep"
+                args: "99d"
+                resourceRequestCpu: "500m"
+                resourceLimitCpu: "2000m"
+                resourceRequestMemory: "512Mi"
+                resourceLimitMemory: "2048Mi"
+                envVars:
+                  - envVar:
+                      key: "COMPOSER_HOME"
+                      value: "/tmp/composer"
+                  - envVar:
+                      key: "COMPOSER_CACHE_DIR"
+                      value: "/tmp/composer/cache"
+            volumes:
+              - emptyDirVolume:
+                  memory: false
+                  mountPath: "/tmp/composer"
+              - emptyDirVolume:
+                  memory: false
+                  mountPath: "/tmp"
+            workspaceVolume:
+              emptyDirWorkspaceVolume: false
+            slaveConnectTimeout: 300
+            idleMinutes: 5
+            yamlMergeStrategy: "override"
+
+          # ── 2. security-agent ──────────────────────────────────────
+          - name: "security-agent"
+            label: "security-agent"
+            nodeUsageMode: EXCLUSIVE
+            containers:
+              - name: "security"
+                image: "localhost:5001/securerag-hub-security-agent:latest"
+                command: "sleep"
+                args: "99d"
+                resourceRequestCpu: "500m"
+                resourceLimitCpu: "4000m"
+                resourceRequestMemory: "512Mi"
+                resourceLimitMemory: "4096Mi"
+            workspaceVolume:
+              emptyDirWorkspaceVolume: false
+            slaveConnectTimeout: 300
+            idleMinutes: 5
+            yamlMergeStrategy: "override"
+
+          # ── 3. docker-agent ────────────────────────────────────────
+          - name: "docker-agent"
+            label: "docker-agent"
+            nodeUsageMode: EXCLUSIVE
+            containers:
+              - name: "docker"
+                image: "localhost:5001/securerag-hub-docker-agent:latest"
+                command: "sleep"
+                args: "99d"
+                resourceRequestCpu: "1"
+                resourceLimitCpu: "4000m"
+                resourceRequestMemory: "1Gi"
+                resourceLimitMemory: "4096Mi"
+                envVars:
+                  - envVar:
+                      key: "DOCKER_HOST"
+                      value: "tcp://localhost:2375"
+              - name: "dind"
+                image: "docker:27-dind"
+                securityContext:
+                  privileged: true
+                resourceRequestCpu: "500m"
+                resourceLimitCpu: "2000m"
+                resourceRequestMemory: "512Mi"
+                resourceLimitMemory: "2048Mi"
+                envVars:
+                  - envVar:
+                      key: "DOCKER_TLS_CERTDIR"
+                      value: ""
+            workspaceVolume:
+              emptyDirWorkspaceVolume: false
+            slaveConnectTimeout: 300
+            idleMinutes: 5
+            yamlMergeStrategy: "override"
+
+          # ── 4. k8s-agent ───────────────────────────────────────────
+          - name: "k8s-agent"
+            label: "k8s-agent"
+            nodeUsageMode: EXCLUSIVE
+            containers:
+              - name: "k8s"
+                image: "localhost:5001/securerag-hub-k8s-agent:latest"
+                command: "sleep"
+                args: "99d"
+                resourceRequestCpu: "500m"
+                resourceLimitCpu: "2000m"
+                resourceRequestMemory: "512Mi"
+                resourceLimitMemory: "2048Mi"
+            workspaceVolume:
+              emptyDirWorkspaceVolume: false
+            slaveConnectTimeout: 300
+            idleMinutes: 5
+            yamlMergeStrategy: "override"
+
+          # ── 5. sonar-agent ─────────────────────────────────────────
+          - name: "sonar-agent"
+            label: "sonar-agent"
+            nodeUsageMode: EXCLUSIVE
+            containers:
+              - name: "sonar"
+                image: "localhost:5001/securerag-hub-sonar-agent:latest"
+                command: "sleep"
+                args: "99d"
+                resourceRequestCpu: "500m"
+                resourceLimitCpu: "2000m"
+                resourceRequestMemory: "512Mi"
+                resourceLimitMemory: "4096Mi"
+            workspaceVolume:
+              emptyDirWorkspaceVolume: false
+            slaveConnectTimeout: 300
+            idleMinutes: 5
+            yamlMergeStrategy: "override"
+
+          # ── 6. zap-agent ───────────────────────────────────────────
+          - name: "zap-agent"
+            label: "zap-agent"
+            nodeUsageMode: EXCLUSIVE
+            containers:
+              - name: "zap"
+                image: "localhost:5001/securerag-hub-zap-agent:latest"
+                command: "sleep"
+                args: "99d"
+                resourceRequestCpu: "1"
+                resourceLimitCpu: "4000m"
+                resourceRequestMemory: "1Gi"
+                resourceLimitMemory: "4096Mi"
+            workspaceVolume:
+              emptyDirWorkspaceVolume: false
+            slaveConnectTimeout: 300
+            idleMinutes: 5
+            yamlMergeStrategy: "override"
+
+          # ── 7. deploy-agent ────────────────────────────────────────
+          - name: "deploy-agent"
+            label: "deploy-agent"
+            nodeUsageMode: EXCLUSIVE
+            containers:
+              - name: "deploy"
+                image: "localhost:5001/securerag-hub-deploy-agent:latest"
+                command: "sleep"
+                args: "99d"
+                resourceRequestCpu: "250m"
+                resourceLimitCpu: "1000m"
+                resourceRequestMemory: "256Mi"
+                resourceLimitMemory: "1024Mi"
+            workspaceVolume:
+              emptyDirWorkspaceVolume: false
+            slaveConnectTimeout: 300
+            idleMinutes: 5
+            yamlMergeStrategy: "override"
