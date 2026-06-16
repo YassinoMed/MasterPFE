@@ -175,9 +175,14 @@ pipeline {
           semgrep scan \
             --config security/semgrep/semgrep.yml \
             --config auto \
-            --json --output security/reports/semgrep.json \
-            --sarif --output security/reports/semgrep.sarif \
+            --json -o security/reports/semgrep.json \
             --error
+
+          semgrep scan \
+            --config security/semgrep/semgrep.yml \
+            --config auto \
+            --sarif -o security/reports/semgrep.sarif \
+            --error || true
 
           CONTAINER_ID=$(hostname)
           MOUNTS=$(docker inspect "${CONTAINER_ID}" --format='{{range .Mounts}}{{.Destination}}:{{.Source}} {{end}}' 2>/dev/null || \

@@ -306,7 +306,7 @@ cd: build image-scan sbom sign verify deploy ## Run the full CD chain locally: b
 security-scan: ## Run all security scans: Semgrep, Gitleaks, Trivy FS, Kyverno policies
 	@echo "[INFO] Running Semgrep SAST scan"
 	@if command -v semgrep >/dev/null 2>&1; then \
-		semgrep scan --config security/semgrep/semgrep.yml --json --output security/reports/semgrep.json --error 2>/dev/null || true; \
+		semgrep scan --config security/semgrep/semgrep.yml --json -o security/reports/semgrep.json --error 2>/dev/null || true; \
 	else \
 		echo "[WARN] Semgrep not installed; skipping SAST scan"; \
 	fi
