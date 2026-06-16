@@ -1,0 +1,109 @@
+# Backstage — Developer Portal
+# Namespace: backstage-system
+# Feature flag: ENABLE_BACKSTAGE=false
+# NE MODIFIE PAS les applications métier existantes.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backstage
+  namespace: backstage-system
+  labels:
+    app.kubernetes.io/name: backstage
+    feature.securerag.dev/enable-backstage: "false"
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app.kubernetes.io/name: backstage }
+  template:
+    metadata:
+      labels: { app.kubernetes.io/name: backstage }
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile: { type: RuntimeDefault }
+      containers:
+        - name: backstage
+          image: backstageio/backstage:latest
+          ports: [{ name: http, containerPort: 7007 }]
+          env:
+            - name: BACKSTAGE_BASE_URL
+              value: "http://backstage.backstage-system.svc:7007"
+            - name: GITHUB_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: backstage-secrets
+                  key: github-token
+                  optional: true
+          resources:
+            requests: { cpu: 250m, memory: 512Mi }
+            limits: { cpu: 1, memory: 1Gi }
+          readinessProbe:
+            httpGet: { path: /, port: http }
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          livenessProbe:
+            httpGet: { path: /, port: http }
+            initialDelaySeconds: 60
+            periodSeconds: 30
+
+---
+# Backstage Catalog — SecureRAG Components
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: securerag-hub
+  description: "SecureRAG Hub — Laravel DevSecOps Platform"
+  annotations:
+    backstage.io/techdocs-ref: dir:.
+    github.com/project-slug: YassinoMed/MasterPFE
+spec:
+  type: service
+  lifecycle: production
+  owner: platform-engineering
+  system: securerag
+  dependsOn:
+    - component:auth-users-service
+    - component:chatbot-manager-service
+    - component:conversation-service
+    - component:audit-security-service
+    - component:portal-web
+  providesApis:
+    - auth-users-api
+    - chatbot-manager-api
+    - conversation-api
+    - audit-security-api
+
+---
+# Scorecard DevSecOps
+apiVersion: backstage.io/v1alpha1
+kind: Scorecard
+metadata:
+  name: securerag-devsecops-scorecard
+spec:
+  metrics:
+    - name: "SAST"
+      weight: 15
+      check: "semgrep --error"
+      threshold: "0 findings"
+    - name: "Coverage"
+      weight: 15
+      check: "coverage >= 85%"
+    - name: "Secret Scanning"
+      weight: 10
+      check: "gitleaks 0 leaks"
+    - name: "Container Scan"
+      weight: 15
+      check: "trivy 0 CRITICAL"
+    - name: "IaC Scan"
+      weight: 10
+      check: "checkov 0 CRITICAL"
+    - name: "DAST"
+      weight: 10
+      check: "zap 0 High/Critical"
+    - name: "Supply Chain"
+      weight: 15
+      check: "cosign verify + SBOM"
+    - name: "SLSA Level"
+      weight: 10
+      check: "slsa >= 3"
+  passingThreshold: 80

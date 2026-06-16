@@ -1,0 +1,68 @@
+# Chaos Mesh — Experiments (désactivés par défaut)
+# Namespace: chaos-mesh
+# Feature flag: ENABLE_CHAOS_MESH=false
+# Ajoute des expériences supplémentaires SANS remplacer Litmus.
+#
+# Activation:
+#   export ENABLE_CHAOS_MESH=true
+#   helm install chaos-mesh chaos-mesh/chaos-mesh --namespace=chaos-mesh --create-namespace --set chaosDaemon.runtime=crio
+#   kubectl apply -f infra/k8s/chaos-mesh/
+#
+# Rollback:
+#   kubectl delete -f infra/k8s/chaos-mesh/
+#   helm uninstall chaos-mesh -n chaos-mesh
+
+apiVersion: chaos-mesh.org/v1alpha1
+kind: PodChaos
+metadata:
+  name: securerag-pod-kill-canary
+  namespace: securerag-hub
+  annotations:
+    feature.securerag.dev/enable-chaos-mesh: "false"
+spec:
+  action: pod-kill
+  mode: one
+  selector:
+    namespaces: [securerag-hub]
+    labelSelectors: { "istio-mtls": "canary" }
+  scheduler:
+    cron: "@every 1h"
+  duration: "30s"
+
+---
+apiVersion: chaos-mesh.org/v1alpha1
+kind: NetworkChaos
+metadata:
+  name: securerag-network-partition
+  namespace: securerag-hub
+  annotations:
+    feature.securerag.dev/enable-chaos-mesh: "false"
+spec:
+  action: partition
+  mode: one
+  selector:
+    namespaces: [securerag-hub]
+    labelSelectors: { "app.kubernetes.io/name": "chatbot-manager" }
+  direction: both
+  scheduler:
+    cron: "@every 2h"
+  duration: "10s"
+
+---
+apiVersion: chaos-mesh.org/v1alpha1
+kind: StressChaos
+metadata:
+  name: securerag-cpu-stress
+  namespace: securerag-hub
+  annotations:
+    feature.securerag.dev/enable-chaos-mesh: "false"
+spec:
+  mode: one
+  selector:
+    namespaces: [securerag-hub]
+    labelSelectors: { "app.kubernetes.io/name": "portal-web" }
+  stressors:
+    cpu:
+      workers: 1
+      load: 50
+  duration: "60s"

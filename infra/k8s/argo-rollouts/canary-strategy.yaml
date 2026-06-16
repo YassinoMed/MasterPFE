@@ -1,0 +1,90 @@
+# Argo Rollouts — Canary Deployment (Progressive Delivery)
+# Namespace: securerag-hub
+# Feature flag: ENABLE_ARGO_ROLLOUTS=false
+# Migration canary : chatbot-manager → conversation-service
+# NE MODIFIE PAS les Deployments actuels.
+#
+# Installation:
+#   kubectl apply -n argo-rollouts -f https://github.com/argoproj/argo-rollouts/releases/latest/download/install.yaml
+#   ENABLE_ARGO_ROLLOUTS=true kubectl apply -f infra/k8s/argo-rollouts/
+#
+# Rollback:
+#   kubectl delete -f infra/k8s/argo-rollouts/
+#   kubectl argo rollouts undo chatbot-manager
+
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: chatbot-manager-canary
+  namespace: securerag-hub
+  annotations:
+    feature.securerag.dev/enable-argo-rollouts: "false"
+    feature.securerag.dev/enable-canary-deployment: "false"
+spec:
+  replicas: 2
+  strategy:
+    canary:
+      steps:
+        - setWeight: 10
+        - pause: { duration: 60s }
+        - setWeight: 30
+        - pause: { duration: 60s }
+        - setWeight: 50
+        - pause: { duration: 120s }
+        - setWeight: 100
+      analysis:
+        templates:
+          - templateName: securerag-canary-analysis
+        startingStep: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: chatbot-manager
+      rollout: canary
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: chatbot-manager
+        rollout: canary
+    spec:
+      containers:
+        - name: chatbot-manager
+          image: localhost:5001/securerag-hub-chatbot-manager:dev
+          ports:
+            - name: http
+              containerPort: 8000
+          readinessProbe:
+            httpGet: { path: /health, port: http }
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            failureThreshold: 6
+
+---
+# Canary Analysis — Prometheus-based
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata:
+  name: securerag-canary-analysis
+  namespace: securerag-hub
+spec:
+  metrics:
+    - name: error-rate
+      interval: 30s
+      count: 5
+      successCondition: result < 0.05
+      failureLimit: 2
+      provider:
+        prometheus:
+          address: http://prometheus.securerag-monitoring.svc:9090
+          query: |
+            sum(rate(http_server_requests_total{namespace="securerag-hub",status=~"5.."}[1m]))
+            / sum(rate(http_server_requests_total{namespace="securerag-hub"}[1m]))
+    - name: p95-latency
+      interval: 30s
+      count: 5
+      successCondition: result < 0.5
+      failureLimit: 2
+      provider:
+        prometheus:
+          address: http://prometheus.securerag-monitoring.svc:9090
+          query: |
+            histogram_quantile(0.95, sum(rate(http_server_request_duration_seconds_bucket{namespace="securerag-hub"}[1m])) by (le))

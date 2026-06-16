@@ -1,0 +1,62 @@
+# SLSA Level 4 — Hermetic Builders + Non-falsifiable Provenance
+# Migration SLSA 3+ → 4 via ENABLE_SLSA4=true
+# Ajoute des builders hermétiques sans modifier le pipeline existant.
+apiVersion: slsa.dev/v1
+kind: BuilderConfig
+metadata:
+  name: securerag-slsa4-migration
+spec:
+  level: 4
+  featureFlag: "ENABLE_SLSA4"
+  defaultEnabled: false
+  migrationPath: "SLSA 3+ → 4"
+
+  # ── Hermetic Builders ──────────────────────────────
+  # Builders isolés, sans accès réseau pendant le build
+  builders:
+    - name: "securerag-hermetic-php"
+      type: "docker"
+      hermetic: true
+      source: "https://github.com/YassinoMed/MasterPFE.git"
+      buildDefinition: ".slsa/build-php.yaml"
+      attestation:
+        format: "in-toto SLSA v1.0"
+        signer: "Cosign keyless (Fulcio + Rekor)"
+        transparencyLog: "https://rekor.sigstore.dev"
+
+  # ── Provenance Level 4 ─────────────────────────────
+  provenance:
+    reproducible: true
+    nonFalsifiable: true
+    dependenciesComplete: true
+    parametersDeclared: true
+    stepsDeclared: true
+    verifiedByTwoPersons: true
+
+  # ── Verification ───────────────────────────────────
+  verification:
+    policyEngine: "Kyverno"
+    policy: "verify-cosign-images Enforce"
+    admissionCheck: "SLSA 4 provenance required"
+
+---
+# SLSA 4 Build Definition — PHP Builder
+apiVersion: slsa.dev/v1
+kind: BuildDefinition
+metadata:
+  name: securerag-php-build
+spec:
+  buildType: "https://slsa.dev/container-based-build/v1"
+  parameters:
+    SOURCE_REPO: "https://github.com/YassinoMed/MasterPFE.git"
+    BUILDER_IMAGE: "localhost:5001/securerag-hub-builder:hermetic"
+  steps:
+    - name: "pre-build"
+      command: ["/bin/sh", "-c", "cd /workspace && composer install --no-dev --no-interaction"]
+    - name: "build"
+      command: ["/bin/sh", "-c", "docker build -f Dockerfile -t ${IMAGE_REF} ."]
+    - name: "attest"
+      command: ["/bin/sh", "-c", "cosign attest --predicate /tmp/provenance.json ${IMAGE_REF}"]
+  networkAccess: false
+  mountPoints: []
+  environment: {}

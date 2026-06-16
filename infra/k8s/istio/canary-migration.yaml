@@ -1,0 +1,67 @@
+# Istio Service Mesh — Canary mTLS Migration
+# Namespace: istio-system
+# Feature flag: ENABLE_SERVICE_MESH=false
+# Migration canary : chatbot-manager → conversation-service → audit
+# NE MODIFIE PAS les Services actuels.
+#
+# Installation (désactivée par défaut) :
+#   istioctl install --set profile=minimal -y
+#   kubectl label namespace securerag-hub istio-injection=enabled --overwrite
+#
+# Rollback:
+#   kubectl label namespace securerag-hub istio-injection-
+#   istioctl uninstall --purge -y
+
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: securerag-mtls-canary
+  namespace: securerag-hub
+  annotations:
+    feature.securerag.dev/enable-service-mesh: "false"
+spec:
+  selector:
+    matchLabels:
+      istio-mtls: canary
+  mtls:
+    mode: STRICT
+
+---
+# Canary mTLS target — chatbot-manager uniquement
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: istio-canary-config
+  namespace: securerag-hub
+data:
+  canary-steps: |
+    [
+      {"step": 1, "service": "chatbot-manager", "mtls": "PERMISSIVE", "duration": "1h"},
+      {"step": 2, "service": "chatbot-manager", "mtls": "STRICT", "duration": "2h"},
+      {"step": 3, "service": "conversation-service", "mtls": "PERMISSIVE", "duration": "1h"},
+      {"step": 4, "service": "conversation-service", "mtls": "STRICT", "duration": "2h"},
+      {"step": 5, "service": "audit-security-service", "mtls": "PERMISSIVE", "duration": "1h"}
+    ]
+
+---
+# VirtualService for canary traffic shifting
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: securerag-canary
+  namespace: securerag-hub
+  annotations:
+    feature.securerag.dev/enable-canary-deployment: "false"
+spec:
+  hosts:
+    - chatbot-manager
+  http:
+    - route:
+        - destination:
+            host: chatbot-manager
+            subset: stable
+          weight: 100
+        - destination:
+            host: chatbot-manager
+            subset: canary
+          weight: 0

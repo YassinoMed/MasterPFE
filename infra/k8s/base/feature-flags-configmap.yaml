@@ -1,0 +1,44 @@
+# Feature Flags Registry — SecureRAG Hub
+# Tous les flags sont désactivés par défaut pour préserver la production.
+# Activation via ConfigMap ou variables d'environnement.
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: securerag-feature-flags
+  namespace: securerag-hub
+data:
+  # ── Multi-Cluster ──────────────────────────────────
+  ENABLE_MULTI_CLUSTER: "false"
+  ENABLE_STAGING_CLUSTER: "false"
+  ENABLE_DR_CLUSTER: "false"
+
+  # ── Cloud Providers ────────────────────────────────
+  ENABLE_AWS_EKS: "false"
+  ENABLE_AZURE_AKS: "false"
+  ENABLE_GCP_GKE: "false"
+
+  # ── Security ───────────────────────────────────────
+  ENABLE_SLSA4: "false"
+  ENABLE_ISTIO_MTLS: "false"
+  ENABLE_SERVICE_MESH: "false"
+  ENABLE_CHAOS_MESH: "false"
+
+  # ── Observability ──────────────────────────────────
+  ENABLE_OPENTELEMETRY: "false"
+  ENABLE_TEMPO_TRACING: "false"
+
+  # ── AIOps ──────────────────────────────────────────
+  ENABLE_AIOPS: "false"
+  ENABLE_OLLAMA: "false"
+  ENABLE_OPENWEBUI: "false"
+
+  # ── Platform ───────────────────────────────────────
+  ENABLE_BACKSTAGE: "false"
+  ENABLE_ARGO_ROLLOUTS: "false"
+  ENABLE_CANARY_DEPLOYMENT: "false"
+
+  # ── Progressive Rollout ────────────────────────────
+  CANARY_WEIGHT_PERCENT: "10"
+  CANARY_DURATION_SECONDS: "300"
+  ROLLBACK_THRESHOLD_ERROR_RATE: "5"

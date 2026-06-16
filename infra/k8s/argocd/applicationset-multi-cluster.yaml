@@ -1,0 +1,105 @@
+# ApplicationSet — Multi-Cluster Staging + DR
+# Déploie les overlays staging et DR sur des clusters distants.
+# NE MODIFIE PAS la production actuelle.
+# Feature flag: ENABLE_MULTI_CLUSTER=true (défaut: false)
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: securerag-multi-cluster
+  namespace: argocd
+  annotations:
+    feature.securerag.dev/enable-multi-cluster: "false"
+    feature.securerag.dev/description: "Multi-cluster staging + DR deployment"
+spec:
+  generators:
+    - list:
+        elements:
+          - name: staging
+            overlay: infra/k8s/overlays/staging
+            cluster: staging
+            namespace: securerag-hub
+            wave: "25"
+          - name: dr
+            overlay: infra/k8s/overlays/dr
+            cluster: dr
+            namespace: securerag-hub
+            wave: "30"
+  template:
+    metadata:
+      name: 'securerag-{{name}}'
+      annotations:
+        argocd.argoproj.io/sync-wave: '{{wave}}'
+        feature.securerag.dev/enable-multi-cluster: "false"
+      finalizers:
+        - resources-finalizer.argocd.argoproj.io
+    spec:
+      project: securerag-hub
+      source:
+        repoURL: https://github.com/YassinoMed/MasterPFE.git
+        targetRevision: main
+        path: '{{overlay}}'
+      destination:
+        name: '{{cluster}}'
+        namespace: '{{namespace}}'
+      syncPolicy:
+        automated:
+          prune: false
+          selfHeal: false
+        syncOptions:
+          - CreateNamespace=true
+        retry:
+          limit: 3
+
+---
+# Staging overlay — mirror of demo avec feature flags
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+metadata:
+  name: securerag-staging-overlay
+  annotations:
+    feature.securerag.dev/enable-staging: "false"
+namespace: securerag-hub
+resources:
+  - ../../base
+configMapGenerator:
+  - name: securerag-common-config
+    behavior: merge
+    literals:
+      - APP_ENV=staging
+      - APP_DEBUG=false
+      - FEATURE_MULTI_CLUSTER=false
+      - FEATURE_OTEL_ENABLED=false
+      - FEATURE_CANARY_ENABLED=false
+images:
+  - name: ghcr.io/example/securerag-hub-portal-web
+    newName: localhost:5001/securerag-hub-portal-web
+    newTag: demo
+  - name: ghcr.io/example/securerag-hub-auth-users
+    newName: localhost:5001/securerag-hub-auth-users
+    newTag: demo
+
+---
+# DR overlay — minimal footprint, cold standby
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+metadata:
+  name: securerag-dr-overlay
+  annotations:
+    feature.securerag.dev/enable-dr: "false"
+namespace: securerag-hub
+resources:
+  - ../../base
+patches:
+  - target:
+      kind: Deployment
+    patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 1
+configMapGenerator:
+  - name: securerag-common-config
+    behavior: merge
+    literals:
+      - APP_ENV=dr
+      - APP_DEBUG=false
+      - DR_MODE=true
