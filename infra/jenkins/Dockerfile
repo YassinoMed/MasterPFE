@@ -41,6 +41,7 @@ RUN apt-get update && \
       php-sqlite3 \
       php-xml \
       php-zip \
+      php-xdebug \
       python3 \
       python3-pip \
       python3-yaml \
@@ -49,6 +50,10 @@ RUN apt-get update && \
       socat \
       unzip && \
     rm -rf /var/lib/apt/lists/*
+
+# Enable Xdebug for code coverage
+RUN echo "zend_extension=xdebug.so" > /etc/php/8.2/cli/conf.d/20-xdebug.ini && \
+    echo "xdebug.mode=coverage" >> /etc/php/8.2/cli/conf.d/20-xdebug.ini
 
 COPY plugins.txt /usr/share/jenkins/ref/plugins.txt
 RUN jenkins-plugin-cli --plugin-file /usr/share/jenkins/ref/plugins.txt

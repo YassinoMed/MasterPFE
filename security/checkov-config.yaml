@@ -4,8 +4,11 @@
 
 ---
 skip-check:
-  - CKV_K8S_21  # Exemple : ignore l'exigence du namespace par défaut
-  # Ajouter d'autres IDs CKV à ignorer si nécessaire
+  - CKV_K8S_21   # Default namespace requirement not applicable with explicit ns
+  - CKV_K8S_15   # Image Pull Policy: IfNotPresent acceptable in dev/local envs
+  - CKV_K8S_16   # Privileged containers: required by Falco runtime detection
+  - CKV_K8S_23   # Root containers: required by Falco DaemonSet
+  - CKV_K8S_43   # Image digest: dev images use tags; production uses digest via promotion
 
 soft-fail: false
 quiet: true

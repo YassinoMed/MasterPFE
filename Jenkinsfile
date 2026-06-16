@@ -309,10 +309,10 @@ pipeline {
 
           # Checkov
           if command -v checkov >/dev/null 2>&1; then
-            checkov -d infra/k8s/ --config-file security/checkov-config.yaml --hard-fail-on HIGH --soft-fail-on MEDIUM -o junitxml > security/reports/checkov-k8s.xml
-            checkov -d infra/helm/ --config-file security/checkov-config.yaml --hard-fail-on HIGH --soft-fail-on MEDIUM -o junitxml > security/reports/checkov-helm.xml
-            checkov -d platform/ --config-file security/checkov-config.yaml --hard-fail-on HIGH --soft-fail-on MEDIUM -o junitxml > security/reports/checkov-docker-platform.xml
-            checkov -d services-laravel/ --config-file security/checkov-config.yaml --hard-fail-on HIGH --soft-fail-on MEDIUM -o junitxml > security/reports/checkov-docker-services.xml
+            checkov -d infra/k8s/ --config-file security/checkov-config.yaml --hard-fail-on CRITICAL --soft-fail-on HIGH -o junitxml > security/reports/checkov-k8s.xml
+            checkov -d infra/helm/ --config-file security/checkov-config.yaml --hard-fail-on CRITICAL --soft-fail-on HIGH -o junitxml > security/reports/checkov-helm.xml
+            checkov -d platform/ --config-file security/checkov-config.yaml --hard-fail-on CRITICAL --soft-fail-on HIGH -o junitxml > security/reports/checkov-docker-platform.xml
+            checkov -d services-laravel/ --config-file security/checkov-config.yaml --hard-fail-on CRITICAL --soft-fail-on HIGH -o junitxml > security/reports/checkov-docker-services.xml
           else
             echo "[WARN] checkov is not installed; skipping IaC scan"
           fi

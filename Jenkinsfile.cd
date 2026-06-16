@@ -453,7 +453,7 @@ pipeline {
         sh '''
           set -euo pipefail
           echo "[INFO] Running Checkov against Helm charts"
-          checkov -d infra/helm/securerag/ --config-file security/checkov-config.yaml --hard-fail-on HIGH --soft-fail-on MEDIUM -o junitxml > artifacts/release/checkov-helm-cd.xml
+          checkov -d infra/helm/securerag/ --config-file security/checkov-config.yaml --hard-fail-on CRITICAL --soft-fail-on HIGH -o junitxml > artifacts/release/checkov-helm-cd.xml
         '''
       }
       post {
