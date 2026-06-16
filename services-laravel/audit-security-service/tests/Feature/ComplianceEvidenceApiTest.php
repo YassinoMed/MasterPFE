@@ -26,6 +26,7 @@ class ComplianceEvidenceApiTest extends TestCase
             'control_id' => 'CTRL-001',
             'title' => 'Access Control Evidence',
             'summary' => 'IAM policies enforced',
+            'status' => 'active',
         ]);
 
         $response->assertStatus(201)
