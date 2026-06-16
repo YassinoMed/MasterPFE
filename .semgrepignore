@@ -1,0 +1,8 @@
+# SecureRAG Hub — Semgrep ignore patterns
+# Test fixtures with fake/placeholder values trigger community secret-detection rules
+**/.env.testing
+**/phpunit.xml
+**/tests/**/fixtures/**
+**/vendor/**
+**/node_modules/**
+**/infra/jenkins/secrets/**

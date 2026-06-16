@@ -174,7 +174,6 @@ pipeline {
 
           semgrep scan \
             --config security/semgrep/semgrep.yml \
-            --config auto \
             --json -o security/reports/semgrep.json \
             --error
 
