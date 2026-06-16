@@ -52,8 +52,9 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 # Enable Xdebug for code coverage
-RUN echo "zend_extension=xdebug.so" > /etc/php/8.2/cli/conf.d/20-xdebug.ini && \
-    echo "xdebug.mode=coverage" >> /etc/php/8.2/cli/conf.d/20-xdebug.ini
+RUN PHP_VERSION=$(php -r 'echo PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION;') && \
+    echo "zend_extension=xdebug.so" > /etc/php/${PHP_VERSION}/cli/conf.d/20-xdebug.ini && \
+    echo "xdebug.mode=coverage" >> /etc/php/${PHP_VERSION}/cli/conf.d/20-xdebug.ini
 
 COPY plugins.txt /usr/share/jenkins/ref/plugins.txt
 RUN jenkins-plugin-cli --plugin-file /usr/share/jenkins/ref/plugins.txt
