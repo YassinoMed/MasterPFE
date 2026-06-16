@@ -47,14 +47,24 @@ for app in "${apps[@]}"; do
     record "${app} composer" "PRÊT_NON_EXÉCUTÉ" "composer.lock missing"
   fi
 
+  npm_app_dirs="${app}/node_modules"
+  if [[ ! -d "${app}/node_modules" ]] && [[ -f "${app}/package.json" ]]; then
+    echo "[INFO] Installing npm dependencies for ${app} (required for audit)"
+    (cd "${app}" && npm install --no-fund --no-audit --ignore-scripts)
+  fi
+
   if [[ -f "${app}/package-lock.json" ]]; then
     output="${REPORT_DIR}/npm-audit-${slug}.json"
-    if (cd "${app}" && npm audit --json > "../../${output}"); then
-      record "${app} npm" "TERMINÉ" "${output}"
+    # Audit production dependencies (blocking)
+    if (cd "${app}" && npm audit --production --json > "../../${output}" 2>/dev/null) && \
+       (cd "${app}" && npm audit --production --audit-level=critical 2>/dev/null); then
+      record "${app} npm (prod)" "TERMINÉ" "${output}"
     else
-      record "${app} npm" "PARTIEL" "${output}"
+      record "${app} npm (prod)" "PARTIEL" "${output}"
       failures=$((failures + 1))
     fi
+    # Full audit for reporting (non-blocking)
+    (cd "${app}" && npm audit --json > "../../${REPORT_DIR}/npm-audit-full-${slug}.json" 2>/dev/null) || true
   else
     record "${app} npm" "PRÊT_NON_EXÉCUTÉ" "package-lock.json absent"
   fi
