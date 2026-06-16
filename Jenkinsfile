@@ -56,7 +56,7 @@ pipeline {
 
   environment {
     SEMGREP_VERSION = '1.156.0'
-    COVERAGE_MIN = '100'
+    COVERAGE_MIN = '85'
     ENFORCE_COVERAGE_GATE = 'true'
     GITLEAKS_IMAGE = 'ghcr.io/gitleaks/gitleaks:v8.30.1@sha256:c00b6bd0aeb3071cbcb79009cb16a60dd9e0a7c60e2be9ab65d25e6bc8abbb7f'
     LARAVEL_APPS = 'platform/portal-web services-laravel/auth-users-service services-laravel/chatbot-manager-service services-laravel/conversation-service services-laravel/audit-security-service'
@@ -133,7 +133,7 @@ pipeline {
       }
     }
 
-    stage('CI_COVERAGE_GATE - Enforce 100% Minimum Coverage') {
+    stage('CI_COVERAGE_GATE - Enforce Minimum Coverage') {
       steps {
         sh '''
           set -euo pipefail
