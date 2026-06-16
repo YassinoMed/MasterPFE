@@ -18,7 +18,10 @@ ssh-agent
 docker-workflow
 timestamper
 ws-cleanup
-matrix-auth
 role-strategy
 prometheus
+htmlpublisher
+slack
+mailer
+email-ext
 

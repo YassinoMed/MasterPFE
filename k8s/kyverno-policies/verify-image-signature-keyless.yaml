@@ -33,8 +33,9 @@ spec:
             - count: 1
               entries:
                 - keyless:
-                    url: http://fulcio.sigstore-system
-                    rekor:
-                      url: http://rekor.sigstore-system
-                    issuer: http://keycloak.sigstore-system/realms/securerag-cicd
+                    issuer: https://keycloak.sigstore-system/realms/securerag-cicd
                     subject: jenkins-cosign@securerag.local
+                    rekor:
+                      url: https://rekor.sigstore-system
+                    ctlog:
+                      url: https://fulcio.sigstore-system

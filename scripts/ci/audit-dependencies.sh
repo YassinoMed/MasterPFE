@@ -61,8 +61,8 @@ for app in "${apps[@]}"; do
 done
 
 if (( failures > 0 )); then
-  echo "[WARN] Dependency audit found vulnerabilities. Proceeding as non-blocking in CI. See ${SUMMARY_FILE}" >&2
-else
-  echo "[INFO] Dependency audit completed successfully. Summary: ${SUMMARY_FILE}"
+  echo "[FAIL] Dependency audit found vulnerabilities in ${failures} component(s). See ${SUMMARY_FILE}" >&2
+  exit 1
 fi
+echo "[INFO] Dependency audit completed successfully. Summary: ${SUMMARY_FILE}"
 exit 0

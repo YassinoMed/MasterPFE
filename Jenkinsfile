@@ -14,7 +14,7 @@ pipeline {
   parameters {
     booleanParam(
       name: 'RUN_SONAR',
-      defaultValue: false,
+      defaultValue: true,
       description: 'Run Sonar analysis and block the build on the Sonar quality gate. Requires SONAR_HOST_URL and SONAR_TOKEN in the Jenkins environment.'
     )
     string(
@@ -56,7 +56,7 @@ pipeline {
 
   environment {
     SEMGREP_VERSION = '1.156.0'
-    COVERAGE_MIN = '0'
+    COVERAGE_MIN = '80'
     ENFORCE_COVERAGE_GATE = 'true'
     GITLEAKS_IMAGE = 'ghcr.io/gitleaks/gitleaks:v8.30.1@sha256:c00b6bd0aeb3071cbcb79009cb16a60dd9e0a7c60e2be9ab65d25e6bc8abbb7f'
     LARAVEL_APPS = 'platform/portal-web services-laravel/auth-users-service services-laravel/chatbot-manager-service services-laravel/conversation-service services-laravel/audit-security-service'
@@ -174,8 +174,9 @@ pipeline {
 
           semgrep scan \
             --config security/semgrep/semgrep.yml \
-            --json \
-            --output security/reports/semgrep.json \
+            --config auto \
+            --json --output security/reports/semgrep.json \
+            --sarif --output security/reports/semgrep.sarif \
             --error
 
           CONTAINER_ID=$(hostname)
@@ -304,10 +305,10 @@ pipeline {
 
           # Checkov
           if command -v checkov >/dev/null 2>&1; then
-            checkov -d infra/k8s/ --config-file security/checkov-config.yaml -o junitxml > security/reports/checkov-k8s.xml || true
-            checkov -d infra/helm/ --config-file security/checkov-config.yaml -o junitxml > security/reports/checkov-helm.xml || true
-            checkov -d platform/ --config-file security/checkov-config.yaml -o junitxml > security/reports/checkov-docker-platform.xml || true
-            checkov -d services-laravel/ --config-file security/checkov-config.yaml -o junitxml > security/reports/checkov-docker-services.xml || true
+            checkov -d infra/k8s/ --config-file security/checkov-config.yaml --hard-fail-on HIGH --soft-fail-on MEDIUM -o junitxml > security/reports/checkov-k8s.xml
+            checkov -d infra/helm/ --config-file security/checkov-config.yaml --hard-fail-on HIGH --soft-fail-on MEDIUM -o junitxml > security/reports/checkov-helm.xml
+            checkov -d platform/ --config-file security/checkov-config.yaml --hard-fail-on HIGH --soft-fail-on MEDIUM -o junitxml > security/reports/checkov-docker-platform.xml
+            checkov -d services-laravel/ --config-file security/checkov-config.yaml --hard-fail-on HIGH --soft-fail-on MEDIUM -o junitxml > security/reports/checkov-docker-services.xml
           else
             echo "[WARN] checkov is not installed; skipping IaC scan"
           fi
@@ -315,7 +316,7 @@ pipeline {
           # Trivy fs scan
           trivy fs . --scanners vuln,config,secret \
             --format json \
-            --output security/reports/trivy-iac.json || true
+            --output security/reports/trivy-iac.json
         '''
       }
       post {

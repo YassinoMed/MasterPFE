@@ -210,10 +210,10 @@ pipeline {
             
             # Override Cosign configuration for local keyless signature
             export COSIGN_EXPERIMENTAL=1
-            export COSIGN_FULCIO_URL="http://fulcio.sigstore-system"
-            export COSIGN_REKOR_URL="http://rekor.sigstore-system"
+            export COSIGN_FULCIO_URL="https://fulcio.sigstore-system"
+            export COSIGN_REKOR_URL="https://rekor.sigstore-system"
             export COSIGN_IDENTITY_TOKEN="${TOKEN}"
-            export COSIGN_OIDC_ISSUER="http://keycloak.sigstore-system/realms/securerag-cicd"
+            export COSIGN_OIDC_ISSUER="https://keycloak.sigstore-system/realms/securerag-cicd"
             export COSIGN_ALLOW_INSECURE_REGISTRY="true" # Required for local registry
             
             # Run the signing script (it will pick up keyless mode automatically when COSIGN_KEY is unset)
@@ -244,7 +244,7 @@ pipeline {
             export COSIGN_EXPERIMENTAL=1
             export COSIGN_REKOR_URL="http://rekor.sigstore-system"
             export COSIGN_CERTIFICATE_IDENTITY="jenkins-cosign@securerag.local"
-            export COSIGN_CERTIFICATE_OIDC_ISSUER="http://keycloak.sigstore-system/realms/securerag-cicd"
+            export COSIGN_CERTIFICATE_OIDC_ISSUER="https://keycloak.sigstore-system/realms/securerag-cicd"
             export COSIGN_ALLOW_INSECURE_REGISTRY="true"
             
             bash scripts/release/verify-signatures.sh
@@ -453,7 +453,7 @@ pipeline {
         sh '''
           set -euo pipefail
           echo "[INFO] Running Checkov against Helm charts"
-          checkov -d infra/helm/securerag/ --config-file security/checkov-config.yaml -o junitxml > artifacts/release/checkov-helm-cd.xml || true
+          checkov -d infra/helm/securerag/ --config-file security/checkov-config.yaml --hard-fail-on HIGH --soft-fail-on MEDIUM -o junitxml > artifacts/release/checkov-helm-cd.xml
         '''
       }
       post {
