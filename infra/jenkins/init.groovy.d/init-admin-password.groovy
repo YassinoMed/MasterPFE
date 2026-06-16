@@ -8,9 +8,10 @@ if (adminPassword) {
     def jenkins = Jenkins.get()
     def realm = jenkins.getSecurityRealm()
     if (realm instanceof HudsonPrivateSecurityRealm) {
-        def user = realm.getUser(adminId)
+        def user = hudson.model.User.getById(adminId, false)
         if (user != null) {
-            user.changePassword(adminPassword)
+            def details = hudson.security.HudsonPrivateSecurityRealm.Details.fromPlainPassword(adminPassword)
+            user.addProperty(details)
             user.save()
             println("SecureRAG Hub Jenkins bootstrap: updated admin user password from environment.")
         } else {
