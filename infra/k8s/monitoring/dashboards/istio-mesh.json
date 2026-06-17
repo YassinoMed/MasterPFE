@@ -1,0 +1,44 @@
+{
+  "title": "SecureRAG Hub — Istio Service Mesh",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "10s",
+  "tags": ["securerag", "istio", "mesh"],
+  "panels": [
+    {
+      "id": 1, "type": "stat", "title": "mTLS Connections",
+      "targets": [{ "expr": "sum(istio_tcp_connections_opened_total{connection_security_policy=\"mutual_tls\"})", "datasource": "Prometheus" }],
+      "gridPos": { "x": 0, "y": 0, "w": 3, "h": 3 }
+    },
+    {
+      "id": 2, "type": "stat", "title": "Requests/s",
+      "targets": [{ "expr": "sum(rate(istio_requests_total[1m]))", "datasource": "Prometheus" }],
+      "gridPos": { "x": 3, "y": 0, "w": 3, "h": 3 }
+    },
+    {
+      "id": 3, "type": "stat", "title": "5xx/min",
+      "targets": [{ "expr": "sum(rate(istio_requests_total{response_code=~\"5..\"}[1m])) * 60", "datasource": "Prometheus" }],
+      "gridPos": { "x": 6, "y": 0, "w": 3, "h": 3 },
+      "fieldConfig": { "defaults": { "thresholds": { "steps": [{ "color": "green", "value": null }, { "color": "red", "value": 1 }] } } }
+    },
+    {
+      "id": 4, "type": "stat", "title": "p95 Latency",
+      "targets": [{ "expr": "histogram_quantile(0.95, sum(rate(istio_request_duration_milliseconds_bucket[5m])) by (le))", "datasource": "Prometheus" }],
+      "gridPos": { "x": 9, "y": 0, "w": 3, "h": 3 }
+    },
+    {
+      "id": 10, "type": "timeseries", "title": "Requests by Service",
+      "targets": [
+        { "expr": "sum(rate(istio_requests_total[5m])) by (destination_service)", "legendFormat": "{{destination_service}}", "datasource": "Prometheus" }
+      ],
+      "gridPos": { "x": 0, "y": 3, "w": 12, "h": 8 }
+    },
+    {
+      "id": 11, "type": "timeseries", "title": "Success Rate by Service",
+      "targets": [
+        { "expr": "sum(rate(istio_requests_total{response_code!~\"5..\"}[5m])) by (destination_service) / sum(rate(istio_requests_total[5m])) by (destination_service)", "legendFormat": "{{destination_service}}", "datasource": "Prometheus" }
+      ],
+      "gridPos": { "x": 12, "y": 3, "w": 12, "h": 8 }
+    }
+  ]
+}

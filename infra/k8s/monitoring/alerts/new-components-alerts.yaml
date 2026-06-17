@@ -1,0 +1,54 @@
+{
+  "apiVersion": 1,
+  "groups": [
+    {
+      "name": "SecureRAG-NewComponents",
+      "folder": "SecureRAG-Evolution",
+      "interval": "30s",
+      "rules": [
+        {
+          "alert": "OpenTelemetryCollectorDown",
+          "expr": "up{job=\"otel-collector\",namespace=\"otel-system\"} == 0",
+          "for": "2m",
+          "labels": { "severity": "warning", "component": "opentelemetry", "feature": "ENABLE_OPENTELEMETRY" },
+          "annotations": { "summary": "OTel Collector is down", "description": "The OpenTelemetry Collector in namespace otel-system has been down for 2 minutes." }
+        },
+        {
+          "alert": "IstioSidecarInjectionFailure",
+          "expr": "rate(pilot_injection_failure_total[5m]) > 0",
+          "for": "1m",
+          "labels": { "severity": "critical", "component": "istio", "feature": "ENABLE_SERVICE_MESH" },
+          "annotations": { "summary": "Istio sidecar injection failing", "description": "Istio sidecar injection is failing at rate {{ $value }}/s." }
+        },
+        {
+          "alert": "PostgreSQLReplicationLag",
+          "expr": "cnpg_replication_lag_bytes > 10485760",
+          "for": "5m",
+          "labels": { "severity": "warning", "component": "postgresql-ha", "feature": "ENABLE_POSTGRESQL_HA" },
+          "annotations": { "summary": "PostgreSQL replication lag > 10MB", "description": "Replication lag is {{ $value }} bytes." }
+        },
+        {
+          "alert": "AIOpsOllamaDown",
+          "expr": "up{job=\"ollama\",namespace=\"aiops-system\"} == 0",
+          "for": "2m",
+          "labels": { "severity": "warning", "component": "aiops", "feature": "ENABLE_AIOPS" },
+          "annotations": { "summary": "Ollama is down", "description": "Ollama in aiops-system is not responding." }
+        },
+        {
+          "alert": "ArgoRolloutDegraded",
+          "expr": "argo_rollout_info{status=\"degraded\"} > 0",
+          "for": "1m",
+          "labels": { "severity": "critical", "component": "argo-rollouts", "feature": "ENABLE_ARGO_ROLLOUTS" },
+          "annotations": { "summary": "Argo Rollout degraded", "description": "Rollout {{ $labels.name }} is degraded." }
+        },
+        {
+          "alert": "ChaosExperimentActive",
+          "expr": "chaos_mesh_experiment_active > 0",
+          "for": "0m",
+          "labels": { "severity": "warning", "component": "chaos-mesh", "feature": "ENABLE_CHAOS_MESH" },
+          "annotations": { "summary": "Chaos experiment active", "description": "A chaos experiment is currently running." }
+        }
+      ]
+    }
+  ]
+}
