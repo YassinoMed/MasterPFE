@@ -1,0 +1,93 @@
+# ML Platform — Kubeflow + MLflow + Ray
+# Namespace: ml-platform
+# Feature flag: ENABLE_ML_PLATFORM=false
+
+# ── MLflow Tracking Server ────────────────────────────────
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mlflow
+  namespace: ml-platform
+  labels:
+    app.kubernetes.io/name: mlflow
+    feature.securerag.dev/enable-ml-platform: "false"
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app.kubernetes.io/name: mlflow }
+  template:
+    metadata:
+      labels: { app.kubernetes.io/name: mlflow }
+    spec:
+      containers:
+        - name: mlflow
+          image: ghcr.io/mlflow/mlflow:v2.14.0
+          ports:
+            - { containerPort: 5000, name: http }
+          args: ["mlflow", "server", "--host", "0.0.0.0", "--port", "5000", "--backend-store-uri", "sqlite:///mlflow.db"]
+          resources:
+            requests: { cpu: 250m, memory: 512Mi }
+            limits: { cpu: 1, memory: 2Gi }
+
+---
+# ── Ray Cluster ───────────────────────────────────────────
+apiVersion: ray.io/v1
+kind: RayCluster
+metadata:
+  name: securerag-ray
+  namespace: ml-platform
+  annotations:
+    feature.securerag.dev/enable-ml-platform: "false"
+spec:
+  rayVersion: 2.30.0
+  headGroupSpec:
+    rayStartParams: { dashboard-host: "0.0.0.0" }
+    template:
+      spec:
+        containers:
+          - name: ray-head
+            image: rayproject/ray:2.30.0
+            ports:
+              - { containerPort: 6379, name: redis }
+              - { containerPort: 8265, name: dashboard }
+            resources:
+              requests: { cpu: 1, memory: 2Gi }
+              limits: { cpu: 2, memory: 4Gi }
+  workerGroupSpecs:
+    - replicas: 2
+      minReplicas: 1
+      maxReplicas: 4
+      rayStartParams: {}
+      template:
+        spec:
+          containers:
+            - name: ray-worker
+              image: rayproject/ray:2.30.0
+              resources:
+                requests: { cpu: 1, memory: 2Gi }
+                limits: { cpu: 2, memory: 4Gi }
+
+---
+# ── Feast Feature Store ──────────────────────────────────
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: feast
+  namespace: ml-platform
+  labels:
+    app.kubernetes.io/name: feast
+    feature.securerag.dev/enable-ml-platform: "false"
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app.kubernetes.io/name: feast }
+  template:
+    spec:
+      containers:
+        - name: feast
+          image: feastdev/feast:latest
+          ports:
+            - { containerPort: 6566, name: grpc }
+          resources:
+            requests: { cpu: 250m, memory: 512Mi }
+            limits: { cpu: 1, memory: 1Gi }

@@ -1,0 +1,60 @@
+# OPA Gatekeeper — Policy as Code (complements Kyverno)
+# Namespace: gatekeeper-system
+# Feature flag: ENABLE_GATEKEEPER=false
+# CONSERVE Kyverno — Gatekeeper est complémentaire (Rego-based policies)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gatekeeper-controller-manager
+  namespace: gatekeeper-system
+  labels:
+    app.kubernetes.io/name: gatekeeper
+    feature.securerag.dev/enable-gatekeeper: "false"
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app.kubernetes.io/name: gatekeeper }
+  template:
+    metadata:
+      labels: { app.kubernetes.io/name: gatekeeper }
+    spec:
+      serviceAccountName: gatekeeper-admin
+      containers:
+        - name: manager
+          image: openpolicyagent/gatekeeper:v3.17.0
+          args:
+            - --port=8443
+            - --health-addr=:9090
+            - --logtostderr
+          ports:
+            - { containerPort: 8443, name: webhook }
+            - { containerPort: 9090, name: health }
+          resources:
+            requests: { cpu: 100m, memory: 256Mi }
+            limits: { cpu: 1, memory: 512Mi }
+
+---
+# Gatekeeper ConstraintTemplate — Require Resource Limits
+apiVersion: templates.gatekeeper.sh/v1
+kind: ConstraintTemplate
+metadata:
+  name: k8srequiredresources
+  annotations:
+    feature.securerag.dev/enable-gatekeeper: "false"
+spec:
+  crd:
+    spec:
+      names: { kind: K8sRequiredResources }
+  targets:
+    - target: admission.k8s.gatekeeper.sh
+      rego: |
+        package k8srequiredresources
+        violation[{"msg": msg}] {
+          container := input.review.object.spec.containers[_]
+          not has_limits(container)
+          msg := sprintf("container <%v> must specify resource limits", [container.name])
+        }
+        has_limits(container) {
+          container.resources.limits.cpu
+          container.resources.limits.memory
+        }

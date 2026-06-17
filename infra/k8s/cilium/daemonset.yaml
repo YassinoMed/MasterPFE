@@ -1,0 +1,104 @@
+# Cilium eBPF Platform — Network + Observability + Security
+# Namespace: kube-system (DaemonSet, replaces kube-proxy)
+# Feature flag: ENABLE_CILIUM=false
+# CONSERVE Istio — Cilium est la couche réseau, Istio la couche applicative.
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: cilium
+  namespace: kube-system
+  labels:
+    app.kubernetes.io/name: cilium
+    feature.securerag.dev/enable-cilium: "false"
+spec:
+  selector:
+    matchLabels: { app.kubernetes.io/name: cilium }
+  template:
+    metadata:
+      labels: { app.kubernetes.io/name: cilium }
+    spec:
+      hostNetwork: true
+      hostPID: true
+      tolerations:
+        - operator: Exists
+      containers:
+        - name: cilium-agent
+          image: quay.io/cilium/cilium:v1.16.0
+          securityContext:
+            privileged: true
+          args:
+            - --enable-hubble
+            - --hubble-listen-address=:4244
+            - --enable-network-policy
+            - --enable-bpf-clock-probe
+            - --kube-proxy-replacement=strict
+            - --enable-cluster-mesh
+          ports:
+            - { containerPort: 4244, name: hubble }
+          env:
+            - name: K8S_NODE_NAME
+              valueFrom: { fieldRef: { fieldPath: spec.nodeName } }
+          resources:
+            requests: { cpu: 100m, memory: 256Mi }
+            limits: { cpu: 1, memory: 1Gi }
+          volumeMounts:
+            - { name: cilium-run, mountPath: /var/run/cilium }
+            - { name: bpf, mountPath: /sys/fs/bpf }
+      volumes:
+        - { name: cilium-run, hostPath: { path: /var/run/cilium } }
+        - { name: bpf, hostPath: { path: /sys/fs/bpf } }
+
+---
+# Hubble Relay — Service Dependency Graph
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hubble-relay
+  namespace: kube-system
+  labels:
+    app.kubernetes.io/name: hubble-relay
+    feature.securerag.dev/enable-cilium: "false"
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app.kubernetes.io/name: hubble-relay }
+  template:
+    metadata:
+      labels: { app.kubernetes.io/name: hubble-relay }
+    spec:
+      containers:
+        - name: hubble-relay
+          image: quay.io/cilium/hubble-relay:v1.16.0
+          ports:
+            - { containerPort: 4245, name: grpc }
+          args: ["serve"]
+          resources:
+            requests: { cpu: 50m, memory: 64Mi }
+            limits: { cpu: 200m, memory: 256Mi }
+
+---
+# Hubble UI — Service Map
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hubble-ui
+  namespace: kube-system
+  labels:
+    app.kubernetes.io/name: hubble-ui
+    feature.securerag.dev/enable-cilium: "false"
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app.kubernetes.io/name: hubble-ui }
+  template:
+    metadata:
+      labels: { app.kubernetes.io/name: hubble-ui }
+    spec:
+      containers:
+        - name: hubble-ui
+          image: quay.io/cilium/hubble-ui:v0.13.0
+          ports:
+            - { containerPort: 8081, name: http }
+          resources:
+            requests: { cpu: 50m, memory: 64Mi }
+            limits: { cpu: 200m, memory: 256Mi }

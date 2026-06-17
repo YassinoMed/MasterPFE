@@ -1,0 +1,96 @@
+# Data Platform — Kafka + ClickHouse + MinIO
+# Namespace: data-platform
+# Feature flag: ENABLE_DATA_PLATFORM=false
+
+# ── Kafka (Strimzi) ──────────────────────────────────────
+apiVersion: kafka.strimzi.io/v1beta2
+kind: Kafka
+metadata:
+  name: securerag-kafka
+  namespace: data-platform
+  annotations:
+    feature.securerag.dev/enable-data-platform: "false"
+spec:
+  kafka:
+    version: 3.7.0
+    replicas: 3
+    listeners:
+      - name: plain
+        port: 9092
+        type: internal
+        tls: false
+    storage:
+      type: ephemeral
+    config:
+      offsets.topic.replication.factor: 3
+      transaction.state.log.replication.factor: 3
+  zookeeper:
+    replicas: 3
+    storage:
+      type: ephemeral
+  entityOperator:
+    topicOperator: {}
+    userOperator: {}
+
+---
+# ── ClickHouse ───────────────────────────────────────────
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: clickhouse
+  namespace: data-platform
+  labels:
+    app.kubernetes.io/name: clickhouse
+    feature.securerag.dev/enable-data-platform: "false"
+spec:
+  replicas: 1
+  serviceName: clickhouse
+  selector:
+    matchLabels: { app.kubernetes.io/name: clickhouse }
+  template:
+    metadata:
+      labels: { app.kubernetes.io/name: clickhouse }
+    spec:
+      containers:
+        - name: clickhouse
+          image: clickhouse/clickhouse-server:latest
+          ports:
+            - { containerPort: 8123, name: http }
+            - { containerPort: 9000, name: tcp }
+          resources:
+            requests: { cpu: 500m, memory: 1Gi }
+            limits: { cpu: 2, memory: 4Gi }
+
+---
+# ── MinIO ────────────────────────────────────────────────
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: minio
+  namespace: data-platform
+  labels:
+    app.kubernetes.io/name: minio
+    feature.securerag.dev/enable-data-platform: "false"
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app.kubernetes.io/name: minio }
+  template:
+    metadata:
+      labels: { app.kubernetes.io/name: minio }
+    spec:
+      containers:
+        - name: minio
+          image: minio/minio:latest
+          args: ["server", "/data", "--console-address", ":9001"]
+          ports:
+            - { containerPort: 9000, name: api }
+            - { containerPort: 9001, name: console }
+          env:
+            - name: MINIO_ROOT_USER
+              value: minioadmin
+            - name: MINIO_ROOT_PASSWORD
+              value: minioadmin
+          resources:
+            requests: { cpu: 250m, memory: 256Mi }
+            limits: { cpu: 1, memory: 1Gi }

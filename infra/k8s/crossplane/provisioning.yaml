@@ -1,0 +1,71 @@
+# Crossplane — Cloud Resource Provisioning
+# Namespace: crossplane-system
+# Feature flag: ENABLE_CROSSPLANE=false
+# Provisionne DB, Buckets, DNS, LB via K8s CRDs (Infrastructure as Data)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: crossplane
+  namespace: crossplane-system
+  labels:
+    app.kubernetes.io/name: crossplane
+    feature.securerag.dev/enable-crossplane: "false"
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app.kubernetes.io/name: crossplane }
+  template:
+    metadata:
+      labels: { app.kubernetes.io/name: crossplane }
+    spec:
+      serviceAccountName: crossplane
+      containers:
+        - name: crossplane
+          image: xpkg.upbound.io/crossplane/crossplane:v1.17.0
+          ports:
+            - { containerPort: 8080, name: health }
+          resources:
+            requests: { cpu: 100m, memory: 256Mi }
+            limits: { cpu: 500m, memory: 512Mi }
+
+---
+# Crossplane Composition — PostgreSQL HA on AWS RDS
+apiVersion: apiextensions.crossplane.io/v1
+kind: Composition
+metadata:
+  name: securerag-postgresql-aws
+  labels:
+    feature.securerag.dev/enable-crossplane: "false"
+spec:
+  compositeTypeRef:
+    apiVersion: database.securerag.dev/v1alpha1
+    kind: XPostgreSQL
+  resources:
+    - name: rds-instance
+      base:
+        apiVersion: rds.aws.upbound.io/v1beta1
+        kind: Instance
+        spec:
+          forProvider:
+            region: eu-west-3
+            instanceClass: db.t3.medium
+            allocatedStorage: 20
+            engine: postgres
+            engineVersion: "16"
+            publiclyAccessible: false
+            skipFinalSnapshotBeforeDeletion: true
+
+---
+# Crossplane Claim — PostgreSQL for SecureRAG
+apiVersion: database.securerag.dev/v1alpha1
+kind: PostgreSQL
+metadata:
+  name: securerag-db
+  namespace: securerag-hub
+  annotations:
+    feature.securerag.dev/enable-crossplane: "false"
+spec:
+  compositionRef: { name: securerag-postgresql-aws }
+  parameters:
+    storageGB: 20
+    instanceClass: db.t3.medium
