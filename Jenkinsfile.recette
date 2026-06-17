@@ -290,6 +290,16 @@ pipeline {
       }
     }
 
+    stage('CI_PLATFORM_TOOLS - Platform Tools Validation') {
+      steps {
+        sh '''
+          set -euo pipefail
+          mkdir -p artifacts/security
+          bash scripts/ci/validate-platform-tools.sh
+        '''
+      }
+    }
+
     stage('CI_QUALITY_GATE - Aggregated Verdict') {
       when {
         expression { return params.ENFORCE_QUALITY_GATE }
