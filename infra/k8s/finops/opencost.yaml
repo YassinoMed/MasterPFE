@@ -1,0 +1,50 @@
+# FinOps — OpenCost + Kubecost
+# Namespace: finops-system
+# Feature flag: ENABLE_FINOPS=false
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: opencost
+  namespace: finops-system
+  labels:
+    app.kubernetes.io/name: opencost
+    feature.securerag.dev/enable-finops: "false"
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app.kubernetes.io/name: opencost }
+  template:
+    metadata:
+      labels: { app.kubernetes.io/name: opencost }
+    spec:
+      serviceAccountName: opencost
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile: { type: RuntimeDefault }
+      containers:
+        - name: opencost
+          image: ghcr.io/opencost/opencost:latest
+          ports:
+            - { name: http, containerPort: 9003 }
+          args:
+            - --kubecost-namespace=finops-system
+            - --prometheus-server-endpoint=http://prometheus.securerag-monitoring.svc:9090
+          resources:
+            requests: { cpu: 100m, memory: 256Mi }
+            limits: { cpu: 500m, memory: 512Mi }
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: opencost
+  namespace: finops-system
+spec:
+  selector: { app.kubernetes.io/name: opencost }
+  ports:
+    - { port: 9003, targetPort: 9003, name: http }
+
+---
+# OpenCost Cost Dashboard (Grafana)
+# Add datasource: Prometheus → query opencost_* metrics
+# Panels: cost by namespace, cost by pod, CPU cost, memory cost, projected monthly

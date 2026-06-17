@@ -1,0 +1,61 @@
+# SPIFFE/SPIRE — Workload Identity (Zero Trust)
+# Namespace: spire-system
+# Feature flag: ENABLE_SPIFFE=false
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: spire-server
+  namespace: spire-system
+  labels:
+    app: spire-server
+    feature.securerag.dev/enable-spiffe: "false"
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app: spire-server }
+  template:
+    metadata:
+      labels: { app: spire-server }
+    spec:
+      serviceAccountName: spire-server
+      containers:
+        - name: spire-server
+          image: ghcr.io/spiffe/spire-server:latest
+          ports:
+            - { containerPort: 8081, name: api }
+          args: ["-config", "/run/spire/config/server.conf"]
+          volumeMounts:
+            - { name: config, mountPath: /run/spire/config, readOnly: true }
+            - { name: data, mountPath: /run/spire/data }
+      volumes:
+        - { name: config, configMap: { name: spire-server-config } }
+        - { name: data, emptyDir: {} }
+
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: spire-agent
+  namespace: spire-system
+  labels:
+    app: spire-agent
+    feature.securerag.dev/enable-spiffe: "false"
+spec:
+  selector:
+    matchLabels: { app: spire-agent }
+  template:
+    metadata:
+      labels: { app: spire-agent }
+    spec:
+      hostPID: true
+      serviceAccountName: spire-agent
+      containers:
+        - name: spire-agent
+          image: ghcr.io/spiffe/spire-agent:latest
+          args: ["-config", "/run/spire/config/agent.conf"]
+          volumeMounts:
+            - { name: config, mountPath: /run/spire/config, readOnly: true }
+            - { name: socket, mountPath: /run/spire/sockets }
+      volumes:
+        - { name: config, configMap: { name: spire-agent-config } }
+        - { name: socket, hostPath: { path: /run/spire/sockets, type: DirectoryOrCreate } }

@@ -1,0 +1,43 @@
+{
+  "title": "SecureRAG Hub — SRE Dashboard",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "30s",
+  "tags": ["securerag", "sre", "slo"],
+  "panels": [
+    {
+      "id": 1, "type": "stat", "title": "Availability (30d)",
+      "targets": [{ "expr": "avg_over_time(probe_success{job=\"portal-web\"}[30d]) * 100", "datasource": "Prometheus" }],
+      "gridPos": { "x": 0, "y": 0, "w": 3, "h": 3 },
+      "fieldConfig": { "defaults": { "unit": "percent", "thresholds": { "steps": [{ "color": "red", "value": null }, { "color": "green", "value": 99.9 }] } } }
+    },
+    {
+      "id": 2, "type": "stat", "title": "Error Budget Remaining",
+      "targets": [{ "expr": "(1 - avg_over_time(probe_success{job=\"portal-web\"}[30d])) * 30 * 24 * 60", "datasource": "Prometheus" }],
+      "gridPos": { "x": 3, "y": 0, "w": 3, "h": 3 },
+      "fieldConfig": { "defaults": { "unit": "m" } }
+    },
+    {
+      "id": 3, "type": "stat", "title": "p95 Latency",
+      "targets": [{ "expr": "histogram_quantile(0.95, rate(http_server_request_duration_seconds_bucket[5m]))", "datasource": "Prometheus" }],
+      "gridPos": { "x": 6, "y": 0, "w": 3, "h": 3 },
+      "fieldConfig": { "defaults": { "unit": "s" } }
+    },
+    {
+      "id": 4, "type": "stat", "title": "Error Rate (5m)",
+      "targets": [{ "expr": "sum(rate(http_requests_total{status=~\"5..\"}[5m])) / sum(rate(http_requests_total[5m])) * 100", "datasource": "Prometheus" }],
+      "gridPos": { "x": 9, "y": 0, "w": 3, "h": 3 },
+      "fieldConfig": { "defaults": { "unit": "percent", "thresholds": { "steps": [{ "color": "green", "value": null }, { "color": "red", "value": 1 }] } } }
+    },
+    {
+      "id": 10, "type": "timeseries", "title": "Availability Trend (30d)",
+      "targets": [{ "expr": "avg_over_time(probe_success{job=\"portal-web\"}[30d]) * 100", "legendFormat": "portal-web", "datasource": "Prometheus" }],
+      "gridPos": { "x": 0, "y": 3, "w": 12, "h": 8 }
+    },
+    {
+      "id": 11, "type": "timeseries", "title": "Error Budget Burn Rate",
+      "targets": [{ "expr": "rate(probe_success{job=\"portal-web\"}[1h]) * 3600", "legendFormat": "Burn rate (s/h)", "datasource": "Prometheus" }],
+      "gridPos": { "x": 12, "y": 3, "w": 12, "h": 8 }
+    }
+  ]
+}

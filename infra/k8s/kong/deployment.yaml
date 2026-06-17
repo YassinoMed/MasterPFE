@@ -1,0 +1,91 @@
+# Kong API Gateway — JWT, OAuth2, Rate Limiting
+# Namespace: kong-system
+# Feature flag: ENABLE_KONG=false
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kong
+  namespace: kong-system
+  labels:
+    app.kubernetes.io/name: kong
+    feature.securerag.dev/enable-kong: "false"
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app.kubernetes.io/name: kong }
+  template:
+    metadata:
+      labels: { app.kubernetes.io/name: kong }
+    spec:
+      containers:
+        - name: kong
+          image: kong:latest
+          ports:
+            - { containerPort: 8000, name: proxy }
+            - { containerPort: 8001, name: admin }
+            - { containerPort: 8443, name: proxy-ssl }
+          env:
+            - name: KONG_DATABASE
+              value: "off"
+            - name: KONG_DECLARATIVE_CONFIG
+              value: /etc/kong/kong.yml
+            - name: KONG_PROXY_ACCESS_LOG
+              value: /dev/stdout
+            - name: KONG_ADMIN_ACCESS_LOG
+              value: /dev/stdout
+            - name: KONG_PROXY_ERROR_LOG
+              value: /dev/stderr
+            - name: KONG_ADMIN_ERROR_LOG
+              value: /dev/stderr
+            - name: KONG_ADMIN_LISTEN
+              value: "0.0.0.0:8001"
+            - name: KONG_PLUGINS
+              value: "bundled,jwt,oauth2,rate-limiting,prometheus"
+          volumeMounts:
+            - { name: config, mountPath: /etc/kong }
+          resources:
+            requests: { cpu: 250m, memory: 256Mi }
+            limits: { cpu: 1, memory: 512Mi }
+      volumes:
+        - { name: config, configMap: { name: kong-config } }
+
+---
+# Kong Declarative Config — Routes + Plugins
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kong-config
+  namespace: kong-system
+data:
+  kong.yml: |
+    _format_version: "3.0"
+    services:
+      - name: auth-users
+        url: http://auth-users.securerag-hub.svc:8000
+        routes:
+          - name: auth-users-api
+            paths: ["/api/v1/users", "/api/v1/roles", "/api/v1/permissions"]
+            strip_path: false
+        plugins:
+          - name: rate-limiting
+            config:
+              minute: 100
+              policy: local
+          - name: jwt
+            config:
+              claims_to_verify: ["exp"]
+          - name: prometheus
+            config: {}
+      - name: chatbot-manager
+        url: http://chatbot-manager.securerag-hub.svc:8000
+        routes:
+          - name: chatbot-api
+            paths: ["/api/v1/chatbots", "/api/v1/business-domains"]
+            strip_path: false
+        plugins:
+          - name: rate-limiting
+            config:
+              minute: 200
+              policy: local
+          - name: prometheus
+            config: {}

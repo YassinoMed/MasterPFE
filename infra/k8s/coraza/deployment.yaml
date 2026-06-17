@@ -1,0 +1,54 @@
+# Coraza WAF — Web Application Firewall
+# Protège les APIs via ingress annotations ou sidecar
+# Namespace: coraza-system
+# Feature flag: ENABLE_CORAZA=false
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: coraza-waf
+  namespace: coraza-system
+  labels:
+    app.kubernetes.io/name: coraza-waf
+    feature.securerag.dev/enable-coraza: "false"
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app.kubernetes.io/name: coraza-waf }
+  template:
+    metadata:
+      labels: { app.kubernetes.io/name: coraza-waf }
+    spec:
+      containers:
+        - name: coraza-waf
+          image: ghcr.io/corazawaf/coraza-proxy-wasm:latest
+          ports:
+            - { containerPort: 8080, name: proxy }
+          env:
+            - name: CORAZA_DIRECTIVES
+              value: |
+                SecRuleEngine On
+                SecRule REQUEST_URI "@contains /api/" "id:1,phase:1,pass,t:none,msg:'API request monitored'"
+                Include /etc/coraza/owasp-crs/*.conf
+          volumeMounts:
+            - { name: rules, mountPath: /etc/coraza }
+          resources:
+            requests: { cpu: 100m, memory: 128Mi }
+            limits: { cpu: 500m, memory: 256Mi }
+      volumes:
+        - { name: rules, configMap: { name: coraza-rules } }
+
+---
+# Coraza OWASP Core Rule Set (minimal)
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: coraza-rules
+  namespace: coraza-system
+data:
+  "owasp-crs-setup.conf": |
+    SecDefaultAction "phase:2,deny,log,status:403"
+    SecRuleEngine On
+    SecResponseBodyAccess On
+    SecRequestBodyLimit 13107200
+    SecRequestBodyNoFilesLimit 131072
+    SecRule REQUEST_HEADERS:Content-Type "text/xml" "id:200000,phase:1,t:none,pass"
