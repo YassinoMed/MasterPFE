@@ -187,6 +187,23 @@ pipeline {
     }
 
     // ════════════════════════════════════════════════════════════════
+    //  STAGE 5b — Platform Tools (OPA, Cilium, Crossplane, CIS)
+    // ════════════════════════════════════════════════════════════════
+    stage('CI: Platform Tools Validation') {
+      agent { label 'k8s-agent' }
+      steps {
+        timeout(time: 5, unit: 'MINUTES') {
+          unstash 'workspace'
+          sh '''
+            set -euo pipefail
+            mkdir -p artifacts/security
+            bash scripts/ci/validate-platform-tools.sh
+          '''
+        }
+      }
+    }
+
+    // ════════════════════════════════════════════════════════════════
     //  STAGE 6 — Coverage Merge + Dependency Audit
     // ════════════════════════════════════════════════════════════════
     stage('CI: Coverage Gate') {
