@@ -1,4 +1,3 @@
----
 apiVersion: v1
 kind: ServiceAccount
 metadata:
@@ -19,23 +18,23 @@ metadata:
     app.kubernetes.io/component: finops
 rules:
   - apiGroups: [""]
-    resources: ["pods", "nodes", "namespaces", "persistentvolumes", "persistentvolumeclaims"]
+    resources: ["pods", "nodes", "services", "resourcequotas", "replicationcontrollers", "limitranges", "persistentvolumes", "persistentvolumeclaims", "namespaces"]
     verbs: ["get", "list", "watch"]
   - apiGroups: ["apps"]
-    resources: ["deployments", "statefulsets", "daemonsets"]
+    resources: ["deployments", "statefulsets", "replicasets", "daemonsets"]
     verbs: ["get", "list", "watch"]
   - apiGroups: ["batch"]
-    resources: ["jobs", "cronjobs"]
+    resources: ["jobs"]
     verbs: ["get", "list", "watch"]
   - apiGroups: ["autoscaling"]
     resources: ["horizontalpodautoscalers"]
     verbs: ["get", "list", "watch"]
+  - apiGroups: ["policy"]
+    resources: ["poddisruptionbudgets"]
+    verbs: ["get", "list", "watch"]
   - apiGroups: ["storage.k8s.io"]
     resources: ["storageclasses"]
     verbs: ["get", "list", "watch"]
-  - apiGroups: ["kubecost.com"]
-    resources: ["*"]
-    verbs: ["get", "list", "watch", "create", "update", "delete"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
@@ -94,21 +93,19 @@ spec:
             - name: ui
               containerPort: 9004
               protocol: TCP
-          args:
-            - --kubecost-namespace=securerag-finops
-            - --prometheus-server-endpoint=http://prometheus.securerag-monitoring.svc:9090
-            - --prometheus-query-service-endpoint=http://prometheus.securerag-monitoring.svc:9090
-            - --emit-kubecost-metrics
-            - --emit-namespace-metrics
-            - --emit-deployment-metrics
-            - --emit-pod-metrics
-            - --emit-node-metrics
-            - --emit-cluster-metrics
           env:
-            - name: OPENCOST_PROMETHEUS_SERVER_ENDPOINT
+            - name: PROMETHEUS_SERVER_ENDPOINT
               value: http://prometheus.securerag-monitoring.svc:9090
-            - name: OPENCOST_KUBECOST_NAMESPACE
-              value: securerag-finops
+            - name: OPENCOST_PROMETHEUS_QUERY_URL
+              value: http://prometheus.securerag-monitoring.svc:9090
+            - name: EMIT_NAMESPACE_METRICS
+              value: "true"
+            - name: EMIT_DEPLOYMENT_METRICS
+              value: "true"
+            - name: EMIT_POD_METRICS
+              value: "true"
+            - name: EMIT_NODE_METRICS
+              value: "true"
           resources:
             requests:
               cpu: 100m
@@ -116,27 +113,15 @@ spec:
             limits:
               cpu: 500m
               memory: 1Gi
-          securityContext:
-            allowPrivilegeEscalation: false
-            readOnlyRootFilesystem: true
-            capabilities:
-              drop: ["ALL"]
-          volumeMounts:
-            - name: cost-data
-              mountPath: /var/cost-data
           livenessProbe:
             httpGet:
               path: /healthz
-              port: api
-            initialDelaySeconds: 30
+              port: 9003
+            initialDelaySeconds: 10
             periodSeconds: 30
           readinessProbe:
             httpGet:
               path: /healthz
-              port: api
+              port: 9003
             initialDelaySeconds: 5
-            periodSeconds: 10
-      volumes:
-        - name: cost-data
-          emptyDir:
-            sizeLimit: 1Gi
+            periodSeconds: 15
