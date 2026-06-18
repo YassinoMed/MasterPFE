@@ -45,8 +45,7 @@ jobs:
           tags: ghcr.io/${{ github.repository }}/securerag-hub:${{ github.sha }}
 
       - name: Sign Image with Cosign (Keyless)
-        env:
-          COSIGN_EXPERIMENTAL: "1"
+        # Cosign v2+ uses keyless mode natively when id-token permission is granted
         run: |
           IMAGE="ghcr.io/${{ github.repository }}/securerag-hub"
           DIGEST="${{ steps.build-push.outputs.digest }}"

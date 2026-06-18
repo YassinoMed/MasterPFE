@@ -9,57 +9,8 @@
 #
 # Après terraform apply, le cluster est entièrement fonctionnel.
 
-terraform {
-  required_version = ">= 1.5"
-  required_providers {
-    kind = {
-      source  = "tehcyx/kind"
-      version = "~> 0.4"
-    }
-    kubernetes = {
-      source  = "hashicorp/kubernetes"
-      version = "~> 2.30"
-    }
-    kubectl = {
-      source  = "alekc/kubectl"
-      version = "~> 2.0"
-    }
-    helm = {
-      source  = "hashicorp/helm"
-      version = "~> 2.15"
-    }
-    docker = {
-      source  = "kreuzwerker/docker"
-      version = "~> 3.0"
-    }
-  }
-}
-
-provider "kind" {}
-
-provider "kubernetes" {
-  host                   = kind_cluster.secure_rag.endpoint
-  client_certificate     = kind_cluster.secure_rag.client_certificate
-  client_key             = kind_cluster.secure_rag.client_key
-  cluster_ca_certificate = kind_cluster.secure_rag.cluster_ca_certificate
-}
-
-provider "kubectl" {
-  host                   = kind_cluster.secure_rag.endpoint
-  client_certificate     = kind_cluster.secure_rag.client_certificate
-  client_key             = kind_cluster.secure_rag.client_key
-  cluster_ca_certificate = kind_cluster.secure_rag.cluster_ca_certificate
-  load_config_file       = false
-}
-
-provider "helm" {
-  kubernetes {
-    host                   = kind_cluster.secure_rag.endpoint
-    client_certificate     = kind_cluster.secure_rag.client_certificate
-    client_key             = kind_cluster.secure_rag.client_key
-    cluster_ca_certificate = kind_cluster.secure_rag.cluster_ca_certificate
-  }
-}
+# Terraform et providers configurés dans provider.tf
+# Backend configuré dans remote-state.tf
 
 # ── Cluster kind ───────────────────────────────────────────────────────
 
@@ -224,38 +175,5 @@ spec:
 YAML
 }
 
-# ── Variables ──────────────────────────────────────────────────────────
-
-variable "cluster_name" {
-  type    = string
-  default = "securerag-cluster"
-}
-
-variable "registry_port" {
-  type    = number
-  default = 5001
-}
-
-variable "argocd_helm_version" {
-  type    = string
-  default = "7.3.0"
-}
-
-# ── Outputs ────────────────────────────────────────────────────────────
-
-output "cluster_endpoint" {
-  value = kind_cluster.secure_rag.endpoint
-}
-
-output "argocd_admin_password" {
-  value     = "kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath='{.data.password}' | base64 -d"
-  sensitive = true
-}
-
-output "registry_url" {
-  value = "localhost:${var.registry_port}"
-}
-
-output "bootstrap_complete" {
-  value = "Cluster ${var.cluster_name} is ready. ArgoCD auto-sync in progress."
-}
+# Les variables sont maintenant définies dans variables.tf
+# Les outputs sont maintenant définis dans outputs.tf (multi-cloud consolidation)

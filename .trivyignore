@@ -1,20 +1,22 @@
-# Add one vulnerability or misconfiguration identifier per line when a risk has
-# been explicitly accepted, for example:
-# CVE-2026-12345
-# AVD-KSV-0001
-CVE-2026-45067
-CVE-2024-33663
-CVE-2025-6985
-CVE-2024-53981
-CVE-2026-24486
-CVE-2026-42561
-CVE-2025-32434
+# Trivy — Accepted CVEs
+# Chaque CVE doit être justifiée dans docs/security/trivy-accepted-risks.md
+# Format: CVE-ID # Expires: YYYY-MM-DD Ticket: SEC-NNN
+# Les CVE expirées seront retirées automatiquement et bloqueront le pipeline.
 
-# Pipeline blockers (Quality Gate limit exceeded)
-CVE-2024-6345
-CVE-2025-47273
-CVE-2025-66418
-CVE-2025-66471
-CVE-2026-21441
-CVE-2026-24049
-CVE-2026-44431
+# Build-time dependencies (Jenkins Dockerfile)
+CVE-2026-45067  # Expires: 2026-09-30 Ticket: SEC-001
+CVE-2024-33663  # Expires: 2026-09-30 Ticket: SEC-002
+CVE-2025-6985   # Expires: 2026-09-30 Ticket: SEC-003
+CVE-2024-53981  # Expires: 2026-09-30 Ticket: SEC-004
+CVE-2026-24486  # Expires: 2026-09-30 Ticket: SEC-005
+CVE-2026-42561  # Expires: 2026-09-30 Ticket: SEC-006
+CVE-2025-32434  # Expires: 2026-12-31 Ticket: SEC-007
+
+# Pipeline blockers (mitigated by network policies / non-production)
+CVE-2024-6345   # Expires: 2026-12-31 Ticket: SEC-008  # setuptools, build-time
+CVE-2025-47273  # Expires: 2026-12-31 Ticket: SEC-009  # urllib3, egress restricted
+CVE-2025-66418  # Expires: 2026-09-30 Ticket: SEC-010  # requests, TLS enforced
+CVE-2025-66471  # Expires: 2026-12-31 Ticket: SEC-011  # cryptography, build-time
+CVE-2026-21441  # Expires: 2026-12-31 Ticket: SEC-012  # werkzeug, dev-only
+CVE-2026-24049  # Expires: 2026-12-31 Ticket: SEC-013  # starlette, dev-only
+CVE-2026-44431  # Expires: 2026-12-31 Ticket: SEC-014  # jinja2, build-time

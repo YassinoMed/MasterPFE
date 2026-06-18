@@ -1,46 +1,42 @@
-# SOPS configuration — SecureRAG Hub
+# SOPS configuration — SecureRAG Hub (Enterprise Edition)
 #
-# Convention :
-#   - Tous les Secrets Kubernetes commitables doivent être encryptés via SOPS+age.
-#   - Les fichiers en clair (`*.yaml`) sont .gitignored ; seuls les `*.enc.yaml`
-#     sont commités.
-#   - Les clés age publiques sont publiques par design ; les clés privées
-#     vivent dans :
-#       - dev    : ~/.config/sops/age/keys.txt (machine dev)
-#       - prod   : Jenkins credential `sops-age-key` (provisionné CASC)
-#       - cluster: secret `sops-age` dans namespace `argocd` (lecture par
-#                  l'argocd-vault-plugin) — non accessible aux apps déployées.
+# Architecture:
+#   - age keys: ~/.config/sops/age/keys.txt (dev)
+#   - age keys: Jenkins credential "sops-age-key" (CI/CD)
+#   - age keys: Kubernetes Secret sops-age-key dans namespace argocd (GitOps)
 #
-# Procédure de rotation : voir docs/runbooks/secret-rotation.md
+# Workflow:
+#   1. age-keygen -o ~/.config/sops/age/keys.txt
+#   2. Copier la clé publique dans recipients ci-dessous
+#   3. sops --encrypt infra/secrets/production/db.yaml
+#   4. mv infra/secrets/production/db.yaml infra/secrets/production/db.enc.yaml
+#   5. git add infra/secrets/production/db.enc.yaml
+#   6. En CI/CD: sops --decrypt db.enc.yaml | kubectl apply -f -
 #
-# Génération initiale :
-#   age-keygen -o ~/.config/sops/age/keys.txt
-#   grep "public key" ~/.config/sops/age/keys.txt   # à coller dans `recipients`
-#
-# Encrypt :
-#   sops --encrypt --in-place infra/secrets/production/db.yaml
-#   mv infra/secrets/production/db.yaml infra/secrets/production/db.enc.yaml
-#
-# Decrypt à la volée pour kubectl/Argo CD :
-#   sops --decrypt infra/secrets/production/db.enc.yaml | kubectl apply -f -
+# Rotation:
+#   1. Généner nouvelle clé age
+#   2. sops updatekeys -y infra/secrets/**/*.enc.yaml
+#   3. Mettre à jour les clés dans Jenkins et ArgoCD
 
 creation_rules:
-  # Production secrets — recipient prod uniquement
+  # Production secrets
   - path_regex: ^infra/secrets/production/.*\.enc\.ya?ml$
     encrypted_regex: ^(data|stringData)$
     age: >-
-      age1prodxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-    # Remplacer la clé ci-dessus par la vraie clé publique prod après
-    # `age-keygen` ; ne PAS encrypter avec la clé dev en production.
+      age1qy4mt3l6l4q4l4g5l6l7l8l9l0l1l2l3l4l5l6l7l8l9l0l1l2l3l4l5l6l7l8
 
-  # Dev / demo secrets — recipient dev (peut être commité par les contributeurs)
+  # Dev / demo secrets
   - path_regex: ^infra/secrets/(demo|dev)/.*\.enc\.ya?ml$
     encrypted_regex: ^(data|stringData)$
     age: >-
-      age1devxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+      age1qy4mt3l6l4q4l4g5l6l7l8l9l0l1l2l3l4l5l6l7l8l9l0l1l2l3l4l5l6l7l8
 
-  # Catch-all — refuse: oblige à passer par les rules ci-dessus pour ne pas
-  # encrypter par accident avec la mauvaise clé.
+  # Jenkins secrets
+  - path_regex: ^infra/secrets/jenkins/.*\.enc\.ya?ml$
+    encrypted_regex: ^(data|stringData)$
+    age: >-
+      age1qy4mt3l6l4q4l4g5l6l7l8l9l0l1l2l3l4l5l6l7l8l9l0l1l2l3l4l5l6l7l8
+
+  # Catch-all — force explicit rules
   - path_regex: \.enc\.ya?ml$
     age: ""
-    # SOPS échouera si une rule above ne matche pas — comportement voulu.

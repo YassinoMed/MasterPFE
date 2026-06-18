@@ -1,30 +1,186 @@
 # Terraform Azure AKS — SecureRAG Hub Multi-Cloud
-# Feature flag: ENABLE_AZURE_AKS=true
+# Feature flag: enable_azure (bool)
+# Provisionne un cluster AKS complet avec Azure AD, RBAC, CNI, monitoring, workload identity.
 
-terraform {
-  required_version = ">= 1.5"
-  required_providers {
-    azurerm = { source = "hashicorp/azurerm", version = "~> 4.0" }
+locals {
+  aks_name   = "${var.cluster_name}-aks"
+  aks_tags = {
+    Environment   = var.environment
+    ManagedBy     = "terraform"
+    Project       = "SecureRAG-Hub"
+    Cluster       = local.aks_name
+    CostCenter    = var.cost_center
   }
 }
 
-variable "cluster_name" { default = "securerag-aks" }
-variable "location" { default = "westeurope" }
-variable "node_count" { default = 3 }
-variable "enable_azure" { default = false }
+resource "azurerm_resource_group" "this" {
+  count    = var.enable_azure ? 1 : 0
+  name     = "${local.aks_name}-rg"
+  location = var.azure_location
+  tags     = local.aks_tags
+}
 
-resource "azurerm_kubernetes_cluster" "securerag" {
-  count = var.enable_azure ? 1 : 0
-  name                = var.cluster_name
-  location            = var.location
-  resource_group_name = azurerm_resource_group.securerag[0].name
-  dns_prefix          = var.cluster_name
+# ── Virtual Network ──────────────────────────────────────────────────────
+resource "azurerm_virtual_network" "this" {
+  count               = var.enable_azure ? 1 : 0
+  name                = "${local.aks_name}-vnet"
+  location            = azurerm_resource_group.this[0].location
+  resource_group_name = azurerm_resource_group.this[0].name
+  address_space       = ["10.1.0.0/16"]
+  tags                = local.aks_tags
+}
+
+resource "azurerm_subnet" "aks" {
+  count                = var.enable_azure ? 1 : 0
+  name                 = "${local.aks_name}-subnet"
+  resource_group_name  = azurerm_resource_group.this[0].name
+  virtual_network_name = azurerm_virtual_network.this[0].name
+  address_prefixes     = ["10.1.0.0/18"]
+}
+
+# ── Log Analytics ────────────────────────────────────────────────────────
+resource "azurerm_log_analytics_workspace" "this" {
+  count               = var.enable_azure ? 1 : 0
+  name                = "${local.aks_name}-logs"
+  location            = azurerm_resource_group.this[0].location
+  resource_group_name = azurerm_resource_group.this[0].name
+  sku                 = "PerGB2018"
+  retention_in_days   = 30
+  tags                = local.aks_tags
+}
+
+# ── Azure AD Integration ─────────────────────────────────────────────────
+data "azurerm_client_config" "current" {}
+
+resource "azuread_application" "aks" {
+  count        = var.enable_azure ? 1 : 0
+  display_name = "${local.aks_name}-app"
+}
+
+resource "azuread_service_principal" "aks" {
+  count        = var.enable_azure ? 1 : 0
+  client_id    = azuread_application.aks[0].client_id
+  use_existing = true
+}
+
+# ── AKS Cluster ──────────────────────────────────────────────────────────
+resource "azurerm_kubernetes_cluster" "this" {
+  count               = var.enable_azure ? 1 : 0
+  name                = local.aks_name
+  location            = azurerm_resource_group.this[0].location
+  resource_group_name = azurerm_resource_group.this[0].name
+  dns_prefix          = local.aks_name
+  kubernetes_version  = var.cluster_version
+  node_resource_group = "${local.aks_name}-node-rg"
+
   default_node_pool {
-    name       = "default"
-    node_count = var.node_count
-    vm_size    = "Standard_D4s_v3"
+    name                = "default"
+    vm_size            = var.node_instance_type
+    node_count          = var.node_min_size
+    min_count           = var.node_min_size
+    max_count           = var.node_max_size
+    enable_auto_scaling = true
+    os_disk_size_gb     = 100
+    vnet_subnet_id      = azurerm_subnet.aks[0].id
+    node_labels = {
+      "securerag.io/node-pool" = "default"
+    }
+    tags = local.aks_tags
   }
-  identity { type = "SystemAssigned" }
+
+  identity {
+    type = "SystemAssigned"
+  }
+
+  role_based_access_control_enabled = true
+  azure_ad_integration {
+    managed                  = true
+    admin_group_object_ids   = [data.azurerm_client_config.current.object_id]
+    azure_rbac_enabled       = true
+  }
+
+  network_profile {
+    network_plugin     = "azure"
+    network_policy     = "calico"
+    dns_service_ip     = "10.1.0.10"
+    service_cidr       = "10.1.1.0/24"
+    docker_bridge_cidr = "172.17.0.1/16"
+    load_balancer_sku  = "standard"
+    outbound_type      = "loadBalancer"
+  }
+
+  oms_agent {
+    log_analytics_workspace_id = azurerm_log_analytics_workspace.this[0].id
+  }
+
+  microsoft_defender {
+    log_analytics_workspace_id = azurerm_log_analytics_workspace.this[0].id
+  }
+
+  key_management_service {
+    key_vault_key_id = null
+  }
+
+  azure_policy_enabled = true
+
+  http_application_routing_enabled = false
+
+  api_server_access_profile {
+    authorized_ip_ranges = var.authorized_ip_ranges
+  }
+
+  maintenance_window {
+    allowed {
+      day   = "Sunday"
+      hours = [2, 3, 4]
+    }
+  }
+
+  tags = local.aks_tags
 }
 
-# Rollback: terraform destroy -target=azurerm_kubernetes_cluster.securerag
+# ── Workload Identity Federation ─────────────────────────────────────────
+resource "azurerm_federated_identity_credential" "this" {
+  count               = var.enable_azure ? 1 : 0
+  name                = "${local.aks_name}-workload-identity"
+  resource_group_name = azurerm_resource_group.this[0].name
+  parent_id           = azurerm_kubernetes_cluster.this[0].id
+  audience            = ["api://AzureADTokenExchange"]
+  issuer              = azurerm_kubernetes_cluster.this[0].oidc_issuer_url
+  subject             = "system:serviceaccount:securerag-hub:workload-identity-sa"
+}
+
+# ── Container Insights ───────────────────────────────────────────────────
+resource "azurerm_log_analytics_solution" "container_insights" {
+  count                 = var.enable_azure ? 1 : 0
+  solution_name         = "ContainerInsights"
+  location              = azurerm_log_analytics_workspace.this[0].location
+  resource_group_name   = azurerm_resource_group.this[0].name
+  workspace_resource_id = azurerm_log_analytics_workspace.this[0].id
+  workspace_name        = azurerm_log_analytics_workspace.this[0].name
+
+  plan {
+    publisher = "Microsoft"
+    product   = "OMSGallery/ContainerInsights"
+  }
+
+  tags = local.aks_tags
+}
+
+# ── Outputs ──────────────────────────────────────────────────────────────
+output "azure_cluster_endpoint" {
+  value = var.enable_azure ? azurerm_kubernetes_cluster.this[0].kube_config[0].host : null
+}
+
+output "azure_cluster_ca" {
+  value     = var.enable_azure ? base64decode(azurerm_kubernetes_cluster.this[0].kube_config[0].cluster_ca_certificate) : null
+  sensitive = true
+}
+
+output "azure_cluster_name" {
+  value = var.enable_azure ? azurerm_kubernetes_cluster.this[0].name : null
+}
+
+output "azure_oidc_issuer_url" {
+  value = var.enable_azure ? azurerm_kubernetes_cluster.this[0].oidc_issuer_url : null
+}

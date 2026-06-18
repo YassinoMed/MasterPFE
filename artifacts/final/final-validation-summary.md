@@ -1,6 +1,6 @@
 # Final Validation Summary - SecureRAG Hub
 
-- Generated at UTC: `2026-06-15T19:14:04Z`
+- Generated at UTC: `2026-06-17T21:51:15Z`
 - Status: `PARTIEL`
 
 ## 1. Official scenario
@@ -17,20 +17,20 @@
 | Gate | Result |
 |---|---|
 | Static checks | See Jenkins or shell output |
-| Tests | unknown |
-| Coverage | unknown |
-| Semgrep findings | unknown |
-| Gitleaks leaks | unknown |
-| Trivy vulnerabilities | unknown |
+| Tests | 172 Laravel tests, failures=0, errors=0 |
+| Coverage | 87.09% |
+| Semgrep findings | 0 |
+| Gitleaks leaks | 0 |
+| Trivy vulnerabilities | 84 |
 
 ## 3. CD and runtime results
 
 | Check | Status |
 |---|---|
-| Jenkins / CD gates (job: `securerag-hub-ci`) | TERMINÉ |
+| Jenkins / CD gates (job: `securerag-hub-ci`) | PARTIEL |
 | Kubernetes runtime | TERMINÉ |
 | Portal Web health | PARTIEL |
-| Digest-pinned runtime (registry: `securerag-registry:5000`) | DÉPENDANT_DE_L_ENVIRONNEMENT |
+| Digest-pinned runtime (registry: `localhost:5001`) | PARTIEL |
 
 ## 4. Evidence files
 
@@ -45,14 +45,14 @@
 | `artifacts/release/release-attestation.json` | PARTIEL |
 | `artifacts/observability/observability-snapshot.md` | TERMINÉ |
 | `artifacts/security/production-external-db-readiness.md` | PRÊT_NON_EXÉCUTÉ |
-| `artifacts/security/runtime-security-postdeploy.md` | TERMINÉ |
+| `artifacts/security/runtime-security-postdeploy.md` | PARTIEL |
 | `artifacts/security/external-secrets-runtime.md` | PRÊT_NON_EXÉCUTÉ |
 | `artifacts/validation/kyverno-local-registry-enforce-blocker.md` | DÉPENDANT_DE_L_ENVIRONNEMENT |
 | `artifacts/application/portal-service-connectivity.md` | PARTIEL |
 | `artifacts/final/global-project-status.md` | TERMINÉ |
 | `artifacts/final/missing-phases-closure.md` | PARTIEL |
 | `artifacts/final/devsecops-readiness-report.md` | PARTIEL |
-| `artifacts/jenkins/github-webhook-validation.md` | PRÊT_NON_EXÉCUTÉ |
+| `artifacts/jenkins/github-webhook-validation.md` | PARTIEL |
 | `artifacts/jenkins/ci-push-trigger-proof.md` | PRÊT_NON_EXÉCUTÉ |
 | Latest support pack | artifacts/support-pack/support-demo-20260411T144030Z.tar.gz |
 

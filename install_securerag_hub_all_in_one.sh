@@ -417,7 +417,7 @@ if bool_true "$INSTALL_JENKINS"; then
   echo "Tunnel SSH Jenkins depuis votre machine locale :"
   echo "ssh -L 8085:127.0.0.1:8085 ${VPS_USER}@<IP_DU_VPS>"
   echo "URL Jenkins : http://localhost:8085"
-  cat infra/jenkins/secrets/jenkins-admin-password || true
+  echo "  Jenkins admin password: kubectl get secret jenkins-credentials -n jenkins-agents -o jsonpath='{.data.admin-password}' | base64 -d"
 fi
 
 ########################################

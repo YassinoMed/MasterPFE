@@ -1,0 +1,24 @@
+title = "SecureRAG Hub Gitleaks Configuration"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Allow generated reports, documentation samples, and test fixtures with fake credentials."
+paths = [
+  '''(^|/)\.coverage-artifacts/''',
+  '''(^|/)security/reports/''',
+  '''(^|/)security/adversarial/''',
+  '''(^|/)security/secrets/\.env\.local$''',
+  '''(^|/)security/secrets/\.env\.example$''',
+  '''(^|/)tests/fixtures/''',
+  '''(^|/)tests/security/fixtures/''',
+  '''(^|/)vendor/''',
+  '''(^|/)node_modules/'''
+]
+regexes = [
+  '''(?i)example[_-]?(token|secret|key|password)''',
+  '''(?i)(dummy|fake|sample|test|changeme|not[-_]?real)[_-]?(token|secret|key|password)?''',
+  # Placeholder générique dans la config Alertmanager, ne correspond à aucun webhook réel — voir alertmanager.yaml ligne 10
+  '''https://hooks\.slack\.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX'''
+]

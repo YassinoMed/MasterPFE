@@ -1,0 +1,115 @@
+{
+  "dashboard": {
+    "title": "Vault Health & Operations",
+    "description": "HashiCorp Vault health, secret rotation, and auth metrics",
+    "timezone": "browser",
+    "panels": [
+      {
+        "title": "Vault Sealed Status",
+        "type": "stat",
+        "datasource": "prometheus",
+        "targets": [
+          {
+            "expr": "vault_core_unsealed",
+            "legendFormat": "Unsealed"
+          }
+        ],
+        "description": "1 = unsealed, 0 = sealed (CRITICAL)"
+      },
+      {
+        "title": "Vault Token TTL Remaining",
+        "type": "gauge",
+        "datasource": "prometheus",
+        "targets": [
+          {
+            "expr": "vault_token_ttl_seconds",
+            "legendFormat": "TTL remaining"
+          }
+        ],
+        "unit": "s"
+      },
+      {
+        "title": "Secret Rotations (24h)",
+        "type": "timeseries",
+        "datasource": "prometheus",
+        "targets": [
+          {
+            "expr": "rate(vault_route_create_request_count[24h])",
+            "legendFormat": "Create"
+          },
+          {
+            "expr": "rate(vault_route_delete_request_count[24h])",
+            "legendFormat": "Delete"
+          }
+        ],
+        "description": "Rate of secret create/delete operations"
+      },
+      {
+        "title": "External Secrets Operator — Sync Status",
+        "type": "stat",
+        "datasource": "prometheus",
+        "targets": [
+          {
+            "expr": "externalsecret_sync_status{status=\"Success\"}",
+            "legendFormat": "Sync OK"
+          }
+        ],
+        "description": "Count of successful ExternalSecret syncs"
+      },
+      {
+        "title": "Auth Failures (15m)",
+        "type": "timeseries",
+        "datasource": "prometheus",
+        "targets": [
+          {
+            "expr": "rate(vault_route_login_request_count{error=\"true\"}[15m])",
+            "legendFormat": "Login errors"
+          }
+        ],
+        "description": "Vault authentication failure rate"
+      },
+      {
+        "title": "Database Credential Leases",
+        "type": "gauge",
+        "datasource": "prometheus",
+        "targets": [
+          {
+            "expr": "vault_database_num_leases",
+            "legendFormat": "Active leases"
+          }
+        ],
+        "description": "Number of active database credential leases"
+      },
+      {
+        "title": "Vault Storage (raft)",
+        "type": "gauge",
+        "datasource": "prometheus",
+        "targets": [
+          {
+            "expr": "vault_raft_storage_used_bytes",
+            "legendFormat": "Used"
+          },
+          {
+            "expr": "vault_raft_storage_total_bytes",
+            "legendFormat": "Total"
+          }
+        ],
+        "unit": "bytes"
+      },
+      {
+        "title": "Audit Log Rate",
+        "type": "timeseries",
+        "datasource": "prometheus",
+        "targets": [
+          {
+            "expr": "rate(vault_audit_log_request_count[5m])",
+            "legendFormat": "Requests/s"
+          }
+        ]
+      }
+    ],
+    "tags": ["securerag-hub", "vault", "secrets"],
+    "schemaVersion": 36,
+    "version": 1
+  }
+}

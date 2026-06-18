@@ -37,11 +37,8 @@ if kubectl get namespace "${NS}" > /dev/null 2>&1; then
   cluster_available=true
 fi
 
-COSIGN_ALLOW_INSECURE_REGISTRY="${COSIGN_ALLOW_INSECURE_REGISTRY:-}"
-if [[ -z "${COSIGN_ALLOW_INSECURE_REGISTRY}" ]]; then
   case "${REGISTRY_HOST}" in
     localhost:*|127.0.0.1:*|0.0.0.0:*)
-      COSIGN_ALLOW_INSECURE_REGISTRY=true
       ;;
   esac
 fi
@@ -117,8 +114,6 @@ for service in "${official_services[@]}"; do
 
   # Attempt Cosign verification
   cosign_env=()
-  if is_true "${COSIGN_ALLOW_INSECURE_REGISTRY:-false}"; then
-    cosign_env=(env COSIGN_ALLOW_INSECURE_REGISTRY=true)
   fi
 
   if "${cosign_env[@]+"${cosign_env[@]}"}" cosign verify --key "${COSIGN_PUBLIC_KEY}" "${image}" > /dev/null 2>&1; then
@@ -149,7 +144,6 @@ echo "" >> "${REPORT_FILE}"
   fi
   printf '\n## Honest interpretation\n\n'
   printf 'In a local kind cluster with `localhost:5001` registry, Cosign verification\n'
-  printf 'requires `COSIGN_ALLOW_INSECURE_REGISTRY=true`. This is expected for development.\n'
   printf 'In a production environment, images would be signed against a public registry\n'
   printf 'with proper TLS, making verification straightforward.\n'
 } >> "${REPORT_FILE}"

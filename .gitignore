@@ -9,7 +9,6 @@ venv/
 .tools/
 .coverage
 .coverage-artifacts/
-# Generated coverage artifacts (per-app)
 **/coverage.xml
 **/coverage-report/
 .trivycache/
@@ -21,3 +20,46 @@ security/reports/*.json
 security/reports/*.txt
 security/reports/*.cdx.json
 security/secrets/.env.local
+
+# ── Secrets — jamais de credentials en clair dans Git ──────────
+infra/jenkins/secrets/
+infra/jenkins/secrets/**/*
+
+# ── SOPS — fichiers encryptés commités, fichiers en clair exclus ──
+*.yaml
+!*.enc.yaml
+!*.enc.yml
+!*.sops.yaml
+infra/secrets/production/*.yaml
+!infra/secrets/production/*.enc.yaml
+infra/secrets/dev/*.yaml
+!infra/secrets/dev/*.enc.yaml
+infra/secrets/demo/*.yaml
+!infra/secrets/demo/*.enc.yaml
+
+# ── Age private keys (ne jamais commiter) ─────────────────────
+age-key*
+!age-key*
+*.age-key
+keys.txt
+sops/age/keys.txt
+~/.config/sops/age/keys.txt
+
+# ── Kubeconfig (ne jamais commiter) ───────────────────────────
+kubeconfig
+*.kubeconfig
+.kube/config
+
+# ── Cosign keys (remplacées par keyless) ──────────────────────
+cosign.key
+cosign.pub
+cosign.password
+
+# ── Terraform state / vars ────────────────────────────────────
+*.tfstate
+*.tfstate.*
+*.tfvars
+terraform.tfvars
+override.tf
+override.tf.json
+.terraform/

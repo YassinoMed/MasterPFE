@@ -1,0 +1,4 @@
+make[1]: Entering directory '/root/MasterPFE'
+[INFO] Jenkins is reachable: HTTP 200
+[INFO] Webhook validation written to artifacts/jenkins/github-webhook-validation.md
+make[1]: Leaving directory '/root/MasterPFE'

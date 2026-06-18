@@ -208,7 +208,7 @@ pipeline {
             --config security/semgrep/semgrep.yml \
             --config auto \
             --sarif -o security/reports/semgrep.sarif \
-            --error || true
+            --error
 
           CONTAINER_ID=$(hostname)
           MOUNTS=$(docker inspect "${CONTAINER_ID}" --format='{{range .Mounts}}{{.Destination}}:{{.Source}} {{end}}' 2>/dev/null || \
@@ -242,10 +242,10 @@ pipeline {
             --report-format json \
             --report-path security/reports/gitleaks.json
 
-          checkov -d infra/k8s/ --config-file security/checkov-config.yaml --hard-fail-on CRITICAL --soft-fail-on HIGH -o junitxml > security/reports/checkov-k8s.xml || echo "[WARN] Checkov k8s found issues (see JUnit report)"
-          checkov -d infra/helm/ --config-file security/checkov-config.yaml --hard-fail-on CRITICAL --soft-fail-on HIGH -o junitxml > security/reports/checkov-helm.xml || echo "[WARN] Checkov helm found issues (see JUnit report)"
-          checkov -d platform/ --config-file security/checkov-config.yaml --hard-fail-on CRITICAL --soft-fail-on HIGH -o junitxml > security/reports/checkov-docker-platform.xml || echo "[WARN] Checkov platform found issues (see JUnit report)"
-          checkov -d services-laravel/ --config-file security/checkov-config.yaml --hard-fail-on CRITICAL --soft-fail-on HIGH -o junitxml > security/reports/checkov-docker-services.xml || echo "[WARN] Checkov services-laravel found issues (see JUnit report)"
+          checkov -d infra/k8s/ --config-file security/checkov-config.yaml --hard-fail-on CRITICAL --soft-fail-on HIGH -o junitxml > security/reports/checkov-k8s.xml
+          checkov -d infra/helm/ --config-file security/checkov-config.yaml --hard-fail-on CRITICAL --soft-fail-on HIGH -o junitxml > security/reports/checkov-helm.xml
+          checkov -d platform/ --config-file security/checkov-config.yaml --hard-fail-on CRITICAL --soft-fail-on HIGH -o junitxml > security/reports/checkov-docker-platform.xml
+          checkov -d services-laravel/ --config-file security/checkov-config.yaml --hard-fail-on CRITICAL --soft-fail-on HIGH -o junitxml > security/reports/checkov-docker-services.xml
 
           trivy fs \
             --config security/trivy/trivy.yaml \
@@ -308,9 +308,8 @@ pipeline {
         sh '''
           set -euo pipefail
           QG_REQUIRE_SONAR="${RUN_SONAR:-false}" \
-          QG_REQUIRE_COSIGN="false" \
           QG_COVERAGE_MIN="${COVERAGE_MIN:-70}" \
-            bash scripts/ci/quality-gate.sh
+            bash scripts/ci/secure-quality-gate.sh
         '''
       }
       post {
@@ -396,8 +395,8 @@ REMOTE_UPDATE
                 bash scripts/deploy/deploy-kind.sh
 
               # Restart pods
-              kubectl delete pod -n securerag-hub --all 2>/dev/null || true
-              kubectl wait --for=condition=Ready pod --all -n securerag-hub --timeout=300s || true
+              kubectl delete pod -n securerag-hub --all 2>/dev/null
+              kubectl wait --for=condition=Ready pod --all -n securerag-hub --timeout=300s
 
               kubectl get all -n securerag-hub
 REMOTE_DEPLOY
@@ -524,7 +523,7 @@ REMOTE_SMOKE
               docker run --rm --network host \
                 -v "/MasterPFE/security/reports:/zap/wrk:rw" \
                 ghcr.io/zaproxy/zaproxy:2.15.0 \
-                zap.sh -cmd -autorun /zap/wrk/security/zap/zap-baseline.yaml || true
+                zap.sh -cmd -autorun /zap/wrk/security/zap/zap-baseline.yaml
 REMOTE_DAST
           """
           

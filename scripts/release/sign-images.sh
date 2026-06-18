@@ -25,7 +25,7 @@ REPORT_DIR="${REPORT_DIR:-artifacts/release}"
 ALLOW_MISSING_IMAGES="${ALLOW_MISSING_IMAGES:-false}"
 FAIL_FAST="${FAIL_FAST:-false}"
 COSIGN_YES="${COSIGN_YES:-true}"
-COSIGN_EXPERIMENTAL="${COSIGN_EXPERIMENTAL:-}"
+
 
 init_services_array
 
@@ -99,20 +99,12 @@ require_command python3
 mkdir -p "${REPORT_DIR}"
 : > "${INDEX_JSONL}"
 
-if [[ -n "${COSIGN_EXPERIMENTAL}" ]]; then
-  export COSIGN_EXPERIMENTAL
-fi
-
 mode="keyless"
 declare -a sign_args
 sign_args=(sign)
 
 if is_true "${COSIGN_YES}"; then
   sign_args+=(--yes)
-fi
-
-if is_true "${COSIGN_ALLOW_INSECURE_REGISTRY:-false}"; then
-  sign_args+=(--allow-insecure-registry)
 fi
 
 if [[ -n "${COSIGN_KEY:-}" ]]; then

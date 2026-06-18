@@ -41,13 +41,12 @@ info "OIDC token retrieved successfully."
 
 # 3. Sign image keyless via local Fulcio & Rekor
 info "Signing image keyless..."
-export COSIGN_EXPERIMENTAL=1
+# Cosign v2+ uses keyless mode by default via Fulcio + Rekor
 cosign sign \
   --fulcio-url=http://fulcio.sigstore-system \
   --rekor-url=http://rekor.sigstore-system \
   --oidc-issuer=http://keycloak.sigstore-system/realms/securerag-cicd \
   --identity-token="${TOKEN}" \
-  --allow-insecure-registry \
   --yes \
   "${SIGNED_IMAGE}"
 
@@ -75,7 +74,6 @@ cosign verify \
   --rekor-url=http://rekor.sigstore-system \
   --certificate-identity=jenkins-cosign@securerag.local \
   --certificate-oidc-issuer=http://keycloak.sigstore-system/realms/securerag-cicd \
-  --allow-insecure-registry \
   "${SIGNED_IMAGE}"
 
 info "CLI signature verification PASSED!"

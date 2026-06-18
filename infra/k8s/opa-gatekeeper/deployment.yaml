@@ -1,7 +1,7 @@
-# OPA Gatekeeper — Policy as Code (complements Kyverno)
+# OPA Gatekeeper — Policy as Code (active)
 # Namespace: gatekeeper-system
-# Feature flag: ENABLE_GATEKEEPER=false
-# CONSERVE Kyverno — Gatekeeper est complémentaire (Rego-based policies)
+# Feature flag: ENABLE_GATEKEEPER=true
+# Complémentaire à Kyverno — Rego-based policies pour admission control
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -9,9 +9,9 @@ metadata:
   namespace: gatekeeper-system
   labels:
     app.kubernetes.io/name: gatekeeper
-    feature.securerag.dev/enable-gatekeeper: "false"
+    feature.securerag.dev/enable-gatekeeper: "true"
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels: { app.kubernetes.io/name: gatekeeper }
   template:
@@ -19,42 +19,84 @@ spec:
       labels: { app.kubernetes.io/name: gatekeeper }
     spec:
       serviceAccountName: gatekeeper-admin
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchLabels: { app.kubernetes.io/name: gatekeeper }
+                topologyKey: kubernetes.io/hostname
       containers:
         - name: manager
-          image: openpolicyagent/gatekeeper:v3.17.0
+          image: openpolicyagent/gatekeeper:v3.18.0
           args:
             - --port=8443
             - --health-addr=:9090
             - --logtostderr
+            - --enable-merge-ingress-status=false
           ports:
             - { containerPort: 8443, name: webhook }
             - { containerPort: 9090, name: health }
           resources:
-            requests: { cpu: 100m, memory: 256Mi }
-            limits: { cpu: 1, memory: 512Mi }
-
+            requests: { cpu: 200m, memory: 512Mi }
+            limits: { cpu: 1, memory: 1Gi }
+          readinessProbe:
+            httpGet: { path: /v1/readyz, port: 9090 }
+            initialDelaySeconds: 10
+            periodSeconds: 5
+          livenessProbe:
+            httpGet: { path: /v1/healthz, port: 9090 }
+            initialDelaySeconds: 30
+            periodSeconds: 15
 ---
-# Gatekeeper ConstraintTemplate — Require Resource Limits
-apiVersion: templates.gatekeeper.sh/v1
-kind: ConstraintTemplate
+apiVersion: v1
+kind: Service
 metadata:
-  name: k8srequiredresources
-  annotations:
-    feature.securerag.dev/enable-gatekeeper: "false"
+  name: gatekeeper-webhook-service
+  namespace: gatekeeper-system
+  labels:
+    app.kubernetes.io/name: gatekeeper
+    feature.securerag.dev/enable-gatekeeper: "true"
 spec:
-  crd:
-    spec:
-      names: { kind: K8sRequiredResources }
-  targets:
-    - target: admission.k8s.gatekeeper.sh
-      rego: |
-        package k8srequiredresources
-        violation[{"msg": msg}] {
-          container := input.review.object.spec.containers[_]
-          not has_limits(container)
-          msg := sprintf("container <%v> must specify resource limits", [container.name])
-        }
-        has_limits(container) {
-          container.resources.limits.cpu
-          container.resources.limits.memory
-        }
+  ports:
+    - port: 443
+      targetPort: 8443
+  selector:
+    app.kubernetes.io/name: gatekeeper
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: gatekeeper-system
+  labels:
+    app.kubernetes.io/part-of: securerag-hub
+    pod-security.kubernetes.io/enforce: restricted
+    pod-security.kubernetes.io/audit: restricted
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: gatekeeper-manager-role
+  labels:
+    app.kubernetes.io/name: gatekeeper
+aggregationRule:
+  clusterRoleSelectors:
+    - matchLabels:
+        rbac.authorization.k8s.io/aggregate-to-gatekeeper: "true"
+rules: []
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: gatekeeper-manager-rolebinding
+  labels:
+    app.kubernetes.io/name: gatekeeper
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: gatekeeper-manager-role
+subjects:
+  - kind: ServiceAccount
+    name: gatekeeper-admin
+    namespace: gatekeeper-system

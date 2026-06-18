@@ -12,7 +12,7 @@ metadata:
       registries required by the official SecureRAG Laravel runtime. Validation
       Pods are limited to the pinned curlimages/curl helper image family.
 spec:
-  validationFailureAction: Audit
+  validationFailureAction: Enforce
   background: true
   rules:
     - name: disallow-latest-tags

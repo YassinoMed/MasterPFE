@@ -8,58 +8,151 @@ data:
   alertmanager.yml: |
     global:
       resolve_timeout: 5m
-      slack_api_url: >-
-        https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX
+      slack_api_url: ${SLACK_WEBHOOK_URL}
+      pagerduty_url: https://events.pagerduty.com/v2/enqueue
+    templates:
+      - /etc/alertmanager/templates/*.tmpl
+
     route:
-      receiver: securerag-default
-      group_by: [alertname, namespace, service]
+      receiver: default
+      group_by: [alertname, namespace, severity]
       group_wait: 30s
       group_interval: 5m
       repeat_interval: 4h
       routes:
-        - matchers: [severity="critical"]
-          receiver: securerag-critical
-          continue: true
-        - matchers: [category="runtime"]
-          receiver: securerag-runtime
-        - matchers: [category="admission"]
-          receiver: securerag-admission
+        - receiver: critical-page
+          matchers:
+            - severity = critical
+          repeat_interval: 15m
+          continue: false
+        - receiver: warning-ticket
+          matchers:
+            - severity = warning
+          repeat_interval: 4h
+          continue: false
+        - receiver: info-log
+          matchers:
+            - severity = info
+          repeat_interval: 24h
+          continue: false
+        - receiver: default
+
     receivers:
-      - name: securerag-default
+      - name: default
         webhook_configs:
-          - url: >-
-              http://alertmanager-webhook.securerag-monitoring.svc.cluster.local:9095/alert
+          - url: http://alertmanager-webhook.securerag-monitoring.svc.cluster.local:9095/alert
             send_resolved: true
             max_alerts: 10
-        slack_configs:
-          - channel: "#securerag-ops"
-            title: '{{ .CommonAnnotations.summary }}'
-            text: '{{ .CommonAnnotations.description }}'
-            send_resolved: true
-      - name: securerag-critical
-        webhook_configs:
-          - url: >-
-              http://alertmanager-webhook.securerag-monitoring.svc.cluster.local:9095/critical
-            send_resolved: true
+
+      - name: critical-page
         slack_configs:
           - channel: "#securerag-critical"
-            title: '🚨 {{ .CommonAnnotations.summary }}'
-            text: '{{ .CommonAnnotations.description }}'
+            title: '🚨 [CRITICAL] {{ .GroupLabels.alertname }} / {{ .GroupLabels.namespace }}'
+            text: >-
+              *Alert:* {{ .CommonAnnotations.summary }}
+              *Description:* {{ .CommonAnnotations.description }}
+              *Graph:* {{ .GeneratorURL }}
+              *Runbook:* {{ .CommonAnnotations.runbook_url }}
             send_resolved: true
-      - name: securerag-runtime
+            actions:
+              - type: button
+                text: 'Acknowledge'
+                url: '{{ .ExternalURL }}/#/alerts'
+              - type: button
+                text: 'Runbook'
+                url: '{{ .CommonAnnotations.runbook_url }}'
+        pagerduty_configs:
+          - routing_key: ${PAGERDUTY_ROUTING_KEY}
+            severity: critical
+            description: '{{ .CommonAnnotations.summary }}'
+            client: SecureRAG Hub
+            client_url: '{{ .ExternalURL }}'
+            images:
+              - src: 'https://monitoring.securerag.io/grafana/d/{{ .CommonAnnotations.dashboard }}'
+                href: '{{ .GeneratorURL }}'
+                alt: 'Grafana Dashboard'
+            details:
+              alertname: '{{ .GroupLabels.alertname }}'
+              namespace: '{{ .GroupLabels.namespace }}'
+              severity: critical
+              runbook: '{{ .CommonAnnotations.runbook_url }}'
+            send_resolved: true
+        email_configs:
+          - to: ${ONCALL_EMAIL}
+            from: alertmanager@securerag.io
+            smarthost: ${SMTP_HOST}:587
+            auth_username: ${SMTP_USER}
+            auth_password: ${SMTP_PASSWORD}
+            headers:
+              subject: '[CRITICAL] {{ .GroupLabels.alertname }} - {{ .GroupLabels.namespace }}'
+            html: >-
+              <h2>{{ .CommonAnnotations.summary }}</h2>
+              <p>{{ .CommonAnnotations.description }}</p>
+              <pre>{{ .CommonAnnotations.runbook_url }}</pre>
+            send_resolved: true
+
+      - name: warning-ticket
+        slack_configs:
+          - channel: "#securerag-ops"
+            title: '⚠️ [WARNING] {{ .GroupLabels.alertname }} / {{ .GroupLabels.namespace }}'
+            text: >-
+              *Alert:* {{ .CommonAnnotations.summary }}
+              *Description:* {{ .CommonAnnotations.description }}
+              *Graph:* {{ .GeneratorURL }}
+            send_resolved: true
+        email_configs:
+          - to: ${OPS_EMAIL}
+            from: alertmanager@securerag.io
+            smarthost: ${SMTP_HOST}:587
+            auth_username: ${SMTP_USER}
+            auth_password: ${SMTP_PASSWORD}
+            headers:
+              subject: '[WARNING] {{ .GroupLabels.alertname }} - {{ .GroupLabels.namespace }}'
+            html: >-
+              <h2>{{ .CommonAnnotations.summary }}</h2>
+              <p>{{ .CommonAnnotations.description }}</p>
+            send_resolved: true
+
+      - name: info-log
         webhook_configs:
-          - url: >-
-              http://alertmanager-webhook.securerag-monitoring.svc.cluster.local:9095/runtime
+          - url: http://alertmanager-webhook.securerag-monitoring.svc.cluster.local:9095/info
             send_resolved: true
-      - name: securerag-admission
-        webhook_configs:
-          - url: >-
-              http://alertmanager-webhook.securerag-monitoring.svc.cluster.local:9095/admission
-            send_resolved: true
+
     inhibit_rules:
-      - source_matchers: [severity="critical"]
-        target_matchers: [severity="warning"]
-        equal: [namespace, service]
+      - source_matchers:
+          - severity = critical
+        target_matchers:
+          - severity = warning
+        equal: [alertname, namespace]
+      - source_matchers:
+          - severity = critical
+        target_matchers:
+          - severity = info
+        equal: [alertname, namespace]
+      - source_matchers:
+          - alertname = Watchdog
+        target_matchers:
+          - severity = critical
+        equal: [namespace]
+
+    time_intervals:
+      - name: business_hours
+        time_intervals:
+          - weekdays: ["monday:thursday", "friday"]
+            times:
+              - start_time: "09:00"
+                end_time: "18:00"
+      - name: oncall_hours
+        time_intervals:
+          - weekdays: ["saturday", "sunday"]
+            times:
+              - start_time: "00:00"
+                end_time: "23:59"
+          - weekdays: ["monday:thursday", "friday"]
+            times:
+              - start_time: "18:00"
+                end_time: "09:00"
+
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -67,7 +160,12 @@ metadata:
   name: alertmanager
   namespace: securerag-monitoring
 spec:
-  replicas: 1
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
   selector:
     matchLabels:
       app.kubernetes.io/name: alertmanager
@@ -75,6 +173,12 @@ spec:
     metadata:
       labels:
         app.kubernetes.io/name: alertmanager
+        app.kubernetes.io/component: alerting
+        app.kubernetes.io/part-of: securerag-monitoring
+      annotations:
+        checksum/config: ${CONFIG_CHECKSUM}
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9093"
     spec:
       securityContext:
         runAsNonRoot: true
@@ -82,22 +186,64 @@ spec:
         fsGroup: 65534
         seccompProfile:
           type: RuntimeDefault
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    app.kubernetes.io/name: alertmanager
+                topologyKey: kubernetes.io/hostname
       containers:
         - name: alertmanager
           image: prom/alertmanager:v0.27.0
           args:
             - --config.file=/etc/alertmanager/alertmanager.yml
             - --storage.path=/alertmanager
+            - --data.retention=120h
+            - --web.external-url=https://alertmanager.securerag.io
+            - --cluster.listen-address=0.0.0.0:9094
+            - --cluster.advertise-address=$(POD_IP):9094
           ports:
             - name: http
               containerPort: 9093
+              protocol: TCP
+            - name: cluster
+              containerPort: 9094
+              protocol: TCP
+          env:
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+            - name: SLACK_WEBHOOK_URL
+              valueFrom:
+                secretKeyRef:
+                  name: alertmanager-secrets
+                  key: slack-webhook-url
+            - name: PAGERDUTY_ROUTING_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: alertmanager-secrets
+                  key: pagerduty-routing-key
+            - name: ONCALL_EMAIL
+              valueFrom:
+                configMapKeyRef:
+                  name: alertmanager-config
+                  key: oncall-email
+            - name: OPS_EMAIL
+              valueFrom:
+                configMapKeyRef:
+                  name: alertmanager-config
+                  key: ops-email
           resources:
             requests:
-              cpu: 50m
-              memory: 64Mi
+              cpu: 100m
+              memory: 128Mi
             limits:
-              cpu: 200m
-              memory: 256Mi
+              cpu: 300m
+              memory: 512Mi
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
@@ -107,16 +253,33 @@ spec:
           volumeMounts:
             - name: config
               mountPath: /etc/alertmanager
+            - name: templates
+              mountPath: /etc/alertmanager/templates
             - name: data
               mountPath: /alertmanager
+          livenessProbe:
+            httpGet:
+              path: /-/healthy
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 30
+            timeoutSeconds: 5
           readinessProbe:
             httpGet:
               path: /-/ready
               port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 5
+            successThreshold: 1
+            failureThreshold: 3
       volumes:
         - name: config
           configMap:
             name: alertmanager-config
+        - name: templates
+          configMap:
+            name: alertmanager-templates
         - name: data
           emptyDir: {}
 ---
@@ -125,6 +288,9 @@ kind: Service
 metadata:
   name: alertmanager
   namespace: securerag-monitoring
+  labels:
+    app.kubernetes.io/name: alertmanager
+    app.kubernetes.io/component: alerting
 spec:
   type: ClusterIP
   selector:
@@ -133,3 +299,92 @@ spec:
     - name: http
       port: 9093
       targetPort: 9093
+      protocol: TCP
+    - name: cluster
+      port: 9094
+      targetPort: 9094
+      protocol: TCP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: alertmanager-headless
+  namespace: securerag-monitoring
+spec:
+  type: ClusterIP
+  clusterIP: None
+  selector:
+    app.kubernetes.io/name: alertmanager
+  ports:
+    - name: cluster
+      port: 9094
+      targetPort: 9094
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: alertmanager-templates
+  namespace: securerag-monitoring
+data:
+  slack.tmpl: |
+    {{ define "__slack_critical" -}}
+    🚨 *[CRITICAL]* {{ .GroupLabels.alertname }}
+    *Namespace:* {{ .GroupLabels.namespace }}
+    *Summary:* {{ .CommonAnnotations.summary }}
+    *Description:* {{ .CommonAnnotations.description }}
+    *Generator:* {{ .GeneratorURL }}
+    {{- end }}
+    {{ define "__slack_warning" -}}
+    ⚠️ *[WARNING]* {{ .GroupLabels.alertname }}
+    *Namespace:* {{ .GroupLabels.namespace }}
+    *Summary:* {{ .CommonAnnotations.summary }}
+    {{- end }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: alertmanager-config
+  namespace: securerag-monitoring
+data:
+  oncall-email: oncall@securerag.io
+  ops-email: ops@securerag.io
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: alertmanager-network-policy
+  namespace: securerag-monitoring
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: alertmanager
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: securerag-monitoring
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: prometheus
+      ports:
+        - port: 9093
+          protocol: TCP
+    - from:
+        - namespaceSelector: {}
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: alertmanager
+      ports:
+        - port: 9094
+          protocol: TCP
+  egress:
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+            except:
+              - 10.0.0.0/8
+              - 172.16.0.0/12
+              - 192.168.0.0/16

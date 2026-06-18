@@ -1,0 +1,5 @@
+audit-security-service-9ff7f9ddc-km222	localhost:5001/securerag-hub-audit-security-service:demo	localhost:5001/securerag-hub-audit-security-service@sha256:dbe4052bfaa5e483971304008e290afa273b7043d7cefb21e3e2c814a43a574d
+auth-users-6f6b795bc4-xk9x5	localhost:5001/securerag-hub-auth-users:demo	localhost:5001/securerag-hub-auth-users@sha256:0539a63c0387008274def09c44115a07361973950844e7610c24cbbcc113db0f
+chatbot-manager-58d7f6849b-62rdm	localhost:5001/securerag-hub-chatbot-manager:demo	localhost:5001/securerag-hub-chatbot-manager@sha256:fab7c3001344ff2872c9cf761ffbe62b82d2371063f8b177136245b1eb86af67
+conversation-service-6556bc84fd-n75n4	localhost:5001/securerag-hub-conversation-service:demo	localhost:5001/securerag-hub-conversation-service@sha256:c1c7f050e081f70f8aac9f21bcad8633fb3f2049f6752d94f39373d0f8b29b37
+portal-web-c99d94df-tgk7n	localhost:5001/securerag-hub-portal-web:demo	localhost:5001/securerag-hub-portal-web@sha256:0cbc3de627ab4bc5e9c8d591dc0ec07a063ec3dec32d41984ce0536d66094550

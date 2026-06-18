@@ -1,0 +1,4 @@
+make[1]: Entering directory '/root/MasterPFE'
+[WARN] Runtime security post-deployment report contains gaps: artifacts/security/runtime-security-postdeploy.md
+make[1]: *** [Makefile:128: runtime-security-postdeploy] Error 1
+make[1]: Leaving directory '/root/MasterPFE'

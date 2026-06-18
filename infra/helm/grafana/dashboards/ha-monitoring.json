@@ -1,0 +1,380 @@
+{
+  "annotations": {
+    "list": []
+  },
+  "description": "High Availability Monitoring Dashboard for SecureRAG Hub - Tracks replicas, HPA, PDB, rolling updates, and cluster health",
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "collapsed": false,
+      "title": "Réplicas & Disponibilité des Services",
+      "type": "row",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 },
+      "panels": []
+    },
+    {
+      "id": 1,
+      "title": "Réplicas Désirés vs Disponibles (tous services)",
+      "type": "stat",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "expr": "count(kube_deployment_spec_replicas{namespace=\"securerag-hub\"})",
+          "legendFormat": "Déploiements",
+          "refId": "A"
+        },
+        {
+          "expr": "sum(kube_deployment_status_replicas_ready{namespace=\"securerag-hub\"})",
+          "legendFormat": "Pods Ready",
+          "refId": "B"
+        },
+        {
+          "expr": "sum(kube_deployment_status_replicas_unavailable{namespace=\"securerag-hub\"})",
+          "legendFormat": "Pods Unavailable",
+          "refId": "C"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "red", "value": null },
+              { "color": "orange", "value": 1 },
+              { "color": "green", "value": 0 }
+            ]
+          },
+          "mappings": [],
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 4, "w": 8, "x": 0, "y": 1 }
+    },
+    {
+      "id": 2,
+      "title": "État des Réplicas par Service",
+      "type": "table",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "expr": "kube_deployment_spec_replicas{namespace=\"securerag-hub\"}",
+          "format": "table",
+          "legendFormat": "{{deployment}} desired",
+          "refId": "A",
+          "instant": true
+        },
+        {
+          "expr": "kube_deployment_status_replicas_ready{namespace=\"securerag-hub\"}",
+          "format": "table",
+          "legendFormat": "{{deployment}} ready",
+          "refId": "B",
+          "instant": true
+        },
+        {
+          "expr": "kube_deployment_status_replicas_available{namespace=\"securerag-hub\"}",
+          "format": "table",
+          "legendFormat": "{{deployment}} available",
+          "refId": "C",
+          "instant": true
+        },
+        {
+          "expr": "kube_deployment_status_replicas_unavailable{namespace=\"securerag-hub\"}",
+          "format": "table",
+          "legendFormat": "{{deployment}} unavailable",
+          "refId": "D",
+          "instant": true
+        }
+      ],
+      "gridPos": { "h": 8, "w": 16, "x": 8, "y": 1 }
+    },
+    {
+      "collapsed": false,
+      "title": "HPA - Auto-scaling Horizontal",
+      "type": "row",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 9 },
+      "panels": []
+    },
+    {
+      "id": 3,
+      "title": "HPA - Réplicas Min/Max/Actuels",
+      "type": "timeseries",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "expr": "kube_horizontalpodautoscaler_spec_min_replicas{namespace=\"securerag-hub\"}",
+          "legendFormat": "{{horizontalpodautoscaler}} min",
+          "refId": "A"
+        },
+        {
+          "expr": "kube_horizontalpodautoscaler_spec_max_replicas{namespace=\"securerag-hub\"}",
+          "legendFormat": "{{horizontalpodautoscaler}} max",
+          "refId": "B"
+        },
+        {
+          "expr": "kube_horizontalpodautoscaler_status_current_replicas{namespace=\"securerag-hub\"}",
+          "legendFormat": "{{horizontalpodautoscaler}} current",
+          "refId": "C"
+        },
+        {
+          "expr": "kube_horizontalpodautoscaler_status_desired_replicas{namespace=\"securerag-hub\"}",
+          "legendFormat": "{{horizontalpodautoscaler}} desired",
+          "refId": "D"
+        }
+      ],
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 10 }
+    },
+    {
+      "id": 4,
+      "title": "HPA - CPU/Memory Target Utilization",
+      "type": "timeseries",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "expr": "kube_horizontalpodautoscaler_status_current_metrics{namespace=\"securerag-hub\", metric_name=\"cpu\"}",
+          "legendFormat": "{{horizontalpodautoscaler}} cpu",
+          "refId": "A"
+        },
+        {
+          "expr": "kube_horizontalpodautoscaler_status_current_metrics{namespace=\"securerag-hub\", metric_name=\"memory\"}",
+          "legendFormat": "{{horizontalpodautoscaler}} memory",
+          "refId": "B"
+        }
+      ],
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 10 }
+    },
+    {
+      "id": 5,
+      "title": "HPA - État du Scaling (scaling limits reached)",
+      "type": "stat",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "expr": "count(kube_horizontalpodautoscaler_status_current_replicas{namespace=\"securerag-hub\"} == kube_horizontalpodautoscaler_spec_max_replicas{namespace=\"securerag-hub\"})",
+          "legendFormat": "At Max",
+          "refId": "A"
+        },
+        {
+          "expr": "count(kube_horizontalpodautoscaler_status_current_replicas{namespace=\"securerag-hub\"} == kube_horizontalpodautoscaler_spec_min_replicas{namespace=\"securerag-hub\"})",
+          "legendFormat": "At Min",
+          "refId": "B"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "orange", "value": 1 },
+              { "color": "red", "value": 3 }
+            ]
+          },
+          "unit": "none"
+        }
+      },
+      "gridPos": { "h": 4, "w": 8, "x": 0, "y": 18 }
+    },
+    {
+      "collapsed": false,
+      "title": "PDB - Budget de Perturbation",
+      "type": "row",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 22 },
+      "panels": []
+    },
+    {
+      "id": 6,
+      "title": "PDB - Perturbations Autorisées",
+      "type": "timeseries",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "expr": "kube_poddisruptionbudget_status_current_healthy{namespace=\"securerag-hub\"}",
+          "legendFormat": "{{poddisruptionbudget}} healthy",
+          "refId": "A"
+        },
+        {
+          "expr": "kube_poddisruptionbudget_status_desired_healthy{namespace=\"securerag-hub\"}",
+          "legendFormat": "{{poddisruptionbudget}} desired",
+          "refId": "B"
+        },
+        {
+          "expr": "kube_poddisruptionbudget_status_disruptions_allowed{namespace=\"securerag-hub\"}",
+          "legendFormat": "{{poddisruptionbudget}} disruptions allowed",
+          "refId": "C"
+        }
+      ],
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 23 }
+    },
+    {
+      "id": 7,
+      "title": "PDB - Statut de Violation",
+      "type": "stat",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "expr": "count(kube_poddisruptionbudget_status_current_healthy{namespace=\"securerag-hub\"} < kube_poddisruptionbudget_status_desired_healthy{namespace=\"securerag-hub\"})",
+          "legendFormat": "PDB Violations",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "red", "value": 1 }
+            ]
+          },
+          "mappings": [
+            { "type": "value", "value": "0", "text": "✅ Aucune violation" }
+          ]
+        }
+      },
+      "gridPos": { "h": 4, "w": 8, "x": 12, "y": 23 }
+    },
+    {
+      "collapsed": false,
+      "title": "Rolling Updates & Déploiements",
+      "type": "row",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 27 },
+      "panels": []
+    },
+    {
+      "id": 8,
+      "title": "Révisions de Déploiement (rolling update)",
+      "type": "timeseries",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "expr": "kube_deployment_metadata_generation{namespace=\"securerag-hub\"}",
+          "legendFormat": "{{deployment}} generation",
+          "refId": "A"
+        },
+        {
+          "expr": "kube_deployment_status_observed_generation{namespace=\"securerag-hub\"}",
+          "legendFormat": "{{deployment}} observed",
+          "refId": "B"
+        }
+      ],
+      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 28 }
+    },
+    {
+      "id": 9,
+      "title": "Conditions de Déploiement (Available/Progressing)",
+      "type": "timeseries",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "expr": "kube_deployment_status_condition{namespace=\"securerag-hub\", condition=\"Available\"}",
+          "legendFormat": "{{deployment}} available",
+          "refId": "A"
+        },
+        {
+          "expr": "kube_deployment_status_condition{namespace=\"securerag-hub\", condition=\"Progressing\"}",
+          "legendFormat": "{{deployment}} progressing",
+          "refId": "B"
+        },
+        {
+          "expr": "kube_deployment_status_condition{namespace=\"securerag-hub\", condition=\"ReplicaFailure\"}",
+          "legendFormat": "{{deployment}} replica failure",
+          "refId": "C"
+        }
+      ],
+      "gridPos": { "h": 8, "w": 16, "x": 8, "y": 28 }
+    },
+    {
+      "collapsed": false,
+      "title": "Ressources & Santé des Noeuds",
+      "type": "row",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 36 },
+      "panels": []
+    },
+    {
+      "id": 10,
+      "title": "Consommation CPU par Service",
+      "type": "timeseries",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "expr": "sum(rate(container_cpu_usage_seconds_total{namespace=\"securerag-hub\"}[5m])) by (pod)",
+          "legendFormat": "{{pod}}",
+          "refId": "A"
+        }
+      ],
+      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 37 }
+    },
+    {
+      "id": 11,
+      "title": "Consommation Mémoire par Service",
+      "type": "timeseries",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "expr": "sum(container_memory_working_set_bytes{namespace=\"securerag-hub\"}) by (pod)",
+          "legendFormat": "{{pod}}",
+          "refId": "A"
+        }
+      ],
+      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 37 }
+    },
+    {
+      "id": 12,
+      "title": "Restarts de Pods (instabilité)",
+      "type": "timeseries",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "expr": "sum(kube_pod_container_status_restarts_total{namespace=\"securerag-hub\"}) by (pod)",
+          "legendFormat": "{{pod}}",
+          "refId": "A"
+        }
+      ],
+      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 37 }
+    },
+    {
+      "collapsed": false,
+      "title": "Alertes HA",
+      "type": "row",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 45 },
+      "panels": []
+    },
+    {
+      "id": 13,
+      "title": "Alertes HA Actives",
+      "type": "alertlist",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [],
+      "options": {
+        "alertInstanceLabelFilter": "",
+        "showInstances": true,
+        "stateFilter": ["alerting", "firing", "pending"]
+      },
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 46 }
+    }
+  ],
+  "refresh": "30s",
+  "schemaVersion": 38,
+  "style": "dark",
+  "tags": ["ha", "high-availability", "securerag-hub"],
+  "templating": {
+    "list": []
+  },
+  "time": {
+    "from": "now-1h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "HA Monitoring – SecureRAG Hub",
+  "uid": "ha-mon-01",
+  "version": 1
+}

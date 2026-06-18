@@ -1,0 +1,7 @@
+NAME                     TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)          AGE   SELECTOR
+audit-security-service   ClusterIP   10.96.203.13    <none>        8000/TCP         37h   app.kubernetes.io/name=audit-security-service,app.kubernetes.io/part-of=securerag-hub
+auth-users               ClusterIP   10.96.249.47    <none>        8000/TCP         37h   app.kubernetes.io/name=auth-users,app.kubernetes.io/part-of=securerag-hub
+chatbot-manager          ClusterIP   10.96.205.74    <none>        8000/TCP         37h   app.kubernetes.io/name=chatbot-manager,app.kubernetes.io/part-of=securerag-hub
+conversation-service     ClusterIP   10.96.183.193   <none>        8000/TCP         37h   app.kubernetes.io/name=conversation-service,app.kubernetes.io/part-of=securerag-hub
+portal-web               NodePort    10.96.107.28    <none>        8000:30081/TCP   37h   app.kubernetes.io/name=portal-web,app.kubernetes.io/part-of=securerag-hub
+postgres-auth            ClusterIP   10.96.143.14    <none>        5432/TCP         37h   app.kubernetes.io/name=postgres-auth,app.kubernetes.io/part-of=securerag-hub

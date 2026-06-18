@@ -12,7 +12,7 @@ metadata:
       variables without an explicit SecureRAG internal-cleartext risk
       acceptance annotation.
 spec:
-  validationFailureAction: Audit
+  validationFailureAction: Enforce
   background: true
   rules:
     - name: audit-literal-http-env-without-risk-acceptance

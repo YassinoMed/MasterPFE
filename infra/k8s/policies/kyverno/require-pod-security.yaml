@@ -12,7 +12,7 @@ metadata:
       minimum security posture without breaking the local demonstration
       environment.
 spec:
-  validationFailureAction: Audit
+  validationFailureAction: Enforce
   background: true
   rules:
     - name: require-seccomp-serviceaccount-and-resource-guards

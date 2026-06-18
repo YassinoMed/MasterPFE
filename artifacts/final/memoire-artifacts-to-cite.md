@@ -2,6 +2,7 @@
 
 - `artifacts/security/security-posture-report.md`
 - `artifacts/security/production-ha-readiness.md`
+- `artifacts/security/production-external-db-readiness.md`
 - `artifacts/security/production-dockerfiles.md`
 - `artifacts/security/secrets-management.md`
 - `artifacts/security/runtime-security-postdeploy.md`

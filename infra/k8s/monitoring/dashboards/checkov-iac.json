@@ -1,0 +1,14 @@
+{
+  "dashboard": {
+    "title": "Checkov IaC Security",
+    "description": "Infrastructure as Code scanning results, policy violations",
+    "panels": [
+      { "title": "Failed Checks (CRITICAL)", "type": "stat", "datasource": "prometheus", "targets": [{ "expr": "checkov_failed_checks{severity=\"CRITICAL\"}", "legendFormat": "CRITICAL" }] },
+      { "title": "Failed Checks (HIGH)", "type": "stat", "datasource": "prometheus", "targets": [{ "expr": "checkov_failed_checks{severity=\"HIGH\"}", "legendFormat": "HIGH" }] },
+      { "title": "Pass Rate", "type": "gauge", "datasource": "prometheus", "targets": [{ "expr": "checkov_pass_rate", "legendFormat": "Pass %" }], "unit": "percent" },
+      { "title": "Violations by Framework", "type": "barchart", "datasource": "prometheus", "targets": [{ "expr": "checkov_failed_checks", "legendFormat": "{{framework}}" }] }
+    ],
+    "tags": ["securerag-hub", "checkov", "iac", "security"],
+    "schemaVersion": 36
+  }
+}

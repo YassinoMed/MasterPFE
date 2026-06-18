@@ -1,0 +1,9 @@
+docker	OK	/usr/bin/docker
+kubectl	OK	/usr/local/bin/kubectl
+kind	OK	/usr/local/bin/kind
+make	OK	/usr/bin/make
+curl	OK	/usr/bin/curl
+trivy	OK	/usr/local/bin/trivy
+syft	MISSING	-
+cosign	MISSING	-
+python3	OK	/usr/bin/python3

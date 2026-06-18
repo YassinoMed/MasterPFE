@@ -20,7 +20,7 @@ wazuh_agents_total = Gauge(
 
 WAZUH_URL = os.getenv("WAZUH_URL", "https://localhost:55000")
 WAZUH_USER = os.getenv("WAZUH_USER", "admin")
-WAZUH_PASSWORD = os.getenv("WAZUH_PASSWORD", "SecretPassword")
+WAZUH_PASSWORD = os.environ["WAZUH_PASSWORD"]  # Required — injected via Vault / K8s Secret
 POLL_INTERVAL = int(os.getenv("POLL_INTERVAL", "60"))
 PORT = int(os.getenv("PORT", "9200"))
 

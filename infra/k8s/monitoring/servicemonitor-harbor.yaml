@@ -6,7 +6,7 @@ apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
   name: servicemonitor-harbor
-  namespace: monitoring
+  namespace: securerag-monitoring
   labels:
     app.kubernetes.io/part-of: securerag-hub
 spec:

@@ -1,0 +1,4 @@
+make[1]: Entering directory '/root/MasterPFE'
+/root/MasterPFE/scripts/release/lib/common.sh: line 75: syntax error near unexpected token `fi'
+make[1]: *** [Makefile:205: release-proof-strict] Error 2
+make[1]: Leaving directory '/root/MasterPFE'

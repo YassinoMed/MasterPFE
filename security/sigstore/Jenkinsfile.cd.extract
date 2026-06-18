@@ -27,12 +27,12 @@
             export FAIL_FAST="true"
             
             # Override Cosign configuration for local keyless signature
-            export COSIGN_EXPERIMENTAL=1
+            # Cosign v2+ uses keyless mode natively via Fulcio + Rekor
             export COSIGN_FULCIO_URL="http://fulcio.sigstore-system"
             export COSIGN_REKOR_URL="http://rekor.sigstore-system"
             export COSIGN_IDENTITY_TOKEN="${TOKEN}"
             export COSIGN_OIDC_ISSUER="http://keycloak.sigstore-system/realms/securerag-cicd"
-            export COSIGN_ALLOW_INSECURE_REGISTRY="true" # Required for local registry
+            # Registry TLS required — no insecure registry override
             
             # Run the signing script (it will pick up keyless mode automatically when COSIGN_KEY is unset)
             bash scripts/release/sign-images.sh

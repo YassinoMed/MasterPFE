@@ -1,50 +1,142 @@
-# FinOps — OpenCost + Kubecost
-# Namespace: finops-system
-# Feature flag: ENABLE_FINOPS=false
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: opencost
+  namespace: securerag-finops
+  labels:
+    app.kubernetes.io/name: opencost
+    app.kubernetes.io/part-of: securerag-hub
+    app.kubernetes.io/component: finops
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: opencost
+  labels:
+    app.kubernetes.io/name: opencost
+    app.kubernetes.io/part-of: securerag-hub
+    app.kubernetes.io/component: finops
+rules:
+  - apiGroups: [""]
+    resources: ["pods", "nodes", "namespaces", "persistentvolumes", "persistentvolumeclaims"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["apps"]
+    resources: ["deployments", "statefulsets", "daemonsets"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["batch"]
+    resources: ["jobs", "cronjobs"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["autoscaling"]
+    resources: ["horizontalpodautoscalers"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["storage.k8s.io"]
+    resources: ["storageclasses"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["kubecost.com"]
+    resources: ["*"]
+    verbs: ["get", "list", "watch", "create", "update", "delete"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: opencost
+  labels:
+    app.kubernetes.io/name: opencost
+    app.kubernetes.io/part-of: securerag-hub
+    app.kubernetes.io/component: finops
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: opencost
+subjects:
+  - kind: ServiceAccount
+    name: opencost
+    namespace: securerag-finops
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: opencost
-  namespace: finops-system
+  namespace: securerag-finops
   labels:
     app.kubernetes.io/name: opencost
-    feature.securerag.dev/enable-finops: "false"
+    app.kubernetes.io/part-of: securerag-hub
+    app.kubernetes.io/component: finops
 spec:
   replicas: 1
   selector:
-    matchLabels: { app.kubernetes.io/name: opencost }
+    matchLabels:
+      app.kubernetes.io/name: opencost
   template:
     metadata:
-      labels: { app.kubernetes.io/name: opencost }
+      labels:
+        app.kubernetes.io/name: opencost
+        app.kubernetes.io/part-of: securerag-hub
+        app.kubernetes.io/component: finops
     spec:
       serviceAccountName: opencost
       securityContext:
         runAsNonRoot: true
-        seccompProfile: { type: RuntimeDefault }
+        runAsUser: 1001
+        runAsGroup: 1001
+        fsGroup: 1001
+        seccompProfile:
+          type: RuntimeDefault
       containers:
         - name: opencost
           image: ghcr.io/opencost/opencost:latest
+          imagePullPolicy: IfNotPresent
           ports:
-            - { name: http, containerPort: 9003 }
+            - name: api
+              containerPort: 9003
+              protocol: TCP
+            - name: ui
+              containerPort: 9004
+              protocol: TCP
           args:
-            - --kubecost-namespace=finops-system
+            - --kubecost-namespace=securerag-finops
             - --prometheus-server-endpoint=http://prometheus.securerag-monitoring.svc:9090
+            - --prometheus-query-service-endpoint=http://prometheus.securerag-monitoring.svc:9090
+            - --emit-kubecost-metrics
+            - --emit-namespace-metrics
+            - --emit-deployment-metrics
+            - --emit-pod-metrics
+            - --emit-node-metrics
+            - --emit-cluster-metrics
+          env:
+            - name: OPENCOST_PROMETHEUS_SERVER_ENDPOINT
+              value: http://prometheus.securerag-monitoring.svc:9090
+            - name: OPENCOST_KUBECOST_NAMESPACE
+              value: securerag-finops
           resources:
-            requests: { cpu: 100m, memory: 256Mi }
-            limits: { cpu: 500m, memory: 512Mi }
-
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: opencost
-  namespace: finops-system
-spec:
-  selector: { app.kubernetes.io/name: opencost }
-  ports:
-    - { port: 9003, targetPort: 9003, name: http }
-
----
-# OpenCost Cost Dashboard (Grafana)
-# Add datasource: Prometheus → query opencost_* metrics
-# Panels: cost by namespace, cost by pod, CPU cost, memory cost, projected monthly
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 1Gi
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          volumeMounts:
+            - name: cost-data
+              mountPath: /var/cost-data
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: api
+            initialDelaySeconds: 30
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: api
+            initialDelaySeconds: 5
+            periodSeconds: 10
+      volumes:
+        - name: cost-data
+          emptyDir:
+            sizeLimit: 1Gi

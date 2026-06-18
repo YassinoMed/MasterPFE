@@ -1,0 +1,135 @@
+# syntax=docker/dockerfile:1
+# Unified SecureRAG Hub Image — PHP/Laravel + Python microservices + DevSecOps tools
+FROM composer:2@sha256:dc292c5c0f95f526b051d4c341bf08e7e2b18504c74625e3203d7f123050e318 AS composer-bin
+
+FROM python:3.11-slim-bookworm AS python-deps
+ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 PIP_NO_CACHE_DIR=1 VENV_PATH=/opt/venv
+RUN python -m venv "${VENV_PATH}"
+ENV PATH="${VENV_PATH}/bin:${PATH}"
+COPY services/api-gateway/requirements.txt /tmp/req-api-gateway.txt
+COPY services/auth-users/requirements.txt /tmp/req-auth-users.txt
+COPY services/chatbot-manager/requirements.txt /tmp/req-chatbot-manager.txt
+COPY services/knowledge-hub/requirements.txt /tmp/req-knowledge-hub.txt
+COPY services/llm-orchestrator/requirements.txt /tmp/req-llm-orchestrator.txt
+COPY services/security-auditor/requirements.txt /tmp/req-security-auditor.txt
+COPY services/rag-service/requirements.txt /tmp/req-rag-service.txt
+RUN cat /tmp/req-*.txt | sort -u > /tmp/requirements-combined.txt && \
+    pip install --upgrade pip setuptools wheel && \
+    pip install -r /tmp/requirements-combined.txt && \
+    pip install supervisor
+
+FROM php:8.4-cli-bookworm AS php-base
+ENV COMPOSER_ALLOW_SUPERUSER=1
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends curl unzip libicu-dev libsqlite3-dev libzip-dev libpq-dev ca-certificates gnupg jq git make && \
+    docker-php-ext-install pdo_sqlite pdo_mysql pdo_pgsql intl && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
+COPY --from=composer-bin /usr/bin/composer /usr/bin/composer
+RUN groupadd --gid 10001 app && useradd --uid 10001 --gid 10001 --create-home --shell /usr/sbin/nologin app
+
+FROM php-base AS devsecops-apt
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends nodejs npm python3-pip ruby socat unzip && \
+    rm -rf /var/lib/apt/lists/* && \
+    pip3 install --no-cache-dir --break-system-packages checkov pre-commit semgrep
+
+FROM devsecops-apt AS devsecops-python
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends python3 python3-venv && \
+    ln -sf /usr/bin/python3 /usr/local/bin/python && \
+    rm -rf /var/lib/apt/lists/*
+
+FROM devsecops-python AS devsecops-tools
+ARG TARGETARCH=amd64
+RUN SRC_ARCH="$(echo ${TARGETARCH} | sed -e 's/amd64/x86_64/' -e 's/arm64/aarch64/')"; \
+    curl -fsSLo /usr/local/bin/kubectl "https://dl.k8s.io/release/v1.32.0/bin/linux/${TARGETARCH}/kubectl" && chmod +x /usr/local/bin/kubectl && \
+    curl -fsSLo /usr/local/bin/kind "https://kind.sigs.k8s.io/dl/v0.27.0/kind-linux-${TARGETARCH}" && chmod +x /usr/local/bin/kind && \
+    curl -fsSLo /usr/local/bin/hadolint "https://github.com/hadolint/hadolint/releases/download/v2.12.0/hadolint-Linux-${SRC_ARCH}" && chmod +x /usr/local/bin/hadolint && \
+    curl -fsSLo /usr/local/bin/cosign "https://github.com/sigstore/cosign/releases/download/v2.4.1/cosign-linux-${TARGETARCH}" && chmod +x /usr/local/bin/cosign && \
+    npm install -g dockerfilelint && \
+    curl -fsSL https://aquasecurity.github.io/trivy-repo/deb/public.key | gpg --dearmor -o /usr/share/keyrings/trivy.gpg && \
+    echo "deb [signed-by=/usr/share/keyrings/trivy.gpg] https://aquasecurity.github.io/trivy-repo/deb generic main" > /etc/apt/sources.list.d/trivy.list && \
+    apt-get update && apt-get install -y --no-install-recommends trivy && rm -rf /var/lib/apt/lists/*
+
+FROM devsecops-tools AS runtime
+COPY --from=python-deps /opt/venv /opt/venv
+ENV VENV_PATH=/opt/venv PATH="/opt/venv/bin:/usr/local/bin:/usr/bin:/bin"
+WORKDIR /app
+
+# Laravel portal-web
+COPY platform/portal-web/composer.json platform/portal-web/composer.lock /app/portal-web/
+COPY services-laravel/shared-security /var/services-laravel/shared-security
+RUN cd /app/portal-web && composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader --no-scripts
+COPY platform/portal-web /app/portal-web
+RUN cd /app/portal-web && composer dump-autoload --optimize && php artisan package:discover --ansi && chmod +x docker/entrypoint.sh
+
+# Python microservices — handle both src/ and app/ conventions
+COPY services/api-gateway/app /app/api-gateway/app
+COPY services/auth-users/src /app/auth-users/src
+COPY services/security-auditor/src /app/security-auditor/src
+COPY services/rag-service/app /app/rag-service/app
+
+# DevSecOps configs
+COPY .semgrepignore .gitleaks.toml .trivyignore /app/
+COPY security/semgrep /app/security/semgrep
+COPY security/checkov-config.yaml /app/security/
+COPY .pre-commit-config.yaml /app/
+
+COPY <<-"EOF" /usr/local/bin/securerag-entrypoint.sh
+#!/bin/bash
+set -euo pipefail
+
+# Start all services via supervisord
+cat > /etc/supervisord.conf << 'SUPERV'
+[supervisord]
+nodaemon=true
+user=root
+logfile=/tmp/supervisord.log
+pidfile=/tmp/supervisord.pid
+
+[program:portal-web]
+command=php -S 0.0.0.0:8000 -t /app/portal-web/public
+directory=/app/portal-web
+user=10001
+autostart=true
+autorestart=true
+stdout_logfile=/tmp/portal-web.log
+stderr_logfile=/tmp/portal-web.log
+
+[program:auth-users]
+command=uvicorn src.main:app --host 0.0.0.0 --port 8081
+directory=/app/auth-users
+user=10001
+autostart=true
+autorestart=true
+stdout_logfile=/tmp/auth-users.log
+
+[program:security-auditor]
+command=uvicorn src.main:app --host 0.0.0.0 --port 8082
+directory=/app/security-auditor
+user=10001
+autostart=true
+autorestart=true
+stdout_logfile=/tmp/security-auditor.log
+SUPERV
+
+echo "=== SecureRAG Hub Unifié — Démarrage ==="
+echo "  portal-web:       http://0.0.0.0:8000"
+echo "  auth-users:       http://0.0.0.0:8081"
+echo "  security-auditor: http://0.0.0.0:8082"
+echo ""
+echo "=== DevSecOps Tools ==="
+for tool in kubectl kind cosign syft trivy kube-score kyverno sonar-scanner hadolint opa conftest semgrep gitleaks checkov pre-commit; do
+  if command -v "$tool" &>/dev/null; then
+    echo "  $tool: $(command -v $tool)"
+  fi
+done
+
+exec supervisord -c /etc/supervisord.conf
+EOF
+
+RUN chmod +x /usr/local/bin/securerag-entrypoint.sh
+
+EXPOSE 8000 8081 8082
+
+ENTRYPOINT ["/usr/local/bin/securerag-entrypoint.sh"]

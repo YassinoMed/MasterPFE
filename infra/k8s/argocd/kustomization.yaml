@@ -10,10 +10,14 @@ resources:
   - application-demo.yaml
   - application-production.yaml
   - applicationset-platform.yaml
+  - applicationset-all.yaml
   - application-harbor.yaml
   - application-vault.yaml
   - application-velero.yaml
   - notifications-cm.yaml         # P1-15 drift notifications
+  - rbac-cm.yaml                  # RBAC roles (admin, auditor, developer, platform-team)
+  - argocd-cm.yaml                # ArgoCD config (repo credentials, CMP, status badge)
+  - application-image-updater.yaml # Automatic image updates
 commonLabels:
   app.kubernetes.io/part-of: securerag-hub
   app.kubernetes.io/managed-by: argocd

@@ -9,6 +9,11 @@ resources:
   - hpa-chatbot-manager.yaml
   - hpa-conversation-service.yaml
   - hpa-audit-security-service.yaml
+  - ../../policies/kyverno-enforce
+  - ../../opa-gatekeeper/constraints
+  # ArgoCD GitOps resources are managed via infra/k8s/argocd/kustomization.yaml
+  # Applied by the root Application (securerag-root) in the argocd namespace.
+  # See: infra/k8s/argocd/application-root.yaml
 
 configMapGenerator:
   - name: securerag-common-config

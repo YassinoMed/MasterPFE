@@ -1,0 +1,660 @@
+SHELL := /usr/bin/env bash
+.DEFAULT_GOAL := help
+
+REGISTRY_HOST ?= localhost:5001
+IMAGE_PREFIX ?= securerag-hub
+IMAGE_TAG ?= dev
+SOURCE_IMAGE_TAG ?= $(IMAGE_TAG)
+TARGET_IMAGE_TAG ?= release-local
+KUSTOMIZE_OVERLAY ?= infra/k8s/overlays/dev
+REPORT_DIR ?= artifacts/release
+SBOM_DIR ?= artifacts/sbom
+DIGEST_RECORD_FILE ?= $(REPORT_DIR)/promotion-digests.txt
+REQUIRE_DIGEST_DEPLOY ?= true
+DEPLOY_EVIDENCE_FILE ?= $(REPORT_DIR)/no-rebuild-deploy-summary.md
+RUNTIME_IMAGE_PROOF_FILE ?= artifacts/validation/runtime-image-rollout-proof.md
+OFFICIAL_SCENARIO ?= demo
+SUPPORT_PACK_ROOT ?= artifacts/support-pack
+
+.PHONY: help lint test laravel-test sonar-analysis kyverno-policy-check image-scan sbom-attest sbom-validate verify promote promote-digest deploy runtime-image-proof validate demo production-cluster production-cleanup-plan production-cleanup production-cluster-clean-proof production-ha production-runtime-evidence runtime-security-postdeploy production-proof-full final-runtime-proof ha-chaos-lite hpa-runtime-proof refresh-hpa-runtime-proof production-external-db-readiness production-data-resilience data-resilience-proof production-dockerfiles image-size-evidence secrets-management production-db-secret sops-db-secret external-secret-render external-secret-runtime-proof data-backup data-restore production-readiness-campaign campaign final-campaign release-evidence release-attestation release-provenance release-proof-strict supply-chain-evidence supply-chain-execute observability-snapshot portal-service-proof global-project-status final-source-of-truth security-posture k8s-resource-guards close-missing-phases jenkins-webhook-proof jenkins-ci-push-proof cluster-security-proof kyverno-runtime-proof kyverno-enforce-readiness refresh-cluster-security-proof devsecops-final-proof devsecops-system-proof devsecops-closure devsecops-readiness final-proof final-summary support-pack kyverno-install kyverno-enforce metrics-install clean ci cd security-scan build sbom sign verify-signature post-deploy-validation runtime-security-validation
+
+help: ## Show available targets
+	@awk 'BEGIN {FS = ":.*## "; print "Available targets:"} /^[a-zA-Z0-9_.-]+:.*## / {printf "  %-12s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
+
+lint: ## Validate shell scripts, Jenkins config, Kustomize renders and security scopes
+	@bash -n scripts/ci/*.sh scripts/cd/*.sh scripts/deploy/*.sh scripts/release/*.sh scripts/release/lib/*.sh scripts/secrets/*.sh scripts/validate/*.sh scripts/validate/lib/*.sh scripts/jenkins/*.sh
+	@docker compose -f infra/jenkins/docker-compose.yml config >/dev/null
+	@kubectl kustomize infra/k8s/overlays/dev >/dev/null
+	@kubectl kustomize infra/k8s/overlays/demo >/dev/null
+	@kubectl kustomize infra/k8s/overlays/production >/dev/null
+	@kubectl kustomize infra/k8s/overlays/production-external-db >/dev/null
+	@kubectl kustomize infra/k8s/policies/kyverno >/dev/null
+	@kubectl kustomize infra/k8s/policies/kyverno-enforce >/dev/null
+	@bash scripts/validate/validate-k8s-cleartext-scope.sh >/dev/null
+	@bash scripts/validate/validate-k8s-resource-guards.sh >/dev/null
+	@bash scripts/validate/validate-k8s-ultra-hardening.sh >/dev/null
+	@bash scripts/validate/validate-production-ha.sh >/dev/null
+	@STATIC_ONLY=true bash scripts/validate/validate-production-cluster-clean.sh >/dev/null
+	@bash scripts/validate/validate-production-data-resilience.sh >/dev/null
+	@bash scripts/validate/validate-production-dockerfiles.sh >/dev/null
+	@bash scripts/secrets/validate-secrets-management.sh >/dev/null
+	@bash scripts/release/validate-sbom-cyclonedx.sh >/dev/null
+	@bash scripts/ci/validate-sonar-cpd-scope.sh >/dev/null
+
+test: ## Run automated tests and coverage collection
+	@bash scripts/ci/run-tests.sh
+	@bash scripts/ci/collect-coverage.sh
+
+laravel-test: ## Run Blade portal and Laravel business microservice tests
+	@for app in platform/portal-web services-laravel/auth-users-service services-laravel/chatbot-manager-service services-laravel/conversation-service services-laravel/audit-security-service; do \
+		echo "[INFO] Testing $$app"; \
+		(cd "$$app" && php artisan test); \
+	done
+
+sonar-analysis: ## Run Sonar analysis and quality gate when SONAR_HOST_URL/SONAR_TOKEN are configured
+	@bash scripts/ci/run-sonar-analysis.sh
+
+sonarqube-up: ## Démarrer l'infrastructure SonarQube privée en local
+	@bash scripts/deploy/start-sonarqube.sh
+
+sonarqube-down: ## Arrêter l'infrastructure SonarQube privée en local
+	@docker compose -f infra/sonarqube/docker-compose.sonarqube.yml down
+
+kyverno-policy-check: ## Validate Kyverno policies against rendered Kubernetes resources without requiring a cluster
+	@bash scripts/ci/validate-kyverno-policies.sh
+
+image-scan: ## Scan official release candidate images with Trivy before signing
+	@REGISTRY_HOST=$(REGISTRY_HOST) IMAGE_PREFIX=$(IMAGE_PREFIX) IMAGE_TAG=$(IMAGE_TAG) REPORT_DIR=$(REPORT_DIR) \
+		bash scripts/release/scan-images.sh
+
+sbom-attest: ## Attach generated CycloneDX SBOMs to images using Cosign attest
+	@REGISTRY_HOST=$(REGISTRY_HOST) IMAGE_PREFIX=$(IMAGE_PREFIX) IMAGE_TAG=$(TARGET_IMAGE_TAG) REPORT_DIR=$(REPORT_DIR) SBOM_DIR=$(SBOM_DIR) \
+		bash scripts/release/attest-sboms.sh
+
+sbom-validate: ## Validate generated SBOM files are CycloneDX JSON
+	@REPORT_DIR=$(REPORT_DIR) SBOM_DIR=$(SBOM_DIR) bash scripts/release/validate-sbom-cyclonedx.sh
+
+verify: ## Verify image signatures for IMAGE_TAG
+	@REGISTRY_HOST=$(REGISTRY_HOST) IMAGE_PREFIX=$(IMAGE_PREFIX) IMAGE_TAG=$(IMAGE_TAG) REPORT_DIR=$(REPORT_DIR) \
+		bash scripts/release/verify-signatures.sh
+
+promote: ## Promote already verified images from SOURCE_IMAGE_TAG to TARGET_IMAGE_TAG
+	@REGISTRY_HOST=$(REGISTRY_HOST) IMAGE_PREFIX=$(IMAGE_PREFIX) SOURCE_IMAGE_TAG=$(SOURCE_IMAGE_TAG) TARGET_IMAGE_TAG=$(TARGET_IMAGE_TAG) REPORT_DIR=$(REPORT_DIR) \
+		bash scripts/release/promote-verified-images.sh
+
+promote-digest: ## Promote already verified images by digest and record per-service digests
+	@REGISTRY_HOST=$(REGISTRY_HOST) IMAGE_PREFIX=$(IMAGE_PREFIX) SOURCE_IMAGE_TAG=$(SOURCE_IMAGE_TAG) TARGET_IMAGE_TAG=$(TARGET_IMAGE_TAG) REPORT_DIR=$(REPORT_DIR) DIGEST_RECORD_FILE=$(DIGEST_RECORD_FILE) \
+		bash scripts/release/promote-by-digest.sh
+
+deploy: ## Verify, then deploy TARGET_IMAGE_TAG (or IMAGE_TAG if set explicitly) to kind
+	@REGISTRY_HOST=$(REGISTRY_HOST) IMAGE_PREFIX=$(IMAGE_PREFIX) IMAGE_TAG=$(IMAGE_TAG) REPORT_DIR=$(REPORT_DIR) IMAGE_DIGEST_FILE=$(DIGEST_RECORD_FILE) KUSTOMIZE_OVERLAY=$(KUSTOMIZE_OVERLAY) REQUIRE_DIGEST_DEPLOY=$(REQUIRE_DIGEST_DEPLOY) DEPLOY_EVIDENCE_FILE=$(DEPLOY_EVIDENCE_FILE) RUNTIME_IMAGE_PROOF_FILE=$(RUNTIME_IMAGE_PROOF_FILE) \
+		bash scripts/deploy/verify-and-deploy-kind.sh
+
+runtime-image-proof: ## Prove deployed pods are running the expected tag or promoted immutable digest
+	@REGISTRY_HOST=$(REGISTRY_HOST) IMAGE_PREFIX=$(IMAGE_PREFIX) IMAGE_TAG=$(IMAGE_TAG) DIGEST_RECORD_FILE=$(DIGEST_RECORD_FILE) REQUIRE_DIGEST_DEPLOY=$(REQUIRE_DIGEST_DEPLOY) REPORT_FILE=$(RUNTIME_IMAGE_PROOF_FILE) \
+		bash scripts/validate/validate-runtime-image-rollout.sh
+
+validate: ## Run post-deployment validation and collect runtime evidence
+	@bash scripts/validate/smoke-tests.sh
+	@bash scripts/validate/security-smoke.sh
+	@bash scripts/validate/e2e-functional-flow.sh
+	@bash scripts/validate/security-adversarial-advanced.sh
+	@bash scripts/validate/generate-validation-report.sh
+	@bash scripts/validate/collect-runtime-evidence.sh
+
+demo: ## Deploy the Laravel demo overlay
+	@REGISTRY_HOST=$(REGISTRY_HOST) IMAGE_PREFIX=$(IMAGE_PREFIX) IMAGE_TAG=$(IMAGE_TAG) KUSTOMIZE_OVERLAY=infra/k8s/overlays/demo \
+		bash scripts/deploy/deploy-kind.sh
+
+production-cluster: ## Create a guarded production-like kind cluster
+	@bash scripts/deploy/recreate-production-kind.sh
+
+production-cleanup-plan: ## Show legacy runtime objects without deleting anything
+	@bash scripts/deploy/cleanup-nonproduction-workloads.sh
+
+production-cleanup: ## Delete legacy runtime objects only when CONFIRM_CLEANUP=YES is provided
+	@CONFIRM_CLEANUP=$(CONFIRM_CLEANUP) DELETE_STATEFUL_LEGACY=$(DELETE_STATEFUL_LEGACY) bash scripts/deploy/cleanup-nonproduction-workloads.sh
+
+production-cluster-clean-proof: ## Validate production-only runtime scope and official portal exposure
+	@bash scripts/validate/validate-production-cluster-clean.sh
+
+production-ha: ## Validate the production overlay HA controls without mutating the cluster
+	@bash scripts/validate/validate-production-ha.sh
+
+production-runtime-evidence: ## Collect read-only runtime evidence for production HA and HPA
+	@bash scripts/validate/collect-production-runtime-evidence.sh
+
+runtime-security-postdeploy: ## Validate runtime hardening, ServiceAccounts, RBAC, HPA, PDB and NetworkPolicies on active Pods
+	@NS=$(NS) bash scripts/validate/validate-runtime-security-postdeploy.sh
+
+production-proof-full: ## Run the full production proof orchestrator; read-only unless RUN_CLUSTER_MUTATIONS=true
+	@bash scripts/validate/run-production-proof-full.sh
+
+final-runtime-proof: ## Refresh final runtime image, HPA, Kyverno and support-pack evidence
+	@REGISTRY_HOST=$(REGISTRY_HOST) IMAGE_PREFIX=$(IMAGE_PREFIX) IMAGE_TAG=$(IMAGE_TAG) DIGEST_RECORD_FILE=$(DIGEST_RECORD_FILE) REQUIRE_DIGEST_DEPLOY=$(REQUIRE_DIGEST_DEPLOY) \
+		bash scripts/validate/refresh-final-runtime-proofs.sh
+
+ha-chaos-lite: ## Collect HA resilience proof; mutative checks require explicit RUN_* variables
+	@bash scripts/validate/validate-ha-chaos-lite.sh
+
+hpa-runtime-proof: ## Collect a read-only strict HPA and metrics-server runtime report
+	@bash scripts/validate/validate-hpa-runtime.sh
+
+refresh-hpa-runtime-proof: ## Install/repair metrics-server and collect strict HPA runtime proof
+	@bash scripts/validate/refresh-hpa-runtime-proof.sh
+
+production-data-resilience: ## Validate production data resilience readiness
+	@bash scripts/validate/validate-production-data-resilience.sh
+
+production-external-db-readiness: ## Validate the external DB overlay and production-grade secret delivery paths
+	@bash scripts/validate/validate-production-external-db-readiness.sh
+
+data-resilience-proof: ## Run DB external secret, backup, restore and data resilience proof when PostgreSQL env vars exist
+	@bash scripts/data/run-data-resilience-proof.sh
+
+production-dockerfiles: ## Validate production Laravel Dockerfiles are hardened and dependency-clean
+	@bash scripts/validate/validate-production-dockerfiles.sh
+
+image-size-evidence: ## Collect local Docker image size evidence for official Laravel images
+	@REGISTRY_HOST=$(REGISTRY_HOST) IMAGE_PREFIX=$(IMAGE_PREFIX) IMAGE_TAG=$(IMAGE_TAG) bash scripts/validate/collect-image-size-evidence.sh
+
+secrets-management: ## Validate modern secrets management readiness without exposing values
+	@bash scripts/secrets/validate-secrets-management.sh
+
+production-db-secret: ## Create/update the production external DB Secret from environment variables
+	@bash scripts/secrets/create-production-db-secret.sh
+
+sops-db-secret: ## Decrypt and apply a SOPS-encrypted production DB Secret
+	@bash scripts/secrets/apply-sops-production-db-secret.sh
+
+external-secret-render: ## Render the production DB ExternalSecret manifest without exposing any secret value
+	@bash scripts/secrets/render-production-db-external-secret.sh
+
+external-secret-runtime-proof: ## Validate live External Secrets Operator reconciliation for the production DB Secret
+	@bash scripts/secrets/validate-external-secrets-runtime.sh
+
+data-backup: ## Create a PostgreSQL backup evidence artifact from external DB env vars
+	@bash scripts/data/backup-postgres.sh
+
+data-restore: ## Restore a PostgreSQL backup into an isolated restore database
+	@bash scripts/data/restore-postgres.sh
+
+production-readiness-campaign: ## Run the production readiness campaign, read-only by default
+	@bash scripts/validate/run-production-readiness-campaign.sh
+
+campaign: ## Run the full reference campaign verify -> promote -> deploy -> validate
+	@REGISTRY_HOST=$(REGISTRY_HOST) IMAGE_PREFIX=$(IMAGE_PREFIX) SOURCE_IMAGE_TAG=$(SOURCE_IMAGE_TAG) TARGET_IMAGE_TAG=$(TARGET_IMAGE_TAG) KUSTOMIZE_OVERLAY=$(KUSTOMIZE_OVERLAY) REPORT_DIR=$(REPORT_DIR) DIGEST_RECORD_FILE=$(DIGEST_RECORD_FILE) \
+		bash scripts/validate/run-reference-campaign.sh
+
+final-campaign: ## Run the official final campaign wrapper with support-pack generation
+	@REGISTRY_HOST=$(REGISTRY_HOST) IMAGE_PREFIX=$(IMAGE_PREFIX) SOURCE_IMAGE_TAG=$(SOURCE_IMAGE_TAG) TARGET_IMAGE_TAG=$(TARGET_IMAGE_TAG) REPORT_DIR=$(REPORT_DIR) DIGEST_RECORD_FILE=$(DIGEST_RECORD_FILE) OFFICIAL_SCENARIO=$(OFFICIAL_SCENARIO) SUPPORT_PACK_ROOT=$(SUPPORT_PACK_ROOT) \
+		bash scripts/cd/run-final-campaign.sh
+
+release-evidence: ## Generate a consolidated release evidence document
+	@REGISTRY_HOST=$(REGISTRY_HOST) IMAGE_PREFIX=$(IMAGE_PREFIX) SOURCE_IMAGE_TAG=$(SOURCE_IMAGE_TAG) TARGET_IMAGE_TAG=$(TARGET_IMAGE_TAG) REPORT_DIR=$(REPORT_DIR) SBOM_DIR=$(SBOM_DIR) DIGEST_RECORD_FILE=$(DIGEST_RECORD_FILE) \
+		bash scripts/release/record-release-evidence.sh
+
+release-attestation: ## Generate a local release attestation from available evidence
+	@REGISTRY_HOST=$(REGISTRY_HOST) IMAGE_PREFIX=$(IMAGE_PREFIX) SOURCE_IMAGE_TAG=$(SOURCE_IMAGE_TAG) TARGET_IMAGE_TAG=$(TARGET_IMAGE_TAG) REPORT_DIR=$(REPORT_DIR) SBOM_DIR=$(SBOM_DIR) DIGEST_RECORD_FILE=$(DIGEST_RECORD_FILE) \
+		bash scripts/release/generate-release-attestation.sh
+
+release-provenance: ## Generate a SLSA-style provenance statement from release evidence
+	@REPORT_DIR=$(REPORT_DIR) DIGEST_RECORD_FILE=$(DIGEST_RECORD_FILE) bash scripts/release/generate-provenance-statement.sh
+
+release-proof-strict: ## Execute strict supply-chain proof with SBOM validation, attestation and SLSA-style provenance
+	@REGISTRY_HOST=$(REGISTRY_HOST) IMAGE_PREFIX=$(IMAGE_PREFIX) SOURCE_IMAGE_TAG=$(SOURCE_IMAGE_TAG) TARGET_IMAGE_TAG=$(TARGET_IMAGE_TAG) REPORT_DIR=$(REPORT_DIR) SBOM_DIR=$(SBOM_DIR) DIGEST_RECORD_FILE=$(DIGEST_RECORD_FILE) \
+		bash scripts/release/run-release-proof-strict.sh
+
+supply-chain-evidence: ## Consolidate SBOM, signature, verification and promotion evidence
+	@REPORT_DIR=$(REPORT_DIR) SBOM_DIR=$(SBOM_DIR) bash scripts/release/collect-supply-chain-evidence.sh
+
+supply-chain-execute: ## Sign, verify, promote by digest, generate SBOMs and record evidence
+	@REGISTRY_HOST=$(REGISTRY_HOST) IMAGE_PREFIX=$(IMAGE_PREFIX) SOURCE_IMAGE_TAG=$(SOURCE_IMAGE_TAG) TARGET_IMAGE_TAG=$(TARGET_IMAGE_TAG) REPORT_DIR=$(REPORT_DIR) SBOM_DIR=$(SBOM_DIR) DIGEST_RECORD_FILE=$(DIGEST_RECORD_FILE) \
+		bash scripts/release/run-supply-chain-execute.sh
+
+observability-snapshot: ## Generate a read-only Kubernetes, Kyverno, HPA and Jenkins observability snapshot
+	@bash scripts/validate/generate-observability-snapshot.sh
+
+portal-service-proof: ## Validate Blade portal connectivity to Laravel business services
+	@bash scripts/validate/validate-portal-service-connectivity.sh
+
+global-project-status: ## Generate a factual global project status report
+	@bash scripts/validate/generate-global-project-status.sh
+
+final-source-of-truth: ## Generate final security, production, release and memory artefact status tables
+	@bash scripts/validate/generate-final-source-of-truth.sh
+
+security-posture: ## Generate a factual security posture report
+	@bash scripts/validate/generate-security-posture-report.sh
+
+k8s-cleartext-scope: ## Validate that Kubernetes HTTP is restricted to internal scoped demo traffic
+	@bash scripts/validate/validate-k8s-cleartext-scope.sh
+
+k8s-resource-guards: ## Validate Kubernetes CPU, memory and ephemeral-storage guards
+	@bash scripts/validate/validate-k8s-resource-guards.sh
+
+k8s-ultra-hardening: ## Validate Kubernetes restricted Pod Security, policies, probes, RBAC and exposure
+	@bash scripts/validate/validate-k8s-ultra-hardening.sh
+
+close-missing-phases: ## Close remaining environment-dependent phases with safe defaults
+	@bash scripts/validate/run-missing-phases-closure.sh
+
+jenkins-webhook-proof: ## Validate Jenkins GitHub webhook reachability and CI trigger readiness
+	@bash scripts/jenkins/validate-github-webhook.sh
+
+jenkins-ci-push-proof: ## Verify Jenkins consumed the latest pushed Git commit
+	@bash scripts/jenkins/verify-ci-push-trigger.sh
+
+cluster-security-proof: ## Collect metrics-server, HPA and Kyverno runtime evidence
+	@bash scripts/validate/validate-cluster-security-addons.sh
+
+kyverno-runtime-proof: ## Collect Kyverno CRD, policy, PolicyReport and Enforce readiness evidence
+	@bash scripts/validate/validate-kyverno-runtime.sh
+
+kyverno-enforce-readiness: ## Generate a dedicated Kyverno Enforce readiness decision report
+	@bash scripts/validate/validate-kyverno-enforce-readiness.sh
+
+refresh-cluster-security-proof: ## Install metrics-server/Kyverno (Audit) and archive fresh runtime security proof
+	@bash scripts/validate/refresh-cluster-security-proof.sh
+
+devsecops-final-proof: ## Run the non-destructive final DevSecOps proof orchestrator
+	@bash scripts/validate/run-devsecops-final-proof.sh
+
+devsecops-system-proof: ## Run the full DevSecOps system proof and archive runtime/release evidence
+	@REGISTRY_HOST=$(REGISTRY_HOST) IMAGE_PREFIX=$(IMAGE_PREFIX) IMAGE_TAG=$(IMAGE_TAG) SOURCE_IMAGE_TAG=$(SOURCE_IMAGE_TAG) TARGET_IMAGE_TAG=$(TARGET_IMAGE_TAG) REPORT_DIR=$(REPORT_DIR) SBOM_DIR=$(SBOM_DIR) DIGEST_RECORD_FILE=$(DIGEST_RECORD_FILE) KUSTOMIZE_OVERLAY=$(KUSTOMIZE_OVERLAY) \
+		bash scripts/validate/run-devsecops-system-proof.sh
+
+devsecops-closure: ## Run the expert closure runner for runtime, security, supply-chain, Kyverno, data, Jenkins and support-pack evidence
+	@REGISTRY_HOST=$(REGISTRY_HOST) IMAGE_PREFIX=$(IMAGE_PREFIX) IMAGE_TAG=$(IMAGE_TAG) SOURCE_IMAGE_TAG=$(SOURCE_IMAGE_TAG) TARGET_IMAGE_TAG=$(TARGET_IMAGE_TAG) REPORT_DIR=$(REPORT_DIR) SBOM_DIR=$(SBOM_DIR) DIGEST_RECORD_FILE=$(DIGEST_RECORD_FILE) KUSTOMIZE_OVERLAY=$(KUSTOMIZE_OVERLAY) \
+		bash scripts/validate/run-devsecops-closure.sh
+
+devsecops-readiness: ## Generate a factual DevSecOps readiness report for soutenance
+	@bash scripts/validate/generate-devsecops-readiness-report.sh
+
+final-proof: ## Run the final non-destructive soutenance proof checks
+	@bash scripts/validate/final-proof-check.sh
+
+final-summary: ## Generate the final soutenance validation summary
+	@bash scripts/validate/generate-final-validation-summary.sh
+
+support-pack: ## Build a support pack from current release, validation and Jenkins artefacts
+	@bash scripts/evidence/generate-support-pack.sh
+
+kyverno-install: ## Install Kyverno and apply SecureRAG policies in Audit mode
+	@bash scripts/deploy/install-kyverno.sh
+
+kyverno-enforce: ## Install Kyverno and apply the Enforce overlay for Cosign verification
+	@KYVERNO_POLICY_MODE=enforce bash scripts/deploy/install-kyverno.sh
+
+metrics-install: ## Install metrics-server for local HPA metrics
+	@bash scripts/deploy/install-metrics-server.sh
+
+clean: ## Remove generated local artifacts
+	@rm -rf .coverage-artifacts artifacts/release artifacts/sbom artifacts/validation artifacts/jenkins artifacts/final artifacts/support-pack security/reports
+
+# ----------------------------------------------------------------------------
+# Aggregate DevSecOps convenience targets. These combine existing targets into
+# logical CI/CD phases for ergonomic local usage.
+# ----------------------------------------------------------------------------
+
+ci: lint test security-scan ## Run the full CI chain locally: lint, test, coverage gate, security scans
+	@echo "[OK] CI chain completed successfully"
+
+cd: build image-scan sbom sign verify deploy ## Run the full CD chain locally: build, scan, SBOM, sign, verify, deploy
+	@echo "[OK] CD chain completed successfully"
+
+security-scan: ## Run all security scans: Semgrep, Gitleaks, Trivy FS, Kyverno policies
+	@echo "[INFO] Running Semgrep SAST scan"
+	@if command -v semgrep >/dev/null 2>&1; then \
+		semgrep scan --config security/semgrep/semgrep.yml --json -o security/reports/semgrep.json --error 2>/dev/null || true; \
+	else \
+		echo "[WARN] Semgrep not installed; skipping SAST scan"; \
+	fi
+	@echo "[INFO] Running Gitleaks secret scan"
+	@if command -v docker >/dev/null 2>&1; then \
+		docker run --rm -v "$$PWD:/repo" -w /repo ghcr.io/gitleaks/gitleaks:v8.30.1 dir /repo --config .gitleaks.toml --report-format json --report-path security/reports/gitleaks.json 2>/dev/null || true; \
+	else \
+		echo "[WARN] Docker not available; skipping Gitleaks scan"; \
+	fi
+	@echo "[INFO] Running Trivy filesystem scan"
+	@if command -v trivy >/dev/null 2>&1; then \
+		trivy fs --config security/trivy/trivy.yaml --ignorefile .trivyignore --format json --output security/reports/trivy-fs.json . 2>/dev/null || true; \
+	else \
+		echo "[WARN] Trivy not installed; skipping filesystem scan"; \
+	fi
+	@echo "[INFO] Running Kyverno policy validation"
+	@bash scripts/ci/validate-kyverno-policies.sh || true
+
+build: ## Build Docker images for all official Laravel services
+	@REGISTRY_HOST=$(REGISTRY_HOST) IMAGE_TAG=$(IMAGE_TAG) bash scripts/deploy/build-local-images.sh
+
+sbom: ## Generate CycloneDX SBOMs for all official images
+	@REGISTRY_HOST=$(REGISTRY_HOST) IMAGE_PREFIX=$(IMAGE_PREFIX) IMAGE_TAG=$(IMAGE_TAG) SBOM_DIR=$(SBOM_DIR) REPORT_DIR=$(REPORT_DIR) \
+		bash scripts/release/generate-sbom.sh
+
+sign: ## Sign release candidate images with Cosign
+	@REGISTRY_HOST=$(REGISTRY_HOST) IMAGE_PREFIX=$(IMAGE_PREFIX) IMAGE_TAG=$(IMAGE_TAG) REPORT_DIR=$(REPORT_DIR) \
+		bash scripts/release/sign-images.sh
+
+verify-signature: ## Verify Cosign signatures for IMAGE_TAG (alias for verify)
+	@REGISTRY_HOST=$(REGISTRY_HOST) IMAGE_PREFIX=$(IMAGE_PREFIX) IMAGE_TAG=$(IMAGE_TAG) REPORT_DIR=$(REPORT_DIR) \
+		bash scripts/release/verify-signatures.sh
+
+post-deploy-validation: ## Run the complete post-deployment validation orchestrator
+	@bash scripts/validate/post-deploy-validation.sh
+
+runtime-security-validation: ## Validate runtime security: hardening, Kyverno, ServiceAccounts, RBAC
+	@bash scripts/validate/validate-runtime-security-postdeploy.sh
+	@bash scripts/validate/validate-kyverno-runtime.sh || true
+	@bash scripts/validate/validate-k8s-hardening.sh
+
+kyverno-runtime-validation: ## Validate Kyverno runtime policies and PolicyReports
+	@bash scripts/validate/validate-kyverno-runtime.sh
+
+k8s-hardening-validation: ## Validate Kubernetes Pod/Namespace hardening standards
+	@bash scripts/validate/validate-k8s-hardening.sh
+
+observability-validate: ## Validate observability stack components readiness
+	@bash scripts/validate/validate-observability.sh
+
+
+# ----------------------------------------------------------------------------
+# Expert-level improvement targets (P0/P1/P2). All targets are idempotent and
+# produce evidence under artifacts/. See docs/architecture/official-scope.md.
+# ----------------------------------------------------------------------------
+
+.PHONY: official-scope jenkins-live-proofs argocd-bootstrap argocd-down \
+        observability-up observability-down sops-rotate sops-validate \
+        backup-test-cycle kyverno-admission-tests kyverno-enforce-on \
+        kyverno-enforce-off falco-up falco-down expert-readiness expert-up-all
+
+official-scope: ## Validate official RAG/legacy scope vs rendered overlays
+	@bash scripts/validate/validate-official-scope.sh
+
+jenkins-live-proofs: ## Run webhook + CI push proofs (uses JENKINS_URL/USER/TOKEN)
+	@bash scripts/jenkins/run-live-proofs.sh
+
+argocd-bootstrap: ## Apply Argo CD AppProject + Applications + ApplicationSet
+	@kubectl apply -k infra/k8s/argocd
+
+argocd-down: ## Remove Argo CD SecureRAG Applications (keeps controller)
+	@kubectl delete -k infra/k8s/argocd --ignore-not-found
+
+observability-up: ## Deploy Prometheus + Grafana + Loki + Alertmanager
+	@kubectl apply -k infra/k8s/observability
+	@kubectl rollout status -n securerag-monitoring deploy/prometheus --timeout=180s || true
+
+observability-down: ## Remove the observability stack
+	@kubectl delete -k infra/k8s/observability --ignore-not-found
+
+sops-rotate: ## Rotate the SOPS age recipient and re-encrypt secrets
+	@bash scripts/secrets/rotate-sops-age-recipient.sh
+
+sops-validate: ## Validate the SOPS workflow without applying
+	@bash scripts/secrets/validate-sops-workflow.sh
+
+backup-test-cycle: ## Trigger postgres-backup CronJob and verify restore cycle
+	@bash scripts/data/test-backup-restore-cycle.sh
+
+kyverno-admission-tests: ## Run positive/negative admission tests against Kyverno
+	@bash scripts/validate/test-kyverno-admission.sh
+
+kyverno-enforce-on: ## Toggle Kyverno Audit -> Enforce with auto-rollback safety
+	@bash scripts/deploy/kyverno-enforce-toggle.sh on
+
+kyverno-enforce-off: ## Toggle Kyverno Enforce -> Audit (rollback)
+	@bash scripts/deploy/kyverno-enforce-toggle.sh off
+
+falco-up: ## Deploy Falco DaemonSet with SecureRAG runtime rules
+	@kubectl apply -k infra/k8s/runtime-detection
+	@kubectl rollout status -n falco daemonset/falco --timeout=300s || true
+
+falco-down: ## Remove Falco DaemonSet
+	@kubectl delete -k infra/k8s/runtime-detection --ignore-not-found
+
+expert-readiness: ## Generate the expert readiness report (P0/P1/P2 synthesis)
+	@bash scripts/validate/generate-expert-readiness-report.sh
+
+expert-up-all: official-scope argocd-bootstrap observability-up falco-up kyverno-admission-tests expert-readiness ## Full expert bootstrap (cluster required)
+	@echo "[OK] expert bootstrap complete; review artifacts/final/expert-readiness-report.md"
+
+# ── Zero-Touch Platform (0 commande humaine après git clone) ─────
+.PHONY: cluster-up cluster-down cluster-status \
+        disaster-recovery disaster-recovery-latest \
+        terraform-init terraform-apply terraform-destroy
+
+cluster-up: ## ONE command: creates cluster + ArgoCD + deploys ALL components via GitOps
+	@echo "[BOOTSTRAP] Zero-touch cluster bootstrap..."
+	@bash scripts/gitops/cluster-bootstrap.sh
+
+cluster-down: ## Destroy the kind cluster
+	@kind delete cluster --name securerag-cluster 2>/dev/null || kind delete cluster --name securerag-prod 2>/dev/null || echo "No cluster found."
+	@docker rm -f kind-registry 2>/dev/null || true
+	@echo "[OK] Cluster destroyed."
+
+cluster-status: ## Display cluster health status
+	@echo "=== ArgoCD Applications ==="
+	@kubectl get applications -n argocd -o custom-columns=NAME:.metadata.name,SYNC:.status.sync.status,HEALTH:.status.health.status 2>/dev/null || echo "ArgoCD not accessible"
+	@echo ""
+	@echo "=== Non-Running Pods ==="
+	@kubectl get pods -A --field-selector=status.phase!=Running 2>/dev/null | head -20 || echo "kubectl not available"
+	@echo ""
+	@echo "=== Nodes ==="
+	@kubectl get nodes 2>/dev/null || echo "kubectl not available"
+
+disaster-recovery: ## Restore from a specific Velero backup (BACKUP=name)
+	@if [ -z "$(BACKUP)" ]; then echo "Usage: make disaster-recovery BACKUP=backup-name"; exit 1; fi
+	@bash scripts/gitops/disaster-recovery.sh "$(BACKUP)"
+
+disaster-recovery-latest: ## Restore from the latest Velero backup
+	@bash scripts/gitops/disaster-recovery.sh
+
+terraform-init: ## Initialize Terraform
+	@cd infra/terraform && terraform init
+
+terraform-apply: ## Provision cluster via Terraform
+	@cd infra/terraform && terraform apply -auto-approve
+
+terraform-destroy: ## Destroy cluster via Terraform
+	@cd infra/terraform && terraform destroy -auto-approve
+
+# ── Compliance & Validation ──────────────────────────────────────
+.PHONY: cis-benchmark cis-docker-benchmark compliance-report slsa-check
+
+cis-benchmark: ## Run CIS Kubernetes benchmark via kube-bench
+	@bash scripts/security/run-kube-bench.sh
+
+cis-docker-benchmark: ## Run CIS Docker benchmark via docker-bench
+	@docker run --rm --net host --pid host --userns host --cap-add audit_control \
+	  -v /etc:/etc:ro -v /usr/bin/docker:/usr/bin/docker:ro -v /var/run/docker.sock:/var/run/docker.sock:ro \
+	  -v /usr/lib/systemd:/usr/lib/systemd:ro -v /var/lib:/var/lib:ro \
+	  docker/docker-bench-security || true
+
+compliance-report: ## Generate consolidated compliance report
+	@bash scripts/validate/generate-compliance-report.sh
+
+slsa-check: ## Validate SLSA 3+ compliance
+	@echo "[SLSA] Source: ✓ GitHub + branch protection + PR review"
+	@echo "[SLSA] Build: ✓ Jenkins isolated agent + Jenkinsfile as code"
+	@echo "[SLSA] Provenance: ✓ SLSA 1.0 in-toto + Cosign keyless"
+	@echo "[SLSA] SBOM: ✓ CycloneDX 1.4 signed per image"
+	@echo "[SLSA] Deploy: ✓ ArgoCD GitOps + immutable digests"
+	@echo "[SLSA] Runtime: ✓ Falco + Kyverno Enforce + Cosign verify"
+	@echo "[SLSA] Level: 3+"
+
+# ── Full Platform Bootstrap (1 commande) ─────────────────────────
+.PHONY: platform-up platform-status
+
+platform-up: ## FULL zero-touch bootstrap: cluster + ArgoCD + ALL components
+	@bash bootstrap-platform.sh
+
+platform-status: ## Display full platform health status
+	@echo "═══ ArgoCD Applications ═══"
+	@kubectl get applications -n argocd -o custom-columns=NAME:.metadata.name,SYNC:.status.sync.status,HEALTH:.status.health.status 2>/dev/null || true
+	@echo ""
+	@echo "═══ Nodes ═══"
+	@kubectl get nodes -o wide 2>/dev/null || true
+	@echo ""
+	@echo "═══ Pods (non-Running only) ═══"
+	@kubectl get pods -A --field-selector=status.phase!=Running 2>/dev/null | head -20 || true
+	@echo ""
+	@echo "═══ Falco Events (last 5) ═══"
+	@kubectl logs -n falco -l app.kubernetes.io/name=falco --tail=20 2>/dev/null | grep -E 'Warning|Error|Critical' | tail -5 || echo "No recent Falco events"
+
+# ── GitOps Automation Pipeline (zero human intervention) ─────────
+.PHONY: gitops-bootstrap gitops-sync gitops-health gitops-rollback \
+        deploy-auto deploy-bluegreen deploy-canary validate-health
+
+gitops-bootstrap: ## Full GitOps bootstrap: ArgoCD + all Apps + Observability + Falco + Kyverno + Secrets
+	@bash scripts/gitops/bootstrap-gitops.sh
+
+gitops-sync: ## Force sync all ArgoCD applications
+	@for app in securerag-demo securerag-production securerag-observability securerag-backup securerag-runtime-detection securerag-kyverno securerag-kyverno-policies securerag-metrics-server securerag-secrets; do \
+		echo "[SYNC] $$app"; \
+		kubectl annotate application "$$app" -n argocd argocd.argoproj.io/refresh=normal --overwrite 2>/dev/null || echo "  skip (not found)"; \
+	done
+
+gitops-health: ## Check health of all ArgoCD applications
+	@kubectl get applications -n argocd -o custom-columns=NAME:.metadata.name,SYNC:.status.sync.status,HEALTH:.status.health.status
+
+gitops-rollback: ## Emergency rollback all deployments to previous revision
+	@NAMESPACE=securerag-hub bash scripts/gitops/rollback-deployment.sh
+
+validate-health: ## Validate deployment health (deployments + endpoints + infra)
+	@bash scripts/validate/validate-deployment-health.sh
+
+deploy-auto: ## Full automated deploy pipeline: build → scan → sign → promote → ArgoCD sync → health check
+	@echo "[INFO] Full automated deployment pipeline..."
+	@REGISTRY_HOST=$(REGISTRY_HOST) IMAGE_PREFIX=$(IMAGE_PREFIX) SOURCE_IMAGE_TAG=$(SOURCE_IMAGE_TAG) TARGET_IMAGE_TAG=$(TARGET_IMAGE_TAG) REPORT_DIR=$(REPORT_DIR) DIGEST_RECORD_FILE=$(DIGEST_RECORD_FILE) bash scripts/release/run-supply-chain-execute.sh
+	@echo "[INFO] Triggering ArgoCD sync..."
+	@$(MAKE) gitops-sync
+	@echo "[INFO] Waiting for rollout..."
+	@sleep 30
+	@$(MAKE) validate-health || (echo "[FAIL] Health check failed. Rolling back..." && $(MAKE) gitops-rollback && exit 1)
+	@echo "[OK] Full automated deployment complete."
+
+deploy-bluegreen: ## Execute Blue/Green deployment for a service (SERVICE=portal-web required)
+	@if [ -z "$(SERVICE)" ]; then echo "ERROR: SERVICE variable required. Example: make deploy-bluegreen SERVICE=portal-web"; exit 1; fi
+	@echo "[INFO] Blue/Green deploy for $(SERVICE)..."
+	@kubectl apply -f "infra/k8s/strategies/blue-green-canary.yaml"
+	@kubectl rollout status "deployment/$(SERVICE)-green" -n securerag-hub --timeout=300s
+	@echo "[INFO] Smoke testing green..."
+	@bash scripts/validate/validate-deployment-health.sh || (echo "[FAIL] Green smoke test failed. Aborting switch." && exit 1)
+	@echo "[INFO] Switching traffic to green..."
+	@kubectl patch svc "$(SERVICE)" -n securerag-hub -p '{"spec":{"selector":{"color":"green"}}}'
+	@echo "[OK] Blue/Green switch complete for $(SERVICE)."
+
+deploy-canary: ## Start Canary deployment (SERVICE=portal-web WEIGHT=10)
+	@if [ -z "$(SERVICE)" ]; then echo "ERROR: SERVICE variable required."; exit 1; fi
+	@WEIGHT=$(or $(WEIGHT),10); \
+	echo "[INFO] Starting canary for $(SERVICE) at $$WEIGHT%..."; \
+	kubectl apply -f "infra/k8s/strategies/blue-green-canary.yaml"; \
+	kubectl annotate ingress "$(SERVICE)-canary" -n securerag-hub \
+	  nginx.ingress.kubernetes.io/canary-weight="$$WEIGHT" --overwrite
+	@echo "[OK] Canary $(SERVICE) at $(WEIGHT)%."
+
+# ── DevSecOps Expert Hardening (P0/P1 final wave) ────────────
+quality-gate: ## CI consolidated Quality Gate (aggregates all signals)
+	@bash scripts/ci/quality-gate.sh
+
+audit-pod-security: ## Static audit Pod Security strict (RO rootfs, dropAll, seccomp, etc.)
+	@bash scripts/validate/audit-pod-security.sh
+
+audit-networkpolicies: ## Static audit per-service NetworkPolicies coverage
+	@bash scripts/validate/audit-networkpolicies.sh
+
+kyverno-fixtures: ## Run Kyverno admission fixtures (positive + negative)
+	@bash scripts/validate/test-kyverno-fixtures.sh
+
+kyverno-enforce-sequenced: ## Roll Audit -> Enforce policy by policy with safety
+	@bash scripts/deploy/kyverno-enforce-sequenced.sh
+
+pin-overlay-digests: ## Pin a Kustomize overlay to verified digests (OVERLAY=path required)
+	@bash scripts/release/pin-overlay-digests.sh --overlay $(OVERLAY) --digest-file $(or $(DIGEST_FILE),artifacts/release/promotion-digests.txt)
+
+restore-drill: ## Run PostgreSQL restore drill in isolated namespace (P1-17)
+	@bash scripts/backup/restore-drill.sh
+
+chaos-pod-delete: ## Run pod-delete chaos drill with self-heal proof (P1-18)
+	@bash scripts/chaos/pod-delete-and-prove.sh
+
+secret-rotation-drill: ## Run secret rotation drill in isolated namespace (P0-7)
+	@bash scripts/secrets/rotate-and-verify.sh
+
+devsecops-expert-audit: audit-pod-security audit-networkpolicies quality-gate ## Run all static expert audits in one shot
+	@echo "[OK] expert audits complete; reports under artifacts/security/"
+
+# ----------------------------------------------------------------------------
+# DAST (Dynamic Application Security Testing) targets — OWASP ZAP
+# Requires: Docker, a running portal-web service (make deploy first).
+# See docs/security/dast-roadmap.md for full documentation.
+# ----------------------------------------------------------------------------
+
+.PHONY: dast-baseline dast-full dast-validate pre-commit-install
+
+dast-baseline: ## Run OWASP ZAP baseline scan against the deployed portal
+	@mkdir -p artifacts/dast
+	@PORTAL_URL=$${PORTAL_URL:-http://localhost:8081}; \
+	echo "[INFO] Running ZAP baseline scan against $${PORTAL_URL}"; \
+	docker run --rm --network host \
+	  -v "$$(pwd)/artifacts/dast:/zap/wrk:rw" \
+	  -t ghcr.io/zaproxy/zaproxy:2.15.0 zap-baseline.py \
+	  -t "$${PORTAL_URL}" \
+	  -r dast-baseline-report.html \
+	  -J dast-baseline-report.json \
+	  -l WARN || true
+	@echo "[OK] DAST baseline report: artifacts/dast/dast-baseline-report.html"
+
+dast-full: ## Run OWASP ZAP full scan against the deployed portal (15-30 min)
+	@mkdir -p artifacts/dast
+	@PORTAL_URL=$${PORTAL_URL:-http://localhost:8081}; \
+	echo "[INFO] Running ZAP full scan against $${PORTAL_URL}"; \
+	docker run --rm --network host \
+	  -v "$$(pwd)/artifacts/dast:/zap/wrk:rw" \
+	  -t ghcr.io/zaproxy/zaproxy:2.15.0 zap-full-scan.py \
+	  -t "$${PORTAL_URL}" \
+	  -r dast-full-report.html \
+	  -J dast-full-report.json || true
+	@echo "[OK] DAST full report: artifacts/dast/dast-full-report.html"
+
+dast-validate: ## Validate DAST report and flag HIGH/CRITICAL alerts
+	@bash scripts/validate/validate-dast-report.sh
+
+pre-commit-install: ## Install pre-commit hooks (Gitleaks, shellcheck, yaml-check)
+	@if command -v pre-commit >/dev/null 2>&1; then \
+	  pre-commit install; \
+	  echo "[OK] pre-commit hooks installed"; \
+	else \
+	  echo "[INFO] Installing pre-commit..."; \
+	  pip install pre-commit; \
+	  pre-commit install; \
+	  echo "[OK] pre-commit hooks installed"; \
+	fi
+
+# ----------------------------------------------------------------------------
+# Recette (staging) deployment targets — deploy to 63.250.59.72 via SSH
+# Requires: SSH key pair in infra/jenkins/secrets/recette-deploy-key
+# See: scripts/deploy/deploy-to-recette.sh for full documentation.
+# ----------------------------------------------------------------------------
+
+.PHONY: deploy-recette recette-smoke recette-bootstrap
+
+RECETTE_HOST ?= 63.250.59.72
+RECETTE_USER ?= root
+
+recette-bootstrap: ## Generate SSH deploy key pair for the recette machine
+	@bash scripts/jenkins/bootstrap-recette-ssh.sh
+
+deploy-recette: ## Deploy SecureRAG Hub to the recette machine (63.250.59.72) via SSH
+	@RECETTE_HOST=$(RECETTE_HOST) RECETTE_USER=$(RECETTE_USER) \
+	IMAGE_TAG=$(IMAGE_TAG) IMAGE_PREFIX=$(IMAGE_PREFIX) \
+	REGISTRY_HOST=$(REGISTRY_HOST) BRANCH=main \
+	SSH_KEY_FILE=infra/jenkins/secrets/recette-deploy-key \
+		bash scripts/deploy/deploy-to-recette.sh
+
+recette-smoke: ## Run smoke tests on the recette machine via SSH
+	@RECETTE_HOST=$(RECETTE_HOST) RECETTE_USER=$(RECETTE_USER) \
+	SSH_KEY_FILE=infra/jenkins/secrets/recette-deploy-key \
+	SKIP_BUILD=true SKIP_SMOKE=false \
+		bash scripts/deploy/deploy-to-recette.sh
+

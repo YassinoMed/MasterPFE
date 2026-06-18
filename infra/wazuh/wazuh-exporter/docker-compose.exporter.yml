@@ -16,6 +16,6 @@ services:
     environment:
       - WAZUH_URL=https://wazuh-manager:55000
       - WAZUH_USER=admin
-      - WAZUH_PASSWORD=SecretPassword
+      - WAZUH_PASSWORD=${WAZUH_PASSWORD:-from-vault}
       - POLL_INTERVAL=60
       - PORT=9200

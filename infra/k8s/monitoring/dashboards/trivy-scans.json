@@ -1,0 +1,14 @@
+{
+  "dashboard": {
+    "title": "Trivy Vulnerability Scans",
+    "description": "Trivy filesystem and image scan results, vulnerability trends",
+    "panels": [
+      { "title": "CRITICAL Vulnerabilities", "type": "stat", "datasource": "prometheus", "targets": [{ "expr": "trivy_vulnerabilities{severity=\"CRITICAL\"}", "legendFormat": "CRITICAL" }] },
+      { "title": "HIGH Vulnerabilities", "type": "stat", "datasource": "prometheus", "targets": [{ "expr": "trivy_vulnerabilities{severity=\"HIGH\"}", "legendFormat": "HIGH" }] },
+      { "title": "Vulnerability Trend (7d)", "type": "timeseries", "datasource": "prometheus", "targets": [{ "expr": "rate(trivy_vulnerabilities[7d])", "legendFormat": "Vulns/day" }] },
+      { "title": "Scanned Images", "type": "stat", "datasource": "prometheus", "targets": [{ "expr": "trivy_image_scans_total", "legendFormat": "Total scans" }] }
+    ],
+    "tags": ["securerag-hub", "trivy", "security"],
+    "schemaVersion": 36
+  }
+}

@@ -6,7 +6,7 @@ apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
   name: servicemonitor-vectordb
-  namespace: monitoring
+  namespace: securerag-monitoring
   labels:
     app.kubernetes.io/part-of: securerag-hub
 spec:
@@ -15,7 +15,7 @@ spec:
       app.kubernetes.io/name: qdrant
   namespaceSelector:
     matchNames:
-      - securerag-prod
+      - securerag-hub
   endpoints:
     - port: http
       path: /metrics

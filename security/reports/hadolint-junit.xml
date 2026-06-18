@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="hadolint" tests="22" failures="22">
+  <testcase name="hadolint: DL3013" classname="docker/audit-security-service/Dockerfile" line="20">
+    <failure message="Pin versions in pip. Instead of `pip install <package>` use `pip install <package>==<version>` or `pip install --requirement <requirements file>`">DL3013 at docker/audit-security-service/Dockerfile:20</failure>
+  </testcase>
+  <testcase name="hadolint: DL3008" classname="docker/portal-web/Dockerfile" line="33">
+    <failure message="Pin versions in apt get install. Instead of `apt-get install <package>` use `apt-get install <package>=<version>`">DL3008 at docker/portal-web/Dockerfile:33</failure>
+  </testcase>
+  <testcase name="hadolint: DL3008" classname="embeding/services/knowledge-hub/Dockerfile" line="13">
+    <failure message="Pin versions in apt get install. Instead of `apt-get install <package>` use `apt-get install <package>=<version>`">DL3008 at embeding/services/knowledge-hub/Dockerfile:13</failure>
+  </testcase>
+  <testcase name="hadolint: DL3008" classname="embeding/services/knowledge-hub/Dockerfile" line="29">
+    <failure message="Pin versions in apt get install. Instead of `apt-get install <package>` use `apt-get install <package>=<version>`">DL3008 at embeding/services/knowledge-hub/Dockerfile:29</failure>
+  </testcase>
+  <testcase name="hadolint: DL3018" classname="infra/jenkins/agents/deploy/Dockerfile" line="4">
+    <failure message="Pin versions in apk add. Instead of `apk add <package>` use `apk add <package>=<version>`">DL3018 at infra/jenkins/agents/deploy/Dockerfile:4</failure>
+  </testcase>
+  <testcase name="hadolint: DL3018" classname="infra/jenkins/agents/docker/Dockerfile" line="4">
+    <failure message="Pin versions in apk add. Instead of `apk add <package>` use `apk add <package>=<version>`">DL3018 at infra/jenkins/agents/docker/Dockerfile:4</failure>
+  </testcase>
+  <testcase name="hadolint: DL4006" classname="infra/jenkins/agents/docker/Dockerfile" line="8">
+    <failure message="Set the SHELL option -o pipefail before RUN with a pipe in it. If you are using /bin/sh in an alpine image or if your shell is symlinked to busybox then consider explicitly setting your SHELL to /bin/ash, or disable this check">DL4006 at infra/jenkins/agents/docker/Dockerfile:8</failure>
+  </testcase>
+  <testcase name="hadolint: DL4006" classname="infra/jenkins/agents/docker/Dockerfile" line="13">
+    <failure message="Set the SHELL option -o pipefail before RUN with a pipe in it. If you are using /bin/sh in an alpine image or if your shell is symlinked to busybox then consider explicitly setting your SHELL to /bin/ash, or disable this check">DL4006 at infra/jenkins/agents/docker/Dockerfile:13</failure>
+  </testcase>
+  <testcase name="hadolint: DL4006" classname="infra/jenkins/agents/docker/Dockerfile" line="17">
+    <failure message="Set the SHELL option -o pipefail before RUN with a pipe in it. If you are using /bin/sh in an alpine image or if your shell is symlinked to busybox then consider explicitly setting your SHELL to /bin/ash, or disable this check">DL4006 at infra/jenkins/agents/docker/Dockerfile:17</failure>
+  </testcase>
+  <testcase name="hadolint: DL3018" classname="infra/jenkins/agents/k8s/Dockerfile" line="4">
+    <failure message="Pin versions in apk add. Instead of `apk add <package>` use `apk add <package>=<version>`">DL3018 at infra/jenkins/agents/k8s/Dockerfile:4</failure>
+  </testcase>
+  <testcase name="hadolint: SC2015" classname="infra/jenkins/agents/security/Dockerfile" line="8">
+    <failure message="Note that A && B || C is not if-then-else. C may run when A is true.">SC2015 at infra/jenkins/agents/security/Dockerfile:8</failure>
+  </testcase>
+  <testcase name="hadolint: DL3018" classname="infra/jenkins/agents/security/Dockerfile" line="14">
+    <failure message="Pin versions in apk add. Instead of `apk add <package>` use `apk add <package>=<version>`">DL3018 at infra/jenkins/agents/security/Dockerfile:14</failure>
+  </testcase>
+  <testcase name="hadolint: DL3018" classname="infra/jenkins/agents/sonar/Dockerfile" line="5">
+    <failure message="Pin versions in apk add. Instead of `apk add <package>` use `apk add <package>=<version>`">DL3018 at infra/jenkins/agents/sonar/Dockerfile:5</failure>
+  </testcase>
+  <testcase name="hadolint: DL3018" classname="infra/jenkins/agents/test/Dockerfile" line="5">
+    <failure message="Pin versions in apk add. Instead of `apk add <package>` use `apk add <package>=<version>`">DL3018 at infra/jenkins/agents/test/Dockerfile:5</failure>
+  </testcase>
+  <testcase name="hadolint: DL3008" classname="infra/jenkins/agents/zap/Dockerfile" line="5">
+    <failure message="Pin versions in apt get install. Instead of `apt-get install <package>` use `apt-get install <package>=<version>`">DL3008 at infra/jenkins/agents/zap/Dockerfile:5</failure>
+  </testcase>
+  <testcase name="hadolint: DL3015" classname="infra/jenkins/agents/zap/Dockerfile" line="5">
+    <failure message="Avoid additional packages by specifying `--no-install-recommends`">DL3015 at infra/jenkins/agents/zap/Dockerfile:5</failure>
+  </testcase>
+  <testcase name="hadolint: DL3008" classname="infra/jenkins/Dockerfile" line="16">
+    <failure message="Pin versions in apt get install. Instead of `apt-get install <package>` use `apt-get install <package>=<version>`">DL3008 at infra/jenkins/Dockerfile:16</failure>
+  </testcase>
+  <testcase name="hadolint: DL4006" classname="infra/jenkins/Dockerfile" line="16">
+    <failure message="Set the SHELL option -o pipefail before RUN with a pipe in it. If you are using /bin/sh in an alpine image or if your shell is symlinked to busybox then consider explicitly setting your SHELL to /bin/ash, or disable this check">DL4006 at infra/jenkins/Dockerfile:16</failure>
+  </testcase>
+  <testcase name="hadolint: SC1091" classname="infra/jenkins/Dockerfile" line="16">
+    <failure message="Not following: File not included in mock.">SC1091 at infra/jenkins/Dockerfile:16</failure>
+  </testcase>
+  <testcase name="hadolint: DL4006" classname="infra/jenkins/Dockerfile" line="55">
+    <failure message="Set the SHELL option -o pipefail before RUN with a pipe in it. If you are using /bin/sh in an alpine image or if your shell is symlinked to busybox then consider explicitly setting your SHELL to /bin/ash, or disable this check">DL4006 at infra/jenkins/Dockerfile:55</failure>
+  </testcase>
+  <testcase name="hadolint: SC2015" classname="infra/jenkins/Dockerfile" line="55">
+    <failure message="Note that A && B || C is not if-then-else. C may run when A is true.">SC2015 at infra/jenkins/Dockerfile:55</failure>
+  </testcase>
+  <testcase name="hadolint: DL3008" classname="platform/portal-web/Dockerfile" line="7">
+    <failure message="Pin versions in apt get install. Instead of `apt-get install <package>` use `apt-get install <package>=<version>`">DL3008 at platform/portal-web/Dockerfile:7</failure>
+  </testcase>
+  <testcase name="hadolint: DL3013" classname="services/api-gateway/Dockerfile" line="14">
+    <failure message="Pin versions in pip. Instead of `pip install <package>` use `pip install <package>==<version>` or `pip install --requirement <requirements file>`">DL3013 at services/api-gateway/Dockerfile:14</failure>
+  </testcase>
+  <testcase name="hadolint: DL3013" classname="services/auth-users/Dockerfile" line="14">
+    <failure message="Pin versions in pip. Instead of `pip install <package>` use `pip install <package>==<version>` or `pip install --requirement <requirements file>`">DL3013 at services/auth-users/Dockerfile:14</failure>
+  </testcase>
+  <testcase name="hadolint: DL3013" classname="services/chatbot-manager/Dockerfile" line="14">
+    <failure message="Pin versions in pip. Instead of `pip install <package>` use `pip install <package>==<version>` or `pip install --requirement <requirements file>`">DL3013 at services/chatbot-manager/Dockerfile:14</failure>
+  </testcase>
+  <testcase name="hadolint: DL3013" classname="services/knowledge-hub/Dockerfile" line="14">
+    <failure message="Pin versions in pip. Instead of `pip install <package>` use `pip install <package>==<version>` or `pip install --requirement <requirements file>`">DL3013 at services/knowledge-hub/Dockerfile:14</failure>
+  </testcase>
+  <testcase name="hadolint: DL3008" classname="services-laravel/audit-security-service/Dockerfile" line="7">
+    <failure message="Pin versions in apt get install. Instead of `apt-get install <package>` use `apt-get install <package>=<version>`">DL3008 at services-laravel/audit-security-service/Dockerfile:7</failure>
+  </testcase>
+  <testcase name="hadolint: DL3008" classname="services-laravel/auth-users-service/Dockerfile" line="7">
+    <failure message="Pin versions in apt get install. Instead of `apt-get install <package>` use `apt-get install <package>=<version>`">DL3008 at services-laravel/auth-users-service/Dockerfile:7</failure>
+  </testcase>
+  <testcase name="hadolint: DL3008" classname="services-laravel/chatbot-manager-service/Dockerfile" line="7">
+    <failure message="Pin versions in apt get install. Instead of `apt-get install <package>` use `apt-get install <package>=<version>`">DL3008 at services-laravel/chatbot-manager-service/Dockerfile:7</failure>
+  </testcase>
+  <testcase name="hadolint: DL3008" classname="services-laravel/conversation-service/Dockerfile" line="7">
+    <failure message="Pin versions in apt get install. Instead of `apt-get install <package>` use `apt-get install <package>=<version>`">DL3008 at services-laravel/conversation-service/Dockerfile:7</failure>
+  </testcase>
+  <testcase name="hadolint: DL3013" classname="services/llm-orchestrator/Dockerfile" line="14">
+    <failure message="Pin versions in pip. Instead of `pip install <package>` use `pip install <package>==<version>` or `pip install --requirement <requirements file>`">DL3013 at services/llm-orchestrator/Dockerfile:14</failure>
+  </testcase>
+  <testcase name="hadolint: DL3013" classname="services/security-auditor/Dockerfile" line="14">
+    <failure message="Pin versions in pip. Instead of `pip install <package>` use `pip install <package>==<version>` or `pip install --requirement <requirements file>`">DL3013 at services/security-auditor/Dockerfile:14</failure>
+  </testcase>
+</testsuite>

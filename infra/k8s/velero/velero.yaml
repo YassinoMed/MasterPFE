@@ -1,40 +1,91 @@
-apiVersion: v1
-kind: Namespace
+# Velero — Backup & Restore (Production)
+# SecureRAG Hub — World-Class Disaster Recovery
+apiVersion: velero.io/v1
+kind: Schedule
 metadata:
-  name: velero
-  labels:
-    app.kubernetes.io/name: velero
----
-# Ce fichier est un squelette pour l'installation Velero via Helm ou kubectl.
-# Pour installer Velero avec Minio local (pour la recette) :
-# velero install \
-#   --provider aws \
-#   --plugins velero/velero-plugin-for-aws:v1.7.0 \
-#   --bucket velero-backups \
-#   --secret-file credentials-velero \
-#   --use-volume-snapshots=false \
-#   --backup-location-config region=minio,s3ForcePathStyle="true",s3Url=http://minio.velero.svc:9000
----
-apiVersion: batch/v1
-kind: CronJob
-metadata:
-  name: velero-daily-backup
+  name: daily-securerag-backup
   namespace: velero
+  labels:
+    app.kubernetes.io/part-of: securerag-hub
 spec:
   schedule: "0 2 * * *"
-  jobTemplate:
-    spec:
-      template:
-        spec:
-          serviceAccountName: velero
-          containers:
-          - name: velero
-            image: velero/velero:v1.11.1
-            command:
-            - /velero
-            - backup
-            - create
-            - daily-backup-$(date +\%Y\%m\%d)
-            - --include-namespaces=securerag-hub,securerag-monitoring,falco
-            - --default-volumes-to-fs-backup
-          restartPolicy: OnFailure
+  template:
+    ttl: "720h"
+    includedNamespaces:
+      - securerag-hub
+      - vault
+      - argocd
+      - observability
+      - falco
+    includedResources:
+      - deployments
+      - statefulsets
+      - configmaps
+      - secrets
+      - pvc
+      - externalsecrets
+      - servicemonitors
+      - prometheusrules
+    storageLocation: velero-minio
+    volumeSnapshotLocations:
+      - velero-minio
+    defaultVolumesToRestic: true
+---
+apiVersion: velero.io/v1
+kind: Schedule
+metadata:
+  name: weekly-vault-backup
+  namespace: velero
+  labels:
+    app.kubernetes.io/part-of: securerag-hub
+spec:
+  schedule: "0 3 * * 0"
+  template:
+    ttl: "2160h"
+    includedNamespaces:
+      - vault
+    includedResources:
+      - pods
+      - pvc
+    labelSelector:
+      matchLabels:
+        app.kubernetes.io/name: vault
+    storageLocation: velero-minio
+    volumeSnapshotLocations:
+      - velero-minio
+    defaultVolumesToRestic: true
+---
+apiVersion: velero.io/v1
+kind: Schedule
+metadata:
+  name: monthly-argocd-backup
+  namespace: velero
+  labels:
+    app.kubernetes.io/part-of: securerag-hub
+spec:
+  schedule: "0 4 1 * *"
+  template:
+    ttl: "8760h"
+    includedNamespaces:
+      - argocd
+    storageLocation: velero-minio
+---
+apiVersion: velero.io/v1
+kind: BackupStorageLocation
+metadata:
+  name: velero-minio
+  namespace: velero
+  labels:
+    app.kubernetes.io/part-of: securerag-hub
+spec:
+  provider: aws
+  objectStorage:
+    bucket: securerag-velero-backups
+  config:
+    region: minio
+    s3ForcePathStyle: "true"
+    s3Url: "http://minio.minio.svc.cluster.local:9000"
+    publicUrl: "http://minio.minio.svc.cluster.local:9000"
+  credential:
+    name: velero-minio-credentials
+    key: cloud

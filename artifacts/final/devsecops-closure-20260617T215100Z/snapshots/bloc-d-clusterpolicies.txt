@@ -1,0 +1,8 @@
+NAME                                   ADMISSION   BACKGROUND   READY   AGE   MESSAGE
+securerag-audit-cleartext-env-values   true        true         True    37h   Ready
+securerag-require-pod-security         true        true         True    37h   Ready
+securerag-require-workload-controls    true        true         True    37h   Ready
+securerag-restrict-image-references    true        true         True    37h   Ready
+securerag-restrict-service-exposure    true        true         True    37h   Ready
+securerag-restrict-volume-types        true        true         True    37h   Ready
+securerag-verify-cosign-images         true        false        True    37h   Ready

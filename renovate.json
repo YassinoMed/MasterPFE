@@ -4,13 +4,38 @@
     "config:base",
     ":preserveSemverRanges",
     ":dependencyDashboard",
-    "schedule:weekly"
+    "schedule:weekly",
+    ":separateMultipleMajorReleases",
+    ":combinePatchMinorUpdates"
   ],
+  "labels": ["dependencies", "renovate"],
   "packageRules": [
     {
       "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
       "automerge": true,
-      "automergeType": "pr"
+      "automergeType": "pr",
+      "platformAutomerge": true
+    },
+    {
+      "matchDepTypes": ["devDependencies"],
+      "automerge": true,
+      "schedule": ["before 9am on Monday"]
+    },
+    {
+      "matchPackagePrefixes": ["hashicorp/vault", "external-secrets", "velero"],
+      "groupName": "Infrastructure",
+      "automerge": false,
+      "labels": ["infra", "security"]
+    },
+    {
+      "matchPackagePrefixes": ["php", "laravel", "laminas"],
+      "groupName": "Laravel Framework",
+      "labels": ["laravel"]
+    },
+    {
+      "matchPackagePrefixes": ["postgres", "redis", "qdrant"],
+      "groupName": "Data Stores",
+      "labels": ["data-store"]
     },
     {
       "matchPackagePatterns": ["*"],
@@ -22,5 +47,23 @@
   },
   "helm-values": {
     "fileMatch": ["values\\.yaml$"]
-  }
+  },
+  "regexManagers": [
+    {
+      "fileMatch": ["(^|/)deployment\\.yaml$"],
+      "matchStrings": ["image: (?<depName>[^:]+):(?<currentValue>[^\\s]+)"],
+      "datasourceTemplate": "docker"
+    },
+    {
+      "fileMatch": ["(^|/)Jenkinsfile(\\.cd)?$"],
+      "matchStrings": ["IMAGE_TAG\\s*=\\s*['\"](?<currentValue>[^'\"]+)['\"]"],
+      "datasourceTemplate": "docker",
+      "depNameTemplate": "securerag-hub"
+    }
+  ],
+  "vulnerabilityAlerts": {
+    "enabled": true,
+    "labels": ["security", "vulnerability"]
+  },
+  "osvVulnerabilityAlerts": true
 }

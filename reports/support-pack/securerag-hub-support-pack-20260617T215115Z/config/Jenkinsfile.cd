@@ -1,0 +1,258 @@
+// Jenkinsfile.cd — SecureRAG Hub CD (Distributed Edition)
+pipeline {
+  agent none
+
+  options {
+    timestamps()
+    disableConcurrentBuilds()
+    buildDiscarder(logRotator(numToKeepStr: '20'))
+    timeout(time: 90, unit: 'MINUTES')
+  }
+
+  parameters {
+    string(name: 'REGISTRY_HOST', defaultValue: 'localhost:5001', description: 'Target OCI registry')
+    string(name: 'IMAGE_PREFIX', defaultValue: 'securerag-hub', description: 'OCI image prefix')
+    string(name: 'SOURCE_IMAGE_TAG', defaultValue: 'dev', description: 'Release candidate tag')
+    string(name: 'TARGET_IMAGE_TAG', defaultValue: 'release-local', description: 'Promoted image tag')
+    booleanParam(name: 'SIGN_RELEASE_CANDIDATES', defaultValue: true, description: 'Cosign sign')
+    booleanParam(name: 'RUN_GITOPS_SYNC', defaultValue: true, description: 'Update Git manifests')
+    booleanParam(name: 'RUN_DAST', defaultValue: true, description: 'OWASP ZAP')
+    booleanParam(name: 'DEPLOY_TO_PRODUCTION', defaultValue: false, description: 'Trigger ArgoCD deploy')
+  }
+
+  environment {
+    SBOM_DIR = 'artifacts/sbom'
+    REPORT_DIR = 'artifacts/release'
+  }
+
+  stages {
+
+    stage('Checkout') {
+      agent { label 'master' }
+      steps {
+        timeout(time: 5, unit: 'MINUTES') {
+          checkout scm
+          stash name: 'workspace', includes: '**'
+        }
+      }
+    }
+
+    stage('Prepare Workspace') {
+      agent { label 'master' }
+      steps {
+        timeout(time: 2, unit: 'MINUTES') {
+          unstash 'workspace'
+          sh 'mkdir -p "${SBOM_DIR}" "${REPORT_DIR}" artifacts/validation && find scripts -type f -name "*.sh" -exec chmod +x {} +'
+          stash name: 'workspace', includes: '**'
+        }
+      }
+    }
+
+    // ════════════════════════════════════════════════════════════════
+    //  PARALLEL: Image Scan + Checkov Helm
+    // ════════════════════════════════════════════════════════════════
+    stage('CD: Scans') {
+      parallel {
+        stage('Trivy Image Scan') {
+          agent { label 'docker-agent' }
+          steps {
+            timeout(time: 20, unit: 'MINUTES') {
+              unstash 'workspace'
+              sh '''
+                REGISTRY_HOST="${REGISTRY_HOST}" IMAGE_PREFIX="${IMAGE_PREFIX}" IMAGE_TAG="${SOURCE_IMAGE_TAG}" \
+                REPORT_DIR="${REPORT_DIR}" IMAGE_SCAN_DIR="security/reports" \
+                bash scripts/release/scan-images.sh
+              '''
+              stash name: 'image-scan', includes: 'artifacts/release/*scan*,security/reports/trivy-image-*.json'
+            }
+          }
+        }
+        stage('Checkov Helm') {
+          agent { label 'k8s-agent' }
+          steps {
+            timeout(time: 5, unit: 'MINUTES') {
+              unstash 'workspace'
+              sh 'checkov -d infra/helm/ --config-file security/checkov-config.yaml --hard-fail-on CRITICAL --soft-fail-on HIGH -o junitxml > artifacts/release/checkov-helm-cd.xml'
+              stash name: 'checkov-cd', includes: 'artifacts/release/checkov-*.xml'
+            }
+          }
+        }
+      }
+    }
+
+    // ════════════════════════════════════════════════════════════════
+    //  PARALLEL: Sign + SBOM + Grype
+    // ════════════════════════════════════════════════════════════════
+    stage('CD: Supply Chain') {
+      parallel {
+        stage('Cosign Sign') {
+          when { expression { return params.SIGN_RELEASE_CANDIDATES } }
+          agent { label 'docker-agent' }
+          steps {
+            timeout(time: 15, unit: 'MINUTES') {
+              unstash 'workspace'
+              sh '''
+                REGISTRY_HOST="${REGISTRY_HOST}" IMAGE_PREFIX="${IMAGE_PREFIX}" IMAGE_TAG="${SOURCE_IMAGE_TAG}" \
+                REPORT_DIR="${REPORT_DIR}" FAIL_FAST=true bash scripts/release/sign-images.sh
+              '''
+              stash name: 'sign-artifacts', includes: 'artifacts/release/*sign*'
+            }
+          }
+        }
+        stage('Cosign Verify') {
+          when { expression { return params.SIGN_RELEASE_CANDIDATES } }
+          agent { label 'docker-agent' }
+          steps {
+            timeout(time: 10, unit: 'MINUTES') {
+              unstash 'workspace'
+              sh '''
+                REGISTRY_HOST="${REGISTRY_HOST}" IMAGE_PREFIX="${IMAGE_PREFIX}" IMAGE_TAG="${SOURCE_IMAGE_TAG}" \
+                REPORT_DIR="${REPORT_DIR}" FAIL_FAST=true bash scripts/release/verify-signatures.sh
+              '''
+              stash name: 'verify-artifacts', includes: 'artifacts/release/*verify*'
+            }
+          }
+        }
+        stage('Generate SBOM + Grype') {
+          agent { label 'docker-agent' }
+          steps {
+            timeout(time: 15, unit: 'MINUTES') {
+              unstash 'workspace'
+              sh '''
+                REGISTRY_HOST="${REGISTRY_HOST}" IMAGE_PREFIX="${IMAGE_PREFIX}" IMAGE_TAG="${TARGET_IMAGE_TAG}" \
+                SBOM_DIR="${SBOM_DIR}" REPORT_DIR="${REPORT_DIR}" bash scripts/release/generate-sbom.sh
+                STRICT_SBOM_VALIDATION=true SBOM_DIR="${SBOM_DIR}" REPORT_DIR="${REPORT_DIR}" bash scripts/release/validate-sbom-cyclonedx.sh
+                for sbom in "${SBOM_DIR}"/*.cyclonedx.json; do
+                  [ -e "$sbom" ] && grype "sbom:$sbom" --fail-on high,critical -o json > "${sbom}.grype.json"
+                done
+              '''
+              stash name: 'sbom-artifacts', includes: 'artifacts/sbom/**,artifacts/release/*sbom*'
+            }
+          }
+        }
+      }
+    }
+
+    // ════════════════════════════════════════════════════════════════
+    //  Promote + Evidence + Provenance
+    // ════════════════════════════════════════════════════════════════
+    stage('CD: Promote by Digest') {
+      agent { label 'docker-agent' }
+      steps {
+        timeout(time: 10, unit: 'MINUTES') {
+          unstash 'workspace'
+          sh '''
+            REGISTRY_HOST="${REGISTRY_HOST}" IMAGE_PREFIX="${IMAGE_PREFIX}" \
+            SOURCE_IMAGE_TAG="${SOURCE_IMAGE_TAG}" TARGET_IMAGE_TAG="${TARGET_IMAGE_TAG}" \
+            REPORT_DIR="${REPORT_DIR}" VERIFY_SOURCE_BEFORE_PROMOTION=false VERIFY_TARGET_AFTER_PROMOTION=true \
+            bash scripts/release/promote-by-digest.sh
+          '''
+          stash name: 'promote-artifacts', includes: 'artifacts/release/*promot*,artifacts/release/*digest*'
+        }
+      }
+    }
+
+    stage('CD: Release Evidence') {
+      agent { label 'docker-agent' }
+      steps {
+        timeout(time: 10, unit: 'MINUTES') {
+          unstash 'workspace'
+          unstash 'sign-artifacts'
+          unstash 'sbom-artifacts'
+          unstash 'promote-artifacts'
+          sh '''
+            REPORT_DIR="${REPORT_DIR}" SBOM_DIR="${SBOM_DIR}" \
+            DIGEST_RECORD_FILE="${REPORT_DIR}/promotion-digests.txt" \
+            STRICT_RELEASE_ATTESTATION=true bash scripts/release/generate-release-attestation.sh
+            REPORT_DIR="${REPORT_DIR}" DIGEST_RECORD_FILE="${REPORT_DIR}/promotion-digests.txt" \
+            STRICT_PROVENANCE=true bash scripts/release/generate-provenance-statement.sh
+            bash scripts/release/record-release-evidence.sh
+          '''
+        }
+      }
+    }
+
+    // ════════════════════════════════════════════════════════════════
+    //  GitOps Update
+    // ════════════════════════════════════════════════════════════════
+    stage('CD: GitOps Update') {
+      when { expression { return params.RUN_GITOPS_SYNC } }
+      agent { label 'master' }
+      steps {
+        timeout(time: 5, unit: 'MINUTES') {
+          unstash 'workspace'
+          unstash 'promote-artifacts'
+          sh '''
+            DIGEST_RECORD_FILE="${REPORT_DIR}/promotion-digests.txt"
+            if [ -f "$DIGEST_RECORD_FILE" ]; then
+              git config --global user.email "jenkins@securerag.local"
+              git config --global user.name "Jenkins GitOps Bot"
+              while IFS="|" read -r service _ _ digest; do
+                [ -n "$service" ] && [ -n "$digest" ] && bash scripts/gitops/update-image-digest.sh production "$service" "$digest"
+              done < "$DIGEST_RECORD_FILE"
+            fi
+          '''
+        }
+      }
+    }
+
+    // ════════════════════════════════════════════════════════════════
+    //  ArgoCD Deploy + Smoke Tests
+    // ════════════════════════════════════════════════════════════════
+    stage('CD: Deploy to Production') {
+      when { expression { return params.DEPLOY_TO_PRODUCTION && params.RUN_GITOPS_SYNC } }
+      agent { label 'deploy-agent' }
+      steps {
+        timeout(time: 15, unit: 'MINUTES') {
+          unstash 'workspace'
+          sh '''
+            sleep 10
+            kubectl annotate application securerag-production -n argocd argocd.argoproj.io/refresh=normal --overwrite 2>/dev/null || true
+            for deploy in portal-web auth-users chatbot-manager conversation-service audit-security-service; do
+              kubectl rollout status "deployment/${deploy}" -n securerag-hub --timeout=300s || exit 1
+            done
+            bash scripts/validate/validate-deployment-health.sh || {
+              NAMESPACE=securerag-hub bash scripts/gitops/rollback-deployment.sh
+              exit 1
+            }
+          '''
+        }
+      }
+    }
+
+    // ════════════════════════════════════════════════════════════════
+    //  DAST — OWASP ZAP
+    // ════════════════════════════════════════════════════════════════
+    stage('CD: DAST — OWASP ZAP') {
+      when { expression { return params.RUN_DAST } }
+      agent { label 'zap-agent' }
+      steps {
+        timeout(time: 20, unit: 'MINUTES') {
+          unstash 'workspace'
+          sh '''
+            mkdir -p reports
+            zap-api-scan.py -t http://staging.securerag.local/api/docs.json -f openapi -r zap-report.html -J zap-report.json
+            bash scripts/zap-quality-gate.sh reports/zap-report.json
+          '''
+        }
+      }
+      post {
+        always { archiveArtifacts allowEmptyArchive: true, artifacts: 'reports/zap-*' }
+      }
+    }
+
+    stage('Generate Support Pack') {
+      agent { label 'master' }
+      steps {
+        timeout(time: 5, unit: 'MINUTES') {
+          unstash 'workspace'
+          sh 'make support-pack'
+        }
+      }
+    }
+  }
+
+  post {
+    always { archiveArtifacts allowEmptyArchive: true, artifacts: 'artifacts/sbom/**,artifacts/release/**,artifacts/validation/**' }
+  }
+}

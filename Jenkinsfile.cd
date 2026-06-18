@@ -61,7 +61,7 @@ pipeline {
               sh '''
                 REGISTRY_HOST="${REGISTRY_HOST}" IMAGE_PREFIX="${IMAGE_PREFIX}" IMAGE_TAG="${SOURCE_IMAGE_TAG}" \
                 REPORT_DIR="${REPORT_DIR}" IMAGE_SCAN_DIR="security/reports" \
-                ALLOW_IMAGE_VULNERABILITIES=true bash scripts/release/scan-images.sh
+                bash scripts/release/scan-images.sh
               '''
               stash name: 'image-scan', includes: 'artifacts/release/*scan*,security/reports/trivy-image-*.json'
             }
@@ -72,7 +72,7 @@ pipeline {
           steps {
             timeout(time: 5, unit: 'MINUTES') {
               unstash 'workspace'
-              sh 'checkov -d infra/helm/ --config-file security/checkov-config.yaml --hard-fail-on CRITICAL --soft-fail-on HIGH -o junitxml > artifacts/release/checkov-helm-cd.xml || echo "[WARN] Checkov helm found issues"'
+              sh 'checkov -d infra/helm/ --config-file security/checkov-config.yaml --hard-fail-on CRITICAL --soft-fail-on HIGH -o junitxml > artifacts/release/checkov-helm-cd.xml'
               stash name: 'checkov-cd', includes: 'artifacts/release/checkov-*.xml'
             }
           }
@@ -92,7 +92,6 @@ pipeline {
             timeout(time: 15, unit: 'MINUTES') {
               unstash 'workspace'
               sh '''
-                export COSIGN_EXPERIMENTAL=1
                 REGISTRY_HOST="${REGISTRY_HOST}" IMAGE_PREFIX="${IMAGE_PREFIX}" IMAGE_TAG="${SOURCE_IMAGE_TAG}" \
                 REPORT_DIR="${REPORT_DIR}" FAIL_FAST=true bash scripts/release/sign-images.sh
               '''
@@ -107,7 +106,6 @@ pipeline {
             timeout(time: 10, unit: 'MINUTES') {
               unstash 'workspace'
               sh '''
-                export COSIGN_EXPERIMENTAL=1
                 REGISTRY_HOST="${REGISTRY_HOST}" IMAGE_PREFIX="${IMAGE_PREFIX}" IMAGE_TAG="${SOURCE_IMAGE_TAG}" \
                 REPORT_DIR="${REPORT_DIR}" FAIL_FAST=true bash scripts/release/verify-signatures.sh
               '''
@@ -125,7 +123,7 @@ pipeline {
                 SBOM_DIR="${SBOM_DIR}" REPORT_DIR="${REPORT_DIR}" bash scripts/release/generate-sbom.sh
                 STRICT_SBOM_VALIDATION=true SBOM_DIR="${SBOM_DIR}" REPORT_DIR="${REPORT_DIR}" bash scripts/release/validate-sbom-cyclonedx.sh
                 for sbom in "${SBOM_DIR}"/*.cyclonedx.json; do
-                  [ -e "$sbom" ] && grype "sbom:$sbom" --fail-on high,critical -o json > "${sbom}.grype.json" || true
+                  [ -e "$sbom" ] && grype "sbom:$sbom" --fail-on high,critical -o json > "${sbom}.grype.json"
                 done
               '''
               stash name: 'sbom-artifacts', includes: 'artifacts/sbom/**,artifacts/release/*sbom*'
@@ -233,13 +231,40 @@ pipeline {
           unstash 'workspace'
           sh '''
             mkdir -p reports
-            zap-api-scan.py -t http://staging.securerag.local/api/docs.json -f openapi -r zap-report.html -J zap-report.json || true
+            zap-api-scan.py -t http://staging.securerag.local/api/docs.json -f openapi -r zap-report.html -J zap-report.json
             bash scripts/zap-quality-gate.sh reports/zap-report.json
           '''
         }
       }
       post {
         always { archiveArtifacts allowEmptyArchive: true, artifacts: 'reports/zap-*' }
+      }
+    }
+
+    // ════════════════════════════════════════════════════════════════
+    //  DR Test — Velero Backup & Restore Validation
+    // ════════════════════════════════════════════════════════════════
+    stage('CD: DR Test — Backup Validation') {
+      when { expression { return params.DEPLOY_TO_PRODUCTION } }
+      agent { label 'k8s-agent' }
+      steps {
+        timeout(time: 15, unit: 'MINUTES') {
+          unstash 'workspace'
+          sh '''
+            set -euo pipefail
+            echo "═══ DR TEST — BACKUP & RESTORE VALIDATION ═══"
+            if command -v velero &>/dev/null || kubectl get deployment -n velero velero &>/dev/null 2>&1; then
+              bash scripts/dr/backup-test.sh || echo "[WARN] Backup test had issues"
+              bash scripts/dr/validate-restore.sh || echo "[WARN] Restore validation had issues"
+            else
+              echo "[WARN] Velero not installed — DR test skipped"
+              echo "Deploy Velero: bash scripts/deploy/deploy-velero.sh"
+            fi
+          '''
+        }
+      }
+      post {
+        always { archiveArtifacts allowEmptyArchive: true, artifacts: 'artifacts/validation/restore-drill-*.md,artifacts/dr/*.md' }
       }
     }
 

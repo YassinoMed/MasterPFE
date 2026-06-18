@@ -1,0 +1,14 @@
+{
+  "dashboard": {
+    "title": "Semgrep SAST Results",
+    "description": "Static analysis findings, rule violations, trend analysis",
+    "panels": [
+      { "title": "Total Findings", "type": "stat", "datasource": "prometheus", "targets": [{ "expr": "semgrep_findings_total", "legendFormat": "Findings" }] },
+      { "title": "ERROR Severity", "type": "stat", "datasource": "prometheus", "targets": [{ "expr": "semgrep_findings{severity=\"ERROR\"}", "legendFormat": "ERROR" }] },
+      { "title": "WARNING Severity", "type": "stat", "datasource": "prometheus", "targets": [{ "expr": "semgrep_findings{severity=\"WARNING\"}", "legendFormat": "WARNING" }] },
+      { "title": "Findings Trend (30d)", "type": "timeseries", "datasource": "prometheus", "targets": [{ "expr": "rate(semgrep_findings_total[30d])", "legendFormat": "Findings/day" }] }
+    ],
+    "tags": ["securerag-hub", "semgrep", "sast", "security"],
+    "schemaVersion": 36
+  }
+}
