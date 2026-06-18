@@ -19,6 +19,12 @@ jenkins:
     standard: {}
 
 
+  globalNodeProperties:
+    - envVars:
+        env:
+          - key: "SONAR_HOST_URL"
+            value: "http://host.docker.internal:9000"
+
   remotingSecurity:
     enabled: true
 

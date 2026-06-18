@@ -7,178 +7,200 @@ INFO: User cache: /opt/sonar-scanner/.sonar/cache
 INFO: Analyzing on SonarQube server 10.7.0.96327
 INFO: Default locale: "en_US", source code encoding: "UTF-8" (analysis is platform dependent)
 INFO: Load global settings
-INFO: Load global settings (done) | time=147ms
+INFO: Load global settings (done) | time=85ms
 INFO: Server id: 32DC5AF4-AZ7KjuDFqY-u_b-JPezK
 INFO: Loading required plugins
 INFO: Load plugins index
-INFO: Load plugins index (done) | time=89ms
+INFO: Load plugins index (done) | time=61ms
 INFO: Load/download plugins
-INFO: Load/download plugins (done) | time=481ms
+INFO: Load/download plugins (done) | time=345ms
 INFO: Process project properties
-INFO: Process project properties (done) | time=25ms
+INFO: Process project properties (done) | time=16ms
 INFO: Project key: securerag-hub
 INFO: Base dir: /usr/src
 INFO: Working dir: /usr/src/.scannerwork
 INFO: Load project settings for component key: 'securerag-hub'
-INFO: Load project settings for component key: 'securerag-hub' (done) | time=22ms
+INFO: Load project settings for component key: 'securerag-hub' (done) | time=21ms
 INFO: Load quality profiles
-INFO: Load quality profiles (done) | time=98ms
+INFO: Load quality profiles (done) | time=84ms
 INFO: Load active rules
-INFO: Load active rules (done) | time=2489ms
+INFO: Load active rules (done) | time=1904ms
 INFO: Load analysis cache
-INFO: Load analysis cache | time=59ms
+INFO: Load analysis cache | time=38ms
 INFO: Preprocessing files...
-INFO: 10 languages detected in 1100 preprocessed files
-INFO: 47 files ignored because of inclusion/exclusion patterns
-INFO: 1724 files ignored because of scm ignore settings
+WARN: File '/usr/src/istio-1.23.0/bin/istioctl' is bigger than 20MB and as consequence is removed from the analysis scope.
+INFO: 11 languages detected in 1429 preprocessed files
+INFO: 60524 files ignored because of inclusion/exclusion patterns
+INFO: 2887 files ignored because of scm ignore settings
 INFO: Loading plugins for detected languages
 INFO: Load/download plugins
-INFO: Load/download plugins (done) | time=913ms
+INFO: Load/download plugins (done) | time=663ms
 INFO: Load project repositories
-INFO: Load project repositories (done) | time=41ms
+INFO: Load project repositories (done) | time=34ms
 INFO: Indexing files...
 INFO: Project configuration:
 INFO:   Excluded sources: **/vendor/**, **/node_modules/**, **/tests/**, **/storage/**, **/bootstrap/cache/**, **/tests/**
 INFO:   Included tests: **/tests/**
 INFO:   Excluded sources for duplication: **/config/**, services-laravel/*/config/*.php, platform/portal-web/config/*.php, **/database/migrations/0001_01_01_*.php, services-laravel/*/database/migrations/0001_01_01_*.php, platform/portal-web/database/migrations/0001_01_01_*.php, services-laravel/auth-users-service/database/migrations/2026_04_11_000003_create_permission_role_table.php, services-laravel/auth-users-service/database/migrations/2026_04_11_000004_create_role_user_table.php, **/database/factories/UserFactory.php, services-laravel/*/database/factories/UserFactory.php, platform/portal-web/database/factories/UserFactory.php, services-laravel/*/tests/Feature/AuthorizationSecurityTest.php, platform/portal-web/app/Support/DemoPortalData.php
-INFO: 1099 files indexed
+INFO: 1428 files indexed
 INFO: Quality profile for css: Sonar way
 INFO: Quality profile for docker: Sonar way
 INFO: Quality profile for js: Sonar way
 INFO: Quality profile for json: Sonar way
 INFO: Quality profile for php: Sonar way
 INFO: Quality profile for py: Sonar way
+INFO: Quality profile for terraform: Sonar way
 INFO: Quality profile for ts: Sonar way
 INFO: Quality profile for web: Sonar way
 INFO: Quality profile for xml: Sonar way
 INFO: Quality profile for yaml: Sonar way
 INFO: ------------- Run sensors on module SecureRAG Hub
 INFO: Load metrics repository
-INFO: Load metrics repository (done) | time=22ms
+INFO: Load metrics repository (done) | time=19ms
 INFO: Sensor Python Sensor [python]
 WARN: Your code is analyzed as compatible with all Python 3 versions by default. You can get a more precise analysis by setting the exact Python version in your configuration via the parameter "sonar.python.version"
 INFO: Starting global symbols computation
-INFO: 27 source files to be analyzed
-INFO: 27/27 source files have been analyzed
+INFO: 29 source files to be analyzed
+INFO: 29/29 source files have been analyzed
 INFO: Starting rules execution
-INFO: 27 source files to be analyzed
-INFO: 27/27 source files have been analyzed
-INFO: The Python analyzer was able to leverage cached data from previous analyses for 0 out of 27 files. These files were not parsed.
-INFO: Sensor Python Sensor [python] (done) | time=4712ms
+INFO: 29 source files to be analyzed
+INFO: 29/29 source files have been analyzed
+INFO: The Python analyzer was able to leverage cached data from previous analyses for 0 out of 29 files. These files were not parsed.
+INFO: Sensor Python Sensor [python] (done) | time=5110ms
 INFO: Sensor Cobertura Sensor for Python coverage [python]
-INFO: Sensor Cobertura Sensor for Python coverage [python] (done) | time=60ms
+INFO: Sensor Cobertura Sensor for Python coverage [python] (done) | time=3218ms
 INFO: Sensor PythonXUnitSensor [python]
-INFO: Sensor PythonXUnitSensor [python] (done) | time=56ms
+INFO: Sensor PythonXUnitSensor [python] (done) | time=1668ms
 INFO: Sensor HTML [web]
-INFO: Sensor HTML [web] (done) | time=305ms
+INFO: Sensor HTML [web] (done) | time=392ms
 INFO: Sensor XML Sensor [xml]
-INFO: 7 source files to be analyzed
+INFO: 9 source files to be analyzed
+WARN: Unable to analyse file file:///usr/src/security/reports/hadolint-junit.xml;
 WARN: Unable to analyse file file:///usr/src/infra/wazuh/decoders/falco-decoder.xml;
-INFO: 7/7 source files have been analyzed
-INFO: Sensor XML Sensor [xml] (done) | time=334ms
+INFO: 9/9 source files have been analyzed
+INFO: Sensor XML Sensor [xml] (done) | time=311ms
 INFO: Sensor JaCoCo XML Report Importer [jacoco]
 INFO: 'sonar.coverage.jacoco.xmlReportPaths' is not defined. Using default locations: target/site/jacoco/jacoco.xml,target/site/jacoco-it/jacoco.xml,build/reports/jacoco/test/jacocoTestReport.xml
 INFO: No report imported, no coverage information will be imported by JaCoCo XML Report Importer
-INFO: Sensor JaCoCo XML Report Importer [jacoco] (done) | time=4ms
+INFO: Sensor JaCoCo XML Report Importer [jacoco] (done) | time=3ms
 INFO: Sensor PHP sensor [php]
 INFO: Starting PHP symbol indexer
-INFO: 249 source files to be analyzed
-INFO: 249/249 source files have been analyzed
-INFO: Cached information of global symbols will be used for 0 out of 249 files. Global symbols were recomputed for the remaining files.
+INFO: 276 source files to be analyzed
+INFO: 276/276 source files have been analyzed
+INFO: Cached information of global symbols will be used for 0 out of 276 files. Global symbols were recomputed for the remaining files.
 INFO: Starting PHP rules
-INFO: 249 source files to be analyzed
-INFO: 249/249 source files have been analyzed
-INFO: The PHP analyzer was able to leverage cached data from previous analyses for 0 out of 249 files. These files were not parsed.
-INFO: Sensor PHP sensor [php] (done) | time=7737ms
+INFO: 276 source files to be analyzed
+INFO: 276/276 source files have been analyzed
+INFO: The PHP analyzer was able to leverage cached data from previous analyses for 0 out of 276 files. These files were not parsed.
+INFO: Sensor PHP sensor [php] (done) | time=8026ms
 INFO: Sensor Analyzer for "php.ini" files [php]
-INFO: Sensor Analyzer for "php.ini" files [php] (done) | time=6ms
+INFO: Sensor Analyzer for "php.ini" files [php] (done) | time=12ms
 INFO: Sensor PHPUnit report sensor [php]
-INFO: No PHPUnit tests reports provided (see 'sonar.php.tests.reportPath' property)
-INFO: Importing /usr/src/coverage.xml
-ERROR: An error occurred when reading report file '/usr/src/coverage.xml', nothing will be imported from this report. IOException: /usr/src/coverage.xml (No such file or directory)
-INFO: Sensor PHPUnit report sensor [php] (done) | time=14ms
+INFO: Importing /usr/src/.coverage-artifacts/junit-services_laravel_auth_users_service.xml
+INFO: Importing /usr/src/.coverage-artifacts/junit-services_laravel_audit_security_service.xml
+INFO: Importing /usr/src/.coverage-artifacts/junit-services_laravel_conversation_service.xml
+INFO: Importing /usr/src/.coverage-artifacts/junit-platform_portal_web.xml
+INFO: Importing /usr/src/.coverage-artifacts/junit-services_laravel_chatbot_manager_service.xml
+INFO: Importing /usr/src/.coverage-artifacts/coverage.xml
+INFO: Sensor PHPUnit report sensor [php] (done) | time=2580ms
+INFO: Sensor IaC Terraform Sensor [iac]
+INFO: 14 source files to be analyzed
+INFO: 14/14 source files have been analyzed
+INFO: Sensor IaC Terraform Sensor [iac] (done) | time=532ms
 INFO: Sensor IaC CloudFormation Sensor [iac]
 INFO: 0 source files to be analyzed
 INFO: 0/0 source files have been analyzed
-INFO: Sensor IaC CloudFormation Sensor [iac] (done) | time=105ms
+INFO: Sensor IaC CloudFormation Sensor [iac] (done) | time=99ms
 INFO: Sensor IaC Kubernetes Sensor [iac]
-INFO: 165 source files to be parsed
-INFO: 165/165 source files have been parsed
-INFO: 165 source files to be analyzed
-INFO: 165/165 source files have been analyzed
-INFO: 165 source files to be checked
-INFO: 165/165 source files have been checked
-INFO: Sensor IaC Kubernetes Sensor [iac] (done) | time=758ms
+INFO: 7 source files to be parsed
+INFO: 7/7 source files have been parsed
+INFO: 7 source files to be analyzed
+INFO: 7/7 source files have been analyzed
+INFO: 7 source files to be checked
+INFO: 7/7 source files have been checked
+INFO: Sensor IaC Kubernetes Sensor [iac] (done) | time=178ms
 INFO: Sensor IaC AzureResourceManager Sensor [iac]
 INFO: 0 source files to be analyzed
 INFO: 0/0 source files have been analyzed
-INFO: Sensor IaC AzureResourceManager Sensor [iac] (done) | time=132ms
+INFO: Sensor IaC AzureResourceManager Sensor [iac] (done) | time=78ms
 INFO: Sensor Java Config Sensor [iac]
 INFO: 0 source files to be analyzed
 INFO: 0/0 source files have been analyzed
-INFO: Sensor Java Config Sensor [iac] (done) | time=32ms
+INFO: Sensor Java Config Sensor [iac] (done) | time=24ms
 INFO: Sensor JavaScript/TypeScript analysis [javascript]
 INFO: Detected os: Linux arch: amd64 alpine: true. Platform: UNSUPPORTED
 INFO: Using Node.js executable: 'node'.
-INFO: Memory configuration: OS (24080 MB), Node.js (4144 MB).
+INFO: Memory configuration: OS (16015 MB), Node.js (4144 MB).
 INFO: Found 0 tsconfig.json file(s): []
 INFO: Creating TypeScript program
-INFO: TypeScript configuration file /tmp/tmp-79-87ifldwZ6TKb
+INFO: TypeScript configuration file /tmp/tmp-75-jkkazj1rU8Ad
 INFO: 20 source files to be analyzed
 INFO: Starting analysis with current program
 INFO: Analyzed 20 file(s) with current program
 INFO: 20/20 source files have been analyzed
 INFO: Hit the cache for 0 out of 20
 INFO: Miss the cache for 20 out of 20: ANALYSIS_MODE_INELIGIBLE [20/20]
-INFO: Sensor JavaScript/TypeScript analysis [javascript] (done) | time=13159ms
+INFO: Sensor JavaScript/TypeScript analysis [javascript] (done) | time=19450ms
 INFO: Sensor JavaScript inside YAML analysis [javascript]
 INFO: No input files found for analysis
 INFO: Hit the cache for 0 out of 0
 INFO: Miss the cache for 0 out of 0
-INFO: Sensor JavaScript inside YAML analysis [javascript] (done) | time=97ms
+INFO: Sensor JavaScript inside YAML analysis [javascript] (done) | time=16ms
 INFO: Sensor JavaScript inside HTML analysis [javascript]
-INFO: 1 source file to be analyzed
-INFO: 1/1 source file has been analyzed
-INFO: Hit the cache for 0 out of 1
-INFO: Miss the cache for 1 out of 1: ANALYSIS_MODE_INELIGIBLE [1/1]
-INFO: Sensor JavaScript inside HTML analysis [javascript] (done) | time=139ms
+INFO: 2 source files to be analyzed
+INFO: 2/2 source files have been analyzed
+INFO: Hit the cache for 0 out of 2
+INFO: Miss the cache for 2 out of 2: ANALYSIS_MODE_INELIGIBLE [2/2]
+INFO: Sensor JavaScript inside HTML analysis [javascript] (done) | time=121ms
 INFO: Sensor CSS Rules [javascript]
-INFO: 6 source files to be analyzed
-INFO: 6/6 source files have been analyzed
+INFO: 7 source files to be analyzed
+INFO: 7/7 source files have been analyzed
 INFO: Hit the cache for 0 out of 0
 INFO: Miss the cache for 0 out of 0
-INFO: Sensor CSS Rules [javascript] (done) | time=389ms
+INFO: Sensor CSS Rules [javascript] (done) | time=536ms
 INFO: Sensor CSS Metrics [javascript]
-INFO: Sensor CSS Metrics [javascript] (done) | time=25ms
+INFO: Sensor CSS Metrics [javascript] (done) | time=18ms
 INFO: Sensor IaC Docker Sensor [iac]
-INFO: 14 source files to be analyzed
-INFO: 14/14 source files have been analyzed
-INFO: Sensor IaC Docker Sensor [iac] (done) | time=527ms
+INFO: 24 source files to be analyzed
+INFO: 24/24 source files have been analyzed
+INFO: Sensor IaC Docker Sensor [iac] (done) | time=546ms
 INFO: Sensor TextAndSecretsSensor [text]
-INFO: Available processors: 6
-INFO: Using 6 threads for analysis.
+INFO: Available processors: 8
+INFO: Using 8 threads for analysis.
 INFO: Using git CLI to retrieve untracked files
 INFO: Analyzing language associated files and files included via "sonar.text.inclusions" that are tracked by git
-INFO: 717 source files to be analyzed
-INFO: 717/717 source files have been analyzed
-INFO: Sensor TextAndSecretsSensor [text] (done) | time=2597ms
+INFO: 714 source files to be analyzed
+INFO: 714/714 source files have been analyzed
+INFO: Sensor TextAndSecretsSensor [text] (done) | time=3296ms
 INFO: ------------- Run sensors on project
 INFO: Sensor Zero Coverage Sensor
-INFO: Sensor Zero Coverage Sensor (done) | time=39ms
-INFO: CPD Executor 68 files had no CPD blocks
-INFO: CPD Executor Calculating CPD for 132 files
-INFO: CPD Executor CPD calculation finished (done) | time=72ms
-INFO: SCM revision ID '309bae619e6a051d058b86f019479f89ff29f746'
-INFO: Analysis report generated in 253ms, dir size=1.9 MB
-INFO: Analysis report compressed in 802ms, zip size=1.2 MB
-INFO: Analysis report uploaded in 95ms
-INFO: ------------- Check Quality Gate status
-INFO: Waiting for the analysis report to be processed (max 300s)
-INFO: QUALITY GATE STATUS: PASSED - View details on http://127.0.0.1:9000/dashboard?id=securerag-hub
-INFO: Analysis total time: 56.982 s
+INFO: Sensor Zero Coverage Sensor (done) | time=35ms
+INFO: SCM Publisher SCM provider for this project is: git
+INFO: SCM Publisher 7 source files to be analyzed
+INFO: SCM Publisher 0/7 source files have been analyzed (done) | time=207ms
+WARN: Missing blame information for the following files:
+WARN:   * istio-1.23.0/manifests/charts/istio-cni/templates/_helpers.tpl
+WARN:   * istio-1.23.0/manifests/charts/istio-control/istio-discovery/templates/_helpers.tpl
+WARN:   * istio-1.23.0/manifests/charts/gateway/templates/_helpers.tpl
+WARN:   * istio-1.23.0/manifests/charts/gateways/istio-ingress/templates/_affinity.tpl
+WARN:   * istio-1.23.0/manifests/charts/ztunnel/templates/_helpers.tpl
+WARN:   * istio-1.23.0/manifests/charts/gateways/istio-egress/templates/_affinity.tpl
+WARN:   * istio-1.23.0/manifests/charts/istiod-remote/templates/_helpers.tpl
+WARN: This may lead to missing/broken features in SonarQube
+INFO: CPD Executor 69 files had no CPD blocks
+INFO: CPD Executor Calculating CPD for 134 files
+INFO: CPD Executor CPD calculation finished (done) | time=87ms
+INFO: SCM revision ID '0c7e886999c132f9a20e2a18ee807b87e28c373d'
+INFO: Analysis report generated in 353ms, dir size=1.8 MB
+INFO: Analysis report compressed in 1440ms, zip size=1.1 MB
+INFO: Analysis report uploaded in 90ms
+INFO: ANALYSIS SUCCESSFUL, you can find the results at: http://localhost:9000/dashboard?id=securerag-hub
+INFO: Note that you will be able to access the updated dashboard once the server has processed the submitted analysis report
+INFO: More about the report processing at http://localhost:9000/api/ce/task?id=6cc17578-5815-4ae5-a9b6-678ab416403b
+INFO: Analysis total time: 59.591 s
 INFO: ------------------------------------------------------------------------
 INFO: EXECUTION SUCCESS
 INFO: ------------------------------------------------------------------------
-INFO: Total time: 1:00.059s
-INFO: Final Memory: 40M/176M
+INFO: Total time: 1:02.292s
+INFO: Final Memory: 40M/168M
 INFO: ------------------------------------------------------------------------

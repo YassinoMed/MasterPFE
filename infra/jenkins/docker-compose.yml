@@ -19,6 +19,7 @@ services:
       SECURERAG_GIT_BRANCH: "*/main"
       ENABLE_LOCAL_FORWARDING: "true"
       RECETTE_SSH_USER: ${RECETTE_SSH_USER:-root}
+      SONAR_HOST_URL: http://host.docker.internal:9000
     volumes:
       - jenkins_home:/var/jenkins_home
       - ./casc:/var/jenkins_home/casc_configs:ro
