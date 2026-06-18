@@ -23,6 +23,12 @@ pipeline {
     string(name: 'COVERAGE_MIN', defaultValue: '85', description: 'Minimum coverage percentage')
     string(name: 'KUBE_SCORE_MAX_CRITICAL', defaultValue: '0', description: 'Max CRITICAL kube-score findings')
     string(name: 'KUBE_SCORE_MAX_WARNINGS', defaultValue: '0', description: 'Max WARNING kube-score findings')
+    booleanParam(name: 'RUN_SPIRE_VALIDATION', defaultValue: true, description: 'Run SPIRE validation')
+    booleanParam(name: 'RUN_TRIVY_OPERATOR', defaultValue: true, description: 'Run Trivy Operator scan')
+    booleanParam(name: 'RUN_CIS_BENCHMARK', defaultValue: false, description: 'Run CIS benchmark (nightly only)')
+    booleanParam(name: 'RUN_POLICY_AS_CODE', defaultValue: true, description: 'Run Policy-as-Code (Conftest) validation')
+    booleanParam(name: 'RUN_SLSA_VERIFY', defaultValue: false, description: 'Run SLSA provenance verification')
+    booleanParam(name: 'RUN_SIEM_VALIDATION', defaultValue: false, description: 'Run SIEM validation (nightly)')
   }
 
   environment {
@@ -399,6 +405,119 @@ pipeline {
       post {
         always {
           archiveArtifacts allowEmptyArchive: true, artifacts: 'artifacts/security/**'
+        }
+      }
+    }
+
+    // ════════════════════════════════════════════════════════════════
+    //  STAGE 11a — SPIRE Validation
+    // ════════════════════════════════════════════════════════════════
+    stage('CI: SPIRE Validation') {
+      when {
+        expression { return params.ENFORCE_QUALITY_GATE && params.RUN_SPIRE_VALIDATION }
+      }
+      agent { label 'worker' }
+      steps {
+        timeout(time: 10, unit: 'MINUTES') {
+          unstash 'workspace'
+          sh 'bash scripts/spire/deploy-spire.sh --validate-only'
+        }
+      }
+    }
+
+    // ════════════════════════════════════════════════════════════════
+    //  STAGE 11b — Trivy Operator Scan
+    // ════════════════════════════════════════════════════════════════
+    stage('CI: Trivy Operator Scan') {
+      when { expression { return params.RUN_TRIVY_OPERATOR } }
+      agent { label 'worker' }
+      steps {
+        timeout(time: 10, unit: 'MINUTES') {
+          unstash 'workspace'
+          sh 'bash scripts/trivy-operator/validate-trivy-scans.sh'
+        }
+      }
+    }
+
+    // ════════════════════════════════════════════════════════════════
+    //  STAGE 11c — CIS Benchmark (nightly)
+    // ════════════════════════════════════════════════════════════════
+    stage('CI: CIS Benchmark') {
+      when {
+        expression { return currentBuild.getBuildCauses().toString().contains('TimerTrigger') && params.RUN_CIS_BENCHMARK }
+      }
+      agent { label 'worker' }
+      steps {
+        timeout(time: 15, unit: 'MINUTES') {
+          unstash 'workspace'
+          sh 'bash scripts/security/run-cis-benchmark.sh'
+        }
+      }
+      post {
+        always {
+          archiveArtifacts allowEmptyArchive: true, artifacts: 'artifacts/security/cis-report.md'
+        }
+      }
+    }
+
+    // ════════════════════════════════════════════════════════════════
+    //  STAGE 11d — Policy-as-Code (Conftest)
+    // ════════════════════════════════════════════════════════════════
+    stage('CI: Policy-as-Code (Conftest)') {
+      when { expression { return params.RUN_POLICY_AS_CODE } }
+      agent { label 'worker' }
+      steps {
+        timeout(time: 10, unit: 'MINUTES') {
+          unstash 'workspace'
+          sh 'bash scripts/ci/policy-as-code.sh'
+        }
+      }
+    }
+
+    // ════════════════════════════════════════════════════════════════
+    //  STAGE 11e — SLSA Verify (CD trigger only)
+    // ════════════════════════════════════════════════════════════════
+    stage('CI: SLSA Verify') {
+      when {
+        expression { return params.RUN_SLSA_VERIFY }
+      }
+      agent { label 'worker' }
+      steps {
+        timeout(time: 10, unit: 'MINUTES') {
+          unstash 'workspace'
+          sh 'bash scripts/supply-chain/verify-slsa.sh'
+        }
+      }
+    }
+
+    // ════════════════════════════════════════════════════════════════
+    //  STAGE 11f — Dynamic Secrets Validation
+    // ════════════════════════════════════════════════════════════════
+    stage('CI: Dynamic Secrets Validation') {
+      when {
+        expression { return params.DEPLOY_VAULT }
+      }
+      agent { label 'worker' }
+      steps {
+        timeout(time: 10, unit: 'MINUTES') {
+          unstash 'workspace'
+          sh 'bash scripts/vault/validate-dynamic-secrets.sh'
+        }
+      }
+    }
+
+    // ════════════════════════════════════════════════════════════════
+    //  STAGE 11g — SIEM Validation (nightly)
+    // ════════════════════════════════════════════════════════════════
+    stage('CI: SIEM Validation') {
+      when {
+        expression { return currentBuild.getBuildCauses().toString().contains('TimerTrigger') && params.RUN_SIEM_VALIDATION }
+      }
+      agent { label 'worker' }
+      steps {
+        timeout(time: 10, unit: 'MINUTES') {
+          unstash 'workspace'
+          sh 'bash scripts/opensearch/validate-siem.sh'
         }
       }
     }

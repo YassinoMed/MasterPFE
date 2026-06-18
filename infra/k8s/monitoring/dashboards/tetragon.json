@@ -1,0 +1,138 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-dashboard-tetragon
+  namespace: securerag-monitoring
+  labels:
+    grafana_dashboard: "1"
+    app.kubernetes.io/category: security
+    app.kubernetes.io/part-of: securerag-hub
+data:
+  tetragon.json: |
+    {
+      "title": "SecureRAG - Tetragon Runtime Security",
+      "uid": "securerag-tetragon",
+      "schemaVersion": 39,
+      "version": 1,
+      "refresh": "10s",
+      "tags": ["securerag", "tetragon", "runtime", "ebpf"],
+      "time": { "from": "now-6h", "to": "now" },
+      "templating": {
+        "list": [
+          { "name": "namespace", "type": "query", "datasource": "Prometheus", "query": "label_values(tetragon_events_total, namespace)", "includeAll": true, "multi": true }
+        ]
+      },
+      "panels": [
+        {
+          "id": 1, "type": "timeseries",
+          "title": "Security Events by Type",
+          "gridPos": { "x": 0, "y": 0, "w": 12, "h": 8 },
+          "targets": [{
+            "expr": "sum(rate(tetragon_events_total[5m])) by (event_type)",
+            "legendFormat": "{{event_type}}",
+            "refId": "A"
+          }],
+          "fieldConfig": { "defaults": { "unit": "eps" } }
+        },
+        {
+          "id": 2, "type": "stat",
+          "title": "Policy Violations (24h)",
+          "gridPos": { "x": 12, "y": 0, "w": 6, "h": 4 },
+          "targets": [{
+            "expr": "sum(increase(tetragon_policy_violations_total[24h]))",
+            "legendFormat": "violations",
+            "refId": "A"
+          }],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "none",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "color": "green", "value": null },
+                  { "color": "orange", "value": 10 },
+                  { "color": "red", "value": 50 }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "id": 3, "type": "stat",
+          "title": "Active Processes Monitored",
+          "gridPos": { "x": 18, "y": 0, "w": 6, "h": 4 },
+          "targets": [{
+            "expr": "count(tetragon_process_exec_total)",
+            "legendFormat": "processes",
+            "refId": "A"
+          }]
+        },
+        {
+          "id": 4, "type": "table",
+          "title": "Top Triggered Policies",
+          "gridPos": { "x": 12, "y": 4, "w": 12, "h": 8 },
+          "targets": [{
+            "expr": "topk(20, sum(rate(tetragon_policy_violations_total[24h])) by (policy_name))",
+            "legendFormat": "{{policy_name}}",
+            "refId": "A",
+            "format": "table",
+            "instant": true
+          }],
+          "transformations": [
+            { "id": "organize", "options": { "renameByName": { "Value": "Rate (24h)" } } }
+          ]
+        },
+        {
+          "id": 5, "type": "piechart",
+          "title": "Events by Namespace",
+          "gridPos": { "x": 0, "y": 8, "w": 8, "h": 8 },
+          "targets": [{
+            "expr": "sum(rate(tetragon_events_total[5m])) by (namespace)",
+            "legendFormat": "{{namespace}}",
+            "refId": "A"
+          }],
+          "fieldConfig": {
+            "defaults": { "unit": "eps" },
+            "overrides": []
+          },
+          "options": {
+            "displayLabels": ["name", "value"],
+            "legend": { "displayMode": "list", "placement": "right" },
+            "pieType": "pie",
+            "reduceOptions": { "calcs": ["sum"], "fields": "", "values": false }
+          }
+        },
+        {
+          "id": 6, "type": "logs",
+          "title": "Real-time Event Stream",
+          "gridPos": { "x": 8, "y": 8, "w": 16, "h": 8 },
+          "targets": [{
+            "expr": "{__name__=~\"tetragon_events.*\"}",
+            "legendFormat": "",
+            "refId": "A"
+          }],
+          "options": {
+            "showTime": true,
+            "showLabels": true,
+            "sortOrder": "Descending",
+            "wrapLogMessage": true,
+            "prettifyLogs": true
+          }
+        },
+        {
+          "id": 7, "type": "table",
+          "title": "MITRE ATT&CK Mapping",
+          "gridPos": { "x": 0, "y": 16, "w": 24, "h": 6 },
+          "targets": [{
+            "expr": "tetragon_mitre_attack_mapping",
+            "legendFormat": "{{technique}}",
+            "refId": "A",
+            "format": "table",
+            "instant": true
+          }],
+          "transformations": [
+            { "id": "organize", "options": { "renameByName": { "Value": "Events" } } }
+          ]
+        }
+      ]
+    }

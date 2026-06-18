@@ -1,0 +1,127 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-dashboard-ratify
+  namespace: securerag-monitoring
+  labels:
+    grafana_dashboard: "1"
+    app.kubernetes.io/category: security
+    app.kubernetes.io/part-of: securerag-hub
+data:
+  ratify.json: |
+    {
+      "title": "SecureRAG - Ratify Verification",
+      "uid": "securerag-ratify",
+      "schemaVersion": 39,
+      "version": 1,
+      "refresh": "30s",
+      "tags": ["securerag", "ratify", "verification", "supply-chain"],
+      "time": { "from": "now-6h", "to": "now" },
+      "panels": [
+        {
+          "id": 1, "type": "timeseries",
+          "title": "Verification Requests Rate",
+          "gridPos": { "x": 0, "y": 0, "w": 12, "h": 8 },
+          "targets": [{
+            "expr": "sum(rate(ratify_verification_requests_total[5m]))",
+            "legendFormat": "requests/s",
+            "refId": "A"
+          }],
+          "fieldConfig": { "defaults": { "unit": "rps" } }
+        },
+        {
+          "id": 2, "type": "gauge",
+          "title": "Verification Pass/Fail Ratio",
+          "gridPos": { "x": 12, "y": 0, "w": 6, "h": 8 },
+          "targets": [{
+            "expr": "sum(rate(ratify_verification_success_total[5m])) / sum(rate(ratify_verification_requests_total[5m])) * 100",
+            "legendFormat": "pass %",
+            "refId": "A"
+          }],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "percent",
+              "min": 0,
+              "max": 100,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "color": "red", "value": null },
+                  { "color": "orange", "value": 90 },
+                  { "color": "green", "value": 99 }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "id": 3, "type": "stat",
+          "title": "Total Verifications (24h)",
+          "gridPos": { "x": 18, "y": 0, "w": 6, "h": 4 },
+          "targets": [{
+            "expr": "sum(increase(ratify_verification_requests_total[24h]))",
+            "legendFormat": "total",
+            "refId": "A"
+          }]
+        },
+        {
+          "id": 4, "type": "stat",
+          "title": "Failed Verifications (24h)",
+          "gridPos": { "x": 18, "y": 4, "w": 6, "h": 4 },
+          "targets": [{
+            "expr": "sum(increase(ratify_verification_failed_total[24h]))",
+            "legendFormat": "failed",
+            "refId": "A"
+          }],
+          "fieldConfig": {
+            "defaults": {
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "color": "green", "value": null },
+                  { "color": "orange", "value": 5 },
+                  { "color": "red", "value": 20 }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "id": 5, "type": "table",
+          "title": "Policy Violations by Type",
+          "gridPos": { "x": 0, "y": 8, "w": 12, "h": 8 },
+          "targets": [{
+            "expr": "sum(rate(ratify_policy_violations_total[24h])) by (policy_name, violation_type)",
+            "legendFormat": "{{policy_name}} - {{violation_type}}",
+            "refId": "A",
+            "format": "table",
+            "instant": true
+          }],
+          "transformations": [
+            { "id": "organize", "options": { "renameByName": { "Value": "Rate" } } }
+          ]
+        },
+        {
+          "id": 6, "type": "heatmap",
+          "title": "Image Verification Latency",
+          "gridPos": { "x": 12, "y": 8, "w": 12, "h": 8 },
+          "targets": [{
+            "expr": "rate(ratify_verification_duration_seconds_bucket[5m])",
+            "legendFormat": "{{le}}",
+            "refId": "A"
+          }],
+          "fieldConfig": { "defaults": { "unit": "s" } }
+        },
+        {
+          "id": 7, "type": "timeseries",
+          "title": "Failed Verifications Over Time",
+          "gridPos": { "x": 0, "y": 16, "w": 24, "h": 8 },
+          "targets": [{
+            "expr": "sum(rate(ratify_verification_failed_total[5m])) by (reason)",
+            "legendFormat": "{{reason}}",
+            "refId": "A"
+          }],
+          "fieldConfig": { "defaults": { "unit": "eps" } }
+        }
+      ]
+    }

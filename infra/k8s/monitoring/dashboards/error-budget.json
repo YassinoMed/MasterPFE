@@ -1,0 +1,523 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-dashboard-error-budget
+  namespace: securerag-monitoring
+  labels:
+    grafana_dashboard: "1"
+    app.kubernetes.io/category: sre
+    app.kubernetes.io/part-of: securerag-hub
+data:
+  error-budget.json: |
+    {
+      "title": "SecureRAG - SLO Error Budgets (Enhanced)",
+      "uid": "securerag-error-budget-enhanced",
+      "schemaVersion": 39,
+      "version": 1,
+      "refresh": "30s",
+      "tags": ["securerag", "slo", "error-budget", "sre", "enhanced"],
+      "time": { "from": "now-7d", "to": "now" },
+      "templating": {
+        "list": [
+          {
+            "name": "service",
+            "type": "query",
+            "datasource": "Prometheus",
+            "query": "label_values(securerag:slo:error_budget_remaining:minutes, service)",
+            "current": { "text": "All", "value": "$__all" },
+            "includeAll": true,
+            "multi": true
+          }
+        ]
+      },
+      "panels": [
+        {
+          "id": 1, "type": "gauge",
+          "title": "EB Remaining - portal-web",
+          "description": "Error budget remaining for portal-web (SLO 99.9%)",
+          "gridPos": { "x": 0, "y": 0, "w": 4, "h": 5 },
+          "targets": [{
+            "expr": "securerag:slo:error_budget_remaining:minutes{service=\"portal-web\"}",
+            "legendFormat": "portal-web",
+            "refId": "A"
+          }],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "m",
+              "min": 0,
+              "max": 43.2,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "color": "red", "value": null },
+                  { "color": "orange", "value": 10 },
+                  { "color": "green", "value": 30 }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "id": 2, "type": "gauge",
+          "title": "EB Remaining - auth-users",
+          "description": "Error budget remaining for auth-users (SLO 99.95%)",
+          "gridPos": { "x": 4, "y": 0, "w": 4, "h": 5 },
+          "targets": [{
+            "expr": "securerag:slo:error_budget_remaining:minutes{service=\"auth-users\"}",
+            "legendFormat": "auth-users",
+            "refId": "A"
+          }],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "m",
+              "min": 0,
+              "max": 21.6,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "color": "red", "value": null },
+                  { "color": "orange", "value": 5 },
+                  { "color": "green", "value": 15 }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "id": 3, "type": "gauge",
+          "title": "EB Remaining - chatbot-manager",
+          "description": "Error budget remaining for chatbot-manager (SLO 99.5%)",
+          "gridPos": { "x": 8, "y": 0, "w": 4, "h": 5 },
+          "targets": [{
+            "expr": "securerag:slo:error_budget_remaining:minutes{service=\"chatbot-manager\"}",
+            "legendFormat": "chatbot-manager",
+            "refId": "A"
+          }],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "m",
+              "min": 0,
+              "max": 216,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "color": "red", "value": null },
+                  { "color": "orange", "value": 50 },
+                  { "color": "green", "value": 150 }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "id": 4, "type": "gauge",
+          "title": "EB Remaining - conversation-svc",
+          "description": "Error budget remaining for conversation-svc (SLO 99.9%)",
+          "gridPos": { "x": 12, "y": 0, "w": 4, "h": 5 },
+          "targets": [{
+            "expr": "securerag:slo:error_budget_remaining:minutes{service=\"conversation-svc\"}",
+            "legendFormat": "conversation-svc",
+            "refId": "A"
+          }],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "m",
+              "min": 0,
+              "max": 43.2,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "color": "red", "value": null },
+                  { "color": "orange", "value": 10 },
+                  { "color": "green", "value": 30 }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "id": 5, "type": "gauge",
+          "title": "EB Remaining - audit-security",
+          "description": "Error budget remaining for audit-security (SLO 99.9%)",
+          "gridPos": { "x": 16, "y": 0, "w": 4, "h": 5 },
+          "targets": [{
+            "expr": "securerag:slo:error_budget_remaining:minutes{service=\"audit-security\"}",
+            "legendFormat": "audit-security",
+            "refId": "A"
+          }],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "m",
+              "min": 0,
+              "max": 43.2,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "color": "red", "value": null },
+                  { "color": "orange", "value": 10 },
+                  { "color": "green", "value": 30 }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "id": 6, "type": "stat",
+          "title": "Burn Rate (1h) - portal-web",
+          "gridPos": { "x": 0, "y": 5, "w": 4, "h": 3 },
+          "targets": [{
+            "expr": "securerag:slo:burn_rate:1h{service=\"portal-web\"}",
+            "legendFormat": "1h burn",
+            "refId": "A"
+          }],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "x",
+              "decimals": 1,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "color": "green", "value": null },
+                  { "color": "orange", "value": 1 },
+                  { "color": "red", "value": 6 }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "id": 7, "type": "stat",
+          "title": "Burn Rate (5m) - portal-web",
+          "gridPos": { "x": 0, "y": 8, "w": 4, "h": 3 },
+          "targets": [{
+            "expr": "securerag:slo:burn_rate:5m{service=\"portal-web\"}",
+            "legendFormat": "5m burn",
+            "refId": "A"
+          }],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "x",
+              "decimals": 1,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "color": "green", "value": null },
+                  { "color": "orange", "value": 1 },
+                  { "color": "red", "value": 14.4 }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "id": 8, "type": "stat",
+          "title": "Burn Rate (1h) - auth-users",
+          "gridPos": { "x": 4, "y": 5, "w": 4, "h": 3 },
+          "targets": [{
+            "expr": "securerag:slo:burn_rate:1h{service=\"auth-users\"}",
+            "legendFormat": "1h burn",
+            "refId": "A"
+          }],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "x",
+              "decimals": 1,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "color": "green", "value": null },
+                  { "color": "orange", "value": 1 },
+                  { "color": "red", "value": 6 }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "id": 9, "type": "stat",
+          "title": "Burn Rate (5m) - auth-users",
+          "gridPos": { "x": 4, "y": 8, "w": 4, "h": 3 },
+          "targets": [{
+            "expr": "securerag:slo:burn_rate:5m{service=\"auth-users\"}",
+            "legendFormat": "5m burn",
+            "refId": "A"
+          }],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "x",
+              "decimals": 1,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "color": "green", "value": null },
+                  { "color": "orange", "value": 1 },
+                  { "color": "red", "value": 14.4 }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "id": 10, "type": "stat",
+          "title": "Burn Rate (1h) - chatbot-manager",
+          "gridPos": { "x": 8, "y": 5, "w": 4, "h": 3 },
+          "targets": [{
+            "expr": "securerag:slo:burn_rate:1h{service=\"chatbot-manager\"}",
+            "legendFormat": "1h burn",
+            "refId": "A"
+          }],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "x",
+              "decimals": 1,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "color": "green", "value": null },
+                  { "color": "orange", "value": 1 },
+                  { "color": "red", "value": 6 }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "id": 11, "type": "stat",
+          "title": "Burn Rate (5m) - chatbot-manager",
+          "gridPos": { "x": 8, "y": 8, "w": 4, "h": 3 },
+          "targets": [{
+            "expr": "securerag:slo:burn_rate:5m{service=\"chatbot-manager\"}",
+            "legendFormat": "5m burn",
+            "refId": "A"
+          }],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "x",
+              "decimals": 1,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "color": "green", "value": null },
+                  { "color": "orange", "value": 1 },
+                  { "color": "red", "value": 14.4 }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "id": 12, "type": "stat",
+          "title": "Burn Rate (1h) - conversation-svc",
+          "gridPos": { "x": 12, "y": 5, "w": 4, "h": 3 },
+          "targets": [{
+            "expr": "securerag:slo:burn_rate:1h{service=\"conversation-svc\"}",
+            "legendFormat": "1h burn",
+            "refId": "A"
+          }],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "x",
+              "decimals": 1,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "color": "green", "value": null },
+                  { "color": "orange", "value": 1 },
+                  { "color": "red", "value": 6 }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "id": 13, "type": "stat",
+          "title": "Burn Rate (5m) - conversation-svc",
+          "gridPos": { "x": 12, "y": 8, "w": 4, "h": 3 },
+          "targets": [{
+            "expr": "securerag:slo:burn_rate:5m{service=\"conversation-svc\"}",
+            "legendFormat": "5m burn",
+            "refId": "A"
+          }],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "x",
+              "decimals": 1,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "color": "green", "value": null },
+                  { "color": "orange", "value": 1 },
+                  { "color": "red", "value": 14.4 }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "id": 14, "type": "stat",
+          "title": "Burn Rate (1h) - audit-security",
+          "gridPos": { "x": 16, "y": 5, "w": 4, "h": 3 },
+          "targets": [{
+            "expr": "securerag:slo:burn_rate:1h{service=\"audit-security\"}",
+            "legendFormat": "1h burn",
+            "refId": "A"
+          }],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "x",
+              "decimals": 1,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "color": "green", "value": null },
+                  { "color": "orange", "value": 1 },
+                  { "color": "red", "value": 6 }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "id": 15, "type": "stat",
+          "title": "Burn Rate (5m) - audit-security",
+          "gridPos": { "x": 16, "y": 8, "w": 4, "h": 3 },
+          "targets": [{
+            "expr": "securerag:slo:burn_rate:5m{service=\"audit-security\"}",
+            "legendFormat": "5m burn",
+            "refId": "A"
+          }],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "x",
+              "decimals": 1,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "color": "green", "value": null },
+                  { "color": "orange", "value": 1 },
+                  { "color": "red", "value": 14.4 }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "id": 16, "type": "stat",
+          "title": "Error Budget Consumption Rate",
+          "gridPos": { "x": 20, "y": 5, "w": 4, "h": 3 },
+          "targets": [{
+            "expr": "sum(rate(securerag:slo:error_budget_consumed:minutes[5m])) by (service)",
+            "legendFormat": "{{service}}",
+            "refId": "A"
+          }],
+          "fieldConfig": { "defaults": { "unit": "m" } }
+        },
+        {
+          "id": 17, "type": "stat",
+          "title": "Time to Exhaustion",
+          "gridPos": { "x": 20, "y": 8, "w": 4, "h": 3 },
+          "targets": [{
+            "expr": "securerag:slo:error_budget_remaining:minutes{service=~\"$service\"} / clamp_min(securerag:slo:burn_rate:1h{service=~\"$service\"}, 0.01)",
+            "legendFormat": "{{service}}",
+            "refId": "A"
+          }],
+          "fieldConfig": { "defaults": { "unit": "m" } }
+        },
+        {
+          "id": 18, "type": "table",
+          "title": "Multi-Window Burn Rate Alerts",
+          "gridPos": { "x": 0, "y": 11, "w": 24, "h": 6 },
+          "targets": [
+            {
+              "expr": "securerag:slo:burn_rate:5m{service=~\"$service\"}",
+              "refId": "A", "format": "table", "instant": true
+            },
+            {
+              "expr": "securerag:slo:burn_rate:1h{service=~\"$service\"}",
+              "refId": "B", "format": "table", "instant": true
+            },
+            {
+              "expr": "securerag:slo:burn_rate:6h{service=~\"$service\"}",
+              "refId": "C", "format": "table", "instant": true
+            }
+          ],
+          "transformations": [
+            { "id": "merge" },
+            {
+              "id": "organize",
+              "options": {
+                "renameByName": {
+                  "Value #A": "Burn 5m",
+                  "Value #B": "Burn 1h",
+                  "Value #C": "Burn 6h"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "id": 19, "type": "timeseries",
+          "title": "SLO Compliance Over Time",
+          "gridPos": { "x": 0, "y": 17, "w": 12, "h": 8 },
+          "targets": [
+            {
+              "expr": "securerag:sli:availability:rate1h{service=~\"$service\"}",
+              "legendFormat": "{{service}}",
+              "refId": "A"
+            },
+            {
+              "expr": "vector(0.9995)",
+              "legendFormat": "SLO 99.95% (auth-users)",
+              "refId": "B"
+            },
+            {
+              "expr": "vector(0.999)",
+              "legendFormat": "SLO 99.9% (portal/conversation/audit)",
+              "refId": "C"
+            },
+            {
+              "expr": "vector(0.995)",
+              "legendFormat": "SLO 99.5% (chatbot)",
+              "refId": "D"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": { "unit": "percentunit", "min": 0.98, "max": 1.001 },
+            "overrides": [
+              {
+                "matcher": { "id": "byName", "options": "SLO 99.95% (auth-users)" },
+                "properties": [
+                  { "id": "custom.lineStyle", "value": { "fill": "dash", "dash": [10, 10] } },
+                  { "id": "color", "value": { "mode": "fixed", "fixedColor": "purple" } }
+                ]
+              },
+              {
+                "matcher": { "id": "byName", "options": "SLO 99.9% (portal/conversation/audit)" },
+                "properties": [
+                  { "id": "custom.lineStyle", "value": { "fill": "dash", "dash": [10, 10] } },
+                  { "id": "color", "value": { "mode": "fixed", "fixedColor": "red" } }
+                ]
+              },
+              {
+                "matcher": { "id": "byName", "options": "SLO 99.5% (chatbot)" },
+                "properties": [
+                  { "id": "custom.lineStyle", "value": { "fill": "dash", "dash": [10, 10] } },
+                  { "id": "color", "value": { "mode": "fixed", "fixedColor": "orange" } }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": 20, "type": "timeseries",
+          "title": "Error Budget Consumption Over Time",
+          "gridPos": { "x": 12, "y": 17, "w": 12, "h": 8 },
+          "targets": [{
+            "expr": "securerag:slo:error_budget_consumed:minutes{service=~\"$service\"}",
+            "legendFormat": "{{service}}",
+            "refId": "A"
+          }],
+          "fieldConfig": { "defaults": { "unit": "m" } }
+        }
+      ]
+    }

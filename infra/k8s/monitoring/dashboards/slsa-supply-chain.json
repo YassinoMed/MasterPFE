@@ -1,0 +1,161 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-dashboard-slsa-supply-chain
+  namespace: securerag-monitoring
+  labels:
+    grafana_dashboard: "1"
+    app.kubernetes.io/category: security
+    app.kubernetes.io/part-of: securerag-hub
+data:
+  slsa-supply-chain.json: |
+    {
+      "title": "SecureRAG - SLSA Supply Chain",
+      "uid": "securerag-slsa-supply-chain",
+      "schemaVersion": 39,
+      "version": 1,
+      "refresh": "5m",
+      "tags": ["securerag", "slsa", "supply-chain", "security"],
+      "time": { "from": "now-7d", "to": "now" },
+      "panels": [
+        {
+          "id": 1, "type": "gauge",
+          "title": "Signed Images Ratio",
+          "gridPos": { "x": 0, "y": 0, "w": 6, "h": 6 },
+          "targets": [{
+            "expr": "sum(slsa_signed_images_total) / sum(slsa_total_images) * 100",
+            "legendFormat": "signed %",
+            "refId": "A"
+          }],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "percent",
+              "min": 0,
+              "max": 100,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "color": "red", "value": null },
+                  { "color": "orange", "value": 50 },
+                  { "color": "green", "value": 90 }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "id": 2, "type": "gauge",
+          "title": "SBOM Coverage",
+          "gridPos": { "x": 6, "y": 0, "w": 6, "h": 6 },
+          "targets": [{
+            "expr": "sum(slsa_sbom_coverage_total) / sum(slsa_total_images) * 100",
+            "legendFormat": "sbom %",
+            "refId": "A"
+          }],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "percent",
+              "min": 0,
+              "max": 100,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "color": "red", "value": null },
+                  { "color": "orange", "value": 50 },
+                  { "color": "green", "value": 90 }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "id": 3, "type": "stat",
+          "title": "Provenance Attestations",
+          "gridPos": { "x": 12, "y": 0, "w": 6, "h": 3 },
+          "targets": [{
+            "expr": "sum(increase(slsa_provenance_attestations_total[24h]))",
+            "legendFormat": "attestations",
+            "refId": "A"
+          }],
+          "fieldConfig": { "defaults": { "unit": "none" } }
+        },
+        {
+          "id": 4, "type": "stat",
+          "title": "Total Images",
+          "gridPos": { "x": 18, "y": 0, "w": 6, "h": 3 },
+          "targets": [{
+            "expr": "sum(slsa_total_images)",
+            "legendFormat": "images",
+            "refId": "A"
+          }]
+        },
+        {
+          "id": 5, "type": "stat",
+          "title": "Verification Failures (7d)",
+          "gridPos": { "x": 12, "y": 3, "w": 6, "h": 3 },
+          "targets": [{
+            "expr": "sum(increase(slsa_verification_failures_total[7d]))",
+            "legendFormat": "failures",
+            "refId": "A"
+          }],
+          "fieldConfig": {
+            "defaults": {
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "color": "green", "value": null },
+                  { "color": "orange", "value": 5 },
+                  { "color": "red", "value": 20 }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "id": 6, "type": "stat",
+          "title": "Highest SLSA Level",
+          "gridPos": { "x": 18, "y": 3, "w": 6, "h": 3 },
+          "targets": [{
+            "expr": "max(slsa_level)",
+            "legendFormat": "SLSA {slsa_level}",
+            "refId": "A"
+          }],
+          "fieldConfig": { "defaults": { "unit": "none" } }
+        },
+        {
+          "id": 7, "type": "text",
+          "title": "Supply Chain Level Summary",
+          "gridPos": { "x": 0, "y": 6, "w": 12, "h": 6 },
+          "options": {
+            "mode": "html",
+            "content": "<h2>SLSA Supply Chain Levels</h2><table><tr><th>Level</th><th>Requirement</th><th>Status</th></tr><tr><td>L1</td><td>Build provenance</td><td style='color: green;'>✓</td></tr><tr><td>L2</td><td>Signed provenance + hosted build</td><td style='color: green;'>✓</td></tr><tr><td>L3</td><td>Hardened builds + hermetic</td><td style='color: orange;'>In Progress</td></tr><tr><td>L4</td><td>Two-person review + audit</td><td style='color: red;'>Pending</td></tr></table><p>Target: SLSA L3 by Q3 2026</p>"
+          }
+        },
+        {
+          "id": 8, "type": "timeseries",
+          "title": "Verification Failures Over Time",
+          "gridPos": { "x": 12, "y": 6, "w": 12, "h": 6 },
+          "targets": [{
+            "expr": "sum(rate(slsa_verification_failures_total[5m])) by (reason)",
+            "legendFormat": "{{reason}}",
+            "refId": "A"
+          }],
+          "fieldConfig": { "defaults": { "unit": "eps" } }
+        },
+        {
+          "id": 9, "type": "table",
+          "title": "Image Signing Status",
+          "gridPos": { "x": 0, "y": 12, "w": 24, "h": 8 },
+          "targets": [{
+            "expr": "slsa_image_status",
+            "legendFormat": "{{image}}",
+            "refId": "A",
+            "format": "table",
+            "instant": true
+          }],
+          "transformations": [
+            { "id": "organize", "options": { "renameByName": { "Value": "Status" } } }
+          ]
+        }
+      ]
+    }

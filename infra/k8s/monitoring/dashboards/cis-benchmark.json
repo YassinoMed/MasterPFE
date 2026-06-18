@@ -1,0 +1,159 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-dashboard-cis-benchmark
+  namespace: securerag-monitoring
+  labels:
+    grafana_dashboard: "1"
+    app.kubernetes.io/category: security
+    app.kubernetes.io/part-of: securerag-hub
+data:
+  cis-benchmark.json: |
+    {
+      "title": "SecureRAG - CIS Benchmark",
+      "uid": "securerag-cis-benchmark",
+      "schemaVersion": 39,
+      "version": 1,
+      "refresh": "5m",
+      "tags": ["securerag", "cis", "benchmark", "compliance"],
+      "time": { "from": "now-7d", "to": "now" },
+      "templating": {
+        "list": [
+          { "name": "category", "type": "query", "datasource": "Prometheus", "query": "label_values(cis_benchmark_score, category)", "includeAll": true, "multi": true }
+        ]
+      },
+      "panels": [
+        {
+          "id": 1, "type": "gauge",
+          "title": "Compliance Score",
+          "gridPos": { "x": 0, "y": 0, "w": 8, "h": 6 },
+          "targets": [{
+            "expr": "cis_benchmark_score",
+            "legendFormat": "score",
+            "refId": "A"
+          }],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "percent",
+              "min": 0,
+              "max": 100,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "color": "red", "value": null },
+                  { "color": "orange", "value": 60 },
+                  { "color": "yellow", "value": 80 },
+                  { "color": "green", "value": 90 }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "id": 2, "type": "stat",
+          "title": "Passed Controls",
+          "gridPos": { "x": 8, "y": 0, "w": 4, "h": 3 },
+          "targets": [{
+            "expr": "cis_benchmark_controls_total{status=\"pass\"}",
+            "legendFormat": "pass",
+            "refId": "A"
+          }],
+          "fieldConfig": { "defaults": { "color": { "mode": "fixed", "fixedColor": "green" } } }
+        },
+        {
+          "id": 3, "type": "stat",
+          "title": "Failed Controls",
+          "gridPos": { "x": 12, "y": 0, "w": 4, "h": 3 },
+          "targets": [{
+            "expr": "cis_benchmark_controls_total{status=\"fail\"}",
+            "legendFormat": "fail",
+            "refId": "A"
+          }],
+          "fieldConfig": { "defaults": { "color": { "mode": "fixed", "fixedColor": "red" } } }
+        },
+        {
+          "id": 4, "type": "stat",
+          "title": "Warnings",
+          "gridPos": { "x": 16, "y": 0, "w": 4, "h": 3 },
+          "targets": [{
+            "expr": "cis_benchmark_controls_total{status=\"warn\"}",
+            "legendFormat": "warn",
+            "refId": "A"
+          }],
+          "fieldConfig": { "defaults": { "color": { "mode": "fixed", "fixedColor": "orange" } } }
+        },
+        {
+          "id": 5, "type": "stat",
+          "title": "Total Controls",
+          "gridPos": { "x": 20, "y": 0, "w": 4, "h": 3 },
+          "targets": [{
+            "expr": "sum(cis_benchmark_controls_total)",
+            "legendFormat": "total",
+            "refId": "A"
+          }]
+        },
+        {
+          "id": 6, "type": "barchart",
+          "title": "Pass/Fail/Warn by Category",
+          "gridPos": { "x": 0, "y": 6, "w": 12, "h": 8 },
+          "targets": [{
+            "expr": "cis_benchmark_controls_total{category=~\"$category\"}",
+            "legendFormat": "{{category}} - {{status}}",
+            "refId": "A",
+            "format": "table",
+            "instant": true
+          }],
+          "transformations": [
+            { "id": "organize", "options": { "renameByName": { "Value": "Count" } } }
+          ],
+          "fieldConfig": {
+            "defaults": { "unit": "none" },
+            "overrides": []
+          }
+        },
+        {
+          "id": 7, "type": "timeseries",
+          "title": "Compliance Trend Over Time",
+          "gridPos": { "x": 12, "y": 6, "w": 12, "h": 8 },
+          "targets": [{
+            "expr": "cis_benchmark_score",
+            "legendFormat": "compliance",
+            "refId": "A"
+          }],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "percent",
+              "min": 0,
+              "max": 100
+            }
+          }
+        },
+        {
+          "id": 8, "type": "table",
+          "title": "Failed Controls Detail",
+          "gridPos": { "x": 0, "y": 14, "w": 12, "h": 8 },
+          "targets": [{
+            "expr": "cis_benchmark_control_info{status=\"fail\"}",
+            "legendFormat": "{{control_id}}",
+            "refId": "A",
+            "format": "table",
+            "instant": true
+          }]
+        },
+        {
+          "id": 9, "type": "table",
+          "title": "Remediation Status",
+          "gridPos": { "x": 12, "y": 14, "w": 12, "h": 8 },
+          "targets": [{
+            "expr": "cis_benchmark_remediation_status",
+            "legendFormat": "{{control_id}}",
+            "refId": "A",
+            "format": "table",
+            "instant": true
+          }],
+          "transformations": [
+            { "id": "organize", "options": { "renameByName": { "Value": "Status" } } }
+          ]
+        }
+      ]
+    }

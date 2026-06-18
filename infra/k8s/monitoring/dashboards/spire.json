@@ -1,0 +1,137 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-dashboard-spire
+  namespace: securerag-monitoring
+  labels:
+    grafana_dashboard: "1"
+    app.kubernetes.io/category: security
+    app.kubernetes.io/part-of: securerag-hub
+data:
+  spire.json: |
+    {
+      "title": "SecureRAG - SPIRE Identity Management",
+      "uid": "securerag-spire",
+      "schemaVersion": 39,
+      "version": 1,
+      "refresh": "30s",
+      "tags": ["securerag", "spire", "identity", "spiffe"],
+      "time": { "from": "now-24h", "to": "now" },
+      "panels": [
+        {
+          "id": 1, "type": "stat",
+          "title": "Active SVIDs",
+          "gridPos": { "x": 0, "y": 0, "w": 6, "h": 4 },
+          "targets": [{
+            "expr": "sum(spire_svid_count)",
+            "legendFormat": "SVIDs",
+            "refId": "A"
+          }],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "none",
+              "color": { "mode": "fixed", "fixedColor": "blue" }
+            }
+          }
+        },
+        {
+          "id": 2, "type": "stat",
+          "title": "SPIRE Agents",
+          "gridPos": { "x": 6, "y": 0, "w": 6, "h": 4 },
+          "targets": [{
+            "expr": "count(spire_agent_health)",
+            "legendFormat": "agents",
+            "refId": "A"
+          }]
+        },
+        {
+          "id": 3, "type": "stat",
+          "title": "Registration Entries",
+          "gridPos": { "x": 12, "y": 0, "w": 6, "h": 4 },
+          "targets": [{
+            "expr": "sum(spire_registration_entries)",
+            "legendFormat": "entries",
+            "refId": "A"
+          }]
+        },
+        {
+          "id": 4, "type": "stat",
+          "title": "Agent Health",
+          "gridPos": { "x": 18, "y": 0, "w": 6, "h": 4 },
+          "targets": [{
+            "expr": "avg(spire_agent_health)",
+            "legendFormat": "health",
+            "refId": "A"
+          }],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "percent",
+              "min": 0,
+              "max": 100,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "color": "red", "value": null },
+                  { "color": "orange", "value": 80 },
+                  { "color": "green", "value": 95 }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "id": 5, "type": "piechart",
+          "title": "SVIDs by Workload Type",
+          "gridPos": { "x": 0, "y": 4, "w": 8, "h": 8 },
+          "targets": [{
+            "expr": "sum(spire_svid_count) by (workload_type)",
+            "legendFormat": "{{workload_type}}",
+            "refId": "A"
+          }],
+          "options": {
+            "displayLabels": ["name", "percent"],
+            "legend": { "displayMode": "list", "placement": "right" },
+            "pieType": "pie",
+            "reduceOptions": { "calcs": ["sum"], "fields": "", "values": false }
+          }
+        },
+        {
+          "id": 6, "type": "table",
+          "title": "Certificate Expiry Timeline",
+          "gridPos": { "x": 8, "y": 4, "w": 16, "h": 8 },
+          "targets": [{
+            "expr": "spire_certificate_expiry_timestamp",
+            "legendFormat": "{{svid}}",
+            "refId": "A",
+            "format": "table",
+            "instant": true
+          }],
+          "transformations": [
+            { "id": "organize", "options": { "renameByName": { "Value": "Expiry" } } }
+          ]
+        },
+        {
+          "id": 7, "type": "table",
+          "title": "Registration Entries Detail",
+          "gridPos": { "x": 0, "y": 12, "w": 12, "h": 8 },
+          "targets": [{
+            "expr": "spire_registration_entry_info",
+            "legendFormat": "{{entry_id}}",
+            "refId": "A",
+            "format": "table",
+            "instant": true
+          }]
+        },
+        {
+          "id": 8, "type": "timeseries",
+          "title": "Rotation Events",
+          "gridPos": { "x": 12, "y": 12, "w": 12, "h": 8 },
+          "targets": [{
+            "expr": "rate(spire_certificate_rotation_events_total[5m])",
+            "legendFormat": "rotations",
+            "refId": "A"
+          }],
+          "fieldConfig": { "defaults": { "unit": "rps" } }
+        }
+      ]
+    }

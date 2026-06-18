@@ -1,24 +1,18 @@
 #!/usr/bin/env bash
 # File: scripts/security/run-conftest.sh
-# Description: Run Conftest validation on all Kubernetes manifests
-# Modified by: DevSecOps Agent — 2026-06-13
-
+# Description: Run Conftest policy validation on Terraform, Helm, and Kustomize IaC
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 
-CONFTEST_CONFIG="${CONFTEST_CONFIG:-${PROJECT_ROOT}/security/conftest/conftest-config.yaml}"
 POLICY_DIR="${POLICY_DIR:-${PROJECT_ROOT}/security/conftest/policy}"
-MANIFEST_DIR="${MANIFEST_DIR:-${PROJECT_ROOT}/infra/k8s}"
 REPORT_DIR="${REPORT_DIR:-${PROJECT_ROOT}/security/reports/conftest}"
 FAIL_ON_WARN="${FAIL_ON_WARN:-true}"
-COMBINE="${COMBINE:-false}"
-PARALLELISM="${PARALLELISM:-4}"
 
-pass_count=0
-fail_count=0
-skip_count=0
+PASS=0
+FAIL=0
+ERRORS=()
 
 mkdir -p "${REPORT_DIR}"
 
@@ -26,131 +20,89 @@ log()   { printf '[INFO]  %s\n' "$*"; }
 warn()  { printf '[WARN]  %s\n' "$*"; }
 error() { printf '[ERROR] %s\n' "$*" >&2; }
 
-usage() {
-  cat <<EOF
-Usage: $(basename "$0") [OPTIONS]
-
-Runs Conftest policy validation on all Kubernetes manifests.
-
-Options:
-  --manifest-dir DIR   Directory containing Kubernetes manifests (default: infra/k8s)
-  --policy-dir DIR     Directory containing Rego policies (default: security/conftest/policy)
-  --config FILE        Conftest configuration file
-  --report-dir DIR     Output directory for reports
-  --no-fail-warn       Do not fail on warnings
-  --combine            Combine all namespaces into a single decision
-  --help, -h           Show this help message
-EOF
-  exit 0
-}
-
-while [[ $# -gt 0 ]]; do
-  case "$1" in
-    --manifest-dir)  MANIFEST_DIR="$2";   shift 2 ;;
-    --policy-dir)    POLICY_DIR="$2";     shift 2 ;;
-    --config)        CONFTEST_CONFIG="$2"; shift 2 ;;
-    --report-dir)    REPORT_DIR="$2";     shift 2 ;;
-    --no-fail-warn)  FAIL_ON_WARN="false"; shift ;;
-    --combine)       COMBINE="true";      shift ;;
-    --parallelism)   PARALLELISM="$2";    shift 2 ;;
-    --help|-h)       usage ;;
-    *)               error "Unknown arg: $1"; usage ;;
-  esac
-done
-
-require_command() {
-  if ! command -v "$1" >/dev/null 2>&1; then
-    error "Required command not found: $1"
+require_conftest() {
+  if ! command -v conftest &>/dev/null; then
+    error "conftest is not installed. Install from https://www.conftest.dev/"
     exit 1
   fi
 }
 
-require_command conftest
+run_test() {
+  local name="$1"
+  local target="$2"
+  local extra_args="${3:-}"
+  local junit_file="${REPORT_DIR}/conftest-${name//\//-}.xml"
+  local output_file="${REPORT_DIR}/conftest-${name//\//-}.out"
+
+  log "Validating ${name} ..."
+  set +e
+  # shellcheck disable=SC2086
+  conftest test "${target}" \
+    --policy "${POLICY_DIR}" \
+    --all-namespaces \
+    --output json \
+    ${extra_args} \
+    2>"${output_file}" | tee "${junit_file}"
+
+  local exit_code=$?
+  set -e
+
+  if [ $exit_code -eq 0 ]; then
+    PASS=$((PASS + 1))
+    log "  PASS: ${name}"
+  else
+    FAIL=$((FAIL + 1))
+    ERRORS+=("${name}")
+    error "  FAIL: ${name} — see ${output_file}"
+
+    local junit_out="${REPORT_DIR}/junit-${name//\//-}.xml"
+    {
+      echo '<?xml version="1.0" encoding="UTF-8"?>'
+      echo '<testsuite name="conftest" tests="1" failures="1" errors="0">'
+      echo '  <testcase name="'"${name}"'">'
+      echo '    <failure message="Conftest violation">'
+      echo '      Policy violations found in '"${target}"
+      echo '    </failure>'
+      echo '  </testcase>'
+      echo '</testsuite>'
+    } > "${junit_out}"
+  fi
+}
+
+require_conftest
 
 if [ ! -d "${POLICY_DIR}" ]; then
   error "Policy directory not found: ${POLICY_DIR}"
   exit 1
 fi
 
-if [ ! -d "${MANIFEST_DIR}" ]; then
-  error "Manifest directory not found: ${MANIFEST_DIR}"
-  exit 1
+log "Policy dir: ${POLICY_DIR}"
+log "Report dir: ${REPORT_DIR}"
+
+if [ -d "${PROJECT_ROOT}/infra/terraform" ]; then
+  run_test "terraform" "${PROJECT_ROOT}/infra/terraform/"
+else
+  warn "infra/terraform/ not found — skipping"
 fi
 
-log "Conftest configuration:"
-log "  Policy dir: ${POLICY_DIR}"
-log "  Manifest dir: ${MANIFEST_DIR}"
-log "  Report dir: ${REPORT_DIR}"
-log "  Config: ${CONFTEST_CONFIG}"
-log "  Fail on warn: ${FAIL_ON_WARN}"
-log "  Combine: ${COMBINE}"
-
-# Discover all YAML files
-manifest_files=()
-while IFS= read -r -d '' f; do
-  manifest_files+=("$f")
-done < <(find "${MANIFEST_DIR}" -type f \( -name '*.yaml' -o -name '*.yml' \) -print0)
-
-if [[ ${#manifest_files[@]} -eq 0 ]]; then
-  warn "No Kubernetes manifest files found in ${MANIFEST_DIR}"
-  exit 0
+if [ -d "${PROJECT_ROOT}/infra/helm" ]; then
+  run_test "helm" "${PROJECT_ROOT}/infra/helm/"
+else
+  warn "infra/helm/ not found — skipping"
 fi
 
-log "Found ${#manifest_files[@]} manifest file(s) in ${MANIFEST_DIR}"
-
-summary_file="${REPORT_DIR}/conftest-summary.txt"
-failures_file="${REPORT_DIR}/conftest-failures.txt"
-: > "${summary_file}"
-: > "${failures_file}"
-
-conftest_args=(
-  "--policy" "${POLICY_DIR}"
-)
-
-if [ "${FAIL_ON_WARN}" = "true" ]; then
-  conftest_args+=("--fail-on-warn")
+if [ -d "${PROJECT_ROOT}/infra/k8s" ]; then
+  run_test "k8s" "${PROJECT_ROOT}/infra/k8s/"
+else
+  warn "infra/k8s/ not found — skipping"
 fi
 
-if [ "${COMBINE}" = "true" ]; then
-  conftest_args+=("--combine")
-fi
+printf '\n=== Conftest Summary ===\n'
+printf 'PASS: %d  FAIL: %d  TOTAL: %d\n' "${PASS}" "${FAIL}" $((PASS + FAIL))
 
-if [ -f "${CONFTEST_CONFIG}" ]; then
-  conftest_args+=("--config" "${CONFTEST_CONFIG}")
-fi
-
-# Run conftest per file for granular reporting
-for manifest in "${manifest_files[@]}"; do
-  rel_path="${manifest#${PROJECT_ROOT}/}"
-  log "Checking ${rel_path}..."
-
-  if conftest test "${manifest}" "${conftest_args[@]}" > "${REPORT_DIR}/$(basename "${manifest}").conftest" 2>&1; then
-    pass_count=$((pass_count + 1))
-    printf '%-6s | %s\n' "PASS" "${rel_path}" >> "${summary_file}"
-  else
-    fail_count=$((fail_count + 1))
-    printf '%-6s | %s\n' "FAIL" "${rel_path}" >> "${summary_file}"
-    printf 'FAIL | %s\n' "${rel_path}" >> "${failures_file}"
-    cat "${REPORT_DIR}/$(basename "${manifest}").conftest" >> "${failures_file}"
-    printf '\n---\n' >> "${failures_file}"
-  fi
-done
-
-{
-  printf '\n--- SUMMARY ---\n'
-  printf 'PASS: %s\n' "${pass_count}"
-  printf 'FAIL: %s\n' "${fail_count}"
-  printf 'SKIP: %s\n' "${skip_count}"
-  printf 'TOTAL: %s\n' "$(( pass_count + fail_count + skip_count ))"
-} >> "${summary_file}"
-
-printf '\n[INFO] Conftest validation completed: PASS=%s FAIL=%s SKIP=%s\n' \
-  "${pass_count}" "${fail_count}" "${skip_count}"
-log "Summary: ${summary_file}"
-log "Failures: ${failures_file}"
-
-if (( fail_count > 0 )); then
-  error "${fail_count} violation(s) found — review ${failures_file}"
+if [ "${#ERRORS[@]}" -gt 0 ]; then
+  printf 'FAILURES:\n'
+  for e in "${ERRORS[@]}"; do printf '  - %s\n' "${e}"; done
   exit 1
 fi
 

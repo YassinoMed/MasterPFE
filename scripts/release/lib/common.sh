@@ -71,6 +71,7 @@ image_reachable_in_registry() {
 
   local -a cosign_args
   cosign_args=(triangulate)
+  if is_true "${INSECURE_REGISTRY:-false}"; then
     cosign_args+=(--allow-insecure-registry)
   fi
 

@@ -134,6 +134,42 @@ pipeline {
     }
 
     // ════════════════════════════════════════════════════════════════
+    //  CD: SLSA Provenance
+    // ════════════════════════════════════════════════════════════════
+    stage('CD: SLSA Provenance') {
+      agent { label 'worker' }
+      steps {
+        timeout(time: 10, unit: 'MINUTES') {
+          unstash 'workspace'
+          sh '''
+            REGISTRY_HOST="${REGISTRY_HOST}" IMAGE_PREFIX="${IMAGE_PREFIX}" \
+            SOURCE_IMAGE_TAG="${SOURCE_IMAGE_TAG}" TARGET_IMAGE_TAG="${TARGET_IMAGE_TAG}" \
+            REPORT_DIR="${REPORT_DIR}" bash scripts/supply-chain/build-provenance.sh
+          '''
+          stash name: 'provenance-artifacts', includes: 'artifacts/release/*provenance*,artifacts/release/*attestation*'
+        }
+      }
+    }
+
+    // ════════════════════════════════════════════════════════════════
+    //  CD: Heremetic Build
+    // ════════════════════════════════════════════════════════════════
+    stage('CD: Heremetic Build') {
+      agent { label 'worker' }
+      steps {
+        timeout(time: 10, unit: 'MINUTES') {
+          unstash 'workspace'
+          sh '''
+            REGISTRY_HOST="${REGISTRY_HOST}" IMAGE_PREFIX="${IMAGE_PREFIX}" \
+            SOURCE_IMAGE_TAG="${SOURCE_IMAGE_TAG}" TARGET_IMAGE_TAG="${TARGET_IMAGE_TAG}" \
+            bash scripts/supply-chain/hermetic-build.sh
+          '''
+          stash name: 'hermetic-artifacts', includes: 'artifacts/release/*hermetic*'
+        }
+      }
+    }
+
+    // ════════════════════════════════════════════════════════════════
     //  Promote + Evidence + Provenance
     // ════════════════════════════════════════════════════════════════
     stage('CD: Promote by Digest') {
@@ -216,6 +252,34 @@ pipeline {
               exit 1
             }
           '''
+        }
+      }
+    }
+
+    // ════════════════════════════════════════════════════════════════
+    //  CD: Immutable Backup Validation
+    // ════════════════════════════════════════════════════════════════
+    stage('CD: Immutable Backup Validation') {
+      when { expression { return params.DEPLOY_TO_PRODUCTION } }
+      agent { label 'worker' }
+      steps {
+        timeout(time: 10, unit: 'MINUTES') {
+          unstash 'workspace'
+          sh 'bash scripts/dr/validate-immutable.sh'
+        }
+      }
+    }
+
+    // ════════════════════════════════════════════════════════════════
+    //  CD: Ratify Policy Sync
+    // ════════════════════════════════════════════════════════════════
+    stage('CD: Ratify Policy Sync') {
+      when { expression { return params.DEPLOY_TO_PRODUCTION } }
+      agent { label 'worker' }
+      steps {
+        timeout(time: 10, unit: 'MINUTES') {
+          unstash 'workspace'
+          sh 'bash scripts/ratify/deploy-ratify.sh --verify-only'
         }
       }
     }

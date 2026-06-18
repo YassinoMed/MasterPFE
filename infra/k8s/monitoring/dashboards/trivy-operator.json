@@ -1,0 +1,143 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-dashboard-trivy-operator
+  namespace: securerag-monitoring
+  labels:
+    grafana_dashboard: "1"
+    app.kubernetes.io/category: security
+    app.kubernetes.io/part-of: securerag-hub
+data:
+  trivy-operator.json: |
+    {
+      "title": "SecureRAG - Trivy Operator",
+      "uid": "securerag-trivy-operator",
+      "schemaVersion": 39,
+      "version": 1,
+      "refresh": "30s",
+      "tags": ["securerag", "trivy", "vulnerability", "security"],
+      "time": { "from": "now-7d", "to": "now" },
+      "templating": {
+        "list": [
+          { "name": "namespace", "type": "query", "datasource": "Prometheus", "query": "label_values(trivy_image_vulnerabilities, namespace)", "includeAll": true, "multi": true }
+        ]
+      },
+      "panels": [
+        {
+          "id": 1, "type": "stat",
+          "title": "Total Vulnerabilities by Severity",
+          "gridPos": { "x": 0, "y": 0, "w": 6, "h": 4 },
+          "targets": [{ "expr": "sum(trivy_image_vulnerabilities{severity=\"CRITICAL\"})", "legendFormat": "CRITICAL", "refId": "A" }],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "none",
+              "color": { "mode": "fixed", "fixedColor": "red" },
+              "thresholds": { "mode": "absolute", "steps": [{ "color": "red", "value": null }] }
+            }
+          }
+        },
+        {
+          "id": 2, "type": "stat",
+          "title": "HIGH Vulnerabilities",
+          "gridPos": { "x": 6, "y": 0, "w": 6, "h": 4 },
+          "targets": [{ "expr": "sum(trivy_image_vulnerabilities{severity=\"HIGH\"})", "legendFormat": "HIGH", "refId": "A" }],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "none",
+              "color": { "mode": "fixed", "fixedColor": "orange" },
+              "thresholds": { "mode": "absolute", "steps": [{ "color": "orange", "value": null }] }
+            }
+          }
+        },
+        {
+          "id": 3, "type": "stat",
+          "title": "MEDIUM Vulnerabilities",
+          "gridPos": { "x": 12, "y": 0, "w": 6, "h": 4 },
+          "targets": [{ "expr": "sum(trivy_image_vulnerabilities{severity=\"MEDIUM\"})", "legendFormat": "MEDIUM", "refId": "A" }]
+        },
+        {
+          "id": 4, "type": "stat",
+          "title": "Scanned Images",
+          "gridPos": { "x": 18, "y": 0, "w": 6, "h": 4 },
+          "targets": [{ "expr": "count(trivy_image_scan_summary)", "legendFormat": "images", "refId": "A" }]
+        },
+        {
+          "id": 5, "type": "timeseries",
+          "title": "Vulnerabilities Over Time",
+          "gridPos": { "x": 0, "y": 4, "w": 12, "h": 8 },
+          "targets": [
+            { "expr": "sum(rate(trivy_image_vulnerabilities{severity=\"CRITICAL\"}[24h]))", "legendFormat": "CRITICAL", "refId": "A" },
+            { "expr": "sum(rate(trivy_image_vulnerabilities{severity=\"HIGH\"}[24h]))", "legendFormat": "HIGH", "refId": "B" },
+            { "expr": "sum(rate(trivy_image_vulnerabilities{severity=\"MEDIUM\"}[24h]))", "legendFormat": "MEDIUM", "refId": "C" },
+            { "expr": "sum(rate(trivy_image_vulnerabilities{severity=\"LOW\"}[24h]))", "legendFormat": "LOW", "refId": "D" }
+          ],
+          "fieldConfig": { "defaults": { "unit": "cps" } }
+        },
+        {
+          "id": 6, "type": "table",
+          "title": "Top Affected Images",
+          "gridPos": { "x": 12, "y": 4, "w": 12, "h": 8 },
+          "targets": [{
+            "expr": "topk(20, sum(trivy_image_vulnerabilities) by (image_name, severity))",
+            "legendFormat": "{{image_name}} - {{severity}}",
+            "refId": "A",
+            "format": "table",
+            "instant": true
+          }],
+          "transformations": [
+            { "id": "organize", "options": { "renameByName": { "Value": "Count" } } }
+          ]
+        },
+        {
+          "id": 7, "type": "table",
+          "title": "Config Audit Findings",
+          "gridPos": { "x": 0, "y": 12, "w": 12, "h": 8 },
+          "targets": [{
+            "expr": "trivy_config_audit_summary",
+            "legendFormat": "{{namespace}}/{{resource}}",
+            "refId": "A",
+            "format": "table",
+            "instant": true
+          }],
+          "transformations": [
+            { "id": "organize", "options": { "renameByName": { "Value": "Findings" } } }
+          ]
+        },
+        {
+          "id": 8, "type": "gauge",
+          "title": "Compliance Status",
+          "gridPos": { "x": 12, "y": 12, "w": 6, "h": 8 },
+          "targets": [{
+            "expr": "trivy_compliance_score",
+            "legendFormat": "compliance",
+            "refId": "A"
+          }],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "percent",
+              "min": 0,
+              "max": 100,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "color": "red", "value": null },
+                  { "color": "orange", "value": 60 },
+                  { "color": "green", "value": 85 }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "id": 9, "type": "timeseries",
+          "title": "CRITICAL Trends",
+          "gridPos": { "x": 18, "y": 12, "w": 6, "h": 8 },
+          "targets": [{
+            "expr": "sum(rate(trivy_image_vulnerabilities{severity=\"CRITICAL\"}[5m])) by (image_name)",
+            "legendFormat": "{{image_name}}",
+            "refId": "A"
+          }],
+          "fieldConfig": { "defaults": { "unit": "cps" } }
+        }
+      ]
+    }
