@@ -1,0 +1,27 @@
+# Gatekeeper Constraint — Required Security Context
+# Aligns with Kyverno require-workload-controls.yaml
+apiVersion: constraints.gatekeeper.sh/v1beta1
+kind: K8sRequiredSecurityContext
+metadata:
+  name: required-security-context
+  annotations:
+    feature.securerag.dev/enable-gatekeeper: "true"
+spec:
+  match:
+    kinds:
+      - apiGroups: [""]
+        kinds: ["Pod"]
+  parameters:
+    exemptNamespaces:
+      - kube-system
+      - gatekeeper-system
+      - monitoring
+      - loki
+      - tempo
+      - falco
+    requireNonRoot: true
+    requireReadOnlyRootFS: true
+    requiredDropCapabilities:
+      - "ALL"
+  validation:
+    message: "Containers must have securityContext: runAsNonRoot=true, readOnlyRootFilesystem=true, capabilities.drop=[ALL]"

@@ -1,0 +1,20 @@
+# Gatekeeper Constraint — Disallow hostPath volumes
+# Exemptions: falco, kube-system (cilium, tetragon), wazuh, spire
+apiVersion: constraints.gatekeeper.sh/v1beta1
+kind: K8sDisallowHostPath
+metadata:
+  name: disallow-hostpath-volumes
+  annotations:
+    feature.securerag.dev/enable-gatekeeper: "true"
+spec:
+  match:
+    kinds:
+      - apiGroups: [""]
+        kinds: ["Pod"]
+  parameters:
+    exemptNamespaces:
+      - falco
+      - wazuh
+      - spire
+  validation:
+    message: "hostPath volumes are not allowed except in runtime-dedicated namespaces (falco, wazuh, spire)."

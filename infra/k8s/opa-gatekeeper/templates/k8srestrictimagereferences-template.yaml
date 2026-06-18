@@ -1,0 +1,110 @@
+# Gatekeeper ConstraintTemplate — Restrict Image References (No Latest, Signed Images)
+# Aligns with Kyverno restrict-image-references.yaml and verify-cosign-images.yaml
+apiVersion: templates.gatekeeper.sh/v1
+kind: ConstraintTemplate
+metadata:
+  name: k8srestrictimagereferences
+  annotations:
+    feature.securerag.dev/enable-gatekeeper: "true"
+    metadata.gatekeeper.sh/title: "Restrict Image References"
+    metadata.gatekeeper.sh/version: 1.0.0
+spec:
+  crd:
+    spec:
+      names:
+        kind: K8sRestrictImageReferences
+      validation:
+        openAPIV3Schema:
+          type: object
+          properties:
+            exemptNamespaces:
+              type: array
+              items:
+                type: string
+            allowedRegistries:
+              type: array
+              items:
+                type: string
+            disallowLatestTag:
+              type: boolean
+              default: true
+            requireCosignVerification:
+              type: boolean
+              default: false
+            cosignPublicKeys:
+              type: array
+              items:
+                type: string
+  targets:
+    - target: admission.k8s.gatekeeper.sh
+      rego: |
+        package k8srestrictimagereferences
+        
+        allowed_registries := input.parameters.allowedRegistries
+        disallow_latest := input.parameters.disallowLatestTag != false
+        require_cosign := input.parameters.requireCosignVerification == true
+        cosign_keys := input.parameters.cosignPublicKeys
+        
+        # Check each container image
+        violation[{"msg": msg}] {
+          container := input.review.object.spec.containers[_]
+          image := container.image
+          
+          # Check for latest tag
+          disallow_latest
+          endswith(image, ":latest")
+          not exempt_namespace(input.review.object.metadata.namespace)
+          msg := sprintf("container <%v> uses :latest tag which is not allowed in namespace <%v>", [container.name, input.review.object.metadata.namespace])
+        }
+        
+        violation[{"msg": msg}] {
+          container := input.review.object.spec.initContainers[_]
+          image := container.image
+          
+          disallow_latest
+          endswith(image, ":latest")
+          not exempt_namespace(input.review.object.metadata.namespace)
+          msg := sprintf("initContainer <%v> uses :latest tag which is not allowed in namespace <%v>", [container.name, input.review.object.metadata.namespace])
+        }
+        
+        # Check allowed registries
+        violation[{"msg": msg}] {
+          container := input.review.object.spec.containers[_]
+          image := container.image
+          count(allowed_registries) > 0
+          not startswith_any(image, allowed_registries)
+          not exempt_namespace(input.review.object.metadata.namespace)
+          msg := sprintf("container <%v> uses image from disallowed registry: %v. Allowed: %v", [container.name, image, allowed_registries])
+        }
+        
+        violation[{"msg": msg}] {
+          container := input.review.object.spec.initContainers[_]
+          image := container.image
+          count(allowed_registries) > 0
+          not startswith_any(image, allowed_registries)
+          not exempt_namespace(input.review.object.metadata.namespace)
+          msg := sprintf("initContainer <%v> uses image from disallowed registry: %v. Allowed: %v", [container.name, image, allowed_registries])
+        }
+        
+        # Cosign verification placeholder (actual verification done by Kyverno/sigstore)
+        violation[{"msg": msg}] {
+          require_cosign
+          container := input.review.object.spec.containers[_]
+          not has_cosign_annotation(input.review.object.metadata.annotations)
+          not exempt_namespace(input.review.object.metadata.namespace)
+          msg := sprintf("container <%v> requires cosign signature verification annotation in namespace <%v>", [container.name, input.review.object.metadata.namespace])
+        }
+        
+        startswith_any(str, prefixes) {
+          prefixes[_] == prefix
+          startswith(str, prefix)
+        }
+        
+        has_cosign_annotation(annotations) {
+          annotations["cosign.sigstore.dev/signature"]
+        }
+        
+        exempt_namespace(ns) {
+          exempt_ns := input.parameters.exemptNamespaces[_]
+          ns == exempt_ns
+        }

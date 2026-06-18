@@ -1,0 +1,19 @@
+# Gatekeeper Constraint — Disallow Privileged Containers
+# Exemptions: falco, kube-system (cilium, tetragon)
+apiVersion: constraints.gatekeeper.sh/v1beta1
+kind: K8sDisallowPrivileged
+metadata:
+  name: disallow-privileged-containers
+  annotations:
+    feature.securerag.dev/enable-gatekeeper: "true"
+spec:
+  match:
+    kinds:
+      - apiGroups: [""]
+        kinds: ["Pod"]
+  parameters:
+    exemptNamespaces:
+      - falco
+      - gatekeeper-system
+  validation:
+    message: "Privileged containers are not allowed except in runtime-dedicated namespaces (falco)."

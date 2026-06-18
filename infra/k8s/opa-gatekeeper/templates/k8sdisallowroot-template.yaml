@@ -1,0 +1,53 @@
+# Gatekeeper ConstraintTemplate — Disallow Root Containers
+# Aligns with Kyverno require-pod-security.yaml
+apiVersion: templates.gatekeeper.sh/v1
+kind: ConstraintTemplate
+metadata:
+  name: k8sdisallowroot
+  annotations:
+    feature.securerag.dev/enable-gatekeeper: "true"
+    metadata.gatekeeper.sh/title: "Disallow Root Containers"
+    metadata.gatekeeper.sh/version: 1.0.0
+spec:
+  crd:
+    spec:
+      names:
+        kind: K8sDisallowRoot
+      validation:
+        openAPIV3Schema:
+          type: object
+          properties:
+            exemptNamespaces:
+              type: array
+              items:
+                type: string
+            exemptContainers:
+              type: array
+              items:
+                type: string
+  targets:
+    - target: admission.k8s.gatekeeper.sh
+      rego: |
+        package k8sdisallowroot
+        violation[{"msg": msg}] {
+          container := input.review.object.spec.containers[_]
+          container.securityContext.runAsUser == 0
+          not exempt_namespace(input.review.object.metadata.namespace)
+          not exempt_container(container.name)
+          msg := sprintf("container <%v> must not run as root (UID 0) in namespace <%v>", [container.name, input.review.object.metadata.namespace])
+        }
+        violation[{"msg": msg}] {
+          container := input.review.object.spec.initContainers[_]
+          container.securityContext.runAsUser == 0
+          not exempt_namespace(input.review.object.metadata.namespace)
+          not exempt_container(container.name)
+          msg := sprintf("initContainer <%v> must not run as root (UID 0) in namespace <%v>", [container.name, input.review.object.metadata.namespace])
+        }
+        exempt_namespace(ns) {
+          exempt_ns := input.parameters.exemptNamespaces[_]
+          ns == exempt_ns
+        }
+        exempt_container(name) {
+          exempt_c := input.parameters.exemptContainers[_]
+          name == exempt_c
+        }

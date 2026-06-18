@@ -1,0 +1,73 @@
+# Gatekeeper ConstraintTemplate — Required Security Context (Non-Root, ReadOnlyRootFS, Drop Capabilities)
+# Aligns with Kyverno require-workload-controls.yaml
+apiVersion: templates.gatekeeper.sh/v1
+kind: ConstraintTemplate
+metadata:
+  name: k8srequiredsecuritycontext
+  annotations:
+    feature.securerag.dev/enable-gatekeeper: "true"
+    metadata.gatekeeper.sh/title: "Required Security Context"
+    metadata.gatekeeper.sh/version: 1.0.0
+spec:
+  crd:
+    spec:
+      names:
+        kind: K8sRequiredSecurityContext
+      validation:
+        openAPIV3Schema:
+          type: object
+          properties:
+            exemptNamespaces:
+              type: array
+              items:
+                type: string
+            requireNonRoot:
+              type: boolean
+              default: true
+            requireReadOnlyRootFS:
+              type: boolean
+              default: true
+            requiredDropCapabilities:
+              type: array
+              items:
+                type: string
+  targets:
+    - target: admission.k8s.gatekeeper.sh
+      rego: |
+        package k8srequiredsecuritycontext
+        
+        # Default parameters
+        require_non_root := input.parameters.requireNonRoot != false
+        require_readonly_rootfs := input.parameters.requireReadOnlyRootFS != false
+        required_drop_caps := input.parameters.requiredDropCapabilities
+        
+        violation[{"msg": msg}] {
+          require_non_root
+          container := input.review.object.spec.containers[_]
+          not container.securityContext.runAsNonRoot
+          not exempt_namespace(input.review.object.metadata.namespace)
+          msg := sprintf("container <%v> must set securityContext.runAsNonRoot=true in namespace <%v>", [container.name, input.review.object.metadata.namespace])
+        }
+        
+        violation[{"msg": msg}] {
+          require_readonly_rootfs
+          container := input.review.object.spec.containers[_]
+          not container.securityContext.readOnlyRootFilesystem
+          not exempt_namespace(input.review.object.metadata.namespace)
+          msg := sprintf("container <%v> must set securityContext.readOnlyRootFilesystem=true in namespace <%v>", [container.name, input.review.object.metadata.namespace])
+        }
+        
+        violation[{"msg": msg}] {
+          required_drop_caps
+          container := input.review.object.spec.containers[_]
+          caps := container.securityContext.capabilities.drop[_]
+          required_cap := required_drop_caps[_]
+          caps != required_cap
+          not exempt_namespace(input.review.object.metadata.namespace)
+          msg := sprintf("container <%v> must drop capability <%v> in namespace <%v>", [container.name, required_cap, input.review.object.metadata.namespace])
+        }
+        
+        exempt_namespace(ns(ns(ns) {
+          exempt_ns := input.parameters.exemptNamespaces[_]
+          ns == exempt_ns
+        }

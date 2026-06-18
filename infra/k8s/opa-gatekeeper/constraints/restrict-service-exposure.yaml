@@ -1,0 +1,24 @@
+# Gatekeeper Constraint — Restrict Service Exposure
+# Aligns with Kyverno restrict-service-exposure.yaml
+apiVersion: constraints.gatekeeper.sh/v1beta1
+kind: K8sRestrictServiceExposure
+metadata:
+  name: restrict-service-exposure
+  annotations:
+    feature.securerag.dev/enable-gatekeeper: "true"
+spec:
+  match:
+    kinds:
+      - apiGroups: [""]
+        kinds: ["Service"]
+  parameters:
+    exemptNamespaces:
+      - kube-system
+      - gatekeeper-system
+      - monitoring
+      - ingress-nginx
+    allowedTypes:
+      - "ClusterIP"
+      - "NodePort"  # For production overlay NodePort exposure
+  validation:
+    message: "Services must be ClusterIP or NodePort only. LoadBalancer and ExternalName require explicit approval."

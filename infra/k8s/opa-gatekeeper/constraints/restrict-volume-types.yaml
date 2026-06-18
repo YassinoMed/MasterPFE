@@ -1,0 +1,31 @@
+# Gatekeeper Constraint — Restrict Volume Types
+# Aligns with Kyverno restrict-volume-types.yaml
+apiVersion: constraints.gatekeeper.sh/v1beta1
+kind: K8sRestrictVolumeTypes
+metadata:
+  name: restrict-volume-types
+  annotations:
+    feature.securerag.dev/enable-gatekeeper: "true"
+spec:
+  match:
+    kinds:
+      - apiGroups: [""]
+        kinds: ["Pod"]
+  parameters:
+    exemptNamespaces:
+      - kube-system
+      - gatekeeper-system
+      - monitoring
+      - loki
+      - tempo
+      - falco
+    allowedVolumeTypes:
+      - "configMap"
+      - "secret"
+      - "emptyDir"
+      - "persistentVolumeClaim"
+      - "projected"
+      - "downwardAPI"
+      - "ephemeral"
+  validation:
+    message: "Only configMap, secret, emptyDir, pvc, projected, downwardAPI, and ephemeral volumes are allowed. hostPath and other host volumes are prohibited."

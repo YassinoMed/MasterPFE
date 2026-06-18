@@ -1,0 +1,26 @@
+# Gatekeeper Constraint — Disallow Root Containers
+# Aligns with Kyverno require-pod-security.yaml (PSA restricted)
+apiVersion: constraints.gatekeeper.sh/v1beta1
+kind: K8sDisallowRoot
+metadata:
+  name: disallow-root-containers
+  annotations:
+    feature.securerag.dev/enable-gatekeeper: "true"
+spec:
+  match:
+    kinds:
+      - apiGroups: [""]
+        kinds: ["Pod"]
+  parameters:
+    exemptNamespaces:
+      - kube-system
+      - gatekeeper-system
+      - monitoring
+      - loki
+      - tempo
+      - falco
+    exemptContainers:
+      - "pause"
+      - "istio-proxy"
+  validation:
+    message: "Containers must not run as root (UID 0). Use securityContext.runAsNonRoot=true and runAsUser>0."

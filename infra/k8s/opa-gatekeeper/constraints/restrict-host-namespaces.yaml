@@ -1,0 +1,26 @@
+# Gatekeeper Constraint — Restrict Host Namespaces
+# Aligns with Kyverno require-workload-controls.yaml
+apiVersion: constraints.gatekeeper.sh/v1beta1
+kind: K8sRestrictHostNamespaces
+metadata:
+  name: restrict-host-namespaces
+  annotations:
+    feature.securerag.dev/enable-gatekeeper: "true"
+spec:
+  match:
+    kinds:
+      - apiGroups: [""]
+        kinds: ["Pod"]
+  parameters:
+    exemptNamespaces:
+      - kube-system
+      - gatekeeper-system
+      - monitoring
+      - loki
+      - tempo
+      - falco
+    allowHostNetwork: false
+    allowHostPID: false
+    allowHostIPC: false
+  validation:
+    message: "hostNetwork, hostPID, and hostIPC are not allowed. Use pod-level networking and isolation."

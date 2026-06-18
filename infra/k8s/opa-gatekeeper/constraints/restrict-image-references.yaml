@@ -1,0 +1,31 @@
+# Gatekeeper Constraint — Restrict Image References
+# Aligns with Kyverno restrict-image-references.yaml and verify-cosign-images.yaml
+apiVersion: constraints.gatekeeper.sh/v1beta1
+kind: K8sRestrictImageReferences
+metadata:
+  name: restrict-image-references
+  annotations:
+    feature.securerag.dev/enable-gatekeeper: "true"
+spec:
+  match:
+    kinds:
+      - apiGroups: [""]
+        kinds: ["Pod"]
+  parameters:
+    exemptNamespaces:
+      - kube-system
+      - gatekeeper-system
+      - monitoring
+      - loki
+      - tempo
+      - falco
+    allowedRegistries:
+      - "localhost:5001/"
+      - "ghcr.io/"
+      - "docker.io/library/"
+    disallowLatestTag: true
+    requireCosignVerification: true
+    cosignPublicKeys:
+      - "cosign.pub"
+  validation:
+    message: "Images must not use :latest tag, must be from allowed registries, and must have cosign signature verification."

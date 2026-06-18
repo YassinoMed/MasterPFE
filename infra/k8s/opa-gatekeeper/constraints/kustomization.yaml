@@ -1,0 +1,16 @@
+# OPA Gatekeeper Constraints Kustomization
+# SecureRAG Hub — Policy as Code Constraints
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - disallow-privileged.yaml
+  - disallow-latest-tag.yaml
+  - disallow-root.yaml
+  - required-labels.yaml
+  - required-resources.yaml
+  - required-security-context.yaml
+  - restrict-host-namespaces.yaml
+  - restrict-image-references.yaml
+  - restrict-service-exposure.yaml
+  - restrict-volume-types.yaml

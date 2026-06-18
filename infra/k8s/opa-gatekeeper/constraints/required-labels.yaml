@@ -1,0 +1,25 @@
+# Gatekeeper Constraint — Required Labels
+# Enforces standard labels for all SecureRAG Hub resources
+apiVersion: constraints.gatekeeper.sh/v1beta1
+kind: K8sRequiredLabels
+metadata:
+  name: required-labels
+  annotations:
+    feature.securerag.dev/enable-gatekeeper: "true"
+spec:
+  match:
+    kinds:
+      - apiGroups: [""]
+        kinds: ["Pod", "Service", "Deployment", "StatefulSet", "DaemonSet", "ConfigMap", "Secret"]
+      - apiGroups: ["apps"]
+        kinds: ["Deployment", "StatefulSet", "DaemonSet"]
+      - apiGroups: ["networking.k8s.io"]
+        kinds: ["NetworkPolicy"]
+      - apiGroups: ["policy"]
+        kinds: ["PodDisruptionBudget"]
+  parameters:
+    labels:
+      - "app.kubernetes.io/part-of"
+      - "app.kubernetes.io/managed-by"
+  validation:
+    message: "All resources must have labels: app.kubernetes.io/part-of=securerag-hub and app.kubernetes.io/managed-by"

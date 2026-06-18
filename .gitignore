@@ -25,6 +25,9 @@ security/secrets/.env.local
 infra/jenkins/secrets/
 infra/jenkins/secrets/**/*
 
+# ── OPA Gatekeeper — suivis malgré *.yaml ──
+!infra/k8s/opa-gatekeeper/**/*.yaml
+
 # ── SOPS — fichiers encryptés commités, fichiers en clair exclus ──
 *.yaml
 !*.enc.yaml

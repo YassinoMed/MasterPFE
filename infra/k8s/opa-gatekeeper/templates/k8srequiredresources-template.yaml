@@ -1,0 +1,142 @@
+# Gatekeeper ConstraintTemplate — Required Resource Limits and Requests
+# Aligns with Kyverno require-workload-controls.yaml and kube-score
+apiVersion: templates.gatekeeper.sh/v1
+kind: ConstraintTemplate
+metadata:
+  name: k8srequiredresources
+  annotations:
+    feature.securerag.dev/enable-gatekeeper: "true"
+    metadata.gatekeeper.sh/title: "Required Resources"
+    metadata.gatekeeper.sh/version: 1.0.0
+spec:
+  crd:
+    spec:
+      names:
+        kind: K8sRequiredResources
+      validation:
+        openAPIV3Schema:
+          type: object
+          properties:
+            exemptNamespaces:
+              type: array
+              items:
+                type: string
+            requireLimits:
+              type: boolean
+              default: true
+            requireRequests:
+              type: boolean
+              default: true
+            limitCPU:
+              type: string
+              default: "2000m"
+            limitMemory:
+              type: string
+              default: "2Gi"
+            requestCPU:
+              type: string
+              default: "100m"
+            requestMemory:
+              type: string
+              default: "128Mi"
+  targets:
+    - target: admission.k8s.gatekeeper.sh
+      rego: |
+        package k8srequiredresources
+        
+        require_limits := input.parameters.requireLimits != false
+        require_requests := input.parameters.requireRequests != false
+        limit_cpu := input.parameters.limitCPU
+        limit_memory := input.parameters.limitMemory
+        request_cpu := input.parameters.requestCPU
+        request_memory := input.parameters.requestMemory
+        
+        # Check container resources
+        violation[{"msg": msg}] {
+          require_limits
+          container := input.review.object.spec.containers[_]
+          not container.resources.limits.cpu
+          not exempt_namespace(input.review.object.metadata.namespace)
+          msg := sprintf("container <%v> must have CPU limit in namespace <%v>", [container.name, input.review.object.metadata.namespace])
+        }
+        
+        violation[{"msg": msg}] {
+          require_limits
+          container := input.review.object.spec.containers[_]
+          not container.resources.limits.memory
+          not exempt_namespace(input.review.object.metadata.namespace)
+          msg := sprintf("container <%v> must have memory limit in namespace <%v>", [container.name, input.review.object.metadata.namespace])
+        }
+        
+        violation[{"msg": msg}] {
+          require_requests
+          container := input.review.object.spec.containers[_]
+          not container.resources.requests.cpu
+          not exempt_namespace(input.review.object.metadata.namespace)
+          msg := sprintf("container <%v> must have CPU request in namespace <%v>", [container.name, input.review.object.metadata.namespace])
+        }
+        
+        violation[{"msg": msg}] {
+          require_requests
+          container := input.review.object.spec.containers[_]
+          not container.resources.requests.memory
+          not exempt_namespace(input.review.object.metadata.namespace)
+          msg := sprintf("container <%v> must have memory request in namespace <%v>", [container.name, input.review.object.metadata.namespace])
+        }
+        
+        # Check limit values are reasonable
+        violation[{"msg": msg}] {
+          require_limits
+          container := input.review.object.spec.containers[_]
+          limit := container.resources.limits.cpu
+          limit != ""
+          cpu_to_millicores(limit) > cpu_to_millicores(limit_cpu)
+          not exempt_namespace(input.review.object.metadata.namespace)
+          msg := sprintf("container <%v> CPU limit %v exceeds maximum %v in namespace <%v>", [container.name, limit, limit_cpu, input.review.object.metadata.namespace])
+        }
+        
+        violation[{"msg": msg}] {
+          require_limits
+          container := input.review.object.spec.containers[_]
+          limit := container.resources.limits.memory
+          limit != ""
+          memory_to_bytes(limit) > memory_to_bytes(limit_memory)
+          not exempt_namespace(input.review.object.metadata.namespace)
+          msg := sprintf("container <%v> memory limit %v exceeds maximum %v in namespace <%v>", [container.name, limit, limit_memory, input.review.object.metadata.namespace])
+        }
+        
+        cpu_to_millicores(cpu_str) = millicores {
+          endswith(cpu_str, "m")
+          millicores := count(cpu_str) - 1
+        }
+        cpu_to_millicores(cpu_str) = millicores {
+          not endswith(cpu_str, "m")
+          millicores := cpu_str * 1000
+        }
+        
+        memory_to_bytes(mem_str) = bytes {
+          endswith(mem_str, "Gi")
+          g := replace(mem_str, "Gi", "")
+          bytes := g * 1024 * 1024 * 1024
+        }
+        memory_to_bytes(mem_str) = bytes {
+          endswith(mem_str, "Mi")
+          m := replace(mem_str, "Mi", "")
+          bytes := m * 1024 * 1024
+        }
+        memory_to_bytes(mem_str) = bytes {
+          endswith(mem_str, "Ki")
+          k := replace(mem_str, "Ki", "")
+          bytes := k * 1024
+        }
+        memory_to_bytes(mem_str) = bytes {
+          not endswith(mem_str, "Gi")
+          not endswith(mem_str, "Mi")
+          not endswith(mem_str, "Ki")
+          bytes := mem_str
+        }
+        
+        exempt_namespace(ns) {
+          exempt_ns := input.parameters.exemptNamespaces[_]
+          ns == exempt_ns
+        }

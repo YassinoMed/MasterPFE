@@ -1,0 +1,17 @@
+# Gatekeeper Constraint — Require Resource Limits & Requests
+apiVersion: constraints.gatekeeper.sh/v1beta1
+kind: K8sRequiredResources
+metadata:
+  name: require-resource-limits
+  annotations:
+    feature.securerag.dev/enable-gatekeeper: "true"
+spec:
+  match:
+    kinds:
+      - apiGroups: [""]
+        kinds: ["Pod"]
+    excludedNamespaces:
+      - gatekeeper-system
+      - kube-system
+  validation:
+    message: "All containers must specify resource requests and limits (CPU + memory)."

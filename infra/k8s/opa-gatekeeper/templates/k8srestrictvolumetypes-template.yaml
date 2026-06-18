@@ -1,0 +1,57 @@
+# Gatekeeper ConstraintTemplate — Restrict Volume Types
+# Aligns with Kyverno restrict-volume-types.yaml
+apiVersion: templates.gatekeeper.sh/v1
+kind: ConstraintTemplate
+metadata:
+  name: k8srestrictvolumetypes
+  annotations:
+    feature.securerag.dev/enable-gatekeeper: "true"
+    metadata.gatekeeper.sh/title: "Restrict Volume Types"
+    metadata.gatekeeper.sh/version: 1.0.0
+spec:
+  crd:
+    spec:
+      names:
+        kind: K8sRestrictVolumeTypes
+      validation:
+        openAPIV3Schema:
+          type: object
+          properties:
+            exemptNamespaces:
+              type: array
+              items:
+                type: string
+            allowedVolumeTypes:
+              type: array
+              items:
+                type: string
+              default: ["configMap", "secret", "emptyDir", "persistentVolumeClaim", "projected", "downwardAPI"]
+  targets:
+    - target: admission.k8s.gatekeeper.sh
+      rego: |
+        package k8srestrictvolumetypes
+        
+        allowed_types := input.parameters.allowedVolumeTypes
+        
+        violation[{"msg": msg}] {
+          volume := input.review.object.spec.volumes[_]
+          volume_type := get_volume_type(volume)
+          volume_type != ""
+          not contains(allowed_types, volume_type)
+          not exempt_namespace(input.review.object.metadata.namespace)
+          msg := sprintf("volume <%v> type <%v> is not allowed in namespace <%v>. Allowed: %v", [volume.name, volume_type, input.review.object.metadata.namespace, allowed_types])
+        }
+        
+        get_volume_type(volume) = vol_type {
+          volume.hostPath
+          vol_type := "hostPath"
+        }
+        get_volume_type(volume) = vol_type {
+          volume.hostPath == {}
+          vol_type := "hostPath"
+        }
+        
+        exempt_namespace(ns) {
+          exempt_ns := input.parameters.exemptNamespaces[_]
+          ns == exempt_ns
+        }

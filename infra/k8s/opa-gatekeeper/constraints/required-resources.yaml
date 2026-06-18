@@ -1,0 +1,29 @@
+# Gatekeeper Constraint — Required Resource Limits and Requests
+# Aligns with Kyverno require-workload-controls.yaml and kube-score
+apiVersion: constraints.gatekeeper.sh/v1beta1
+kind: K8sRequiredResources
+metadata:
+  name: required-resources
+  annotations:
+    feature.securerag.dev/enable-gatekeeper: "true"
+spec:
+  match:
+    kinds:
+      - apiGroups: [""]
+        kinds: ["Pod"]
+  parameters:
+    exemptNamespaces:
+      - kube-system
+      - gatekeeper-system
+      - monitoring
+      - loki
+      - tempo
+      - falco
+    requireLimits: true
+    requireRequests: true
+    limitCPU: "2000m"
+    limitMemory: "2Gi"
+    requestCPU: "100m"
+    requestMemory: "128Mi"
+  validation:
+    message: "Containers must have CPU/memory limits and requests. Max: 2 CPU / 2Gi memory. Min: 100m CPU / 128Mi memory."

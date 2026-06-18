@@ -1,0 +1,23 @@
+# Gatekeeper Constraint — Disallow Latest Tag
+# Aligns with Kyverno restrict-image-references.yaml
+apiVersion: constraints.gatekeeper.sh/v1beta1
+kind: K8sDisallowLatestTag
+metadata:
+  name: disallow-latest-tag
+  annotations:
+    feature.securerag.dev/enable-gatekeeper: "true"
+spec:
+  match:
+    kinds:
+      - apiGroups: [""]
+        kinds: ["Pod"]
+  parameters:
+    exemptNamespaces:
+      - kube-system
+      - gatekeeper-system
+      - monitoring
+      - loki
+      - tempo
+      - falco
+  validation:
+    message: "Images must not use :latest tag. Use explicit version tags or digests."

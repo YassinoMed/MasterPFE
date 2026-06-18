@@ -1,0 +1,49 @@
+# Gatekeeper ConstraintTemplate — Restrict Service Exposure
+# Aligns with Kyverno restrict-service-exposure.yaml
+apiVersion: templates.gatekeeper.sh/v1
+kind: ConstraintTemplate
+metadata:
+  name: k8srestrictserviceexposure
+  annotations:
+    feature.securerag.dev/enable-gatekeeper: "true"
+    metadata.gatekeeper.sh/title: "Restrict Service Exposure"
+    metadata.gatekeeper.sh/version: 1.0.0
+spec:
+  crd:
+    spec:
+      names:
+        kind: K8sRestrictServiceExposure
+      validation:
+        openAPIV3Schema:
+          type: object
+          properties:
+            exemptNamespaces:
+              type: array
+              items:
+                type: string
+            allowedTypes:
+              type: array
+              items:
+                type: string
+              default: ["ClusterIP"]
+  targets:
+    - target: admission.k8s.gatekeeper.sh
+      rego: |
+        package k8srestrictserviceexposure
+        
+        allowed_types := input.parameters.allowedTypes
+        count(allowed_types) == 0
+        
+        violation[{"msg": msg}] {
+          input.review.object.kind == "Service"
+          svc_type := input.review.object.spec.type
+          svc_type != ""
+          not contains(allowed_types, svc_type)
+          not exempt_namespace(input.review.object.metadata.namespace)
+          msg := sprintf("service <%v> type <%v> is not allowed in namespace <%v>. Allowed: %v", [input.review.object.metadata.name, svc_type, input.review.object.metadata.namespace, allowed_types])
+        }
+        
+        exempt_namespace(ns) {
+          exempt_ns := input.parameters.exemptNamespaces[_]
+          ns == exempt_ns
+        }

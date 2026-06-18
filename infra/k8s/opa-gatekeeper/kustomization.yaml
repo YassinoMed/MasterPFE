@@ -1,0 +1,29 @@
+# OPA Gatekeeper Kustomization
+# SecureRAG Hub — Policy as Code
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: gatekeeper-system
+
+resources:
+  - deployment.yaml
+  - templates/k8sdisallowprivileged-template.yaml
+  - templates/k8sdisallowlatesttag-template.yaml
+  - templates/k8sdisallowroot-template.yaml
+  - templates/k8srequiredlabels-template.yaml
+  - templates/k8srequiredresources-template.yaml
+  - templates/k8srequiredsecuritycontext-template.yaml
+  - templates/k8srestricthostnamespaces-template.yaml
+  - templates/k8srestrictimagereferences-template.yaml
+  - templates/k8srestrictserviceexposure-template.yaml
+  - templates/k8srestrictvolumetypes-template.yaml
+  - constraints/disallow-privileged.yaml
+  - constraints/disallow-latest-tag.yaml
+  - constraints/disallow-root.yaml
+  - constraints/required-labels.yaml
+  - constraints/required-resources.yaml
+  - constraints/required-security-context.yaml
+  - constraints/restrict-host-namespaces.yaml
+  - constraints/restrict-image-references.yaml
+  - constraints/restrict-service-exposure.yaml
+  - constraints/restrict-volume-types.yaml

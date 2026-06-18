@@ -1,0 +1,66 @@
+# Gatekeeper ConstraintTemplate — Restrict Host Namespaces (Network, PID, IPC)
+# Aligns with Kyverno require-workload-controls.yaml
+apiVersion: templates.gatekeeper.sh/v1
+kind: ConstraintTemplate
+metadata:
+  name: k8srestricthostnamespaces
+  annotations:
+    feature.securerag.dev/enable-gatekeeper: "true"
+    metadata.gatekeeper.sh/title: "Restrict Host Namespaces"
+    metadata.gatekeeper.sh/version: 1.0.0
+spec:
+  crd:
+    spec:
+      names:
+        kind: K8sRestrictHostNamespaces
+      validation:
+        openAPIV3Schema:
+          type: object
+          properties:
+            exemptNamespaces:
+              type: array
+              items:
+                type: string
+            allowHostNetwork:
+              type: boolean
+              default: false
+            allowHostPID:
+              type: boolean
+              default: false
+            allowHostIPC:
+              type: boolean
+              default: false
+  targets:
+    - target: admission.k8s.gatekeeper.sh
+      rego: |
+        package k8srestricthostnamespaces
+        
+        allow_host_network := input.parameters.allowHostNetwork == true
+        allow_host_pid := input.parameters.allowHostPID == true
+        allow_host_ipc := input.parameters.allowHostIPC == true
+        
+        violation[{"msg": msg}] {
+          not allow_host_network
+          input.review.object.spec.hostNetwork
+          not exempt_namespace(input.review.object.metadata.namespace)
+          msg := sprintf("hostNetwork is not allowed in namespace <%v>", [input.review.object.metadata.namespace])
+        }
+        
+        violation[{"msg": msg}] {
+          not allow_host_pid
+          input.review.object.spec.hostPID
+          not exempt_namespace(input.review.object.metadata.namespace)
+          msg := sprintf("hostPID is not allowed in namespace <%v>", [input.review.object.metadata.namespace])
+        }
+        
+        violation[{"msg": msg}] {
+          not allow_host_ipc
+          input.review.object.spec.hostIPC
+          not exempt_namespace(input.review.object.metadata.namespace)
+          msg := sprintf("hostIPC is not allowed in namespace <%v>", [input.review.object.metadata.namespace])
+        }
+        
+        exempt_namespace(ns) {
+          exempt_ns := input.parameters.exemptNamespaces[_]
+          ns == exempt_ns
+        }
