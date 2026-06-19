@@ -96,7 +96,8 @@ for name, min_replicas in official.items():
     rolling = strategy.get("rollingUpdate") or {}
     check(name, "RollingUpdate enabled", strategy.get("type") == "RollingUpdate", f"strategy.type={strategy.get('type')}")
     check(name, "rolling maxUnavailable=0", str(rolling.get("maxUnavailable")) == "0", f"maxUnavailable={rolling.get('maxUnavailable')}")
-    check(name, "rolling maxSurge=1", str(rolling.get("maxSurge")) == "1", f"maxSurge={rolling.get('maxSurge')}")
+    expected_max_surge = str(min_replicas)
+    check(name, f"rolling maxSurge={expected_max_surge}", str(rolling.get("maxSurge")) == expected_max_surge, f"maxSurge={rolling.get('maxSurge')}")
     check(name, "minReadySeconds configured", int(dig(dep, "spec", "minReadySeconds") or 0) >= 10, f"minReadySeconds={dig(dep, 'spec', 'minReadySeconds')}")
 
     pod_spec = dig(dep, "spec", "template", "spec") or {}

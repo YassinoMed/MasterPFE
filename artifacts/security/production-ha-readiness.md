@@ -1,7 +1,7 @@
 # Production HA Readiness - SecureRAG Hub
 
 - Overlay: `infra/k8s/overlays/production`
-- Generated at UTC: `2026-06-19T17:36:24Z`
+- Generated at UTC: `2026-06-19T20:46:32Z`
 
 | Component | Control | Status | Evidence |
 |---|---|---:|---|
@@ -9,7 +9,7 @@
 | `portal-web` | replicas >= 3 | TERMINÉ | `replicas=3` |
 | `portal-web` | RollingUpdate enabled | TERMINÉ | `strategy.type=RollingUpdate` |
 | `portal-web` | rolling maxUnavailable=0 | TERMINÉ | `maxUnavailable=0` |
-| `portal-web` | rolling maxSurge=1 | FAIL | `maxSurge=3` |
+| `portal-web` | rolling maxSurge=3 | TERMINÉ | `maxSurge=3` |
 | `portal-web` | minReadySeconds configured | TERMINÉ | `minReadySeconds=10` |
 | `portal-web` | soft pod anti-affinity | TERMINÉ | `preferred anti-affinity on kubernetes.io/hostname` |
 | `portal-web` | topology spread constraint | TERMINÉ | `topologyKey=kubernetes.io/hostname` |
@@ -26,7 +26,7 @@
 | `auth-users` | replicas >= 2 | TERMINÉ | `replicas=2` |
 | `auth-users` | RollingUpdate enabled | TERMINÉ | `strategy.type=RollingUpdate` |
 | `auth-users` | rolling maxUnavailable=0 | TERMINÉ | `maxUnavailable=0` |
-| `auth-users` | rolling maxSurge=1 | FAIL | `maxSurge=2` |
+| `auth-users` | rolling maxSurge=2 | TERMINÉ | `maxSurge=2` |
 | `auth-users` | minReadySeconds configured | TERMINÉ | `minReadySeconds=10` |
 | `auth-users` | soft pod anti-affinity | TERMINÉ | `preferred anti-affinity on kubernetes.io/hostname` |
 | `auth-users` | topology spread constraint | TERMINÉ | `topologyKey=kubernetes.io/hostname` |
@@ -43,7 +43,7 @@
 | `chatbot-manager` | replicas >= 2 | TERMINÉ | `replicas=2` |
 | `chatbot-manager` | RollingUpdate enabled | TERMINÉ | `strategy.type=RollingUpdate` |
 | `chatbot-manager` | rolling maxUnavailable=0 | TERMINÉ | `maxUnavailable=0` |
-| `chatbot-manager` | rolling maxSurge=1 | FAIL | `maxSurge=2` |
+| `chatbot-manager` | rolling maxSurge=2 | TERMINÉ | `maxSurge=2` |
 | `chatbot-manager` | minReadySeconds configured | TERMINÉ | `minReadySeconds=10` |
 | `chatbot-manager` | soft pod anti-affinity | TERMINÉ | `preferred anti-affinity on kubernetes.io/hostname` |
 | `chatbot-manager` | topology spread constraint | TERMINÉ | `topologyKey=kubernetes.io/hostname` |
@@ -60,7 +60,7 @@
 | `conversation-service` | replicas >= 2 | TERMINÉ | `replicas=2` |
 | `conversation-service` | RollingUpdate enabled | TERMINÉ | `strategy.type=RollingUpdate` |
 | `conversation-service` | rolling maxUnavailable=0 | TERMINÉ | `maxUnavailable=0` |
-| `conversation-service` | rolling maxSurge=1 | FAIL | `maxSurge=2` |
+| `conversation-service` | rolling maxSurge=2 | TERMINÉ | `maxSurge=2` |
 | `conversation-service` | minReadySeconds configured | TERMINÉ | `minReadySeconds=10` |
 | `conversation-service` | soft pod anti-affinity | TERMINÉ | `preferred anti-affinity on kubernetes.io/hostname` |
 | `conversation-service` | topology spread constraint | TERMINÉ | `topologyKey=kubernetes.io/hostname` |
@@ -77,7 +77,7 @@
 | `audit-security-service` | replicas >= 2 | TERMINÉ | `replicas=2` |
 | `audit-security-service` | RollingUpdate enabled | TERMINÉ | `strategy.type=RollingUpdate` |
 | `audit-security-service` | rolling maxUnavailable=0 | TERMINÉ | `maxUnavailable=0` |
-| `audit-security-service` | rolling maxSurge=1 | FAIL | `maxSurge=2` |
+| `audit-security-service` | rolling maxSurge=2 | TERMINÉ | `maxSurge=2` |
 | `audit-security-service` | minReadySeconds configured | TERMINÉ | `minReadySeconds=10` |
 | `audit-security-service` | soft pod anti-affinity | TERMINÉ | `preferred anti-affinity on kubernetes.io/hostname` |
 | `audit-security-service` | topology spread constraint | TERMINÉ | `topologyKey=kubernetes.io/hostname` |
@@ -93,12 +93,7 @@
 
 ## Interpretation
 
-Statut global: FAIL. Les controles suivants doivent etre corriges avant de presenter l'overlay comme pret HA :
-- portal-web: rolling maxSurge=1 -- maxSurge=3
-- auth-users: rolling maxSurge=1 -- maxSurge=2
-- chatbot-manager: rolling maxSurge=1 -- maxSurge=2
-- conversation-service: rolling maxSurge=1 -- maxSurge=2
-- audit-security-service: rolling maxSurge=1 -- maxSurge=2
+Statut global: TERMINÉ. L'overlay production rend les controles HA statiques attendus.
 
 ## Limite runtime
 
