@@ -47,6 +47,16 @@ credentials:
               secret: "${readFile:/run/jenkins-secrets/sonar-token}"
 
 unclassified:
+  globalLibraries:
+    libraries:
+      - name: "jenkins-shared-library"
+        defaultVersion: "main"
+        implicit: true
+        retriever:
+          modernSCM:
+            scm:
+              git:
+                remote: "https://github.com/YassinoMed/MasterPFE.git"
   location:
     url: "${JENKINS_URL}"
     adminAddress: "${readFile:/run/jenkins-secrets/gmail-user}"

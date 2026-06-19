@@ -130,8 +130,9 @@ pipeline {
                 set -euo pipefail
                 mkdir -p security/reports
                 semgrep scan --config security/semgrep/semgrep.yml --json -o security/reports/semgrep.json --error
+                semgrep scan --config security/semgrep/semgrep.yml --config auto --sarif -o security/reports/semgrep.sarif --error
               '''
-              stash name: 'semgrep-report', includes: 'security/reports/semgrep.json'
+              stash name: 'semgrep-report', includes: 'security/reports/semgrep.*'
             }
           }
         }
@@ -180,10 +181,20 @@ pipeline {
               sh '''
                 set -euo pipefail
                 mkdir -p security/reports
+                set +e
                 checkov -d infra/k8s/ --config-file security/checkov-config.yaml --hard-fail-on CRITICAL --soft-fail-on HIGH -o junitxml > security/reports/checkov-k8s.xml
+                rc1=$?
                 checkov -d infra/helm/ --config-file security/checkov-config.yaml --hard-fail-on CRITICAL --soft-fail-on HIGH -o junitxml > security/reports/checkov-helm.xml
+                rc2=$?
                 checkov -d platform/ --config-file security/checkov-config.yaml --hard-fail-on CRITICAL --soft-fail-on HIGH -o junitxml > security/reports/checkov-docker-platform.xml
+                rc3=$?
                 checkov -d services-laravel/ --config-file security/checkov-config.yaml --hard-fail-on CRITICAL --soft-fail-on HIGH -o junitxml > security/reports/checkov-docker-services.xml
+                rc4=$?
+                set -e
+                if [ $rc1 -ne 0 ] || [ $rc2 -ne 0 ] || [ $rc3 -ne 0 ] || [ $rc4 -ne 0 ]; then
+                  echo "[ERROR] One or more Checkov scans failed."
+                  exit 1
+                fi
               '''
               stash name: 'checkov-reports', includes: 'security/reports/checkov-*.xml'
             }
@@ -199,7 +210,7 @@ pipeline {
                 set -euo pipefail
                 mkdir -p artifacts/security
                 bash scripts/validate/validate-k8s-ultra-hardening.sh
-                REQUIRE_KYVERNO_CLI=false bash scripts/ci/validate-kyverno-policies.sh
+                REQUIRE_KYVERNO_CLI=true bash scripts/ci/validate-kyverno-policies.sh
                 STRICT_KUBE_SCORE=true KUBE_SCORE_MAX_CRITICAL="${KUBE_SCORE_MAX_CRITICAL:-0}" KUBE_SCORE_MAX_WARNINGS="${KUBE_SCORE_MAX_WARNINGS:-0}" bash scripts/ci/validate-kube-score.sh
               '''
               stash name: 'k8s-reports', includes: 'artifacts/security/*.md,artifacts/security/kube-score-*'
@@ -500,10 +511,18 @@ for x in d:
                   set -euo pipefail
                   mkdir -p security/reports
                   echo "[INFO] Running Checkov IaC scan (CD gate)..."
-                  checkov -d infra/k8s/ --config-file security/checkov-config.yaml --soft-fail-on HIGH \
-                    -o json > security/reports/cd-checkov-k8s.json 2>/dev/null || true
-                  checkov -d infra/helm/ --config-file security/checkov-config.yaml --soft-fail-on HIGH \
-                    -o json > security/reports/cd-checkov-helm.json 2>/dev/null || true
+                  set +e
+                  checkov -d infra/k8s/ --config-file security/checkov-config.yaml --hard-fail-on HIGH \
+                    -o json > security/reports/cd-checkov-k8s.json 2>/dev/null
+                  rc1=$?
+                  checkov -d infra/helm/ --config-file security/checkov-config.yaml --hard-fail-on HIGH \
+                    -o json > security/reports/cd-checkov-helm.json 2>/dev/null
+                  rc2=$?
+                  set -e
+                  if [ $rc1 -ne 0 ] || [ $rc2 -ne 0 ]; then
+                    echo "[ERROR] Checkov scans found violations in CD stage."
+                    exit 1
+                  fi
                   echo "[INFO] Checkov IaC scan complete — review reports for findings"
                 '''
               }
@@ -526,13 +545,21 @@ for x in d:
                   set -euo pipefail
                   mkdir -p artifacts/security
                   echo "[INFO] Running kube-score on recette overlay manifests..."
+                  set +e
                   KUSTOMIZE_OVERLAY=infra/k8s/overlays/recette \
                     STRICT_KUBE_SCORE=true \
                     KUBE_SCORE_MAX_CRITICAL="${KUBE_SCORE_MAX_CRITICAL:-0}" \
                     KUBE_SCORE_MAX_WARNINGS="${KUBE_SCORE_MAX_WARNINGS:-0}" \
-                    bash scripts/ci/validate-kube-score.sh || true
+                    bash scripts/ci/validate-kube-score.sh
+                  rc1=$?
                   echo "[INFO] Running Kyverno dry-run on recette overlay..."
-                  REQUIRE_KYVERNO_CLI=false bash scripts/ci/validate-kyverno-policies.sh --dry-run || true
+                  REQUIRE_KYVERNO_CLI=true bash scripts/ci/validate-kyverno-policies.sh --dry-run
+                  rc2=$?
+                  set -e
+                  if [ $rc1 -ne 0 ] || [ $rc2 -ne 0 ]; then
+                    echo "[ERROR] Manifest validation failed."
+                    exit 1
+                  fi
                   echo "[INFO] Manifest validation complete — review kube-score report"
                 '''
               }
@@ -555,7 +582,7 @@ for x in d:
                   set -euo pipefail
                   mkdir -p security/reports
                   echo "[INFO] Running OWASP Dependency-Check (CD gate)..."
-                  bash scripts/ci/run-owasp-dependency-check.sh || true
+                  bash scripts/ci/run-owasp-dependency-check.sh
                   echo "[INFO] OWASP Dependency-Check complete — review HTML report"
                 '''
               }
@@ -590,13 +617,11 @@ for x in d:
       steps {
         timeout(time: 30, unit: 'MINUTES') {
           unstash 'workspace'
-          withCredentials([file(credentialsId: 'recette-deploy-key', variable: 'SSH_KEY_PATH')]) {
+          withCredentials([sshUserPrivateKey(credentialsId: 'recette-deploy-ssh-key', keyFileVariable: 'SSH_KEY_FILE')]) {
             sh '''
               set -euo pipefail
-              cp "${SSH_KEY_PATH}" /tmp/recette-deploy-key
-              chmod 600 /tmp/recette-deploy-key
               echo "[INFO] Deploying to recette (${RECETTE_USER}@${RECETTE_HOST})..."
-              bash scripts/deploy/deploy-to-recette.sh
+              SSH_KEY_FILE="${SSH_KEY_FILE}" bash scripts/deploy/deploy-to-recette.sh
               echo "[INFO] Deployment to recette completed"
             '''
           }
@@ -659,7 +684,7 @@ for x in d:
                     set -euo pipefail
                     echo "[INFO] Running SonarQube analysis (CD validation)..."
                     REQUIRE_SONAR=true SONAR_HOST_URL="${SONAR_HOST_URL:-}" SONAR_TOKEN="${SONAR_TOKEN}" \
-                      bash scripts/ci/run-sonar-analysis.sh || true
+                      bash scripts/ci/run-sonar-analysis.sh
                     echo "[INFO] SonarQube analysis complete"
                     echo "[NOTE] SonarQube Quality Gate status must be reviewed manually"
                   '''
@@ -682,17 +707,27 @@ for x in d:
                 sh '''
                   set -euo pipefail
                   echo "[INFO] Verifying supply chain (SLSA + Cosign)..."
+                  set +e
                   if [ -f "scripts/supply-chain/verify-slsa.sh" ]; then
-                    bash scripts/supply-chain/verify-slsa.sh || true
+                    bash scripts/supply-chain/verify-slsa.sh
+                    rc1=$?
                   else
                     echo "[WARN] SLSA verify script not found — skipping"
+                    rc1=0
                   fi
                   COSIGN_PUB_KEY="k8s://securerag-hub/cosign-public-key"
                   if kubectl get secret cosign-public-key -n securerag-hub &>/dev/null 2>&1; then
                     cosign verify --key "${COSIGN_PUB_KEY}" \
-                      "${REGISTRY_HOST:-localhost:5001}/securerag-hub-portal-web:${IMAGE_TAG:-demo}" || true
+                      "${REGISTRY_HOST:-localhost:5001}/securerag-hub-portal-web:${IMAGE_TAG:-demo}"
+                    rc2=$?
                   else
                     echo "[WARN] Cosign public key not found in cluster — skipping image verification"
+                    rc2=0
+                  fi
+                  set -e
+                  if [ $rc1 -ne 0 ] || [ $rc2 -ne 0 ]; then
+                    echo "[ERROR] Supply chain verification failed."
+                    exit 1
                   fi
                   echo "[INFO] Supply chain verification complete"
                 '''
@@ -714,15 +749,25 @@ for x in d:
                 sh '''
                   set -euo pipefail
                   echo "[INFO] Checking runtime security (Tetragon + OPA Gatekeeper)..."
+                  set +e
                   if [ -f "scripts/ci/validate-tetragon-policies.sh" ]; then
-                    bash scripts/ci/validate-tetragon-policies.sh || true
+                    bash scripts/ci/validate-tetragon-policies.sh
+                    rc1=$?
                   else
                     echo "[WARN] Tetragon validation script not found — skipping"
+                    rc1=0
                   fi
                   if [ -f "scripts/ci/validate-opa-gatekeeper.sh" ]; then
-                    bash scripts/ci/validate-opa-gatekeeper.sh || true
+                    bash scripts/ci/validate-opa-gatekeeper.sh
+                    rc2=$?
                   else
                     echo "[WARN] OPA Gatekeeper validation script not found — skipping"
+                    rc2=0
+                  fi
+                  set -e
+                  if [ $rc1 -ne 0 ] || [ $rc2 -ne 0 ]; then
+                    echo "[ERROR] Runtime security verification failed."
+                    exit 1
                   fi
                   echo "[INFO] Runtime security checks complete"
                 '''
@@ -745,7 +790,7 @@ for x in d:
                   set -euo pipefail
                   echo "[INFO] Validating SPIRE workload identities..."
                   if [ -f "scripts/spire/deploy-spire.sh" ]; then
-                    bash scripts/spire/deploy-spire.sh --validate-only || true
+                    bash scripts/spire/deploy-spire.sh --validate-only
                   else
                     echo "[WARN] SPIRE validation script not found — skipping"
                   fi
@@ -770,7 +815,7 @@ for x in d:
                   set -euo pipefail
                   echo "[INFO] Validating Vault dynamic secrets..."
                   if [ -f "scripts/vault/validate-dynamic-secrets.sh" ]; then
-                    bash scripts/vault/validate-dynamic-secrets.sh || true
+                    bash scripts/vault/validate-dynamic-secrets.sh
                   else
                     echo "[WARN] Vault validation script not found — skipping"
                   fi
@@ -795,7 +840,7 @@ for x in d:
                   set -euo pipefail
                   echo "[INFO] Checking SIEM (Wazuh) for post-deploy alerts..."
                   if [ -f "scripts/opensearch/validate-siem.sh" ]; then
-                    bash scripts/opensearch/validate-siem.sh --window 2m || true
+                    bash scripts/opensearch/validate-siem.sh --window 2m
                   else
                     echo "[WARN] SIEM validation script not found — skipping"
                   fi
@@ -828,17 +873,25 @@ for x in d:
               set -euo pipefail
               mkdir -p artifacts/dast
               echo "[INFO] Running OWASP ZAP baseline scan against ${DAST_PORTAL_URL}..."
+              set +e
               docker run --rm --network host \
                 -v "$(pwd)/artifacts/dast:/zap/wrk:rw" \
                 -t ghcr.io/zaproxy/zaproxy:2.15.0 zap-baseline.py \
                 -t "${DAST_PORTAL_URL}" \
                 -r dast-baseline-report.html \
                 -J dast-baseline-report.json \
-                -l WARN || true
-              echo "[INFO] ZAP baseline scan complete"
+                -l WARN
+              rc1=$?
+              echo "[INFO] ZAP baseline scan complete (exit: ${rc1})"
               echo "[INFO] Validating DAST report..."
               DAST_REPORT=artifacts/dast/dast-baseline-report.json DAST_FAIL_ON=High \
-                bash scripts/validate/validate-dast-report.sh || true
+                bash scripts/validate/validate-dast-report.sh
+              rc2=$?
+              set -e
+              if [ $rc1 -ne 0 ] || [ $rc2 -ne 0 ]; then
+                echo "[ERROR] ZAP scan or validation failed."
+                exit 1
+              fi
               echo "[INFO] DAST validation complete"
             '''
           }

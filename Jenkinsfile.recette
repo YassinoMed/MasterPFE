@@ -242,10 +242,20 @@ pipeline {
             --report-format json \
             --report-path security/reports/gitleaks.json
 
+          set +e
           checkov -d infra/k8s/ --config-file security/checkov-config.yaml --hard-fail-on CRITICAL --soft-fail-on HIGH -o junitxml > security/reports/checkov-k8s.xml
+          rc1=$?
           checkov -d infra/helm/ --config-file security/checkov-config.yaml --hard-fail-on CRITICAL --soft-fail-on HIGH -o junitxml > security/reports/checkov-helm.xml
+          rc2=$?
           checkov -d platform/ --config-file security/checkov-config.yaml --hard-fail-on CRITICAL --soft-fail-on HIGH -o junitxml > security/reports/checkov-docker-platform.xml
+          rc3=$?
           checkov -d services-laravel/ --config-file security/checkov-config.yaml --hard-fail-on CRITICAL --soft-fail-on HIGH -o junitxml > security/reports/checkov-docker-services.xml
+          rc4=$?
+          set -e
+          if [ $rc1 -ne 0 ] || [ $rc2 -ne 0 ] || [ $rc3 -ne 0 ] || [ $rc4 -ne 0 ]; then
+            echo "[ERROR] One or more Checkov scans failed."
+            exit 1
+          fi
 
           trivy fs \
             --config security/trivy/trivy.yaml \
@@ -268,7 +278,7 @@ pipeline {
           set -euo pipefail
 
           bash scripts/validate/validate-k8s-ultra-hardening.sh
-          REQUIRE_KYVERNO_CLI="false" \
+          REQUIRE_KYVERNO_CLI="true" \
             bash scripts/ci/validate-kyverno-policies.sh
 
           STRICT_KUBE_SCORE="true" \
@@ -329,14 +339,15 @@ pipeline {
         expression { return params.DEPLOY_TO_RECETTE }
       }
       steps {
-        sh '''
-          set -euo pipefail
+        withCredentials([sshUserPrivateKey(credentialsId: 'recette-deploy-ssh-key', keyFileVariable: 'SSH_KEY_FILE')]) {
+          sh '''
+            set -euo pipefail
 
-          echo "══════════════════════════════════════════════════════════════"
-          echo "  Deploying to Recette: ${RECETTE_USER}@${RECETTE_HOST}"
-          echo "══════════════════════════════════════════════════════════════"
+            echo "══════════════════════════════════════════════════════════════"
+            echo "  Deploying to Recette: ${RECETTE_USER}@${RECETTE_HOST}"
+            echo "══════════════════════════════════════════════════════════════"
 
-          SSH_OPTS="-i /run/jenkins-secrets/recette-deploy-key -o StrictHostKeyChecking=no -o ConnectTimeout=30"
+            SSH_OPTS="-i ${SSH_KEY_FILE} -o StrictHostKeyChecking=no -o ConnectTimeout=30"
 
             # Step 1: Update code on recette
             echo "[INFO] Step 1/3: Updating code on recette..."
@@ -427,6 +438,7 @@ REMOTE_JENKINS
             echo "  Jenkins: http://${RECETTE_HOST}:8085"
             echo "══════════════════════════════════════════════════════════════"
           '''
+        }
       }
       post {
         failure {
@@ -440,9 +452,10 @@ REMOTE_JENKINS
         expression { return params.DEPLOY_TO_RECETTE && params.RUN_SMOKE_TESTS }
       }
       steps {
-        sh '''
-          set -euo pipefail
-          SSH_OPTS="-i /run/jenkins-secrets/recette-deploy-key -o StrictHostKeyChecking=no -o ConnectTimeout=30"
+        withCredentials([sshUserPrivateKey(credentialsId: 'recette-deploy-ssh-key', keyFileVariable: 'SSH_KEY_FILE')]) {
+          sh '''
+            set -euo pipefail
+            SSH_OPTS="-i ${SSH_KEY_FILE} -o StrictHostKeyChecking=no -o ConnectTimeout=30"
 
             echo "[INFO] Running smoke tests on recette ${RECETTE_HOST}..."
 
@@ -482,6 +495,7 @@ REMOTE_JENKINS
               echo "[RECETTE] === Smoke Tests Complete ==="
 REMOTE_SMOKE
           '''
+        }
       }
       post {
         always {
@@ -495,74 +509,76 @@ REMOTE_SMOKE
         expression { return params.DEPLOY_TO_RECETTE }
       }
       steps {
-        script {
-          def sshOpts = "-i /run/jenkins-secrets/recette-deploy-key -o StrictHostKeyChecking=no -o ConnectTimeout=30"
-          
-          // 1. Run ZAP Baseline Scan on remote VM
-          echo "[INFO] Running ZAP Baseline scan on remote Recette machine..."
-          sh """
-            ssh ${sshOpts} ${params.RECETTE_USER}@${params.RECETTE_HOST} bash -s <<'REMOTE_DAST'
-              set -euo pipefail
-              cd /MasterPFE
-              
-              # Wait for portal-web to be healthy
-              echo "[INFO] Waiting for portal-web to be healthy..."
-              for i in \$(seq 1 30); do
-                HTTP_CODE=\$(curl -s -o /dev/null -w "%{http_code}" --max-time 15 "http://127.0.0.1:9081/health" || echo "000")
-                if [ "\${HTTP_CODE}" = "200" ]; then
-                  echo "[OK] portal-web is healthy!"
-                  break
-                fi
-                echo "[WAIT] portal-web not healthy yet (HTTP \${HTTP_CODE}). Retrying in 10s..."
-                sleep 10
-              done
-              
-              mkdir -p security/reports
-              
-              echo "[INFO] Running ZAP DAST scan against http://staging.portal.securerag.local..."
-              docker run --rm --network host \
-                -v "/MasterPFE/security/reports:/zap/wrk:rw" \
-                ghcr.io/zaproxy/zaproxy:2.15.0 \
-                zap.sh -cmd -autorun /zap/wrk/security/zap/zap-baseline.yaml
+        withCredentials([sshUserPrivateKey(credentialsId: 'recette-deploy-ssh-key', keyFileVariable: 'SSH_KEY_FILE')]) {
+          script {
+            def sshOpts = "-i ${SSH_KEY_FILE} -o StrictHostKeyChecking=no -o ConnectTimeout=30"
+            
+            // 1. Run ZAP Baseline Scan on remote VM
+            echo "[INFO] Running ZAP Baseline scan on remote Recette machine..."
+            sh """
+              ssh ${sshOpts} ${params.RECETTE_USER}@${params.RECETTE_HOST} bash -s <<'REMOTE_DAST'
+                set -euo pipefail
+                cd /MasterPFE
+                
+                # Wait for portal-web to be healthy
+                echo "[INFO] Waiting for portal-web to be healthy..."
+                for i in \$(seq 1 30); do
+                  HTTP_CODE=\$(curl -s -o /dev/null -w "%{http_code}" --max-time 15 "http://127.0.0.1:9081/health" || echo "000")
+                  if [ "\${HTTP_CODE}" = "200" ]; then
+                    echo "[OK] portal-web is healthy!"
+                    break
+                  fi
+                  echo "[WAIT] portal-web not healthy yet (HTTP \${HTTP_CODE}). Retrying in 10s..."
+                  sleep 10
+                done
+                
+                mkdir -p security/reports
+                
+                echo "[INFO] Running ZAP DAST scan against http://staging.portal.securerag.local..."
+                docker run --rm --network host \
+                  -v "/MasterPFE:/zap/wrk:rw" \
+                  ghcr.io/zaproxy/zaproxy:2.15.0 \
+                  zap.sh -cmd -autorun /zap/wrk/security/zap/zap-baseline.yaml
 REMOTE_DAST
-          """
-          
-          // 2. Retrieve reports from remote host
-          echo "[INFO] Retrieving ZAP reports from remote host..."
-          sh """
-            mkdir -p security/reports
-            scp ${sshOpts} ${params.RECETTE_USER}@${params.RECETTE_HOST}:/MasterPFE/security/reports/zap-baseline-report.* security/reports/ 2>/dev/null || echo "[WARN] ZAP reports not found on remote host (scan may have been skipped)"
-          """
-          
-          // 3. Evaluate Quality Gate via parse-zap-report.groovy (skip if no report)
-          def reportFile = 'security/reports/zap-baseline-report.json'
-          def reportExists = fileExists(reportFile)
-          def qgPassed = true
-          if (reportExists) {
-            def zapParser = load 'security/zap/parse-zap-report.groovy'
-            qgPassed = zapParser.parseZapReport(reportFile, 0, 0)
-          } else {
-            echo "[WARN] No ZAP report available — DAST skipped. Remote scan may have failed or timed out."
-          }
-          
-          // 4. Publish HTML report
-          try {
-            publishHTML([
-              allowMissing: true,
-              alwaysLinkToLastBuild: true,
-              keepAll: true,
-              reportDir: 'security/reports',
-              reportFiles: 'zap-baseline-report.html',
-              reportName: 'ZAP DAST Baseline Report',
-              reportTitles: 'ZAP DAST Baseline Report'
-            ])
-          } catch (Exception ex) {
-            echo "[WARN] Failed to publish HTML report in Jenkins: ${ex.message}"
-          }
-          
-          // 5. Fail stage if quality gate failed
-          if (!qgPassed) {
-            error("ZAP DAST Baseline Quality Gate Failed (High or Critical alerts found)")
+            """
+            
+            // 2. Retrieve reports from remote host
+            echo "[INFO] Retrieving ZAP reports from remote host..."
+            sh """
+              mkdir -p security/reports
+              scp ${sshOpts} ${params.RECETTE_USER}@${params.RECETTE_HOST}:/MasterPFE/security/reports/zap-baseline-report.* security/reports/ 2>/dev/null || echo "[WARN] ZAP reports not found on remote host (scan may have been skipped)"
+            """
+            
+            // 3. Evaluate Quality Gate via parse-zap-report.groovy (skip if no report)
+            def reportFile = 'security/reports/zap-baseline-report.json'
+            def reportExists = fileExists(reportFile)
+            def qgPassed = true
+            if (reportExists) {
+              def zapParser = load 'security/zap/parse-zap-report.groovy'
+              qgPassed = zapParser.parseZapReport(reportFile, 0, 0)
+            } else {
+              echo "[WARN] No ZAP report available — DAST skipped. Remote scan may have failed or timed out."
+            }
+            
+            // 4. Publish HTML report
+            try {
+              publishHTML([
+                allowMissing: true,
+                alwaysLinkToLastBuild: true,
+                keepAll: true,
+                reportDir: 'security/reports',
+                reportFiles: 'zap-baseline-report.html',
+                reportName: 'ZAP DAST Baseline Report',
+                reportTitles: 'ZAP DAST Baseline Report'
+              ])
+            } catch (Exception ex) {
+              echo "[WARN] Failed to publish HTML report in Jenkins: ${ex.message}"
+            }
+            
+            // 5. Fail stage if quality gate failed
+            if (!qgPassed) {
+              error("ZAP DAST Baseline Quality Gate Failed (High or Critical alerts found)")
+            }
           }
         }
       }
