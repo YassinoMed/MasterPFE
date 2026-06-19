@@ -1,0 +1,97 @@
+# Velero Schedule — Backup Automation
+# Définit les schedules de backup Velero en dehors des valeurs Helm
+# pour permettre une gestion GitOps des schedules indépendamment du déploiement.
+#
+# Validation:
+#   kubectl apply -f infra/k8s/backup/velero-schedule.yaml --dry-run=server
+#   velero schedule get
+#
+# Rollback:
+#   kubectl delete schedules.velero.io -n velero --all
+
+---
+apiVersion: velero.io/v1
+kind: Schedule
+metadata:
+  name: securerag-daily-full
+  namespace: velero
+  labels:
+    app.kubernetes.io/part-of: securerag-hub
+    app.kubernetes.io/component: backup
+    backup-type: full
+spec:
+  schedule: "0 2 * * *"  # Every day at 02:00
+  template:
+    includedNamespaces:
+      - securerag-hub
+      - securerag-monitoring
+      - falco
+      - securerag-backup
+      - velero
+    includedResources:
+      - deployments
+      - statefulsets
+      - configmaps
+      - secrets
+      - pvcs
+      - pv
+      - namespaces
+      - services
+      - ingresses
+      - customresourcedefinitions
+    storageLocation: default
+    volumeSnapshotLocations:
+      - default
+    ttl: 720h  # 30 days
+    snapshotVolumes: true
+    orderedResources:
+      pv: "4"  # Number of parallel volume snapshots
+
+---
+apiVersion: velero.io/v1
+kind: Schedule
+metadata:
+  name: securerag-hourly-config
+  namespace: velero
+  labels:
+    app.kubernetes.io/part-of: securerag-hub
+    app.kubernetes.io/component: backup
+    backup-type: config
+spec:
+  schedule: "0 * * * *"  # Every hour
+  template:
+    includedNamespaces:
+      - securerag-hub
+    includedResources:
+      - configmaps
+      - secrets
+      - deployments
+      - statefulsets
+      - services
+      - ingresses
+    storageLocation: default
+    ttl: 48h  # 2 days
+    snapshotVolumes: false
+
+---
+apiVersion: velero.io/v1
+kind: Schedule
+metadata:
+  name: securerag-weekly-dr
+  namespace: velero
+  labels:
+    app.kubernetes.io/part-of: securerag-hub
+    app.kubernetes.io/component: backup
+    backup-type: dr
+spec:
+  schedule: "0 3 * * 0"  # Every Sunday at 03:00
+  template:
+    includedNamespaces:
+      - '*'
+    storageLocation: default
+    volumeSnapshotLocations:
+      - default
+    ttl: 2160h  # 90 days (retained for DR compliance)
+    snapshotVolumes: true
+    orderedResources:
+      pv: "2"  # Limit parallel snapshots for DR

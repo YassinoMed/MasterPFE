@@ -1,0 +1,61 @@
+# PeerAuthentication — Strict mTLS pour tout le mesh
+# Active le mTLS STRICT pour chaque namespace du mesh.
+# Stratégie progressive: PERMISSIVE → STRICT
+#
+# Validation:
+#   kubectl apply --dry-run=server -f infra/k8s/istio/peerauthentication-strict.yaml
+#   kubectl get peerauthentication --all-namespaces
+#   istioctl authn tls-check <pod>.<ns>.svc.cluster.local
+#
+# Rollback:
+#   kubectl delete peerauthentication -n securerag-hub --all
+#   kubectl delete peerauthentication -n monitoring --all
+
+---
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
+metadata:
+  name: strict-mtls
+  namespace: securerag-hub
+  labels:
+    app.kubernetes.io/part-of: securerag-hub
+    app.kubernetes.io/component: service-mesh
+spec:
+  mtls:
+    mode: STRICT
+---
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
+metadata:
+  name: strict-mtls
+  namespace: securerag-monitoring
+  labels:
+    app.kubernetes.io/part-of: securerag-hub
+    app.kubernetes.io/component: service-mesh
+spec:
+  mtls:
+    mode: STRICT
+---
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
+metadata:
+  name: strict-mtls
+  namespace: falco
+  labels:
+    app.kubernetes.io/part-of: securerag-hub
+    app.kubernetes.io/component: service-mesh
+spec:
+  mtls:
+    mode: STRICT
+---
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
+metadata:
+  name: strict-mtls
+  namespace: spire
+  labels:
+    app.kubernetes.io/part-of: securerag-hub
+    app.kubernetes.io/component: service-mesh
+spec:
+  mtls:
+    mode: STRICT

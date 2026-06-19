@@ -1,0 +1,84 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dora-exporter
+  namespace: securerag-hub
+  labels:
+    app: dora-exporter
+    app.kubernetes.io/part-of: securerag-hub
+    app.kubernetes.io/component: dora-metrics
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dora-exporter
+  template:
+    metadata:
+      labels:
+        app: dora-exporter
+        app.kubernetes.io/part-of: securerag-hub
+        app.kubernetes.io/component: dora-metrics
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9091"
+    spec:
+      containers:
+        - name: exporter
+          image: ghcr.io/yourorg/dora-exporter:v1.0.0
+          ports:
+            - name: metrics
+              containerPort: 9091
+          env:
+            - name: DORA_CONFIG_PATH
+              value: /etc/dora/dora-config.yaml
+          volumeMounts:
+            - name: config
+              mountPath: /etc/dora
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 200m
+              memory: 256Mi
+      volumes:
+        - name: config
+          configMap:
+            name: dora-exporter-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: dora-exporter
+  namespace: securerag-hub
+  labels:
+    app: dora-exporter
+    app.kubernetes.io/part-of: securerag-hub
+    app.kubernetes.io/component: dora-metrics
+spec:
+  selector:
+    app: dora-exporter
+  ports:
+    - name: metrics
+      port: 9091
+      targetPort: 9091
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: dora-exporter
+  namespace: monitoring
+  labels:
+    app.kubernetes.io/part-of: securerag-hub
+    app.kubernetes.io/component: dora-metrics
+    release: kube-prometheus-stack
+spec:
+  selector:
+    matchLabels:
+      app: dora-exporter
+  namespaceSelector:
+    matchNames:
+      - securerag-hub
+  endpoints:
+    - port: metrics
+      interval: 30s

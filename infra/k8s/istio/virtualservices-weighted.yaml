@@ -1,0 +1,98 @@
+# VirtualServices — Canary Deployments avec Weighted Routing
+# Permet le traffic splitting pour déploiements progressifs.
+# Stratégie: 90% stable / 10% canary → 50/50 → 100% canary
+#
+# Validation:
+#   kubectl apply --dry-run=server -f infra/k8s/istio/virtualservices-weighted.yaml
+#   istioctl proxy-config routes deploy/<svc>.securerag-hub
+#
+# Rollback:
+#   kubectl delete virtualservice -n securerag-hub --all
+
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: portal-web-vs
+  namespace: securerag-hub
+  labels:
+    app.kubernetes.io/part-of: securerag-hub
+    app.kubernetes.io/component: canary
+spec:
+  hosts:
+    - portal-web
+  http:
+    - match:
+        - headers:
+            x-canary:
+              exact: "true"
+      route:
+        - destination:
+            host: portal-web
+            subset: canary
+          weight: 100
+    - route:
+        - destination:
+            host: portal-web
+            subset: stable
+          weight: 90
+        - destination:
+            host: portal-web
+            subset: canary
+          weight: 10
+      retries:
+        attempts: 3
+        perTryTimeout: 2s
+      timeout: 10s
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: auth-users-vs
+  namespace: securerag-hub
+  labels:
+    app.kubernetes.io/part-of: securerag-hub
+    app.kubernetes.io/component: canary
+spec:
+  hosts:
+    - auth-users-service
+  http:
+    - route:
+        - destination:
+            host: auth-users-service
+            subset: stable
+          weight: 90
+        - destination:
+            host: auth-users-service
+            subset: canary
+          weight: 10
+      retries:
+        attempts: 3
+        perTryTimeout: 2s
+      timeout: 10s
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: chatbot-manager-vs
+  namespace: securerag-hub
+  labels:
+    app.kubernetes.io/part-of: securerag-hub
+    app.kubernetes.io/component: canary
+spec:
+  hosts:
+    - chatbot-manager-service
+  http:
+    - route:
+        - destination:
+            host: chatbot-manager-service
+            subset: stable
+          weight: 100
+        - destination:
+            host: chatbot-manager-service
+            subset: canary
+          weight: 0
+      retries:
+        attempts: 3
+        perTryTimeout: 2s
+      timeout: 10s

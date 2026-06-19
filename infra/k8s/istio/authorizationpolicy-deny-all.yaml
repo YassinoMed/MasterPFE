@@ -1,0 +1,155 @@
+# AuthorizationPolicy — Zero-Trust Network Policies
+# Deny-all par défaut + allow spécifiques pour chaque service.
+# Applique le principe de moindre privilège réseau.
+#
+# Stratégie: DENY_ALL → allow-list progressif
+# Ordre: deny-all → allow ingress → allow inter-service
+#
+# Validation:
+#   kubectl apply --dry-run=server -f infra/k8s/istio/authorizationpolicy-deny-all.yaml
+#   kubectl exec deploy/portal-web -- curl -v http://auth-users-service:8000  # Should FAIL
+#   kubectl exec deploy/auth-users-service -- curl -v http://chatbot-manager-service:8000  # Should FAIL
+#
+# Rollback:
+#   kubectl delete authorizationpolicies --all -n securerag-hub
+
+---
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: deny-all
+  namespace: securerag-hub
+  labels:
+    app.kubernetes.io/part-of: securerag-hub
+    app.kubernetes.io/component: network-policy
+spec:
+  action: DENY
+  rules:
+    - to:
+        - operation:
+            ports:
+              - "8000"
+              - "8080"
+              - "443"
+              - "80"
+  # Rien → deny all traffic
+---
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: allow-portal-web
+  namespace: securerag-hub
+  labels:
+    app.kubernetes.io/part-of: securerag-hub
+    app.kubernetes.io/component: network-policy
+spec:
+  selector:
+    matchLabels:
+      app: portal-web
+  action: ALLOW
+  rules:
+    - from:
+        - source:
+            principals:
+              - cluster.local/ns/securerag-hub/sa/portal-web
+              - cluster.local/ns/istio-system/sa/istio-ingressgateway-service-account
+      to:
+        - operation:
+            ports:
+              - "443"
+              - "8080"
+---
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: allow-auth-users
+  namespace: securerag-hub
+  labels:
+    app.kubernetes.io/part-of: securerag-hub
+    app.kubernetes.io/component: network-policy
+spec:
+  selector:
+    matchLabels:
+      app: auth-users-service
+  action: ALLOW
+  rules:
+    - from:
+        - source:
+            principals:
+              - cluster.local/ns/securerag-hub/sa/portal-web
+              - cluster.local/ns/securerag-hub/sa/auth-users-service
+      to:
+        - operation:
+            ports:
+              - "8000"
+---
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: allow-chatbot-manager
+  namespace: securerag-hub
+  labels:
+    app.kubernetes.io/part-of: securerag-hub
+    app.kubernetes.io/component: network-policy
+spec:
+  selector:
+    matchLabels:
+      app: chatbot-manager-service
+  action: ALLOW
+  rules:
+    - from:
+        - source:
+            principals:
+              - cluster.local/ns/securerag-hub/sa/portal-web
+              - cluster.local/ns/securerag-hub/sa/conversation-service
+      to:
+        - operation:
+            ports:
+              - "8000"
+---
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: allow-conversation
+  namespace: securerag-hub
+  labels:
+    app.kubernetes.io/part-of: securerag-hub
+    app.kubernetes.io/component: network-policy
+spec:
+  selector:
+    matchLabels:
+      app: conversation-service
+  action: ALLOW
+  rules:
+    - from:
+        - source:
+            principals:
+              - cluster.local/ns/securerag-hub/sa/chatbot-manager-service
+      to:
+        - operation:
+            ports:
+              - "8000"
+---
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: allow-audit-security
+  namespace: securerag-hub
+  labels:
+    app.kubernetes.io/part-of: securerag-hub
+    app.kubernetes.io/component: network-policy
+spec:
+  selector:
+    matchLabels:
+      app: audit-security-service
+  action: ALLOW
+  rules:
+    - from:
+        - source:
+            principals:
+              - cluster.local/ns/securerag-hub/sa/portal-web
+              - cluster.local/ns/securerag-hub/sa/*  # All services can log to audit
+      to:
+        - operation:
+            ports:
+              - "8000"

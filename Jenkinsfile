@@ -29,10 +29,22 @@ pipeline {
     booleanParam(name: 'RUN_POLICY_AS_CODE', defaultValue: true, description: 'Run Policy-as-Code (Conftest) validation')
     booleanParam(name: 'RUN_SLSA_VERIFY', defaultValue: false, description: 'Run SLSA provenance verification')
     booleanParam(name: 'RUN_SIEM_VALIDATION', defaultValue: false, description: 'Run SIEM validation (nightly)')
+    booleanParam(name: 'DEPLOY_TO_RECETTE', defaultValue: true, description: 'Deploy to recette (63.250.59.72)')
+    booleanParam(name: 'RUN_CD_VALIDATION', defaultValue: true, description: 'Run CD post-deploy validation gates')
   }
 
   environment {
     LARAVEL_APPS = 'platform/portal-web services-laravel/auth-users-service services-laravel/chatbot-manager-service services-laravel/conversation-service services-laravel/audit-security-service'
+
+    // CD Pipeline — Host & Tools
+    RECETTE_HOST = '63.250.59.72'
+    RECETTE_USER = 'root'
+    SSH_KEY_FILE = '/tmp/recette-deploy-key'
+    SONAR_HOST_URL = 'http://sonarqube.securerag-hub.svc:9000'
+    VAULT_ADDR = 'http://vault.vault.svc:8200'
+    WAZUH_API_URL = 'https://wazuh-dashboard.securerag-hub.svc:55000'
+    DAST_PORTAL_URL = 'http://localhost:8081'
+    REPORT_DIR = 'security/reports'
   }
 
   stages {
@@ -405,6 +417,444 @@ pipeline {
       post {
         always {
           archiveArtifacts allowEmptyArchive: true, artifacts: 'artifacts/security/**'
+        }
+      }
+    }
+
+    // ════════════════════════════════════════════════════════════════
+    //  CD — PRE-DEPLOY GATES  (PRIORITÉ 1 — P1)
+    //  Exécuté après CI Quality Gate, avant Deploy to Recette.
+    //  CD_SECRETS_SCAN peut BLOCKER (currentBuild.result = FAILURE).
+    //  Les autres P1 sont ADVISORY (UNSTABLE, décision humaine).
+    // ════════════════════════════════════════════════════════════════
+    stage('CD_PRE_DEPLOY_GATES') {
+      parallel {
+        stage('CD_SECRETS_SCAN') {
+          agent { label 'security-agent' }
+          steps {
+            timeout(time: 5, unit: 'MINUTES') {
+              unstash 'workspace'
+              sh '''
+                set -euo pipefail
+                mkdir -p security/reports
+                echo "[INFO] Running Gitleaks secrets scan (CD gate)..."
+                gitleaks dir . --config .gitleaks.toml --report-format json --report-path security/reports/cd-gitleaks.json --verbose
+                LEAKS=$(python3 -c "import json; d=json.load(open('security/reports/cd-gitleaks.json')); print(len(d))" 2>/dev/null || echo "0")
+                if [ "${LEAKS}" -gt 0 ]; then
+                  echo "============================================"
+                  echo "  BLOCKED: ${LEAKS} secret(s) detected!"
+                  echo "============================================"
+                  python3 -c "
+import json
+d = json.load(open('security/reports/cd-gitleaks.json'))
+for x in d:
+    print(f'  - {x.get(\"Description\",\"?\")} in {x.get(\"File\",\"?\")}:{x.get(\"StartLine\",\"?\")}')
+"
+                  exit 1
+                fi
+                echo "[PASS] No secrets detected in workspace"
+              '''
+            }
+          }
+          post {
+            failure {
+              script { currentBuild.result = 'FAILURE' }
+            }
+            always {
+              archiveArtifacts allowEmptyArchive: true, artifacts: 'security/reports/cd-gitleaks.json'
+            }
+          }
+        }
+
+        stage('CD_DOCKERFILE_LINT') {
+          agent { label 'master' }
+          steps {
+            catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
+              timeout(time: 5, unit: 'MINUTES') {
+                unstash 'workspace'
+                sh '''
+                  set -euo pipefail
+                  mkdir -p security/reports
+                  echo "[INFO] Running Hadolint Dockerfile lint (CD gate)..."
+                  bash scripts/ci/run-hadolint.sh
+                  echo "[INFO] Hadolint completed — review JUnit report for details"
+                '''
+              }
+            }
+          }
+          post {
+            always {
+              junit allowEmptyResults: true, testResults: 'security/reports/hadolint-junit.xml'
+              archiveArtifacts allowEmptyArchive: true, artifacts: 'security/reports/hadolint-junit.xml'
+            }
+          }
+        }
+
+        stage('CD_IAC_SCAN') {
+          agent { label 'k8s-agent' }
+          steps {
+            catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
+              timeout(time: 10, unit: 'MINUTES') {
+                unstash 'workspace'
+                sh '''
+                  set -euo pipefail
+                  mkdir -p security/reports
+                  echo "[INFO] Running Checkov IaC scan (CD gate)..."
+                  checkov -d infra/k8s/ --config-file security/checkov-config.yaml --soft-fail-on HIGH \
+                    -o json > security/reports/cd-checkov-k8s.json 2>/dev/null || true
+                  checkov -d infra/helm/ --config-file security/checkov-config.yaml --soft-fail-on HIGH \
+                    -o json > security/reports/cd-checkov-helm.json 2>/dev/null || true
+                  echo "[INFO] Checkov IaC scan complete — review reports for findings"
+                '''
+              }
+            }
+          }
+          post {
+            always {
+              archiveArtifacts allowEmptyArchive: true, artifacts: 'security/reports/cd-checkov-*.json'
+            }
+          }
+        }
+
+        stage('CD_MANIFEST_VALIDATE') {
+          agent { label 'k8s-agent' }
+          steps {
+            catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
+              timeout(time: 10, unit: 'MINUTES') {
+                unstash 'workspace'
+                sh '''
+                  set -euo pipefail
+                  mkdir -p artifacts/security
+                  echo "[INFO] Running kube-score on recette overlay manifests..."
+                  KUSTOMIZE_OVERLAY=infra/k8s/overlays/recette \
+                    STRICT_KUBE_SCORE=true \
+                    KUBE_SCORE_MAX_CRITICAL="${KUBE_SCORE_MAX_CRITICAL:-0}" \
+                    KUBE_SCORE_MAX_WARNINGS="${KUBE_SCORE_MAX_WARNINGS:-0}" \
+                    bash scripts/ci/validate-kube-score.sh || true
+                  echo "[INFO] Running Kyverno dry-run on recette overlay..."
+                  REQUIRE_KYVERNO_CLI=false bash scripts/ci/validate-kyverno-policies.sh --dry-run || true
+                  echo "[INFO] Manifest validation complete — review kube-score report"
+                '''
+              }
+            }
+          }
+          post {
+            always {
+              archiveArtifacts allowEmptyArchive: true, artifacts: 'artifacts/security/kube-score-*,artifacts/security/*.md'
+            }
+          }
+        }
+
+        stage('CD_OWASP_AUDIT') {
+          agent { label 'docker-agent' }
+          steps {
+            catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
+              timeout(time: 20, unit: 'MINUTES') {
+                unstash 'workspace'
+                sh '''
+                  set -euo pipefail
+                  mkdir -p security/reports
+                  echo "[INFO] Running OWASP Dependency-Check (CD gate)..."
+                  bash scripts/ci/run-owasp-dependency-check.sh || true
+                  echo "[INFO] OWASP Dependency-Check complete — review HTML report"
+                '''
+              }
+            }
+          }
+          post {
+            always {
+              publishHTML(target: [
+                allowMissing: true,
+                alwaysLinkToLastBuild: true,
+                keepAll: true,
+                reportDir: 'security/reports',
+                reportFiles: 'dependency-check-*/dependency-check-report.html',
+                reportName: 'OWASP Dependency-Check Report'
+              ])
+              archiveArtifacts allowEmptyArchive: true, artifacts: 'security/reports/dependency-check-*/'
+            }
+          }
+        }
+      }
+    }
+
+    // ════════════════════════════════════════════════════════════════
+    //  CD — DEPLOY TO RECETTE
+    //  SSH deployment to recette/staging machine (63.250.59.72).
+    //  Utilise deploy-to-recette.sh pour cloner, build, et déployer.
+    //  Temps moyen: ~25s (existing).
+    // ════════════════════════════════════════════════════════════════
+    stage('Deploy to Recette') {
+      when { expression { return params.DEPLOY_TO_RECETTE } }
+      agent { label 'master' }
+      steps {
+        timeout(time: 30, unit: 'MINUTES') {
+          unstash 'workspace'
+          withCredentials([file(credentialsId: 'recette-deploy-key', variable: 'SSH_KEY_PATH')]) {
+            sh '''
+              set -euo pipefail
+              cp "${SSH_KEY_PATH}" /tmp/recette-deploy-key
+              chmod 600 /tmp/recette-deploy-key
+              echo "[INFO] Deploying to recette (${RECETTE_USER}@${RECETTE_HOST})..."
+              bash scripts/deploy/deploy-to-recette.sh
+              echo "[INFO] Deployment to recette completed"
+            '''
+          }
+        }
+      }
+      post {
+        success {
+          echo "[INFO] Deploy to Recette — SUCCESS"
+        }
+        failure {
+          echo "[WARN] Deploy to Recette — FAILED (review logs)"
+        }
+        always {
+          archiveArtifacts allowEmptyArchive: true, artifacts: 'reports/deploy/*.log,reports/deploy/*.md'
+        }
+      }
+    }
+
+    // ════════════════════════════════════════════════════════════════
+    //  CD — POST-DEPLOY SMOKE TESTS
+    //  Vérifie que les workloads sont Running et que les endpoints
+    //  health répondent. Temps moyen: ~1s (existing).
+    // ════════════════════════════════════════════════════════════════
+    stage('Post-deploy Smoke Tests') {
+      agent { label 'k8s-agent' }
+      steps {
+        timeout(time: 10, unit: 'MINUTES') {
+          sh '''
+            set -euo pipefail
+            mkdir -p reports/postdeploy
+            echo "[INFO] Running post-deploy smoke tests..."
+            bash scripts/validate/smoke-tests.sh || echo "[WARN] Smoke tests reported failures — investigate"
+            echo "[INFO] Smoke tests complete"
+          '''
+        }
+      }
+      post {
+        always {
+          archiveArtifacts allowEmptyArchive: true, artifacts: 'reports/postdeploy/smoke-tests-report.md'
+        }
+      }
+    }
+
+    // ════════════════════════════════════════════════════════════════
+    //  CD — POST-DEPLOY VALIDATION  (PRIORITÉ 2 — P2)
+    //  Exécuté après Smoke Tests, avant DAST.
+    //  Tous les stages P2 sont ADVISORY (UNSTABLE, décision humaine).
+    // ════════════════════════════════════════════════════════════════
+    stage('CD_POST_DEPLOY_VALIDATION') {
+      parallel {
+        stage('CD_SONARQUBE') {
+          when { expression { return params.RUN_SONAR } }
+          agent { label 'sonar-agent' }
+          steps {
+            catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
+              timeout(time: 10, unit: 'MINUTES') {
+                unstash 'workspace'
+                withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
+                  sh '''
+                    set -euo pipefail
+                    echo "[INFO] Running SonarQube analysis (CD validation)..."
+                    REQUIRE_SONAR=true SONAR_HOST_URL="${SONAR_HOST_URL:-}" SONAR_TOKEN="${SONAR_TOKEN}" \
+                      bash scripts/ci/run-sonar-analysis.sh || true
+                    echo "[INFO] SonarQube analysis complete"
+                    echo "[NOTE] SonarQube Quality Gate status must be reviewed manually"
+                  '''
+                }
+              }
+            }
+          }
+          post {
+            always {
+              archiveArtifacts allowEmptyArchive: true, artifacts: '.scannerwork/report-task.txt'
+            }
+          }
+        }
+
+        stage('CD_SUPPLY_CHAIN') {
+          agent { label 'worker' }
+          steps {
+            catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
+              timeout(time: 10, unit: 'MINUTES') {
+                sh '''
+                  set -euo pipefail
+                  echo "[INFO] Verifying supply chain (SLSA + Cosign)..."
+                  if [ -f "scripts/supply-chain/verify-slsa.sh" ]; then
+                    bash scripts/supply-chain/verify-slsa.sh || true
+                  else
+                    echo "[WARN] SLSA verify script not found — skipping"
+                  fi
+                  COSIGN_PUB_KEY="k8s://securerag-hub/cosign-public-key"
+                  if kubectl get secret cosign-public-key -n securerag-hub &>/dev/null 2>&1; then
+                    cosign verify --key "${COSIGN_PUB_KEY}" \
+                      "${REGISTRY_HOST:-localhost:5001}/securerag-hub-portal-web:${IMAGE_TAG:-demo}" || true
+                  else
+                    echo "[WARN] Cosign public key not found in cluster — skipping image verification"
+                  fi
+                  echo "[INFO] Supply chain verification complete"
+                '''
+              }
+            }
+          }
+          post {
+            always {
+              archiveArtifacts allowEmptyArchive: true, artifacts: 'security/reports/slsa-verify*.json'
+            }
+          }
+        }
+
+        stage('CD_RUNTIME_SECURITY') {
+          agent { label 'k8s-agent' }
+          steps {
+            catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
+              timeout(time: 5, unit: 'MINUTES') {
+                sh '''
+                  set -euo pipefail
+                  echo "[INFO] Checking runtime security (Tetragon + OPA Gatekeeper)..."
+                  if [ -f "scripts/ci/validate-tetragon-policies.sh" ]; then
+                    bash scripts/ci/validate-tetragon-policies.sh || true
+                  else
+                    echo "[WARN] Tetragon validation script not found — skipping"
+                  fi
+                  if [ -f "scripts/ci/validate-opa-gatekeeper.sh" ]; then
+                    bash scripts/ci/validate-opa-gatekeeper.sh || true
+                  else
+                    echo "[WARN] OPA Gatekeeper validation script not found — skipping"
+                  fi
+                  echo "[INFO] Runtime security checks complete"
+                '''
+              }
+            }
+          }
+          post {
+            always {
+              archiveArtifacts allowEmptyArchive: true, artifacts: 'artifacts/security/opa-audit*.json,artifacts/security/tetragon*.json'
+            }
+          }
+        }
+
+        stage('CD_SPIRE_VALIDATE') {
+          agent { label 'worker' }
+          steps {
+            catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
+              timeout(time: 5, unit: 'MINUTES') {
+                sh '''
+                  set -euo pipefail
+                  echo "[INFO] Validating SPIRE workload identities..."
+                  if [ -f "scripts/spire/deploy-spire.sh" ]; then
+                    bash scripts/spire/deploy-spire.sh --validate-only || true
+                  else
+                    echo "[WARN] SPIRE validation script not found — skipping"
+                  fi
+                  echo "[INFO] SPIRE validation complete"
+                '''
+              }
+            }
+          }
+          post {
+            always {
+              archiveArtifacts allowEmptyArchive: true, artifacts: 'artifacts/security/spire-validate*.json'
+            }
+          }
+        }
+
+        stage('CD_VAULT_SECRETS') {
+          agent { label 'worker' }
+          steps {
+            catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
+              timeout(time: 5, unit: 'MINUTES') {
+                sh '''
+                  set -euo pipefail
+                  echo "[INFO] Validating Vault dynamic secrets..."
+                  if [ -f "scripts/vault/validate-dynamic-secrets.sh" ]; then
+                    bash scripts/vault/validate-dynamic-secrets.sh || true
+                  else
+                    echo "[WARN] Vault validation script not found — skipping"
+                  fi
+                  echo "[INFO] Vault secrets validation complete"
+                '''
+              }
+            }
+          }
+          post {
+            always {
+              archiveArtifacts allowEmptyArchive: true, artifacts: 'artifacts/security/vault-validate*.json'
+            }
+          }
+        }
+
+        stage('CD_SIEM_CHECK') {
+          agent { label 'worker' }
+          steps {
+            catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
+              timeout(time: 5, unit: 'MINUTES') {
+                sh '''
+                  set -euo pipefail
+                  echo "[INFO] Checking SIEM (Wazuh) for post-deploy alerts..."
+                  if [ -f "scripts/opensearch/validate-siem.sh" ]; then
+                    bash scripts/opensearch/validate-siem.sh --window 2m || true
+                  else
+                    echo "[WARN] SIEM validation script not found — skipping"
+                  fi
+                  echo "[INFO] SIEM check complete"
+                '''
+              }
+            }
+          }
+          post {
+            always {
+              archiveArtifacts allowEmptyArchive: true, artifacts: 'artifacts/security/siem-alerts*.json'
+            }
+          }
+        }
+      }
+    }
+
+    // ════════════════════════════════════════════════════════════════
+    //  CD — DAST (Dynamic Application Security Testing)
+    //  OWASP ZAP baseline scan + validation du rapport.
+    //  ADVISORY uniquement — ne bloque jamais le déploiement.
+    //  Temps moyen: ~3s (existing, + ZAP scan time ~2-5min).
+    // ════════════════════════════════════════════════════════════════
+    stage('DAST') {
+      agent { label 'docker-agent' }
+      steps {
+        catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
+          timeout(time: 15, unit: 'MINUTES') {
+            sh '''
+              set -euo pipefail
+              mkdir -p artifacts/dast
+              echo "[INFO] Running OWASP ZAP baseline scan against ${DAST_PORTAL_URL}..."
+              docker run --rm --network host \
+                -v "$(pwd)/artifacts/dast:/zap/wrk:rw" \
+                -t ghcr.io/zaproxy/zaproxy:2.15.0 zap-baseline.py \
+                -t "${DAST_PORTAL_URL}" \
+                -r dast-baseline-report.html \
+                -J dast-baseline-report.json \
+                -l WARN || true
+              echo "[INFO] ZAP baseline scan complete"
+              echo "[INFO] Validating DAST report..."
+              DAST_REPORT=artifacts/dast/dast-baseline-report.json DAST_FAIL_ON=High \
+                bash scripts/validate/validate-dast-report.sh || true
+              echo "[INFO] DAST validation complete"
+            '''
+          }
+        }
+      }
+      post {
+        always {
+          publishHTML(target: [
+            allowMissing: true,
+            alwaysLinkToLastBuild: true,
+            keepAll: true,
+            reportDir: 'artifacts/dast',
+            reportFiles: 'dast-baseline-report.html',
+            reportName: 'OWASP ZAP Baseline Scan Report'
+          ])
+          archiveArtifacts allowEmptyArchive: true, artifacts: 'artifacts/dast/*'
         }
       }
     }

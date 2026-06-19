@@ -1,0 +1,122 @@
+# Chaos Mesh — Scheduled Pod Fault Injection
+# Injections hebdomadaires automatisées pour valider la résilience.
+#
+# Stratégie:
+#   - Lundi 02:00: Pod-kill aléatoire (1 pod, namespace securerag-hub)
+#   - Mercredi 02:00: Network delay (1000ms, 50% des pods)
+#   - Vendredi 02:00: CPU stress (80%, 30s)
+#
+# Validation:
+#   kubectl apply --dry-run=server -f infra/k8s/chaos/schedules/chaos-mesh-pod-fault.yaml
+#   kubectl get schedule --all-namespaces
+#   kubectl get chaos -n chaos-mesh
+#
+# Rollback:
+#   kubectl delete schedule --all -n chaos-mesh
+
+---
+apiVersion: chaos-mesh.org/v1alpha1
+kind: Schedule
+metadata:
+  name: weekly-pod-kill
+  namespace: chaos-mesh
+  labels:
+    app.kubernetes.io/part-of: securerag-hub
+    app.kubernetes.io/component: chaos
+    chaos.alpha.kubernetes.io/scope: weekly
+spec:
+  schedule: "0 2 * * 1"  # Monday 02:00
+  concurrencyPolicy: Forbid
+  type: PodChaos
+  historyLimit: 3
+  podChaos:
+    selector:
+      namespaces:
+        - securerag-hub
+      labelSelectors:
+        app.kubernetes.io/part-of: securerag-hub
+    mode: one
+    action: pod-kill
+    duration: "30s"
+---
+apiVersion: chaos-mesh.org/v1alpha1
+kind: Schedule
+metadata:
+  name: weekly-network-delay
+  namespace: chaos-mesh
+  labels:
+    app.kubernetes.io/part-of: securerag-hub
+    app.kubernetes.io/component: chaos
+    chaos.alpha.kubernetes.io/scope: weekly
+spec:
+  schedule: "0 2 * * 3"  # Wednesday 02:00
+  concurrencyPolicy: Forbid
+  type: NetworkChaos
+  historyLimit: 3
+  networkChaos:
+    selector:
+      namespaces:
+        - securerag-hub
+      labelSelectors:
+        app.kubernetes.io/part-of: securerag-hub
+    mode: all
+    action: delay
+    delay:
+      latency: "1000ms"
+      correlation: "50"
+      jitter: "100ms"
+    duration: "5m"
+---
+apiVersion: chaos-mesh.org/v1alpha1
+kind: Schedule
+metadata:
+  name: weekly-cpu-stress
+  namespace: chaos-mesh
+  labels:
+    app.kubernetes.io/part-of: securerag-hub
+    app.kubernetes.io/component: chaos
+    chaos.alpha.kubernetes.io/scope: weekly
+spec:
+  schedule: "0 2 * * 5"  # Friday 02:00
+  concurrencyPolicy: Forbid
+  type: StressChaos
+  historyLimit: 3
+  stressChaos:
+    selector:
+      namespaces:
+        - securerag-hub
+      labelSelectors:
+        app.kubernetes.io/part-of: securerag-hub
+    mode: one
+    stressors:
+      cpu:
+        workers: 2
+        load: 80
+    duration: "30s"
+---
+apiVersion: chaos-mesh.org/v1alpha1
+kind: Schedule
+metadata:
+  name: dr-failover-drill
+  namespace: chaos-mesh
+  labels:
+    app.kubernetes.io/part-of: securerag-hub
+    app.kubernetes.io/component: chaos
+    chaos.alpha.kubernetes.io/scope: dr
+  annotations:
+    chaos-mesh.org/description: "Weekly DR drill: kills critical pods and validates failover"
+spec:
+  schedule: "0 3 * * 0"  # Sunday 03:00
+  concurrencyPolicy: Forbid
+  type: PodChaos
+  historyLimit: 5
+  podChaos:
+    selector:
+      namespaces:
+        - securerag-hub
+      labelSelectors:
+        app: portal-web
+    mode: one
+    action: pod-kill
+    duration: "2m"
+    gracePeriod: 0

@@ -1,0 +1,69 @@
+# DestinationRules — Configuration TLS pour tous les services du mesh
+# Définit les règles de traffic et TLS mutual auth.
+#
+# Validation:
+#   kubectl apply --dry-run=server -f infra/k8s/istio/destinationrules-tls.yaml
+#   istioctl proxy-config routes <pod>.securerag-hub
+#
+# Rollback:
+#   kubectl delete destinationrules --all -n securerag-hub
+
+---
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: default-tls
+  namespace: securerag-hub
+  labels:
+    app.kubernetes.io/part-of: securerag-hub
+    app.kubernetes.io/component: service-mesh
+spec:
+  host: "*.securerag-hub.svc.cluster.local"
+  trafficPolicy:
+    tls:
+      mode: ISTIO_MUTUAL
+    connectionPool:
+      tcp:
+        maxConnections: 100
+        connectTimeout: 5s
+      http:
+        http1MaxPendingRequests: 1024
+        http2MaxRequests: 2048
+        maxRequestsPerConnection: 10
+    loadBalancer:
+      simple: LEAST_CONN
+  subsets:
+    - name: stable
+      labels:
+        version: stable
+    - name: canary
+      labels:
+        version: canary
+---
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: default-tls
+  namespace: securerag-monitoring
+  labels:
+    app.kubernetes.io/part-of: securerag-hub
+    app.kubernetes.io/component: service-mesh
+spec:
+  host: "*.securerag-monitoring.svc.cluster.local"
+  trafficPolicy:
+    tls:
+      mode: ISTIO_MUTUAL
+---
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: mesh-wide
+  namespace: istio-system
+  labels:
+    app.kubernetes.io/part-of: securerag-hub
+    app.kubernetes.io/component: service-mesh
+spec:
+  host: "*.local"
+  trafficPolicy:
+    tls:
+      mode: ISTIO_MUTUAL

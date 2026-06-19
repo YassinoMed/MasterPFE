@@ -1,0 +1,27 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: monitoring
+
+resources:
+  - alertmanager-config.yaml
+
+generatorOptions:
+  disableNameSuffixHash: true
+
+# Ajouter le mount des templates dans le statefulset Alertmanager implémenté dans prometheus-community/kube-prometheus-stack
+patches:
+  - target:
+      kind: StatefulSet
+      name: alertmanager
+    patch: |-
+      - op: add
+        path: /spec/template/spec/containers/0/volumeMounts/-
+        value:
+          name: alertmanager-templates
+          mountPath: /etc/alertmanager/templates
+      - op: add
+        path: /spec/template/spec/volumes/-
+        value:
+          name: alertmanager-templates
+          configMap:
+            name: alertmanager-templates

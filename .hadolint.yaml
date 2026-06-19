@@ -1,0 +1,52 @@
+---
+trustedRegistries:
+  - docker.io
+  - harbor.securerag-hub.svc:8080
+  - ghcr.io
+  - gcr.io
+
+override:
+  error:
+    - DL3008  # Pin versions in apt-get
+    - DL3009  # Delete apt-get lists
+    - DL3015  # Avoid additional packages
+    - DL3018  # Pin apk versions
+    - DL3020  # Use COPY instead of ADD for non-URLs
+    - DL3025  # Use JSON arguments in CMD/ENTRYPOINT
+    - DL3040  # No --no-install-recommends
+    - DL3041  # Pin pip package versions
+    - DL3042  # Avoid cache in pip
+    - DL3045  # No COPY --chown with root
+    - DL3060  # No RUN that references /tmp without cleanup
+    - SC1091  # Shellcheck: follow sources conditionally
+
+  warning:
+    - DL3001  # No && chaining for some cd
+    - DL3002  # Don't switch to root
+    - DL3003  # Use WORKDIR
+    - DL3006  # Always tag version
+    - DL3007  # Don't use latest tag
+    - DL3013  # Pin pip versions
+    - DL3019  # Pin apk add
+    - DL3026  # Use COPY --from
+    - DL3032  # No yum clean all
+    - DL3033  # Pin yum versions
+    - DL3044  # No ENV with secrets
+    - DL3046  # No ENV with build-time secrets
+    - DL3047  # No wget without progress
+    - SC2046  # Quote expansions
+    - SC2086  # Double quote
+    - SC2164  # cd error handling
+
+  style:
+    - DL4006  # Set SHELL
+    - SC2140  # Word splitting
+
+  ignore:
+    - DL3005  # No apt-get upgrade (acceptable in base images)
+    - DL3048  # Label validation (relaxed for PFE)
+    - SC2155  # Export with assignment
+
+label-schema:
+  maintainer: required
+  description: required

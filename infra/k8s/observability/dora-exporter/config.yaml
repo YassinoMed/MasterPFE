@@ -1,0 +1,53 @@
+# DORA Metrics Exporter — Configuration
+# Tracke les 4 métriques DORA à partir des webhooks Jenkins/GitHub:
+#   1. Deployment Frequency (DF)
+#   2. Lead Time for Changes (LTC)
+#   3. Time to Restore Service (TTRS)
+#   4. Change Failure Rate (CFR)
+#
+# Implémentation légère: service + ConfigMap + deploy pour Prometheus exposition.
+# Agrège les webhooks Jenkins et GitHub Actions.
+#
+# Validation:
+#   kubectl apply --dry-run=server -k infra/k8s/observability/dora-exporter/
+#   curl -s http://dora-exporter.securerag-hub.svc:9091/metrics | grep dora
+#
+# Rollback:
+#   kubectl delete -k infra/k8s/observability/dora-exporter/
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dora-exporter-config
+  namespace: securerag-hub
+  labels:
+    app.kubernetes.io/part-of: securerag-hub
+    app.kubernetes.io/component: dora-metrics
+data:
+  dora-config.yaml: |
+    exporter:
+      port: 9091
+      namespace: securerag_hub
+
+    jenkins:
+      webhook_path: /webhooks/jenkins
+
+    github:
+      webhook_path: /webhooks/github
+
+    metrics:
+      deployment_frequency:
+        buckets: [0.5, 1, 2, 5, 10, 30, 60]
+        description: "Number of deployments per day"
+
+      lead_time_for_changes:
+        buckets: [1, 3, 6, 12, 24, 72, 168]
+        description: "Time from commit to production (hours)"
+
+      time_to_restore:
+        buckets: [0.25, 0.5, 1, 2, 4, 8, 24, 48]
+        description: "Time to restore service after incident (hours)"
+
+      change_failure_rate:
+        description: "Ratio of failed deployments to total deployments"
