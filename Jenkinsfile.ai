@@ -1,0 +1,160 @@
+// Jenkinsfile.ai — AI Security Layer CI/CD Pipeline
+pipeline {
+  agent none
+
+  options {
+    timestamps()
+    disableConcurrentBuilds()
+    buildDiscarder(logRotator(numToKeepStr: '10'))
+    timeout(time: 30, unit: 'MINUTES')
+  }
+
+  environment {
+    REGISTRY_HOST = 'localhost:5001'
+    IMAGE_PREFIX = 'ai-security'
+    IMAGE_TAG = 'production'
+    NAMESPACE = 'ai-security'
+  }
+
+  stages {
+
+    // ════════════════════════════════════════════════════════════════
+    //  STAGE 1 — Checkout
+    // ════════════════════════════════════════════════════════════════
+    stage('Checkout') {
+      agent { label 'master' }
+      steps {
+        checkout scm
+        stash name: 'workspace', includes: '**'
+      }
+    }
+
+    // ════════════════════════════════════════════════════════════════
+    //  STAGE 2 — Linting
+    // ════════════════════════════════════════════════════════════════
+    stage('Lint & Static Analysis') {
+      agent { label 'master' }
+      steps {
+        unstash 'workspace'
+        sh '''
+          set -euo pipefail
+          echo "[INFO] Linting Python files..."
+          if command -v flake8 >/dev/null 2>&1; then
+            flake8 ai-security/ --exclude=frontend,node_modules,.venv || echo "[WARN] Flake8 warnings found"
+          else
+            echo "[WARN] flake8 not installed; skipping Python lint"
+          }
+        '''
+      }
+    }
+
+    // ════════════════════════════════════════════════════════════════
+    //  STAGE 3 — Unit Testing
+    // ════════════════════════════════════════════════════════════════
+    stage('Unit Tests') {
+      agent { label 'test-agent' }
+      steps {
+        unstash 'workspace'
+        sh '''
+          set -euo pipefail
+          echo "[INFO] Running Python tests..."
+          export PYTHONPATH="$PYTHONPATH:$(pwd)/ai-security/backend"
+          pytest ai-security/backend/tests/ -v
+        '''
+      }
+    }
+
+    // ════════════════════════════════════════════════════════════════
+    //  STAGE 4 — Docker Build & Vulnerability Scans
+    // ════════════════════════════════════════════════════════════════
+    stage('Build & Security Scan') {
+      agent { label 'docker-agent' }
+      steps {
+        unstash 'workspace'
+        sh '''
+          set -euo pipefail
+          
+          # 1. Build Inference Service
+          echo "[INFO] Building AI Inference image..."
+          docker build -t ${REGISTRY_HOST}/${IMAGE_PREFIX}-inference:${IMAGE_TAG} -f ai-security/Dockerfile ai-security/
+          
+          # 2. Build Backend Service
+          echo "[INFO] Building Backend API image..."
+          docker build -t ${REGISTRY_HOST}/${IMAGE_PREFIX}-backend:${IMAGE_TAG} -f ai-security/backend/Dockerfile ai-security/backend/
+          
+          # 3. Build Log Collector Daemon
+          echo "[INFO] Building Log Collector image..."
+          docker build -t ${REGISTRY_HOST}/${IMAGE_PREFIX}-log-collector:${IMAGE_TAG} -f ai-security/Dockerfile.collector ai-security/
+          
+          # 4. Build Frontend Service
+          echo "[INFO] Building Frontend UI image..."
+          docker build -t ${REGISTRY_HOST}/${IMAGE_PREFIX}-frontend:${IMAGE_TAG} -f ai-security/frontend/Dockerfile ai-security/frontend/
+          
+          # 5. Security Scanning with Trivy (Fail on CRITICAL)
+          echo "[INFO] Running Trivy container vulnerability scan..."
+          trivy image --severity CRITICAL --exit-code 1 ${REGISTRY_HOST}/${IMAGE_PREFIX}-backend:${IMAGE_TAG}
+          trivy image --severity CRITICAL --exit-code 1 ${REGISTRY_HOST}/${IMAGE_PREFIX}-inference:${IMAGE_TAG}
+        '''
+      }
+    }
+
+    // ════════════════════════════════════════════════════════════════
+    //  STAGE 5 — Push & Sign Images
+    // ════════════════════════════════════════════════════════════════
+    stage('Push & Sign') {
+      agent { label 'docker-agent' }
+      steps {
+        sh '''
+          set -euo pipefail
+          
+          # 1. Push to local registry
+          docker push ${REGISTRY_HOST}/${IMAGE_PREFIX}-inference:${IMAGE_TAG}
+          docker push ${REGISTRY_HOST}/${IMAGE_PREFIX}-backend:${IMAGE_TAG}
+          docker push ${REGISTRY_HOST}/${IMAGE_PREFIX}-log-collector:${IMAGE_TAG}
+          docker push ${REGISTRY_HOST}/${IMAGE_PREFIX}-frontend:${IMAGE_TAG}
+          
+          # 2. Image signature via Cosign keyless or cluster key
+          COSIGN_PUB_KEY="k8s://securerag-hub/cosign-public-key"
+          if command -v cosign >/dev/null 2>&1; then
+            echo "[INFO] Signing images with Cosign..."
+            # Simulating Cosign sign using keyless/key (we skip actual signing if keys are missing in test context)
+            cosign sign --key k8s://securerag-hub/cosign-private-key --yes ${REGISTRY_HOST}/${IMAGE_PREFIX}-backend:${IMAGE_TAG} || echo "[WARN] Skipping actual Cosign signing in dev environment"
+          fi
+        '''
+      }
+    }
+
+    // ════════════════════════════════════════════════════════════════
+    //  STAGE 6 — Kubernetes Deploy
+    // ════════════════════════════════════════════════════════════════
+    stage('Kubernetes Deploy') {
+      agent { label 'k8s-agent' }
+      steps {
+        unstash 'workspace'
+        sh '''
+          set -euo pipefail
+          echo "[INFO] Applying Kubernetes manifests..."
+          kubectl apply -f ai-security/k8s/namespace.yaml
+          kubectl apply -f ai-security/k8s/
+          
+          # Wait for database and services to be fully rollout out
+          echo "[INFO] Waiting for deployments rollout..."
+          kubectl rollout status deployment/ai-security-inference -n ${NAMESPACE} --timeout=120s
+          kubectl rollout status deployment/ai-security-backend -n ${NAMESPACE} --timeout=120s
+          kubectl rollout status deployment/ai-security-frontend -n ${NAMESPACE} --timeout=120s
+          
+          echo "[INFO] AI Security Layer deployed successfully."
+        '''
+      }
+    }
+  }
+
+  post {
+    success {
+      echo "[OK] AI Security Layer CI/CD pipeline completed successfully."
+    }
+    failure {
+      echo "[FAIL] Pipeline failed. Check console logs."
+    }
+  }
+}
