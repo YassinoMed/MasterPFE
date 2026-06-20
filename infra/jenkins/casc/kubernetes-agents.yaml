@@ -35,11 +35,20 @@ jenkins:
                       value: "/tmp/composer"
                   - envVar:
                       key: "COMPOSER_CACHE_DIR"
-                      value: "/tmp/composer/cache"
+                      value: "/tmp/composer-cache"
+                  - envVar:
+                      key: "npm_config_cache"
+                      value: "/tmp/npm-cache"
+                  - envVar:
+                      key: "NPM_CONFIG_CACHE"
+                      value: "/tmp/npm-cache"
             volumes:
-              - emptyDirVolume:
-                  memory: false
-                  mountPath: "/tmp/composer"
+              - persistentVolumeClaim:
+                  claimName: "composer-cache-pvc"
+                  mountPath: "/tmp/composer-cache"
+              - persistentVolumeClaim:
+                  claimName: "npm-cache-pvc"
+                  mountPath: "/tmp/npm-cache"
               - emptyDirVolume:
                   memory: false
                   mountPath: "/tmp"
@@ -62,6 +71,17 @@ jenkins:
                 resourceLimitCpu: "4000m"
                 resourceRequestMemory: "512Mi"
                 resourceLimitMemory: "4096Mi"
+                envVars:
+                  - envVar:
+                      key: "TRIVY_CACHE_DIR"
+                      value: "/tmp/trivy-cache"
+            volumes:
+              - persistentVolumeClaim:
+                  claimName: "trivy-cache-pvc"
+                  mountPath: "/tmp/trivy-cache"
+              - persistentVolumeClaim:
+                  claimName: "dependency-check-cache-pvc"
+                  mountPath: "/tmp/dependency-check"
             workspaceVolume:
               emptyDirWorkspaceVolume: false
             slaveConnectTimeout: 300
@@ -85,6 +105,9 @@ jenkins:
                   - envVar:
                       key: "DOCKER_HOST"
                       value: "tcp://localhost:2375"
+                  - envVar:
+                      key: "TRIVY_CACHE_DIR"
+                      value: "/tmp/trivy-cache"
               - name: "dind"
                 image: "docker:27-dind"
                 securityContext:
@@ -97,6 +120,10 @@ jenkins:
                   - envVar:
                       key: "DOCKER_TLS_CERTDIR"
                       value: ""
+            volumes:
+              - persistentVolumeClaim:
+                  claimName: "trivy-cache-pvc"
+                  mountPath: "/tmp/trivy-cache"
             workspaceVolume:
               emptyDirWorkspaceVolume: false
             slaveConnectTimeout: 300
@@ -135,6 +162,14 @@ jenkins:
                 resourceLimitCpu: "2000m"
                 resourceRequestMemory: "512Mi"
                 resourceLimitMemory: "4096Mi"
+                envVars:
+                  - envVar:
+                      key: "SONAR_USER_HOME"
+                      value: "/tmp/sonar-cache"
+            volumes:
+              - persistentVolumeClaim:
+                  claimName: "sonar-cache-pvc"
+                  mountPath: "/tmp/sonar-cache"
             workspaceVolume:
               emptyDirWorkspaceVolume: false
             slaveConnectTimeout: 300

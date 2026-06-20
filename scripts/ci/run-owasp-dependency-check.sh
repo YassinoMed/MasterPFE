@@ -75,6 +75,11 @@ for dir in "${SCAN_DIRS[@]}"; do
   slug=$(echo "${dir}" | tr '/-' '__')
   info "Scanning ${dir}..."
 
+  DATA_DIR_FLAG=""
+  if [ -d "/tmp/dependency-check" ]; then
+    DATA_DIR_FLAG="--data /tmp/dependency-check"
+  fi
+
   set +e
   "${DC_CMD}" \
     --project "SecureRAG Hub: ${dir}" \
@@ -85,6 +90,7 @@ for dir in "${SCAN_DIRS[@]}"; do
     --out "${REPORT_DIR}/dependency-check-${slug}" \
     --failOnCVSS 7 \
     --enableExperimental false \
+    ${DATA_DIR_FLAG} \
     --noupdate \
     2>/dev/null
   DC_EXIT=$?

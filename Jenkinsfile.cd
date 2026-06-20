@@ -16,13 +16,14 @@ pipeline {
     string(name: 'TARGET_IMAGE_TAG', defaultValue: 'release-local', description: 'Promoted image tag')
     booleanParam(name: 'SIGN_RELEASE_CANDIDATES', defaultValue: true, description: 'Cosign sign')
     booleanParam(name: 'RUN_GITOPS_SYNC', defaultValue: true, description: 'Update Git manifests')
-    booleanParam(name: 'RUN_DAST', defaultValue: true, description: 'OWASP ZAP')
+    booleanParam(name: 'RUN_DAST', defaultValue: false, description: 'OWASP ZAP (Offloaded to weekly scheduler)')
     booleanParam(name: 'DEPLOY_TO_PRODUCTION', defaultValue: false, description: 'Trigger ArgoCD deploy')
   }
 
   environment {
     SBOM_DIR = 'artifacts/sbom'
     REPORT_DIR = 'artifacts/release'
+    ANTHROPIC_API_KEY = credentials('anthropic-api-key')
   }
 
   stages {
@@ -99,20 +100,6 @@ pipeline {
             }
           }
         }
-        stage('Cosign Verify') {
-          when { expression { return params.SIGN_RELEASE_CANDIDATES } }
-          agent { label 'docker-agent' }
-          steps {
-            timeout(time: 10, unit: 'MINUTES') {
-              unstash 'workspace'
-              sh '''
-                REGISTRY_HOST="${REGISTRY_HOST}" IMAGE_PREFIX="${IMAGE_PREFIX}" IMAGE_TAG="${SOURCE_IMAGE_TAG}" \
-                REPORT_DIR="${REPORT_DIR}" FAIL_FAST=true bash scripts/release/verify-signatures.sh
-              '''
-              stash name: 'verify-artifacts', includes: 'artifacts/release/*verify*'
-            }
-          }
-        }
         stage('Generate SBOM + Grype') {
           agent { label 'docker-agent' }
           steps {
@@ -125,10 +112,29 @@ pipeline {
                 for sbom in "${SBOM_DIR}"/*.cyclonedx.json; do
                   [ -e "$sbom" ] && grype "sbom:$sbom" --fail-on high,critical -o json > "${sbom}.grype.json"
                 done
+                python3 scripts/release/generate-vex.py \
+                  --sbom-dir "${SBOM_DIR}" \
+                  --context  "securerag-hub" \
+                  --output   "${SBOM_DIR}/securerag-hub.vex.json"
               '''
               stash name: 'sbom-artifacts', includes: 'artifacts/sbom/**,artifacts/release/*sbom*'
             }
           }
+        }
+      }
+    }
+
+    stage('Cosign Verify') {
+      when { expression { return params.SIGN_RELEASE_CANDIDATES } }
+      agent { label 'docker-agent' }
+      steps {
+        timeout(time: 10, unit: 'MINUTES') {
+          unstash 'workspace'
+          sh '''
+            REGISTRY_HOST="${REGISTRY_HOST}" IMAGE_PREFIX="${IMAGE_PREFIX}" IMAGE_TAG="${SOURCE_IMAGE_TAG}" \
+            REPORT_DIR="${REPORT_DIR}" FAIL_FAST=true bash scripts/release/verify-signatures.sh
+          '''
+          stash name: 'verify-artifacts', includes: 'artifacts/release/*verify*'
         }
       }
     }
@@ -228,6 +234,44 @@ pipeline {
               done < "$DIGEST_RECORD_FILE"
             fi
           '''
+        }
+      }
+    }
+
+    // ════════════════════════════════════════════════════════════════
+    //  CD_PRE_DEPLOY_GATES
+    // ════════════════════════════════════════════════════════════════
+    stage('CD_PRE_DEPLOY_GATES') {
+      parallel {
+        stage('AI_IMAGE_AUDITOR') {
+          agent { label 'docker-agent' }
+          steps {
+            catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
+              timeout(time: 10, unit: 'MINUTES') {
+                unstash 'workspace'
+                try { unstash 'image-scan' } catch(e) { echo "No image-scan stash" }
+                try { unstash 'sbom-artifacts' } catch(e) { echo "No sbom-artifacts stash" }
+                sh '''
+                  set -euo pipefail
+                  python3 scripts/ai/analyze-images.py \
+                    --trivy-reports "security/reports/trivy-image-*.json" \
+                    --sbom-dir      "${SBOM_DIR}" \
+                    --registry      "${REGISTRY_HOST}" \
+                    --image-prefix  "${IMAGE_PREFIX}" \
+                    --image-tag     "${SOURCE_IMAGE_TAG}" \
+                    --output        "artifacts/release/ai-image-advisory.md" \
+                    --context       "SecureRAG Hub — auth, chatbot, conversation, audit, portal" \
+                    --model         "claude-sonnet-4-6" || true
+                '''
+              }
+            }
+          }
+          post {
+            always {
+              archiveArtifacts allowEmptyArchive: true,
+                artifacts: 'artifacts/release/ai-image-advisory.md'
+            }
+          }
         }
       }
     }

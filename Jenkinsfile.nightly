@@ -1,0 +1,82 @@
+pipeline {
+  agent none
+
+  triggers {
+    cron('0 3 * * *') // Run daily at 3 AM (after dependency-check-db-update CronJob at 2 AM)
+  }
+
+  options {
+    timestamps()
+    disableConcurrentBuilds()
+    buildDiscarder(logRotator(numToKeepStr: '10'))
+    timeout(time: 45, unit: 'MINUTES')
+  }
+
+  environment {
+    LARAVEL_APPS = 'platform/portal-web services-laravel/auth-users-service services-laravel/chatbot-manager-service services-laravel/conversation-service services-laravel/audit-security-service'
+    REPORT_DIR = 'security/reports'
+  }
+
+  stages {
+    stage('Checkout') {
+      agent { label 'master' }
+      steps {
+        checkout scm
+        stash name: 'workspace', includes: '**'
+      }
+    }
+
+    stage('OWASP Dependency-Check Scan') {
+      agent { label 'security-agent' }
+      steps {
+        timeout(time: 20, unit: 'MINUTES') {
+          unstash 'workspace'
+          sh 'bash scripts/ci/run-owasp-dependency-check.sh'
+        }
+      }
+      post {
+        always {
+          publishHTML(target: [
+            allowMissing: true,
+            alwaysLinkToLastBuild: true,
+            keepAll: true,
+            reportDir: 'security/reports',
+            reportFiles: 'dependency-check-*/dependency-check-report.html',
+            reportName: 'OWASP Dependency-Check Report'
+          ])
+          archiveArtifacts allowEmptyArchive: true, artifacts: 'security/reports/dependency-check-*/*'
+        }
+      }
+    }
+
+    stage('Backup & Restore DR Validation') {
+      agent { label 'k8s-agent' }
+      steps {
+        timeout(time: 15, unit: 'MINUTES') {
+          unstash 'workspace'
+          sh '''
+            set -euo pipefail
+            echo "═══ NIGHTLY DR TEST — BACKUP & RESTORE VALIDATION ═══"
+            if command -v velero &>/dev/null || kubectl get deployment -n velero velero &>/dev/null 2>&1; then
+              bash scripts/dr/backup-test.sh || echo "[WARN] Backup test had issues"
+              bash scripts/dr/validate-restore.sh || echo "[WARN] Restore validation had issues"
+            else
+              echo "[WARN] Velero not installed — DR test skipped"
+            fi
+          '''
+        }
+      }
+      post {
+        always {
+          archiveArtifacts allowEmptyArchive: true, artifacts: 'artifacts/validation/restore-drill-*.md,artifacts/dr/*.md'
+        }
+      }
+    }
+  }
+
+  post {
+    always {
+      cleanWs()
+    }
+  }
+}

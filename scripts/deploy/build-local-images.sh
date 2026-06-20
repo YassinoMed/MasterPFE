@@ -37,8 +37,12 @@ for component in "${COMPONENT_ARRAY[@]}"; do
   image="${REGISTRY_HOST}/${IMAGE_PREFIX}-${name}:${IMAGE_TAG}"
 
   if [ -f "${dockerfile}" ]; then
-    echo "Building ${image}"
-    docker build -t "${image}" -f "${dockerfile}" "${REPO_ROOT}"
+    echo "Building ${image} with BuildKit caching"
+    export DOCKER_BUILDKIT=1
+    docker build \
+      --build-arg BUILDKIT_INLINE_CACHE=1 \
+      --cache-from "${image}" \
+      -t "${image}" -f "${dockerfile}" "${REPO_ROOT}"
     docker push "${image}"
   else
     if [[ "${ALLOW_MISSING_COMPONENTS}" == "true" ]]; then

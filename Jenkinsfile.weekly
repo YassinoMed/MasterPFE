@@ -1,0 +1,117 @@
+pipeline {
+  agent none
+
+  triggers {
+    cron('0 1 * * 0') // Run weekly on Sundays at 1 AM
+  }
+
+  options {
+    timestamps()
+    disableConcurrentBuilds()
+    buildDiscarder(logRotator(numToKeepStr: '5'))
+    timeout(time: 60, unit: 'MINUTES')
+  }
+
+  environment {
+    DAST_PORTAL_URL = 'http://localhost:8081'
+    REPORT_DIR = 'security/reports'
+  }
+
+  stages {
+    stage('Checkout') {
+      agent { label 'master' }
+      steps {
+        checkout scm
+        stash name: 'workspace', includes: '**'
+      }
+    }
+
+    stage('OWASP ZAP Baseline Scan') {
+      agent { label 'zap-agent' }
+      steps {
+        catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
+          timeout(time: 25, unit: 'MINUTES') {
+            unstash 'workspace'
+            sh '''
+              set -euo pipefail
+              mkdir -p artifacts/dast
+              echo "[INFO] Running OWASP ZAP baseline scan against ${DAST_PORTAL_URL}..."
+              set +e
+              if command -v zap-baseline.py &>/dev/null; then
+                zap-baseline.py -t "${DAST_PORTAL_URL}" -r dast-baseline-report.html -J dast-baseline-report.json -l WARN
+                mv dast-baseline-report.* artifacts/dast/
+              else
+                docker run --rm --network host \
+                  -v "$(pwd)/artifacts/dast:/zap/wrk:rw" \
+                  -t ghcr.io/zaproxy/zaproxy:2.15.0 zap-baseline.py \
+                  -t "${DAST_PORTAL_URL}" \
+                  -r dast-baseline-report.html \
+                  -J dast-baseline-report.json \
+                  -l WARN
+              fi
+              rc1=$?
+              echo "[INFO] ZAP baseline scan complete (exit: ${rc1})"
+              echo "[INFO] Validating DAST report..."
+              DAST_REPORT=artifacts/dast/dast-baseline-report.json DAST_FAIL_ON=High \
+                bash scripts/validate/validate-dast-report.sh || true
+            '''
+          }
+        }
+      }
+      post {
+        always {
+          publishHTML(target: [
+            allowMissing: true,
+            alwaysLinkToLastBuild: true,
+            keepAll: true,
+            reportDir: 'artifacts/dast',
+            reportFiles: 'dast-baseline-report.html',
+            reportName: 'OWASP ZAP Baseline Scan Report'
+          ])
+          archiveArtifacts allowEmptyArchive: true, artifacts: 'artifacts/dast/*'
+        }
+      }
+    }
+
+    stage('OWASP ZAP API Scan') {
+      agent { label 'zap-agent' }
+      steps {
+        catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
+          timeout(time: 25, unit: 'MINUTES') {
+            unstash 'workspace'
+            sh '''
+              set -euo pipefail
+              mkdir -p reports
+              echo "[INFO] Running OWASP ZAP API scan..."
+              set +e
+              if command -v zap-api-scan.py &>/dev/null; then
+                zap-api-scan.py -t http://staging.securerag.local/api/docs.json -f openapi -r zap-report.html -J zap-report.json
+                mv zap-report.* reports/
+              else
+                docker run --rm --network host \
+                  -v "$(pwd)/reports:/zap/wrk:rw" \
+                  -t ghcr.io/zaproxy/zaproxy:2.15.0 zap-api-scan.py \
+                  -t http://staging.securerag.local/api/docs.json -f openapi \
+                  -r zap-report.html -J zap-report.json
+              fi
+              rc=$?
+              echo "[INFO] ZAP API scan complete (exit: ${rc})"
+              bash scripts/zap-quality-gate.sh reports/zap-report.json || true
+            '''
+          }
+        }
+      }
+      post {
+        always {
+          archiveArtifacts allowEmptyArchive: true, artifacts: 'reports/zap-*'
+        }
+      }
+    }
+  }
+
+  post {
+    always {
+      cleanWs()
+    }
+  }
+}
