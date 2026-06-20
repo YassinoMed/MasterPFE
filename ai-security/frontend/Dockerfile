@@ -8,7 +8,8 @@ COPY package.json package-lock.json* ./
 RUN npm ci
 
 # Copy codebase and compile TS/Vite assets
-COPY . .
+COPY src/ ./src/
+COPY index.html tsconfig.json vite.config.ts ./
 RUN npm run build
 
 # Stage 2: Serve via Nginx
