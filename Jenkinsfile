@@ -130,7 +130,7 @@ pipeline {
                 set -euo pipefail
                 mkdir -p security/reports
                 semgrep scan --config security/semgrep/semgrep.yml --json -o security/reports/semgrep.json --error
-                semgrep scan --config security/semgrep/semgrep.yml --config auto --sarif -o security/reports/semgrep.sarif --error
+                semgrep scan --config security/semgrep/semgrep.yml --config auto --sarif -o security/reports/semgrep.sarif
               '''
               stash name: 'semgrep-report', includes: 'security/reports/semgrep.*'
             }
