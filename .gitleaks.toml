@@ -15,7 +15,8 @@ paths = [
   '''(^|/)tests/security/fixtures/''',
   '''(^|/)vendor/''',
   '''(^|/)node_modules/''',
-  '''(^|/)scripts/opensearch/'''
+  '''(^|/)scripts/opensearch/''',
+  '''(^|/)istio-1.23.0/'''
 ]
 regexes = [
   '''(?i)example[_-]?(token|secret|key|password)''',
