@@ -388,6 +388,10 @@ pipeline {
   }
 
   post {
-    always { archiveArtifacts allowEmptyArchive: true, artifacts: 'artifacts/sbom/**,artifacts/release/**,artifacts/validation/**' }
+    always {
+      node('master') {
+        archiveArtifacts allowEmptyArchive: true, artifacts: 'artifacts/sbom/**,artifacts/release/**,artifacts/validation/**'
+      }
+    }
   }
 }
