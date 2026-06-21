@@ -43,11 +43,11 @@ jenkins:
                       key: "NPM_CONFIG_CACHE"
                       value: "/tmp/npm-cache"
             volumes:
-              - persistentVolumeClaim:
-                  claimName: "composer-cache-pvc"
+              - hostPathVolume:
+                  hostPath: "/var/cache/jenkins/composer-cache-pvc"
                   mountPath: "/tmp/composer-cache"
-              - persistentVolumeClaim:
-                  claimName: "npm-cache-pvc"
+              - hostPathVolume:
+                  hostPath: "/var/cache/jenkins/npm-cache-pvc"
                   mountPath: "/tmp/npm-cache"
               - emptyDirVolume:
                   memory: false
@@ -76,11 +76,11 @@ jenkins:
                       key: "TRIVY_CACHE_DIR"
                       value: "/tmp/trivy-cache"
             volumes:
-              - persistentVolumeClaim:
-                  claimName: "trivy-cache-pvc"
+              - hostPathVolume:
+                  hostPath: "/var/cache/jenkins/trivy-cache-pvc"
                   mountPath: "/tmp/trivy-cache"
-              - persistentVolumeClaim:
-                  claimName: "dependency-check-cache-pvc"
+              - hostPathVolume:
+                  hostPath: "/var/cache/jenkins/dependency-check-cache-pvc"
                   mountPath: "/tmp/dependency-check"
             workspaceVolume:
               emptyDirWorkspaceVolume: false
@@ -121,8 +121,8 @@ jenkins:
                       key: "DOCKER_TLS_CERTDIR"
                       value: ""
             volumes:
-              - persistentVolumeClaim:
-                  claimName: "trivy-cache-pvc"
+              - hostPathVolume:
+                  hostPath: "/var/cache/jenkins/trivy-cache-pvc"
                   mountPath: "/tmp/trivy-cache"
             workspaceVolume:
               emptyDirWorkspaceVolume: false
@@ -167,8 +167,8 @@ jenkins:
                       key: "SONAR_USER_HOME"
                       value: "/tmp/sonar-cache"
             volumes:
-              - persistentVolumeClaim:
-                  claimName: "sonar-cache-pvc"
+              - hostPathVolume:
+                  hostPath: "/var/cache/jenkins/sonar-cache-pvc"
                   mountPath: "/tmp/sonar-cache"
             workspaceVolume:
               emptyDirWorkspaceVolume: false
