@@ -81,7 +81,6 @@ pipeline {
     GITLEAKS_IMAGE      = 'ghcr.io/gitleaks/gitleaks:v8.30.1@sha256:c00b6bd0aeb3071cbcb79009cb16a60dd9e0a7c60e2be9ab65d25e6bc8abbb7f'
     LARAVEL_APPS        = 'platform/portal-web services-laravel/auth-users-service services-laravel/chatbot-manager-service services-laravel/conversation-service services-laravel/audit-security-service'
     SSH_KEY_CREDENTIAL  = 'recette-deploy-ssh-key'
-    ANTHROPIC_API_KEY   = credentials('anthropic-api-key')
 
     // Mapping sécurisé des paramètres vers des variables d'environnement (Prévention d'injection)
     ENV_RUN_SONAR = "${params.RUN_SONAR}"
@@ -416,19 +415,21 @@ pipeline {
             catchError(buildResult: 'SUCCESS', stageResult: 'SUCCESS') { unstash 'gitleaks-results' }
             catchError(buildResult: 'SUCCESS', stageResult: 'SUCCESS') { unstash 'trivy-results' }
             catchError(buildResult: 'SUCCESS', stageResult: 'SUCCESS') { unstash 'checkov-results' }
-            sh '''
-              set -euo pipefail
-              mkdir -p security/reports
-              python3 scripts/ai/analyze-security-reports.py \
-                --semgrep  security/reports/semgrep.json \
-                --gitleaks security/reports/gitleaks.json \
-                --trivy    security/reports/trivy-fs.json \
-                --checkov  security/reports/checkov-k8s.xml \
-                --output   security/reports/ai-sast-advisory.md \
-                --context  "Laravel RAG platform, Kubernetes recette, SecureRAG Hub" \
-                --model    "claude-sonnet-4-6" || true
-              echo "[ADVISORY] AI_SAST_TRIAGE complete — review ai-sast-advisory.md"
-            '''
+            withCredentials([string(credentialsId: 'anthropic-api-key', variable: 'ANTHROPIC_API_KEY')]) {
+              sh '''
+                set -euo pipefail
+                mkdir -p security/reports
+                python3 scripts/ai/analyze-security-reports.py \
+                  --semgrep  security/reports/semgrep.json \
+                  --gitleaks security/reports/gitleaks.json \
+                  --trivy    security/reports/trivy-fs.json \
+                  --checkov  security/reports/checkov-k8s.xml \
+                  --output   security/reports/ai-sast-advisory.md \
+                  --context  "Laravel RAG platform, Kubernetes recette, SecureRAG Hub" \
+                  --model    "claude-sonnet-4-6" || true
+                echo "[ADVISORY] AI_SAST_TRIAGE complete — review ai-sast-advisory.md"
+              '''
+            }
           }
         }
       }

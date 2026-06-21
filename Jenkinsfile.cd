@@ -23,7 +23,6 @@ pipeline {
   environment {
     SBOM_DIR = 'artifacts/sbom'
     REPORT_DIR = 'artifacts/release'
-    ANTHROPIC_API_KEY = credentials('anthropic-api-key')
   }
 
   stages {
