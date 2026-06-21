@@ -103,27 +103,27 @@ pipeline {
       agent { label 'master' }
       steps {
         checkout scm
-        stash name: 'workspace', includes: '**'
       }
     }
 
     stage('Prepare Workspace') {
       agent { label 'master' }
       steps {
-        unstash 'workspace'
+              checkout scm
+              sh 'find scripts -type f -name "*.sh" -exec chmod +x {} + || true'
         sh '''
           set -euo pipefail
           mkdir -p security/reports .coverage-artifacts
           find scripts -type f -name "*.sh" -exec chmod +x {} +
         '''
-        stash name: 'workspace', includes: '**'
       }
     }
 
     stage('Install CI Dependencies') {
       agent { label 'test-agent' }
       steps {
-        unstash 'workspace'
+              checkout scm
+              sh 'find scripts -type f -name "*.sh" -exec chmod +x {} + || true'
         sh '''
           set -euo pipefail
 
@@ -139,7 +139,6 @@ pipeline {
             fi
           done
         '''
-        stash name: 'workspace', includes: '**'
       }
     }
 
@@ -149,9 +148,17 @@ pipeline {
           agent { label 'test-agent' }
           steps {
             timeout(time: 5, unit: 'MINUTES') {
-              unstash 'workspace'
+              checkout scm
+              sh 'find scripts -type f -name "*.sh" -exec chmod +x {} + || true'
               sh '''
                 set -euo pipefail
+                for app in ${LARAVEL_APPS}; do
+                  (cd "${app}" && composer install --no-interaction --prefer-dist --no-progress)
+                  if [ -f "${app}/package-lock.json" ]; then
+                    if ! command -v npm &>/dev/null; then apk add --no-cache nodejs npm || true; fi
+                    (cd "${app}" && npm ci --ignore-scripts)
+                  fi
+                done
                 make lint
               '''
             }
@@ -162,9 +169,13 @@ pipeline {
           agent { label 'test-agent' }
           steps {
             timeout(time: 15, unit: 'MINUTES') {
-              unstash 'workspace'
+              checkout scm
+              sh 'find scripts -type f -name "*.sh" -exec chmod +x {} + || true'
               sh '''
                 set -euo pipefail
+                for app in ${LARAVEL_APPS}; do
+                  (cd "${app}" && composer install --no-interaction --prefer-dist --no-progress)
+                done
                 COVERAGE_MIN="${COVERAGE_MIN}" \
                 ENFORCE_COVERAGE_GATE="${ENFORCE_COVERAGE_GATE}" \
                 bash scripts/ci/run-tests.sh
@@ -190,7 +201,8 @@ pipeline {
           agent { label 'test-agent' }
           steps {
             timeout(time: 10, unit: 'MINUTES') {
-              unstash 'workspace'
+              checkout scm
+              sh 'find scripts -type f -name "*.sh" -exec chmod +x {} + || true'
               sh '''
                 set -euo pipefail
                 bash scripts/ci/audit-dependencies.sh
@@ -209,7 +221,8 @@ pipeline {
           agent { label 'security-agent' }
           steps {
             timeout(time: 10, unit: 'MINUTES') {
-              unstash 'workspace'
+              checkout scm
+              sh 'find scripts -type f -name "*.sh" -exec chmod +x {} + || true'
               catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
                 sh '''
                   set -euo pipefail
@@ -237,7 +250,8 @@ pipeline {
           agent { label 'security-agent' }
           steps {
             timeout(time: 5, unit: 'MINUTES') {
-              unstash 'workspace'
+              checkout scm
+              sh 'find scripts -type f -name "*.sh" -exec chmod +x {} + || true'
               sh '''
                 set -euo pipefail
                 gitleaks detect \
@@ -273,7 +287,8 @@ pipeline {
           agent { label 'k8s-agent' }
           steps {
             timeout(time: 10, unit: 'MINUTES') {
-              unstash 'workspace'
+              checkout scm
+              sh 'find scripts -type f -name "*.sh" -exec chmod +x {} + || true'
               catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
                 sh '''
                   set -euo pipefail
@@ -302,7 +317,8 @@ pipeline {
           agent { label 'security-agent' }
           steps {
             timeout(time: 10, unit: 'MINUTES') {
-              unstash 'workspace'
+              checkout scm
+              sh 'find scripts -type f -name "*.sh" -exec chmod +x {} + || true'
               catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
                 sh '''
                   set -euo pipefail
@@ -331,7 +347,8 @@ pipeline {
           agent { label 'k8s-agent' }
           steps {
             timeout(time: 10, unit: 'MINUTES') {
-              unstash 'workspace'
+              checkout scm
+              sh 'find scripts -type f -name "*.sh" -exec chmod +x {} + || true'
               sh '''
                 set -euo pipefail
                 bash scripts/validate/validate-k8s-ultra-hardening.sh
@@ -363,7 +380,8 @@ pipeline {
           agent { label 'k8s-agent' }
           steps {
             timeout(time: 5, unit: 'MINUTES') {
-              unstash 'workspace'
+              checkout scm
+              sh 'find scripts -type f -name "*.sh" -exec chmod +x {} + || true'
               sh '''
                 set -euo pipefail
                 mkdir -p artifacts/security
@@ -381,7 +399,8 @@ pipeline {
       }
       agent { label 'test-agent' }
       steps {
-        unstash 'workspace'
+              checkout scm
+              sh 'find scripts -type f -name "*.sh" -exec chmod +x {} + || true'
         catchError(buildResult: 'SUCCESS', stageResult: 'SUCCESS') { unstash 'coverage-results' }
         catchError(buildResult: 'SUCCESS', stageResult: 'SUCCESS') { unstash 'audit-results' }
         catchError(buildResult: 'SUCCESS', stageResult: 'SUCCESS') { unstash 'semgrep-results' }
@@ -410,7 +429,8 @@ pipeline {
       steps {
         catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
           timeout(time: 5, unit: 'MINUTES') {
-            unstash 'workspace'
+              checkout scm
+              sh 'find scripts -type f -name "*.sh" -exec chmod +x {} + || true'
             catchError(buildResult: 'SUCCESS', stageResult: 'SUCCESS') { unstash 'semgrep-results' }
             catchError(buildResult: 'SUCCESS', stageResult: 'SUCCESS') { unstash 'gitleaks-results' }
             catchError(buildResult: 'SUCCESS', stageResult: 'SUCCESS') { unstash 'trivy-results' }
@@ -451,7 +471,8 @@ pipeline {
       }
       agent { label 'deploy-agent' }
       steps {
-        unstash 'workspace'
+              checkout scm
+              sh 'find scripts -type f -name "*.sh" -exec chmod +x {} + || true'
         withCredentials([file(credentialsId: "${SSH_KEY_CREDENTIAL}", variable: 'DEPLOY_KEY')]) {
           sh '''
             set -euo pipefail
@@ -566,7 +587,8 @@ REMOTE_JENKINS
       }
       agent { label 'deploy-agent' }
       steps {
-        unstash 'workspace'
+              checkout scm
+              sh 'find scripts -type f -name "*.sh" -exec chmod +x {} + || true'
         withCredentials([file(credentialsId: "${SSH_KEY_CREDENTIAL}", variable: 'DEPLOY_KEY')]) {
           sh '''
             set -euo pipefail
