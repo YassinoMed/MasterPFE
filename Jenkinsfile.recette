@@ -888,6 +888,8 @@ REMOTE_SMOKE
                mimeType: 'text/html',
                subject: "🔴 [Jenkins] Échec du build : ${env.JOB_NAME} #${env.BUILD_NUMBER}",
                body: htmlBody
+        }
+      }
     }
   }
 }
