@@ -5,16 +5,16 @@
 jenkins:
   clouds:
     - kubernetes:
-        name: "securerag-k8s"
-        namespace: "jenkins-agents"
-        serverUrl: "https://kubernetes.default.svc"
+        name: "kubernetes"
+        namespace: "securerag-hub"
+        serverUrl: "https://securerag-dev-control-plane:6443"
         skipTlsVerify: true
         jenkinsUrl: "http://jenkins.securerag-hub.svc:8080"
         jenkinsTunnel: "jenkins-agent.securerag-hub.svc:50000"
         containerCapStr: "10"
         maxRequestsPerHostStr: "32"
         waitForPodSec: "600"
-        podRetention: "never()"
+        podRetention: "never"
         templates:
           # ── 1. test-agent ──────────────────────────────────────────
           - name: "test-agent"
@@ -53,7 +53,8 @@ jenkins:
                   memory: false
                   mountPath: "/tmp"
             workspaceVolume:
-              emptyDirWorkspaceVolume: false
+              emptyDirWorkspaceVolume:
+                memory: false
             slaveConnectTimeout: 300
             idleMinutes: 5
             yamlMergeStrategy: "override"
@@ -83,7 +84,8 @@ jenkins:
                   hostPath: "/var/cache/jenkins/dependency-check-cache-pvc"
                   mountPath: "/tmp/dependency-check"
             workspaceVolume:
-              emptyDirWorkspaceVolume: false
+              emptyDirWorkspaceVolume:
+                memory: false
             slaveConnectTimeout: 300
             idleMinutes: 5
             yamlMergeStrategy: "override"
@@ -110,8 +112,7 @@ jenkins:
                       value: "/tmp/trivy-cache"
               - name: "dind"
                 image: "docker:27-dind"
-                securityContext:
-                  privileged: true
+                privileged: true
                 resourceRequestCpu: "500m"
                 resourceLimitCpu: "2000m"
                 resourceRequestMemory: "512Mi"
@@ -125,7 +126,8 @@ jenkins:
                   hostPath: "/var/cache/jenkins/trivy-cache-pvc"
                   mountPath: "/tmp/trivy-cache"
             workspaceVolume:
-              emptyDirWorkspaceVolume: false
+              emptyDirWorkspaceVolume:
+                memory: false
             slaveConnectTimeout: 300
             idleMinutes: 5
             yamlMergeStrategy: "override"
@@ -144,7 +146,8 @@ jenkins:
                 resourceRequestMemory: "512Mi"
                 resourceLimitMemory: "2048Mi"
             workspaceVolume:
-              emptyDirWorkspaceVolume: false
+              emptyDirWorkspaceVolume:
+                memory: false
             slaveConnectTimeout: 300
             idleMinutes: 5
             yamlMergeStrategy: "override"
@@ -171,7 +174,8 @@ jenkins:
                   hostPath: "/var/cache/jenkins/sonar-cache-pvc"
                   mountPath: "/tmp/sonar-cache"
             workspaceVolume:
-              emptyDirWorkspaceVolume: false
+              emptyDirWorkspaceVolume:
+                memory: false
             slaveConnectTimeout: 300
             idleMinutes: 5
             yamlMergeStrategy: "override"
@@ -190,7 +194,8 @@ jenkins:
                 resourceRequestMemory: "1Gi"
                 resourceLimitMemory: "4096Mi"
             workspaceVolume:
-              emptyDirWorkspaceVolume: false
+              emptyDirWorkspaceVolume:
+                memory: false
             slaveConnectTimeout: 300
             idleMinutes: 5
             yamlMergeStrategy: "override"
@@ -209,7 +214,8 @@ jenkins:
                 resourceRequestMemory: "256Mi"
                 resourceLimitMemory: "1024Mi"
             workspaceVolume:
-              emptyDirWorkspaceVolume: false
+              emptyDirWorkspaceVolume:
+                memory: false
             slaveConnectTimeout: 300
             idleMinutes: 5
             yamlMergeStrategy: "override"

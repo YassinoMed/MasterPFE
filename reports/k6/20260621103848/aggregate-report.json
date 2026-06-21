@@ -1,0 +1,13 @@
+{
+  "timestamp": "2026-06-21T10:38:49Z",
+  "environment": "kubernetes",
+  "namespace": "securerag-hub",
+  "tests_requested": ["smoke"],
+  "results": {
+    "passed": 0,
+    "failed": 1,
+    "total": 1
+  },
+  "failed_tests": ["smoke"],
+  "slo_passed": false
+}

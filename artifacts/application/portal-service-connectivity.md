@@ -1,6 +1,6 @@
 # Portal / Service Connectivity Proof - SecureRAG Hub
 
-- Generated at: `2026-06-17T21:51:03Z`
+- Generated at: `2026-06-21T08:49:24Z`
 - Portal backend mode: `auto`
 - Timeout: `2s`
 

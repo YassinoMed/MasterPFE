@@ -46,7 +46,7 @@ export function getBaseUrl(serviceName) {
 }
 
 export function allServices() {
-  return Object.entries(SERVICES).map(([name, cfg]) => ({ name, ...cfg }));
+  return Object.entries(SERVICES).map(([name, cfg]) => Object.assign({ name: name }, cfg));
 }
 
 export const HEADERS = {

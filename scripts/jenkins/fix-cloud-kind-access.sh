@@ -67,7 +67,7 @@ write_jenkins_kubeconfig() {
   log "Exporting kubeconfig for Jenkins"
   normalize_kubeconfig_target
   kind export kubeconfig --name "${CLUSTER_NAME}" --kubeconfig /tmp/kubeconfig-jenkins
-  sed -i "s#server: https://.*:6443#server: https://${CONTROL_PLANE_NAME}:6443#g" /tmp/kubeconfig-jenkins
+  sed -i "s#server: https://.*#server: https://${CONTROL_PLANE_NAME}:6443#g" /tmp/kubeconfig-jenkins
   cp /tmp/kubeconfig-jenkins "${KUBECONFIG_OUTPUT}"
   chmod 600 "${KUBECONFIG_OUTPUT}"
 

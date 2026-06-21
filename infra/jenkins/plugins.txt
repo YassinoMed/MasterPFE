@@ -24,4 +24,5 @@ htmlpublisher
 slack
 mailer
 email-ext
-
+kubernetes
+ansicolor

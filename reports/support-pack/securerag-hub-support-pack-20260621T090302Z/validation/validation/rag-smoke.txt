@@ -1,0 +1,4 @@
+=== RAG smoke validation ===
+[SKIP] PRÊT_NON_EXÉCUTÉ: legacy RAG runtime is excluded from the official Laravel Kubernetes runtime because Python sources under services/ are absent
+[SKIP] Set ENABLE_LEGACY_RAG_VALIDATION=true only in an environment where llm-orchestrator, knowledge-hub, qdrant and ollama are intentionally restored
+RAG smoke validation completed with documented exclusion.

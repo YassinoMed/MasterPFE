@@ -1,0 +1,11 @@
+audit-security-service-5fddbb654-n5ltk	localhost:5001/securerag-hub-audit-security-service:dev	
+audit-security-service-b478dc875-b5s9d	localhost:5001/securerag-hub-audit-security-service:dev	
+auth-users-799b8b5664-whwzb	localhost:5001/securerag-hub-auth-users:dev	
+auth-users-c4b94d64b-t6k79	localhost:5001/securerag-hub-auth-users:dev	
+chatbot-manager-779b7cc44b-bskxh	localhost:5001/securerag-hub-chatbot-manager:dev	
+chatbot-manager-976899cb8-jprbg	localhost:5001/securerag-hub-chatbot-manager:dev	
+conversation-service-64f99b44db-6n2vv	localhost:5001/securerag-hub-conversation-service:dev	
+conversation-service-778479dbbf-wwfcx	localhost:5001/securerag-hub-conversation-service:dev	
+portal-web-68d97f97f-2sjcd	localhost:5001/securerag-hub-portal-web:dev	
+portal-web-6ff6cd4545-swmh5	localhost:5001/securerag-hub-portal-web:dev	
+postgres-auth-867ddc6dc8-w9xgr	postgres:16-alpine	

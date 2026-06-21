@@ -1,6 +1,6 @@
 # Final Validation Summary - SecureRAG Hub
 
-- Generated at UTC: `2026-06-17T21:51:15Z`
+- Generated at UTC: `2026-06-21T09:03:01Z`
 - Status: `PARTIEL`
 
 ## 1. Official scenario
@@ -17,18 +17,18 @@
 | Gate | Result |
 |---|---|
 | Static checks | See Jenkins or shell output |
-| Tests | 172 Laravel tests, failures=0, errors=0 |
-| Coverage | 87.09% |
-| Semgrep findings | 0 |
-| Gitleaks leaks | 0 |
-| Trivy vulnerabilities | 84 |
+| Tests | unknown |
+| Coverage | unknown |
+| Semgrep findings | unknown |
+| Gitleaks leaks | unknown |
+| Trivy vulnerabilities | unknown |
 
 ## 3. CD and runtime results
 
 | Check | Status |
 |---|---|
-| Jenkins / CD gates (job: `securerag-hub-ci`) | PARTIEL |
-| Kubernetes runtime | TERMINÉ |
+| Jenkins / CD gates (job: `securerag-hub-ci`) | DÉPENDANT_DE_L_ENVIRONNEMENT |
+| Kubernetes runtime | PARTIEL |
 | Portal Web health | PARTIEL |
 | Digest-pinned runtime (registry: `localhost:5001`) | PARTIEL |
 
@@ -52,7 +52,7 @@
 | `artifacts/final/global-project-status.md` | TERMINÉ |
 | `artifacts/final/missing-phases-closure.md` | PARTIEL |
 | `artifacts/final/devsecops-readiness-report.md` | PARTIEL |
-| `artifacts/jenkins/github-webhook-validation.md` | PARTIEL |
+| `artifacts/jenkins/github-webhook-validation.md` | PRÊT_NON_EXÉCUTÉ |
 | `artifacts/jenkins/ci-push-trigger-proof.md` | PRÊT_NON_EXÉCUTÉ |
 | Latest support pack | artifacts/support-pack/support-demo-20260411T144030Z.tar.gz |
 

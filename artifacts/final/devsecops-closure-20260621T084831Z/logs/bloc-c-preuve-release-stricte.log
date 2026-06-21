@@ -1,0 +1,4 @@
+make[1]: Entering directory '/root/MasterPFE'
+scripts/release/run-supply-chain-execute.sh: line 63: syntax error near unexpected token `fi'
+make[1]: *** [Makefile:205: release-proof-strict] Error 2
+make[1]: Leaving directory '/root/MasterPFE'

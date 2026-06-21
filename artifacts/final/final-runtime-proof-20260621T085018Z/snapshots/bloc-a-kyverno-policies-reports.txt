@@ -1,0 +1,46 @@
+NAME                                   ADMISSION   BACKGROUND   READY   AGE   MESSAGE
+securerag-audit-cleartext-env-values   true        true         True    36s   Ready
+securerag-require-pod-security         true        true         True    36s   Ready
+securerag-require-workload-controls    true        true         True    35s   Ready
+securerag-restrict-image-references    true        true         True    35s   Ready
+securerag-restrict-service-exposure    true        true         True    35s   Ready
+securerag-restrict-volume-types        true        true         True    35s   Ready
+securerag-verify-cosign-images         true        false        True    35s   Ready
+
+NAMESPACE       NAME                                   KIND         NAME                                     PASS   FAIL   WARN   ERROR   SKIP   AGE
+securerag-hub   02177cb2-a975-43cf-b9cc-34095a19f9f6   Pod          portal-web-6ff6cd4545-swmh5              6      0      0      0       0      25s
+securerag-hub   0af2c865-3b0d-49a5-a7da-804ce361d6fc   Deployment   portal-web                               6      0      0      0       0      25s
+securerag-hub   0fe2bf13-3895-45a1-9c6c-a69487ef6a1f   Pod          auth-users-c4b94d64b-t6k79               6      0      0      0       0      25s
+securerag-hub   10830846-6264-4388-aafd-f1e94ec58b2e   Service      audit-security-service                   1      0      0      0       0      24s
+securerag-hub   10f26d7a-9da3-4ed5-9b82-cfe2edcd975d   ReplicaSet   conversation-service-64f99b44db          4      0      0      0       0      25s
+securerag-hub   1d20f675-dcad-44af-8df9-c109e1bd88ca   ReplicaSet   postgres-auth-867ddc6dc8                 4      0      0      0       0      25s
+securerag-hub   23d605ae-917e-4db5-aee5-de8763ef1892   Pod          conversation-service-64f99b44db-6n2vv    6      0      0      0       0      26s
+securerag-hub   25c40f4e-5780-4f17-b412-fae7b23694c9   ReplicaSet   portal-web-6ff6cd4545                    4      0      0      0       0      25s
+securerag-hub   2b96f891-7d77-432a-a657-2f4cf7a67833   Service      chatbot-manager                          1      0      0      0       0      24s
+securerag-hub   3bbde1fc-579f-4c67-9b3a-bfcf87521c1b   Pod          audit-security-service-b478dc875-b5s9d   6      0      0      0       0      25s
+securerag-hub   4209f692-729b-4575-a1cd-a95e38138066   Pod          audit-security-service-5fddbb654-n5ltk   6      0      0      0       0      26s
+securerag-hub   5b36bbc6-f77e-4689-94db-209c0e890d24   Service      auth-users                               1      0      0      0       0      24s
+securerag-hub   5f6a66e2-d4aa-4c42-98b6-13faaf3d6c6a   ReplicaSet   auth-users-c4b94d64b                     4      0      0      0       0      25s
+securerag-hub   609c3fc4-1423-4b8d-94f9-6caf8d95dedc   Pod          auth-users-799b8b5664-whwzb              6      0      0      0       0      25s
+securerag-hub   685da5a9-4050-42fa-b69f-263a00ebfcbc   ReplicaSet   audit-security-service-b478dc875         4      0      0      0       0      25s
+securerag-hub   766e969b-569f-407e-a6ae-a067c015f512   Pod          chatbot-manager-779b7cc44b-bskxh         6      0      0      0       0      26s
+securerag-hub   7f8a19b2-19ee-4239-9aab-d77c8429e96d   Service      postgres-auth                            0      1      0      0       0      24s
+securerag-hub   815a6cf6-65d1-41a3-9c66-b0e3257ac10b   Deployment   auth-users                               6      0      0      0       0      25s
+securerag-hub   819080ea-ed29-482c-b6da-9fce980be1ea   ReplicaSet   chatbot-manager-779b7cc44b               4      0      0      0       0      25s
+securerag-hub   823cb9df-09d9-409a-b559-9a017d2b039e   Service      portal-web                               1      0      0      0       0      24s
+securerag-hub   84f8448f-378d-4597-9353-c6213983f615   Pod          chatbot-manager-976899cb8-jprbg          6      0      0      0       0      25s
+securerag-hub   868ed9d4-86e1-4b4d-a066-23e3fc1c45af   Service      conversation-service                     1      0      0      0       0      24s
+securerag-hub   8f63f457-7089-4f26-969c-86663c792739   Pod          postgres-auth-867ddc6dc8-w9xgr           5      1      0      0       0      26s
+securerag-hub   92fc148d-803c-4129-a59e-070e1605f256   ReplicaSet   conversation-service-778479dbbf          4      0      0      0       0      25s
+securerag-hub   9628a5b1-1536-434b-9b79-da5bc5bf96bb   Deployment   chatbot-manager                          6      0      0      0       0      25s
+securerag-hub   9bd25686-b67e-43a7-8b3b-7d9f702956d0   Deployment   audit-security-service                   6      0      0      0       0      25s
+securerag-hub   a53b69a9-54f7-416e-ba4b-702605a564ca   Deployment   postgres-auth                            6      0      0      0       0      25s
+securerag-hub   af637b0d-f110-4122-8983-4ce3bbaed2c0   Pod          portal-web-68d97f97f-2sjcd               6      0      0      0       0      25s
+securerag-hub   b3f4cb53-6c92-499d-a2b3-901fe2b3a82f   ReplicaSet   chatbot-manager-976899cb8                4      0      0      0       0      25s
+securerag-hub   c4ac0686-47c1-443c-8a88-ec1714ddaea3   ReplicaSet   audit-security-service-5fddbb654         4      0      0      0       0      25s
+securerag-hub   d9707dd8-805d-4f50-a777-82ee2269df80   ReplicaSet   auth-users-799b8b5664                    4      0      0      0       0      25s
+securerag-hub   db5d9e32-aae8-4dde-805f-bcfc8f026cc0   Pod          conversation-service-778479dbbf-wwfcx    6      0      0      0       0      25s
+securerag-hub   f50b3b4a-7035-46ba-9337-488f1ee6a07c   ReplicaSet   portal-web-68d97f97f                     4      0      0      0       0      25s
+securerag-hub   fa6b373e-acf4-4955-b39c-e6af826a73bf   Deployment   conversation-service                     6      0      0      0       0      25s
+
+No resources found

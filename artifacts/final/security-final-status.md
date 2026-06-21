@@ -1,6 +1,6 @@
 # Security Final Status - SecureRAG Hub
 
-- Generated at UTC: `2026-06-17T21:52:04Z`
+- Generated at UTC: `2026-06-21T09:03:02Z`
 - Status: `PARTIEL`
 
 | Control | Status | Evidence |
@@ -11,5 +11,5 @@
 | Secrets management | PRÊT_NON_EXÉCUTÉ | `artifacts/security/secrets-management.md` |
 | Kyverno runtime | PARTIEL | `artifacts/validation/kyverno-runtime-report.md` |
 | Kyverno Enforce local registry blocker | DÉPENDANT_DE_L_ENVIRONNEMENT | `artifacts/validation/kyverno-local-registry-enforce-blocker.md` |
-| Jenkins webhook proof | PARTIEL | `artifacts/jenkins/github-webhook-validation.md` |
+| Jenkins webhook proof | DÉPENDANT_DE_L_ENVIRONNEMENT | `artifacts/jenkins/github-webhook-validation.md` |
 | Jenkins CI push proof | DÉPENDANT_DE_L_ENVIRONNEMENT | `artifacts/jenkins/ci-push-trigger-proof.md` |

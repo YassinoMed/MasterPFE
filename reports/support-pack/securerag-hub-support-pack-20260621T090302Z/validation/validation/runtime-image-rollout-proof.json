@@ -1,0 +1,228 @@
+{
+  "deployStartedAt": null,
+  "digestRecordFile": "artifacts/release/promotion-digests.txt",
+  "generatedAt": "2026-06-21T08:50:19Z",
+  "imagePrefix": "securerag-hub",
+  "imageTag": "dev",
+  "namespace": "securerag-hub",
+  "registry": "localhost:5001",
+  "requireDigestDeploy": true,
+  "services": [
+    {
+      "deploymentImageOk": false,
+      "deploymentImages": [
+        "localhost:5001/securerag-hub-auth-users:dev"
+      ],
+      "desired": 1,
+      "digestRecordOk": false,
+      "expectedDigest": null,
+      "expectedTagRef": "localhost:5001/securerag-hub-auth-users:dev",
+      "podImageOk": true,
+      "pods": [
+        {
+          "created": "2026-06-21T08:49:51Z",
+          "imageIDMatch": true,
+          "imageIDs": [
+            ""
+          ],
+          "images": [
+            "localhost:5001/securerag-hub-auth-users:dev"
+          ],
+          "name": "auth-users-799b8b5664-whwzb",
+          "ready": false,
+          "recent": null
+        },
+        {
+          "created": "2026-06-21T08:49:51Z",
+          "imageIDMatch": true,
+          "imageIDs": [
+            ""
+          ],
+          "images": [
+            "localhost:5001/securerag-hub-auth-users:dev"
+          ],
+          "name": "auth-users-c4b94d64b-t6k79",
+          "ready": false,
+          "recent": null
+        }
+      ],
+      "readyPods": 0,
+      "recentPods": "not_checked",
+      "service": "auth-users",
+      "status": "PARTIEL"
+    },
+    {
+      "deploymentImageOk": false,
+      "deploymentImages": [
+        "localhost:5001/securerag-hub-chatbot-manager:dev"
+      ],
+      "desired": 1,
+      "digestRecordOk": false,
+      "expectedDigest": null,
+      "expectedTagRef": "localhost:5001/securerag-hub-chatbot-manager:dev",
+      "podImageOk": true,
+      "pods": [
+        {
+          "created": "2026-06-21T08:49:51Z",
+          "imageIDMatch": true,
+          "imageIDs": [
+            ""
+          ],
+          "images": [
+            "localhost:5001/securerag-hub-chatbot-manager:dev"
+          ],
+          "name": "chatbot-manager-779b7cc44b-bskxh",
+          "ready": false,
+          "recent": null
+        },
+        {
+          "created": "2026-06-21T08:49:52Z",
+          "imageIDMatch": true,
+          "imageIDs": [
+            ""
+          ],
+          "images": [
+            "localhost:5001/securerag-hub-chatbot-manager:dev"
+          ],
+          "name": "chatbot-manager-976899cb8-jprbg",
+          "ready": false,
+          "recent": null
+        }
+      ],
+      "readyPods": 0,
+      "recentPods": "not_checked",
+      "service": "chatbot-manager",
+      "status": "PARTIEL"
+    },
+    {
+      "deploymentImageOk": false,
+      "deploymentImages": [
+        "localhost:5001/securerag-hub-conversation-service:dev"
+      ],
+      "desired": 1,
+      "digestRecordOk": false,
+      "expectedDigest": null,
+      "expectedTagRef": "localhost:5001/securerag-hub-conversation-service:dev",
+      "podImageOk": true,
+      "pods": [
+        {
+          "created": "2026-06-21T08:49:52Z",
+          "imageIDMatch": true,
+          "imageIDs": [
+            ""
+          ],
+          "images": [
+            "localhost:5001/securerag-hub-conversation-service:dev"
+          ],
+          "name": "conversation-service-64f99b44db-6n2vv",
+          "ready": false,
+          "recent": null
+        },
+        {
+          "created": "2026-06-21T08:49:51Z",
+          "imageIDMatch": true,
+          "imageIDs": [
+            ""
+          ],
+          "images": [
+            "localhost:5001/securerag-hub-conversation-service:dev"
+          ],
+          "name": "conversation-service-778479dbbf-wwfcx",
+          "ready": false,
+          "recent": null
+        }
+      ],
+      "readyPods": 0,
+      "recentPods": "not_checked",
+      "service": "conversation-service",
+      "status": "PARTIEL"
+    },
+    {
+      "deploymentImageOk": false,
+      "deploymentImages": [
+        "localhost:5001/securerag-hub-audit-security-service:dev"
+      ],
+      "desired": 1,
+      "digestRecordOk": false,
+      "expectedDigest": null,
+      "expectedTagRef": "localhost:5001/securerag-hub-audit-security-service:dev",
+      "podImageOk": true,
+      "pods": [
+        {
+          "created": "2026-06-21T08:49:51Z",
+          "imageIDMatch": true,
+          "imageIDs": [
+            ""
+          ],
+          "images": [
+            "localhost:5001/securerag-hub-audit-security-service:dev"
+          ],
+          "name": "audit-security-service-5fddbb654-n5ltk",
+          "ready": false,
+          "recent": null
+        },
+        {
+          "created": "2026-06-21T08:49:52Z",
+          "imageIDMatch": true,
+          "imageIDs": [
+            ""
+          ],
+          "images": [
+            "localhost:5001/securerag-hub-audit-security-service:dev"
+          ],
+          "name": "audit-security-service-b478dc875-b5s9d",
+          "ready": false,
+          "recent": null
+        }
+      ],
+      "readyPods": 0,
+      "recentPods": "not_checked",
+      "service": "audit-security-service",
+      "status": "PARTIEL"
+    },
+    {
+      "deploymentImageOk": false,
+      "deploymentImages": [
+        "localhost:5001/securerag-hub-portal-web:dev"
+      ],
+      "desired": 1,
+      "digestRecordOk": false,
+      "expectedDigest": null,
+      "expectedTagRef": "localhost:5001/securerag-hub-portal-web:dev",
+      "podImageOk": true,
+      "pods": [
+        {
+          "created": "2026-06-21T08:49:51Z",
+          "imageIDMatch": true,
+          "imageIDs": [
+            ""
+          ],
+          "images": [
+            "localhost:5001/securerag-hub-portal-web:dev"
+          ],
+          "name": "portal-web-68d97f97f-2sjcd",
+          "ready": false,
+          "recent": null
+        },
+        {
+          "created": "2026-06-21T08:49:51Z",
+          "imageIDMatch": true,
+          "imageIDs": [
+            ""
+          ],
+          "images": [
+            "localhost:5001/securerag-hub-portal-web:dev"
+          ],
+          "name": "portal-web-6ff6cd4545-swmh5",
+          "ready": false,
+          "recent": null
+        }
+      ],
+      "readyPods": 0,
+      "recentPods": "not_checked",
+      "service": "portal-web",
+      "status": "PARTIEL"
+    }
+  ],
+  "status": "PARTIEL"
+}

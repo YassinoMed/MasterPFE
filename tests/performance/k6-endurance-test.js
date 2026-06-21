@@ -18,12 +18,11 @@ export const options = {
       tags: { test_type: 'endurance', test_name: 'endurance' },
     },
   },
-  thresholds: {
-    ...SOAK_THRESHOLDS,
+  thresholds: Object.assign({}, SOAK_THRESHOLDS, {
     http_req_duration: ['p(95)<500', 'p(99)<1000', 'max<5000'],
     http_req_failed: ['rate<0.001'],
     iterations: ['count>100'],
-  },
+  }),
 };
 
 const SERVICE_PATHS = {
