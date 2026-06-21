@@ -1,4 +1,4 @@
-// Jenkinsfile.cd — SecureRAG Hub CD (Distributed Edition)
+// Jenkinsfile.cd — SecureRAG Hub CD (Deploy to Recette)
 pipeline {
   agent none
 
@@ -6,391 +6,436 @@ pipeline {
     timestamps()
     disableConcurrentBuilds()
     buildDiscarder(logRotator(numToKeepStr: '20'))
-    timeout(time: 90, unit: 'MINUTES')
+    timeout(time: 60, unit: 'MINUTES')
   }
 
   parameters {
-    string(name: 'REGISTRY_HOST', defaultValue: 'localhost:5001', description: 'Target OCI registry')
-    string(name: 'IMAGE_PREFIX', defaultValue: 'securerag-hub', description: 'OCI image prefix')
-    string(name: 'SOURCE_IMAGE_TAG', defaultValue: 'dev', description: 'Release candidate tag')
-    string(name: 'TARGET_IMAGE_TAG', defaultValue: 'release-local', description: 'Promoted image tag')
-    booleanParam(name: 'SIGN_RELEASE_CANDIDATES', defaultValue: true, description: 'Cosign sign')
-    booleanParam(name: 'RUN_GITOPS_SYNC', defaultValue: true, description: 'Update Git manifests')
-    booleanParam(name: 'RUN_DAST', defaultValue: false, description: 'OWASP ZAP (Offloaded to weekly scheduler)')
-    booleanParam(name: 'DEPLOY_TO_PRODUCTION', defaultValue: false, description: 'Trigger ArgoCD deploy')
+    string(name: 'RECETTE_HOST', defaultValue: '', description: 'IP/hostname recette (vide = via credential)')
+    string(name: 'RECETTE_USER', defaultValue: 'deploy', description: 'SSH user')
+    string(name: 'IMAGE_TAG', defaultValue: 'demo', description: 'Docker image tag à déployer')
+    string(name: 'REGISTRY_HOST', defaultValue: 'localhost:5001', description: 'OCI registry')
+    booleanParam(name: 'DEPLOY_TO_RECETTE', defaultValue: true, description: 'Deploy to recette')
+    booleanParam(name: 'RUN_SMOKE_TESTS', defaultValue: true, description: 'Run smoke tests')
+    booleanParam(name: 'RUN_CD_VALIDATION', defaultValue: true, description: 'Run post-deploy validation gates')
+    booleanParam(name: 'RUN_SONAR', defaultValue: true, description: 'Run Sonar (post-deploy)')
+    booleanParam(name: 'RUN_DAST', defaultValue: false, description: 'Run OWASP ZAP baseline')
+    string(name: 'KUBE_SCORE_MAX_CRITICAL', defaultValue: '0', description: 'Max CRITICAL kube-score')
+    string(name: 'KUBE_SCORE_MAX_WARNINGS', defaultValue: '0', description: 'Max WARNING kube-score')
+    string(name: 'NOTIFICATION_EMAIL', defaultValue: '', description: 'Email de notification (vide = désactivé)')
   }
 
   environment {
-    SBOM_DIR = 'artifacts/sbom'
-    REPORT_DIR = 'artifacts/release'
-    ANTHROPIC_API_KEY = credentials('anthropic-api-key')
+    LARAVEL_SERVICES   = 'portal-web auth-users-service chatbot-manager-service conversation-service audit-security-service'
+    SSH_KEY_CREDENTIAL = 'recette-deploy-ssh-key'
+    SONAR_HOST_URL     = 'http://sonarqube.securerag-hub.svc:9000'
+    DAST_PORTAL_URL    = 'http://staging.securerag.local:9081'
+    REPORT_DIR         = 'security/reports'
+
+    // Mapping sécurisé (prévention d'injection)
+    ENV_RECETTE_HOST = "${params.RECETTE_HOST}"
+    ENV_RECETTE_USER = "${params.RECETTE_USER}"
+    ENV_IMAGE_TAG    = "${params.IMAGE_TAG}"
+    ENV_REGISTRY_HOST = "${params.REGISTRY_HOST}"
+    ENV_KUBE_SCORE_MAX_CRITICAL = "${params.KUBE_SCORE_MAX_CRITICAL}"
+    ENV_KUBE_SCORE_MAX_WARNINGS = "${params.KUBE_SCORE_MAX_WARNINGS}"
   }
 
   stages {
 
     stage('Checkout') {
-      agent { label 'master' }
+      agent { label 'built-in' }
       steps {
         timeout(time: 5, unit: 'MINUTES') {
           checkout scm
-          stash name: 'workspace', includes: '**'
+          sh '''
+            set -euo pipefail
+            # Validation stricte du tag d'image (anti-injection)
+            echo "${ENV_IMAGE_TAG}" | grep -Eq '^[a-zA-Z0-9._-]+$' || { echo "[FATAL] IMAGE_TAG invalide"; exit 1; }
+          '''
+          stash name: 'workspace', includes: '**', excludes: '.git/**,**/vendor/**,**/node_modules/**'
         }
       }
     }
 
     stage('Prepare Workspace') {
-      agent { label 'master' }
+      agent { label 'built-in' }
       steps {
-        timeout(time: 2, unit: 'MINUTES') {
+        timeout(time: 3, unit: 'MINUTES') {
           unstash 'workspace'
-          sh 'mkdir -p "${SBOM_DIR}" "${REPORT_DIR}" artifacts/validation && find scripts -type f -name "*.sh" -exec chmod +x {} +'
-          stash name: 'workspace', includes: '**'
+          sh '''
+            set -euo pipefail
+            mkdir -p "${REPORT_DIR}" artifacts/security artifacts/dast
+            find scripts -type f -name "*.sh" -exec chmod +x {} +
+          '''
+          stash name: 'workspace', includes: '**', excludes: '.git/**,**/vendor/**,**/node_modules/**'
         }
       }
     }
 
     // ════════════════════════════════════════════════════════════════
-    //  PARALLEL: Image Scan + Checkov Helm
+    //  PRE-DEPLOY GATES  (P1)
+    //  CD_SECRETS_SCAN = BLOCKING. Les autres = ADVISORY (UNSTABLE).
     // ════════════════════════════════════════════════════════════════
-    stage('CD: Scans') {
+    stage('CD_PRE_DEPLOY_GATES') {
+      failFast false
       parallel {
-        stage('Trivy Image Scan') {
-          agent { label 'docker-agent' }
-          steps {
-            timeout(time: 20, unit: 'MINUTES') {
-              unstash 'workspace'
-              sh '''
-                REGISTRY_HOST="${REGISTRY_HOST}" IMAGE_PREFIX="${IMAGE_PREFIX}" IMAGE_TAG="${SOURCE_IMAGE_TAG}" \
-                REPORT_DIR="${REPORT_DIR}" IMAGE_SCAN_DIR="security/reports" \
-                bash scripts/release/scan-images.sh
-              '''
-              stash name: 'image-scan', includes: 'artifacts/release/*scan*,security/reports/trivy-image-*.json'
-            }
-          }
-        }
-        stage('Checkov Helm') {
-          agent { label 'k8s-agent' }
+        stage('CD_SECRETS_SCAN') {
+          agent { label 'security-agent' }
           steps {
             timeout(time: 5, unit: 'MINUTES') {
               unstash 'workspace'
-              sh 'checkov -d infra/helm/ --config-file security/checkov-config.yaml --hard-fail-on CRITICAL --soft-fail-on HIGH -o junitxml > artifacts/release/checkov-helm-cd.xml'
-              stash name: 'checkov-cd', includes: 'artifacts/release/checkov-*.xml'
-            }
-          }
-        }
-      }
-    }
-
-    // ════════════════════════════════════════════════════════════════
-    //  PARALLEL: Sign + SBOM + Grype
-    // ════════════════════════════════════════════════════════════════
-    stage('CD: Supply Chain') {
-      parallel {
-        stage('Cosign Sign') {
-          when { expression { return params.SIGN_RELEASE_CANDIDATES } }
-          agent { label 'docker-agent' }
-          steps {
-            timeout(time: 15, unit: 'MINUTES') {
-              unstash 'workspace'
               sh '''
-                REGISTRY_HOST="${REGISTRY_HOST}" IMAGE_PREFIX="${IMAGE_PREFIX}" IMAGE_TAG="${SOURCE_IMAGE_TAG}" \
-                REPORT_DIR="${REPORT_DIR}" FAIL_FAST=true bash scripts/release/sign-images.sh
+                set -euo pipefail
+                mkdir -p "${REPORT_DIR}"
+                gitleaks dir . --config .gitleaks.toml --report-format json --report-path "${REPORT_DIR}/cd-gitleaks.json" --verbose || true
+                LEAKS=$(python3 -c "import json;d=json.load(open('${REPORT_DIR}/cd-gitleaks.json'));print(len(d) if isinstance(d,list) else 0)" 2>/dev/null || echo "0")
+                if [ "${LEAKS}" -gt 0 ]; then
+                  echo "==== BLOCKED: ${LEAKS} secret(s) detected! ===="
+                  exit 1
+                fi
+                echo "[PASS] No secrets detected"
               '''
-              stash name: 'sign-artifacts', includes: 'artifacts/release/*sign*'
             }
           }
-        }
-        stage('Generate SBOM + Grype') {
-          agent { label 'docker-agent' }
-          steps {
-            timeout(time: 15, unit: 'MINUTES') {
-              unstash 'workspace'
-              sh '''
-                REGISTRY_HOST="${REGISTRY_HOST}" IMAGE_PREFIX="${IMAGE_PREFIX}" IMAGE_TAG="${TARGET_IMAGE_TAG}" \
-                SBOM_DIR="${SBOM_DIR}" REPORT_DIR="${REPORT_DIR}" bash scripts/release/generate-sbom.sh
-                STRICT_SBOM_VALIDATION=true SBOM_DIR="${SBOM_DIR}" REPORT_DIR="${REPORT_DIR}" bash scripts/release/validate-sbom-cyclonedx.sh
-                for sbom in "${SBOM_DIR}"/*.cyclonedx.json; do
-                  [ -e "$sbom" ] && grype "sbom:$sbom" --fail-on high,critical -o json > "${sbom}.grype.json"
-                done
-                python3 scripts/release/generate-vex.py \
-                  --sbom-dir "${SBOM_DIR}" \
-                  --context  "securerag-hub" \
-                  --output   "${SBOM_DIR}/securerag-hub.vex.json"
-              '''
-              stash name: 'sbom-artifacts', includes: 'artifacts/sbom/**,artifacts/release/*sbom*'
-            }
+          post {
+            failure { script { currentBuild.result = 'FAILURE' } }
+            always { archiveArtifacts allowEmptyArchive: true, artifacts: 'security/reports/cd-gitleaks.json' }
           }
         }
-      }
-    }
 
-    stage('Cosign Verify') {
-      when { expression { return params.SIGN_RELEASE_CANDIDATES } }
-      agent { label 'docker-agent' }
-      steps {
-        timeout(time: 10, unit: 'MINUTES') {
-          unstash 'workspace'
-          sh '''
-            REGISTRY_HOST="${REGISTRY_HOST}" IMAGE_PREFIX="${IMAGE_PREFIX}" IMAGE_TAG="${SOURCE_IMAGE_TAG}" \
-            REPORT_DIR="${REPORT_DIR}" FAIL_FAST=true bash scripts/release/verify-signatures.sh
-          '''
-          stash name: 'verify-artifacts', includes: 'artifacts/release/*verify*'
-        }
-      }
-    }
-
-    // ════════════════════════════════════════════════════════════════
-    //  CD: SLSA Provenance
-    // ════════════════════════════════════════════════════════════════
-    stage('CD: SLSA Provenance') {
-      agent { label 'worker' }
-      steps {
-        timeout(time: 10, unit: 'MINUTES') {
-          unstash 'workspace'
-          sh '''
-            REGISTRY_HOST="${REGISTRY_HOST}" IMAGE_PREFIX="${IMAGE_PREFIX}" \
-            SOURCE_IMAGE_TAG="${SOURCE_IMAGE_TAG}" TARGET_IMAGE_TAG="${TARGET_IMAGE_TAG}" \
-            REPORT_DIR="${REPORT_DIR}" bash scripts/supply-chain/build-provenance.sh
-          '''
-          stash name: 'provenance-artifacts', includes: 'artifacts/release/*provenance*,artifacts/release/*attestation*'
-        }
-      }
-    }
-
-    // ════════════════════════════════════════════════════════════════
-    //  CD: Heremetic Build
-    // ════════════════════════════════════════════════════════════════
-    stage('CD: Heremetic Build') {
-      agent { label 'worker' }
-      steps {
-        timeout(time: 10, unit: 'MINUTES') {
-          unstash 'workspace'
-          sh '''
-            REGISTRY_HOST="${REGISTRY_HOST}" IMAGE_PREFIX="${IMAGE_PREFIX}" \
-            SOURCE_IMAGE_TAG="${SOURCE_IMAGE_TAG}" TARGET_IMAGE_TAG="${TARGET_IMAGE_TAG}" \
-            bash scripts/supply-chain/hermetic-build.sh
-          '''
-          stash name: 'hermetic-artifacts', includes: 'artifacts/release/*hermetic*'
-        }
-      }
-    }
-
-    // ════════════════════════════════════════════════════════════════
-    //  Promote + Evidence + Provenance
-    // ════════════════════════════════════════════════════════════════
-    stage('CD: Promote by Digest') {
-      agent { label 'docker-agent' }
-      steps {
-        timeout(time: 10, unit: 'MINUTES') {
-          unstash 'workspace'
-          sh '''
-            REGISTRY_HOST="${REGISTRY_HOST}" IMAGE_PREFIX="${IMAGE_PREFIX}" \
-            SOURCE_IMAGE_TAG="${SOURCE_IMAGE_TAG}" TARGET_IMAGE_TAG="${TARGET_IMAGE_TAG}" \
-            REPORT_DIR="${REPORT_DIR}" VERIFY_SOURCE_BEFORE_PROMOTION=false VERIFY_TARGET_AFTER_PROMOTION=true \
-            bash scripts/release/promote-by-digest.sh
-          '''
-          stash name: 'promote-artifacts', includes: 'artifacts/release/*promot*,artifacts/release/*digest*'
-        }
-      }
-    }
-
-    stage('CD: Release Evidence') {
-      agent { label 'docker-agent' }
-      steps {
-        timeout(time: 10, unit: 'MINUTES') {
-          unstash 'workspace'
-          unstash 'sign-artifacts'
-          unstash 'sbom-artifacts'
-          unstash 'promote-artifacts'
-          sh '''
-            REPORT_DIR="${REPORT_DIR}" SBOM_DIR="${SBOM_DIR}" \
-            DIGEST_RECORD_FILE="${REPORT_DIR}/promotion-digests.txt" \
-            STRICT_RELEASE_ATTESTATION=true bash scripts/release/generate-release-attestation.sh
-            REPORT_DIR="${REPORT_DIR}" DIGEST_RECORD_FILE="${REPORT_DIR}/promotion-digests.txt" \
-            STRICT_PROVENANCE=true bash scripts/release/generate-provenance-statement.sh
-            bash scripts/release/record-release-evidence.sh
-          '''
-        }
-      }
-    }
-
-    // ════════════════════════════════════════════════════════════════
-    //  GitOps Update
-    // ════════════════════════════════════════════════════════════════
-    stage('CD: GitOps Update') {
-      when { expression { return params.RUN_GITOPS_SYNC } }
-      agent { label 'master' }
-      steps {
-        timeout(time: 5, unit: 'MINUTES') {
-          unstash 'workspace'
-          unstash 'promote-artifacts'
-          sh '''
-            DIGEST_RECORD_FILE="${REPORT_DIR}/promotion-digests.txt"
-            if [ -f "$DIGEST_RECORD_FILE" ]; then
-              git config --global user.email "jenkins@securerag.local"
-              git config --global user.name "Jenkins GitOps Bot"
-              while IFS="|" read -r service _ _ digest; do
-                [ -n "$service" ] && [ -n "$digest" ] && bash scripts/gitops/update-image-digest.sh production "$service" "$digest"
-              done < "$DIGEST_RECORD_FILE"
-            fi
-          '''
-        }
-      }
-    }
-
-    // ════════════════════════════════════════════════════════════════
-    //  CD_PRE_DEPLOY_GATES
-    // ════════════════════════════════════════════════════════════════
-    stage('CD_PRE_DEPLOY_GATES') {
-      parallel {
-        stage('AI_IMAGE_AUDITOR') {
+        stage('CD_DOCKERFILE_LINT') {
           agent { label 'docker-agent' }
           steps {
             catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
-              timeout(time: 10, unit: 'MINUTES') {
+              timeout(time: 5, unit: 'MINUTES') {
                 unstash 'workspace'
-                try { unstash 'image-scan' } catch(e) { echo "No image-scan stash" }
-                try { unstash 'sbom-artifacts' } catch(e) { echo "No sbom-artifacts stash" }
-                sh '''
-                  set -euo pipefail
-                  python3 scripts/ai/analyze-images.py \
-                    --trivy-reports "security/reports/trivy-image-*.json" \
-                    --sbom-dir      "${SBOM_DIR}" \
-                    --registry      "${REGISTRY_HOST}" \
-                    --image-prefix  "${IMAGE_PREFIX}" \
-                    --image-tag     "${SOURCE_IMAGE_TAG}" \
-                    --output        "artifacts/release/ai-image-advisory.md" \
-                    --context       "SecureRAG Hub — auth, chatbot, conversation, audit, portal" \
-                    --model         "claude-sonnet-4-6" || true
-                '''
+                sh 'bash scripts/ci/run-hadolint.sh'
               }
             }
           }
           post {
             always {
-              archiveArtifacts allowEmptyArchive: true,
-                artifacts: 'artifacts/release/ai-image-advisory.md'
+              junit allowEmptyResults: true, testResults: 'security/reports/hadolint-junit.xml'
+              archiveArtifacts allowEmptyArchive: true, artifacts: 'security/reports/hadolint-junit.xml'
             }
+          }
+        }
+
+        stage('CD_IAC_SCAN') {
+          agent { label 'k8s-agent' }
+          steps {
+            catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
+              timeout(time: 10, unit: 'MINUTES') {
+                unstash 'workspace'
+                sh '''
+                  set -euo pipefail
+                  mkdir -p "${REPORT_DIR}"
+                  set +e
+                  checkov -d . --config-file security/checkov-config.yaml --skip-path vendor --skip-path node_modules \
+                    --hard-fail-on HIGH -o json > "${REPORT_DIR}/cd-checkov-k8s.json" 2>/dev/null
+                  rc=$?
+                  set -e
+                  [ $rc -ne 0 ] && { echo "[ERROR] Checkov found violations."; exit 1; } || true
+                '''
+              }
+            }
+          }
+          post {
+            always { archiveArtifacts allowEmptyArchive: true, artifacts: 'security/reports/cd-checkov-*.json' }
+          }
+        }
+
+        stage('CD_MANIFEST_VALIDATE') {
+          agent { label 'k8s-agent' }
+          steps {
+            catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
+              timeout(time: 10, unit: 'MINUTES') {
+                unstash 'workspace'
+                sh '''
+                  set -euo pipefail
+                  mkdir -p artifacts/security
+                  KUSTOMIZE_OVERLAY=infra/k8s/overlays/recette STRICT_KUBE_SCORE=true \
+                    KUBE_SCORE_MAX_CRITICAL="${ENV_KUBE_SCORE_MAX_CRITICAL:-0}" \
+                    KUBE_SCORE_MAX_WARNINGS="${ENV_KUBE_SCORE_MAX_WARNINGS:-0}" \
+                    bash scripts/ci/validate-kube-score.sh
+                  REQUIRE_KYVERNO_CLI=true bash scripts/ci/validate-kyverno-policies.sh --dry-run
+                '''
+              }
+            }
+          }
+          post {
+            always { archiveArtifacts allowEmptyArchive: true, artifacts: 'artifacts/security/kube-score-*,artifacts/security/*.md' }
           }
         }
       }
     }
 
     // ════════════════════════════════════════════════════════════════
-    //  ArgoCD Deploy + Smoke Tests
+    //  DEPLOY TO RECETTE
     // ════════════════════════════════════════════════════════════════
-    stage('CD: Deploy to Production') {
-      when { expression { return params.DEPLOY_TO_PRODUCTION && params.RUN_GITOPS_SYNC } }
+    stage('Deploy to Recette') {
+      when { expression { return params.DEPLOY_TO_RECETTE } }
       agent { label 'deploy-agent' }
       steps {
-        timeout(time: 15, unit: 'MINUTES') {
+        timeout(time: 30, unit: 'MINUTES') {
           unstash 'workspace'
-          sh '''
-            sleep 10
-            kubectl annotate application securerag-production -n argocd argocd.argoproj.io/refresh=normal --overwrite 2>/dev/null || true
-            for deploy in portal-web auth-users chatbot-manager conversation-service audit-security-service; do
-              kubectl rollout status "deployment/${deploy}" -n securerag-hub --timeout=300s || exit 1
-            done
-            bash scripts/validate/validate-deployment-health.sh || {
-              NAMESPACE=securerag-hub bash scripts/gitops/rollback-deployment.sh
-              exit 1
+          withCredentials([
+            sshUserPrivateKey(credentialsId: "${SSH_KEY_CREDENTIAL}", keyFileVariable: 'DEPLOY_KEY'),
+            file(credentialsId: 'recette-known-hosts', variable: 'KNOWN_HOSTS')
+          ]) {
+            sh '''
+              set -euo pipefail
+              echo "[INFO] Deploying to recette (${ENV_RECETTE_USER}@${ENV_RECETTE_HOST})..."
+
+              # Host key vérifié (pas de StrictHostKeyChecking=no)
+              SSH_OPTS="-i ${DEPLOY_KEY} -o UserKnownHostsFile=${KNOWN_HOSTS} -o StrictHostKeyChecking=yes -o ConnectTimeout=30"
+
+              # Variables passées de façon SÛRE via heredoc QUOTÉ + préfixe d'env distant
+              ssh ${SSH_OPTS} "${ENV_RECETTE_USER}@${ENV_RECETTE_HOST}" \
+                IMAGE_TAG="${ENV_IMAGE_TAG}" REGISTRY_HOST="${ENV_REGISTRY_HOST}" bash -s <<'REMOTE_DEPLOY'
+                set -euo pipefail
+                APP_DIR="/opt/securerag"
+                REPO_URL="https://github.com/YassinoMed/MasterPFE.git"
+
+                command -v git >/dev/null 2>&1 || { sudo apt-get update && sudo apt-get install -y git ca-certificates; }
+
+                if [ -d "${APP_DIR}/.git" ]; then
+                  cd "${APP_DIR}"
+                  git fetch origin main
+                  git reset --hard origin/main
+                else
+                  git clone --branch main "${REPO_URL}" "${APP_DIR}"
+                  cd "${APP_DIR}"
+                fi
+                echo "[RECETTE] HEAD: $(git log -1 --oneline)"
+
+                bash scripts/deploy/create-kind.sh
+                bash scripts/secrets/bootstrap-local-secrets.sh
+                bash scripts/secrets/create-dev-secrets.sh
+
+                REGISTRY_HOST="${REGISTRY_HOST}" IMAGE_PREFIX="securerag-hub" IMAGE_TAG="${IMAGE_TAG}" \
+                  bash scripts/deploy/build-local-images.sh
+
+                bash scripts/deploy/install-kyverno.sh
+
+                REGISTRY_HOST="${REGISTRY_HOST}" IMAGE_PREFIX="securerag-hub" IMAGE_TAG="${IMAGE_TAG}" \
+                  KUSTOMIZE_OVERLAY="infra/k8s/overlays/recette" bash scripts/deploy/deploy-kind.sh
+
+                # Rollout déterministe (au lieu de delete pod --all)
+                for d in portal-web auth-users-service chatbot-manager-service conversation-service audit-security-service; do
+                  kubectl rollout restart "deployment/${d}" -n securerag-hub 2>/dev/null || true
+                done
+                for d in portal-web auth-users-service chatbot-manager-service conversation-service audit-security-service; do
+                  kubectl rollout status "deployment/${d}" -n securerag-hub --timeout=300s
+                done
+                kubectl get all -n securerag-hub
+REMOTE_DEPLOY
+
+              echo "[INFO] Deployment to recette completed"
+            '''
+          }
+        }
+      }
+      post {
+        failure { echo '❌ Deploy to recette failed. Check SSH connectivity & remote logs.' }
+        always  { archiveArtifacts allowEmptyArchive: true, artifacts: 'reports/deploy/*.log,reports/deploy/*.md' }
+      }
+    }
+
+    stage('Post-deploy Smoke Tests') {
+      when { expression { return params.DEPLOY_TO_RECETTE && params.RUN_SMOKE_TESTS } }
+      agent { label 'deploy-agent' }
+      steps {
+        timeout(time: 10, unit: 'MINUTES') {
+          unstash 'workspace'   // FIX: workspace nécessaire pour les scripts
+          withCredentials([
+            sshUserPrivateKey(credentialsId: "${SSH_KEY_CREDENTIAL}", keyFileVariable: 'DEPLOY_KEY'),
+            file(credentialsId: 'recette-known-hosts', variable: 'KNOWN_HOSTS')
+          ]) {
+            sh '''
+              set -euo pipefail
+              SSH_OPTS="-i ${DEPLOY_KEY} -o UserKnownHostsFile=${KNOWN_HOSTS} -o StrictHostKeyChecking=yes -o ConnectTimeout=30"
+              ssh ${SSH_OPTS} "${ENV_RECETTE_USER}@${ENV_RECETTE_HOST}" bash -s <<'REMOTE_SMOKE'
+                set -euo pipefail
+                cd /opt/securerag
+                bash scripts/deploy/smoke-test.sh
+REMOTE_SMOKE
+            '''
+          }
+        }
+      }
+      post {
+        always { archiveArtifacts allowEmptyArchive: true, artifacts: 'reports/postdeploy/smoke-tests-report.md' }
+      }
+    }
+
+    // ════════════════════════════════════════════════════════════════
+    //  POST-DEPLOY VALIDATION  (P2 — ADVISORY)
+    // ════════════════════════════════════════════════════════════════
+    stage('CD_POST_DEPLOY_VALIDATION') {
+      when { expression { return params.RUN_CD_VALIDATION } }   // FIX: param maintenant câblé
+      parallel {
+        stage('CD_SONARQUBE') {
+          when { expression { return params.RUN_SONAR } }
+          agent { label 'sonar-agent' }
+          steps {
+            catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
+              timeout(time: 10, unit: 'MINUTES') {
+                unstash 'workspace'
+                withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
+                  sh '''
+                    set -euo pipefail
+                    REQUIRE_SONAR=true SONAR_HOST_URL="${SONAR_HOST_URL}" SONAR_TOKEN="${SONAR_TOKEN}" \
+                      bash scripts/ci/run-sonar-analysis.sh
+                  '''
+                }
+              }
             }
-          '''
+          }
+          post { always { archiveArtifacts allowEmptyArchive: true, artifacts: '.scannerwork/report-task.txt' } }
+        }
+
+        stage('CD_SUPPLY_CHAIN') {
+          agent { label 'worker' }
+          steps {
+            catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
+              timeout(time: 10, unit: 'MINUTES') {
+                unstash 'workspace'   // FIX: workspace
+                sh '''
+                  set -euo pipefail
+                  set +e
+                  rc1=0; rc2=0
+                  if [ -f scripts/supply-chain/verify-slsa.sh ]; then
+                    bash scripts/supply-chain/verify-slsa.sh; rc1=$?
+                  else
+                    echo "[WARN] SLSA verify script not found"
+                  fi
+
+                  COSIGN_PUB_KEY="k8s://securerag-hub/cosign-public-key"
+                  if kubectl get secret cosign-public-key -n securerag-hub &>/dev/null; then
+                    # FIX: vérifie TOUS les services, pas seulement portal-web
+                    for svc in portal-web auth-users-service chatbot-manager-service conversation-service audit-security-service; do
+                      echo "[INFO] cosign verify: ${svc}"
+                      cosign verify --key "${COSIGN_PUB_KEY}" \
+                        "${ENV_REGISTRY_HOST}/securerag-hub-${svc}:${ENV_IMAGE_TAG}" || rc2=1
+                    done
+                  else
+                    echo "[WARN] Cosign public key not found — skipping image verification"
+                  fi
+                  set -e
+                  [ $rc1 -ne 0 ] || [ $rc2 -ne 0 ] && { echo "[ERROR] Supply chain verification failed."; exit 1; } || true
+                '''
+              }
+            }
+          }
+          post { always { archiveArtifacts allowEmptyArchive: true, artifacts: 'security/reports/slsa-verify*.json' } }
+        }
+
+        stage('CD_RUNTIME_SECURITY') {
+          agent { label 'k8s-agent' }
+          steps {
+            catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
+              timeout(time: 5, unit: 'MINUTES') {
+                unstash 'workspace'   // FIX: workspace
+                sh '''
+                  set -euo pipefail
+                  set +e; rc1=0; rc2=0
+                  [ -f scripts/ci/validate-tetragon-policies.sh ] && { bash scripts/ci/validate-tetragon-policies.sh; rc1=$?; }
+                  [ -f scripts/ci/validate-opa-gatekeeper.sh ] && { bash scripts/ci/validate-opa-gatekeeper.sh; rc2=$?; }
+                  set -e
+                  [ $rc1 -ne 0 ] || [ $rc2 -ne 0 ] && { echo "[ERROR] Runtime security failed."; exit 1; } || true
+                '''
+              }
+            }
+          }
+          post { always { archiveArtifacts allowEmptyArchive: true, artifacts: 'artifacts/security/opa-audit*.json,artifacts/security/tetragon*.json' } }
+        }
+
+        stage('CD_SPIRE_VALIDATE') {
+          agent { label 'worker' }
+          steps {
+            catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
+              timeout(time: 5, unit: 'MINUTES') {
+                unstash 'workspace'   // FIX: workspace
+                sh '''
+                  set -euo pipefail
+                  [ -f scripts/spire/deploy-spire.sh ] && bash scripts/spire/deploy-spire.sh --validate-only || echo "[WARN] SPIRE script not found"
+                '''
+              }
+            }
+          }
+          post { always { archiveArtifacts allowEmptyArchive: true, artifacts: 'artifacts/security/spire-validate*.json' } }
+        }
+
+        stage('CD_VAULT_SECRETS') {
+          agent { label 'worker' }
+          steps {
+            catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
+              timeout(time: 5, unit: 'MINUTES') {
+                unstash 'workspace'   // FIX: workspace
+                sh '''
+                  set -euo pipefail
+                  [ -f scripts/vault/validate-dynamic-secrets.sh ] && bash scripts/vault/validate-dynamic-secrets.sh || echo "[WARN] Vault script not found"
+                '''
+              }
+            }
+          }
+          post { always { archiveArtifacts allowEmptyArchive: true, artifacts: 'artifacts/security/vault-validate*.json' } }
         }
       }
     }
 
     // ════════════════════════════════════════════════════════════════
-    //  CD: Immutable Backup Validation
+    //  DAST — OWASP ZAP (ADVISORY)
     // ════════════════════════════════════════════════════════════════
-    stage('CD: Immutable Backup Validation') {
-      when { expression { return params.DEPLOY_TO_PRODUCTION } }
-      agent { label 'worker' }
-      steps {
-        timeout(time: 10, unit: 'MINUTES') {
-          unstash 'workspace'
-          sh 'bash scripts/dr/validate-immutable.sh'
-        }
-      }
-    }
-
-    // ════════════════════════════════════════════════════════════════
-    //  CD: Ratify Policy Sync
-    // ════════════════════════════════════════════════════════════════
-    stage('CD: Ratify Policy Sync') {
-      when { expression { return params.DEPLOY_TO_PRODUCTION } }
-      agent { label 'worker' }
-      steps {
-        timeout(time: 10, unit: 'MINUTES') {
-          unstash 'workspace'
-          sh 'bash scripts/ratify/deploy-ratify.sh --verify-only'
-        }
-      }
-    }
-
-    // ════════════════════════════════════════════════════════════════
-    //  DAST — OWASP ZAP
-    // ════════════════════════════════════════════════════════════════
-    stage('CD: DAST — OWASP ZAP') {
+    stage('DAST') {
       when { expression { return params.RUN_DAST } }
-      agent { label 'zap-agent' }
+      agent { label 'docker-agent' }
       steps {
-        timeout(time: 20, unit: 'MINUTES') {
-          unstash 'workspace'
-          sh '''
-            mkdir -p reports
-            zap-api-scan.py -t http://staging.securerag.local/api/docs.json -f openapi -r zap-report.html -J zap-report.json
-            bash scripts/zap-quality-gate.sh reports/zap-report.json
-          '''
+        catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
+          timeout(time: 15, unit: 'MINUTES') {
+            unstash 'workspace'   // FIX: workspace
+            sh '''
+              set -euo pipefail
+              mkdir -p artifacts/dast
+              echo "[INFO] OWASP ZAP baseline vs ${DAST_PORTAL_URL}..."
+              set +e
+              docker run --rm -v "$(pwd)/artifacts/dast:/zap/wrk:rw" \
+                -t ghcr.io/zaproxy/zaproxy:2.15.0 zap-baseline.py \
+                -t "${DAST_PORTAL_URL}" -r dast-baseline-report.html -J dast-baseline-report.json -l WARN
+              rc1=$?
+              DAST_REPORT=artifacts/dast/dast-baseline-report.json DAST_FAIL_ON=High \
+                bash scripts/validate/validate-dast-report.sh; rc2=$?
+              set -e
+              [ $rc1 -ne 0 ] || [ $rc2 -ne 0 ] && { echo "[ERROR] ZAP scan/validation failed."; exit 1; } || true
+            '''
+          }
         }
       }
       post {
-        always { archiveArtifacts allowEmptyArchive: true, artifacts: 'reports/zap-*' }
-      }
-    }
-
-    // ════════════════════════════════════════════════════════════════
-    //  DR Test — Velero Backup & Restore Validation
-    // ════════════════════════════════════════════════════════════════
-    stage('CD: DR Test — Backup Validation') {
-      when { expression { return params.DEPLOY_TO_PRODUCTION } }
-      agent { label 'k8s-agent' }
-      steps {
-        timeout(time: 15, unit: 'MINUTES') {
-          unstash 'workspace'
-          sh '''
-            set -euo pipefail
-            echo "═══ DR TEST — BACKUP & RESTORE VALIDATION ═══"
-            if command -v velero &>/dev/null || kubectl get deployment -n velero velero &>/dev/null 2>&1; then
-              bash scripts/dr/backup-test.sh || echo "[WARN] Backup test had issues"
-              bash scripts/dr/validate-restore.sh || echo "[WARN] Restore validation had issues"
-            else
-              echo "[WARN] Velero not installed — DR test skipped"
-              echo "Deploy Velero: bash scripts/deploy/deploy-velero.sh"
-            fi
-          '''
-        }
-      }
-      post {
-        always { archiveArtifacts allowEmptyArchive: true, artifacts: 'artifacts/validation/restore-drill-*.md,artifacts/dr/*.md' }
-      }
-    }
-
-    stage('Generate Support Pack') {
-      agent { label 'master' }
-      steps {
-        timeout(time: 5, unit: 'MINUTES') {
-          unstash 'workspace'
-          sh 'make support-pack'
+        always {
+          publishHTML(target: [allowMissing: true, alwaysLinkToLastBuild: true, keepAll: true,
+            reportDir: 'artifacts/dast', reportFiles: 'dast-baseline-report.html', reportName: 'OWASP ZAP Baseline'])
+          archiveArtifacts allowEmptyArchive: true, artifacts: 'artifacts/dast/*'
         }
       }
     }
   }
 
   post {
-    always {
-      node('master') {
-        archiveArtifacts allowEmptyArchive: true, artifacts: 'artifacts/sbom/**,artifacts/release/**,artifacts/validation/**'
+    success { echo '✅ SecureRAG Hub CD — SUCCESS' }
+    failure {
+      echo '❌ SecureRAG Hub CD — FAILED'
+      script {
+        if (params.NOTIFICATION_EMAIL?.trim()) {
+          mail to: params.NOTIFICATION_EMAIL,
+               mimeType: 'text/html',
+               subject: "🔴 [Jenkins] Échec CD : ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+               body: """<h2>SecureRAG Hub — CD Failed</h2>
+                        <p>Pipeline: ${env.JOB_NAME} #${env.BUILD_NUMBER}</p>
+                        <p>Branche: ${env.GIT_BRANCH ?: 'N/A'} | Commit: ${env.GIT_COMMIT?.take(7) ?: 'N/A'}</p>
+                        <p><a href="${env.BUILD_URL}console">Voir la console</a></p>"""
+        }
       }
     }
   }
