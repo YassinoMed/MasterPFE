@@ -1,12 +1,77 @@
-// Jenkinsfile.cd — SecureRAG Hub CD (Distributed Edition)
 pipeline {
-  agent none
+  agent {
+    kubernetes {
+      yaml '''
+apiVersion: v1
+kind: Pod
+spec:
+  serviceAccountName: jenkins
+  containers:
+  - name: tools
+    image: mohamedyassinebouneb/securerag-hub-unified:latest
+    imagePullPolicy: Always
+    command:
+    - cat
+    tty: true
+    env:
+    - name: DOCKER_HOST
+      value: tcp://localhost:2375
+    volumeMounts:
+    - name: composer-cache
+      mountPath: /home/jenkins/.composer/cache
+    - name: npm-cache
+      mountPath: /home/jenkins/.npm
+    - name: pip-cache
+      mountPath: /home/jenkins/.cache/pip
+    - name: trivy-cache
+      mountPath: /home/jenkins/.trivycache
+    - name: semgrep-cache
+      mountPath: /home/jenkins/.semgrep
+    - name: sonar-cache
+      mountPath: /home/jenkins/.sonar
+    - name: maven-cache
+      mountPath: /home/jenkins/.m2
+  - name: dind
+    image: docker:27-dind
+    securityContext:
+      privileged: true
+    env:
+    - name: DOCKER_TLS_CERTDIR
+      value: ""
+  volumes:
+  - name: composer-cache
+    hostPath:
+      path: /var/cache/jenkins/composer-cache-pvc
+  - name: npm-cache
+    hostPath:
+      path: /var/cache/jenkins/npm-cache-pvc
+  - name: pip-cache
+    hostPath:
+      path: /var/cache/jenkins/pip-cache
+  - name: trivy-cache
+    hostPath:
+      path: /var/cache/jenkins/trivy-cache-pvc
+  - name: semgrep-cache
+    hostPath:
+      path: /var/cache/jenkins/semgrep-cache
+  - name: sonar-cache
+    hostPath:
+      path: /var/cache/jenkins/sonar-cache-pvc
+  - name: maven-cache
+    hostPath:
+      path: /var/cache/jenkins/maven-cache
+'''
+      defaultContainer 'tools'
+    }
+  }
 
   options {
     timestamps()
     disableConcurrentBuilds()
     buildDiscarder(logRotator(numToKeepStr: '20'))
     timeout(time: 90, unit: 'MINUTES')
+    ansiColor('xterm')
+    skipDefaultCheckout()
   }
 
   parameters {
@@ -18,43 +83,45 @@ pipeline {
     booleanParam(name: 'RUN_GITOPS_SYNC', defaultValue: true, description: 'Update Git manifests')
     booleanParam(name: 'RUN_DAST', defaultValue: false, description: 'OWASP ZAP (Offloaded to weekly scheduler)')
     booleanParam(name: 'DEPLOY_TO_PRODUCTION', defaultValue: false, description: 'Trigger ArgoCD deploy')
+    string(
+      name: 'NOTIFICATION_EMAIL',
+      defaultValue: 'med.yassine.bouneb@proton.me',
+      description: 'Email address to notify on build failures. Leave empty to disable.'
+    )
   }
 
   environment {
     SBOM_DIR = 'artifacts/sbom'
     REPORT_DIR = 'artifacts/release'
+
+    // Cache configurations
+    COMPOSER_HOME       = '/home/jenkins/.composer'
+    COMPOSER_CACHE_DIR  = '/home/jenkins/.composer/cache'
+    npm_config_cache    = '/home/jenkins/.npm'
+    NPM_CONFIG_CACHE    = '/home/jenkins/.npm'
+    PIP_CACHE_DIR       = '/home/jenkins/.cache/pip'
+    TRIVY_CACHE_DIR     = '/home/jenkins/.trivycache'
+    SEMGREP_CACHE_DIR   = '/home/jenkins/.semgrep'
+    SONAR_USER_HOME     = '/home/jenkins/.sonar'
   }
 
   stages {
 
-    stage('Checkout') {
-      agent { label 'master' }
-      steps {
-        timeout(time: 5, unit: 'MINUTES') {
-          checkout scm
-          stash name: 'workspace', includes: '**'
-        }
-      }
-    }
-
     stage('Prepare Workspace') {
-      agent { label 'master' }
       steps {
-        timeout(time: 2, unit: 'MINUTES') {
-          unstash 'workspace'
-          sh 'mkdir -p "${SBOM_DIR}" "${REPORT_DIR}" artifacts/validation && find scripts -type f -name "*.sh" -exec chmod +x {} +'
-          stash name: 'workspace', includes: '**'
+        retry(3) {
+          timeout(time: 5, unit: 'MINUTES') {
+            checkout scm
+          }
         }
+        sh 'mkdir -p "${SBOM_DIR}" "${REPORT_DIR}" artifacts/validation && find scripts -type f -name "*.sh" -exec chmod +x {} + || true'
+        stash name: 'workspace', excludes: '.git/**, .trivycache/**, .semgrep/**, .sonar/**'
       }
     }
 
-    // ════════════════════════════════════════════════════════════════
-    //  PARALLEL: Image Scan + Checkov Helm
-    // ════════════════════════════════════════════════════════════════
     stage('CD: Scans') {
       parallel {
         stage('Trivy Image Scan') {
-          agent { label 'docker-agent' }
           steps {
             timeout(time: 20, unit: 'MINUTES') {
               unstash 'workspace'
@@ -68,7 +135,6 @@ pipeline {
           }
         }
         stage('Checkov Helm') {
-          agent { label 'k8s-agent' }
           steps {
             timeout(time: 5, unit: 'MINUTES') {
               unstash 'workspace'
@@ -80,14 +146,10 @@ pipeline {
       }
     }
 
-    // ════════════════════════════════════════════════════════════════
-    //  PARALLEL: Sign + SBOM + Grype
-    // ════════════════════════════════════════════════════════════════
     stage('CD: Supply Chain') {
       parallel {
         stage('Cosign Sign') {
           when { expression { return params.SIGN_RELEASE_CANDIDATES } }
-          agent { label 'docker-agent' }
           steps {
             timeout(time: 15, unit: 'MINUTES') {
               unstash 'workspace'
@@ -100,7 +162,6 @@ pipeline {
           }
         }
         stage('Generate SBOM + Grype') {
-          agent { label 'docker-agent' }
           steps {
             timeout(time: 15, unit: 'MINUTES') {
               unstash 'workspace'
@@ -125,7 +186,6 @@ pipeline {
 
     stage('Cosign Verify') {
       when { expression { return params.SIGN_RELEASE_CANDIDATES } }
-      agent { label 'docker-agent' }
       steps {
         timeout(time: 10, unit: 'MINUTES') {
           unstash 'workspace'
@@ -138,11 +198,7 @@ pipeline {
       }
     }
 
-    // ════════════════════════════════════════════════════════════════
-    //  CD: SLSA Provenance
-    // ════════════════════════════════════════════════════════════════
     stage('CD: SLSA Provenance') {
-      agent { label 'worker' }
       steps {
         timeout(time: 10, unit: 'MINUTES') {
           unstash 'workspace'
@@ -156,11 +212,7 @@ pipeline {
       }
     }
 
-    // ════════════════════════════════════════════════════════════════
-    //  CD: Heremetic Build
-    // ════════════════════════════════════════════════════════════════
     stage('CD: Heremetic Build') {
-      agent { label 'worker' }
       steps {
         timeout(time: 10, unit: 'MINUTES') {
           unstash 'workspace'
@@ -174,11 +226,7 @@ pipeline {
       }
     }
 
-    // ════════════════════════════════════════════════════════════════
-    //  Promote + Evidence + Provenance
-    // ════════════════════════════════════════════════════════════════
     stage('CD: Promote by Digest') {
-      agent { label 'docker-agent' }
       steps {
         timeout(time: 10, unit: 'MINUTES') {
           unstash 'workspace'
@@ -194,7 +242,6 @@ pipeline {
     }
 
     stage('CD: Release Evidence') {
-      agent { label 'docker-agent' }
       steps {
         timeout(time: 10, unit: 'MINUTES') {
           unstash 'workspace'
@@ -213,12 +260,8 @@ pipeline {
       }
     }
 
-    // ════════════════════════════════════════════════════════════════
-    //  GitOps Update
-    // ════════════════════════════════════════════════════════════════
     stage('CD: GitOps Update') {
       when { expression { return params.RUN_GITOPS_SYNC } }
-      agent { label 'master' }
       steps {
         timeout(time: 5, unit: 'MINUTES') {
           unstash 'workspace'
@@ -237,13 +280,9 @@ pipeline {
       }
     }
 
-    // ════════════════════════════════════════════════════════════════
-    //  CD_PRE_DEPLOY_GATES
-    // ════════════════════════════════════════════════════════════════
     stage('CD_PRE_DEPLOY_GATES') {
       parallel {
         stage('AI_IMAGE_AUDITOR') {
-          agent { label 'docker-agent' }
           steps {
             catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
               timeout(time: 10, unit: 'MINUTES') {
@@ -275,12 +314,8 @@ pipeline {
       }
     }
 
-    // ════════════════════════════════════════════════════════════════
-    //  ArgoCD Deploy + Smoke Tests
-    // ════════════════════════════════════════════════════════════════
     stage('CD: Deploy to Production') {
       when { expression { return params.DEPLOY_TO_PRODUCTION && params.RUN_GITOPS_SYNC } }
-      agent { label 'deploy-agent' }
       steps {
         timeout(time: 15, unit: 'MINUTES') {
           unstash 'workspace'
@@ -299,12 +334,8 @@ pipeline {
       }
     }
 
-    // ════════════════════════════════════════════════════════════════
-    //  CD: Immutable Backup Validation
-    // ════════════════════════════════════════════════════════════════
     stage('CD: Immutable Backup Validation') {
       when { expression { return params.DEPLOY_TO_PRODUCTION } }
-      agent { label 'worker' }
       steps {
         timeout(time: 10, unit: 'MINUTES') {
           unstash 'workspace'
@@ -313,12 +344,8 @@ pipeline {
       }
     }
 
-    // ════════════════════════════════════════════════════════════════
-    //  CD: Ratify Policy Sync
-    // ════════════════════════════════════════════════════════════════
     stage('CD: Ratify Policy Sync') {
       when { expression { return params.DEPLOY_TO_PRODUCTION } }
-      agent { label 'worker' }
       steps {
         timeout(time: 10, unit: 'MINUTES') {
           unstash 'workspace'
@@ -327,12 +354,8 @@ pipeline {
       }
     }
 
-    // ════════════════════════════════════════════════════════════════
-    //  DAST — OWASP ZAP
-    // ════════════════════════════════════════════════════════════════
     stage('CD: DAST — OWASP ZAP') {
       when { expression { return params.RUN_DAST } }
-      agent { label 'zap-agent' }
       steps {
         timeout(time: 20, unit: 'MINUTES') {
           unstash 'workspace'
@@ -348,12 +371,8 @@ pipeline {
       }
     }
 
-    // ════════════════════════════════════════════════════════════════
-    //  DR Test — Velero Backup & Restore Validation
-    // ════════════════════════════════════════════════════════════════
     stage('CD: DR Test — Backup Validation') {
       when { expression { return params.DEPLOY_TO_PRODUCTION } }
-      agent { label 'k8s-agent' }
       steps {
         timeout(time: 15, unit: 'MINUTES') {
           unstash 'workspace'
@@ -365,7 +384,6 @@ pipeline {
               bash scripts/dr/validate-restore.sh || echo "[WARN] Restore validation had issues"
             else
               echo "[WARN] Velero not installed — DR test skipped"
-              echo "Deploy Velero: bash scripts/deploy/deploy-velero.sh"
             fi
           '''
         }
@@ -376,7 +394,6 @@ pipeline {
     }
 
     stage('Generate Support Pack') {
-      agent { label 'master' }
       steps {
         timeout(time: 5, unit: 'MINUTES') {
           unstash 'workspace'
@@ -388,9 +405,222 @@ pipeline {
 
   post {
     always {
-      node('master') {
-        archiveArtifacts allowEmptyArchive: true, artifacts: 'artifacts/sbom/**,artifacts/release/**,artifacts/validation/**'
-      }
+      archiveArtifacts allowEmptyArchive: true, artifacts: 'artifacts/sbom/**,artifacts/release/**,artifacts/validation/**'
+      cleanWs deleteDirs: true, notFailBuild: true
+    }
+    success {
+      script { sendNotifications('SUCCESS') }
+    }
+    failure {
+      script { sendNotifications('FAILURE') }
+    }
+    unstable {
+      script { sendNotifications('UNSTABLE') }
+    }
+    aborted {
+      script { sendNotifications('ABORTED') }
+    }
+  }
+}
+
+def sendNotifications(String status) {
+  def colorMap = [
+    'SUCCESS': '#22c55e',
+    'FAILURE': '#ef4444',
+    'UNSTABLE': '#eab308',
+    'ABORTED': '#64748b'
+  ]
+  def statusColor = colorMap[status] ?: '#64748b'
+  def msg = "SecureRAG Hub CD Pipeline - ${env.JOB_NAME} #${env.BUILD_NUMBER} - ${status} (${env.BUILD_URL})"
+  
+  echo "Sending notifications for status: ${status}"
+  
+  // ── Slack ────────────────────────────────────────────────────────
+  try {
+    slackSend channel: '#securerag-alerts', color: statusColor, message: msg
+  } catch (Exception e) {
+    echo "[WARN] Slack notification failed/skipped: ${e.getMessage()}"
+  }
+
+  // ── Teams ────────────────────────────────────────────────────────
+  try {
+    if (env.TEAMS_WEBHOOK_URL) {
+      sh "curl -s -X POST -H 'Content-Type: application/json' -d '{\"text\": \"${msg}\"}' \"\${TEAMS_WEBHOOK_URL}\" || true"
+    }
+  } catch (Exception e) {
+    echo "[WARN] Teams notification failed/skipped: ${e.getMessage()}"
+  }
+
+  // ── Email ────────────────────────────────────────────────────────
+  if (params.NOTIFICATION_EMAIL && params.NOTIFICATION_EMAIL.trim() != '') {
+    try {
+      def gitCommitShort = env.GIT_COMMIT ? env.GIT_COMMIT.take(7) : 'N/A'
+      def buildDuration = currentBuild.durationString ?: 'N/A'
+      def buildUrl = env.BUILD_URL
+      def consoleUrl = "${env.BUILD_URL}console"
+      def jobName = env.JOB_NAME
+      def buildNumber = env.BUILD_NUMBER
+      def gitBranch = env.GIT_BRANCH ?: 'N/A'
+
+      def htmlBody = """
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Build ${status}</title>
+  <style>
+    body {
+      background-color: #0f172a;
+      color: #f8fafc;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      max-width: 600px;
+      margin: 40px auto;
+      background-color: #0f172a;
+      border: 1px solid #1e293b;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+    }
+    .header {
+      background: linear-gradient(135deg, #0f172a 0%, ${status == 'FAILURE' ? '#450a0a' : '#064e3b'} 100%);
+      padding: 35px 30px;
+      text-align: center;
+      border-bottom: 2px solid ${statusColor};
+    }
+    .badge {
+      background-color: ${statusColor};
+      color: #ffffff;
+      padding: 6px 14px;
+      border-radius: 9999px;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+    .title {
+      font-size: 24px;
+      font-weight: 800;
+      margin: 15px 0 0 0;
+      color: #ffffff;
+    }
+    .content {
+      padding: 30px;
+    }
+    .intro {
+      font-size: 15px;
+      color: #94a3b8;
+      line-height: 1.6;
+    }
+    .grid-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 8px;
+      margin-bottom: 24px;
+    }
+    .card {
+      background-color: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 8px;
+      padding: 12px 16px;
+    }
+    .card-label {
+      font-size: 11px;
+      color: #64748b;
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+    .card-value {
+      font-size: 14px;
+      font-weight: 700;
+      color: #e2e8f0;
+    }
+    .actions {
+      text-align: center;
+    }
+    .btn {
+      display: inline-block;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 700;
+      text-decoration: none;
+      background-color: ${statusColor};
+      color: #ffffff;
+    }
+    .footer {
+      background-color: #020617;
+      padding: 24px;
+      text-align: center;
+      border-top: 1px solid #1e293b;
+    }
+    .footer-text {
+      font-size: 12px;
+      color: #64748b;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <span class="badge">Pipeline ${status}</span>
+      <h1 class="title">SecureRAG Hub — CD Alert</h1>
+    </div>
+    <div class="content">
+      <p class="intro">Bonjour, la pipeline de CD a fini avec le statut : <strong>${status}</strong>.</p>
+      
+      <table class="grid-table">
+        <tr>
+          <td class="card">
+            <div class="card-label">Pipeline</div>
+            <div class="card-value">${jobName}</div>
+          </td>
+          <td class="card">
+            <div class="card-label">Build N°</div>
+            <div class="card-value">#${buildNumber}</div>
+          </td>
+        </tr>
+        <tr>
+          <td class="card">
+            <div class="card-label">Branche</div>
+            <div class="card-value">release</div>
+          </td>
+          <td class="card">
+            <div class="card-label">Commit SHA</div>
+            <div class="card-value">${gitCommitShort}</div>
+          </td>
+        </tr>
+        <tr>
+          <td class="card">
+            <div class="card-label">Durée</div>
+            <div class="card-value">${buildDuration}</div>
+          </td>
+          <td class="card">
+            <div class="card-label">Environnement</div>
+            <div class="card-value">Production / Main</div>
+          </td>
+        </tr>
+      </table>
+
+      <div class="actions">
+        <a href="${consoleUrl}" class="btn">Consulter la Console</a>
+      </div>
+    </div>
+    <div class="footer">
+      <p class="footer-text">SecureRAG Hub — Cloud Native DevSecOps Portal</p>
+    </div>
+  </div>
+</body>
+</html>
+"""
+      mail to: params.NOTIFICATION_EMAIL,
+           mimeType: 'text/html',
+           subject: "[Jenkins] ${status}: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+           body: htmlBody
+    } catch (Exception e) {
+      echo "[WARN] Email notification failed: ${e.getMessage()}"
     }
   }
 }

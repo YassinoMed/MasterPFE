@@ -1,8 +1,62 @@
 pipeline {
-  agent none
+  agent {
+    kubernetes {
+      yaml '''
+apiVersion: v1
+kind: Pod
+spec:
+  serviceAccountName: jenkins
+  containers:
+  - name: tools
+    image: mohamedyassinebouneb/securerag-hub-unified:latest
+    imagePullPolicy: Always
+    command:
+    - cat
+    tty: true
+    volumeMounts:
+    - name: composer-cache
+      mountPath: /home/jenkins/.composer/cache
+    - name: npm-cache
+      mountPath: /home/jenkins/.npm
+    - name: pip-cache
+      mountPath: /home/jenkins/.cache/pip
+    - name: trivy-cache
+      mountPath: /home/jenkins/.trivycache
+    - name: semgrep-cache
+      mountPath: /home/jenkins/.semgrep
+    - name: sonar-cache
+      mountPath: /home/jenkins/.sonar
+    - name: maven-cache
+      mountPath: /home/jenkins/.m2
+  volumes:
+  - name: composer-cache
+    hostPath:
+      path: /var/cache/jenkins/composer-cache-pvc
+  - name: npm-cache
+    hostPath:
+      path: /var/cache/jenkins/npm-cache-pvc
+  - name: pip-cache
+    hostPath:
+      path: /var/cache/jenkins/pip-cache
+  - name: trivy-cache
+    hostPath:
+      path: /var/cache/jenkins/trivy-cache-pvc
+  - name: semgrep-cache
+    hostPath:
+      path: /var/cache/jenkins/semgrep-cache
+  - name: sonar-cache
+    hostPath:
+      path: /var/cache/jenkins/sonar-cache-pvc
+  - name: maven-cache
+    hostPath:
+      path: /var/cache/jenkins/maven-cache
+'''
+      defaultContainer 'tools'
+    }
+  }
 
   triggers {
-    cron('0 3 * * *') // Run daily at 3 AM (after dependency-check-db-update CronJob at 2 AM)
+    cron('0 3 * * *')
   }
 
   options {
@@ -10,24 +64,38 @@ pipeline {
     disableConcurrentBuilds()
     buildDiscarder(logRotator(numToKeepStr: '10'))
     timeout(time: 45, unit: 'MINUTES')
+    ansiColor('xterm')
+    skipDefaultCheckout()
   }
 
   environment {
     LARAVEL_APPS = 'platform/portal-web services-laravel/auth-users-service services-laravel/chatbot-manager-service services-laravel/conversation-service services-laravel/audit-security-service'
     REPORT_DIR = 'security/reports'
+
+    // Cache configurations
+    COMPOSER_HOME       = '/home/jenkins/.composer'
+    COMPOSER_CACHE_DIR  = '/home/jenkins/.composer/cache'
+    npm_config_cache    = '/home/jenkins/.npm'
+    NPM_CONFIG_CACHE    = '/home/jenkins/.npm'
+    PIP_CACHE_DIR       = '/home/jenkins/.cache/pip'
+    TRIVY_CACHE_DIR     = '/home/jenkins/.trivycache'
+    SEMGREP_CACHE_DIR   = '/home/jenkins/.semgrep'
+    SONAR_USER_HOME     = '/home/jenkins/.sonar'
   }
 
   stages {
-    stage('Checkout') {
-      agent { label 'master' }
+    stage('Prepare Workspace') {
       steps {
-        checkout scm
-        stash name: 'workspace', includes: '**'
+        retry(3) {
+          timeout(time: 5, unit: 'MINUTES') {
+            checkout scm
+          }
+        }
+        stash name: 'workspace', excludes: '.git/**, .trivycache/**, .semgrep/**, .sonar/**'
       }
     }
 
     stage('OWASP Dependency-Check Scan') {
-      agent { label 'security-agent' }
       steps {
         timeout(time: 20, unit: 'MINUTES') {
           unstash 'workspace'
@@ -50,7 +118,6 @@ pipeline {
     }
 
     stage('Backup & Restore DR Validation') {
-      agent { label 'k8s-agent' }
       steps {
         timeout(time: 15, unit: 'MINUTES') {
           unstash 'workspace'
@@ -72,4 +139,11 @@ pipeline {
         }
       }
     }
+  }
+
+  post {
+    always {
+      cleanWs deleteDirs: true, notFailBuild: true
+    }
+  }
 }
