@@ -41,9 +41,11 @@ info "Prometheus Stack deployed"
 
 # Phase 3: Deploy Grafana (additional dashboards)
 step "Phase 3/7: Configuring Grafana..."
-helm upgrade --install grafana prometheus-community/grafana \
+helm repo add grafana https://grafana.github.io/helm-charts 2>/dev/null || true
+helm repo update grafana
+
+helm upgrade --install grafana grafana/grafana \
   --namespace monitoring --create-namespace \
-  --values infra/helm/grafana/values-production.yaml \
   --wait --timeout 5m
 
 info "Grafana configured"

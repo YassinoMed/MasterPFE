@@ -33,7 +33,7 @@ sudo ${LYNIS_CMD} audit system --quick --pentester --report-file "${REPORT_DIR}/
 log "Extracting Lynis warnings and suggestions..."
 grep -E '(Warning|Suggestion)' "${REPORT_DIR}/lynis-report.dat" > "${REPORT_DIR}/lynis-findings.txt" || true
 
-# TODO: Déployer l'agent Wazuh (wazuh-agent) sur la machine hôte pour le scan SCA continu.
+# L'agent Wazuh (wazuh-agent) doit être installé sur la machine hôte pour le scan SCA continu.
 # L'agent lit la configuration de /var/ossec/etc/ossec.conf pour exécuter "sca".
 log "Wazuh SCA is performed continuously by the Wazuh Agent if installed on the host."
 

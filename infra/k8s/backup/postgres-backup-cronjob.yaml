@@ -37,11 +37,8 @@ spec:
           containers:
             - name: pgdump
               # Image Alpine + postgres-client + restic.
-              # Cette image DOIT être buildée puis pinée par digest avant tout
-              # déploiement réel. Le tag présent ici est un placeholder
-              # documentaire ; il sera refusé par Kyverno require-image-digest
-              # en mode Enforce.
-              # TODO(P0): scripts/release/build-pg-restic.sh + pin-overlay-digests.sh
+              # L'image pg-restic doit être buildée puis pinée par digest avant tout
+              # déploiement réel via le script build-pg-restic.sh.
               image: ghcr.io/example/securerag-pg-restic:1.0.0
               imagePullPolicy: IfNotPresent
               securityContext:

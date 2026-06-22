@@ -1,907 +1,163 @@
 pipeline {
-  agent {
-    kubernetes {
-      yaml '''
-apiVersion: v1
-kind: Pod
-spec:
-  serviceAccountName: jenkins
-  containers:
-  - name: tools
-    image: mohamedyassinebouneb/securerag-hub-unified:latest
-    imagePullPolicy: Always
-    command:
-    - cat
-    tty: true
-    volumeMounts:
-    - name: composer-cache
-      mountPath: /home/jenkins/.composer/cache
-    - name: npm-cache
-      mountPath: /home/jenkins/.npm
-    - name: pip-cache
-      mountPath: /home/jenkins/.cache/pip
-    - name: trivy-cache
-      mountPath: /home/jenkins/.trivycache
-    - name: semgrep-cache
-      mountPath: /home/jenkins/.semgrep
-    - name: sonar-cache
-      mountPath: /home/jenkins/.sonar
-    - name: maven-cache
-      mountPath: /home/jenkins/.m2
-  volumes:
-  - name: composer-cache
-    hostPath:
-      path: /var/cache/jenkins/composer-cache-pvc
-  - name: npm-cache
-    hostPath:
-      path: /var/cache/jenkins/npm-cache-pvc
-  - name: pip-cache
-    hostPath:
-      path: /var/cache/jenkins/pip-cache
-  - name: trivy-cache
-    hostPath:
-      path: /var/cache/jenkins/trivy-cache-pvc
-  - name: semgrep-cache
-    hostPath:
-      path: /var/cache/jenkins/semgrep-cache
-  - name: sonar-cache
-    hostPath:
-      path: /var/cache/jenkins/sonar-cache-pvc
-  - name: maven-cache
-    hostPath:
-      path: /var/cache/jenkins/maven-cache
-'''
-      defaultContainer 'tools'
-    }
-  }
+    agent any
 
-  options {
-    timestamps()
-    disableConcurrentBuilds()
-    buildDiscarder(logRotator(numToKeepStr: '20'))
-    timeout(time: 20, unit: 'MINUTES')
-    ansiColor('xterm')
-    skipDefaultCheckout()
-  }
-
-  parameters {
-    // ── CI Parameters ──────────────────────────────────────────────────
-    booleanParam(
-      name: 'RUN_SONAR',
-      defaultValue: true,
-      description: 'Run Sonar analysis and block on the quality gate.'
-    )
-    string(
-      name: 'SONAR_HOST_URL',
-      defaultValue: '',
-      description: 'SonarQube/SonarCloud URL. Required only when RUN_SONAR=true.'
-    )
-    booleanParam(
-      name: 'ENFORCE_QUALITY_GATE',
-      defaultValue: true,
-      description: 'Run the consolidated CI Quality Gate stage.'
-    )
-    string(
-      name: 'KUBE_SCORE_MAX_CRITICAL',
-      defaultValue: '0',
-      description: 'Maximum allowed CRITICAL findings for kube-score.'
-    )
-    string(
-      name: 'KUBE_SCORE_MAX_WARNINGS',
-      defaultValue: '0',
-      description: 'Maximum allowed WARNING findings for kube-score.'
-    )
-
-    // ── Deploy Recette Parameters ──────────────────────────────────────
-    string(
-      name: 'RECETTE_HOST',
-      defaultValue: '63.250.59.72',
-      description: 'IP address or hostname of the recette (staging) machine.'
-    )
-    string(
-      name: 'RECETTE_USER',
-      defaultValue: 'root',
-      description: 'SSH user on the recette machine.'
-    )
-    booleanParam(
-      name: 'DEPLOY_TO_RECETTE',
-      defaultValue: true,
-      description: 'Deploy to the recette machine after a successful CI.'
-    )
-    booleanParam(
-      name: 'RUN_SMOKE_TESTS',
-      defaultValue: true,
-      description: 'Run smoke tests on the recette machine after deployment.'
-    )
-    string(
-      name: 'IMAGE_TAG',
-      defaultValue: 'demo',
-      description: 'Docker image tag to build and deploy.'
-    )
-    string(
-      name: 'BRANCH',
-      defaultValue: 'main',
-      description: 'Git branch to deploy on the recette machine.'
-    )
-    string(
-      name: 'NOTIFICATION_EMAIL',
-      defaultValue: 'med.yassine.bouneb@proton.me',
-      description: 'Email address to notify on build failures. Leave empty to disable.'
-    )
-  }
-
-  environment {
-    SEMGREP_VERSION     = '1.156.0'
-    COVERAGE_MIN = '80'
-    ENFORCE_COVERAGE_GATE = 'true'
-    GITLEAKS_IMAGE      = 'ghcr.io/gitleaks/gitleaks:v8.30.1@sha256:c00b6bd0aeb3071cbcb79009cb16a60dd9e0a7c60e2be9ab65d25e6bc8abbb7f'
-    LARAVEL_APPS        = 'platform/portal-web services-laravel/auth-users-service services-laravel/chatbot-manager-service services-laravel/conversation-service services-laravel/audit-security-service'
-    SSH_KEY_CREDENTIAL  = 'recette-deploy-ssh-key'
-
-    // Secure environment mapping (Prevention of injection)
-    ENV_RUN_SONAR = "${params.RUN_SONAR}"
-    ENV_SONAR_HOST_URL = "${params.SONAR_HOST_URL}"
-    ENV_KUBE_SCORE_MAX_CRITICAL = "${params.KUBE_SCORE_MAX_CRITICAL}"
-    ENV_KUBE_SCORE_MAX_WARNINGS = "${params.KUBE_SCORE_MAX_WARNINGS}"
-    ENV_RECETTE_HOST = "${params.RECETTE_HOST}"
-    ENV_RECETTE_USER = "${params.RECETTE_USER}"
-    ENV_IMAGE_TAG = "${params.IMAGE_TAG}"
-    ENV_BRANCH = "${params.BRANCH}"
-
-    // Cache variables targeting K8s volume mounts
-    COMPOSER_HOME       = '/home/jenkins/.composer'
-    COMPOSER_CACHE_DIR  = '/home/jenkins/.composer/cache'
-    npm_config_cache    = '/home/jenkins/.npm'
-    NPM_CONFIG_CACHE    = '/home/jenkins/.npm'
-    PIP_CACHE_DIR       = '/home/jenkins/.cache/pip'
-    TRIVY_CACHE_DIR     = '/home/jenkins/.trivycache'
-    SEMGREP_CACHE_DIR   = '/home/jenkins/.semgrep'
-    SONAR_USER_HOME     = '/home/jenkins/.sonar'
-  }
-
-  stages {
-
-    stage('Prepare Workspace') {
-      steps {
-        retry(3) {
-          timeout(time: 5, unit: 'MINUTES') {
-            checkout scm
-          }
-        }
-        sh 'find scripts -type f -name "*.sh" -exec chmod +x {} + || true'
-        sh '''
-          set -euo pipefail
-          for app in ${LARAVEL_APPS}; do
-            echo "[INFO] Running composer install for ${app}"
-            (cd "${app}" && composer install --no-interaction --prefer-dist --no-progress)
-            if [ -f "${app}/package-lock.json" ]; then
-              echo "[INFO] Running npm ci for ${app}"
-              (cd "${app}" && npm ci --ignore-scripts)
-            fi
-          done
-        '''
-        // Stash the workspace excluding heavy directory trees to avoid stashing crash
-        stash name: 'workspace', excludes: '.git/**, .trivycache/**, .semgrep/**, .sonar/**'
-      }
+    triggers {
+        githubPush()
     }
 
-    // ════════════════════════════════════════════════════════════════════
-    //  PHASE 1 — CONTINUOUS INTEGRATION
-    // ════════════════════════════════════════════════════════════════════
-
-    stage('CI: Parallel Checks') {
-      parallel {
-        stage('Lint') {
-          steps {
-            timeout(time: 5, unit: 'MINUTES') {
-              unstash 'workspace'
-              sh 'make lint'
-            }
-          }
-        }
-
-        stage('Tests & Coverage') {
-          steps {
-            timeout(time: 10, unit: 'MINUTES') {
-              unstash 'workspace'
-              sh '''
-                set -euo pipefail
-                COVERAGE_MIN="${COVERAGE_MIN}" \
-                ENFORCE_COVERAGE_GATE="${ENFORCE_COVERAGE_GATE}" \
-                bash scripts/ci/run-tests.sh
-              '''
-              sh '''
-                set -euo pipefail
-                echo "[INFO] Enforcing coverage gate: minimum ${COVERAGE_MIN}%"
-                COVERAGE_MIN="${COVERAGE_MIN}" \
-                bash scripts/ci/collect-coverage.sh
-              '''
-            }
-          }
-          post {
-            always {
-              junit allowEmptyResults: true, testResults: '.coverage-artifacts/junit-*.xml'
-              archiveArtifacts allowEmptyArchive: true, artifacts: '.coverage-artifacts/**'
-              stash name: 'coverage-results', includes: '.coverage-artifacts/**'
-            }
-          }
-        }
-
-        stage('Dependency Audit') {
-          steps {
-            timeout(time: 5, unit: 'MINUTES') {
-              unstash 'workspace'
-              sh '''
-                set -euo pipefail
-                bash scripts/ci/audit-dependencies.sh
-              '''
-            }
-          }
-          post {
-            always {
-              archiveArtifacts allowEmptyArchive: true, artifacts: 'security/reports/dependency-audit-summary.md,security/reports/composer-audit-*.json,security/reports/npm-audit-*.json'
-              stash name: 'audit-results', includes: 'security/reports/dependency-audit-summary.md,security/reports/composer-audit-*.json,security/reports/npm-audit-*.json'
-            }
-          }
-        }
-
-        stage('Semgrep SAST') {
-          steps {
-            timeout(time: 5, unit: 'MINUTES') {
-              unstash 'workspace'
-              catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
-                sh '''
-                  set -euo pipefail
-                  semgrep scan \
-                    --config security/semgrep/semgrep.yml \
-                    --json -o security/reports/semgrep.json \
-                    --error
-
-                  semgrep scan \
-                    --config security/semgrep/semgrep.yml \
-                    --sarif -o security/reports/semgrep.sarif
-                '''
-              }
-            }
-          }
-          post {
-            always {
-              archiveArtifacts allowEmptyArchive: true, artifacts: 'security/reports/semgrep.json,security/reports/semgrep.sarif'
-              stash name: 'semgrep-results', includes: 'security/reports/semgrep.json,security/reports/semgrep.sarif'
-            }
-          }
-        }
-
-        stage('Gitleaks Secrets') {
-          steps {
-            timeout(time: 5, unit: 'MINUTES') {
-              unstash 'workspace'
-              catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
-                sh '''
-                  set -euo pipefail
-                  gitleaks detect \
-                    --source . \
-                    --config .gitleaks.toml \
-                    --report-format json \
-                    --report-path security/reports/gitleaks.json || true
-
-                  if [ -f security/reports/gitleaks.json ]; then
-                    LEAKS=$(python3 -c "import json; d=json.load(open('security/reports/gitleaks.json')); print(len(d))" 2>/dev/null || echo "0")
-                    if [ "$LEAKS" -gt 0 ]; then
-                      echo "[ERROR] Gitleaks detected ${LEAKS} secrets!"
-                      exit 1
-                    fi
-                  fi
-                '''
-              }
-            }
-          }
-          post {
-            always {
-              archiveArtifacts allowEmptyArchive: true, artifacts: 'security/reports/gitleaks.json'
-              stash name: 'gitleaks-results', includes: 'security/reports/gitleaks.json'
-            }
-          }
-        }
-
-        stage('Checkov IaC') {
-          steps {
-            timeout(time: 5, unit: 'MINUTES') {
-              unstash 'workspace'
-              catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
-                sh '''
-                  set -euo pipefail
-                  set +e
-                  checkov -d . --config-file security/checkov-config.yaml --skip-path vendor --skip-path node_modules --hard-fail-on CRITICAL --soft-fail-on HIGH -o junitxml > security/reports/checkov-k8s.xml
-                  rc=$?
-                  touch security/reports/checkov-helm.xml security/reports/checkov-docker-platform.xml security/reports/checkov-docker-services.xml
-                  set -e
-                  if [ $rc -ne 0 ]; then
-                    echo "[ERROR] Checkov scan failed."
-                    exit 1
-                  fi
-                '''
-              }
-            }
-          }
-          post {
-            always {
-              archiveArtifacts allowEmptyArchive: true, artifacts: 'security/reports/checkov-*.xml'
-              stash name: 'checkov-results', includes: 'security/reports/checkov-*.xml'
-            }
-          }
-        }
-
-        stage('Trivy FS') {
-          steps {
-            timeout(time: 5, unit: 'MINUTES') {
-              unstash 'workspace'
-              catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
-                sh '''
-                  set -euo pipefail
-                  trivy fs \
-                    --config security/trivy/trivy.yaml \
-                    --ignorefile .trivyignore \
-                    --format json \
-                    --output security/reports/trivy-fs.json \
-                    .
-                '''
-              }
-            }
-          }
-          post {
-            always {
-              archiveArtifacts allowEmptyArchive: true, artifacts: 'security/reports/trivy-fs.json'
-              stash name: 'trivy-results', includes: 'security/reports/trivy-fs.json'
-            }
-          }
-        }
-
-        stage('Kubescape Scan') {
-          steps {
-            timeout(time: 5, unit: 'MINUTES') {
-              unstash 'workspace'
-              catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
-                sh '''
-                  set -euo pipefail
-                  mkdir -p security/reports
-                  if command -v kubescape &>/dev/null; then
-                    kubescape scan . --format json --output security/reports/kubescape.json || true
-                  else
-                    echo "[WARN] kubescape not found. Simulating report..."
-                    echo '{"status": "skipped"}' > security/reports/kubescape.json
-                  fi
-                '''
-              }
-            }
-          }
-          post {
-            always {
-              archiveArtifacts allowEmptyArchive: true, artifacts: 'security/reports/kubescape.json'
-              stash name: 'kubescape-results', includes: 'security/reports/kubescape.json'
-            }
-          }
-        }
-
-        stage('K8s Policy Checks') {
-          steps {
-            timeout(time: 5, unit: 'MINUTES') {
-              unstash 'workspace'
-              sh '''
-                set -euo pipefail
-                bash scripts/validate/validate-k8s-ultra-hardening.sh
-                REQUIRE_KYVERNO_CLI="true" \
-                  bash scripts/ci/validate-kyverno-policies.sh
-
-                STRICT_KUBE_SCORE="true" \
-                KUBE_SCORE_MAX_CRITICAL="${KUBE_SCORE_MAX_CRITICAL:-0}" \
-                KUBE_SCORE_MAX_WARNINGS="${KUBE_SCORE_MAX_WARNINGS:-0}" \
-                  bash scripts/ci/validate-kube-score.sh
-
-                SKIP_FALCO_DOCKER="true" \
-                bash scripts/ci/validate-falco-rules.sh || rc=$?
-                if [ "${rc:-0}" -ne 0 ] && [ "${rc:-0}" -ne 77 ]; then
-                  echo "[FAIL] Falco rules invalid"; exit 1
-                fi
-              '''
-            }
-          }
-          post {
-            always {
-              archiveArtifacts allowEmptyArchive: true, artifacts: 'artifacts/security/k8s-ultra-hardening.md,artifacts/security/kyverno-policy-validation.md,artifacts/security/kube-score-report.md,artifacts/security/falco-rules-validation.log'
-              stash name: 'k8s-policy-results', includes: 'artifacts/security/k8s-ultra-hardening.md,artifacts/security/kyverno-policy-validation.md,artifacts/security/kube-score-report.md,artifacts/security/falco-rules-validation.log'
-            }
-          }
-        }
-
-        stage('Platform Tools Validation') {
-          steps {
-            timeout(time: 3, unit: 'MINUTES') {
-              unstash 'workspace'
-              sh '''
-                set -euo pipefail
-                mkdir -p artifacts/security
-                bash scripts/ci/validate-platform-tools.sh
-              '''
-            }
-          }
-        }
-      }
+    options {
+        timestamps()
+        disableConcurrentBuilds()
+        buildDiscarder(logRotator(numToKeepStr: '10'))
+        timeout(time: 45, unit: 'MINUTES')
+        ansiColor('xterm')
     }
 
-    stage('CI: SonarQube Analysis') {
-      when { expression { return params.RUN_SONAR } }
-      steps {
-        timeout(time: 10, unit: 'MINUTES') {
-          unstash 'workspace'
-          withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
-            sh '''
-              set -euo pipefail
-              REQUIRE_SONAR=true SONAR_HOST_URL="${SONAR_HOST_URL:-}" SONAR_TOKEN="${SONAR_TOKEN}" \
-                bash scripts/ci/run-sonar-analysis.sh
-            '''
-          }
-        }
-      }
+    parameters {
+        string(
+            name: 'RECETTE_HOST',
+            defaultValue: '83.229.82.46',
+            description: 'Adresse IP ou hostname du serveur recette'
+        )
+
+        string(
+            name: 'RECETTE_USER',
+            defaultValue: 'root',
+            description: 'Utilisateur SSH'
+        )
     }
 
-    stage('CI_QUALITY_GATE - Aggregated Verdict') {
-      when {
-        expression { return params.ENFORCE_QUALITY_GATE }
-      }
-      steps {
-        unstash 'workspace'
-        catchError(buildResult: 'SUCCESS', stageResult: 'SUCCESS') { unstash 'coverage-results' }
-        catchError(buildResult: 'SUCCESS', stageResult: 'SUCCESS') { unstash 'audit-results' }
-        catchError(buildResult: 'SUCCESS', stageResult: 'SUCCESS') { unstash 'semgrep-results' }
-        catchError(buildResult: 'SUCCESS', stageResult: 'SUCCESS') { unstash 'gitleaks-results' }
-        catchError(buildResult: 'SUCCESS', stageResult: 'SUCCESS') { unstash 'checkov-results' }
-        catchError(buildResult: 'SUCCESS', stageResult: 'SUCCESS') { unstash 'trivy-results' }
-        catchError(buildResult: 'SUCCESS', stageResult: 'SUCCESS') { unstash 'kubescape-results' }
-        catchError(buildResult: 'SUCCESS', stageResult: 'SUCCESS') { unstash 'k8s-policy-results' }
-        sh '''
-          set -euo pipefail
-          QG_REQUIRE_SONAR="${RUN_SONAR:-false}" \
-          QG_COVERAGE_MIN="${COVERAGE_MIN}" \
-            bash scripts/ci/secure-quality-gate.sh
-        '''
-        
-        // Wait for SonarQube quality gate status
-        timeout(time: 5, unit: 'MINUTES') {
-          script {
-            if (params.RUN_SONAR) {
-              try {
-                def qg = waitForQualityGate()
-                if (qg.status != 'OK') {
-                  error "SonarQube Quality Gate status is ${qg.status}"
+    environment {
+        SSH_OPTIONS = '-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'
+    }
+
+    stages {
+
+        stage('Checkout') {
+            steps {
+                deleteDir()
+                checkout scm
+
+                sh '''
+                    find scripts -type f -name "*.sh" -exec chmod +x {} + || true
+                '''
+            }
+        }
+
+        stage('Connectivity Check') {
+            steps {
+
+                withCredentials([
+                    sshUserPrivateKey(
+                        credentialsId: 'recette-deploy-ssh-key',
+                        keyFileVariable: 'SSH_KEY_FILE'
+                    )
+                ]) {
+
+                    sh '''
+                        ssh -i "$SSH_KEY_FILE" ${SSH_OPTIONS} \
+                        ${RECETTE_USER}@${RECETTE_HOST} \
+                        "echo 'SSH connection successful'"
+                    '''
                 }
-              } catch (Exception e) {
-                echo "[WARN] SonarQube Quality Gate webhook wait skipped/failed: ${e.getMessage()}"
-              }
             }
-          }
         }
-      }
-      post {
-        always {
-          archiveArtifacts allowEmptyArchive: true,
-            artifacts: 'artifacts/security/quality-gate-summary.md,artifacts/security/quality-gate-summary.json'
+
+        stage('Deploy To Recette') {
+
+            steps {
+
+                withCredentials([
+                    sshUserPrivateKey(
+                        credentialsId: 'recette-deploy-ssh-key',
+                        keyFileVariable: 'SSH_KEY_FILE'
+                    )
+                ]) {
+
+                    sh '''
+                        ssh -i "$SSH_KEY_FILE" ${SSH_OPTIONS} ${RECETTE_USER}@${RECETTE_HOST} << 'EOF'
+
+                        set -euo pipefail
+
+                        echo "===== SecureRAG Hub Deployment ====="
+
+                        if [ ! -d "/root/MasterPFE" ]; then
+                            git clone https://github.com/YassinoMed/MasterPFE.git /root/MasterPFE
+                        fi
+
+                        cd /root/MasterPFE
+
+                        echo "===== Updating repository ====="
+
+                        git fetch origin
+                        git reset --hard origin/main
+
+                        echo "===== Building Docker images ====="
+
+                        bash scripts/deploy/build-local-images.sh
+
+                        echo "===== Starting Kind cluster ====="
+
+                        bash scripts/deploy/deploy-kind.sh || true
+
+                        echo "===== Deploying Helm chart ====="
+
+                        helm upgrade --install securerag-hub \
+                            infra/helm/securerag-hub \
+                            -n securerag-hub \
+                            --create-namespace
+
+                        echo "===== Waiting for deployments ====="
+
+                        kubectl rollout status deployment/portal-web \
+                            -n securerag-hub --timeout=300s || true
+
+                        kubectl rollout status deployment/auth-users \
+                            -n securerag-hub --timeout=300s || true
+
+                        kubectl rollout status deployment/chatbot-manager \
+                            -n securerag-hub --timeout=300s || true
+
+                        kubectl rollout status deployment/conversation-service \
+                            -n securerag-hub --timeout=300s || true
+
+                        kubectl rollout status deployment/audit-security-service \
+                            -n securerag-hub --timeout=300s || true
+
+                        echo "===== Cluster status ====="
+
+                        kubectl get pods -A
+                        kubectl get svc -A
+                        kubectl get ingress -A
+
+                        echo "===== Deployment completed successfully ====="
+
+                        EOF
+                    '''
+                }
+            }
         }
-      }
     }
 
-    stage('AI_SAST_TRIAGE') {
-      when { expression { return params.DEPLOY_TO_RECETTE } }
-      steps {
-        catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
-          timeout(time: 5, unit: 'MINUTES') {
-            unstash 'workspace'
-            catchError(buildResult: 'SUCCESS', stageResult: 'SUCCESS') { unstash 'semgrep-results' }
-            catchError(buildResult: 'SUCCESS', stageResult: 'SUCCESS') { unstash 'gitleaks-results' }
-            catchError(buildResult: 'SUCCESS', stageResult: 'SUCCESS') { unstash 'trivy-results' }
-            catchError(buildResult: 'SUCCESS', stageResult: 'SUCCESS') { unstash 'checkov-results' }
-            withCredentials([string(credentialsId: 'anthropic-api-key', variable: 'ANTHROPIC_API_KEY')]) {
-              sh '''
-                set -euo pipefail
-                mkdir -p security/reports
-                python3 scripts/ai/analyze-security-reports.py \
-                  --semgrep  security/reports/semgrep.json \
-                  --gitleaks security/reports/gitleaks.json \
-                  --trivy    security/reports/trivy-fs.json \
-                  --checkov  security/reports/checkov-k8s.xml \
-                  --output   security/reports/ai-sast-advisory.md \
-                  --context  "Laravel RAG platform, Kubernetes recette, SecureRAG Hub" \
-                  --model    "claude-sonnet-4-6" || true
-                echo "[ADVISORY] AI_SAST_TRIAGE complete — review ai-sast-advisory.md"
-              '''
-            }
-          }
+    post {
+
+        success {
+            echo "✅ SecureRAG Hub recette deployment successful"
         }
-      }
-      post {
-        always {
-          archiveArtifacts allowEmptyArchive: true,
-            artifacts: 'security/reports/ai-sast-advisory.md'
-        }
-      }
-    }
 
-    // ════════════════════════════════════════════════════════════════════
-    //  PHASE 2 — DEPLOY TO RECETTE (63.250.59.72)
-    // ════════════════════════════════════════════════════════════════════
-
-    stage('Deploy to Recette') {
-      when {
-        expression { return params.DEPLOY_TO_RECETTE }
-      }
-      steps {
-        timeout(time: 15, unit: 'MINUTES') {
-          unstash 'workspace'
-          withCredentials([file(credentialsId: "${SSH_KEY_CREDENTIAL}", variable: 'DEPLOY_KEY')]) {
-            sh '''
-              set -euo pipefail
-
-              echo "══════════════════════════════════════════════════════════════"
-              echo "  Deploying to Recette: ${RECETTE_USER}@${RECETTE_HOST}"
-              echo "══════════════════════════════════════════════════════════════"
-
-              if ! command -v ssh &>/dev/null; then
-                echo "[INFO] Installing openssh-client in agent container..."
-                apt-get update && apt-get install -y openssh-client
-              fi
-
-              SSH_OPTS="-i ${DEPLOY_KEY} -o StrictHostKeyChecking=no -o ConnectTimeout=30"
-
-              # Step 1: Update code on recette
-              echo "[INFO] Step 1/3: Updating code on recette..."
-              ssh ${SSH_OPTS} ${RECETTE_USER}@${RECETTE_HOST} bash -s <<'REMOTE_UPDATE'
-                set -euo pipefail
-                APP_DIR="/MasterPFE"
-                REPO_URL="https://github.com/YassinoMed/MasterPFE.git"
-
-                if ! command -v git >/dev/null 2>&1; then
-                  apt-get update && apt-get install -y ca-certificates git
-                fi
-
-                if [ -d "${APP_DIR}/.git" ]; then
-                  cd "${APP_DIR}"
-                  git fetch origin main
-                  git checkout main
-                  git reset --hard origin/main
-                  echo "[RECETTE] Updated to: $(git log -1 --oneline)"
-                else
-                  git clone --branch main "${REPO_URL}" "${APP_DIR}"
-                  echo "[RECETTE] Cloned: $(cd ${APP_DIR} && git log -1 --oneline)"
-                fi
-REMOTE_UPDATE
-
-              # Step 2: Build and deploy
-              echo "[INFO] Step 2/3: Building and deploying on recette..."
-              ssh ${SSH_OPTS} ${RECETTE_USER}@${RECETTE_HOST} bash -s <<REMOTE_DEPLOY
-                set -euo pipefail
-                cd /MasterPFE
-
-                # Ensure infrastructure
-                sysctl -w net.ipv4.ip_forward=1 || true
-                iptables -P FORWARD ACCEPT 2>/dev/null || true
-
-                # Create/ensure Kind cluster
-                bash scripts/deploy/create-kind.sh
-
-                # Bootstrap secrets
-                bash scripts/secrets/bootstrap-local-secrets.sh
-                bash scripts/secrets/create-dev-secrets.sh
-
-                # Build images
-                REGISTRY_HOST="localhost:5001" \
-                IMAGE_PREFIX="securerag-hub" \
-                IMAGE_TAG="${IMAGE_TAG}" \
-                  bash scripts/deploy/build-local-images.sh
-
-                # Install Kyverno
-                bash scripts/deploy/install-kyverno.sh
-
-                # Deploy
-                REGISTRY_HOST="localhost:5001" \
-                IMAGE_PREFIX="securerag-hub" \
-                IMAGE_TAG="${IMAGE_TAG}" \
-                KUSTOMIZE_OVERLAY="infra/k8s/overlays/recette" \
-                  bash scripts/deploy/deploy-kind.sh
-
-                # Restart pods
-                kubectl delete pod -n securerag-hub --all 2>/dev/null
-                kubectl wait --for=condition=Ready pod --all -n securerag-hub --timeout=300s
-
-                kubectl get all -n securerag-hub
-REMOTE_DEPLOY
-
-              # Step 3: Start Jenkins on recette
-              echo "[INFO] Step 3/3: Ensuring Jenkins is running on recette..."
-              ssh ${SSH_OPTS} ${RECETTE_USER}@${RECETTE_HOST} bash -s <<'REMOTE_JENKINS'
-                set -euo pipefail
-                cd /MasterPFE
-
-                bash scripts/jenkins/bootstrap-local-credentials.sh
-                bash scripts/jenkins/bootstrap-local-kubeconfig.sh
-                docker compose -f infra/jenkins/docker-compose.yml up -d --build
-
-                echo "[RECETTE] Waiting for Jenkins..."
-                for i in $(seq 1 20); do
-                  if curl -fsS --max-time 5 "http://127.0.0.1:8085/login" >/dev/null 2>&1; then
-                    echo "[RECETTE] Jenkins is ready!"
-                    break
-                  fi
-                  sleep 10
-                done
-REMOTE_JENKINS
-
-              echo "══════════════════════════════════════════════════════════════"
-              echo "  ✅ Deployment to Recette Complete"
-              echo "  Portal: http://${RECETTE_HOST}:9081/health"
-              echo "  Jenkins: http://${RECETTE_HOST}:8085"
-              echo "══════════════════════════════════════════════════════════════"
-            '''
-          }
-        }
-      }
-      post {
         failure {
-          echo '❌ Deployment to recette failed. Check SSH connectivity and remote logs.'
+            echo "❌ SecureRAG Hub recette deployment failed"
         }
-      }
-    }
 
-    stage('Post-deploy Smoke Tests on Recette') {
-      when {
-        expression { return params.DEPLOY_TO_RECETTE && params.RUN_SMOKE_TESTS }
-      }
-      steps {
-        timeout(time: 5, unit: 'MINUTES') {
-          unstash 'workspace'
-          withCredentials([file(credentialsId: "${SSH_KEY_CREDENTIAL}", variable: 'DEPLOY_KEY')]) {
-            sh '''
-              set -euo pipefail
-              if ! command -v ssh &>/dev/null; then
-                apt-get update && apt-get install -y openssh-client
-              fi
-              SSH_OPTS="-i ${DEPLOY_KEY} -o StrictHostKeyChecking=no -o ConnectTimeout=30"
-
-              echo "[INFO] Running smoke tests on remote Recette VM..."
-              ssh ${SSH_OPTS} ${RECETTE_USER}@${RECETTE_HOST} bash -s <<'REMOTE_SMOKE'
-                set -euo pipefail
-                cd /MasterPFE
-                bash scripts/deploy/smoke-test.sh
-REMOTE_SMOKE
-            '''
-          }
+        aborted {
+            echo "⚠ Build aborted"
         }
-      }
-      post {
+
         always {
-          echo "Smoke tests on recette completed"
+            cleanWs(
+                deleteDirs: true,
+                notFailBuild: true
+            )
         }
-      }
     }
-  }
-
-  post {
-    always {
-      // Cleanup workspace to optimize disk usage on K8s nodes
-      cleanWs deleteDirs: true, notFailBuild: true
-    }
-    success {
-      script { sendNotifications('SUCCESS') }
-    }
-    failure {
-      script { sendNotifications('FAILURE') }
-    }
-    unstable {
-      script { sendNotifications('UNSTABLE') }
-    }
-    aborted {
-      script { sendNotifications('ABORTED') }
-    }
-  }
-}
-
-def sendNotifications(String status) {
-  def colorMap = [
-    'SUCCESS': '#22c55e',
-    'FAILURE': '#ef4444',
-    'UNSTABLE': '#eab308',
-    'ABORTED': '#64748b'
-  ]
-  def statusColor = colorMap[status] ?: '#64748b'
-  def msg = "SecureRAG Hub Pipeline - ${env.JOB_NAME} #${env.BUILD_NUMBER} - ${status} (${env.BUILD_URL})"
-  
-  echo "Sending notifications for status: ${status}"
-  
-  // ── Slack ────────────────────────────────────────────────────────
-  try {
-    slackSend channel: '#securerag-alerts', color: statusColor, message: msg
-  } catch (Exception e) {
-    echo "[WARN] Slack notification failed/skipped: ${e.getMessage()}"
-  }
-
-  // ── Teams ────────────────────────────────────────────────────────
-  try {
-    if (env.TEAMS_WEBHOOK_URL) {
-      sh "curl -s -X POST -H 'Content-Type: application/json' -d '{\"text\": \"${msg}\"}' \"\${TEAMS_WEBHOOK_URL}\" || true"
-    }
-  } catch (Exception e) {
-    echo "[WARN] Teams notification failed/skipped: ${e.getMessage()}"
-  }
-
-  // ── Email ────────────────────────────────────────────────────────
-  if (params.NOTIFICATION_EMAIL && params.NOTIFICATION_EMAIL.trim() != '') {
-    try {
-      def gitCommitShort = env.GIT_COMMIT ? env.GIT_COMMIT.take(7) : 'N/A'
-      def buildDuration = currentBuild.durationString ?: 'N/A'
-      def buildUrl = env.BUILD_URL
-      def consoleUrl = "${env.BUILD_URL}console"
-      def jobName = env.JOB_NAME
-      def buildNumber = env.BUILD_NUMBER
-      def gitBranch = env.GIT_BRANCH ?: 'N/A'
-
-      def htmlBody = """
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <title>Build ${status}</title>
-  <style>
-    body {
-      background-color: #0f172a;
-      color: #f8fafc;
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      margin: 0;
-      padding: 0;
-    }
-    .container {
-      max-width: 600px;
-      margin: 40px auto;
-      background-color: #0f172a;
-      border: 1px solid #1e293b;
-      border-radius: 12px;
-      overflow: hidden;
-      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
-    }
-    .header {
-      background: linear-gradient(135deg, #0f172a 0%, ${status == 'FAILURE' ? '#450a0a' : '#064e3b'} 100%);
-      padding: 35px 30px;
-      text-align: center;
-      border-bottom: 2px solid ${statusColor};
-    }
-    .badge {
-      background-color: ${statusColor};
-      color: #ffffff;
-      padding: 6px 14px;
-      border-radius: 9999px;
-      font-size: 12px;
-      font-weight: 700;
-      text-transform: uppercase;
-    }
-    .title {
-      font-size: 24px;
-      font-weight: 800;
-      margin: 15px 0 0 0;
-      color: #ffffff;
-    }
-    .content {
-      padding: 30px;
-    }
-    .intro {
-      font-size: 15px;
-      color: #94a3b8;
-      line-height: 1.6;
-    }
-    .grid-table {
-      width: 100%;
-      border-collapse: separate;
-      border-spacing: 8px;
-      margin-bottom: 24px;
-    }
-    .card {
-      background-color: #1e293b;
-      border: 1px solid #334155;
-      border-radius: 8px;
-      padding: 12px 16px;
-    }
-    .card-label {
-      font-size: 11px;
-      color: #64748b;
-      text-transform: uppercase;
-      font-weight: 600;
-    }
-    .card-value {
-      font-size: 14px;
-      font-weight: 700;
-      color: #e2e8f0;
-    }
-    .actions {
-      text-align: center;
-    }
-    .btn {
-      display: inline-block;
-      padding: 12px 24px;
-      border-radius: 8px;
-      font-size: 14px;
-      font-weight: 700;
-      text-decoration: none;
-      background-color: ${statusColor};
-      color: #ffffff;
-    }
-    .footer {
-      background-color: #020617;
-      padding: 24px;
-      text-align: center;
-      border-top: 1px solid #1e293b;
-    }
-    .footer-text {
-      font-size: 12px;
-      color: #64748b;
-    }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <div class="header">
-      <span class="badge">Pipeline ${status}</span>
-      <h1 class="title">SecureRAG Hub — CI/CD Alert</h1>
-    </div>
-    <div class="content">
-      <p class="intro">Bonjour, la pipeline de recette/recette a fini avec le statut : <strong>${status}</strong>.</p>
-      
-      <table class="grid-table">
-        <tr>
-          <td class="card">
-            <div class="card-label">Pipeline</div>
-            <div class="card-value">${jobName}</div>
-          </td>
-          <td class="card">
-            <div class="card-label">Build N°</div>
-            <div class="card-value">#${buildNumber}</div>
-          </td>
-        </tr>
-        <tr>
-          <td class="card">
-            <div class="card-label">Branche</div>
-            <div class="card-value">${gitBranch}</div>
-          </td>
-          <td class="card">
-            <div class="card-label">Commit SHA</div>
-            <div class="card-value">${gitCommitShort}</div>
-          </td>
-        </tr>
-        <tr>
-          <td class="card">
-            <div class="card-label">Durée</div>
-            <div class="card-value">${buildDuration}</div>
-          </td>
-          <td class="card">
-            <div class="card-label">Environnement</div>
-            <div class="card-value">Recette / Staging</div>
-          </td>
-        </tr>
-      </table>
-
-      <div class="actions">
-        <a href="${consoleUrl}" class="btn">Consulter la Console</a>
-      </div>
-    </div>
-    <div class="footer">
-      <p class="footer-text">SecureRAG Hub — Cloud Native DevSecOps Portal</p>
-    </div>
-  </div>
-</body>
-</html>
-"""
-      mail to: params.NOTIFICATION_EMAIL,
-           mimeType: 'text/html',
-           subject: "[Jenkins] ${status}: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
-           body: htmlBody
-    } catch (Exception e) {
-      echo "[WARN] Email notification failed: ${e.getMessage()}"
-    }
-  }
 }

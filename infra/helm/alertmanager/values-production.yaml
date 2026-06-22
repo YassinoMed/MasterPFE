@@ -6,7 +6,7 @@
 config:
   global:
     resolve_timeout: 5m
-    slack_api_url: "vault:secret/slack/webhook"
+    slack_api_url: "https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX"
     smtp_smarthost: 'smtp.securerag.local:25'
     smtp_from: 'alertmanager@securerag.local'
 

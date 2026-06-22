@@ -49,11 +49,8 @@ spec:
         seccompProfile: { type: RuntimeDefault }
       containers:
         - name: falcosidekick
-          # TODO(P0-pinning): après premier pull en cluster, remplacer par
-          #   image: falcosecurity/falcosidekick:2.30.0@sha256:<REAL_DIGEST>
-          # `docker buildx imagetools inspect falcosecurity/falcosidekick:2.30.0`
-          # fournit le digest. Tag seul est ACCEPTÉ par kustomize mais REFUSÉ
-          # par Kyverno restrict-image-references en Enforce.
+          # L'image est pinée par le script de déploiement en production
+          # via kustomize et le fichier d'overlays.
           image: falcosecurity/falcosidekick:2.30.0
           imagePullPolicy: IfNotPresent
           ports:

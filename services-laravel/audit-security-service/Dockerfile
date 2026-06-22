@@ -5,6 +5,7 @@ FROM php:8.4-cli-bookworm@sha256:4714c394e9ea215809c4b68da9fda778044c723435279f7
 ENV COMPOSER_ALLOW_SUPERUSER=1
 
 RUN apt-get update \
+    && apt-get upgrade -y \
     && apt-get install -y --no-install-recommends curl unzip libicu-dev libsqlite3-dev libzip-dev libpq-dev \
     && docker-php-ext-install pdo_sqlite pdo_mysql pdo_pgsql intl \
     && apt-get clean \
