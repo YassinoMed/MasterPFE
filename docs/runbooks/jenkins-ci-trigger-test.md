@@ -18,3 +18,4 @@ Ce fichier sert de changement inoffensif pour valider le declenchement automatiq
 - 2026-06-23T00:50:00+02:00: Push trigger validation after fixing Groovy compilation issue.
 - 2026-06-23T00:58:00+02:00: Push trigger validation after setting receive.denyCurrentBranch to updateInstead.
 - 2026-06-23T01:00:00+02:00: Push trigger validation after passing IMAGE_TAG to SSH bash -s in Jenkinsfile.recette.
+- 2026-06-23T01:08:00+02:00: Push trigger validation after setting receive.denyCurrentBranch to updateInstead in securerag-hub-gitops.
