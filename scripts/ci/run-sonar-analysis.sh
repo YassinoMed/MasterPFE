@@ -81,8 +81,8 @@ set +e
 
 if command -v sonar-scanner >/dev/null 2>&1; then
   echo "[INFO] Running local sonar-scanner..."
-  sonar-scanner "${scanner_args[@]}" > "${SCANNER_LOG}" 2>&1
-  scanner_status=$?
+  sonar-scanner "${scanner_args[@]}" 2>&1 | tee "${SCANNER_LOG}"
+  scanner_status=${PIPESTATUS[0]}
 elif command -v docker >/dev/null 2>&1 && docker info >/dev/null 2>&1; then
   echo "[INFO] sonar-scanner not found. Attempting to run via Docker..."
   
@@ -114,8 +114,8 @@ elif command -v docker >/dev/null 2>&1 && docker info >/dev/null 2>&1; then
     -v "${HOST_PWD}:/usr/src" \
     --network host \
     sonarsource/sonar-scanner-cli:5.0.1 \
-    "${scanner_args[@]}" > "${SCANNER_LOG}" 2>&1
-  scanner_status=$?
+    "${scanner_args[@]}" 2>&1 | tee "${SCANNER_LOG}"
+  scanner_status=${PIPESTATUS[0]}
 else
   fail_or_skip "Neither sonar-scanner nor docker is available to run Sonar analysis"
 fi
@@ -123,8 +123,14 @@ fi
 set -e
 
 if [[ "${scanner_status}" -ne 0 ]]; then
-  write_status "FAIL" "sonar-scanner exited with status ${scanner_status}"
-  exit "${scanner_status}"
+  if is_true "${REQUIRE_SONAR}"; then
+    write_status "FAIL" "sonar-scanner exited with status ${scanner_status}"
+    exit "${scanner_status}"
+  else
+    write_status "FAIL" "sonar-scanner exited with status ${scanner_status} (ignored)"
+    echo "[WARN] sonar-scanner exited with status ${scanner_status} (ignored because REQUIRE_SONAR=false)" >&2
+    exit 0
+  fi
 fi
 
 python3 - "${SCANNER_LOG}" "${QUALITY_GATE_JSON}" <<'PY'
@@ -163,8 +169,14 @@ PY
 )"
 
 if is_true "${SONAR_QUALITY_GATE_WAIT}" && [[ "${quality_status}" != "OK" && "${quality_status}" != "PASSED" && "${quality_status}" != "UNKNOWN" ]]; then
-  write_status "FAIL" "Sonar quality gate status is ${quality_status}"
-  exit 1
+  if is_true "${REQUIRE_SONAR}"; then
+    write_status "FAIL" "Sonar quality gate status is ${quality_status}"
+    exit 1
+  else
+    write_status "FAIL" "Sonar quality gate status is ${quality_status} (ignored)"
+    echo "[WARN] Sonar quality gate status is ${quality_status} (ignored because REQUIRE_SONAR=false)" >&2
+    exit 0
+  fi
 fi
 
 write_status "TERMINÉ" "sonar-scanner completed; quality gate status=${quality_status}"

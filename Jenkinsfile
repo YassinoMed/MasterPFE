@@ -90,10 +90,12 @@ pipeline {
               echo "[INFO] Running Semgrep SAST..."
               if command -v semgrep >/dev/null 2>&1; then
                 semgrep scan --config security/semgrep/semgrep.yml --json -o "${SECURITY_REPORT_DIR}/semgrep.json" --error || true
+                semgrep scan --config security/semgrep/semgrep.yml --sarif -o "${SECURITY_REPORT_DIR}/semgrep.sarif" --error || true
               elif [ -d "/opt/checkov-venv" ]; then
                 echo "[WARN] Semgrep not installed, using fallback scan..."
-                # Create a placeholder if not present
+                # Create placeholders if not present
                 echo '{"results": []}' > "${SECURITY_REPORT_DIR}/semgrep.json"
+                echo '{"$schema": "https://schemastore.azurewebsites.net/schemas/json/sarif-2.1.0-rtm.5.json", "version": "2.1.0", "runs": []}' > "${SECURITY_REPORT_DIR}/semgrep.sarif"
               fi
             '''
           }
