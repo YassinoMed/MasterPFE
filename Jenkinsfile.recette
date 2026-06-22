@@ -101,13 +101,6 @@ pipeline {
 
                         bash scripts/deploy/deploy-kind.sh || true
 
-                        echo "===== Deploying Helm chart ====="
-
-                        helm upgrade --install securerag-hub \
-                            infra/helm/securerag-hub \
-                            -n securerag-hub \
-                            --create-namespace
-
                         echo "===== Waiting for deployments ====="
 
                         kubectl rollout status deployment/portal-web \
