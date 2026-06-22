@@ -16,3 +16,4 @@ Ce fichier sert de changement inoffensif pour valider le declenchement automatiq
 
 
 - 2026-06-23T00:50:00+02:00: Push trigger validation after fixing Groovy compilation issue.
+- 2026-06-23T00:58:00+02:00: Push trigger validation after setting receive.denyCurrentBranch to updateInstead.
