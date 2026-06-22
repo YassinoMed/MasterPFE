@@ -70,7 +70,7 @@ if git diff --staged --quiet; then
 else
     echo "[INFO] Committing and pushing changes for $SERVICE in monorepo..."
     git commit -m "gitops: update digest for $SERVICE to $DIGEST"
-    git push origin "$BRANCH"
+    git push origin HEAD:"$BRANCH"
 fi
 
 # ── Sync with dedicated GitOps repository ─────────────────────────────
@@ -117,7 +117,7 @@ else
             else
                 echo "[INFO] Committing and pushing to dedicated GitOps repo via daemon..."
                 git commit -m "gitops: update digest for $SERVICE to $DIGEST"
-                git push origin "$BRANCH"
+                git push origin HEAD:"$BRANCH"
             fi
         )
         rm -rf "$TEMP_CLONE"
