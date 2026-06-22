@@ -3,6 +3,7 @@ pipeline {
 
     triggers {
         githubPush()
+        upstream(upstreamProjects: 'securerag-hub-ci', threshold: hudson.model.Result.SUCCESS)
     }
 
     options {

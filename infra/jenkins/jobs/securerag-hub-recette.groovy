@@ -30,6 +30,7 @@ pipelineJob('securerag-hub-recette') {
     triggers {
         githubPush()
         scm('H/5 * * * *')
+        upstream('securerag-hub-ci', 'SUCCESS')
     }
     logRotator {
         numToKeep(20)
