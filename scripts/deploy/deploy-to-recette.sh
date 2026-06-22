@@ -5,7 +5,7 @@
 # from a local workstation.
 #
 # Required environment variables:
-#   RECETTE_HOST   — IP or hostname of the recette machine (default: 63.250.59.72)
+#   RECETTE_HOST   — IP or hostname of the recette machine (default: 83.229.82.46)
 #   RECETTE_USER   — SSH user on the recette machine       (default: root)
 #
 # Optional:
@@ -25,7 +25,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 
 # ── Configuration ─────────────────────────────────────────────────────────
-RECETTE_HOST="${RECETTE_HOST:-63.250.59.72}"
+RECETTE_HOST="${RECETTE_HOST:-83.229.82.46}"
 RECETTE_USER="${RECETTE_USER:-root}"
 SSH_KEY_FILE="${SSH_KEY_FILE:-}"
 REPO_URL="${REPO_URL:-https://github.com/YassinoMed/MasterPFE.git}"

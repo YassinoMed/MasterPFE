@@ -36,7 +36,7 @@ credentials:
               scope: GLOBAL
               id: "recette-deploy-ssh-key"
               username: "${RECETTE_SSH_USER:-root}"
-              description: "SSH deploy key for recette machine (63.250.59.72)"
+              description: "SSH deploy key for recette machine (83.229.82.46)"
               privateKeySource:
                 directEntry:
                   privateKey: "${readFile:/run/jenkins-secrets/recette-deploy-key}"

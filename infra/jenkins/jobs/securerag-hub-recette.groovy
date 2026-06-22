@@ -2,7 +2,7 @@ def gitUrl = System.getenv('SECURERAG_GIT_URL') ?: 'https://github.com/YassinoMe
 def branchSpec = System.getenv('SECURERAG_GIT_BRANCH') ?: '*/main'
 
 pipelineJob('securerag-hub-recette') {
-    description('SecureRAG Hub — CI/CD pipeline with automatic deployment to the recette (staging) machine (63.250.59.72)')
+    description('SecureRAG Hub — CI/CD pipeline with automatic deployment to the recette (staging) machine (83.229.82.46)')
     definition {
         cpsScm {
             scm {
@@ -17,7 +17,7 @@ pipelineJob('securerag-hub-recette') {
         }
     }
     parameters {
-        stringParam('RECETTE_HOST', '63.250.59.72', 'IP address or hostname of the recette (staging) machine.')
+        stringParam('RECETTE_HOST', '83.229.82.46', 'IP address or hostname of the recette (staging) machine.')
         stringParam('RECETTE_USER', 'root', 'SSH user on the recette machine.')
         booleanParam('DEPLOY_TO_RECETTE', true, 'Deploy to the recette machine after a successful CI.')
         booleanParam('RUN_SMOKE_TESTS', true, 'Run smoke tests on the recette machine after deployment.')

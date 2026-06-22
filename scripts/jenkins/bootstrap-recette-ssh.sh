@@ -10,7 +10,7 @@
 #
 # Environment:
 #   JENKINS_SECRETS_DIR  — Where to store the key  (default: infra/jenkins/secrets)
-#   RECETTE_HOST         — Recette machine IP       (default: 63.250.59.72)
+#   RECETTE_HOST         — Recette machine IP       (default: 83.229.82.46)
 #   RECETTE_USER         — SSH user                 (default: root)
 #   SSH_KEY_TYPE         — Key type                  (default: ed25519)
 # ─────────────────────────────────────────────────────────────────────────────
@@ -18,7 +18,7 @@
 set -euo pipefail
 
 JENKINS_SECRETS_DIR="${JENKINS_SECRETS_DIR:-infra/jenkins/secrets}"
-RECETTE_HOST="${RECETTE_HOST:-63.250.59.72}"
+RECETTE_HOST="${RECETTE_HOST:-83.229.82.46}"
 RECETTE_USER="${RECETTE_USER:-root}"
 SSH_KEY_TYPE="${SSH_KEY_TYPE:-ed25519}"
 SSH_KEY_FILE="${JENKINS_SECRETS_DIR}/recette-deploy-key"

@@ -639,7 +639,7 @@ pre-commit-install: ## Install pre-commit hooks (Gitleaks, shellcheck, yaml-chec
 
 .PHONY: deploy-recette recette-smoke recette-bootstrap
 
-RECETTE_HOST ?= 63.250.59.72
+RECETTE_HOST ?= 83.229.82.46
 RECETTE_USER ?= root
 
 recette-bootstrap: ## Generate SSH deploy key pair for the recette machine
