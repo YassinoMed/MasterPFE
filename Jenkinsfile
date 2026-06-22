@@ -228,6 +228,7 @@ pipeline {
           DIGEST_RECORD_FILE="${REPORT_DIR}/promotion-digests.txt"
           if [ -f "$DIGEST_RECORD_FILE" ]; then
             while IFS="|" read -r service _ _ digest; do
+              case "$service" in \#*) continue ;; esac
               if [ -n "$service" ] && [ -n "$digest" ]; then
                 echo "Updating digest for $service to $digest"
                 bash scripts/gitops/update-image-digest.sh production "$service" "$digest"

@@ -271,9 +271,10 @@ spec:
             if [ -f "$DIGEST_RECORD_FILE" ]; then
               git config --global user.email "jenkins@securerag.local"
               git config --global user.name "Jenkins GitOps Bot"
-              while IFS="|" read -r service _ _ digest; do
-                [ -n "$service" ] && [ -n "$digest" ] && bash scripts/gitops/update-image-digest.sh production "$service" "$digest"
-              done < "$DIGEST_RECORD_FILE"
+               while IFS="|" read -r service _ _ digest; do
+                 case "$service" in \#*) continue ;; esac
+                 [ -n "$service" ] && [ -n "$digest" ] && bash scripts/gitops/update-image-digest.sh production "$service" "$digest"
+               done < "$DIGEST_RECORD_FILE"
             fi
           '''
         }
