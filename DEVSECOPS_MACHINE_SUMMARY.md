@@ -1,5 +1,7 @@
 # Résumé Complet de la Machine DevSecOps & Outils Utilisés
 
+**SecureRAG Hub** is a Cloud-Native DevSecOps Platform implementing secure software delivery practices across the entire application lifecycle. The platform integrates CI/CD automation, SAST, SCA, secret detection, container security, SBOM generation, image signing, policy enforcement, runtime threat detection, observability, and Kubernetes-native deployment workflows. Security controls are embedded from code commit to runtime execution, following DevSecOps and Software Supply Chain Security best practices inspired by SLSA, CIS Benchmarks, OWASP, CNCF and Sigstore ecosystems.
+
 Ce document présente une vue d'ensemble exhaustive de la plateforme **SecureRAG Hub DevSecOps**. L'infrastructure est conçue selon les meilleurs standards de sécurité de l'industrie (alignée sur les niveaux de conformité **SLSA 3+** et **CIS Benchmarks**).
 
 ---
