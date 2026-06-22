@@ -95,28 +95,36 @@ pipeline {
 
                         echo "===== Building Docker images ====="
 
-                        bash scripts/deploy/build-local-images.sh
+                        REGISTRY_HOST="localhost:5001" IMAGE_TAG="${IMAGE_TAG}" bash scripts/deploy/build-local-images.sh
 
-                        echo "===== Starting Kind cluster ====="
+                        echo "===== Updating GitOps manifests ====="
 
-                        bash scripts/deploy/deploy-kind.sh || true
+                        git config --global user.email "jenkins@securerag.local"
+                        git config --global user.name "Jenkins GitOps Bot"
 
-                        echo "===== Waiting for deployments ====="
+                        for service in auth-users chatbot-manager conversation-service audit-security-service portal-web; do
+                            image_name="localhost:5001/securerag-hub-${service}:${IMAGE_TAG}"
+                            digest=$(docker inspect --format='{{index .RepoDigests 0}}' "${image_name}" 2>/dev/null | cut -d'@' -f2 || true)
+                            if [ -n "$digest" ]; then
+                                echo "Updating digest for $service to $digest"
+                                bash scripts/gitops/update-image-digest.sh recette "$service" "$digest"
+                            else
+                                echo "[WARN] No digest found for ${service}"
+                            fi
+                        done
 
-                        kubectl rollout status deployment/portal-web \
-                            -n securerag-hub --timeout=300s || true
+                        echo "===== Waiting for ArgoCD sync and rollout ====="
 
-                        kubectl rollout status deployment/auth-users \
-                            -n securerag-hub --timeout=300s || true
+                        kubectl annotate application securerag-recette -n argocd argocd.argoproj.io/refresh=normal --overwrite || true
 
-                        kubectl rollout status deployment/chatbot-manager \
-                            -n securerag-hub --timeout=300s || true
+                        if command -v argocd &>/dev/null; then
+                            argocd app sync securerag-recette --prune --timeout 300 || true
+                            argocd app wait securerag-recette --timeout 300 || true
+                        fi
 
-                        kubectl rollout status deployment/conversation-service \
-                            -n securerag-hub --timeout=300s || true
-
-                        kubectl rollout status deployment/audit-security-service \
-                            -n securerag-hub --timeout=300s || true
+                        for deploy in portal-web auth-users chatbot-manager conversation-service audit-security-service; do
+                            kubectl rollout status "deployment/${deploy}" -n securerag-hub --timeout=300s || true
+                        done
 
                         echo "===== Cluster status ====="
 

@@ -48,7 +48,7 @@ spec:
     spec:
       project: securerag-hub
       source:
-        repoURL: https://github.com/YassinoMed/MasterPFE.git
+        repoURL: git://172.18.0.1/securerag-hub-gitops
         targetRevision: main
         path: '{{path}}'
       destination:

@@ -214,38 +214,30 @@ pipeline {
       steps {
         sh '''
           set -euo pipefail
-          echo "[INFO] Deploying components..."
+          echo "[INFO] Deploying components via GitOps..."
           
-          # Dynamic GitOps / Direct Deploy check
+          # Pin overlay to new digests and update
+          REGISTRY_HOST="${REGISTRY_HOST}" IMAGE_PREFIX="${IMAGE_PREFIX}" \
+          SOURCE_IMAGE_TAG="${SOURCE_IMAGE_TAG}" TARGET_IMAGE_TAG="${TARGET_IMAGE_TAG}" \
+          REPORT_DIR="${REPORT_DIR}" VERIFY_SOURCE_BEFORE_PROMOTION=false VERIFY_TARGET_AFTER_PROMOTION=false \
+          bash scripts/release/promote-by-digest.sh
+          
+          git config --global user.email "jenkins@securerag.local"
+          git config --global user.name "Jenkins GitOps Bot"
+          
+          DIGEST_RECORD_FILE="${REPORT_DIR}/promotion-digests.txt"
+          if [ -f "$DIGEST_RECORD_FILE" ]; then
+            while IFS="|" read -r service _ _ digest; do
+              if [ -n "$service" ] && [ -n "$digest" ]; then
+                echo "Updating digest for $service to $digest"
+                bash scripts/gitops/update-image-digest.sh production "$service" "$digest"
+              fi
+            done < "$DIGEST_RECORD_FILE"
+          fi
+          
+          # Refresh ArgoCD application to detect drift immediately
           if kubectl get namespace argocd >/dev/null 2>&1; then
-            echo "[INFO] ArgoCD namespace found. Proceeding with GitOps commit..."
-            
-            # Pin overlay to new digests and update
-            # Normally we run: make promote-digest to get digests, then update
-            REGISTRY_HOST="${REGISTRY_HOST}" IMAGE_PREFIX="${IMAGE_PREFIX}" \
-            SOURCE_IMAGE_TAG="${SOURCE_IMAGE_TAG}" TARGET_IMAGE_TAG="${TARGET_IMAGE_TAG}" \
-            REPORT_DIR="${REPORT_DIR}" VERIFY_SOURCE_BEFORE_PROMOTION=false VERIFY_TARGET_AFTER_PROMOTION=false \
-            bash scripts/release/promote-by-digest.sh
-            
-            git config --global user.email "jenkins@securerag.local"
-            git config --global user.name "Jenkins GitOps Bot"
-            
-            DIGEST_RECORD_FILE="${REPORT_DIR}/promotion-digests.txt"
-            if [ -f "$DIGEST_RECORD_FILE" ]; then
-              while IFS="|" read -r service _ _ digest; do
-                if [ -n "$service" ] && [ -n "$digest" ]; then
-                  echo "Updating digest for $service to $digest"
-                  bash scripts/gitops/update-image-digest.sh production "$service" "$digest" || true
-                fi
-              done < "$DIGEST_RECORD_FILE"
-            fi
-            
-            # Run ArgoCD sync if command/cli is available or refresh annotations
             kubectl annotate application securerag-production -n argocd argocd.argoproj.io/refresh=normal --overwrite || true
-          else
-            echo "[INFO] ArgoCD not found. Running direct deployment via Helm/Kubectl..."
-            # Fallback direct deployment in Kind
-            bash scripts/deploy/deploy-kind.sh || echo "[WARN] Direct deploy encountered issues"
           fi
         '''
       }

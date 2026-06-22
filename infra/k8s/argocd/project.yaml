@@ -10,8 +10,8 @@ metadata:
 spec:
   description: "SecureRAG Hub — Laravel platform GitOps project"
   sourceRepos:
-    - https://github.com/YassinoMed/MasterPFE.git
-    - https://github.com/YassinoMed/MasterPFE
+    - git://172.18.0.1/securerag-hub-gitops
+    - git://172.18.0.1/securerag-hub-gitops
     - https://github.com/argoproj/argo-helm
   destinations:
     - server: https://kubernetes.default.svc

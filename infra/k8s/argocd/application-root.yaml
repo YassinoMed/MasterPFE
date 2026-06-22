@@ -24,13 +24,13 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/YassinoMed/MasterPFE.git
+    repoURL: git://172.18.0.1/securerag-hub-gitops
     targetRevision: main
     path: infra/k8s/argocd
     directory:
       recurse: false
       include: '*.yaml'
-      exclude: 'application-root.yaml|namespace.yaml|README.md'
+      exclude: 'kustomization.yaml'
   destination:
     server: https://kubernetes.default.svc
     namespace: argocd

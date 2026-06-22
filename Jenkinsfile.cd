@@ -321,7 +321,14 @@ spec:
           unstash 'workspace'
           sh '''
             sleep 10
-            kubectl annotate application securerag-production -n argocd argocd.argoproj.io/refresh=normal --overwrite 2>/dev/null || true
+            echo "[INFO] Triggering ArgoCD sync and waiting..."
+            if command -v argocd &>/dev/null; then
+              argocd app sync securerag-production --prune --timeout 300
+              argocd app wait securerag-production --timeout 300
+            else
+              kubectl annotate application securerag-production -n argocd argocd.argoproj.io/refresh=normal --overwrite 2>/dev/null || true
+            fi
+            
             for deploy in portal-web auth-users chatbot-manager conversation-service audit-security-service; do
               kubectl rollout status "deployment/${deploy}" -n securerag-hub --timeout=300s || exit 1
             done
