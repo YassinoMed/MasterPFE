@@ -76,7 +76,7 @@ pipeline {
                 ]) {
 
                     sh '''
-                        ssh -i "$SSH_KEY_FILE" ${SSH_OPTIONS} ${RECETTE_USER}@${RECETTE_HOST} << 'EOF'
+                        ssh -i "$SSH_KEY_FILE" ${SSH_OPTIONS} ${RECETTE_USER}@${RECETTE_HOST} "IMAGE_TAG='${IMAGE_TAG}' bash -s" << 'EOF'
 
                         set -euo pipefail
 
