@@ -5,6 +5,7 @@ set -euo pipefail
 start_forwarder() {
   local listen_port="$1"
   local target_port="$2"
+  local target_host="${3:-host.docker.internal}"
 
   if [[ "${ENABLE_LOCAL_FORWARDING:-true}" != "true" ]]; then
     return 0
@@ -15,13 +16,13 @@ start_forwarder() {
     return 0
   fi
 
-  socat "TCP-LISTEN:${listen_port},bind=127.0.0.1,reuseaddr,fork" "TCP:host.docker.internal:${target_port}" &
+  socat "TCP-LISTEN:${listen_port},bind=127.0.0.1,reuseaddr,fork" "TCP:${target_host}:${target_port}" &
 }
 
 # Forward localhost endpoints expected by the repository scripts so the
 # containerized Jenkins instance can reach the host kind cluster and registry.
-start_forwarder 5001 5001
-start_forwarder 6443 6443
+start_forwarder 5001 5000 kind-registry
+start_forwarder 6443 6443 securerag-dev-control-plane
 
 if [[ -z "${JENKINS_ADMIN_PASSWORD:-}" && -n "${JENKINS_ADMIN_PASSWORD_FILE:-}" ]]; then
   if [[ ! -r "${JENKINS_ADMIN_PASSWORD_FILE}" ]]; then

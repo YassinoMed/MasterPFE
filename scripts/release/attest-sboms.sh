@@ -45,7 +45,7 @@ attest_args=(attest --type cyclonedx)
 if is_true "${COSIGN_YES}"; then
   attest_args+=(--yes)
 fi
-
+if is_true "${INSECURE_REGISTRY:-false}"; then
   attest_args+=(--allow-insecure-registry)
 fi
 
