@@ -32,11 +32,18 @@ services:
     working_dir: /workspace
     extra_hosts:
       - "host.docker.internal:host-gateway"
+    networks:
+      - default
+      - kind
     healthcheck:
       test: ["CMD-SHELL", "curl -fsS http://localhost:8080/login >/dev/null || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 10
+
+networks:
+  kind:
+    external: true
 
 volumes:
   jenkins_home:
