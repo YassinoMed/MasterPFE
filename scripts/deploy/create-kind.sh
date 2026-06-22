@@ -27,6 +27,17 @@ if [[ "${portal_binding}" == "<no value>" || -z "${portal_binding}" || "${portal
 fi
 
 for node in $(kind get nodes --name "${CLUSTER_NAME}"); do
+  # Ensure containerd configuration has config_path set for certs.d registry config
+  if ! docker exec "${node}" grep -q "config_path = \"/etc/containerd/certs.d\"" /etc/containerd/config.toml; then
+    echo "Patching containerd config on ${node} to enable certs.d..."
+    docker exec "${node}" bash -c 'cat >> /etc/containerd/config.toml <<EOF
+
+[plugins."io.containerd.grpc.v1.cri".registry]
+  config_path = "/etc/containerd/certs.d"
+EOF'
+    docker exec "${node}" systemctl restart containerd
+  fi
+
   docker exec "${node}" mkdir -p "/etc/containerd/certs.d/localhost:${REG_PORT}"
   cat <<EOF | docker exec -i "${node}" cp /dev/stdin "/etc/containerd/certs.d/localhost:${REG_PORT}/hosts.toml"
 server = "http://${REG_NAME}:5000"
