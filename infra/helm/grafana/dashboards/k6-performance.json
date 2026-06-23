@@ -1,0 +1,448 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": { "type": "grafana", "uid": "-- Grafana --" },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 },
+      "id": 100,
+      "title": "🎯 SLO Quality Gates Overview",
+      "type": "row"
+    },
+    {
+      "title": "p95 Latency",
+      "description": "95th percentile HTTP request duration — Gate: < 200ms",
+      "type": "stat",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "expr": "k6_http_req_duration_p95_seconds{job=\"k6-performance\"}",
+          "legendFormat": "p95",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ms",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "#22c55e", "value": null },
+              { "color": "#eab308", "value": 150 },
+              { "color": "#ef4444", "value": 200 }
+            ]
+          },
+          "color": { "mode": "thresholds" }
+        }
+      },
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"] },
+        "orientation": "auto",
+        "textMode": "value_and_name",
+        "colorMode": "background"
+      },
+      "gridPos": { "h": 6, "w": 8, "x": 0, "y": 1 },
+      "id": 1
+    },
+    {
+      "title": "Error Rate",
+      "description": "HTTP request failure rate — Gate: < 1%",
+      "type": "stat",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "expr": "k6_http_req_failed_rate{job=\"k6-performance\"} * 100",
+          "legendFormat": "Error %",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "#22c55e", "value": null },
+              { "color": "#eab308", "value": 0.5 },
+              { "color": "#ef4444", "value": 1.0 }
+            ]
+          },
+          "color": { "mode": "thresholds" }
+        }
+      },
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"] },
+        "orientation": "auto",
+        "textMode": "value_and_name",
+        "colorMode": "background"
+      },
+      "gridPos": { "h": 6, "w": 8, "x": 8, "y": 1 },
+      "id": 2
+    },
+    {
+      "title": "Availability",
+      "description": "Service availability — Gate: > 99%",
+      "type": "stat",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "expr": "(1 - k6_http_req_failed_rate{job=\"k6-performance\"}) * 100",
+          "legendFormat": "Availability %",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "#ef4444", "value": null },
+              { "color": "#eab308", "value": 95 },
+              { "color": "#22c55e", "value": 99 }
+            ]
+          },
+          "color": { "mode": "thresholds" }
+        }
+      },
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"] },
+        "orientation": "auto",
+        "textMode": "value_and_name",
+        "colorMode": "background"
+      },
+      "gridPos": { "h": 6, "w": 8, "x": 16, "y": 1 },
+      "id": 3
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 7 },
+      "id": 101,
+      "title": "📈 Latency Over Time",
+      "type": "row"
+    },
+    {
+      "title": "HTTP Request Duration (p50 / p95 / p99)",
+      "description": "Latency percentiles over time for all k6 tests",
+      "type": "timeseries",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "expr": "k6_http_req_duration_avg_seconds{job=\"k6-performance\"}",
+          "legendFormat": "Average",
+          "refId": "A"
+        },
+        {
+          "expr": "k6_http_req_duration_p95_seconds{job=\"k6-performance\"}",
+          "legendFormat": "p95",
+          "refId": "B"
+        },
+        {
+          "expr": "k6_http_req_duration_p99_seconds{job=\"k6-performance\"}",
+          "legendFormat": "p99",
+          "refId": "C"
+        },
+        {
+          "expr": "k6_http_req_duration_max_seconds{job=\"k6-performance\"}",
+          "legendFormat": "Max",
+          "refId": "D"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ms",
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "fillOpacity": 10,
+            "gradientMode": "scheme",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "showPoints": "auto"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "#22c55e", "value": null },
+              { "color": "#eab308", "value": 150 },
+              { "color": "#ef4444", "value": 200 }
+            ]
+          }
+        }
+      },
+      "options": {
+        "tooltip": { "mode": "multi" },
+        "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["min", "mean", "max", "lastNotNull"] }
+      },
+      "gridPos": { "h": 10, "w": 24, "x": 0, "y": 8 },
+      "id": 4
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 18 },
+      "id": 102,
+      "title": "📊 Request Volume & Errors",
+      "type": "row"
+    },
+    {
+      "title": "Request Rate (req/s)",
+      "description": "Total HTTP request rate from k6 tests",
+      "type": "timeseries",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "expr": "k6_http_reqs_rate{job=\"k6-performance\"}",
+          "legendFormat": "Requests/s",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps",
+          "custom": {
+            "drawStyle": "bars",
+            "fillOpacity": 40,
+            "gradientMode": "scheme",
+            "lineWidth": 1
+          },
+          "color": { "mode": "palette-classic" }
+        }
+      },
+      "options": {
+        "tooltip": { "mode": "multi" },
+        "legend": { "displayMode": "list", "placement": "bottom" }
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 19 },
+      "id": 5
+    },
+    {
+      "title": "Error Rate Over Time",
+      "description": "HTTP request failure rate trend",
+      "type": "timeseries",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "expr": "k6_http_req_failed_rate{job=\"k6-performance\"} * 100",
+          "legendFormat": "Error Rate %",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "fillOpacity": 20,
+            "gradientMode": "scheme",
+            "lineWidth": 2
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "#22c55e", "value": null },
+              { "color": "#ef4444", "value": 1 }
+            ]
+          },
+          "color": { "mode": "thresholds" }
+        }
+      },
+      "options": {
+        "tooltip": { "mode": "multi" },
+        "legend": { "displayMode": "list", "placement": "bottom" }
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 19 },
+      "id": 6
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 27 },
+      "id": 103,
+      "title": "🚦 SLO Gate Status",
+      "type": "row"
+    },
+    {
+      "title": "Performance SLO Gate",
+      "description": "1 = PASSED, 0 = FAILED — Pipeline gate decision",
+      "type": "stat",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "expr": "k6_slo_gate{job=\"k6-performance\"}",
+          "legendFormat": "SLO Gate",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [
+            { "type": "value", "options": { "0": { "text": "❌ FAILED", "color": "#ef4444" }, "1": { "text": "✅ PASSED", "color": "#22c55e" } } }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "#ef4444", "value": null },
+              { "color": "#22c55e", "value": 1 }
+            ]
+          },
+          "color": { "mode": "thresholds" }
+        }
+      },
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"] },
+        "textMode": "value",
+        "colorMode": "background",
+        "graphMode": "none"
+      },
+      "gridPos": { "h": 6, "w": 8, "x": 0, "y": 28 },
+      "id": 7
+    },
+    {
+      "title": "Total Requests",
+      "description": "Total HTTP requests across all k6 test runs",
+      "type": "stat",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "expr": "k6_http_reqs_total{job=\"k6-performance\"}",
+          "legendFormat": "Total",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": { "mode": "palette-classic" }
+        }
+      },
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"] },
+        "textMode": "value_and_name",
+        "colorMode": "value"
+      },
+      "gridPos": { "h": 6, "w": 8, "x": 8, "y": 28 },
+      "id": 8
+    },
+    {
+      "title": "Request Rate (avg req/s)",
+      "description": "Average request throughput from the last test run",
+      "type": "stat",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "expr": "k6_http_reqs_rate{job=\"k6-performance\"}",
+          "legendFormat": "Rate",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps",
+          "color": { "mode": "palette-classic" }
+        }
+      },
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"] },
+        "textMode": "value_and_name",
+        "colorMode": "value"
+      },
+      "gridPos": { "h": 6, "w": 8, "x": 16, "y": 28 },
+      "id": 9
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 34 },
+      "id": 104,
+      "title": "🔬 Per-Service Latency Breakdown",
+      "type": "row"
+    },
+    {
+      "title": "Per-Service p95 Latency (ms)",
+      "description": "p95 request duration broken down by custom k6 metrics per service",
+      "type": "barchart",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "expr": "k6_request_duration_p95_seconds{job=\"k6-performance\"}",
+          "legendFormat": "{{instance}}",
+          "refId": "A"
+        },
+        {
+          "expr": "k6_smoke_duration_p95_seconds{job=\"k6-performance\"}",
+          "legendFormat": "smoke",
+          "refId": "B"
+        },
+        {
+          "expr": "k6_stress_duration_p95_seconds{job=\"k6-performance\"}",
+          "legendFormat": "stress",
+          "refId": "C"
+        },
+        {
+          "expr": "k6_spike_duration_p95_seconds{job=\"k6-performance\"}",
+          "legendFormat": "spike",
+          "refId": "D"
+        },
+        {
+          "expr": "k6_endurance_duration_p95_seconds{job=\"k6-performance\"}",
+          "legendFormat": "endurance",
+          "refId": "E"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ms",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "#22c55e", "value": null },
+              { "color": "#eab308", "value": 150 },
+              { "color": "#ef4444", "value": 200 }
+            ]
+          },
+          "color": { "mode": "thresholds" }
+        }
+      },
+      "options": {
+        "orientation": "horizontal",
+        "barWidth": 0.7,
+        "showValue": "always",
+        "groupWidth": 0.7,
+        "stacking": "none"
+      },
+      "gridPos": { "h": 10, "w": 24, "x": 0, "y": 35 },
+      "id": 10
+    }
+  ],
+  "refresh": "30s",
+  "schemaVersion": 38,
+  "style": "dark",
+  "tags": ["performance", "k6", "slo", "quality-gate"],
+  "templating": {
+    "list": []
+  },
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "k6 Performance — Quality Gates Dashboard",
+  "uid": "k6-perf-gate-01",
+  "version": 1
+}

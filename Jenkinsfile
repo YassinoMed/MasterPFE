@@ -268,6 +268,46 @@ pipeline {
         '''
       }
     }
+
+    stage('k6 Performance Tests') {
+      steps {
+        sh '''
+          set -euo pipefail
+          echo "[INFO] Running k6 Performance Tests (smoke + load)..."
+          K6_TESTS=smoke,load SLO_STRICT=true \
+            bash scripts/performance/k6-jenkins-stage.sh
+        '''
+      }
+      post {
+        always {
+          archiveArtifacts allowEmptyArchive: true, artifacts: 'reports/k6/**'
+          publishHTML(target: [
+            allowMissing: true,
+            alwaysLinkToLastBuild: true,
+            keepAll: true,
+            reportDir: 'reports/k6',
+            reportFiles: '**/k6-report-*.html',
+            reportName: 'k6 Performance Reports'
+          ])
+        }
+      }
+    }
+
+    stage('Performance Quality Gate') {
+      steps {
+        sh '''
+          set -euo pipefail
+          echo "[INFO] Evaluating Performance Quality Gates..."
+          echo "[INFO]   p95 < 200ms | error < 1% | availability > 99%"
+          bash scripts/performance/performance-quality-gate.sh
+        '''
+      }
+      post {
+        always {
+          archiveArtifacts allowEmptyArchive: true, artifacts: 'reports/k6/performance-gate-report.md,reports/k6/performance-gate-result.json'
+        }
+      }
+    }
   }
 
   post {

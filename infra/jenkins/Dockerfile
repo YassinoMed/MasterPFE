@@ -11,6 +11,7 @@ ARG TRIVY_VERSION=0.69.3
 ARG KUBE_SCORE_VERSION=1.18.0
 ARG SONAR_SCANNER_VERSION=5.0.1.3006
 ARG KYVERNO_VERSION=v1.16.2
+ARG K6_VERSION=v0.56.0
 
 # Install gnupg first (not present in base image), then add Docker official repo
 RUN apt-get update && \
@@ -102,7 +103,12 @@ RUN set -eux; \
       "https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-${SONAR_SCANNER_VERSION}-linux.zip"; \
     unzip -q /tmp/sonar-scanner.zip -d /opt; \
     ln -sf "/opt/sonar-scanner-${SONAR_SCANNER_VERSION}-linux/bin/sonar-scanner" /usr/local/bin/sonar-scanner; \
-    rm -f /tmp/sonar-scanner.zip
+    rm -f /tmp/sonar-scanner.zip; \
+    curl -fsSLo /tmp/k6.tar.gz \
+      "https://github.com/grafana/k6/releases/download/${K6_VERSION}/k6-${K6_VERSION}-linux-${OCI_ARCH}.tar.gz"; \
+    tar -xzf /tmp/k6.tar.gz -C /tmp; \
+    install -m 0755 "/tmp/k6-${K6_VERSION}-linux-${OCI_ARCH}/k6" /usr/local/bin/k6; \
+    rm -rf /tmp/k6.tar.gz "/tmp/k6-${K6_VERSION}-linux-${OCI_ARCH}"
 
 ENV PIP_DISABLE_PIP_VERSION_CHECK=1
 

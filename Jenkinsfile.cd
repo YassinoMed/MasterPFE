@@ -352,6 +352,42 @@ spec:
       }
     }
 
+    stage('CD: Performance Validation') {
+      when { expression { return params.DEPLOY_TO_PRODUCTION } }
+      steps {
+        timeout(time: 20, unit: 'MINUTES') {
+          unstash 'workspace'
+          sh '''
+            set -euo pipefail
+            echo "═══ PERFORMANCE VALIDATION — k6 Performance Tests ═══"
+            echo "[INFO] Running smoke + load + stress tests..."
+            K6_TESTS=smoke,load,stress SLO_STRICT=true \
+              bash scripts/performance/k6-jenkins-stage.sh
+
+            echo "[INFO] Evaluating Performance Quality Gates..."
+            echo "[INFO]   p95 < 200ms | error < 1% | availability > 99%"
+            bash scripts/performance/performance-quality-gate.sh
+          '''
+        }
+      }
+      post {
+        always {
+          archiveArtifacts allowEmptyArchive: true,
+            artifacts: 'reports/k6/**'
+          publishHTML(target: [
+            allowMissing: true,
+            alwaysLinkToLastBuild: true,
+            keepAll: true,
+            reportDir: 'reports/k6',
+            reportFiles: '**/k6-report-*.html',
+            reportName: 'k6 Performance Reports (CD)'
+          ])
+          archiveArtifacts allowEmptyArchive: true,
+            artifacts: 'reports/k6/performance-gate-report.md,reports/k6/performance-gate-result.json'
+        }
+      }
+    }
+
     stage('CD: Ratify Policy Sync') {
       when { expression { return params.DEPLOY_TO_PRODUCTION } }
       steps {

@@ -37,6 +37,7 @@ GATEWAY_URL="${GATEWAY_URL:-}"
 TESTS=(
   "${TEST_DIR}/k6-smoke-test.js:smoke"
   "${TEST_DIR}/k6-load-test.js:load"
+  "${TEST_DIR}/k6-stress-test.js:stress"
   "${TEST_DIR}/k6-spike-test.js:spike"
   "${TEST_DIR}/k6-endurance-test.js:endurance"
 )
@@ -57,9 +58,10 @@ Options:
 Test names (run specific tests):
   smoke      k6-smoke-test.js
   load       k6-load-test.js
+  stress     k6-stress-test.js
   spike      k6-spike-test.js
   endurance  k6-endurance-test.js
-  all        (default) Run all four test suites
+  all        (default) Run all five test suites
 
 Examples:
   $(basename "$0") all
@@ -89,7 +91,7 @@ if [ ${#REQUESTED_TESTS[@]} -eq 0 ]; then
 fi
 
 if [[ "${REQUESTED_TESTS[*]}" == "all" ]]; then
-  REQUESTED_TESTS=("smoke" "load" "spike" "endurance")
+  REQUESTED_TESTS=("smoke" "load" "stress" "spike" "endurance")
 fi
 
 # ── Build k6 env args ─────────────────────────────────────────────────
