@@ -65,11 +65,33 @@ run_syft() {
   local output_file="$2"
   local log_file="$3"
 
-  if syft_supports_scan; then
-    syft scan -q -o "${SYFT_FORMAT}" "${source_ref}" > "${output_file}" 2> "${log_file}"
-  else
-    syft -q -o "${SYFT_FORMAT}" "${source_ref}" > "${output_file}" 2> "${log_file}"
+  local actual_ref="${source_ref}"
+  local tmp_tar=""
+
+  if [[ "${source_ref}" == docker:* ]]; then
+    local image_name="${source_ref#docker:}"
+    tmp_tar="/tmp/syft-archive-$(date +%s%N).tar"
+    echo "[INFO] Exporting ${image_name} to ${tmp_tar} for Syft..." >> "${log_file}"
+    if ! docker save "${image_name}" -o "${tmp_tar}" >> "${log_file}" 2>&1; then
+      echo "[ERROR] Failed to export image via docker save" >> "${log_file}"
+      rm -f "${tmp_tar}"
+      return 1
+    fi
+    actual_ref="docker-archive:${tmp_tar}"
   fi
+
+  local exit_code=0
+  if syft_supports_scan; then
+    syft scan -q -o "${SYFT_FORMAT}" "${actual_ref}" > "${output_file}" 2>> "${log_file}" || exit_code=$?
+  else
+    syft -q -o "${SYFT_FORMAT}" "${actual_ref}" > "${output_file}" 2>> "${log_file}" || exit_code=$?
+  fi
+
+  if [ -n "${tmp_tar}" ] && [ -f "${tmp_tar}" ]; then
+    rm -f "${tmp_tar}"
+  fi
+
+  return $exit_code
 }
 
 validate_sbom_file() {
