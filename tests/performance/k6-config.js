@@ -8,7 +8,16 @@ const {
 } = __ENV;
 
 const svc = (name, port) =>
-  `http://${name}.${NAMESPACE}.svc:${port}`;
+  `http://${name}.${NAMESPACE}.svc.cluster.local:${port}`;
+
+export const SERVICE_HEALTH_PATHS = {
+  'api-gateway': '/health',
+  'portal-web': '/health',
+  'auth-users': '/api/v1/health',
+  'chatbot-manager': '/api/v1/health',
+  'conversation-service': '/api/v1/health',
+  'audit-security-service': '/api/v1/health',
+};
 
 export const SERVICES = {
   'api-gateway': {

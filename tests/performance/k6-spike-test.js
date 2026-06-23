@@ -1,7 +1,7 @@
 import http from 'k6/http';
 import { check, sleep, group } from 'k6';
 import { Rate, Trend } from 'k6/metrics';
-import { getBaseUrl, HEADERS, TIMEOUT, allServices } from './k6-config.js';
+import { getBaseUrl, HEADERS, TIMEOUT, allServices, SERVICE_HEALTH_PATHS } from './k6-config.js';
 import { SPIKE_THRESHOLDS } from './k6-thresholds.js';
 import { makeHandleSummary } from './k6-report.js';
 
@@ -25,20 +25,12 @@ export const options = {
   thresholds: SPIKE_THRESHOLDS,
 };
 
-const SERVICE_PATHS = {
-  'api-gateway': '/health',
-  'portal-web': '/health',
-  'auth-users': '/api/v1/health',
-  'chatbot-manager': '/api/v1/health',
-  'conversation-service': '/api/v1/health',
-  'audit-security-service': '/api/v1/health',
-};
-
 export function setup() {
   const results = [];
   for (const svc of allServices()) {
     try {
-      const res = http.get(`${svc.url}/health`, {
+      const path = SERVICE_HEALTH_PATHS[svc.name] || '/health';
+      const res = http.get(`${svc.url}${path}`, {
         headers: HEADERS,
         timeout: '10s',
       });
@@ -60,7 +52,7 @@ export default function (data) {
 
   group('Spike - Health Check All Services', () => {
     for (const svc of allServices()) {
-      const url = `${svc.url}${SERVICE_PATHS[svc.name] || '/health'}`;
+      const url = `${svc.url}${SERVICE_HEALTH_PATHS[svc.name] || '/health'}`;
       const res = http.get(url, {
         headers: HEADERS,
         timeout: TIMEOUT,
