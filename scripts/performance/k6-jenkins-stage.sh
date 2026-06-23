@@ -38,8 +38,15 @@ JOB_NAME="${JOB_NAME:-manual}"
 echo "[k6-jenkins] Pre-flight checks"
 
 if ! command -v k6 &>/dev/null; then
-  echo "[k6-jenkins] ERROR: k6 not found in PATH"
-  exit 2
+  echo "[k6-jenkins] WARNING: k6 not found in PATH. Downloading locally..."
+  K6_VERSION="v0.56.0"
+  curl -fsSLo /tmp/k6.tar.gz "https://github.com/grafana/k6/releases/download/${K6_VERSION}/k6-${K6_VERSION}-linux-amd64.tar.gz"
+  tar -xzf /tmp/k6.tar.gz -C /tmp
+  export PATH="${PATH}:/tmp/k6-${K6_VERSION}-linux-amd64"
+  if ! command -v k6 &>/dev/null; then
+    echo "[k6-jenkins] ERROR: k6 dynamic installation failed"
+    exit 2
+  fi
 fi
 
 K6_VERSION=$(k6 version 2>&1 || echo "unknown")
