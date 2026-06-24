@@ -12,7 +12,7 @@ metadata:
 spec:
   project: securerag-hub
   source:
-    repoURL: git://172.18.0.1/securerag-hub-gitops
+    repoURL: https://github.com/YassinoMed/MasterPFE.git
     targetRevision: main
     path: infra/k8s/overlays/demo
   destination:
