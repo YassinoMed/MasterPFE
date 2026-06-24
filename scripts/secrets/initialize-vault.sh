@@ -130,30 +130,9 @@ kubectl exec -n ${NAMESPACE} ${VAULT_POD} -- sh -c 'vault auth list -format=json
 info "Kubernetes auth configured"
 
 # Configure Kubernetes auth
-TOKEN_REVIEWER_JWT=$(kubectl create token vault-eso-auth -n ${NAMESPACE} --duration=8760h 2>/dev/null || \
-  kubectl get secret vault-eso-auth-token -n ${NAMESPACE} -o jsonpath='{.data.token}' | base64 -d 2>/dev/null || \
-  echo "")
-
-KUBERNETES_CA_CERT=$(kubectl get secret vault-eso-auth-token -n ${NAMESPACE} -o jsonpath='{.data.ca\.crt}' 2>/dev/null | base64 -d || \
-  kubectl config view --raw --minify --flatten -o jsonpath='{.clusters[0].cluster.certificate-authority-data}' | base64 -d 2>/dev/null || \
-  echo "")
-
-KUBERNETES_HOST=$(kubectl config view --raw --minify --flatten -o jsonpath='{.clusters[0].cluster.server}' 2>/dev/null || \
-  echo "https://kubernetes.default.svc")
-
-if [ -n "${TOKEN_REVIEWER_JWT}" ]; then
-  kubectl exec -n ${NAMESPACE} ${VAULT_POD} -- vault write auth/kubernetes/config \
-    token_reviewer_jwt="${TOKEN_REVIEWER_JWT}" \
-    kubernetes_host="${KUBERNETES_HOST}" \
-    kubernetes_ca_cert="${KUBERNETES_CA_CERT}" \
-    disable_iss_validation=true
-  info "Kubernetes auth configured"
-else
-  warn "Cannot read service account token. Configure kubernetes auth manually:"
-  warn "  kubectl exec -n vault vault-0 -- vault write auth/kubernetes/config \\"
-  warn "    token_reviewer_jwt=@/var/run/secrets/kubernetes.io/serviceaccount/token \\"
-  warn "    kubernetes_host=https://\${KUBERNETES_PORT_443_TCP_ADDR}:443"
-fi
+kubectl exec -n ${NAMESPACE} ${VAULT_POD} -- vault write auth/kubernetes/config \
+  kubernetes_host="https://kubernetes.default.svc"
+info "Kubernetes auth configured"
 
 # Step 5: Create Vault policies and roles
 step "5/6: Creating policies and roles..."
