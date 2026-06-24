@@ -10,8 +10,6 @@ data:
   alertmanager.yml: |
     global:
       resolve_timeout: 5m
-      slack_api_url: ${SLACK_WEBHOOK_URL}
-      pagerduty_url: https://events.pagerduty.com/v2/enqueue
     templates:
       - /etc/alertmanager/templates/*.tmpl
 
@@ -22,12 +20,12 @@ data:
       group_interval: 5m
       repeat_interval: 4h
       routes:
-        - receiver: critical-page
+        - receiver: critical-webhook
           matchers:
             - severity = critical
           repeat_interval: 15m
           continue: false
-        - receiver: warning-ticket
+        - receiver: warning-webhook
           matchers:
             - severity = warning
           repeat_interval: 4h
@@ -46,74 +44,17 @@ data:
             send_resolved: true
             max_alerts: 10
 
-      - name: critical-page
-        slack_configs:
-          - channel: "#securerag-critical"
-            title: '🚨 [CRITICAL] {{ .GroupLabels.alertname }} / {{ .GroupLabels.namespace }}'
-            text: >-
-              *Alert:* {{ .CommonAnnotations.summary }}
-              *Description:* {{ .CommonAnnotations.description }}
-              *Graph:* {{ .GeneratorURL }}
-              *Runbook:* {{ .CommonAnnotations.runbook_url }}
+      - name: critical-webhook
+        webhook_configs:
+          - url: http://alertmanager-webhook.securerag-monitoring.svc.cluster.local:9095/critical
             send_resolved: true
-            actions:
-              - type: button
-                text: 'Acknowledge'
-                url: '{{ .ExternalURL }}/#/alerts'
-              - type: button
-                text: 'Runbook'
-                url: '{{ .CommonAnnotations.runbook_url }}'
-        pagerduty_configs:
-          - routing_key: ${PAGERDUTY_ROUTING_KEY}
-            severity: critical
-            description: '{{ .CommonAnnotations.summary }}'
-            client: SecureRAG Hub
-            client_url: '{{ .ExternalURL }}'
-            images:
-              - src: 'https://monitoring.securerag.io/grafana/d/{{ .CommonAnnotations.dashboard }}'
-                href: '{{ .GeneratorURL }}'
-                alt: 'Grafana Dashboard'
-            details:
-              alertname: '{{ .GroupLabels.alertname }}'
-              namespace: '{{ .GroupLabels.namespace }}'
-              severity: critical
-              runbook: '{{ .CommonAnnotations.runbook_url }}'
-            send_resolved: true
-        email_configs:
-          - to: ${ONCALL_EMAIL}
-            from: alertmanager@securerag.io
-            smarthost: ${SMTP_HOST}:587
-            auth_username: ${SMTP_USER}
-            auth_password: ${SMTP_PASSWORD}
-            headers:
-              subject: '[CRITICAL] {{ .GroupLabels.alertname }} - {{ .GroupLabels.namespace }}'
-            html: >-
-              <h2>{{ .CommonAnnotations.summary }}</h2>
-              <p>{{ .CommonAnnotations.description }}</p>
-              <pre>{{ .CommonAnnotations.runbook_url }}</pre>
-            send_resolved: true
+            max_alerts: 5
 
-      - name: warning-ticket
-        slack_configs:
-          - channel: "#securerag-ops"
-            title: '⚠️ [WARNING] {{ .GroupLabels.alertname }} / {{ .GroupLabels.namespace }}'
-            text: >-
-              *Alert:* {{ .CommonAnnotations.summary }}
-              *Description:* {{ .CommonAnnotations.description }}
-              *Graph:* {{ .GeneratorURL }}
+      - name: warning-webhook
+        webhook_configs:
+          - url: http://alertmanager-webhook.securerag-monitoring.svc.cluster.local:9095/warning
             send_resolved: true
-        email_configs:
-          - to: ${OPS_EMAIL}
-            from: alertmanager@securerag.io
-            smarthost: ${SMTP_HOST}:587
-            auth_username: ${SMTP_USER}
-            auth_password: ${SMTP_PASSWORD}
-            headers:
-              subject: '[WARNING] {{ .GroupLabels.alertname }} - {{ .GroupLabels.namespace }}'
-            html: >-
-              <h2>{{ .CommonAnnotations.summary }}</h2>
-              <p>{{ .CommonAnnotations.description }}</p>
-            send_resolved: true
+            max_alerts: 10
 
       - name: info-log
         webhook_configs:
@@ -153,6 +94,10 @@ data:
           - weekdays: ["monday:thursday", "friday"]
             times:
               - start_time: "18:00"
+                end_time: "23:59"
+          - weekdays: ["tuesday:friday", "saturday"]
+            times:
+              - start_time: "00:00"
                 end_time: "09:00"
 
 ---
@@ -175,8 +120,6 @@ spec:
     metadata:
       labels:
         app.kubernetes.io/name: alertmanager
-        app.kubernetes.io/component: alerting
-        app.kubernetes.io/part-of: securerag-monitoring
       annotations:
         checksum/config: ${CONFIG_CHECKSUM}
         prometheus.io/scrape: "true"
@@ -219,26 +162,6 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: status.podIP
-            - name: SLACK_WEBHOOK_URL
-              valueFrom:
-                secretKeyRef:
-                  name: alertmanager-secrets
-                  key: slack-webhook-url
-            - name: PAGERDUTY_ROUTING_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: alertmanager-secrets
-                  key: pagerduty-routing-key
-            - name: ONCALL_EMAIL
-              valueFrom:
-                configMapKeyRef:
-                  name: alertmanager-config
-                  key: oncall-email
-            - name: OPS_EMAIL
-              valueFrom:
-                configMapKeyRef:
-                  name: alertmanager-config
-                  key: ops-email
           resources:
             requests:
               cpu: 100m

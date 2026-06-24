@@ -23,6 +23,7 @@ data:
     metrics:
       enabled: true
       interval: 1h
+      output_rule: true
     outputs:
       rate: 1
       max_burst: 1000

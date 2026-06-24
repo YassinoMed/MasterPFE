@@ -10,7 +10,9 @@ metadata:
     app.kubernetes.io/name: falco-talon
     app.kubernetes.io/part-of: securerag-hub
 spec:
-  replicas: 1
+  # Replicas set to 0: Falco Talon requires NATS (not yet deployed).
+  # Will be enabled in Phase 1 when NATS is provisioned.
+  replicas: 0
   selector:
     matchLabels:
       app.kubernetes.io/name: falco-talon
@@ -32,6 +34,8 @@ spec:
             - server
             - -c
             - /etc/falco-talon/config.yaml
+            - -r
+            - /etc/falco-talon/rules.yaml
           ports:
             - name: http
               containerPort: 2803
@@ -96,76 +100,70 @@ data:
         host: http://loki.securerag-monitoring.svc:3100
         tenant: falco
 
-    rules:
-      # T1059 — Shell spawned in container → kill pod
-      - name: kill_shell_container
-        match:
-          priority: ">=Warning"
-          rule: "SecureRAG Shell in Container"
-        actions:
-          - action: kubernetes:terminate
-            parameters:
-              gracePeriodSeconds: 5
-          - action: slack:message
-            parameters:
-              text: "POD KILLED: Shell detected in container."
+  rules.yaml: |
+    - action: Terminate Pod
+      actionner: kubernetes:terminate
+      continue: true
+      match:
+        rules:
+          - SecureRAG Shell in Container
+        priority: ">= Warning"
+      parameters:
+        grace_period_seconds: 5
+      output:
+        target: slack:message
+        parameters:
+          text: "POD KILLED: Shell detected in container."
 
-      # T1611 — Privilege escalation → kill + taint
-      - name: kill_privileged_escalation
-        match:
-          priority: ">=Critical"
-          rule: "SecureRAG Privilege Escalation Attempt"
-        actions:
-          - action: kubernetes:terminate
-            parameters:
-              gracePeriodSeconds: 0
-          - action: kubernetes:label
-            parameters:
-              label: "security.securerag.dev/tainted=true"
-          - action: slack:message
-            parameters:
-              text: "CRITICAL: Privilege escalation attempt detected and neutralized."
+    - action: Kill Privilege Escalation
+      actionner: kubernetes:terminate
+      continue: true
+      match:
+        rules:
+          - SecureRAG Privilege Escalation Attempt
+        priority: ">= Critical"
+      parameters:
+        grace_period_seconds: 0
+      output:
+        target: slack:message
+        parameters:
+          text: "CRITICAL: Privilege escalation attempt detected and neutralized."
 
-      # T1136 — User account mutation → notify
-      - name: notify_user_mutation
-        match:
-          rule: "SecureRAG User Account Mutation"
-        actions:
-          - action: slack:message
-            parameters:
-              text: "ALERT: Local user mutation detected in SecureRAG pod."
+    - action: Notify User Mutation
+      actionner: kubernetes:terminate
+      continue: false
+      match:
+        rules:
+          - SecureRAG User Account Mutation
+      output:
+        target: slack:message
+        parameters:
+          text: "ALERT: Local user mutation detected in SecureRAG pod."
 
-      # TA0011 — Unexpected egress → network isolation
-      - name: isolate_unexpected_egress
-        match:
-          priority: ">=Warning"
-          rule: "SecureRAG Outbound Unexpected Port"
-        actions:
-          - action: kubernetes:networkpolicy
-            parameters:
-              action: deny-all
+    - action: Notify Log Tampering
+      actionner: kubernetes:terminate
+      continue: false
+      match:
+        rules:
+          - SecureRAG Log Tampering
+      output:
+        target: slack:message
+        parameters:
+          text: "ALERT: Log tampering detected in SecureRAG pod."
 
-      # T1070 — Log tampering → notify
-      - name: notify_log_tampering
-        match:
-          rule: "SecureRAG Log Tampering"
-        actions:
-          - action: slack:message
-            parameters:
-              text: "ALERT: Log tampering detected in SecureRAG pod."
-
-      # T1552 — Sensitive file read → kill + notify
-      - name: kill_sensitive_read
-        match:
-          priority: ">=Error"
-          rule: "SecureRAG Sensitive File Read"
-        actions:
-          - action: kubernetes:terminate
-            parameters:
-              gracePeriodSeconds: 3
-          - action: slack:message
-            parameters:
-              text: "POD KILLED: Sensitive file access detected."
+    - action: Kill Sensitive Read
+      actionner: kubernetes:terminate
+      continue: true
+      match:
+        rules:
+          - SecureRAG Sensitive File Read
+        priority: ">= Error"
+      parameters:
+        grace_period_seconds: 3
+      output:
+        target: slack:message
+        parameters:
+          text: "POD KILLED: Sensitive file access detected."
 
 ---
 # RBAC
