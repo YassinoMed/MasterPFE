@@ -48,7 +48,6 @@ export const options = {
 };
 
 const API_ENDPOINTS = [
-  { service: 'api-gateway', path: '/api/v1/status' },
   { service: 'portal-web', path: '/' },
   { service: 'auth-users', path: '/api/users' },
   { service: 'chatbot-manager', path: '/api/chatbots' },

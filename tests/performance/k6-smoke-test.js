@@ -9,7 +9,6 @@ const smokeErrorRate = new Rate('smoke_errors');
 const smokeTrend = new Trend('smoke_duration');
 
 const SERVICES = [
-  'api-gateway',
   'portal-web',
   'auth-users',
   'chatbot-manager',

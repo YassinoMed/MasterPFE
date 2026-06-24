@@ -133,6 +133,18 @@ echo "============================================"
 
 mkdir -p "${RESULTS_DIR}"
 
+# Define cleanup function and trap
+cleanup() {
+  echo "  [CLEANUP] Removing k6 runner ConfigMap and Pod..."
+  kubectl delete configmap k6-test-scripts -n "${NAMESPACE}" --ignore-not-found >/dev/null 2>&1 || true
+  kubectl delete pod k6-runner -n "${NAMESPACE}" --grace-period=0 --force >/dev/null 2>&1 || true
+}
+trap cleanup EXIT
+
+echo "  Creating k6 script ConfigMap..."
+kubectl delete configmap k6-test-scripts -n "${NAMESPACE}" --ignore-not-found >/dev/null 2>&1 || true
+kubectl create configmap k6-test-scripts --from-file="${TEST_DIR}/" -n "${NAMESPACE}" >/dev/null
+
 PASS_COUNT=0
 FAIL_COUNT=0
 FAILED_TESTS=()
@@ -152,46 +164,126 @@ run_test() {
   echo "  Script:  ${test_script}"
   echo "────────────────────────────────────────────"
 
-  # Start port-forwards
-  echo "  Starting port-forwards..."
-  kubectl port-forward svc/portal-web 8000:8000 -n "${NAMESPACE}" >/dev/null 2>&1 &
-  PF_PORTAL=$!
-  kubectl port-forward svc/auth-users 8001:8000 -n "${NAMESPACE}" >/dev/null 2>&1 &
-  PF_AUTH=$!
-  kubectl port-forward svc/chatbot-manager 8002:8000 -n "${NAMESPACE}" >/dev/null 2>&1 &
-  PF_CHATBOT=$!
-  kubectl port-forward svc/conversation-service 8003:8000 -n "${NAMESPACE}" >/dev/null 2>&1 &
-  PF_CONV=$!
-  kubectl port-forward svc/audit-security-service 8004:8000 -n "${NAMESPACE}" >/dev/null 2>&1 &
-  PF_AUDIT=$!
+  # Delete any existing k6-runner pod
+  kubectl delete pod k6-runner -n "${NAMESPACE}" --grace-period=0 --force >/dev/null 2>&1 || true
 
-  sleep 5 # Wait for port-forwards to establish
+  # Generate the k6 runner pod spec
+  cat <<EOF > /tmp/k6-pod.yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: k6-runner
+  namespace: ${NAMESPACE}
+  labels:
+    app.kubernetes.io/part-of: securerag-hub
+    job-role: validation
+spec:
+  restartPolicy: Never
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 10005
+    runAsGroup: 10005
+    fsGroup: 10005
+    seccompProfile:
+      type: RuntimeDefault
+  containers:
+  - name: k6
+    image: grafana/k6:0.56.0
+    command: ["/bin/sh", "-c"]
+    args:
+    - |
+      k6 run \\
+        --out "json=/reports/k6/k6-raw.json" \\
+        --out "json=/reports/k6/k6-${test_name}.json" \\
+        --summary-export="/reports/k6/k6-summary-${test_name}.json" \\
+        "/tests/performance/\$(basename "${test_script}")"
+      echo \$? > /reports/k6/exit-code
+      sleep 300
+    securityContext:
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+        - ALL
+      privileged: false
+      readOnlyRootFilesystem: false
+      runAsNonRoot: true
+      runAsUser: 10005
+      runAsGroup: 10005
+    env:
+    - name: NAMESPACE
+      value: "${NAMESPACE}"
+    - name: BASE_URL
+      value: "${BASE_URL:-}"
+    - name: AUTH_URL
+      value: "${AUTH_URL:-}"
+    - name: CHATBOT_URL
+      value: "${CHATBOT_URL:-}"
+    - name: CONVERSATION_URL
+      value: "${CONVERSATION_URL:-}"
+    - name: AUDIT_URL
+      value: "${AUDIT_URL:-}"
+    - name: GATEWAY_URL
+      value: "${GATEWAY_URL:-}"
+    volumeMounts:
+    - name: scripts
+      mountPath: /tests/performance
+    - name: reports
+      mountPath: /reports/k6
+  volumes:
+  - name: scripts
+    configMap:
+      name: k6-test-scripts
+  - name: reports
+    emptyDir: {}
+EOF
 
-  set +e
-  "${K6_BIN}" run \
-    "${K6_ENV_ARGS[@]}" \
-    --env PORTAL_WEB_HOST=localhost \
-    --env PORTAL_WEB_PORT=8000 \
-    --env AUTH_USERS_HOST=localhost \
-    --env AUTH_USERS_PORT=8001 \
-    --env CHATBOT_MANAGER_HOST=localhost \
-    --env CHATBOT_MANAGER_PORT=8002 \
-    --env CONVERSATION_SERVICE_HOST=localhost \
-    --env CONVERSATION_SERVICE_PORT=8003 \
-    --env AUDIT_SECURITY_SERVICE_HOST=localhost \
-    --env AUDIT_SECURITY_SERVICE_PORT=8004 \
-    "${K6_RUN_ARGS[@]}" \
-    --out "json=${RESULTS_DIR}/k6-${test_name}.json" \
-    --summary-export="${RESULTS_DIR}/k6-summary-${test_name}.json" \
-    "${test_script}"
+  echo "  Applying k6-runner pod..."
+  kubectl apply -f /tmp/k6-pod.yaml >/dev/null
 
-  K6_EXIT=$?
-  set -e
+  echo "  Waiting for pod to be ready..."
+  kubectl wait --for=condition=Ready pod/k6-runner -n "${NAMESPACE}" --timeout=60s >/dev/null
 
-  # Stop port-forwards
-  kill $PF_PORTAL $PF_AUTH $PF_CHATBOT $PF_CONV $PF_AUDIT || true
+  # Stream logs in background
+  echo "  Streaming k6 runner logs..."
+  kubectl logs -f k6-runner -n "${NAMESPACE}" &
+  LOGS_PID=$!
 
-  if [ ${K6_EXIT} -eq 0 ]; then
+  # Wait for exit code file
+  echo "  Waiting for test to complete..."
+  while true; do
+    if kubectl exec k6-runner -n "${NAMESPACE}" -- test -f /reports/k6/exit-code 2>/dev/null; then
+      break
+    fi
+    PHASE=$(kubectl get pod k6-runner -n "${NAMESPACE}" -o jsonpath='{.status.phase}' 2>/dev/null || echo "Unknown")
+    if [ "$PHASE" = "Failed" ]; then
+      echo "  [ERROR] Pod failed prematurely."
+      break
+    fi
+    sleep 2
+  done
+
+  # Stop log streaming
+  kill $LOGS_PID || true
+
+  # Fetch exit code
+  K6_EXIT=$(kubectl exec k6-runner -n "${NAMESPACE}" -- cat /reports/k6/exit-code 2>/dev/null || echo "99")
+
+  # Transfer reports
+  echo "  Retrieving test reports..."
+  rm -rf /tmp/k6-transfer
+  mkdir -p /tmp/k6-transfer
+  kubectl cp "${NAMESPACE}/k6-runner:/reports/k6" /tmp/k6-transfer/ 2>/dev/null || true
+  if [ -d /tmp/k6-transfer/k6 ]; then
+    cp -r /tmp/k6-transfer/k6/* "${RESULTS_DIR}/"
+  else
+    cp -r /tmp/k6-transfer/* "${RESULTS_DIR}/" 2>/dev/null || true
+  fi
+  rm -rf /tmp/k6-transfer
+
+  # Delete pod
+  kubectl delete pod k6-runner -n "${NAMESPACE}" --grace-period=0 --force >/dev/null 2>&1 || true
+
+  if [ "${K6_EXIT}" -eq 0 ]; then
     echo "[PASS] ${test_name} — all thresholds met"
     PASS_COUNT=$((PASS_COUNT + 1))
   else

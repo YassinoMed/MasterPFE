@@ -10,7 +10,10 @@ const {
 const svc = (name, defaultPort) => {
   const envPrefix = name.toUpperCase().replace(/-/g, '_');
   const host = __ENV[`${envPrefix}_HOST`] || `${name}.${NAMESPACE}.svc.cluster.local`;
-  const port = __ENV[`${envPrefix}_PORT`] || defaultPort;
+  let port = __ENV[`${envPrefix}_PORT`] || defaultPort;
+  if (port && port.includes('tcp://')) {
+    port = port.split(':').pop();
+  }
   return `http://${host}:${port}`;
 };
 
