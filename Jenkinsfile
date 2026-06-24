@@ -220,6 +220,20 @@ pipeline {
       }
     }
 
+    stage('SLSA Provenance & Attestation') {
+      steps {
+        sh '''
+          set -euo pipefail
+          echo "[INFO] Generating SLSA Provenance and Attesting images..."
+          if [ -f "/run/jenkins-secrets/cosign.password" ]; then
+            export COSIGN_PASSWORD=$(cat /run/jenkins-secrets/cosign.password)
+          fi
+          export COSIGN_KEY="${COSIGN_KEY:-}"
+          bash scripts/release/generate-provenance.sh
+        '''
+      }
+    }
+
     stage('Kubernetes Deploy') {
       steps {
         sh '''

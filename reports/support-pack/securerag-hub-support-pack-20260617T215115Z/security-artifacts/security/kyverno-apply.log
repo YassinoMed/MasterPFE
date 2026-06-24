@@ -1,7 +1,0 @@
-
-Applying 18 policy rule(s) to 41 resource(s)...
-policy securerag-restrict-service-exposure -> resource securerag-hub/Service/postgres-auth failed:
-1 - allow-nodeport-only-for-portal-web Only portal-web may use NodePort in the local demo overlay; LoadBalancer is forbidden.
-
-
-pass: 41, fail: 1, warn: 0, error: 0, skip: 0 

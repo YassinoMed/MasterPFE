@@ -1,6 +1,0 @@
-NAME                                     READY   STATUS    RESTARTS   AGE   IP             NODE                   NOMINATED NODE   READINESS GATES
-audit-security-service-9ff7f9ddc-km222   1/1     Running   0          20h   10.244.1.175   securerag-dev-worker   <none>           <none>
-auth-users-6f6b795bc4-xk9x5              1/1     Running   0          9h    10.244.1.188   securerag-dev-worker   <none>           <none>
-chatbot-manager-58d7f6849b-62rdm         1/1     Running   0          20h   10.244.1.177   securerag-dev-worker   <none>           <none>
-conversation-service-6556bc84fd-n75n4    1/1     Running   0          20h   10.244.1.178   securerag-dev-worker   <none>           <none>
-portal-web-c99d94df-tgk7n                1/1     Running   0          10h   10.244.1.187   securerag-dev-worker   <none>           <none>

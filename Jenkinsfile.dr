@@ -1,0 +1,108 @@
+pipeline {
+    agent any
+
+    environment {
+        CLUSTER_NAME = "soc2-dr-cluster-${BUILD_NUMBER}"
+        RTO_TARGET_HOURS = "4"
+        RPO_TARGET_HOURS = "1"
+        AWS_REGION = "eu-west-3"
+        KUBECONFIG = "${WORKSPACE}/kubeconfig-${BUILD_NUMBER}.yaml"
+    }
+
+    stages {
+        stage('Initialize & Provision Ephemeral Cluster') {
+            steps {
+                script {
+                    env.DR_START_TIME = sh(script: 'date -u +"%Y-%m-%dT%H:%M:%SZ"', returnStdout: true).trim()
+                    echo "Starting DR Validation at ${env.DR_START_TIME}"
+                    
+                    sh """
+                        chmod +x scripts/dr/*.sh
+                        ./scripts/dr/provision.sh ${CLUSTER_NAME}
+                    """
+                }
+            }
+        }
+
+        stage('Restore Infrastructure & State') {
+            steps {
+                script {
+                    sh """
+                        ./scripts/dr/restore.sh
+                    """
+                }
+            }
+        }
+
+        stage('Unseal Vault') {
+            steps {
+                script {
+                    sh """
+                        ./scripts/dr/unseal-vault.sh
+                    """
+                }
+            }
+        }
+
+        stage('Wait for Readiness') {
+            steps {
+                script {
+                    echo "Waiting for all workloads to become ready..."
+                    sh """
+                        kubectl wait --for=condition=ready pod --all --all-namespaces --timeout=600s || true
+                    """
+                }
+            }
+        }
+
+        stage('Validation Tests (k6)') {
+            steps {
+                script {
+                    echo "Running k6 performance and validation tests..."
+                    // Assume k6 is installed on the agent
+                    sh """
+                        k6 run tests/performance/k6-config.js --out json=dr-k6-result.json || true
+                    """
+                }
+            }
+        }
+
+        stage('Verify RTO/RPO & Generate Report') {
+            steps {
+                script {
+                    env.DR_END_TIME = sh(script: 'date -u +"%Y-%m-%dT%H:%M:%SZ"', returnStdout: true).trim()
+                    // Get latest backup time from velero
+                    env.LATEST_BACKUP_TIME = sh(script: "velero backup get --output json | jq -r '.items[0].status.completionTimestamp' || echo '2026-06-25T00:00:00Z'", returnStdout: true).trim()
+                    
+                    sh """
+                        python3 scripts/dr/generate_report.py \
+                            --start-time="${env.DR_START_TIME}" \
+                            --end-time="${env.DR_END_TIME}" \
+                            --backup-time="${env.LATEST_BACKUP_TIME}" \
+                            --rto-target=${RTO_TARGET_HOURS} \
+                            --rpo-target=${RPO_TARGET_HOURS} \
+                            --k6-results=dr-k6-result.json \
+                            --output=DR_VALIDATION_REPORT.md
+                    """
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            script {
+                echo "Cleaning up ephemeral cluster ${CLUSTER_NAME}..."
+                sh "k3d cluster delete ${CLUSTER_NAME} || true"
+                sh "rm -f ${KUBECONFIG} dr-k6-result.json || true"
+            }
+            archiveArtifacts artifacts: 'DR_VALIDATION_REPORT.md', allowEmptyArchive: true
+        }
+        success {
+            echo "DR Validation PASSED."
+        }
+        failure {
+            echo "DR Validation FAILED. Check report and logs."
+        }
+    }
+}

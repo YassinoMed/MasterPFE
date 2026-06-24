@@ -1,22 +1,25 @@
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
+apiVersion: "cilium.io/v2"
+kind: CiliumClusterwideNetworkPolicy
 metadata:
-  name: allow-dns
-  namespace: securerag-hub
+  name: "allow-dns-egress"
 spec:
-  podSelector: {}
-  policyTypes:
-    - Egress
+  description: "Allow all pods to query kube-dns"
+  endpointSelector:
+    matchExpressions:
+      - key: io.kubernetes.pod.namespace
+        operator: NotIn
+        values:
+          - kube-system
+          - cilium
   egress:
-    - to:
-        - namespaceSelector:
-            matchLabels:
-              kubernetes.io/metadata.name: kube-system
-          podSelector:
-            matchLabels:
-              k8s-app: kube-dns
-      ports:
-        - protocol: UDP
-          port: 53
-        - protocol: TCP
-          port: 53
+  - toEndpoints:
+    - matchLabels:
+        k8s:io.kubernetes.pod.namespace: kube-system
+        k8s:k8s-app: kube-dns
+    toPorts:
+    - ports:
+      - port: "53"
+        protocol: ANY
+      rules:
+        dns:
+        - matchPattern: "*"

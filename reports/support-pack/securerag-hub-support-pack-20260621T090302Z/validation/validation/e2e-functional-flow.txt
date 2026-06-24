@@ -1,7 +1,0 @@
-=== E2E functional flow validation ===
-[PASS] Service portal-web exists
-[PASS] Service auth-users exists
-[PASS] Service chatbot-manager exists
-[PASS] Service conversation-service exists
-[PASS] Service audit-security-service exists
-[FAIL] One or more internal health endpoints are unreachable

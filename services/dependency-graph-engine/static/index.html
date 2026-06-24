@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dependency Graph Engine</title>
+    <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #1e1e1e;
+            color: #d4d4d4;
+            display: flex;
+            height: 100vh;
+        }
+        #mynetwork {
+            flex-grow: 1;
+            height: 100%;
+            border-right: 1px solid #333;
+        }
+        #sidebar {
+            width: 350px;
+            padding: 20px;
+            background-color: #252526;
+            box-shadow: -2px 0 5px rgba(0,0,0,0.5);
+            overflow-y: auto;
+        }
+        h2 { margin-top: 0; color: #fff; }
+        .info-box {
+            background: #333;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .info-box h3 { margin-top: 0; font-size: 16px; color: #4daafc; }
+        ul { padding-left: 20px; }
+        li { margin-bottom: 5px; }
+        .action-btns button {
+            background: #0e639c;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            cursor: pointer;
+            border-radius: 3px;
+            margin-right: 10px;
+            margin-bottom: 10px;
+            width: 100%;
+        }
+        .action-btns button:hover { background: #1177bb; }
+        .loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 24px;
+        }
+    </style>
+</head>
+<body>
+
+<div id="mynetwork"><div class="loading">Loading Graph...</div></div>
+<div id="sidebar">
+    <h2>Component Details</h2>
+    <div id="selection-info">
+        <p>Select a node to view its blast radius and impact analysis.</p>
+    </div>
+</div>
+
+<script type="text/javascript">
+    let network = null;
+    let nodesDataset = new vis.DataSet();
+    let edgesDataset = new vis.DataSet();
+
+    async function initGraph() {
+        try {
+            const response = await fetch('/api/dependencies');
+            const data = await response.json();
+
+            // Prepare nodes
+            const visNodes = data.nodes.map(n => ({
+                id: n.id,
+                label: n.label,
+                group: n.group,
+                shape: 'box',
+                margin: 10,
+                color: {
+                    background: '#333',
+                    border: '#555',
+                    highlight: { background: '#0e639c', border: '#4daafc' }
+                },
+                font: { color: '#fff' }
+            }));
+
+            // Prepare edges (Add arrows for directed graph)
+            const visEdges = data.edges.map(e => ({
+                from: e.from,
+                to: e.to,
+                label: e.type,
+                arrows: 'to',
+                color: { color: '#555', highlight: '#4daafc' },
+                font: { color: '#888', size: 12, align: 'middle' }
+            }));
+
+            nodesDataset.add(visNodes);
+            edgesDataset.add(visEdges);
+
+            const container = document.getElementById('mynetwork');
+            const networkData = { nodes: nodesDataset, edges: edgesDataset };
+            const options = {
+                layout: {
+                    hierarchical: {
+                        direction: 'UD',
+                        sortMethod: 'directed',
+                        nodeSpacing: 150,
+                        levelSeparation: 150
+                    }
+                },
+                physics: { enabled: false },
+                interaction: { hover: true }
+            };
+
+            // Remove loading text
+            container.innerHTML = '';
+            network = new vis.Network(container, networkData, options);
+
+            // Event Listeners
+            network.on("selectNode", function (params) {
+                if (params.nodes.length > 0) {
+                    const nodeId = params.nodes[0];
+                    const nodeData = nodesDataset.get(nodeId);
+                    fetchNodeDetails(nodeId, nodeData);
+                }
+            });
+
+            network.on("deselectNode", function () {
+                document.getElementById('selection-info').innerHTML = '<p>Select a node to view its blast radius and impact analysis.</p>';
+                resetHighlights();
+            });
+
+        } catch (error) {
+            document.getElementById('mynetwork').innerHTML = `<div class="loading">Error loading graph: ${error.message}</div>`;
+        }
+    }
+
+    async function fetchNodeDetails(nodeId, nodeData) {
+        document.getElementById('selection-info').innerHTML = '<p>Loading details...</p>';
+        try {
+            const [blastRes, impactRes] = await Promise.all([
+                fetch(`/api/blast-radius/${nodeId}`).then(r => r.json()),
+                fetch(`/api/impact-analysis/${nodeId}`).then(r => r.json())
+            ]);
+
+            const blastRadius = blastRes.blast_radius || [];
+            const impactAnalysis = impactRes.impact_analysis || [];
+
+            let html = `
+                <div class="info-box">
+                    <h3>${nodeData.label} (${nodeId})</h3>
+                    <p>Group: ${nodeData.group}</p>
+                </div>
+                
+                <div class="info-box">
+                    <h3>Blast Radius (If this fails...)</h3>
+                    <p>The following downstream components will be affected:</p>
+                    <ul>
+                        ${blastRadius.length ? blastRadius.map(n => `<li>${n}</li>`).join('') : '<li>None</li>'}
+                    </ul>
+                    <div class="action-btns">
+                        <button onclick="highlightNodes(${JSON.stringify(blastRadius)}, '#d13438')">Highlight Blast Radius</button>
+                    </div>
+                </div>
+
+                <div class="info-box">
+                    <h3>Impact Analysis (Depends on...)</h3>
+                    <p>This component relies on the following upstream services:</p>
+                    <ul>
+                        ${impactAnalysis.length ? impactAnalysis.map(n => `<li>${n}</li>`).join('') : '<li>None</li>'}
+                    </ul>
+                    <div class="action-btns">
+                        <button onclick="highlightNodes(${JSON.stringify(impactAnalysis)}, '#4daafc')">Highlight Dependencies</button>
+                    </div>
+                </div>
+                <div class="action-btns">
+                    <button onclick="resetHighlights()" style="background:#555;">Clear Highlights</button>
+                </div>
+            `;
+            document.getElementById('selection-info').innerHTML = html;
+        } catch (error) {
+            document.getElementById('selection-info').innerHTML = `<p>Error fetching details: ${error.message}</p>`;
+        }
+    }
+
+    function highlightNodes(nodeIds, color) {
+        resetHighlights();
+        const updates = nodeIds.map(id => ({
+            id: id,
+            color: { background: color, border: '#fff' },
+            font: { color: '#fff' }
+        }));
+        nodesDataset.update(updates);
+    }
+
+    function resetHighlights() {
+        const updates = nodesDataset.get().map(n => ({
+            id: n.id,
+            color: {
+                background: '#333',
+                border: '#555'
+            },
+            font: { color: '#fff' }
+        }));
+        nodesDataset.update(updates);
+    }
+
+    // Initialize
+    window.onload = initGraph;
+</script>
+</body>
+</html>

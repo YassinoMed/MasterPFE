@@ -66,3 +66,4 @@ terraform.tfvars
 override.tf
 override.tf.json
 .terraform/
+reports/

@@ -103,3 +103,47 @@ spec:
               value: "30"
             - name: FORCE
               value: "true"
+---
+# Pod-network-latency experiment — teste la résilience aux délais réseau
+apiVersion: litmuschaos.io/v1alpha1
+kind: ChaosEngine
+metadata:
+  name: securerag-network-latency
+  namespace: securerag-hub
+spec:
+  appinfo:
+    appns: securerag-hub
+    applabel: app.kubernetes.io/name=portal-web
+    appkind: deployment
+  chaosServiceAccount: litmus-cluster-scope
+  experiments:
+    - name: pod-network-latency
+      spec:
+        components:
+          env:
+            - name: TOTAL_CHAOS_DURATION
+              value: "60"
+            - name: NETWORK_LATENCY
+              value: "2000" # 2000ms latency
+            - name: PODS_AFFECTED_PERC
+              value: "100"
+---
+# Node-drain experiment — teste l'éviction et l'auto-healing sur panne de noeud
+apiVersion: litmuschaos.io/v1alpha1
+kind: ChaosEngine
+metadata:
+  name: securerag-node-drain
+  namespace: securerag-hub
+spec:
+  appinfo:
+    appns: securerag-hub
+    applabel: app.kubernetes.io/name=portal-web
+    appkind: deployment
+  chaosServiceAccount: litmus-cluster-scope
+  experiments:
+    - name: node-drain
+      spec:
+        components:
+          env:
+            - name: TOTAL_CHAOS_DURATION
+              value: "60"

@@ -51,10 +51,19 @@ data:
         tls: { insecure: true }
       prometheus:
         endpoint: "0.0.0.0:8888"
+    processors:
+      batch:
+        send_batch_size: 1000
+        timeout: 10s
+      memory_limiter:
+        check_interval: 1s
+        limit_mib: 512
+        spike_limit_mib: 128
     service:
       pipelines:
         traces:
           receivers: [otlp]
+          processors: [memory_limiter, batch]
           exporters: [otlphttp/tempo]
 
 ---

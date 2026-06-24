@@ -12,7 +12,7 @@ metadata:
 spec:
   # Replicas set to 0: Falco Talon requires NATS (not yet deployed).
   # Will be enabled in Phase 1 when NATS is provisioned.
-  replicas: 0
+  replicas: 1
   selector:
     matchLabels:
       app.kubernetes.io/name: falco-talon
@@ -77,6 +77,21 @@ spec:
             name: falco-talon-config
 
 ---
+apiVersion: v1
+kind: Service
+metadata:
+  name: falco-talon
+  namespace: falco
+spec:
+  ports:
+    - port: 2803
+      targetPort: 2803
+      protocol: TCP
+      name: http
+  selector:
+    app.kubernetes.io/name: falco-talon
+
+---
 # ConfigMap — Règles Falco Talon
 apiVersion: v1
 kind: ConfigMap
@@ -95,7 +110,8 @@ data:
 
     notifiers:
       slack:
-        webhookUrl: ""
+        # Expected to be injected securely or populated post-deploy
+        webhookUrl: "https://hooks.slack.com/services/T0000/B000/XXXX"
       loki:
         host: http://loki.securerag-monitoring.svc:3100
         tenant: falco
@@ -107,38 +123,42 @@ data:
       match:
         rules:
           - SecureRAG Shell in Container
-        priority: ">= Warning"
-      parameters:
-        grace_period_seconds: 5
-      output:
-        target: slack:message
-        parameters:
-          text: "POD KILLED: Shell detected in container."
-
-    - action: Kill Privilege Escalation
-      actionner: kubernetes:terminate
-      continue: true
-      match:
-        rules:
           - SecureRAG Privilege Escalation Attempt
-        priority: ">= Critical"
+        priority: ">= Warning"
       parameters:
         grace_period_seconds: 0
       output:
         target: slack:message
         parameters:
-          text: "CRITICAL: Privilege escalation attempt detected and neutralized."
+          text: "POD KILLED: Severe security violation detected in container."
 
-    - action: Notify User Mutation
-      actionner: kubernetes:terminate
-      continue: false
+    - action: Isolate Namespace
+      actionner: kubernetes:networkpolicy
+      continue: true
       match:
         rules:
-          - SecureRAG User Account Mutation
+          - SecureRAG Cryptomining Detected
+          - SecureRAG Widespread Malware
+        priority: ">= Critical"
+      parameters:
+        allow: []
       output:
         target: slack:message
         parameters:
-          text: "ALERT: Local user mutation detected in SecureRAG pod."
+          text: "NAMESPACE ISOLATED: Critical widespread anomaly detected. Network traffic blocked."
+
+    - action: Block Malicious IP
+      actionner: kubernetes:networkpolicy
+      continue: true
+      match:
+        rules:
+          - SecureRAG Outbound Connection to C2
+      parameters:
+        allow: []
+      output:
+        target: slack:message
+        parameters:
+          text: "IP BLOCKED: Outbound connection to known C2 server prevented via NetworkPolicy."
 
     - action: Notify Log Tampering
       actionner: kubernetes:terminate
@@ -150,20 +170,6 @@ data:
         target: slack:message
         parameters:
           text: "ALERT: Log tampering detected in SecureRAG pod."
-
-    - action: Kill Sensitive Read
-      actionner: kubernetes:terminate
-      continue: true
-      match:
-        rules:
-          - SecureRAG Sensitive File Read
-        priority: ">= Error"
-      parameters:
-        grace_period_seconds: 3
-      output:
-        target: slack:message
-        parameters:
-          text: "POD KILLED: Sensitive file access detected."
 
 ---
 # RBAC
