@@ -46,24 +46,34 @@ info "Detected Vault pod: ${VAULT_POD}"
 AUTO_UNSEAL=false
 [ "${1:-}" = "--auto-unseal" ] && AUTO_UNSEAL=true
 
-# Step 1: Initialize Vault
-step "1/6: Initializing Vault..."
-INIT_OUTPUT=$(kubectl exec -n ${NAMESPACE} ${VAULT_POD} -- vault operator init \
-  -key-shares=5 \
-  -key-threshold=3 \
-  -format=json)
+# Step 1 & 2: Initialize & Unseal Vault
+INITIALIZED=$(kubectl exec -n ${NAMESPACE} ${VAULT_POD} -- vault status -format=json | jq -r '.initialized')
+if [ "${INITIALIZED}" = "true" ]; then
+  info "Vault is already initialized"
+  ROOT_TOKEN="root"
+  SEALED=$(kubectl exec -n ${NAMESPACE} ${VAULT_POD} -- vault status -format=json | jq -r '.sealed')
+  if [ "${SEALED}" = "true" ]; then
+    error "Vault is sealed and already initialized. Manual unseal required."
+    exit 1
+  fi
+else
+  step "1/6: Initializing Vault..."
+  INIT_OUTPUT=$(kubectl exec -n ${NAMESPACE} ${VAULT_POD} -- vault operator init \
+    -key-shares=5 \
+    -key-threshold=3 \
+    -format=json)
 
-echo "${INIT_OUTPUT}" | jq '.' > /tmp/vault-init.json
+  echo "${INIT_OUTPUT}" | jq '.' > /tmp/vault-init.json
 
-UNSEAL_KEYS=$(echo "${INIT_OUTPUT}" | jq -r '.unseal_keys_b64[]')
-ROOT_TOKEN=$(echo "${INIT_OUTPUT}" | jq -r '.root_token')
+  UNSEAL_KEYS=$(echo "${INIT_OUTPUT}" | jq -r '.unseal_keys_b64[]')
+  ROOT_TOKEN=$(echo "${INIT_OUTPUT}" | jq -r '.root_token')
 
-info "Vault initialized"
-info "Root token: ${ROOT_TOKEN:0:8}... (stored in SOPS)"
+  info "Vault initialized"
+  info "Root token: ${ROOT_TOKEN:0:8}... (stored in SOPS)"
 
-# Store root token in SOPS-encrypted file
-mkdir -p "${SOPS_DIR}"
-cat > /tmp/vault-root-token.yaml << EOF
+  # Store root token in SOPS-encrypted file
+  mkdir -p "${SOPS_DIR}"
+  cat > /tmp/vault-root-token.yaml << EOF
 apiVersion: v1
 kind: Secret
 metadata:
@@ -74,31 +84,37 @@ stringData:
   root-token: "${ROOT_TOKEN}"
 EOF
 
-if command -v sops &>/dev/null; then
-  sops --encrypt /tmp/vault-root-token.yaml > "${SOPS_DIR}/vault-root-token.enc.yaml" 2>/dev/null || \
-    cp /tmp/vault-root-token.yaml "${SOPS_DIR}/vault-root-token.yaml"
-  info "Root token encrypted with SOPS → ${SOPS_DIR}/vault-root-token.enc.yaml"
-else
-  info "SOPS not available, storing root token at ${SOPS_DIR}/vault-root-token.yaml"
-  warn "⚠️  ENCRYPT THIS FILE MANUALLY WITH SOPS!"
+  if command -v sops &>/dev/null; then
+    sops --encrypt /tmp/vault-root-token.yaml > "${SOPS_DIR}/vault-root-token.enc.yaml" 2>/dev/null || \
+      cp /tmp/vault-root-token.yaml "${SOPS_DIR}/vault-root-token.yaml"
+    info "Root token encrypted with SOPS → ${SOPS_DIR}/vault-root-token.enc.yaml"
+  else
+    info "SOPS not available, storing root token at ${SOPS_DIR}/vault-root-token.yaml"
+    warn "⚠️  ENCRYPT THIS FILE MANUALLY WITH SOPS!"
+  fi
+
+  # Step 2: Unseal Vault
+  step "2/6: Unsealing Vault..."
+  for i in 1 2 3; do
+    KEY=$(echo "${UNSEAL_KEYS}" | sed -n "${i}p")
+    kubectl exec -n ${NAMESPACE} ${VAULT_POD} -- vault operator unseal "${KEY}"
+    info "Unseal key ${i}/3 applied"
+  done
+
+  # Verify sealed status
+  SEALED=$(kubectl exec -n ${NAMESPACE} ${VAULT_POD} -- vault status -format=json | jq -r '.sealed')
+  if [ "${SEALED}" = "false" ]; then
+    info "Vault is unsealed"
+  else
+    error "Vault is still sealed after 3 keys"
+    exit 1
+  fi
 fi
 
-# Step 2: Unseal Vault
-step "2/6: Unsealing Vault..."
-for i in 1 2 3; do
-  KEY=$(echo "${UNSEAL_KEYS}" | sed -n "${i}p")
-  kubectl exec -n ${NAMESPACE} ${VAULT_POD} -- vault operator unseal "${KEY}"
-  info "Unseal key ${i}/3 applied"
-done
-
-# Verify sealed status
-SEALED=$(kubectl exec -n ${NAMESPACE} ${VAULT_POD} -- vault status -format=json | jq -r '.sealed')
-if [ "${SEALED}" = "false" ]; then
-  info "Vault is unsealed"
-else
-  error "Vault is still sealed after 3 keys"
-  exit 1
-fi
+# Store root token in a Kubernetes secret so other scripts can access it
+kubectl create secret generic vault-init-keys -n ${NAMESPACE} \
+  --from-literal=root-token="${ROOT_TOKEN}" \
+  --dry-run=client -o yaml | kubectl apply -f -
 
 # Login with root token
 kubectl exec -n ${NAMESPACE} ${VAULT_POD} -- vault login "${ROOT_TOKEN}"
