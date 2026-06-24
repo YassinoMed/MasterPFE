@@ -168,6 +168,32 @@ pipeline {
       }
     }
 
+    stage('Génération SBOM') {
+      steps {
+        sh '''
+          set -euo pipefail
+          echo "[INFO] Generating SBOMs..."
+          bash scripts/release/generate-sbom.sh
+          bash scripts/release/validate-sbom-cyclonedx.sh
+        '''
+      }
+    }
+
+    stage('Scan CVE (Grype)') {
+      steps {
+        sh '''
+          set -euo pipefail
+          echo "[INFO] Scanning SBOMs with Grype..."
+          for sbom in "${SBOM_DIR}"/*.cyclonedx.json; do
+            if [ -f "$sbom" ] && command -v grype >/dev/null 2>&1; then
+              # Retire '|| true' pour bloquer le pipeline en cas de vulnérabilités HIGH/CRITICAL
+              grype "sbom:$sbom" --fail-on high,critical -o json > "${sbom}.grype.json"
+            fi
+          done
+        '''
+      }
+    }
+
     stage('Push Images to Local Registry') {
       steps {
         sh '''
@@ -180,31 +206,15 @@ pipeline {
       }
     }
 
-    stage('Génération SBOM + Grype') {
-      steps {
-        sh '''
-          set -euo pipefail
-          echo "[INFO] Generating SBOMs..."
-          bash scripts/release/generate-sbom.sh
-          bash scripts/release/validate-sbom-cyclonedx.sh
-          
-          echo "[INFO] Scanning SBOMs with Grype..."
-          for sbom in "${SBOM_DIR}"/*.cyclonedx.json; do
-            if [ -f "$sbom" ] && command -v grype >/dev/null 2>&1; then
-              grype "sbom:$sbom" --fail-on high,critical -o json > "${sbom}.grype.json" || true
-            fi
-          done
-        '''
-      }
-    }
-
     stage('Signature avec Cosign') {
       steps {
         sh '''
           set -euo pipefail
           echo "[INFO] Signing images with Cosign..."
-          export COSIGN_PASSWORD=$(cat /run/jenkins-secrets/cosign.password)
-          export COSIGN_KEY="${COSIGN_KEY}"
+          if [ -f "/run/jenkins-secrets/cosign.password" ]; then
+            export COSIGN_PASSWORD=$(cat /run/jenkins-secrets/cosign.password)
+          fi
+          export COSIGN_KEY="${COSIGN_KEY:-}"
           bash scripts/release/sign-images.sh
         '''
       }

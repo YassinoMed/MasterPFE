@@ -27,6 +27,8 @@ spec:
       verifyImages:
         - imageReferences:
             - "ghcr.io/*/securerag-hub-*"
+            - "localhost:5001/securerag-hub-*"
+            - "registry.securerag.local/securerag-hub-*"
           required: true
           mutateDigest: false
           verifyDigest: false
