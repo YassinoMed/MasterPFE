@@ -95,8 +95,8 @@ Plutôt que d'exporter les résultats k6 dans des fichiers JSON locaux puis de l
 
 | Étape | Action | Impact | Complexité | Priorité |
 | :--- | :--- | :--- | :--- | :--- |
-| **1** | Réparer Kyverno & Falco (CrashLoops) | Sécurité d'Admission & Runtime | Moyenne | 🚨 Critique |
-| **2** | Intégrer External Secrets Operator (ESO) | Élimination des secrets en clair | Haute | ⭐ Haute |
+| **1** | ✅ [TERMINÉ] Réparer Kyverno & Falco (CrashLoops) | Sécurité d'Admission & Runtime | Moyenne | 🚨 Critique |
+| **2** | ✅ [TERMINÉ] Intégrer External Secrets Operator (ESO) | Élimination des secrets en clair | Haute | ⭐ Haute |
 | **3** | Ajouter la signature d'images (Cosign) | Intégrité de la chaîne logiciellle | Moyenne | ⭐ Haute |
 | **4** | Mettre en place des namespaces PR éphémères | Isolation des tests de charge | Haute | 📅 Moyenne |
 | **5** | Exporter k6 directement vers Prometheus | Observabilité temps réel | Faible | 📅 Moyenne |
