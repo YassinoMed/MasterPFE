@@ -11,7 +11,9 @@ resources:
   - grafana-dashboards.yaml             # P1-14 dashboards SRE/Sécurité
   - grafana-dashboards-extra.yaml
   - loki-deployment.yaml
+  - promtail.yaml
   - alertmanager.yaml
+  - alertmanager-external-secret.yaml
   - networkpolicy.yaml
 commonLabels:
   app.kubernetes.io/part-of: securerag-hub

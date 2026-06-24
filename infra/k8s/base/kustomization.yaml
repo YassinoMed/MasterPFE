@@ -58,3 +58,6 @@ labels:
 commonAnnotations:
   kube-score/ignore: pod-probes, container-security-context-user-group-id, deployment-replicas, networkpolicy-targets-pod, container-image-pull-policy, pod-networkpolicy, service-type, deployment-has-host-podantiaffinity, deployment-targeted-by-hpa-does-not-have-replicas-configured
 
+patches:
+  - path: otel-patch.yaml
+
