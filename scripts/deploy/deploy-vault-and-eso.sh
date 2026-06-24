@@ -19,9 +19,9 @@ echo "════════════════════════�
 
 # Phase 1: Deploy Vault
 info "Phase 1/6: Waiting for ArgoCD to deploy HashiCorp Vault..."
-kubectl wait --for=condition=Ready pod/vault-0 -n vault --timeout=300s || {
+kubectl wait --for=condition=Ready pod -l app.kubernetes.io/name=vault -n vault --timeout=300s || {
   error "Vault pod not ready after 5 minutes"
-  kubectl describe pod vault-0 -n vault || true
+  kubectl describe pod -l app.kubernetes.io/name=vault -n vault || true
   exit 1
 }
 info "Vault deployed successfully"

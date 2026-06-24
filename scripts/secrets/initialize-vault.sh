@@ -33,13 +33,18 @@ warn()    { printf "${YELLOW}[WARN]${NC}    %s\n" "$*"; }
 error()   { printf "${RED}[ERROR]${NC}   %s\n" "$*" >&2; }
 step()    { printf "${BLUE}[STEP]${NC}    %s\n" "$*"; }
 
-VAULT_POD="vault-0"
+# Wait for Vault pod by label
+step "Waiting for Vault pod..."
+kubectl wait --for=condition=Ready pod -l app.kubernetes.io/name=vault -n ${NAMESPACE} --timeout=120s
+
+# Auto-detect Vault pod name in the namespace
+VAULT_POD=$(kubectl get pods -n "${NAMESPACE}" -l app.kubernetes.io/name=vault -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || \
+            kubectl get pods -n "${NAMESPACE}" -l app=vault -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || \
+            echo "securerag-vault-0")
+info "Detected Vault pod: ${VAULT_POD}"
+
 AUTO_UNSEAL=false
 [ "${1:-}" = "--auto-unseal" ] && AUTO_UNSEAL=true
-
-# Wait for Vault pod
-step "Waiting for Vault pod..."
-kubectl wait --for=condition=Ready pod/${VAULT_POD} -n ${NAMESPACE} --timeout=120s
 
 # Step 1: Initialize Vault
 step "1/6: Initializing Vault..."
@@ -221,6 +226,10 @@ kubectl exec -n ${NAMESPACE} ${VAULT_POD} -- vault kv put secret/securerag/grafa
   admin_password="placeholder-rotate-immediately"
 kubectl exec -n ${NAMESPACE} ${VAULT_POD} -- vault kv put secret/securerag/argocd \
   slack_webhook_url="placeholder-rotate-immediately"
+
+# Enable audit logging
+info "Enabling Vault audit device..."
+kubectl exec -n ${NAMESPACE} ${VAULT_POD} -- sh -c 'vault audit list -format=json | grep -q "\"file/\"" || vault audit enable file file_path=/tmp/vault-audit.log'
 
 info "Initial secrets seeded in Vault"
 
