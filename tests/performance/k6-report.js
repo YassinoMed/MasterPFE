@@ -1,4 +1,4 @@
-import { textSummary } from 'https://jslib.k6.io/k6-summary/0.0.4/index.js';
+import { textSummary } from './k6-summary.js';
 
 export function buildReportData(data, testName) {
   const httpReqs = data.metrics.http_reqs;
