@@ -67,11 +67,13 @@ spec:
                 matchLabels:
                   job-role: validation
       validate:
-        message: Validation Pods may only use the pinned curlimages/curl helper family.
+        message: Validation Pods may only use the pinned curlimages/curl and grafana/k6 helper families.
         foreach:
           - list: "request.object.spec.containers[]"
-            pattern:
-              image: "curlimages/curl:*"
+            anyPattern:
+              - image: "curlimages/curl:*"
+              - image: "grafana/k6:*"
           - list: "request.object.spec.initContainers[] || []"
-            pattern:
-              image: "curlimages/curl:*"
+            anyPattern:
+              - image: "curlimages/curl:*"
+              - image: "grafana/k6:*"
