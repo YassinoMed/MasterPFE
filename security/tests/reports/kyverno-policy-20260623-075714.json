@@ -1,0 +1,253 @@
+{
+  "test_suite": "kyverno-policy",
+  "timestamp": "2026-06-23T05:57:15Z",
+  "environment": "kind",
+  "results": [
+    {
+      "test_id": "T201",
+      "name": "All ClusterPolicies Ready",
+      "status": "FAIL",
+      "duration_sec": 0,
+      "details": "",
+      "evidence": ""
+    },
+    {
+      "test_id": "T202",
+      "name": "8 core policies in Enforce mode",
+      "status": "FAIL",
+      "duration_sec": 0,
+      "details": "",
+      "evidence": "Error from server (NotFound): clusterpolicies.kyverno.io \"require-signed-images\" not found\nError from server (NotFound): clusterpolicies.kyverno.io \"require-image-digest\" not found\nError from server (NotFound): clusterpolicies.kyverno.io \"no-root-containers\" not found\nError from server (NotFound): clusterpolicies.kyverno.io \"require-resource-limits\" not found\nError from server (NotFound): clusterpolicies.kyverno.io \"restrict-capabilities\" not found\nError from server (NotFound): clusterpolicies.kyverno.io \"no-privileged-containers\" not found\nError from server (NotFound): clusterpolicies.kyverno.io \"require-probes\" not found\nError from server (NotFound): clusterpolicies.kyverno.io \"require-labels\" not found"
+    },
+    {
+      "test_id": "T203",
+      "name": "PolicyReports fail=0",
+      "status": "FAIL",
+      "duration_sec": 0,
+      "details": "",
+      "evidence": "0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0"
+    },
+    {
+      "test_id": "T204",
+      "name": "ClusterPolicyReports fail=0",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "",
+      "evidence": ""
+    },
+    {
+      "test_id": "T205",
+      "name": "Kyverno webhooks active",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "",
+      "evidence": "10"
+    },
+    {
+      "test_id": "T206",
+      "name": "failurePolicy=Fail on Kyverno webhook",
+      "status": "FAIL",
+      "duration_sec": 0,
+      "details": "",
+      "evidence": ""
+    },
+    {
+      "test_id": "T207",
+      "name": ">= 8 ClusterPolicies active",
+      "status": "FAIL",
+      "duration_sec": 0,
+      "details": "",
+      "evidence": "7"
+    },
+    {
+      "test_id": "T208",
+      "name": "Policies have descriptions",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "",
+      "evidence": "OK"
+    },
+    {
+      "test_id": "T209",
+      "name": "Policies have categories",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "",
+      "evidence": "OK"
+    },
+    {
+      "test_id": "T210",
+      "name": "PolicyReport in namespaces",
+      "status": "WARN",
+      "duration_sec": 0,
+      "details": "",
+      "evidence": "Not found"
+    },
+    {
+      "test_id": "T211_NEG",
+      "name": "runAsUser:0 -> Reject",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "",
+      "evidence": "dry-run success"
+    },
+    {
+      "test_id": "T212_NEG",
+      "name": "privileged:true -> Reject",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "",
+      "evidence": "dry-run success"
+    },
+    {
+      "test_id": "T213_NEG",
+      "name": "allowPrivilegeEscalation:true -> Reject",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "",
+      "evidence": "dry-run success"
+    },
+    {
+      "test_id": "T214_NEG",
+      "name": "No capabilities.drop:[ALL] -> Reject",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "",
+      "evidence": "dry-run success"
+    },
+    {
+      "test_id": "T215_NEG",
+      "name": "capabilities.add:[NET_ADMIN] -> Reject",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "",
+      "evidence": "dry-run success"
+    },
+    {
+      "test_id": "T216_NEG",
+      "name": "No resources.limits -> Reject",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "",
+      "evidence": "dry-run success"
+    },
+    {
+      "test_id": "T217_NEG",
+      "name": "No resources.requests -> Reject",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "",
+      "evidence": "dry-run success"
+    },
+    {
+      "test_id": "T218_NEG",
+      "name": "No livenessProbe -> Reject",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "",
+      "evidence": "dry-run success"
+    },
+    {
+      "test_id": "T219_NEG",
+      "name": "No readinessProbe -> Reject",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "",
+      "evidence": "dry-run success"
+    },
+    {
+      "test_id": "T220_NEG",
+      "name": "No label app.kubernetes.io/name -> Reject",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "",
+      "evidence": "dry-run success"
+    },
+    {
+      "test_id": "T221_NEG",
+      "name": "No label app.kubernetes.io/part-of -> Reject",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "",
+      "evidence": "dry-run success"
+    },
+    {
+      "test_id": "T222_NEG",
+      "name": "Unsigned nginx image -> Reject",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "",
+      "evidence": "dry-run success"
+    },
+    {
+      "test_id": "T223_NEG",
+      "name": "Image without @sha256 -> Reject",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "",
+      "evidence": "dry-run success"
+    },
+    {
+      "test_id": "T224_NEG",
+      "name": "readOnlyRootFilesystem:false -> Reject",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "",
+      "evidence": "dry-run success"
+    },
+    {
+      "test_id": "T225_NEG",
+      "name": "No seccompProfile -> Reject",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "",
+      "evidence": "dry-run success"
+    },
+    {
+      "test_id": "T226_POS",
+      "name": "Pod fully PSS compliant -> Accept",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "",
+      "evidence": "dry-run success"
+    },
+    {
+      "test_id": "T227_POS",
+      "name": "Falco privileged pod -> Accept in falco-system",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "",
+      "evidence": "dry-run success"
+    },
+    {
+      "test_id": "T228_POS",
+      "name": "Pod with valid PolicyException -> Accept",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "",
+      "evidence": "dry-run success"
+    },
+    {
+      "test_id": "T229_POS",
+      "name": "Existing pods 100% compliant",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "",
+      "evidence": "dry-run success"
+    },
+    {
+      "test_id": "T230_POS",
+      "name": "kube-system pods not blocked",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "",
+      "evidence": "dry-run success"
+    }
+  ],
+  "summary": {
+    "total": 30,
+    "passed": 24,
+    "failed": 6,
+    "duration_sec": 1
+  }
+}

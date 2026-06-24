@@ -1,0 +1,53 @@
+{
+  "test_suite": "kyverno-compliance-validation",
+  "timestamp": "2026-06-23T06:00:23Z",
+  "environment": "kind",
+  "results": [
+    {
+      "test_id": "KYV-00",
+      "name": "Kyverno Admission Controller is running",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "Deployment kyverno-admission-controller found.",
+      "evidence": ""
+    },
+    {
+      "test_id": "KYV-01",
+      "name": "PolicyReports retrieval",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "Successfully retrieved PolicyReports.",
+      "evidence": ""
+    },
+    {
+      "test_id": "KYV-02",
+      "name": "Zero failed policies in PolicyReports",
+      "status": "FAIL",
+      "duration_sec": 0,
+      "details": "Found 2 failing checks across resources.",
+      "evidence": "{\"namespace\":\"securerag-hub\",\"name\":\"3636e51f-3569-4542-955e-b704352df8e9\",\"fails\":1}\n{\"namespace\":\"securerag-hub\",\"name\":\"3fecdead-2b32-4e91-b772-2f651650e164\",\"fails\":1}"
+    },
+    {
+      "test_id": "KYV-03",
+      "name": "ClusterPolicyReports retrieval",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "Successfully retrieved ClusterPolicyReports.",
+      "evidence": ""
+    },
+    {
+      "test_id": "KYV-04",
+      "name": "Zero failed policies in ClusterPolicyReports",
+      "status": "PASS",
+      "duration_sec": 0,
+      "details": "Found 0 passing checks and 0 failing checks.",
+      "evidence": ""
+    }
+  ],
+  "summary": {
+    "total": 5,
+    "passed": 4,
+    "failed": 1,
+    "duration_sec": 0
+  }
+}
