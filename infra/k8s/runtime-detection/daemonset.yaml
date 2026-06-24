@@ -30,7 +30,7 @@ spec:
           image: falcosecurity/falco-driver-loader:0.38.2
           imagePullPolicy: IfNotPresent
           args:
-            - bpf
+            - ebpf
           env:
             - name: HOST_ROOT
               value: /host
