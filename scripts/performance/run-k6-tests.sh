@@ -194,8 +194,6 @@ spec:
     args:
     - |
       k6 run \\
-        --out "json=/reports/k6/k6-raw.json" \\
-        --out "json=/reports/k6/k6-${test_name}.json" \\
         --summary-export="/reports/k6/k6-summary-${test_name}.json" \\
         "/tests/performance/\$(basename "${test_script}")"
       echo \$? > /reports/k6/exit-code
