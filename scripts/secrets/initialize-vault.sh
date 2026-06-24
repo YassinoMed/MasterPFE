@@ -121,13 +121,13 @@ kubectl exec -n ${NAMESPACE} ${VAULT_POD} -- vault login "${ROOT_TOKEN}"
 
 # Step 3: Enable KV v2 engine
 step "3/6: Enabling KV v2 secrets engine..."
-kubectl exec -n ${NAMESPACE} ${VAULT_POD} -- vault secrets enable -path=secret kv-v2
-info "KV v2 engine enabled at path: secret"
+kubectl exec -n ${NAMESPACE} ${VAULT_POD} -- sh -c 'vault secrets list -format=json | grep -q "\"secret/\"" || vault secrets enable -path=secret kv-v2'
+info "KV v2 engine configured at path: secret"
 
 # Step 4: Enable Kubernetes auth
 step "4/6: Enabling Kubernetes auth..."
-kubectl exec -n ${NAMESPACE} ${VAULT_POD} -- vault auth enable kubernetes
-info "Kubernetes auth enabled"
+kubectl exec -n ${NAMESPACE} ${VAULT_POD} -- sh -c 'vault auth list -format=json | grep -q "\"kubernetes/\"" || vault auth enable kubernetes'
+info "Kubernetes auth configured"
 
 # Configure Kubernetes auth
 TOKEN_REVIEWER_JWT=$(kubectl create token vault-eso-auth -n ${NAMESPACE} --duration=8760h 2>/dev/null || \
