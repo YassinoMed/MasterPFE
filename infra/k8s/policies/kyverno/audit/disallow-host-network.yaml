@@ -1,0 +1,29 @@
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: securerag-disallow-host-network
+  annotations:
+    policies.kyverno.io/title: Disallow Host Network
+    policies.kyverno.io/category: Pod Security Standards (Baseline)
+    policies.kyverno.io/severity: medium
+    policies.kyverno.io/subject: Pod
+    policies.kyverno.io/description: >-
+      Pods must not use the host network namespace. This policy audits 
+      deployments that attempt to use hostNetwork: true.
+spec:
+  validationFailureAction: Audit
+  background: true
+  rules:
+    - name: check-host-network
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+              namespaces:
+                - securerag-hub
+      validate:
+        message: "Pods must not use the host network (hostNetwork: false)."
+        pattern:
+          spec:
+            =(hostNetwork): false

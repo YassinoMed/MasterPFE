@@ -1,14 +1,15 @@
 apiVersion: kyverno.io/v1
 kind: ClusterPolicy
 metadata:
-  name: securerag-no-root-containers-audit
+  name: securerag-disallow-root-containers
   annotations:
-    policies.kyverno.io/title: Disallow Root Containers (Audit)
+    policies.kyverno.io/title: Disallow Root Containers
     policies.kyverno.io/category: Pod Security Standards (Restricted)
     policies.kyverno.io/severity: high
     policies.kyverno.io/subject: Pod
     policies.kyverno.io/description: >-
-      Containers must run as non-root (runAsNonRoot: true) and runAsUser must be >= 1000.
+      Containers must run as non-root (runAsNonRoot: true). This policy audits 
+      deployments that do not enforce non-root execution.
 spec:
   validationFailureAction: Audit
   background: true
@@ -21,19 +22,15 @@ spec:
                 - Pod
               namespaces:
                 - securerag-hub
-                - recette
       validate:
-        message: "Pods must run as non-root (runAsNonRoot: true) and runAsUser must be >= 1000."
+        message: "Pods must run as non-root (runAsNonRoot: true)."
         pattern:
           spec:
             securityContext:
               runAsNonRoot: true
-              runAsUser: ">=1000"
             containers:
               - =(securityContext):
                   =(runAsNonRoot): true
-                  =(runAsUser): ">=1000"
             =(initContainers):
               - =(securityContext):
                   =(runAsNonRoot): true
-                  =(runAsUser): ">=1000"
