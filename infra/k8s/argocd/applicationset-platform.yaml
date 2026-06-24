@@ -26,6 +26,10 @@ spec:
             path: infra/k8s/runtime-detection
             namespace: falco
             wave: "50"
+          - name: psa-policies
+            path: infra/k8s/policies/psa
+            namespace: securerag-hub
+            wave: "4"
           - name: kyverno
             path: infra/k8s/addons/kyverno
             namespace: kyverno
