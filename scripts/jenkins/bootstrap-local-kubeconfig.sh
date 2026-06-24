@@ -15,6 +15,17 @@ if [[ -d "${KUBECONFIG_OUTPUT}" ]]; then
   exit 2
 fi
 kubectl config view --minify --raw > "${KUBECONFIG_OUTPUT}"
+python3 -c "
+import sys, json, yaml, re
+with open('${KUBECONFIG_OUTPUT}', 'r') as f:
+    config = yaml.safe_load(f)
+for cluster in config.get('clusters', []):
+    server = cluster['cluster']['server']
+    server = re.sub(r'https://[^:]+:\d+', 'https://securerag-dev-control-plane:6443', server)
+    cluster['cluster']['server'] = server
+with open('${KUBECONFIG_OUTPUT}', 'w') as f:
+    yaml.safe_dump(config, f)
+"
 chmod 600 "${KUBECONFIG_OUTPUT}"
 
 info "Local kind kubeconfig exported to ${KUBECONFIG_OUTPUT}"

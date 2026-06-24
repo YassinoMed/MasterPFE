@@ -103,6 +103,7 @@ spec:
     TRIVY_CACHE_DIR     = '/home/jenkins/.trivycache'
     SEMGREP_CACHE_DIR   = '/home/jenkins/.semgrep'
     SONAR_USER_HOME     = '/home/jenkins/.sonar'
+    KUBECONFIG          = ''
   }
 
   stages {
@@ -323,6 +324,7 @@ spec:
           sh '''
             sleep 10
             echo "[INFO] Triggering ArgoCD sync and waiting..."
+            export KUBECONFIG=""
             if command -v argocd &>/dev/null; then
               argocd app sync securerag-production --prune --timeout 300
               argocd app wait securerag-production --timeout 300
