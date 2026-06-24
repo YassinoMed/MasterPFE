@@ -189,6 +189,7 @@ spec:
   containers:
   - name: k6
     image: grafana/k6:0.56.0
+    workingDir: /reports/k6
     command: ["/bin/sh", "-c"]
     args:
     - |
