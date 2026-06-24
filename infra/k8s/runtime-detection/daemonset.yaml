@@ -14,7 +14,6 @@ spec:
     metadata:
       labels: { app.kubernetes.io/name: falco }
       annotations:
-        # Falco needs host kernel access; PSA labels on namespace allow it.
         container.apparmor.security.beta.kubernetes.io/falco: unconfined
     spec:
       serviceAccountName: falco
@@ -26,6 +25,34 @@ spec:
           operator: Exists
         - effect: NoExecute
           operator: Exists
+      initContainers:
+        - name: falco-driver-loader
+          image: falcosecurity/falco-driver-loader:0.38.2
+          imagePullPolicy: IfNotPresent
+          args:
+            - bpf
+          env:
+            - name: HOST_ROOT
+              value: /host
+          securityContext:
+            privileged: true
+          volumeMounts:
+            - name: proc-fs
+              mountPath: /host/proc
+              readOnly: true
+            - name: boot-fs
+              mountPath: /host/boot
+              readOnly: true
+            - name: lib-modules
+              mountPath: /host/lib/modules
+            - name: usr-fs
+              mountPath: /host/usr
+              readOnly: true
+            - name: etc-fs
+              mountPath: /host/etc
+              readOnly: true
+            - name: falco-bpf-probe
+              mountPath: /root/.falco
       containers:
         - name: falco
           image: falcosecurity/falco-no-driver:0.38.2
@@ -33,7 +60,7 @@ spec:
           args:
             - /usr/bin/falco
             - -o
-            - engine.kind=modern_ebpf
+            - engine.kind=ebpf
             - -o
             - watch_config_files=false
           securityContext:
@@ -42,7 +69,7 @@ spec:
             - name: HOST_ROOT
               value: /host
             - name: FALCO_BPF_PROBE
-              value: ""
+              value: /root/.falco/falco-bpf.o
           resources:
             requests: { cpu: 100m, memory: 256Mi }
             limits: { cpu: 1, memory: 1Gi }
@@ -56,7 +83,8 @@ spec:
             - { name: lib-modules, mountPath: /host/lib/modules, readOnly: true }
             - { name: usr-fs, mountPath: /host/usr, readOnly: true }
             - { name: etc-fs, mountPath: /host/etc, readOnly: true }
-            - { name: sys-fs, mountPath: /sys, readOnly: true }
+            - { name: sys-fs, mountPath: /sys/kernel/debug, readOnly: true }
+            - { name: falco-bpf-probe, mountPath: /root/.falco }
       volumes:
         - { name: rules, configMap: { name: falco-rules } }
         - { name: dev-fs, hostPath: { path: /dev } }
@@ -65,4 +93,5 @@ spec:
         - { name: lib-modules, hostPath: { path: /lib/modules } }
         - { name: usr-fs, hostPath: { path: /usr } }
         - { name: etc-fs, hostPath: { path: /etc } }
-        - { name: sys-fs, hostPath: { path: /sys } }
+        - { name: sys-fs, hostPath: { path: /sys/kernel/debug } }
+        - { name: falco-bpf-probe, emptyDir: {} }
