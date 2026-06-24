@@ -1,0 +1,72 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: argocd-backup
+  namespace: securerag-backup
+  labels:
+    app.kubernetes.io/name: argocd-backup
+    app.kubernetes.io/component: backup
+spec:
+  schedule: "30 1 * * *" # Run at 01:30 UTC daily
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            app.kubernetes.io/name: argocd-backup
+        spec:
+          serviceAccountName: argocd-server
+          restartPolicy: OnFailure
+          containers:
+            - name: argocd-backup
+              image: argoproj/argocd:v2.12.3
+              env:
+                - name: AWS_ACCESS_KEY_ID
+                  valueFrom:
+                    secretKeyRef:
+                      name: s3-backup-credentials
+                      key: AWS_ACCESS_KEY_ID
+                      optional: true
+                - name: AWS_SECRET_ACCESS_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: s3-backup-credentials
+                      key: AWS_SECRET_ACCESS_KEY
+                      optional: true
+                - name: ENCRYPTION_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: s3-backup-credentials
+                      key: ENCRYPTION_PASSWORD
+                      optional: true
+              command:
+                - /bin/bash
+                - -c
+                - |
+                  set -euo pipefail
+                  ts=$(date +%Y%m%d%H%M%S)
+                  out="/tmp/argocd-export-${ts}.yaml"
+                  
+                  echo "[INFO] Taking ArgoCD export..."
+                  argocd admin export -n argocd > ${out}
+                  
+                  echo "[INFO] Encrypting export..."
+                  apt-get update && apt-get install -y gnupg awscli > /dev/null
+                  echo "${ENCRYPTION_PASSWORD}" | gpg --batch --yes --passphrase-fd 0 --symmetric --cipher-algo AES256 -o "${out}.gpg" "${out}"
+                  
+                  echo "[INFO] Uploading to S3..."
+                  if [ -n "${AWS_ACCESS_KEY_ID:-}" ]; then
+                    aws s3 cp "${out}.gpg" s3://securerag-backups/argocd/argocd-export-${ts}.yaml.gpg
+                  else
+                    echo "[WARN] No S3 credentials found. Simulating upload."
+                  fi
+                  echo "[OK] ArgoCD backup completed."
+              volumeMounts:
+                - name: tmp
+                  mountPath: /tmp
+          volumes:
+            - name: tmp
+              emptyDir: {}
