@@ -20,6 +20,8 @@ spec:
       hostPID: true
       hostNetwork: true
       dnsPolicy: ClusterFirstWithHostNet
+      nodeSelector:
+        securerag.dev/falco-enabled: "true" # Falco disabled in KIND due to eBPF limits
       tolerations:
         - effect: NoSchedule
           operator: Exists
