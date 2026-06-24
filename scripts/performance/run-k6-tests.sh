@@ -152,9 +152,34 @@ run_test() {
   echo "  Script:  ${test_script}"
   echo "────────────────────────────────────────────"
 
+  # Start port-forwards
+  echo "  Starting port-forwards..."
+  kubectl port-forward svc/portal-web 8000:8000 -n "${NAMESPACE}" >/dev/null 2>&1 &
+  PF_PORTAL=$!
+  kubectl port-forward svc/auth-users 8001:8000 -n "${NAMESPACE}" >/dev/null 2>&1 &
+  PF_AUTH=$!
+  kubectl port-forward svc/chatbot-manager 8002:8000 -n "${NAMESPACE}" >/dev/null 2>&1 &
+  PF_CHATBOT=$!
+  kubectl port-forward svc/conversation-service 8003:8000 -n "${NAMESPACE}" >/dev/null 2>&1 &
+  PF_CONV=$!
+  kubectl port-forward svc/audit-security-service 8004:8000 -n "${NAMESPACE}" >/dev/null 2>&1 &
+  PF_AUDIT=$!
+
+  sleep 5 # Wait for port-forwards to establish
+
   set +e
   "${K6_BIN}" run \
     "${K6_ENV_ARGS[@]}" \
+    --env PORTAL_WEB_HOST=localhost \
+    --env PORTAL_WEB_PORT=8000 \
+    --env AUTH_USERS_HOST=localhost \
+    --env AUTH_USERS_PORT=8001 \
+    --env CHATBOT_MANAGER_HOST=localhost \
+    --env CHATBOT_MANAGER_PORT=8002 \
+    --env CONVERSATION_SERVICE_HOST=localhost \
+    --env CONVERSATION_SERVICE_PORT=8003 \
+    --env AUDIT_SECURITY_SERVICE_HOST=localhost \
+    --env AUDIT_SECURITY_SERVICE_PORT=8004 \
     "${K6_RUN_ARGS[@]}" \
     --out "json=${RESULTS_DIR}/k6-${test_name}.json" \
     --summary-export="${RESULTS_DIR}/k6-summary-${test_name}.json" \
@@ -162,6 +187,9 @@ run_test() {
 
   K6_EXIT=$?
   set -e
+
+  # Stop port-forwards
+  kill $PF_PORTAL $PF_AUTH $PF_CHATBOT $PF_CONV $PF_AUDIT || true
 
   if [ ${K6_EXIT} -eq 0 ]; then
     echo "[PASS] ${test_name} — all thresholds met"

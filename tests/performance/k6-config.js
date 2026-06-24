@@ -7,8 +7,12 @@ const {
   GATEWAY_PORT = '8080',
 } = __ENV;
 
-const svc = (name, port) =>
-  `http://${name}.${NAMESPACE}.svc.cluster.local:${port}`;
+const svc = (name, defaultPort) => {
+  const envPrefix = name.toUpperCase().replace(/-/g, '_');
+  const host = __ENV[`${envPrefix}_HOST`] || `${name}.${NAMESPACE}.svc.cluster.local`;
+  const port = __ENV[`${envPrefix}_PORT`] || defaultPort;
+  return `http://${host}:${port}`;
+};
 
 export const SERVICE_HEALTH_PATHS = {
 
