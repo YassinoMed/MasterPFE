@@ -11,7 +11,7 @@ const svc = (name, port) =>
   `http://${name}.${NAMESPACE}.svc.cluster.local:${port}`;
 
 export const SERVICE_HEALTH_PATHS = {
-  'api-gateway': '/health',
+
   'portal-web': '/health',
   'auth-users': '/api/v1/health',
   'chatbot-manager': '/api/v1/health',
@@ -20,10 +20,7 @@ export const SERVICE_HEALTH_PATHS = {
 };
 
 export const SERVICES = {
-  'api-gateway': {
-    url: svc('api-gateway', GATEWAY_PORT),
-    tags: { service: 'api-gateway', type: 'python' },
-  },
+
   'portal-web': {
     url: svc('portal-web', PORTAL_PORT),
     tags: { service: 'portal-web', type: 'laravel' },
