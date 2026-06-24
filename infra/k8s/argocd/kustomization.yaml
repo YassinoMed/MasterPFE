@@ -13,6 +13,7 @@ resources:
   - applicationset-all.yaml
   - application-harbor.yaml
   - application-vault.yaml
+  - application-eso.yaml
   - application-velero.yaml
   - notifications-cm.yaml         # P1-15 drift notifications
   - rbac-cm.yaml                  # RBAC roles (admin, auditor, developer, platform-team)

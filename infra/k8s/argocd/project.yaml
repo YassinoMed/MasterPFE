@@ -11,8 +11,9 @@ spec:
   description: "SecureRAG Hub — Laravel platform GitOps project"
   sourceRepos:
     - https://github.com/YassinoMed/MasterPFE.git
-    - https://github.com/YassinoMed/MasterPFE.git
     - https://github.com/argoproj/argo-helm
+    - https://helm.releases.hashicorp.com
+    - https://charts.external-secrets.io
   destinations:
     - server: https://kubernetes.default.svc
       namespace: securerag-hub

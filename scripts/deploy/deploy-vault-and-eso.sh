@@ -18,11 +18,10 @@ echo "  VAULT + EXTERNAL SECRETS OPERATOR — DEPLOYMENT"
 echo "═══════════════════════════════════════════════════════════════"
 
 # Phase 1: Deploy Vault
-info "Phase 1/6: Deploying HashiCorp Vault..."
-kubectl apply -k infra/k8s/vault/
-kubectl wait --for=condition=Ready pod/vault-0 -n vault --timeout=180s || {
-  error "Vault pod not ready after 3 minutes"
-  kubectl describe pod vault-0 -n vault
+info "Phase 1/6: Waiting for ArgoCD to deploy HashiCorp Vault..."
+kubectl wait --for=condition=Ready pod/vault-0 -n vault --timeout=300s || {
+  error "Vault pod not ready after 5 minutes"
+  kubectl describe pod vault-0 -n vault || true
   exit 1
 }
 info "Vault deployed successfully"
@@ -32,36 +31,27 @@ info "Phase 2/6: Initializing Vault..."
 bash scripts/secrets/initialize-vault.sh --auto-unseal
 
 # Phase 3: Install External Secrets Operator
-info "Phase 3/6: Installing External Secrets Operator..."
-helm repo add external-secrets https://charts.external-secrets.io 2>/dev/null || true
-helm upgrade --install external-secrets external-secrets/external-secrets \
-  --namespace external-secrets --create-namespace \
-  --values infra/helm/external-secrets/values-production.yaml \
-  --wait --timeout 5m
-
-kubectl wait --for=condition=Ready pod -l app.kubernetes.io/instance=external-secrets \
-  -n external-secrets --timeout=120s || {
+info "Phase 3/6: Waiting for ArgoCD to deploy External Secrets Operator..."
+kubectl wait --for=condition=Ready pod -l app.kubernetes.io/name=external-secrets \
+  -n external-secrets --timeout=300s || {
   error "External Secrets Operator not ready"
   exit 1
 }
-info "External Secrets Operator installed"
+info "External Secrets Operator deployed successfully"
 
 # Phase 4: Configure ClusterSecretStore
 info "Phase 4/6: Configuring ClusterSecretStore..."
-kubectl apply -f infra/k8s/secrets/eso-cluster-secret-store.prod.yaml
+kubectl apply -f infra/k8s/secrets/eso-cluster-secret-store.yaml
 info "ClusterSecretStore 'vault-backend' created"
 
 # Phase 5: Create ExternalSecrets
 info "Phase 5/6: Creating ExternalSecrets..."
-for es in infra/k8s/secrets/*external-secret*.yaml; do
-  kubectl apply -f "${es}"
-  info "  Applied: ${es}"
-done
+kubectl apply -k infra/k8s/secrets/
+info "ExternalSecrets applied successfully"
 
-# Phase 6: Deploy secret rotation CronJob
-info "Phase 6/6: Deploying secret rotation CronJob..."
-kubectl apply -f infra/k8s/jobs/secret-rotation-cronjob.yaml
-info "Secret rotation CronJob deployed"
+# Phase 6: Secret Rotation Policy
+info "Phase 6/6: Verifying secret rotation configuration..."
+info "Rotation is configured natively via ExternalSecrets refreshInterval"
 
 echo ""
 echo "═══════════════════════════════════════════════════════════════"

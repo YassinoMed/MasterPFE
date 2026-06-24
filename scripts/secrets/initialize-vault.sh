@@ -178,6 +178,41 @@ info "Policy 'jenkins-reader' created"
 
 # Step 6: Seed initial secrets
 step "6/6: Seeding initial secrets..."
+
+# Load local environment secrets if present
+ENV_LOCAL="security/secrets/.env.local"
+if [ -f "${ENV_LOCAL}" ]; then
+  info "Extracting dev secrets from ${ENV_LOCAL}..."
+  COSIGN_PASSWORD=$(grep '^COSIGN_PASSWORD=' "${ENV_LOCAL}" | cut -d= -f2-)
+  JWT_SECRET=$(grep '^JWT_SECRET=' "${ENV_LOCAL}" | cut -d= -f2-)
+  APP_SECRET_KEY=$(grep '^APP_SECRET_KEY=' "${ENV_LOCAL}" | cut -d= -f2-)
+  APP_KEY=$(grep '^APP_KEY=' "${ENV_LOCAL}" | cut -d= -f2-)
+  DB_PASSWORD=$(grep '^DB_PASSWORD=' "${ENV_LOCAL}" | cut -d= -f2-)
+  SECURERAG_SHARED_API_TOKEN=$(grep '^SECURERAG_SHARED_API_TOKEN=' "${ENV_LOCAL}" | cut -d= -f2-)
+else
+  warn "${ENV_LOCAL} not found, using default placeholders"
+  COSIGN_PASSWORD="placeholder-rotate-immediately"
+  JWT_SECRET="placeholder-rotate-immediately"
+  APP_SECRET_KEY="placeholder-rotate-immediately"
+  APP_KEY="placeholder-rotate-immediately"
+  DB_PASSWORD="placeholder-rotate-immediately"
+  SECURERAG_SHARED_API_TOKEN="placeholder-rotate-immediately"
+fi
+
+# Seed common secrets
+kubectl exec -n ${NAMESPACE} ${VAULT_POD} -- vault kv put secret/securerag/common-secrets \
+  APP_KEY="${APP_KEY}" \
+  APP_SECRET_KEY="${APP_SECRET_KEY}" \
+  COSIGN_PASSWORD="${COSIGN_PASSWORD}" \
+  DB_PASSWORD="${DB_PASSWORD}" \
+  JWT_SECRET="${JWT_SECRET}" \
+  SECURERAG_SHARED_API_TOKEN="${SECURERAG_SHARED_API_TOKEN}"
+
+# Seed database credentials for example-external-secret
+kubectl exec -n ${NAMESPACE} ${VAULT_POD} -- vault kv put secret/database/credentials \
+  username="securerag_app" \
+  password="${DB_PASSWORD}"
+
 kubectl exec -n ${NAMESPACE} ${VAULT_POD} -- vault kv put secret/securerag/jenkins/sonar-token \
   value="placeholder-rotate-immediately"
 kubectl exec -n ${NAMESPACE} ${VAULT_POD} -- vault kv put secret/securerag/jenkins/github-token \
