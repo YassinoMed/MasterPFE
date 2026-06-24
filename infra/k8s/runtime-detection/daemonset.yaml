@@ -56,6 +56,7 @@ spec:
             - { name: lib-modules, mountPath: /host/lib/modules, readOnly: true }
             - { name: usr-fs, mountPath: /host/usr, readOnly: true }
             - { name: etc-fs, mountPath: /host/etc, readOnly: true }
+            - { name: sys-fs, mountPath: /sys, readOnly: true }
       volumes:
         - { name: rules, configMap: { name: falco-rules } }
         - { name: dev-fs, hostPath: { path: /dev } }
@@ -64,3 +65,4 @@ spec:
         - { name: lib-modules, hostPath: { path: /lib/modules } }
         - { name: usr-fs, hostPath: { path: /usr } }
         - { name: etc-fs, hostPath: { path: /etc } }
+        - { name: sys-fs, hostPath: { path: /sys } }
