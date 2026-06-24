@@ -65,8 +65,8 @@ ok "All nodes ready"
 # ── 2. Registry ─────────────────────────────────────────────────────────
 step "Configure container registry"
 
-docker rm -f kind-registry 2>/dev/null || true
-docker run -d --restart=always --name kind-registry -p 5001:5000 registry:2 >/dev/null 2>&1
+# docker rm -f kind-registry 2>/dev/null || true
+# docker run -d --restart=always --name kind-registry -p 5001:5000 registry:2 >/dev/null 2>&1
 docker network connect kind kind-registry 2>/dev/null || true
 ok "Registry running on localhost:5001"
 
