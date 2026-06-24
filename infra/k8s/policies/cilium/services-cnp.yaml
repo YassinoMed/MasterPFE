@@ -1,0 +1,285 @@
+apiVersion: "cilium.io/v2"
+kind: CiliumNetworkPolicy
+metadata:
+  name: "api-gateway-cnp"
+  namespace: "securerag-hub"
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: api-gateway
+  ingress:
+    # Allow external ingress (if using Nginx or other Ingress controller, we allow from everywhere or specific LB)
+    - fromEntities:
+        - cluster
+        - world
+      toPorts:
+        - ports:
+            - port: "8080"
+              protocol: TCP
+          rules:
+            http:
+              - method: ".*"
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            app.kubernetes.io/name: auth-users
+      toPorts:
+        - ports:
+            - port: "8000"
+              protocol: TCP
+          rules:
+            http:
+              - method: ".*"
+    - toEndpoints:
+        - matchLabels:
+            app.kubernetes.io/name: chatbot-manager
+      toPorts:
+        - ports:
+            - port: "8000"
+              protocol: TCP
+          rules:
+            http:
+              - method: ".*"
+    - toEndpoints:
+        - matchLabels:
+            app.kubernetes.io/name: llm-orchestrator
+      toPorts:
+        - ports:
+            - port: "8080"
+              protocol: TCP
+          rules:
+            http:
+              - method: ".*"
+---
+apiVersion: "cilium.io/v2"
+kind: CiliumNetworkPolicy
+metadata:
+  name: "portal-web-cnp"
+  namespace: "securerag-hub"
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: portal-web
+  ingress:
+    - fromEntities:
+        - cluster
+        - world
+      toPorts:
+        - ports:
+            - port: "8000"
+              protocol: TCP
+          rules:
+            http:
+              - method: ".*"
+  egress:
+    - toEndpoints:
+        - matchExpressions:
+            - key: app.kubernetes.io/name
+              operator: In
+              values:
+                - auth-users
+                - chatbot-manager
+                - conversation-service
+                - audit-security-service
+      toPorts:
+        - ports:
+            - port: "8000"
+              protocol: TCP
+          rules:
+            http:
+              - method: ".*"
+---
+apiVersion: "cilium.io/v2"
+kind: CiliumNetworkPolicy
+metadata:
+  name: "auth-users-cnp"
+  namespace: "securerag-hub"
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: auth-users
+  ingress:
+    - fromEndpoints:
+        - matchExpressions:
+            - key: app.kubernetes.io/name
+              operator: In
+              values:
+                - portal-web
+                - chatbot-manager
+                - api-gateway
+                - llm-orchestrator
+      toPorts:
+        - ports:
+            - port: "8000"
+              protocol: TCP
+          rules:
+            http:
+              - method: ".*"
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            app.kubernetes.io/name: postgres-auth
+      toPorts:
+        - ports:
+            - port: "5432"
+              protocol: TCP
+---
+apiVersion: "cilium.io/v2"
+kind: CiliumNetworkPolicy
+metadata:
+  name: "chatbot-manager-cnp"
+  namespace: "securerag-hub"
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: chatbot-manager
+  ingress:
+    - fromEndpoints:
+        - matchExpressions:
+            - key: app.kubernetes.io/name
+              operator: In
+              values:
+                - portal-web
+                - api-gateway
+                - llm-orchestrator
+      toPorts:
+        - ports:
+            - port: "8000"
+              protocol: TCP
+          rules:
+            http:
+              - method: ".*"
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            app.kubernetes.io/name: auth-users
+      toPorts:
+        - ports:
+            - port: "8000"
+              protocol: TCP
+          rules:
+            http:
+              - method: ".*"
+---
+apiVersion: "cilium.io/v2"
+kind: CiliumNetworkPolicy
+metadata:
+  name: "llm-orchestrator-cnp"
+  namespace: "securerag-hub"
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: llm-orchestrator
+  ingress:
+    - fromEndpoints:
+        - matchLabels:
+            app.kubernetes.io/name: api-gateway
+      toPorts:
+        - ports:
+            - port: "8080"
+              protocol: TCP
+          rules:
+            http:
+              - method: ".*"
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            app.kubernetes.io/name: chatbot-manager
+      toPorts:
+        - ports:
+            - port: "8000"
+              protocol: TCP
+          rules:
+            http:
+              - method: ".*"
+    - toEndpoints:
+        - matchLabels:
+            app.kubernetes.io/name: auth-users
+      toPorts:
+        - ports:
+            - port: "8000"
+              protocol: TCP
+          rules:
+            http:
+              - method: ".*"
+    - toEndpoints:
+        - matchLabels:
+            app.kubernetes.io/name: security-auditor
+      toPorts:
+        - ports:
+            - port: "8080"
+              protocol: TCP
+          rules:
+            http:
+              - method: ".*"
+---
+apiVersion: "cilium.io/v2"
+kind: CiliumNetworkPolicy
+metadata:
+  name: "security-auditor-cnp"
+  namespace: "securerag-hub"
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: security-auditor
+  ingress:
+    - fromEndpoints:
+        - matchLabels:
+            app.kubernetes.io/name: llm-orchestrator
+      toPorts:
+        - ports:
+            - port: "8080"
+              protocol: TCP
+          rules:
+            http:
+              - method: ".*"
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            app.kubernetes.io/name: knowledge-hub
+      toPorts:
+        - ports:
+            - port: "8080"
+              protocol: TCP
+          rules:
+            http:
+              - method: ".*"
+    - toEndpoints:
+        - matchLabels:
+            app.kubernetes.io/name: ollama
+      toPorts:
+        - ports:
+            - port: "11434"
+              protocol: TCP
+          rules:
+            http:
+              - method: ".*"
+---
+apiVersion: "cilium.io/v2"
+kind: CiliumNetworkPolicy
+metadata:
+  name: "knowledge-hub-cnp"
+  namespace: "securerag-hub"
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: knowledge-hub
+  ingress:
+    - fromEndpoints:
+        - matchLabels:
+            app.kubernetes.io/name: security-auditor
+      toPorts:
+        - ports:
+            - port: "8080"
+              protocol: TCP
+          rules:
+            http:
+              - method: ".*"
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            app.kubernetes.io/name: qdrant
+      toPorts:
+        - ports:
+            - port: "6333"
+              protocol: TCP
