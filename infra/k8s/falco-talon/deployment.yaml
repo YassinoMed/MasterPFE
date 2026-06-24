@@ -29,6 +29,7 @@ spec:
           image: issif/falco-talon:latest
           imagePullPolicy: IfNotPresent
           args:
+            - server
             - -c
             - /etc/falco-talon/config.yaml
           ports:

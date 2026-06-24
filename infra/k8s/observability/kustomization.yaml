@@ -13,8 +13,6 @@ resources:
   - loki-deployment.yaml
   - alertmanager.yaml
   - networkpolicy.yaml
-  - opentelemetry
-  - tempo
 commonLabels:
   app.kubernetes.io/part-of: securerag-hub
   app.kubernetes.io/component: observability

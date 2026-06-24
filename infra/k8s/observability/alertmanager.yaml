@@ -5,6 +5,8 @@ metadata:
   name: alertmanager-config
   namespace: securerag-monitoring
 data:
+  oncall-email: oncall@securerag.io
+  ops-email: ops@securerag.io
   alertmanager.yml: |
     global:
       resolve_timeout: 5m
@@ -339,15 +341,6 @@ data:
     *Namespace:* {{ .GroupLabels.namespace }}
     *Summary:* {{ .CommonAnnotations.summary }}
     {{- end }}
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: alertmanager-config
-  namespace: securerag-monitoring
-data:
-  oncall-email: oncall@securerag.io
-  ops-email: ops@securerag.io
 ---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy

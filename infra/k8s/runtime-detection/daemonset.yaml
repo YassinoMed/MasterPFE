@@ -32,7 +32,8 @@ spec:
           imagePullPolicy: IfNotPresent
           args:
             - /usr/bin/falco
-            - --modern-bpf
+            - -o
+            - engine.kind=modern_ebpf
           securityContext:
             privileged: true
           env:
