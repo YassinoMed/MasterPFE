@@ -58,6 +58,8 @@ spec:
               value: auth_users
             - name: DB_USERNAME
               value: securerag
+            - name: DB_SSLMODE
+              value: disable
             - name: SESSION_DRIVER
               value: file
             - name: CACHE_STORE

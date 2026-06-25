@@ -44,4 +44,4 @@ php artisan optimize:clear >/dev/null 2>&1 || true
 
 php artisan migrate --force --graceful
 
-exec env PHP_CLI_SERVER_WORKERS=${PHP_CLI_SERVER_WORKERS:-50} php artisan serve --host=0.0.0.0 --port=8000
+exec env PHP_CLI_SERVER_WORKERS=${PHP_CLI_SERVER_WORKERS:-50} php artisan serve --host=0.0.0.0 --port=8000 --no-reload

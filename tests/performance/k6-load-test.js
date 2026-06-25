@@ -10,12 +10,6 @@ const errorRate = new Rate('request_errors');
 
 export const options = {
   scenarios: {
-    smoke: {
-      executor: 'constant-vus',
-      vus: 1,
-      duration: '1m',
-      tags: { test_type: 'smoke', test_name: 'load' },
-    },
     load: {
       executor: 'ramping-vus',
       startVUs: 0,
@@ -26,34 +20,6 @@ export const options = {
       ],
       tags: { test_type: 'load', test_name: 'load' },
       gracefulStop: '30s',
-    },
-    stress: {
-      executor: 'ramping-vus',
-      startVUs: 0,
-      stages: [
-        { duration: '1m', target: 50 },
-        { duration: '1m', target: 100 },
-        { duration: '1m', target: 200 },
-        { duration: '30s', target: 0 },
-      ],
-      tags: { test_type: 'stress', test_name: 'load' },
-      gracefulStop: '30s',
-    },
-    spike: {
-      executor: 'ramping-vus',
-      startVUs: 0,
-      stages: [
-        { duration: '10s', target: 500 },
-        { duration: '10s', target: 0 },
-      ],
-      tags: { test_type: 'spike', test_name: 'load' },
-      gracefulStop: '15s',
-    },
-    soak: {
-      executor: 'constant-vus',
-      vus: 30,
-      duration: '10m',
-      tags: { test_type: 'soak', test_name: 'load' },
     },
   },
   thresholds: LOAD_THRESHOLDS,

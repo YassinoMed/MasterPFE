@@ -169,7 +169,7 @@ class PrometheusMetricsMiddleware
 
             $activeConnections = 0;
             try {
-                $pdo = DB::connection()->getPdo();
+                $pdo = DB::connection()->rawGetPdo();
                 if ($pdo) {
                     $activeConnections = 1;
                 }
