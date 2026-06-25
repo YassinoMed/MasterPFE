@@ -1,0 +1,84 @@
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: enforce-slsa-provenance
+  annotations:
+    policies.kyverno.io/title: Enforce SLSA Provenance and Image Signatures (Keyless)
+    policies.kyverno.io/category: Software Supply Chain Security
+    policies.kyverno.io/severity: high
+    policies.kyverno.io/subject: Pod
+    policies.kyverno.io/description: >-
+      To meet SLSA Level 3+, all container images must have a valid cryptographic keyless signature, 
+      a valid SLSA Provenance attestation, and a valid SBOM.
+      Additionally, the use of mutable tags ('latest', 'dev') is strictly forbidden.
+spec:
+  validationFailureAction: Enforce
+  background: false
+  webhookTimeoutSeconds: 30
+  failurePolicy: Fail
+  rules:
+    # 1. Block mutable tags (latest/dev) or enforce digest use
+    - name: block-mutable-tags
+      match:
+        any:
+        - resources:
+            kinds:
+              - Pod
+            namespaces:
+              - securerag-hub
+      validate:
+        message: "Images must use a sha256 digest. Mutable tags like 'latest' or 'dev' are strictly forbidden."
+        pattern:
+          spec:
+            containers:
+            - image: "*@sha256:*"
+
+    # 2. Verify Keyless Image Signatures, SBOM, and SLSA Provenance
+    - name: verify-image-and-attestations
+      match:
+        any:
+        - resources:
+            kinds:
+              - Pod
+            namespaces:
+              - securerag-hub
+      verifyImages:
+      - imageReferences:
+        - "localhost:5001/securerag-hub-*"
+        - "my-registry/securerag-hub-*"
+        mutateDigest: true
+        verifyDigest: true
+        required: true
+        
+        # 1. Verify the standard image signature (Keyless)
+        attestors:
+        - count: 1
+          entries:
+          - keyless:
+              subject: "https://github.com/YassinoMed/MasterPFE/.github/workflows/ci.yml@refs/heads/main"
+              issuer: "https://token.actions.githubusercontent.com"
+        
+        # 2. Verify the Attestations
+        attestations:
+        # A. SBOM Attestation
+        - predicateType: https://spdx.dev/Document
+          attestors:
+          - count: 1
+            entries:
+            - keyless:
+                subject: "https://github.com/YassinoMed/MasterPFE/.github/workflows/ci.yml@refs/heads/main"
+                issuer: "https://token.actions.githubusercontent.com"
+                
+        # B. SLSA Provenance Attestation
+        - predicateType: https://slsa.dev/provenance/v1
+          attestors:
+          - count: 1
+            entries:
+            - keyless:
+                subject: "https://github.com/YassinoMed/MasterPFE/.github/workflows/ci.yml@refs/heads/main"
+                issuer: "https://token.actions.githubusercontent.com"
+          conditions:
+          - all:
+            - key: "{{ builder.id }}"
+              operator: Equals
+              value: "https://jenkins.securerag.local/job/securerag-hub/"
