@@ -70,7 +70,7 @@ def _require_role(*roles: Role):
 
 # ── Health ────────────────────────────────────────────────────
 @app.get("/health")
-def health() -> dict[str, str]:
+async def health() -> dict[str, str]:
     return {"status": "ok", "service": "auth-users"}
 
 
@@ -125,8 +125,10 @@ def me(user: Annotated[UserORM, Depends(_current_user)]) -> UserOut:
 def list_users(
     db: Annotated[Session, Depends(get_session)],
     _: Annotated[UserORM, Depends(_require_role(Role.ADMIN, Role.AUDITOR))],
+    skip: int = 0,
+    limit: int = 100,
 ) -> list[UserOut]:
-    rows = db.query(UserORM).order_by(UserORM.id.asc()).all()
+    rows = db.query(UserORM).order_by(UserORM.id.asc()).offset(skip).limit(limit).all()
     return [UserOut(id=r.id, email=r.email, role=Role(r.role), created_at=r.created_at) for r in rows]
 
 
