@@ -27,8 +27,8 @@ services:
       - ./init.groovy.d:/var/jenkins_home/init.groovy.d:ro
       - ./secrets:/run/jenkins-secrets:ro
       - ./secrets/kubeconfig:/var/jenkins_home/.kube/config:ro
-      - /var/run/docker.sock:/var/run/docker.sock
       - ../../:/workspace
+      # [SEC-03] Removed docker.sock volume
     working_dir: /workspace
     extra_hosts:
       - "host.docker.internal:host-gateway"

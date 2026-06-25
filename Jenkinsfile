@@ -106,11 +106,15 @@ pipeline {
             sh '''
               set -euo pipefail
               echo "[INFO] Running Gitleaks Secrets Scan..."
-              if command -v docker >/dev/null 2>&1 && docker info >/dev/null 2>&1; then
-                docker run --rm -v "$PWD:/repo" -w /repo ghcr.io/gitleaks/gitleaks:v8.30.1 dir /repo --config .gitleaks.toml --report-format json --report-path "${SECURITY_REPORT_DIR}/gitleaks.json" || true
+              # [SEC-04] Make Gitleaks fail the pipeline on secret detection
+              # Assuming gitleaks is installed in the environment or we use docker if available
+              if command -v gitleaks >/dev/null 2>&1; then
+                gitleaks dir . --config .gitleaks.toml --report-format json --report-path "${SECURITY_REPORT_DIR}/gitleaks.json" --exit-code 1
+              elif command -v docker >/dev/null 2>&1 && docker info >/dev/null 2>&1; then
+                docker run --rm -v "$PWD:/repo" -w /repo ghcr.io/gitleaks/gitleaks:v8.30.1 dir /repo --config .gitleaks.toml --report-format json --report-path "/repo/${SECURITY_REPORT_DIR}/gitleaks.json" --exit-code 1
               else
-                echo "[WARN] Docker not available for Gitleaks"
-                echo '[]' > "${SECURITY_REPORT_DIR}/gitleaks.json"
+                echo "[ERROR] Gitleaks not available"
+                exit 1
               fi
             '''
           }
@@ -198,10 +202,8 @@ pipeline {
       steps {
         sh '''
           set -euo pipefail
-          echo "[INFO] Pushing Docker images..."
-          for service in auth-users chatbot-manager conversation-service audit-security-service portal-web; do
-            docker push "${REGISTRY_HOST}/${IMAGE_PREFIX}-${service}:${IMAGE_TAG}"
-          done
+          echo "[INFO] Pushing Docker images... (Handled by Kaniko)"
+          # [SEC-03] docker push is handled by Kaniko during the build stage
         '''
       }
     }

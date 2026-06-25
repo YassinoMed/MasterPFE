@@ -39,11 +39,12 @@ for component in "${COMPONENT_ARRAY[@]}"; do
   if [ -f "${dockerfile}" ]; then
     echo "Building ${image} with BuildKit caching"
     export DOCKER_BUILDKIT=1
-    docker build \
-      --build-arg BUILDKIT_INLINE_CACHE=1 \
-      --cache-from "${image}" \
-      -t "${image}" -f "${dockerfile}" "${REPO_ROOT}"
-    docker push "${image}"
+    # [SEC-03] Replace docker build with Kaniko
+    docker run --rm -v "${REPO_ROOT}:/workspace" \
+      gcr.io/kaniko-project/executor@sha256:4e7a52dd1f14872430652bb3b027405b8dfd17c4538751c620ac005741ef9698 \
+      --context=/workspace \
+      --dockerfile="/workspace/${dockerfile}" \
+      --destination="${image}"
   else
     if [[ "${ALLOW_MISSING_COMPONENTS}" == "true" ]]; then
       echo "Skipping ${name}: Dockerfile missing"
