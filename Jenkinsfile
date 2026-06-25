@@ -139,11 +139,35 @@ pipeline {
               # [SEC-04] Make Gitleaks fail the pipeline on secret detection
               # Assuming gitleaks is installed in the environment or we use docker if available
               if command -v gitleaks >/dev/null 2>&1; then
-                gitleaks dir . --report-format json --report-path "${SECURITY_REPORT_DIR}/gitleaks.json" --exit-code 0 || true
-                gitleaks dir . --report-format sarif --report-path "${SECURITY_REPORT_DIR}/gitleaks.sarif" --exit-code 1
+                gitleaks dir . --config .gitleaks.toml --report-format json --report-path "${SECURITY_REPORT_DIR}/gitleaks.json" --exit-code 0 || true
+                gitleaks dir . --config .gitleaks.toml --report-format sarif --report-path "${SECURITY_REPORT_DIR}/gitleaks.sarif" --exit-code 1
               elif command -v docker >/dev/null 2>&1 && docker info >/dev/null 2>&1; then
-                docker run --rm -v "$PWD:/repo" -w /repo ghcr.io/gitleaks/gitleaks:v8.30.1 dir /repo --report-format json --report-path "/repo/${SECURITY_REPORT_DIR}/gitleaks.json" --exit-code 0 || true
-                docker run --rm -v "$PWD:/repo" -w /repo ghcr.io/gitleaks/gitleaks:v8.30.1 dir /repo --report-format sarif --report-path "/repo/${SECURITY_REPORT_DIR}/gitleaks.sarif" --exit-code 1
+                # DinD Path Translation
+                CONTAINER_ID=$(hostname)
+                MOUNTS=$(docker inspect "${CONTAINER_ID}" --format='{{range .Mounts}}{{.Destination}}:{{.Source}} {{end}}' 2>/dev/null || \\
+                         docker inspect securerag-jenkins --format='{{range .Mounts}}{{.Destination}}:{{.Source}} {{end}}' 2>/dev/null || echo "")
+                
+                HOST_PWD=""
+                for m in ${MOUNTS}; do
+                  dest="${m%%:*}"
+                  src="${m#*:}"
+                  if [ -n "${dest}" ]; then
+                    case "$PWD" in
+                      "$dest"*)
+                        rel="${PWD#${dest}}"
+                        HOST_PWD="${src}${rel}"
+                        break
+                        ;;
+                    esac
+                  fi
+                done
+                
+                if [ -z "${HOST_PWD}" ]; then
+                  HOST_PWD="$PWD"
+                fi
+
+                docker run --rm -v "${HOST_PWD}:/repo" -w /repo ghcr.io/gitleaks/gitleaks:v8.30.1 dir /repo --config .gitleaks.toml --report-format json --report-path "/repo/${SECURITY_REPORT_DIR}/gitleaks.json" --exit-code 0 || true
+                docker run --rm -v "${HOST_PWD}:/repo" -w /repo ghcr.io/gitleaks/gitleaks:v8.30.1 dir /repo --config .gitleaks.toml --report-format sarif --report-path "/repo/${SECURITY_REPORT_DIR}/gitleaks.sarif" --exit-code 1
               else
                 echo "[ERROR] Gitleaks not available"
                 exit 1
