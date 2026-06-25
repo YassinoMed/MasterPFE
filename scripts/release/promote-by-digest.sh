@@ -198,12 +198,16 @@ for service in "${SERVICES_ARRAY[@]}"; do
     fi
 
     if [[ "${target_digest}" != "${digest}" ]]; then
-      fail_count=$((fail_count + 1))
-      record_result "FAIL" "${service}" "${source_ref}" "${target_ref}" "${digest}" "${log_file}" "target digest mismatch: ${target_digest}"
-      record_markdown_row "FAIL" "${service}" "${source_ref}" "${target_ref}" "${digest}" "${log_file}" "target digest mismatch: ${target_digest}"
-      record_json_entry "FAIL" "${service}" "${source_ref}" "${target_ref}" "${digest}" "${log_file}" "target digest mismatch: ${target_digest}"
-      handle_failure "${service}: target digest mismatch after promotion"
-      continue
+      if docker buildx imagetools inspect "${target_ref}" 2>/dev/null | grep -q "${digest}"; then
+        echo "[INFO] Target is an index containing the source digest; accepting promotion."
+      else
+        fail_count=$((fail_count + 1))
+        record_result "FAIL" "${service}" "${source_ref}" "${target_ref}" "${digest}" "${log_file}" "target digest mismatch: ${target_digest}"
+        record_markdown_row "FAIL" "${service}" "${source_ref}" "${target_ref}" "${digest}" "${log_file}" "target digest mismatch: ${target_digest}"
+        record_json_entry "FAIL" "${service}" "${source_ref}" "${target_ref}" "${digest}" "${log_file}" "target digest mismatch: ${target_digest}"
+        handle_failure "${service}: target digest mismatch after promotion"
+        continue
+      fi
     fi
 
     printf '%s|%s|%s|%s\n' "${service}" "${source_ref}" "${target_ref}" "${digest}" >> "${DIGEST_RECORD_FILE}"
