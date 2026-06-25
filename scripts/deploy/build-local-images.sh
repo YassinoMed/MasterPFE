@@ -8,6 +8,29 @@ IMAGE_PREFIX="${IMAGE_PREFIX:-securerag-hub}"
 ALLOW_MISSING_COMPONENTS="${ALLOW_MISSING_COMPONENTS:-false}"
 REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
 
+HOST_REPO_ROOT=""
+if command -v docker >/dev/null 2>&1; then
+  CONTAINER_ID=$(hostname)
+  MOUNTS=$(docker inspect "${CONTAINER_ID}" --format='{{range .Mounts}}{{.Destination}}:{{.Source}} {{end}}' 2>/dev/null || \
+           docker inspect securerag-jenkins --format='{{range .Mounts}}{{.Destination}}:{{.Source}} {{end}}' 2>/dev/null || echo "")
+  for m in ${MOUNTS}; do
+    dest="${m%%:*}"
+    src="${m#*:}"
+    if [ -n "${dest}" ]; then
+      case "${REPO_ROOT}" in
+        "$dest"*)
+          rel="${REPO_ROOT#${dest}}"
+          HOST_REPO_ROOT="${src}${rel}"
+          break
+          ;;
+      esac
+    fi
+  done
+fi
+if [ -z "${HOST_REPO_ROOT}" ]; then
+  HOST_REPO_ROOT="${REPO_ROOT}"
+fi
+
 DEFAULT_COMPONENTS=(
   auth-users=services-laravel/auth-users-service
   chatbot-manager=services-laravel/chatbot-manager-service
@@ -40,7 +63,7 @@ for component in "${COMPONENT_ARRAY[@]}"; do
     echo "Building ${image} with BuildKit caching"
     export DOCKER_BUILDKIT=1
     # [SEC-03] Replace docker build with Kaniko
-    docker run --rm -v "${REPO_ROOT}:/workspace" \
+    docker run --rm -v "${HOST_REPO_ROOT}:/workspace" \
       gcr.io/kaniko-project/executor@sha256:4e7a52dd1f14872430652bb3b027405b8dfd17c4538751c620ac005741ef9698 \
       --context=/workspace \
       --dockerfile="/workspace/${dockerfile}" \
