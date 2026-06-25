@@ -1,0 +1,5 @@
+# SecureRAG Hub image signing summary
+# Generated at: 2026-06-25T07:58:55Z
+# Cosign version:   ______   ______        _______. __    _______ .__   __.
+# Mode: keyless
+STATUS | SERVICE            | IMAGE                                                            | MODE       | ARTIFACT                                 | DETAIL

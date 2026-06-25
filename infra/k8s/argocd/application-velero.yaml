@@ -32,11 +32,8 @@ spec:
               config:
                 region: us-east-1
         credentials:
-          secretContents:
-            cloud: |
-              [default]
-              aws_access_key_id=minioadmin
-              aws_secret_access_key=minioadmin
+          existingSecret: vault-velero-credentials
+          # [SEC-02] replaced secretContents with existingSecret via ESO
         schedules:
           daily-backup:
             schedule: "0 2 * * *"

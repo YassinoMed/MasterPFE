@@ -1,0 +1,14 @@
+Generating ephemeral keys...
+Retrieving signed certificate...
+
+	The sigstore service, hosted by sigstore a Series of LF Projects, LLC, is provided pursuant to the Hosted Project Tools Terms of Use, available at https://lfprojects.org/policies/hosted-project-tools-terms-of-use/.
+	Note that if your submission includes personal data associated with this signed artifact, it will be part of an immutable record.
+	This may include the email address associated with the account with which you authenticate your contractual Agreement.
+	This information will be used for signing this artifact and will be stored in public transparency logs and cannot be removed later, and is subject to the Immutable Record notice at https://lfprojects.org/policies/hosted-project-tools-immutable-records/.
+
+By typing 'y', you attest that (1) you are not submitting the personal data of any other person; and (2) you understand and agree to the statement and the Agreement terms at the URLs listed above.
+error opening browser: exec: "xdg-open": executable file not found in $PATH
+Go to the following link in a browser:
+
+	 https://oauth2.sigstore.dev/auth/auth?access_type=online&client_id=sigstore&code_challenge=T4kMDN5wMrkqL5wChYihxL6e6o2mXswZd7jsX2Bb2Eo&code_challenge_method=S256&nonce=3FcVRPCN3zyoFWInPEh0hnWeb9n&redirect_uri=urn%3Aietf%3Awg%3Aoauth%3A2.0%3Aoob&response_type=code&scope=openid+email&state=3FcVROxNg2ENXyEsUEx4AGkutWs
+Enter verification code: 
