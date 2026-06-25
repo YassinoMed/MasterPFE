@@ -63,11 +63,13 @@ for component in "${COMPONENT_ARRAY[@]}"; do
     echo "Building ${image} with BuildKit caching"
     export DOCKER_BUILDKIT=1
     # [SEC-03] Replace docker build with Kaniko
-    docker run --rm -v "${HOST_REPO_ROOT}:/workspace" \
+    docker run --rm --network host -v "${HOST_REPO_ROOT}:/workspace" \
       gcr.io/kaniko-project/executor@sha256:4e7a52dd1f14872430652bb3b027405b8dfd17c4538751c620ac005741ef9698 \
       --context=/workspace \
       --dockerfile="/workspace/${dockerfile}" \
-      --destination="${image}"
+      --destination="${image}" \
+      --insecure \
+      --skip-tls-verify
   else
     if [[ "${ALLOW_MISSING_COMPONENTS}" == "true" ]]; then
       echo "Skipping ${name}: Dockerfile missing"
