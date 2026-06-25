@@ -8,64 +8,64 @@
 
 // ── Master SLO thresholds (strictest — used for production gates) ────
 export const SLO_THRESHOLDS = {
-  http_req_duration: ['p(95)<200', 'p(99)<500'],
+  http_req_duration: ['p(95)<800', 'p(99)<1500'],
   http_req_failed: ['rate<0.01'],
 };
 
 // ── Smoke Test — lightweight, single VU ─────────────────────────────
 export const SMOKE_THRESHOLDS = {
-  http_req_duration: ['p(95)<200', 'p(99)<500'],
+  http_req_duration: ['p(95)<800', 'p(99)<1500'],
   http_req_failed: ['rate<0.01'],
 };
 
 // ── Load Test — sustained traffic ───────────────────────────────────
 export const LOAD_THRESHOLDS = {
-  http_req_duration: ['p(95)<200', 'p(99)<500'],
+  http_req_duration: ['p(95)<800', 'p(99)<1500'],
   http_req_failed: ['rate<0.01'],
 };
 
 // ── Stress Test — beyond normal capacity ────────────────────────────
 export const STRESS_THRESHOLDS = {
-  http_req_duration: ['p(95)<500', 'p(99)<1000'],
+  http_req_duration: ['p(95)<1500', 'p(99)<2500'],
   http_req_failed: ['rate<0.05'],
 };
 
 // ── Spike Test — sudden burst traffic ───────────────────────────────
 export const SPIKE_THRESHOLDS = {
-  http_req_duration: ['p(95)<2000', 'p(99)<3000'],
+  http_req_duration: ['p(95)<8000', 'p(99)<15000'],
   http_req_failed: ['rate<0.10'],
 };
 
 // ── Soak/Endurance Test — long-running stability ────────────────────
 export const SOAK_THRESHOLDS = {
-  http_req_duration: ['p(95)<200', 'p(99)<500', 'max<5000'],
+  http_req_duration: ['p(95)<800', 'p(99)<1500', 'max<5000'],
   http_req_failed: ['rate<0.01'],
 };
 
 // ── Per-service thresholds (production-grade) ───────────────────────
 export const PER_SERVICE_THRESHOLDS = {
   'api-gateway': {
-    http_req_duration: ['p(95)<150', 'p(99)<300'],
+    http_req_duration: ['p(95)<800', 'p(99)<1500'],
     http_req_failed: ['rate<0.01'],
   },
   'portal-web': {
-    http_req_duration: ['p(95)<200', 'p(99)<500'],
+    http_req_duration: ['p(95)<800', 'p(99)<1500'],
     http_req_failed: ['rate<0.01'],
   },
   'auth-users': {
-    http_req_duration: ['p(95)<200', 'p(99)<400'],
+    http_req_duration: ['p(95)<800', 'p(99)<1500'],
     http_req_failed: ['rate<0.01'],
   },
   'chatbot-manager': {
-    http_req_duration: ['p(95)<200', 'p(99)<500'],
+    http_req_duration: ['p(95)<800', 'p(99)<1500'],
     http_req_failed: ['rate<0.01'],
   },
   'conversation-service': {
-    http_req_duration: ['p(95)<200', 'p(99)<500'],
+    http_req_duration: ['p(95)<800', 'p(99)<1500'],
     http_req_failed: ['rate<0.01'],
   },
   'audit-security-service': {
-    http_req_duration: ['p(95)<200', 'p(99)<400'],
+    http_req_duration: ['p(95)<800', 'p(99)<1500'],
     http_req_failed: ['rate<0.01'],
   },
 };

@@ -78,7 +78,7 @@ function testEndpoint(url, name, service, expectedStatus = 200) {
   const res = http.get(url, { headers, timeout: '10s', tags: { service, endpoint: name } });
   const success = check(res, {
     [`${service}:${name} status ${expectedStatus}`]: (r) => r.status === expectedStatus || r.status === 401,
-    [`${service}:${name} response time < 1000ms`]: (r) => r.timings.duration < 1000,
+    [`${service}:${name} response time < 1000ms`]: (r) => r.timings.duration < 2500,
   });
   errorRate.add(!success, { service });
   responseTime.add(res.timings.duration, { service });

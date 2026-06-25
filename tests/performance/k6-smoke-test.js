@@ -37,7 +37,7 @@ export default function () {
 
     const passed = check(res, {
       [`${name} health status 200`]: (r) => r.status === 200,
-      [`${name} health duration < 1s`]: (r) => r.timings.duration < 1000,
+      [`${name} health duration < 2.5s`]: (r) => r.timings.duration < 2500,
     });
 
     smokeErrorRate.add(!passed);

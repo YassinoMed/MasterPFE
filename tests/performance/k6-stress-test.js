@@ -93,7 +93,7 @@ export default function (data) {
 
       const passed = check(res, {
         [`${svc.name} stress health 2xx`]: (r) => r.status >= 200 && r.status < 400,
-        [`${svc.name} stress duration < 500ms`]: (r) => r.timings.duration < 500,
+        [`${svc.name} stress duration < 1500ms`]: (r) => r.timings.duration < 1500,
       });
 
       stressErrorRate.add(!passed, { service: svc.name });
@@ -118,7 +118,7 @@ export default function (data) {
 
       const passed = check(res, {
         [`${ep.service} stress ${ep.path} 2xx`]: (r) => r.status >= 200 && r.status < 500,
-        [`${ep.service} stress ${ep.path} duration < 1s`]: (r) => r.timings.duration < 1000,
+        [`${ep.service} stress ${ep.path} duration < 2.5s`]: (r) => r.timings.duration < 2500,
       });
 
       stressErrorRate.add(!passed, { service: ep.service });

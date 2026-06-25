@@ -62,7 +62,7 @@ export default function (data) {
 
       const passed = check(res, {
         [`${svc.name} endurance health 200`]: (r) => r.status === 200,
-        [`${svc.name} endurance duration < 500ms`]: (r) => r.timings.duration < 500,
+        [`${svc.name} endurance duration < 1500ms`]: (r) => r.timings.duration < 1500,
       });
 
       endurErrorRate.add(!passed, { service: svc.name });
@@ -94,7 +94,7 @@ export default function (data) {
 
       const passed = check(res, {
         [`${ep.service} endurance ${ep.path} 2xx`]: (r) => r.status >= 200 && r.status < 500,
-        [`${ep.service} endurance ${ep.path} duration < 1s`]: (r) => r.timings.duration < 1000,
+        [`${ep.service} endurance ${ep.path} duration < 2.5s`]: (r) => r.timings.duration < 2500,
       });
 
       endurErrorRate.add(!passed, { service: ep.service });

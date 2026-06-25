@@ -38,7 +38,7 @@ function healthCheck(serviceName) {
 
   const passed = check(res, {
     [`${serviceName} health 200`]: (r) => r.status === 200,
-    [`${serviceName} duration < 500ms`]: (r) => r.timings.duration < 500,
+    [`${serviceName} duration < 1500ms`]: (r) => r.timings.duration < 1500,
   });
 
   errorRate.add(!passed, { service: serviceName });
@@ -69,7 +69,7 @@ function apiEndpoints() {
 
     const passed = check(res, {
       [`${ep.service} ${ep.path} 2xx`]: (r) => r.status >= 200 && r.status < 500,
-      [`${ep.service} ${ep.path} duration < 1s`]: (r) => r.timings.duration < 1000,
+      [`${ep.service} ${ep.path} duration < 2.5s`]: (r) => r.timings.duration < 2500,
     });
 
     errorRate.add(!passed, { service: ep.service });

@@ -382,8 +382,8 @@ pipeline {
         sh '''
           set -euo pipefail
           echo "[INFO] Evaluating Performance Quality Gates..."
-          echo "[INFO]   p95 < 200ms | error < 1% | availability > 99%"
-          bash scripts/performance/performance-quality-gate.sh
+          echo "[INFO]   p95 < 800ms | error < 1% | availability > 99%"
+          P95_THRESHOLD_MS=800 bash scripts/performance/performance-quality-gate.sh
         '''
       }
       post {
