@@ -136,21 +136,35 @@ spec:
         sh '''
           set -euo pipefail
           
+          KANIKO_IMG="gcr.io/kaniko-project/executor@sha256:4e7a52dd1f14872430652bb3b027405b8dfd17c4538751c620ac005741ef9698"
+
           # 1. Build Inference Service
-          echo "[INFO] Building AI Inference image..."
-          docker build -t ${REGISTRY_HOST}/${IMAGE_PREFIX}-inference:${IMAGE_TAG} -f ai-security/Dockerfile ai-security/
+          echo "[INFO] Building AI Inference image with Kaniko..."
+          docker run --rm -v "$PWD:/workspace" ${KANIKO_IMG} \
+            --context=/workspace/ai-security \
+            --dockerfile=/workspace/ai-security/Dockerfile \
+            --destination=${REGISTRY_HOST}/${IMAGE_PREFIX}-inference:${IMAGE_TAG}
           
           # 2. Build Backend Service
-          echo "[INFO] Building Backend API image..."
-          docker build -t ${REGISTRY_HOST}/${IMAGE_PREFIX}-backend:${IMAGE_TAG} -f ai-security/backend/Dockerfile ai-security/backend/
+          echo "[INFO] Building Backend API image with Kaniko..."
+          docker run --rm -v "$PWD:/workspace" ${KANIKO_IMG} \
+            --context=/workspace/ai-security/backend \
+            --dockerfile=/workspace/ai-security/backend/Dockerfile \
+            --destination=${REGISTRY_HOST}/${IMAGE_PREFIX}-backend:${IMAGE_TAG}
           
           # 3. Build Log Collector Daemon
-          echo "[INFO] Building Log Collector image..."
-          docker build -t ${REGISTRY_HOST}/${IMAGE_PREFIX}-log-collector:${IMAGE_TAG} -f ai-security/Dockerfile.collector ai-security/
+          echo "[INFO] Building Log Collector image with Kaniko..."
+          docker run --rm -v "$PWD:/workspace" ${KANIKO_IMG} \
+            --context=/workspace/ai-security \
+            --dockerfile=/workspace/ai-security/Dockerfile.collector \
+            --destination=${REGISTRY_HOST}/${IMAGE_PREFIX}-log-collector:${IMAGE_TAG}
           
           # 4. Build Frontend Service
-          echo "[INFO] Building Frontend UI image..."
-          docker build -t ${REGISTRY_HOST}/${IMAGE_PREFIX}-frontend:${IMAGE_TAG} -f ai-security/frontend/Dockerfile ai-security/frontend/
+          echo "[INFO] Building Frontend UI image with Kaniko..."
+          docker run --rm -v "$PWD:/workspace" ${KANIKO_IMG} \
+            --context=/workspace/ai-security/frontend \
+            --dockerfile=/workspace/ai-security/frontend/Dockerfile \
+            --destination=${REGISTRY_HOST}/${IMAGE_PREFIX}-frontend:${IMAGE_TAG}
           
           # 5. Security Scanning with Trivy (Fail on CRITICAL)
           echo "[INFO] Running Trivy container vulnerability scan..."
@@ -166,10 +180,7 @@ spec:
           set -euo pipefail
           
           # 1. Push to local registry
-          docker push ${REGISTRY_HOST}/${IMAGE_PREFIX}-inference:${IMAGE_TAG}
-          docker push ${REGISTRY_HOST}/${IMAGE_PREFIX}-backend:${IMAGE_TAG}
-          docker push ${REGISTRY_HOST}/${IMAGE_PREFIX}-log-collector:${IMAGE_TAG}
-          docker push ${REGISTRY_HOST}/${IMAGE_PREFIX}-frontend:${IMAGE_TAG}
+          echo "[INFO] Images already pushed by Kaniko during build stage."
           
           # 2. Image signature via Cosign keyless or cluster key
           COSIGN_PUB_KEY="k8s://securerag-hub/cosign-public-key"

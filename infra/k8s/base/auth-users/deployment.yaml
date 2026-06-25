@@ -51,7 +51,12 @@ spec:
             - name: DB_CONNECTION
               value: pgsql
             - name: DB_HOST
-              value: postgres-auth
+              value: postgres-auth-rw
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-auth-app
+                  key: password
             - name: DB_PORT
               value: "5432"
             - name: DB_DATABASE
@@ -65,7 +70,9 @@ spec:
             - name: CACHE_STORE
               value: file
             - name: QUEUE_CONNECTION
-              value: sync
+              value: nats
+            - name: NATS_URL
+              value: nats://nats.ai-security.svc.cluster.local:4222
             - name: LOG_CHANNEL
               value: stderr
             - name: CREATE_DOTENV

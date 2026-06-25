@@ -69,8 +69,8 @@ spec:
         - name: rules
           configMap: { name: prometheus-rules }
         - name: data
-          emptyDir:
-            sizeLimit: 12Gi
+          persistentVolumeClaim:
+            claimName: prometheus-data
 ---
 apiVersion: v1
 kind: Service
@@ -87,3 +87,15 @@ spec:
     - name: http
       port: 9090
       targetPort: 9090
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: prometheus-data
+  namespace: securerag-monitoring
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 20Gi

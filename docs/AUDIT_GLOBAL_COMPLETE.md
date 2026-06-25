@@ -23,6 +23,8 @@ Ce document rassemble et unifie l'ensemble des analyses techniques, architectura
 - [Phase 14 — Gap Analysis (Analyse des Écarts)](#phase-14--gap-analysis-analyse-des-écarts)
 - [Phase 15 — Plan d'Amélioration & Feuille de Route (Roadmap)](#phase-15--plan-damélioration--feuille-de-route-roadmap)
 - [Phase 16 — Rapport Final d'Audit Exécutif & Scorecard](#phase-16--rapport-final-daudit-exécutif--scorecard)
+- [Phase 17 — Formal System Verification & System Reduction Layer](#phase-17--formal-system-verification--system-reduction-layer)
+
 
 ---
 
@@ -351,3 +353,12 @@ Les résultats des derniers tests de charge k6 sous **50 VUs (Utilisateurs Virtu
 1.  **Signature Keyless** : Remplacer l'authentification par clé statique Cosign par le protocole Sigstore Keyless, liant cryptographiquement l'intégrité de l'image à des identités OIDC éphémères fournies par Keycloak.
 2.  **Hardening Noyau Actif** : Configurer Tetragon pour tuer automatiquement au niveau du noyau Linux (eBPF) les processus effectuant des tentatives d'accès non autorisées (ex. lecture de fichiers de configuration sensibles par le serveur PHP).
 3.  **Chaos destructif automatisé** : Lancer de manière continue des tests d'injection de pannes (Chaos Monkey) pour valider qu'aucune perte de service n'est constatée, y compris sous charge de production.
+
+---
+
+## Phase 17 — Formal System Verification & System Reduction Layer
+
+La phase ultime de maturité (Production Mature) est atteinte par la mise en place d'une vérification formelle mathématique et d'une couche de réduction des systèmes.
+L'analyse de cette preuve mathématique et des invariants du système (TCB, TLA+, limites de Blast Radius) est détaillée dans le document dédié :
+👉 **[Lire le Rapport de Vérification Formelle](file:///root/MasterPFE/docs/AUDIT_FORMAL_VERIFICATION.md)**
+

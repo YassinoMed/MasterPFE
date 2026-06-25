@@ -1,111 +1,15 @@
-apiVersion: apps/v1
-kind: Deployment
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
 metadata:
   name: postgres-auth
   namespace: securerag-hub
 spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app.kubernetes.io/name: postgres-auth
-  template:
-    metadata:
-      labels:
-        app.kubernetes.io/name: postgres-auth
-    spec:
-      serviceAccountName: sa-postgres-auth
-      automountServiceAccountToken: false
-      securityContext:
-        runAsNonRoot: true
-        runAsUser: 70
-        runAsGroup: 70
-        fsGroup: 70
-        seccompProfile:
-          type: RuntimeDefault
-      containers:
-        - name: postgres-auth
-          image: localhost:5001/postgres:16-alpine
-          imagePullPolicy: IfNotPresent
-          args:
-            - -c
-            - max_connections=300
-          ports:
-            - name: postgres
-              containerPort: 5432
-          env:
-            - name: POSTGRES_DB
-              value: auth_users
-            - name: POSTGRES_USER
-              value: securerag
-            - name: POSTGRES_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: securerag-common-secrets
-                  key: DB_PASSWORD
-            - name: PGDATA
-              value: /var/lib/postgresql/data/pgdata
-          resources:
-            requests:
-              cpu: 200m
-              memory: 256Mi
-              ephemeral-storage: 128Mi
-            limits:
-              cpu: 1000m
-              memory: 512Mi
-              ephemeral-storage: 512Mi
-          securityContext:
-            allowPrivilegeEscalation: false
-            readOnlyRootFilesystem: true
-            runAsNonRoot: true
-            capabilities:
-              drop: ["ALL"]
-          readinessProbe:
-            exec:
-              command:
-                - pg_isready
-                - -U
-                - securerag
-                - -d
-                - auth_users
-            initialDelaySeconds: 5
-            periodSeconds: 5
-            timeoutSeconds: 3
-            failureThreshold: 6
-          livenessProbe:
-            exec:
-              command:
-                - pg_isready
-                - -U
-                - securerag
-                - -d
-                - auth_users
-            initialDelaySeconds: 30
-            periodSeconds: 10
-            timeoutSeconds: 3
-            failureThreshold: 3
-          startupProbe:
-            exec:
-              command:
-                - pg_isready
-                - -U
-                - securerag
-                - -d
-                - auth_users
-            initialDelaySeconds: 5
-            periodSeconds: 3
-            timeoutSeconds: 3
-            failureThreshold: 20
-          volumeMounts:
-            - name: pgdata
-              mountPath: /var/lib/postgresql/data
-            - name: pgvars
-              mountPath: /var/run/postgresql
-            - name: tmp
-              mountPath: /tmp
-      volumes:
-        - name: pgdata
-          emptyDir: {}
-        - name: pgvars
-          emptyDir: {}
-        - name: tmp
-          emptyDir: {}
+  instances: 3
+  imageName: ghcr.io/cloudnative-pg/postgresql:16
+  primaryUpdateStrategy: unsupervised
+  storage:
+    size: 5Gi
+  bootstrap:
+    initdb:
+      database: auth_users
+      owner: securerag

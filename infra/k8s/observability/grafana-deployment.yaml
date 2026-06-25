@@ -38,7 +38,7 @@ data:
         disableDeletion: true
         editable: false
         options:
-          path: /var/lib/grafana/dashboards
+          path: /etc/grafana/dashboards
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -111,13 +111,17 @@ spec:
           volumeMounts:
             - { name: datasources, mountPath: /etc/grafana/provisioning/datasources }
             - { name: dashboards-provider, mountPath: /etc/grafana/provisioning/dashboards }
-            - { name: dashboards, mountPath: /var/lib/grafana/dashboards }
+            - { name: dashboards, mountPath: /etc/grafana/dashboards }
+            - { name: data, mountPath: /var/lib/grafana }
           readinessProbe:
             httpGet: { path: /api/health, port: http }
       volumes:
         - { name: datasources, configMap: { name: grafana-datasources } }
         - { name: dashboards-provider, configMap: { name: grafana-dashboards-provider } }
         - { name: dashboards, configMap: { name: grafana-dashboard-securerag } }
+        - name: data
+          persistentVolumeClaim:
+            claimName: grafana-data
 ---
 apiVersion: v1
 kind: Service
@@ -128,4 +132,15 @@ spec:
   type: ClusterIP
   selector: { app.kubernetes.io/name: grafana }
   ports: [{ name: http, port: 3000, targetPort: 3000 }]
-
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: grafana-data
+  namespace: securerag-monitoring
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi

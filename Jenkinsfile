@@ -139,9 +139,11 @@ pipeline {
               # [SEC-04] Make Gitleaks fail the pipeline on secret detection
               # Assuming gitleaks is installed in the environment or we use docker if available
               if command -v gitleaks >/dev/null 2>&1; then
-                gitleaks dir . --config .gitleaks.toml --report-format json --report-path "${SECURITY_REPORT_DIR}/gitleaks.json" --exit-code 1
+                gitleaks dir . --config .gitleaks.toml --report-format json --report-path "${SECURITY_REPORT_DIR}/gitleaks.json" --exit-code 0 || true
+                gitleaks dir . --config .gitleaks.toml --report-format sarif --report-path "${SECURITY_REPORT_DIR}/gitleaks.sarif" --exit-code 1
               elif command -v docker >/dev/null 2>&1 && docker info >/dev/null 2>&1; then
-                docker run --rm -v "$PWD:/repo" -w /repo ghcr.io/gitleaks/gitleaks:v8.30.1 dir /repo --config .gitleaks.toml --report-format json --report-path "/repo/${SECURITY_REPORT_DIR}/gitleaks.json" --exit-code 1
+                docker run --rm -v "$PWD:/repo" -w /repo ghcr.io/gitleaks/gitleaks:v8.30.1 dir /repo --config .gitleaks.toml --report-format json --report-path "/repo/${SECURITY_REPORT_DIR}/gitleaks.json" --exit-code 0 || true
+                docker run --rm -v "$PWD:/repo" -w /repo ghcr.io/gitleaks/gitleaks:v8.30.1 dir /repo --config .gitleaks.toml --report-format sarif --report-path "/repo/${SECURITY_REPORT_DIR}/gitleaks.sarif" --exit-code 1
               else
                 echo "[ERROR] Gitleaks not available"
                 exit 1
@@ -157,9 +159,11 @@ pipeline {
               echo "[INFO] Running Trivy Filesystem Scan..."
               if command -v trivy >/dev/null 2>&1; then
                 trivy fs --config security/trivy/trivy.yaml --ignorefile .trivyignore --format json --output "${SECURITY_REPORT_DIR}/trivy-fs.json" . || true
+                trivy fs --config security/trivy/trivy.yaml --ignorefile .trivyignore --format sarif --output "${SECURITY_REPORT_DIR}/trivy-fs.sarif" . || true
               else
                 echo "[WARN] Trivy not installed"
                 echo '{"results": []}' > "${SECURITY_REPORT_DIR}/trivy-fs.json"
+                echo '{"$schema": "https://schemastore.azurewebsites.net/schemas/json/sarif-2.1.0-rtm.5.json", "version": "2.1.0", "runs": []}' > "${SECURITY_REPORT_DIR}/trivy-fs.sarif"
               fi
             '''
           }

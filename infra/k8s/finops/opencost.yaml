@@ -111,7 +111,7 @@ spec:
       serviceAccountName: opencost
       containers:
         - name: opencost
-          image: quay.io/kubecost1/opencost:1.111.0@sha256:abcd1234567ddc563e414c243003006d6490edaf828ea28a0e98032ec1a1abec
+          image: quay.io/kubecost1/opencost:latest # TODO: Pin image digest
           ports:
             - name: api
               containerPort: 9003

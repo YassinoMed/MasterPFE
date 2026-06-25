@@ -57,7 +57,9 @@ spec:
             - name: CACHE_STORE
               value: file
             - name: QUEUE_CONNECTION
-              value: sync
+              value: nats
+            - name: NATS_URL
+              value: nats://nats.ai-security.svc.cluster.local:4222
             - name: LOG_CHANNEL
               value: stderr
             - name: CREATE_DOTENV

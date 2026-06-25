@@ -17,8 +17,11 @@ resources:
 
 configMapGenerator:
   - name: securerag-common-config
-    envs:
-      - configmap-env.env
+    behavior: merge
+    literals:
+      - APP_ENV=production
+      - APP_DEBUG=false
+      - FEATURE_OTEL_ENABLED=true
 
 generatorOptions:
   disableNameSuffixHash: true

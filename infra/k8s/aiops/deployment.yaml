@@ -20,11 +20,18 @@ spec:
     spec:
       containers:
         - name: ollama
-          image: ollama/ollama:0.1.30@sha256:90121234567ddc563e414c243003006d6490edaf828ea28a0e98032ec1a1abec
+          image: ollama/ollama:latest # TODO: Pin image digest
           ports: [{ containerPort: 11434 }]
           resources:
             requests: { cpu: 1, memory: 4Gi }
             limits: { cpu: 4, memory: 8Gi }
+          startupProbe:
+            httpGet:
+              path: /api/tags
+              port: 11434
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            failureThreshold: 30
           volumeMounts:
             - name: models
               mountPath: /root/.ollama

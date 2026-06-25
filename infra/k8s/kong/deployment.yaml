@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
         - name: kong
-          image: kong:3.6@sha256:56781234567ddc563e414c243003006d6490edaf828ea28a0e98032ec1a1abec
+          image: kong:latest # TODO: Pin image digest
           ports:
             - { containerPort: 8000, name: proxy }
             - { containerPort: 8001, name: admin }
@@ -89,3 +89,41 @@ data:
               policy: local
           - name: prometheus
             config: {}
+      - name: conversation-service
+        url: http://conversation-service.securerag-hub.svc:8000
+        routes:
+          - name: llm-chat-api
+            paths: ["/api/v1/chat", "/api/v1/conversations"]
+            strip_path: false
+        plugins:
+          - name: rate-limiting
+            config:
+              minute: 20
+              policy: local
+          - name: prometheus
+            config: {}
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: kong-admin-policy
+  namespace: kong-system
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: kong
+  policyTypes:
+    - Ingress
+  ingress:
+    - ports:
+        - protocol: TCP
+          port: 8000
+        - protocol: TCP
+          port: 8443
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: kong
+      ports:
+        - protocol: TCP
+          port: 8001

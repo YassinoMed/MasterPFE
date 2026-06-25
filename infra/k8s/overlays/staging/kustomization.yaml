@@ -10,7 +10,7 @@ configMapGenerator:
       - APP_ENV=staging
       - APP_DEBUG=false
       - FEATURE_MULTI_CLUSTER=false
-      - FEATURE_OTEL_ENABLED=false
+      - FEATURE_OTEL_ENABLED=true
       - FEATURE_CANARY_ENABLED=false
 images:
   - name: ghcr.io/example/securerag-hub-portal-web

@@ -73,7 +73,8 @@ spec:
       volumes:
         - { name: config, configMap: { name: loki-config } }
         - name: data
-          emptyDir: { sizeLimit: 5Gi }
+          persistentVolumeClaim:
+            claimName: loki-data
 ---
 apiVersion: v1
 kind: Service
@@ -84,3 +85,15 @@ spec:
   type: ClusterIP
   selector: { app.kubernetes.io/name: loki }
   ports: [{ name: http, port: 3100, targetPort: 3100 }]
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: loki-data
+  namespace: securerag-monitoring
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi

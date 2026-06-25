@@ -139,6 +139,26 @@ EOF
                 }
             }
         }
+
+        stage('Smoke Tests') {
+            steps {
+                withCredentials([
+                    sshUserPrivateKey(
+                        credentialsId: 'recette-deploy-ssh-key',
+                        keyFileVariable: 'SSH_KEY_FILE'
+                    )
+                ]) {
+                    sh '''
+                        ssh -i "$SSH_KEY_FILE" ${SSH_OPTIONS} ${RECETTE_USER}@${RECETTE_HOST} "bash -s" << 'EOF'
+                        set -euo pipefail
+                        cd /root/MasterPFE
+                        echo "===== Running Smoke Tests ====="
+                        NS="securerag-hub" REPORT_DIR="reports/postdeploy" bash scripts/validate/smoke-tests.sh
+EOF
+                    '''
+                }
+            }
+        }
     }
 
     post {

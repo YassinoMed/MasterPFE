@@ -64,7 +64,9 @@ spec:
             - name: CREATE_DOTENV
               value: "false"
             - name: QUEUE_CONNECTION
-              value: sync
+              value: nats
+            - name: NATS_URL
+              value: nats://nats.ai-security.svc.cluster.local:4222
             - name: SECURERAG_PORTAL_BACKEND_MODE
               value: auto
             - name: AUTH_USERS_BASE_URL

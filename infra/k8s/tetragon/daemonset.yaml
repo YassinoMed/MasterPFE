@@ -22,7 +22,7 @@ spec:
         - operator: Exists
       containers:
         - name: tetragon
-          image: quay.io/cilium/tetragon:v1.1.1@sha256:12341234567ddc563e414c243003006d6490edaf828ea28a0e98032ec1a1abec
+          image: quay.io/cilium/tetragon:latest # TODO: Pin image digest
           securityContext:
             privileged: true
           env:
