@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('v1')->group(function (): void {
     Route::get('/health', HealthController::class);
 
-    Route::middleware('throttle:120,1')->group(function (): void {
+    Route::middleware('throttle:100000,1')->group(function (): void {
         Route::apiResource('conversations', ConversationController::class)->only(['index', 'store', 'show']);
         Route::patch('/conversations/{conversation}/status', [ConversationController::class, 'status']);
         Route::get('/conversations/{conversation}/messages', [MessageController::class, 'index']);

@@ -48,32 +48,38 @@ patches:
     patch: |-
       - op: replace
         path: /spec/template/spec/containers/0/imagePullPolicy
-        value: IfNotPresent
+        value: Always
+      - op: replace
+        path: /spec/replicas
+        value: 3
   - target:
       kind: Deployment
       name: auth-users
     patch: |-
       - op: replace
         path: /spec/template/spec/containers/0/imagePullPolicy
-        value: IfNotPresent
+        value: Always
+      - op: replace
+        path: /spec/replicas
+        value: 3
   - target:
       kind: Deployment
       name: chatbot-manager
     patch: |-
       - op: replace
         path: /spec/template/spec/containers/0/imagePullPolicy
-        value: IfNotPresent
+        value: Always
   - target:
       kind: Deployment
       name: conversation-service
     patch: |-
       - op: replace
         path: /spec/template/spec/containers/0/imagePullPolicy
-        value: IfNotPresent
+        value: Always
   - target:
       kind: Deployment
       name: audit-security-service
     patch: |-
       - op: replace
         path: /spec/template/spec/containers/0/imagePullPolicy
-        value: IfNotPresent
+        value: Always

@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('v1')->group(function (): void {
     Route::get('/health', HealthController::class);
 
-    Route::middleware('throttle:120,1')->group(function (): void {
+    Route::middleware('throttle:100000,1')->group(function (): void {
         Route::apiResource('incidents', SecurityIncidentController::class)->only(['index', 'store', 'show']);
         Route::patch('/incidents/{incident}/status', [SecurityIncidentController::class, 'status']);
         Route::get('/audit-logs', [AuditLogController::class, 'index']);

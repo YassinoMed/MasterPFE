@@ -78,10 +78,10 @@ export default function (data) {
   group(`Endurance #${iterationCount} - API Endpoints`, () => {
     const endpoints = [
       { service: 'portal-web', path: '/' },
-      { service: 'auth-users', path: '/api/users' },
-      { service: 'chatbot-manager', path: '/api/chatbots' },
-      { service: 'conversation-service', path: '/api/conversations' },
-      { service: 'audit-security-service', path: '/api/audit-logs' },
+      { service: 'auth-users', path: '/api/v1/users' },
+      { service: 'chatbot-manager', path: '/api/v1/chatbots' },
+      { service: 'conversation-service', path: '/api/v1/conversations' },
+      { service: 'audit-security-service', path: '/api/v1/audit-logs' },
     ];
 
     for (const ep of endpoints) {

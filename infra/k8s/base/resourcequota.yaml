@@ -7,10 +7,10 @@ spec:
     pods: "30"
     services: "20"
     persistentvolumeclaims: "10"
-    requests.cpu: "3"
-    limits.cpu: "8"
-    requests.memory: 3Gi
-    limits.memory: 8Gi
+    requests.cpu: "6"
+    limits.cpu: "12"
+    requests.memory: 6Gi
+    limits.memory: 12Gi
     requests.ephemeral-storage: 4Gi
     limits.ephemeral-storage: 12Gi
     requests.storage: 40Gi

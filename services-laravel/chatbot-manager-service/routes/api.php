@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('v1')->group(function (): void {
     Route::get('/health', HealthController::class);
 
-    Route::middleware('throttle:120,1')->group(function (): void {
+    Route::middleware('throttle:100000,1')->group(function (): void {
         Route::apiResource('business-domains', BusinessDomainController::class)
             ->parameters(['business-domains' => 'domain'])
             ->except(['destroy']);
