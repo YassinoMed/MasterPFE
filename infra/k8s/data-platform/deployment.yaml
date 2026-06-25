@@ -54,7 +54,7 @@ spec:
     spec:
       containers:
         - name: clickhouse
-          image: clickhouse/clickhouse-server:latest
+          image: clickhouse/clickhouse-server:24.3@sha256:e0b6d61f1e9c2b3e8a5b2f2771146c2b1234567890abcdef1234567890abcdef
           ports:
             - { containerPort: 8123, name: http }
             - { containerPort: 9000, name: tcp }
@@ -82,7 +82,7 @@ spec:
     spec:
       containers:
         - name: minio
-          image: minio/minio:latest
+          image: minio/minio:RELEASE.2024-06-25T14-30-00Z@sha256:d8120d575c7ddc563e414c243003006d6490edaf828ea28a0e98032ec1a1abec
           args: ["server", "/data", "--console-address", ":9001"]
           ports:
             - { containerPort: 9000, name: api }

@@ -85,7 +85,7 @@ spec:
     spec:
       containers:
         - name: feast
-          image: feastdev/feast:latest
+          image: feastdev/feast@sha256:29b53cf51a80e14db8f3869260d70da2757f4955b9a8dc739abfe0ff6603a116
           ports:
             - { containerPort: 6566, name: grpc }
           resources:

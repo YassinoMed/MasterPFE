@@ -20,7 +20,7 @@ spec:
     spec:
       containers:
         - name: otel-collector
-          image: otel/opentelemetry-collector-contrib:latest
+          image: otel/opentelemetry-collector-contrib@sha256:4935caa35e9a4cb387e35732e8fb22b2b5759af8d12e7043357f03837f6e8df5
           ports:
             - { containerPort: 4317, name: otlp-grpc }
             - { containerPort: 4318, name: otlp-http }
@@ -84,7 +84,7 @@ spec:
     spec:
       containers:
         - name: tempo
-          image: grafana/tempo:latest
+          image: grafana/tempo@sha256:1ce31d6d7ffab62189685e8c47881d4a561c5d38bd0dbd66e40ca83cef07923d
           ports:
             - { containerPort: 3200, name: http }
             - { containerPort: 4317, name: otlp-grpc }

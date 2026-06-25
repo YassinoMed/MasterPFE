@@ -28,7 +28,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: falco-talon
-          image: issif/falco-talon:latest
+          image: issif/falco-talon@sha256:ecf35224d30e5375cc346815aa98a62c3de97c6c704d22f8a280674ed624b2fc
           imagePullPolicy: IfNotPresent
           args:
             - server

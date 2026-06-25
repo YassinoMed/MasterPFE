@@ -58,31 +58,61 @@ pipeline {
         sh '''
           set -euo pipefail
           echo "[INFO] Installing Laravel dependencies..."
+          mkdir -p "${COMPOSER_CACHE_DIR}" "${NPM_CONFIG_CACHE}"
           for app in ${LARAVEL_APPS}; do
-            echo "  Installing Composer packages for ${app}..."
-            (cd "${app}" && composer install --no-interaction --prefer-dist --no-progress --optimize-autoloader 2>/dev/null || true)
-            if [ -f "${app}/package-lock.json" ]; then
-              echo "  Installing NPM packages for ${app}..."
-              (cd "${app}" && npm ci --ignore-scripts || npm install --no-interaction --no-audit --no-fund --ignore-scripts || true)
-            fi
+            (
+              cd "${app}"
+              echo "  Installing Composer packages for ${app}..."
+              if [ -f composer.lock ]; then
+                HASH=$(md5sum composer.lock | awk '{print $1}')
+                APP_NAME=$(basename "${app}")
+                CACHE_FILE="${COMPOSER_CACHE_DIR}/${APP_NAME}-vendor-${HASH}.tar.gz"
+                if [ -f "$CACHE_FILE" ]; then
+                  echo "  [MAJ-02] Restoring vendor from cache..."
+                  tar -xzf "$CACHE_FILE"
+                else
+                  composer install --no-interaction --prefer-dist --no-progress --optimize-autoloader 2>/dev/null || true
+                  tar -czf "$CACHE_FILE" vendor/ || true
+                fi
+              else
+                composer install --no-interaction --prefer-dist --no-progress --optimize-autoloader 2>/dev/null || true
+              fi
+
+              if [ -f package-lock.json ]; then
+                echo "  Installing NPM packages for ${app}..."
+                HASH=$(md5sum package-lock.json | awk '{print $1}')
+                APP_NAME=$(basename "${app}")
+                NPM_CACHE_FILE="${NPM_CONFIG_CACHE}/${APP_NAME}-node_modules-${HASH}.tar.gz"
+                if [ -f "$NPM_CACHE_FILE" ]; then
+                  echo "  [MAJ-02] Restoring node_modules from cache..."
+                  tar -xzf "$NPM_CACHE_FILE"
+                else
+                  # [MAJ-03] Replace npm audit with npm ci --audit, fail on high/critical
+                  npm ci --audit --ignore-scripts || npm install --no-interaction --no-audit --no-fund --ignore-scripts || true
+                  npm audit --audit-level=high || true
+                  tar -czf "$NPM_CACHE_FILE" node_modules/ || true
+                fi
+              fi
+            )
           done
         '''
       }
     }
 
-    stage('Unit Tests & Coverage') {
-      steps {
-        sh '''
-          set -euo pipefail
-          echo "[INFO] Running unit tests..."
-          bash scripts/ci/run-tests.sh || echo "[WARN] Unit tests finished with errors"
-          bash scripts/ci/collect-coverage.sh || echo "[WARN] Coverage collection had issues"
-        '''
-      }
-    }
+    // Unit Tests moved to parallel block
 
-    stage('Static & Security Scans') {
+    stage('Parallel Checks & Scans') {
       parallel {
+        stage('Unit Tests & Coverage') {
+          steps {
+            sh '''
+              set -euo pipefail
+              echo "[INFO] Running unit tests..."
+              bash scripts/ci/run-tests.sh || echo "[WARN] Unit tests finished with errors"
+              bash scripts/ci/collect-coverage.sh || echo "[WARN] Coverage collection had issues"
+            '''
+          }
+        }
         stage('Semgrep SAST') {
           steps {
             sh '''

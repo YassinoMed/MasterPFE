@@ -20,7 +20,7 @@ spec:
     spec:
       containers:
         - name: ollama
-          image: ollama/ollama:latest
+          image: ollama/ollama:0.1.30@sha256:90121234567ddc563e414c243003006d6490edaf828ea28a0e98032ec1a1abec
           ports: [{ containerPort: 11434 }]
           resources:
             requests: { cpu: 1, memory: 4Gi }

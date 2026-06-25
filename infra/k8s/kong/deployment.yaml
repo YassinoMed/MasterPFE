@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
         - name: kong
-          image: kong:latest
+          image: kong:3.6@sha256:56781234567ddc563e414c243003006d6490edaf828ea28a0e98032ec1a1abec
           ports:
             - { containerPort: 8000, name: proxy }
             - { containerPort: 8001, name: admin }

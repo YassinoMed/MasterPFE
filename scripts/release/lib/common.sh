@@ -72,7 +72,9 @@ image_reachable_in_registry() {
   local -a cosign_args
   cosign_args=(triangulate)
   if is_true "${INSECURE_REGISTRY:-false}"; then
-    cosign_args+=(--allow-insecure-registry)
+    # [MAJ-04] Removed --allow-insecure-registry. Ensure Harbor CA is trusted.
+    # Expected verify: cosign verify --key cosign.pub <image>
+    :
   fi
 
   if command -v cosign >/dev/null 2>&1 && cosign "${cosign_args[@]}" "${image_ref}" >/dev/null 2>&1; then

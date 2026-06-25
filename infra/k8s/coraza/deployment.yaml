@@ -20,7 +20,7 @@ spec:
     spec:
       containers:
         - name: coraza-waf
-          image: ghcr.io/corazawaf/coraza-proxy-wasm:latest
+          image: ghcr.io/corazawaf/coraza-proxy-wasm@sha256:d66f944831428ea27039207fa4019bea55f9ea0a876d7b0dc8cc7c9e385fa4b1
           ports:
             - { containerPort: 8080, name: proxy }
           env:
