@@ -1,0 +1,44 @@
+apiVersion: "serving.kserve.io/v1beta1"
+kind: "InferenceService"
+metadata:
+  name: "zysec-ai"
+  namespace: ai-security
+spec:
+  predictor:
+    minReplicas: 1
+    maxReplicas: 3 # KEDA will auto-scale this based on NATS queue length
+    model:
+      modelFormat:
+        name: vLLM
+      storageUri: "s3://models/zysec-ai"
+      resources:
+        limits:
+          cpu: "2"
+          memory: 8Gi
+          # nvidia.com/gpu: 1
+---
+apiVersion: "serving.kserve.io/v1beta1"
+kind: "InferenceService"
+metadata:
+  name: "deephat-v1-7b"
+  namespace: ai-security
+spec:
+  predictor:
+    minReplicas: 0 # Scale to zero supported
+    model:
+      modelFormat:
+        name: vLLM
+      storageUri: "s3://models/deephat-v1-7b"
+---
+apiVersion: "serving.kserve.io/v1beta1"
+kind: "InferenceService"
+metadata:
+  name: "qwythos-9b"
+  namespace: ai-security
+spec:
+  predictor:
+    minReplicas: 0 # Invoked only for deep correlation SIEM tasks
+    model:
+      modelFormat:
+        name: vLLM
+      storageUri: "s3://models/qwythos-9b-claude-mythos"

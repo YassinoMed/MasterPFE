@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ai-routing-engine
+  namespace: ai-security
+  labels:
+    app: ai-routing-engine
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: ai-routing-engine
+  template:
+    metadata:
+      labels:
+        app: ai-routing-engine
+    spec:
+      containers:
+      - name: routing-engine
+        # In a real environment, this would be built via Jenkins and pushed to a registry
+        # [MAJ-05] Excluded from pinning: application image built in CI
+        image: securerag-hub-ai-routing-engine:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8000
+        readinessProbe:
+          httpGet:
+            path: /healthz
+            port: 8000
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ai-routing-engine
+  namespace: ai-security
+spec:
+  selector:
+    app: ai-routing-engine
+  ports:
+  - port: 80
+    targetPort: 8000

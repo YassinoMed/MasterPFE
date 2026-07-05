@@ -84,7 +84,7 @@ spec:
     spec:
       containers:
         - name: tempo
-          image: grafana/tempo@sha256:1ce31d6d7ffab62189685e8c47881d4a561c5d38bd0dbd66e40ca83cef07923d
+          image: grafana/tempo:2.4.1
           ports:
             - { containerPort: 3200, name: http }
             - { containerPort: 4317, name: otlp-grpc }
@@ -109,14 +109,14 @@ data:
     distributor:
       receivers:
         otlp: { protocols: { grpc: {}, http: {} } }
-    ingester:
-      trace_idle_period: 10s
-      max_block_duration: 5m
     storage:
       trace:
         backend: local
         local:
           path: /tmp/tempo/traces
+        wal:
+          path: /tmp/tempo/wal
     querier:
       frontend_worker:
         frontend_address: "tempo.otel-system.svc:9095"
+

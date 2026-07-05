@@ -1,0 +1,17 @@
+apiVersion: telemetry.istio.io/v1alpha1
+kind: Telemetry
+metadata:
+  name: mesh-default-tracing
+  namespace: istio-system
+spec:
+  tracing:
+  - providers:
+    - name: "envoy"
+    randomSamplingPercentage: 100.0
+    customTags:
+      cluster_id:
+        literal:
+          value: "securerag-cluster"
+      environment:
+        literal:
+          value: "production"

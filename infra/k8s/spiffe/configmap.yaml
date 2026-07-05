@@ -1,0 +1,97 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: spire-server-config
+  namespace: spire-system
+data:
+  server.conf: |
+    server {
+      bind_address = "0.0.0.0"
+      bind_port = "8081"
+      trust_domain = "cluster.local"
+      data_dir = "/run/spire/data"
+      log_level = "INFO"
+      
+      ca_subject = {
+        country = ["FR"]
+        organization = ["SecureRAG"]
+        common_name = ""
+      }
+    }
+    
+    plugins {
+      DataStore "sql" {
+        plugin_data {
+          database_type = "sqlite3"
+          connection_string = "/run/spire/data/datastore.sqlite3"
+        }
+      }
+      
+      NodeAttestor "k8s_psat" {
+        plugin_data {
+          clusters = {
+            "securerag-cluster" = {
+              service_account_allow_list = ["spire-system:spire-agent"]
+            }
+          }
+        }
+      }
+      
+      KeyManager "memory" {
+        plugin_data = {}
+      }
+      
+      Notifier "k8sbundle" {
+        plugin_data {}
+      }
+    }
+  controller-manager.conf: |
+    apiVersion: spire.spiffe.io/v1alpha1
+    kind: ControllerManagerConfig
+    metrics:
+      bindAddress: 0.0.0.0:8082
+    health:
+      healthProbeBindAddress: 0.0.0.0:8083
+    leaderElection:
+      leaderElect: true
+      resourceName: 808b4170.spiffe.io
+      resourceNamespace: spire-system
+    validatingWebhookConfigurationName: spire-controller-manager-webhook
+    entryIDPrefix: spire-
+    clusterName: securerag-cluster
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: spire-agent-config
+  namespace: spire-system
+data:
+  agent.conf: |
+    agent {
+      data_dir = "/run/spire/data"
+      log_level = "INFO"
+      server_address = "spire-server"
+      server_port = "8081"
+      socket_path = "/run/spire/sockets/agent.sock"
+      trust_bundle_path = "/run/spire/bundle/bundle.crt"
+      trust_domain = "cluster.local"
+    }
+    
+    plugins {
+      NodeAttestor "k8s_psat" {
+        plugin_data {
+          cluster = "securerag-cluster"
+        }
+      }
+      
+      KeyManager "memory" {
+        plugin_data {
+        }
+      }
+      
+      WorkloadAttestor "k8s" {
+        plugin_data {
+          skip_kubelet_verification = true
+        }
+      }
+    }

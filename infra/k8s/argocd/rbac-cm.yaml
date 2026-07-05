@@ -1,0 +1,33 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: argocd-rbac-cm
+  namespace: argocd
+  labels:
+    app.kubernetes.io/part-of: argocd
+data:
+  policy.default: role:readonly
+  policy.csv: |
+    # Auditor role - read-only across all resources
+    p, role:auditor, applications, get, securerag-hub/*, allow
+    p, role:auditor, projects, get, securerag-hub, allow
+    
+    # Developer role - CRUD + sync for dev/staging/recette environments
+    p, role:developer, applications, get, securerag-hub/securerag-dev, allow
+    p, role:developer, applications, create, securerag-hub/securerag-dev, allow
+    p, role:developer, applications, update, securerag-hub/securerag-dev, allow
+    p, role:developer, applications, delete, securerag-hub/securerag-dev, allow
+    p, role:developer, applications, sync, securerag-hub/securerag-dev, allow
+    p, role:developer, applications, get, securerag-hub/securerag-staging, allow
+    p, role:developer, applications, sync, securerag-hub/securerag-staging, allow
+    p, role:developer, applications, get, securerag-hub/securerag-recette, allow
+    p, role:developer, applications, sync, securerag-hub/securerag-recette, allow
+    p, role:developer, projects, get, securerag-hub, allow
+
+    # Platform Team role - full control over all applications
+    p, role:platform-team, applications, *, *, allow
+    p, role:platform-team, projects, *, *, allow
+    p, role:platform-team, repositories, *, *, allow
+
+    # Map admin user to default admin role
+    g, admin, role:admin

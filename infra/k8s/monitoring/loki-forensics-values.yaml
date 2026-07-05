@@ -1,0 +1,42 @@
+loki:
+  # Configure WORM storage with AWS S3
+  storage:
+    type: s3
+    s3:
+      # Placeholder for SOC2 WORM bucket
+      s3: s3://region-name/soc2-audit-logs
+      endpoint: s3.region-name.amazonaws.com
+      region: region-name
+      # Object lock MUST be enabled on the bucket side for true WORM
+  
+  # Configure Promtail/Loki pipeline to extract trace_id
+  config:
+    schema_config:
+      configs:
+        - from: 2024-01-01
+          store: boltdb-shipper
+          object_store: s3
+          schema: v11
+          index:
+            prefix: index_
+            period: 24h
+            
+    limits_config:
+      enforce_metric_name: false
+      reject_old_samples: true
+      reject_old_samples_max_age: 168h
+      
+promtail:
+  config:
+    snippets:
+      pipelineStages:
+        - cri: {}
+        - match:
+            selector: '{app=~".+"}'
+            stages:
+              # Extract trace_id and span_id from log formats (e.g. JSON or standard formats)
+              # Assuming standard Istio / Envoy JSON access logs or app logs with trace_id="<hex>"
+              - regex:
+                  expression: '(trace_id|traceId)=(?P<trace_id>[a-f0-9]{32})'
+              - labels:
+                  trace_id:

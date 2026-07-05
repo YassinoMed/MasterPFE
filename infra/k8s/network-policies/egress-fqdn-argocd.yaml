@@ -1,0 +1,30 @@
+apiVersion: "cilium.io/v2"
+kind: CiliumNetworkPolicy
+metadata:
+  name: "egress-fqdn-argocd"
+  namespace: "argocd"
+spec:
+  description: "Allow ArgoCD to access github.com and other Git providers by FQDN only"
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: argocd-repo-server
+  egress:
+  - toEndpoints:
+    - matchLabels:
+        k8s:io.kubernetes.pod.namespace: kube-system
+        k8s:k8s-app: kube-dns
+    toPorts:
+    - ports:
+      - port: "53"
+        protocol: ANY
+      rules:
+        dns:
+        - matchPattern: "*.github.com"
+        - matchPattern: "github.com"
+  - toFQDNs:
+    - matchPattern: "*.github.com"
+    - matchName: "github.com"
+    toPorts:
+    - ports:
+      - port: "443"
+        protocol: TCP

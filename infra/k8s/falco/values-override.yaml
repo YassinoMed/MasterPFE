@@ -1,0 +1,19 @@
+# values-override.yaml for Falco to integrate with Falco Talon
+
+falco:
+  http_output:
+    enabled: true
+    url: "http://falco-talon.falco.svc:2803"
+    # Falco Talon requires JSON payload
+    format: "json"
+  
+  # Ensure JSON output is enabled for the webhook
+  json_output: true
+  json_include_output_property: true
+  json_include_tags_property: true
+
+# Enable metrics for SOC2 observability
+metrics:
+  enabled: true
+
+# We already have a sidecar or DaemonSet, this just ensures the config is applied.

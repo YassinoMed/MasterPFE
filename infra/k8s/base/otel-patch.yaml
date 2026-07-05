@@ -1,0 +1,75 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: auth-users
+spec:
+  template:
+    spec:
+      containers:
+        - name: auth-users
+          env:
+            - name: OTEL_PHP_AUTOLOAD_ENABLED
+              value: "true"
+            - name: OTEL_TRACES_EXPORTER
+              value: "otlp"
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: "http://otel-collector.otel-system.svc.cluster.local:4318"
+            - name: OTEL_SERVICE_NAME
+              value: "auth-users"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: chatbot-manager
+spec:
+  template:
+    spec:
+      containers:
+        - name: chatbot-manager
+          env:
+            - name: OTEL_PHP_AUTOLOAD_ENABLED
+              value: "true"
+            - name: OTEL_TRACES_EXPORTER
+              value: "otlp"
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: "http://otel-collector.otel-system.svc.cluster.local:4318"
+            - name: OTEL_SERVICE_NAME
+              value: "chatbot-manager"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: conversation-service
+spec:
+  template:
+    spec:
+      containers:
+        - name: conversation-service
+          env:
+            - name: OTEL_PHP_AUTOLOAD_ENABLED
+              value: "true"
+            - name: OTEL_TRACES_EXPORTER
+              value: "otlp"
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: "http://otel-collector.otel-system.svc.cluster.local:4318"
+            - name: OTEL_SERVICE_NAME
+              value: "conversation-service"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: audit-security-service
+spec:
+  template:
+    spec:
+      containers:
+        - name: audit-security-service
+          env:
+            - name: OTEL_PHP_AUTOLOAD_ENABLED
+              value: "true"
+            - name: OTEL_TRACES_EXPORTER
+              value: "otlp"
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: "http://otel-collector.otel-system.svc.cluster.local:4318"
+            - name: OTEL_SERVICE_NAME
+              value: "audit-security-service"

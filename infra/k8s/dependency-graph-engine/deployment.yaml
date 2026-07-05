@@ -1,0 +1,125 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dependency-graph-config
+  namespace: securerag-hub
+data:
+  config.yaml: |
+    nodes:
+      - id: "argocd"
+        label: "ArgoCD"
+        group: "cd"
+      - id: "git-repo"
+        label: "Git Repository"
+        group: "source"
+      - id: "vault"
+        label: "HashiCorp Vault"
+        group: "security"
+      - id: "vault-storage"
+        label: "Vault Storage Backend"
+        group: "storage"
+      - id: "kubernetes-api"
+        label: "Kubernetes API Server"
+        group: "control-plane"
+      - id: "etcd"
+        label: "etcd Cluster"
+        group: "storage"
+      - id: "cilium"
+        label: "Cilium CNI"
+        group: "network"
+      - id: "kernel"
+        label: "Linux Kernel (eBPF)"
+        group: "infrastructure"
+      - id: "kubelet"
+        label: "Kubelet"
+        group: "node"
+      - id: "portal-web"
+        label: "Portal Web (Frontend)"
+        group: "workload"
+      - id: "auth-users"
+        label: "Auth Users Service"
+        group: "workload"
+
+    edges:
+      - from: "argocd"
+        to: "git-repo"
+        type: "pulls-from"
+      - from: "vault"
+        to: "vault-storage"
+        type: "persists-to"
+      - from: "kubernetes-api"
+        to: "etcd"
+        type: "persists-to"
+      - from: "cilium"
+        to: "kernel"
+        type: "runs-in"
+      - from: "kubelet"
+        to: "kubernetes-api"
+        type: "communicates-with"
+      - from: "cilium"
+        to: "kubernetes-api"
+        type: "communicates-with"
+      - from: "argocd"
+        to: "kubernetes-api"
+        type: "applies-to"
+      - from: "auth-users"
+        to: "vault"
+        type: "fetches-secrets"
+      - from: "portal-web"
+        to: "auth-users"
+        type: "calls"
+      - from: "auth-users"
+        to: "kubernetes-api"
+        type: "hosted-on"
+      - from: "portal-web"
+        to: "kubernetes-api"
+        type: "hosted-on"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dependency-graph-engine
+  namespace: securerag-hub
+  labels:
+    app: dependency-graph-engine
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dependency-graph-engine
+  template:
+    metadata:
+      labels:
+        app: dependency-graph-engine
+    spec:
+      containers:
+        - name: engine
+          # [MAJ-05] Excluded from pinning: application image built in CI
+          image: my-registry/dependency-graph-engine:latest
+          ports:
+            - containerPort: 8080
+              name: http
+          volumeMounts:
+            - name: config-volume
+              mountPath: /app/config.yaml
+              subPath: config.yaml
+      volumes:
+        - name: config-volume
+          configMap:
+            name: dependency-graph-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: dependency-graph-engine
+  namespace: securerag-hub
+  labels:
+    app: dependency-graph-engine
+spec:
+  ports:
+    - port: 8080
+      targetPort: 8080
+      protocol: TCP
+      name: http
+  selector:
+    app: dependency-graph-engine

@@ -29,10 +29,11 @@ infra/jenkins/secrets/**/*
 !infra/k8s/opa-gatekeeper/**/*.yaml
 
 # ── SOPS — fichiers encryptés commités, fichiers en clair exclus ──
-*.yaml
-!*.enc.yaml
-!*.enc.yml
-!*.sops.yaml
+# Allow all infra Kubernetes/Helm manifests (critical for ArgoCD GitOps)
+!infra/k8s/**/*.yaml
+!infra/helm/**/*.yaml
+
+# Exclude decrypted secret files (only encrypted versions should be committed)
 infra/secrets/production/*.yaml
 !infra/secrets/production/*.enc.yaml
 infra/secrets/dev/*.yaml

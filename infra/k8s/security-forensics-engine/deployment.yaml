@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: security-forensics-engine
+  namespace: securerag-hub
+  labels:
+    app: security-forensics-engine
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: security-forensics-engine
+  template:
+    metadata:
+      labels:
+        app: security-forensics-engine
+    spec:
+      containers:
+        - name: engine
+          # [MAJ-05] Excluded from pinning: application image built in CI
+          image: my-registry/security-forensics-engine:latest
+          ports:
+            - containerPort: 8080
+              name: http
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: security-forensics-engine
+  namespace: securerag-hub
+  labels:
+    app: security-forensics-engine
+spec:
+  ports:
+    - port: 8080
+      targetPort: 8080
+      protocol: TCP
+      name: http
+  selector:
+    app: security-forensics-engine
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: security-forensics-engine
+  namespace: securerag-hub
+  labels:
+    release: prometheus
+spec:
+  selector:
+    matchLabels:
+      app: security-forensics-engine
+  endpoints:
+    - port: http
+      path: /metrics

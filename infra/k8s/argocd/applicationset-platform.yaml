@@ -38,10 +38,6 @@ spec:
             path: infra/k8s/policies/kyverno
             namespace: kyverno
             wave: "6"
-          - name: cilium-policies
-            path: infra/k8s/policies/cilium
-            namespace: kube-system
-            wave: "7"
           - name: metrics-server
             path: infra/k8s/addons/metrics-server
             namespace: kube-system

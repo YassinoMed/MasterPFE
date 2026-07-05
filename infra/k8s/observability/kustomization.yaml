@@ -15,6 +15,7 @@ resources:
   - alertmanager.yaml
   - alertmanager-external-secret.yaml
   - networkpolicy.yaml
-commonLabels:
-  app.kubernetes.io/part-of: securerag-hub
-  app.kubernetes.io/component: observability
+labels:
+  - pairs:
+      app.kubernetes.io/part-of: securerag-hub
+      app.kubernetes.io/component: observability

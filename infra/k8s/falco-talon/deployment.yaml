@@ -12,7 +12,7 @@ metadata:
 spec:
   # Replicas set to 0: Falco Talon requires NATS (not yet deployed).
   # Will be enabled in Phase 1 when NATS is provisioned.
-  replicas: 1
+  replicas: 0
   selector:
     matchLabels:
       app.kubernetes.io/name: falco-talon

@@ -1,0 +1,24 @@
+apiVersion: "cilium.io/v2"
+kind: CiliumNetworkPolicy
+metadata:
+  name: "l7-auth-users-ingress"
+  namespace: "securerag-hub"
+spec:
+  description: "Strict L7 HTTP policy for auth-users service"
+  endpointSelector:
+    matchLabels:
+      app: auth-users
+  ingress:
+  - fromEndpoints:
+    - matchLabels:
+        app: portal-web
+    toPorts:
+    - ports:
+      - port: "8080"
+        protocol: TCP
+      rules:
+        http:
+        - method: "POST"
+          path: "/api/v1/login"
+        - method: "GET"
+          path: "/healthz"

@@ -1,0 +1,61 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: securerag-all-services
+  namespace: argocd
+  labels:
+    app.kubernetes.io/part-of: securerag-hub
+    app.kubernetes.io/managed-by: argocd
+spec:
+  generators:
+    - list:
+        elements:
+          - env: dev
+            path: infra/k8s/overlays/dev
+            wave: "10"
+          - env: demo
+            path: infra/k8s/overlays/demo
+            wave: "10"
+          - env: recette
+            path: infra/k8s/overlays/recette
+            wave: "15"
+          - env: staging
+            path: infra/k8s/overlays/staging
+            wave: "25"
+          - env: production
+            path: infra/k8s/overlays/production
+            wave: "30"
+          - env: dr
+            path: infra/k8s/overlays/dr
+            wave: "35"
+  template:
+    metadata:
+      name: 'securerag-{{env}}'
+      annotations:
+        argocd.argoproj.io/sync-wave: '{{wave}}'
+      finalizers:
+        - resources-finalizer.argocd.argoproj.io
+    spec:
+      project: securerag-hub
+      source:
+        repoURL: https://github.com/YassinoMed/MasterPFE.git
+        targetRevision: main
+        path: '{{path}}'
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: securerag-hub
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
+          - ApplyOutOfSyncOnly=true
+          - ServerSideApply=true
+        retry:
+          limit: 5
+          backoff:
+            duration: 10s
+            factor: 2
+            maxDuration: 3m
+      revisionHistoryLimit: 10
