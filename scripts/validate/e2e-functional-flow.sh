@@ -57,10 +57,11 @@ done
   && pass "All internal health endpoints are reachable" \
   || fail "One or more internal health endpoints are unreachable"
 
-if curl -fsS "http://localhost:8081/health" >/dev/null 2>&1; then
-  pass "Portal web NodePort works on localhost:8081"
+PORTAL_URL="${PORTAL_URL:-http://localhost:9081}"
+if curl -fsS "${PORTAL_URL}/health" >/dev/null 2>&1; then
+  pass "Portal web NodePort works on ${PORTAL_URL}"
 else
-  fail "Portal web is not reachable on localhost:8081"
+  fail "Portal web is not reachable on ${PORTAL_URL}"
 fi
 
 skip "Legacy api-gateway /chat flow is excluded from the official Laravel runtime validation"

@@ -1,0 +1,27 @@
+diff --git a/security-patch.py b/security-patch.py
+--- a/security-patch.py
++++ b/security-patch.py
+# FIX NEEDED in ./services/ai-orchestrator/main.py at line 126: Avoid dynamic strings or hardcoded parameters.
+# FIX NEEDED in ./services/ai-metrics/main.py at line 53: Avoid dynamic strings or hardcoded parameters.
+# FIX NEEDED in ./services/ai-memory/main.py at line 100: Avoid dynamic strings or hardcoded parameters.
+# FIX NEEDED in ./services/ai-feedback-engine/main.py at line 77: Avoid dynamic strings or hardcoded parameters.
+# FIX NEEDED in ./services/ai-trust-engine/main.py at line 189: Avoid dynamic strings or hardcoded parameters.
+# FIX NEEDED in ./services/ai-risk-engine/main.py at line 89: Avoid dynamic strings or hardcoded parameters.
+# FIX NEEDED in ./services/ai-explainability/main.py at line 137: Avoid dynamic strings or hardcoded parameters.
+# FIX NEEDED in ./services/ai-knowledge/main.py at line 91: Avoid dynamic strings or hardcoded parameters.
+# FIX NEEDED in ./services/auth-users/tests/test_auth_flow.py at line 18: Avoid dynamic strings or hardcoded parameters.
+# FIX NEEDED in ./services/auth-users/src/main.py at line 42: Avoid dynamic strings or hardcoded parameters.
+# FIX NEEDED in ./services/auth-users/src/main.py at line 102: Avoid dynamic strings or hardcoded parameters.
+# FIX NEEDED in ./services/auth-users/src/main.py at line 114: Avoid dynamic strings or hardcoded parameters.
+# FIX NEEDED in ./infra/wazuh/wazuh-exporter/exporter.py at line 83: Avoid dynamic strings or hardcoded parameters.
+# FIX NEEDED in ./infra/wazuh/wazuh-exporter/exporter.py at line 87: Avoid dynamic strings or hardcoded parameters.
+# FIX NEEDED in ./infra/wazuh/wazuh-exporter/exporter.py at line 92: Avoid dynamic strings or hardcoded parameters.
+# FIX NEEDED in ./scripts/ai-agents/secure_coding_agent.py at line 36: Avoid dynamic strings or hardcoded parameters.
+# FIX NEEDED in ./scripts/ai/analyze-images.py at line 22: Avoid dynamic strings or hardcoded parameters.
+# FIX NEEDED in ./ai-security/app.py at line 274: Avoid dynamic strings or hardcoded parameters.
+# FIX NEEDED in ./embeding/services/knowledge-hub/app/retrieval/retrieval_engine.py at line 20: Avoid dynamic strings or hardcoded parameters.
+# FIX NEEDED in ./embeding/services/knowledge-hub/app/vectorstore/qdrant_manager.py at line 39: Avoid dynamic strings or hardcoded parameters.
+# FIX NEEDED in ./services-laravel/shared-security/src/Http/Requests/Concerns/AuthorizesServiceRequest.php at line 17: Avoid dynamic strings or hardcoded parameters.
+# FIX NEEDED in ./services-laravel/shared-security/src/Http/Requests/Concerns/AuthorizesServiceRequest.php at line 18: Avoid dynamic strings or hardcoded parameters.
+# FIX NEEDED in ./services-laravel/shared-security/src/Http/Requests/Concerns/AuthorizesServiceRequest.php at line 22: Avoid dynamic strings or hardcoded parameters.
+# FIX NEEDED in ./services-laravel/shared-security/src/Http/Requests/Concerns/AuthorizesServiceRequest.php at line 27: Avoid dynamic strings or hardcoded parameters.

@@ -1,0 +1,196 @@
+{
+  "findings": [
+    {
+      "file": "./services/ai-orchestrator/main.py",
+      "line": 126,
+      "type": "Remote Code Execution (RCE)",
+      "severity": "CRITICAL",
+      "description": "Dangerous shell execution 'run' with dynamic arguments detected.",
+      "code": "uvicorn.run(app, host=\"0.0.0.0\", port=8091)"
+    },
+    {
+      "file": "./services/ai-metrics/main.py",
+      "line": 53,
+      "type": "Remote Code Execution (RCE)",
+      "severity": "CRITICAL",
+      "description": "Dangerous shell execution 'run' with dynamic arguments detected.",
+      "code": "uvicorn.run(app, host=\"0.0.0.0\", port=8098)"
+    },
+    {
+      "file": "./services/ai-memory/main.py",
+      "line": 100,
+      "type": "Remote Code Execution (RCE)",
+      "severity": "CRITICAL",
+      "description": "Dangerous shell execution 'run' with dynamic arguments detected.",
+      "code": "uvicorn.run(app, host=\"0.0.0.0\", port=8095)"
+    },
+    {
+      "file": "./services/ai-feedback-engine/main.py",
+      "line": 77,
+      "type": "Remote Code Execution (RCE)",
+      "severity": "CRITICAL",
+      "description": "Dangerous shell execution 'run' with dynamic arguments detected.",
+      "code": "uvicorn.run(app, host=\"0.0.0.0\", port=8097)"
+    },
+    {
+      "file": "./services/ai-trust-engine/main.py",
+      "line": 189,
+      "type": "Remote Code Execution (RCE)",
+      "severity": "CRITICAL",
+      "description": "Dangerous shell execution 'run' with dynamic arguments detected.",
+      "code": "uvicorn.run(app, host=\"0.0.0.0\", port=8093)"
+    },
+    {
+      "file": "./services/ai-risk-engine/main.py",
+      "line": 89,
+      "type": "Remote Code Execution (RCE)",
+      "severity": "CRITICAL",
+      "description": "Dangerous shell execution 'run' with dynamic arguments detected.",
+      "code": "uvicorn.run(app, host=\"0.0.0.0\", port=8092)"
+    },
+    {
+      "file": "./services/ai-explainability/main.py",
+      "line": 137,
+      "type": "Remote Code Execution (RCE)",
+      "severity": "CRITICAL",
+      "description": "Dangerous shell execution 'run' with dynamic arguments detected.",
+      "code": "uvicorn.run(app, host=\"0.0.0.0\", port=8094)"
+    },
+    {
+      "file": "./services/ai-knowledge/main.py",
+      "line": 91,
+      "type": "Remote Code Execution (RCE)",
+      "severity": "CRITICAL",
+      "description": "Dangerous shell execution 'run' with dynamic arguments detected.",
+      "code": "uvicorn.run(app, host=\"0.0.0.0\", port=8096)"
+    },
+    {
+      "file": "./services/auth-users/tests/test_auth_flow.py",
+      "line": 18,
+      "type": "Hardcoded Secret",
+      "severity": "CRITICAL",
+      "description": "Potential hardcoded credentials or API token found.",
+      "code": "token = r2.json()[\"access_token\"]"
+    },
+    {
+      "file": "./services/auth-users/src/main.py",
+      "line": 42,
+      "type": "Hardcoded Secret",
+      "severity": "CRITICAL",
+      "description": "Potential hardcoded credentials or API token found.",
+      "code": "token = authorization.split(\" \", 1)[1].strip()"
+    },
+    {
+      "file": "./services/auth-users/src/main.py",
+      "line": 102,
+      "type": "Hardcoded Secret",
+      "severity": "CRITICAL",
+      "description": "Potential hardcoded credentials or API token found.",
+      "code": "token = issue_token(subject=str(user.id), role=user.role)"
+    },
+    {
+      "file": "./services/auth-users/src/main.py",
+      "line": 114,
+      "type": "Hardcoded Secret",
+      "severity": "CRITICAL",
+      "description": "Potential hardcoded credentials or API token found.",
+      "code": "token = issue_token(subject=str(user.id), role=user.role)"
+    },
+    {
+      "file": "./infra/wazuh/wazuh-exporter/exporter.py",
+      "line": 83,
+      "type": "Hardcoded Secret",
+      "severity": "CRITICAL",
+      "description": "Potential hardcoded credentials or API token found.",
+      "code": "token = None"
+    },
+    {
+      "file": "./infra/wazuh/wazuh-exporter/exporter.py",
+      "line": 87,
+      "type": "Hardcoded Secret",
+      "severity": "CRITICAL",
+      "description": "Potential hardcoded credentials or API token found.",
+      "code": "token = get_token()"
+    },
+    {
+      "file": "./infra/wazuh/wazuh-exporter/exporter.py",
+      "line": 92,
+      "type": "Hardcoded Secret",
+      "severity": "CRITICAL",
+      "description": "Potential hardcoded credentials or API token found.",
+      "code": "token = None"
+    },
+    {
+      "file": "./scripts/ai-agents/secure_coding_agent.py",
+      "line": 36,
+      "type": "Hardcoded Secret",
+      "severity": "CRITICAL",
+      "description": "Potential hardcoded credentials or API token found.",
+      "code": "if any(x in line.lower() for x in [\"password = \", \"passwd =\", \"api_key =\", \"secret_key =\", \"token =\"]):"
+    },
+    {
+      "file": "./scripts/ai/analyze-images.py",
+      "line": 22,
+      "type": "Remote Code Execution (RCE)",
+      "severity": "CRITICAL",
+      "description": "Dangerous shell execution 'run' with dynamic arguments detected.",
+      "code": "res = subprocess.run("
+    },
+    {
+      "file": "./ai-security/app.py",
+      "line": 274,
+      "type": "Remote Code Execution (RCE)",
+      "severity": "CRITICAL",
+      "description": "Dangerous shell execution 'run' with dynamic arguments detected.",
+      "code": "uvicorn.run(app, host=\"0.0.0.0\", port=8000)"
+    },
+    {
+      "file": "./embeding/services/knowledge-hub/app/retrieval/retrieval_engine.py",
+      "line": 20,
+      "type": "Hardcoded Secret",
+      "severity": "CRITICAL",
+      "description": "Potential hardcoded credentials or API token found.",
+      "code": "CHARS_PER_TOKEN = 4"
+    },
+    {
+      "file": "./embeding/services/knowledge-hub/app/vectorstore/qdrant_manager.py",
+      "line": 39,
+      "type": "Hardcoded Secret",
+      "severity": "CRITICAL",
+      "description": "Potential hardcoded credentials or API token found.",
+      "code": "self.api_key = api_key if api_key is not None else settings.qdrant_api_key"
+    },
+    {
+      "file": "./services-laravel/shared-security/src/Http/Requests/Concerns/AuthorizesServiceRequest.php",
+      "line": 17,
+      "type": "Hardcoded Secret",
+      "severity": "CRITICAL",
+      "description": "Potential hardcoded credentials or API token found.",
+      "code": "$sharedToken = (string) $this->authzValue('SECURERAG_SHARED_API_TOKEN', '');"
+    },
+    {
+      "file": "./services-laravel/shared-security/src/Http/Requests/Concerns/AuthorizesServiceRequest.php",
+      "line": 18,
+      "type": "Hardcoded Secret",
+      "severity": "CRITICAL",
+      "description": "Potential hardcoded credentials or API token found.",
+      "code": "if ($sharedToken === '') {"
+    },
+    {
+      "file": "./services-laravel/shared-security/src/Http/Requests/Concerns/AuthorizesServiceRequest.php",
+      "line": 22,
+      "type": "Hardcoded Secret",
+      "severity": "CRITICAL",
+      "description": "Potential hardcoded credentials or API token found.",
+      "code": "$headerToken = (string) $this->header('X-SecureRAG-Service-Token', '');"
+    },
+    {
+      "file": "./services-laravel/shared-security/src/Http/Requests/Concerns/AuthorizesServiceRequest.php",
+      "line": 27,
+      "type": "Hardcoded Secret",
+      "severity": "CRITICAL",
+      "description": "Potential hardcoded credentials or API token found.",
+      "code": "$bearerToken = (string) $this->bearerToken();"
+    }
+  ]
+}

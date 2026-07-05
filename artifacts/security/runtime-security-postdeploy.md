@@ -1,6 +1,6 @@
 # Runtime Security Post-Deployment Report - SecureRAG Hub
 
-- Generated at UTC: `2026-06-21T09:02:58Z`
+- Generated at UTC: `2026-07-05T11:59:18Z`
 - Namespace: `securerag-hub`
 - Status: `PARTIEL`
 
@@ -17,67 +17,60 @@
 
 | Workload | Status | Ready / Desired | imageID coverage | Runtime hardening coverage | ServiceAccount | NetPol | HPA | PDB |
 |---|---:|---:|---:|---:|---|---|---|---|
-| `auth-users` | PARTIEL | 0 / 1 | 0 / 1 | 0 / 1 | `sa-auth-users` | `True` | `False` | `True` |
-| `chatbot-manager` | PARTIEL | 0 / 1 | 0 / 1 | 0 / 1 | `sa-chatbot-manager` | `True` | `False` | `True` |
-| `conversation-service` | PARTIEL | 0 / 1 | 0 / 1 | 0 / 1 | `sa-conversation-service` | `True` | `False` | `True` |
-| `audit-security-service` | PARTIEL | 0 / 1 | 0 / 1 | 0 / 1 | `sa-audit-security-service` | `True` | `False` | `True` |
-| `portal-web` | PARTIEL | 0 / 1 | 0 / 1 | 0 / 1 | `sa-portal-web` | `True` | `True` | `True` |
+| `auth-users` | PARTIEL | 3 / 3 | 3 / 3 | 3 / 3 | `sa-auth-users` | `True` | `False` | `True` |
+| `chatbot-manager` | PARTIEL | 1 / 1 | 1 / 1 | 1 / 1 | `sa-chatbot-manager` | `True` | `False` | `True` |
+| `conversation-service` | PARTIEL | 1 / 1 | 1 / 1 | 1 / 1 | `sa-conversation-service` | `True` | `False` | `True` |
+| `audit-security-service` | PARTIEL | 1 / 1 | 1 / 1 | 1 / 1 | `sa-audit-security-service` | `True` | `False` | `True` |
+| `portal-web` | TERMINÉ | 3 / 3 | 3 / 3 | 3 / 3 | `sa-portal-web` | `True` | `True` | `True` |
 
 ## Workload details
 
 ### auth-users
 
 - Gap: HPA missing
-- Gap: ready pods 0/1
-- Pod `auth-users-799b8b5664-whwzb` ready=`False` created=`2026-06-21T08:49:51Z` imageIDs=`1`
+- Pod `auth-users-8678978685-bfl4l` ready=`True` created=`2026-06-25T10:30:42Z` imageIDs=`1`
   - Runtime hardening checks matched the active Pod spec.
-  - imageID: ``
-- Pod `auth-users-c4b94d64b-t6k79` ready=`False` created=`2026-06-21T08:49:51Z` imageIDs=`1`
+  - imageID: `localhost:5001/securerag-hub-auth-users@sha256:7b24d8aa5f36d0db05d10fb2a46286711cc4a2304f47dde84ba796362aef5522`
+- Pod `auth-users-8678978685-l7968` ready=`True` created=`2026-06-25T10:30:54Z` imageIDs=`1`
   - Runtime hardening checks matched the active Pod spec.
-  - imageID: ``
+  - imageID: `localhost:5001/securerag-hub-auth-users@sha256:7b24d8aa5f36d0db05d10fb2a46286711cc4a2304f47dde84ba796362aef5522`
+- Pod `auth-users-8678978685-zrn25` ready=`True` created=`2026-06-25T10:31:25Z` imageIDs=`1`
+  - Runtime hardening checks matched the active Pod spec.
+  - imageID: `localhost:5001/securerag-hub-auth-users@sha256:7b24d8aa5f36d0db05d10fb2a46286711cc4a2304f47dde84ba796362aef5522`
 
 ### chatbot-manager
 
 - Gap: HPA missing
-- Gap: ready pods 0/1
-- Pod `chatbot-manager-779b7cc44b-bskxh` ready=`False` created=`2026-06-21T08:49:51Z` imageIDs=`1`
+- Pod `chatbot-manager-79b79d59c4-lvgtp` ready=`True` created=`2026-06-25T10:30:42Z` imageIDs=`1`
   - Runtime hardening checks matched the active Pod spec.
-  - imageID: ``
-- Pod `chatbot-manager-976899cb8-jprbg` ready=`False` created=`2026-06-21T08:49:52Z` imageIDs=`1`
-  - Runtime hardening checks matched the active Pod spec.
-  - imageID: ``
+  - imageID: `localhost:5001/securerag-hub-chatbot-manager@sha256:086ed526afb4439f6d4c5590326be3a757574ccda5e894ce1b652054bde84513`
 
 ### conversation-service
 
 - Gap: HPA missing
-- Gap: ready pods 0/1
-- Pod `conversation-service-64f99b44db-6n2vv` ready=`False` created=`2026-06-21T08:49:52Z` imageIDs=`1`
+- Pod `conversation-service-6bc4c7dbc6-pq7xf` ready=`True` created=`2026-06-25T10:30:43Z` imageIDs=`1`
   - Runtime hardening checks matched the active Pod spec.
-  - imageID: ``
-- Pod `conversation-service-778479dbbf-wwfcx` ready=`False` created=`2026-06-21T08:49:51Z` imageIDs=`1`
-  - Runtime hardening checks matched the active Pod spec.
-  - imageID: ``
+  - imageID: `localhost:5001/securerag-hub-conversation-service@sha256:35f53f4cd274b54021812ed48b95991af875c7e8e0aa66c53bb06df65fe4e03f`
 
 ### audit-security-service
 
 - Gap: HPA missing
-- Gap: ready pods 0/1
-- Pod `audit-security-service-5fddbb654-n5ltk` ready=`False` created=`2026-06-21T08:49:51Z` imageIDs=`1`
+- Pod `audit-security-service-667b7997b4-j5m7r` ready=`True` created=`2026-06-25T10:30:43Z` imageIDs=`1`
   - Runtime hardening checks matched the active Pod spec.
-  - imageID: ``
-- Pod `audit-security-service-b478dc875-b5s9d` ready=`False` created=`2026-06-21T08:49:52Z` imageIDs=`1`
-  - Runtime hardening checks matched the active Pod spec.
-  - imageID: ``
+  - imageID: `localhost:5001/securerag-hub-audit-security-service@sha256:6cf5cd864a1eb4b9179869b55519c1ba7b86d03f355b28506d3b7de97325d9bb`
 
 ### portal-web
 
-- Gap: ready pods 0/1
-- Pod `portal-web-68d97f97f-2sjcd` ready=`False` created=`2026-06-21T08:49:51Z` imageIDs=`1`
+- No deployment-level hardening gap detected.
+- Pod `portal-web-859c78db95-8xxmr` ready=`True` created=`2026-06-25T10:31:26Z` imageIDs=`1`
   - Runtime hardening checks matched the active Pod spec.
-  - imageID: ``
-- Pod `portal-web-6ff6cd4545-swmh5` ready=`False` created=`2026-06-21T08:49:51Z` imageIDs=`1`
+  - imageID: `localhost:5001/securerag-hub-portal-web@sha256:fa1fc37b44b4cedc7e32c38940f1971f5e9af7c7b6d425d66d3214cd4bc18f80`
+- Pod `portal-web-859c78db95-v9vwx` ready=`True` created=`2026-06-25T10:30:59Z` imageIDs=`1`
   - Runtime hardening checks matched the active Pod spec.
-  - imageID: ``
+  - imageID: `localhost:5001/securerag-hub-portal-web@sha256:fa1fc37b44b4cedc7e32c38940f1971f5e9af7c7b6d425d66d3214cd4bc18f80`
+- Pod `portal-web-859c78db95-z68jt` ready=`True` created=`2026-06-25T10:30:42Z` imageIDs=`1`
+  - Runtime hardening checks matched the active Pod spec.
+  - imageID: `localhost:5001/securerag-hub-portal-web@sha256:fa1fc37b44b4cedc7e32c38940f1971f5e9af7c7b6d425d66d3214cd4bc18f80`
 
 ## Honest reading
 
@@ -88,222 +81,575 @@
 ## Deployments
 
 ```text
-NAME                     READY   UP-TO-DATE   AVAILABLE   AGE   CONTAINERS               IMAGES                                                    SELECTOR
-audit-security-service   0/1     1            0           13m   audit-security-service   localhost:5001/securerag-hub-audit-security-service:dev   app.kubernetes.io/name=audit-security-service,app.kubernetes.io/part-of=securerag-hub
-auth-users               0/1     1            0           13m   auth-users               localhost:5001/securerag-hub-auth-users:dev               app.kubernetes.io/name=auth-users,app.kubernetes.io/part-of=securerag-hub
-chatbot-manager          0/1     1            0           13m   chatbot-manager          localhost:5001/securerag-hub-chatbot-manager:dev          app.kubernetes.io/name=chatbot-manager,app.kubernetes.io/part-of=securerag-hub
-conversation-service     0/1     1            0           13m   conversation-service     localhost:5001/securerag-hub-conversation-service:dev     app.kubernetes.io/name=conversation-service,app.kubernetes.io/part-of=securerag-hub
-portal-web               0/1     1            0           13m   portal-web               localhost:5001/securerag-hub-portal-web:dev               app.kubernetes.io/name=portal-web,app.kubernetes.io/part-of=securerag-hub
-postgres-auth            0/1     1            0           13m   postgres-auth            postgres:16-alpine                                        app.kubernetes.io/name=postgres-auth,app.kubernetes.io/part-of=securerag-hub
+NAME                     READY   UP-TO-DATE   AVAILABLE   AGE   CONTAINERS               IMAGES                                                     SELECTOR
+audit-security-service   1/1     1            1           11d   audit-security-service   localhost:5001/securerag-hub-audit-security-service:demo   app.kubernetes.io/name=audit-security-service,app.kubernetes.io/part-of=securerag-hub
+auth-users               3/3     3            3           11d   auth-users               localhost:5001/securerag-hub-auth-users:demo               app.kubernetes.io/name=auth-users,app.kubernetes.io/part-of=securerag-hub
+chatbot-manager          1/1     1            1           11d   chatbot-manager          localhost:5001/securerag-hub-chatbot-manager:demo          app.kubernetes.io/name=chatbot-manager,app.kubernetes.io/part-of=securerag-hub
+conversation-service     1/1     1            1           11d   conversation-service     localhost:5001/securerag-hub-conversation-service:demo     app.kubernetes.io/name=conversation-service,app.kubernetes.io/part-of=securerag-hub
+portal-web               3/3     3            3           11d   portal-web               localhost:5001/securerag-hub-portal-web:demo               app.kubernetes.io/name=portal-web,app.kubernetes.io/part-of=securerag-hub
+postgres-auth            1/1     1            1           11d   postgres-auth            localhost:5001/postgres:16-alpine                          app.kubernetes.io/name=postgres-auth,app.kubernetes.io/part-of=securerag-hub
 ```
 
 ## Pods
 
 ```text
-NAME                                     READY   STATUS                       RESTARTS   AGE   IP            NODE                   NOMINATED NODE   READINESS GATES
-audit-security-service-5fddbb654-n5ltk   0/1     ImagePullBackOff             0          13m   10.244.1.2    securerag-dev-worker   <none>           <none>
-audit-security-service-b478dc875-b5s9d   0/1     ImagePullBackOff             0          13m   10.244.1.12   securerag-dev-worker   <none>           <none>
-auth-users-799b8b5664-whwzb              0/1     ImagePullBackOff             0          13m   10.244.1.3    securerag-dev-worker   <none>           <none>
-auth-users-c4b94d64b-t6k79               0/1     ImagePullBackOff             0          13m   10.244.1.9    securerag-dev-worker   <none>           <none>
-chatbot-manager-779b7cc44b-bskxh         0/1     ImagePullBackOff             0          13m   10.244.1.4    securerag-dev-worker   <none>           <none>
-chatbot-manager-976899cb8-jprbg          0/1     ImagePullBackOff             0          13m   10.244.1.10   securerag-dev-worker   <none>           <none>
-conversation-service-64f99b44db-6n2vv    0/1     ImagePullBackOff             0          13m   10.244.1.11   securerag-dev-worker   <none>           <none>
-conversation-service-778479dbbf-wwfcx    0/1     ImagePullBackOff             0          13m   10.244.1.5    securerag-dev-worker   <none>           <none>
-portal-web-68d97f97f-2sjcd               0/1     ImagePullBackOff             0          13m   10.244.1.8    securerag-dev-worker   <none>           <none>
-portal-web-6ff6cd4545-swmh5              0/1     ImagePullBackOff             0          13m   10.244.1.6    securerag-dev-worker   <none>           <none>
-postgres-auth-867ddc6dc8-w9xgr           0/1     CreateContainerConfigError   0          13m   10.244.1.7    securerag-dev-worker   <none>           <none>
+NAME                                      READY   STATUS    RESTARTS   AGE   IP             NODE                   NOMINATED NODE   READINESS GATES
+audit-security-service-667b7997b4-j5m7r   1/1     Running   0          10d   10.244.1.226   securerag-dev-worker   <none>           <none>
+auth-users-8678978685-bfl4l               1/1     Running   0          10d   10.244.1.223   securerag-dev-worker   <none>           <none>
+auth-users-8678978685-l7968               1/1     Running   0          10d   10.244.1.227   securerag-dev-worker   <none>           <none>
+auth-users-8678978685-zrn25               1/1     Running   0          10d   10.244.1.229   securerag-dev-worker   <none>           <none>
+chatbot-manager-79b79d59c4-lvgtp          1/1     Running   0          10d   10.244.1.224   securerag-dev-worker   <none>           <none>
+conversation-service-6bc4c7dbc6-pq7xf     1/1     Running   0          10d   10.244.1.225   securerag-dev-worker   <none>           <none>
+portal-web-859c78db95-8xxmr               1/1     Running   0          10d   10.244.1.230   securerag-dev-worker   <none>           <none>
+portal-web-859c78db95-v9vwx               1/1     Running   0          10d   10.244.1.228   securerag-dev-worker   <none>           <none>
+portal-web-859c78db95-z68jt               1/1     Running   0          10d   10.244.1.222   securerag-dev-worker   <none>           <none>
+postgres-auth-fbf55db78-kwlh4             1/1     Running   0          10d   10.244.1.212   securerag-dev-worker   <none>           <none>
 ```
 
 ## Deployment images and imageIDs
 
 ```text
-audit-security-service-5fddbb654-n5ltk	localhost:5001/securerag-hub-audit-security-service:dev	
-audit-security-service-b478dc875-b5s9d	localhost:5001/securerag-hub-audit-security-service:dev	
-auth-users-799b8b5664-whwzb	localhost:5001/securerag-hub-auth-users:dev	
-auth-users-c4b94d64b-t6k79	localhost:5001/securerag-hub-auth-users:dev	
-chatbot-manager-779b7cc44b-bskxh	localhost:5001/securerag-hub-chatbot-manager:dev	
-chatbot-manager-976899cb8-jprbg	localhost:5001/securerag-hub-chatbot-manager:dev	
-conversation-service-64f99b44db-6n2vv	localhost:5001/securerag-hub-conversation-service:dev	
-conversation-service-778479dbbf-wwfcx	localhost:5001/securerag-hub-conversation-service:dev	
-portal-web-68d97f97f-2sjcd	localhost:5001/securerag-hub-portal-web:dev	
-portal-web-6ff6cd4545-swmh5	localhost:5001/securerag-hub-portal-web:dev	
-postgres-auth-867ddc6dc8-w9xgr	postgres:16-alpine	
+audit-security-service-667b7997b4-j5m7r	localhost:5001/securerag-hub-audit-security-service:demo	localhost:5001/securerag-hub-audit-security-service@sha256:6cf5cd864a1eb4b9179869b55519c1ba7b86d03f355b28506d3b7de97325d9bb
+auth-users-8678978685-bfl4l	localhost:5001/securerag-hub-auth-users:demo	localhost:5001/securerag-hub-auth-users@sha256:7b24d8aa5f36d0db05d10fb2a46286711cc4a2304f47dde84ba796362aef5522
+auth-users-8678978685-l7968	localhost:5001/securerag-hub-auth-users:demo	localhost:5001/securerag-hub-auth-users@sha256:7b24d8aa5f36d0db05d10fb2a46286711cc4a2304f47dde84ba796362aef5522
+auth-users-8678978685-zrn25	localhost:5001/securerag-hub-auth-users:demo	localhost:5001/securerag-hub-auth-users@sha256:7b24d8aa5f36d0db05d10fb2a46286711cc4a2304f47dde84ba796362aef5522
+chatbot-manager-79b79d59c4-lvgtp	localhost:5001/securerag-hub-chatbot-manager:demo	localhost:5001/securerag-hub-chatbot-manager@sha256:086ed526afb4439f6d4c5590326be3a757574ccda5e894ce1b652054bde84513
+conversation-service-6bc4c7dbc6-pq7xf	localhost:5001/securerag-hub-conversation-service:demo	localhost:5001/securerag-hub-conversation-service@sha256:35f53f4cd274b54021812ed48b95991af875c7e8e0aa66c53bb06df65fe4e03f
+portal-web-859c78db95-8xxmr	localhost:5001/securerag-hub-portal-web:demo	localhost:5001/securerag-hub-portal-web@sha256:fa1fc37b44b4cedc7e32c38940f1971f5e9af7c7b6d425d66d3214cd4bc18f80
+portal-web-859c78db95-v9vwx	localhost:5001/securerag-hub-portal-web:demo	localhost:5001/securerag-hub-portal-web@sha256:fa1fc37b44b4cedc7e32c38940f1971f5e9af7c7b6d425d66d3214cd4bc18f80
+portal-web-859c78db95-z68jt	localhost:5001/securerag-hub-portal-web:demo	localhost:5001/securerag-hub-portal-web@sha256:fa1fc37b44b4cedc7e32c38940f1971f5e9af7c7b6d425d66d3214cd4bc18f80
+postgres-auth-fbf55db78-kwlh4	docker.io/library/postgres:16-alpine	docker.io/library/postgres@sha256:e013e867e712fec275706a6c51c966f0bb0c93cfa8f51000f85a15f9865a28cb
 ```
 
 ## ServiceAccounts
 
 ```text
 NAME                        SECRETS   AGE
-default                     0         13m
-sa-audit-security-service   0         13m
-sa-auth-users               0         13m
-sa-chatbot-manager          0         13m
-sa-conversation-service     0         13m
-sa-portal-web               0         13m
-sa-postgres-auth            0         13m
-sa-validation               0         13m
+default                     0         11d
+sa-audit-security-service   0         11d
+sa-auth-users               0         11d
+sa-chatbot-manager          0         11d
+sa-conversation-service     0         11d
+sa-portal-web               0         11d
+sa-postgres-auth            0         11d
+sa-validation               0         11d
 ```
 
 ## Roles and RoleBindings
 
 ```text
 NAME                                                        CREATED AT
-role.rbac.authorization.k8s.io/securerag-runtime-readonly   2026-06-21T08:49:51Z
+role.rbac.authorization.k8s.io/securerag-runtime-readonly   2026-06-24T11:03:14Z
 
 NAME                                                                                      ROLE                              AGE   USERS   GROUPS   SERVICEACCOUNTS
-rolebinding.rbac.authorization.k8s.io/securerag-runtime-readonly-audit-security-service   Role/securerag-runtime-readonly   13m                    securerag-hub/sa-audit-security-service
+rolebinding.rbac.authorization.k8s.io/securerag-runtime-readonly-audit-security-service   Role/securerag-runtime-readonly   11d                    securerag-hub/sa-audit-security-service
 ```
 
 ## NetworkPolicies
 
 ```text
 NAME                             POD-SELECTOR                                                                                                    AGE
-allow-dns-egress                 <none>                                                                                                          13m
-allow-validation-egress          app.kubernetes.io/part-of=securerag-hub,job-role=validation                                                     13m
-allow-validation-ingress         app.kubernetes.io/name in (audit-security-service,auth-users,chatbot-manager,conversation-service,portal-web)   13m
-audit-security-service-network   app.kubernetes.io/name=audit-security-service,app.kubernetes.io/part-of=securerag-hub                           13m
-auth-users-policy                app.kubernetes.io/name=auth-users,app.kubernetes.io/part-of=securerag-hub                                       13m
-chatbot-manager-policy           app.kubernetes.io/name=chatbot-manager,app.kubernetes.io/part-of=securerag-hub                                  13m
-conversation-service-network     app.kubernetes.io/name=conversation-service,app.kubernetes.io/part-of=securerag-hub                             13m
-default-deny-all                 <none>                                                                                                          13m
-portal-web-policy                app.kubernetes.io/name=portal-web,app.kubernetes.io/part-of=securerag-hub                                       13m
-postgres-auth-policy             app.kubernetes.io/name=postgres-auth,app.kubernetes.io/part-of=securerag-hub                                    13m
+allow-dns-egress                 <none>                                                                                                          11d
+allow-validation-egress          app.kubernetes.io/part-of=securerag-hub,job-role=validation                                                     11d
+allow-validation-ingress         app.kubernetes.io/name in (audit-security-service,auth-users,chatbot-manager,conversation-service,portal-web)   11d
+audit-security-service-network   app.kubernetes.io/name=audit-security-service,app.kubernetes.io/part-of=securerag-hub                           11d
+auth-users-policy                app.kubernetes.io/name=auth-users,app.kubernetes.io/part-of=securerag-hub                                       11d
+chatbot-manager-policy           app.kubernetes.io/name=chatbot-manager,app.kubernetes.io/part-of=securerag-hub                                  11d
+conversation-service-network     app.kubernetes.io/name=conversation-service,app.kubernetes.io/part-of=securerag-hub                             11d
+default-deny-all                 <none>                                                                                                          11d
+portal-web-policy                app.kubernetes.io/name=portal-web,app.kubernetes.io/part-of=securerag-hub                                       11d
+postgres-auth-policy             app.kubernetes.io/name=postgres-auth,app.kubernetes.io/part-of=securerag-hub                                    11d
 ```
 
 ## PodDisruptionBudgets
 
 ```text
 NAME                         MIN AVAILABLE   MAX UNAVAILABLE   ALLOWED DISRUPTIONS   AGE
-audit-security-service-pdb   1               N/A               0                     13m
-auth-users-pdb               1               N/A               0                     13m
-chatbot-manager-pdb          1               N/A               0                     13m
-conversation-service-pdb     1               N/A               0                     13m
-portal-web-pdb               1               N/A               0                     13m
+audit-security-service-pdb   1               N/A               0                     11d
+auth-users-pdb               1               N/A               2                     11d
+chatbot-manager-pdb          1               N/A               0                     11d
+conversation-service-pdb     1               N/A               0                     11d
+portal-web-pdb               1               N/A               2                     11d
 ```
 
 ## HPA
 
 ```text
 NAME         REFERENCE               TARGETS              MINPODS   MAXPODS   REPLICAS   AGE
-portal-web   Deployment/portal-web   cpu: <unknown>/70%   1         3         1          13m
+portal-web   Deployment/portal-web   cpu: <unknown>/70%   1         3         3          11d
 ```
 
 ## Recent events
 
 ```text
-13m         Normal    ScalingReplicaSet              deployment/conversation-service               Scaled up replica set conversation-service-64f99b44db from 0 to 1
-13m         Normal    SuccessfulCreate               replicaset/chatbot-manager-976899cb8          Created pod: chatbot-manager-976899cb8-jprbg
-13m         Normal    SuccessfulCreate               replicaset/conversation-service-64f99b44db    Created pod: conversation-service-64f99b44db-6n2vv
-13m         Normal    Scheduled                      pod/conversation-service-64f99b44db-6n2vv     Successfully assigned securerag-hub/conversation-service-64f99b44db-6n2vv to securerag-dev-worker
-13m         Normal    ScalingReplicaSet              deployment/chatbot-manager                    Scaled up replica set chatbot-manager-976899cb8 from 0 to 1
-13m         Normal    Pulling                        pod/postgres-auth-867ddc6dc8-w9xgr            Pulling image "postgres:16-alpine"
-13m         Normal    Scheduled                      pod/audit-security-service-b478dc875-b5s9d    Successfully assigned securerag-hub/audit-security-service-b478dc875-b5s9d to securerag-dev-worker
-13m         Normal    Scheduled                      pod/chatbot-manager-976899cb8-jprbg           Successfully assigned securerag-hub/chatbot-manager-976899cb8-jprbg to securerag-dev-worker
-13m         Normal    ScalingReplicaSet              deployment/audit-security-service             Scaled up replica set audit-security-service-b478dc875 from 0 to 1
-13m         Normal    SuccessfulCreate               replicaset/audit-security-service-b478dc875   Created pod: audit-security-service-b478dc875-b5s9d
-13m         Normal    Pulled                         pod/postgres-auth-867ddc6dc8-w9xgr            Successfully pulled image "postgres:16-alpine" in 4.79s (4.794s including waiting). Image size: 116039346 bytes.
-12m         Warning   FailedGetResourceMetric        horizontalpodautoscaler/portal-web            failed to get cpu utilization: unable to get metrics for resource cpu: unable to fetch metrics from resource metrics API: the server could not find the requested resource (get pods.metrics.k8s.io)
-12m         Warning   FailedComputeMetricsReplicas   horizontalpodautoscaler/portal-web            invalid metrics (1 invalid out of 1), first error is: failed to get cpu resource metric value: failed to get cpu utilization: unable to get metrics for resource cpu: unable to fetch metrics from resource metrics API: the server could not find the requested resource (get pods.metrics.k8s.io)
-10m         Normal    Pulling                        pod/portal-web-68d97f97f-2sjcd                Pulling image "localhost:5001/securerag-hub-portal-web:dev"
-10m         Warning   Failed                         pod/portal-web-68d97f97f-2sjcd                Failed to pull image "localhost:5001/securerag-hub-portal-web:dev": failed to pull and unpack image "localhost:5001/securerag-hub-portal-web:dev": failed to resolve reference "localhost:5001/securerag-hub-portal-web:dev": failed to do request: Head "http://kind-registry:5000/v2/securerag-hub-portal-web/manifests/dev?ns=localhost%3A5001": dial tcp: lookup kind-registry on 172.18.0.1:53: server misbehaving
-10m         Warning   Failed                         pod/portal-web-68d97f97f-2sjcd                Error: ErrImagePull
-10m         Warning   Failed                         pod/conversation-service-778479dbbf-wwfcx     Failed to pull image "localhost:5001/securerag-hub-conversation-service:dev": failed to pull and unpack image "localhost:5001/securerag-hub-conversation-service:dev": failed to resolve reference "localhost:5001/securerag-hub-conversation-service:dev": failed to do request: Head "http://kind-registry:5000/v2/securerag-hub-conversation-service/manifests/dev?ns=localhost%3A5001": dial tcp: lookup kind-registry on 172.18.0.1:53: server misbehaving
-10m         Normal    Pulling                        pod/conversation-service-778479dbbf-wwfcx     Pulling image "localhost:5001/securerag-hub-conversation-service:dev"
-10m         Warning   Failed                         pod/conversation-service-778479dbbf-wwfcx     Error: ErrImagePull
-10m         Warning   Failed                         pod/portal-web-6ff6cd4545-swmh5               Failed to pull image "localhost:5001/securerag-hub-portal-web:dev": failed to pull and unpack image "localhost:5001/securerag-hub-portal-web:dev": failed to resolve reference "localhost:5001/securerag-hub-portal-web:dev": failed to do request: Head "http://kind-registry:5000/v2/securerag-hub-portal-web/manifests/dev?ns=localhost%3A5001": dial tcp: lookup kind-registry on 172.18.0.1:53: server misbehaving
-10m         Warning   Failed                         pod/portal-web-6ff6cd4545-swmh5               Error: ErrImagePull
-10m         Normal    Pulling                        pod/portal-web-6ff6cd4545-swmh5               Pulling image "localhost:5001/securerag-hub-portal-web:dev"
-10m         Warning   Failed                         pod/auth-users-799b8b5664-whwzb               Failed to pull image "localhost:5001/securerag-hub-auth-users:dev": failed to pull and unpack image "localhost:5001/securerag-hub-auth-users:dev": failed to resolve reference "localhost:5001/securerag-hub-auth-users:dev": failed to do request: Head "http://kind-registry:5000/v2/securerag-hub-auth-users/manifests/dev?ns=localhost%3A5001": dial tcp: lookup kind-registry on 172.18.0.1:53: server misbehaving
-10m         Warning   Failed                         pod/auth-users-799b8b5664-whwzb               Error: ErrImagePull
-10m         Normal    Pulling                        pod/auth-users-799b8b5664-whwzb               Pulling image "localhost:5001/securerag-hub-auth-users:dev"
-10m         Normal    Pulling                        pod/audit-security-service-5fddbb654-n5ltk    Pulling image "localhost:5001/securerag-hub-audit-security-service:dev"
-10m         Warning   Failed                         pod/audit-security-service-5fddbb654-n5ltk    Error: ErrImagePull
-10m         Warning   Failed                         pod/audit-security-service-5fddbb654-n5ltk    Failed to pull image "localhost:5001/securerag-hub-audit-security-service:dev": failed to pull and unpack image "localhost:5001/securerag-hub-audit-security-service:dev": failed to resolve reference "localhost:5001/securerag-hub-audit-security-service:dev": failed to do request: Head "http://kind-registry:5000/v2/securerag-hub-audit-security-service/manifests/dev?ns=localhost%3A5001": dial tcp: lookup kind-registry on 172.18.0.1:53: server misbehaving
-10m         Normal    Pulling                        pod/auth-users-c4b94d64b-t6k79                Pulling image "localhost:5001/securerag-hub-auth-users:dev"
-10m         Warning   Failed                         pod/auth-users-c4b94d64b-t6k79                Failed to pull image "localhost:5001/securerag-hub-auth-users:dev": failed to pull and unpack image "localhost:5001/securerag-hub-auth-users:dev": failed to resolve reference "localhost:5001/securerag-hub-auth-users:dev": failed to do request: Head "http://kind-registry:5000/v2/securerag-hub-auth-users/manifests/dev?ns=localhost%3A5001": dial tcp: lookup kind-registry on 172.18.0.1:53: server misbehaving
-10m         Warning   Failed                         pod/auth-users-c4b94d64b-t6k79                Error: ErrImagePull
-10m         Warning   Failed                         pod/chatbot-manager-779b7cc44b-bskxh          Error: ErrImagePull
-10m         Warning   Failed                         pod/chatbot-manager-779b7cc44b-bskxh          Failed to pull image "localhost:5001/securerag-hub-chatbot-manager:dev": failed to pull and unpack image "localhost:5001/securerag-hub-chatbot-manager:dev": failed to resolve reference "localhost:5001/securerag-hub-chatbot-manager:dev": failed to do request: Head "http://kind-registry:5000/v2/securerag-hub-chatbot-manager/manifests/dev?ns=localhost%3A5001": dial tcp: lookup kind-registry on 172.18.0.1:53: server misbehaving
-10m         Normal    Pulling                        pod/chatbot-manager-779b7cc44b-bskxh          Pulling image "localhost:5001/securerag-hub-chatbot-manager:dev"
-10m         Warning   FailedComputeMetricsReplicas   horizontalpodautoscaler/portal-web            invalid metrics (1 invalid out of 1), first error is: failed to get cpu resource metric value: failed to get cpu utilization: unable to get metrics for resource cpu: unable to fetch metrics from resource metrics API: the server is currently unable to handle the request (get pods.metrics.k8s.io)
-10m         Normal    Pulling                        pod/conversation-service-64f99b44db-6n2vv     Pulling image "localhost:5001/securerag-hub-conversation-service:dev"
-10m         Warning   Failed                         pod/conversation-service-64f99b44db-6n2vv     Error: ErrImagePull
-10m         Warning   Failed                         pod/conversation-service-64f99b44db-6n2vv     Failed to pull image "localhost:5001/securerag-hub-conversation-service:dev": failed to pull and unpack image "localhost:5001/securerag-hub-conversation-service:dev": failed to resolve reference "localhost:5001/securerag-hub-conversation-service:dev": failed to do request: Head "http://kind-registry:5000/v2/securerag-hub-conversation-service/manifests/dev?ns=localhost%3A5001": dial tcp: lookup kind-registry on 172.18.0.1:53: server misbehaving
-10m         Normal    Pulling                        pod/chatbot-manager-976899cb8-jprbg           Pulling image "localhost:5001/securerag-hub-chatbot-manager:dev"
-10m         Warning   Failed                         pod/chatbot-manager-976899cb8-jprbg           Error: ErrImagePull
-10m         Warning   Failed                         pod/chatbot-manager-976899cb8-jprbg           Failed to pull image "localhost:5001/securerag-hub-chatbot-manager:dev": failed to pull and unpack image "localhost:5001/securerag-hub-chatbot-manager:dev": failed to resolve reference "localhost:5001/securerag-hub-chatbot-manager:dev": failed to do request: Head "http://kind-registry:5000/v2/securerag-hub-chatbot-manager/manifests/dev?ns=localhost%3A5001": dial tcp: lookup kind-registry on 172.18.0.1:53: server misbehaving
-10m         Normal    Pulling                        pod/audit-security-service-b478dc875-b5s9d    Pulling image "localhost:5001/securerag-hub-audit-security-service:dev"
-10m         Warning   Failed                         pod/audit-security-service-b478dc875-b5s9d    Failed to pull image "localhost:5001/securerag-hub-audit-security-service:dev": failed to pull and unpack image "localhost:5001/securerag-hub-audit-security-service:dev": failed to resolve reference "localhost:5001/securerag-hub-audit-security-service:dev": failed to do request: Head "http://kind-registry:5000/v2/securerag-hub-audit-security-service/manifests/dev?ns=localhost%3A5001": dial tcp: lookup kind-registry on 172.18.0.1:53: server misbehaving
-10m         Warning   Failed                         pod/audit-security-service-b478dc875-b5s9d    Error: ErrImagePull
-7m55s       Normal    Scheduled                      pod/curl-smoke-1782031804                     Successfully assigned securerag-hub/curl-smoke-1782031804 to securerag-dev-worker
-7m54s       Normal    Pulling                        pod/curl-smoke-1782031804                     Pulling image "curlimages/curl:8.11.1"
-7m52s       Normal    Started                        pod/curl-smoke-1782031804                     Started container curl-smoke-1782031804
-7m52s       Normal    Created                        pod/curl-smoke-1782031804                     Created container: curl-smoke-1782031804
-7m52s       Normal    Pulled                         pod/curl-smoke-1782031804                     Successfully pulled image "curlimages/curl:8.11.1" in 2.185s (2.185s including waiting). Image size: 9560620 bytes.
-7m19s       Normal    Created                        pod/curl-sec-smoke-1782032139                 Created container: curl-sec-smoke-1782032139
-7m19s       Normal    Pulled                         pod/curl-sec-smoke-1782032139                 Container image "curlimages/curl:8.11.1" already present on machine
-7m19s       Normal    Scheduled                      pod/curl-sec-smoke-1782032139                 Successfully assigned securerag-hub/curl-sec-smoke-1782032139 to securerag-dev-worker
-7m18s       Normal    Started                        pod/curl-sec-smoke-1782032139                 Started container curl-sec-smoke-1782032139
-6m46s       Normal    Scheduled                      pod/e2e-functional-check-1782032173           Successfully assigned securerag-hub/e2e-functional-check-1782032173 to securerag-dev-worker
-6m45s       Normal    Pulled                         pod/e2e-functional-check-1782032173           Container image "curlimages/curl:8.11.1" already present on machine
-6m45s       Normal    Created                        pod/e2e-functional-check-1782032173           Created container: e2e-functional-check-1782032173
-6m45s       Normal    Started                        pod/e2e-functional-check-1782032173           Started container e2e-functional-check-1782032173
-3m7s        Normal    BackOff                        pod/auth-users-c4b94d64b-t6k79                Back-off pulling image "localhost:5001/securerag-hub-auth-users:dev"
-3m5s        Normal    BackOff                        pod/audit-security-service-5fddbb654-n5ltk    Back-off pulling image "localhost:5001/securerag-hub-audit-security-service:dev"
-3m5s        Warning   Failed                         pod/audit-security-service-5fddbb654-n5ltk    Error: ImagePullBackOff
-3m4s        Normal    BackOff                        pod/conversation-service-778479dbbf-wwfcx     Back-off pulling image "localhost:5001/securerag-hub-conversation-service:dev"
-3m1s        Normal    BackOff                        pod/portal-web-6ff6cd4545-swmh5               Back-off pulling image "localhost:5001/securerag-hub-portal-web:dev"
-3m1s        Warning   Failed                         pod/portal-web-6ff6cd4545-swmh5               Error: ImagePullBackOff
-3m          Normal    BackOff                        pod/chatbot-manager-976899cb8-jprbg           Back-off pulling image "localhost:5001/securerag-hub-chatbot-manager:dev"
-3m          Warning   Failed                         pod/auth-users-799b8b5664-whwzb               Error: ImagePullBackOff
-3m          Normal    BackOff                        pod/conversation-service-64f99b44db-6n2vv     Back-off pulling image "localhost:5001/securerag-hub-conversation-service:dev"
-3m          Warning   Failed                         pod/chatbot-manager-976899cb8-jprbg           Error: ImagePullBackOff
-3m          Warning   Failed                         pod/conversation-service-64f99b44db-6n2vv     Error: ImagePullBackOff
-3m          Normal    BackOff                        pod/auth-users-799b8b5664-whwzb               Back-off pulling image "localhost:5001/securerag-hub-auth-users:dev"
-2m59s       Normal    BackOff                        pod/portal-web-68d97f97f-2sjcd                Back-off pulling image "localhost:5001/securerag-hub-portal-web:dev"
-2m59s       Warning   Failed                         pod/portal-web-68d97f97f-2sjcd                Error: ImagePullBackOff
-2m59s       Warning   Failed                         pod/chatbot-manager-779b7cc44b-bskxh          Error: ImagePullBackOff
-2m59s       Normal    BackOff                        pod/chatbot-manager-779b7cc44b-bskxh          Back-off pulling image "localhost:5001/securerag-hub-chatbot-manager:dev"
-2m58s       Warning   Failed                         pod/audit-security-service-b478dc875-b5s9d    Error: ImagePullBackOff
-2m58s       Normal    BackOff                        pod/audit-security-service-b478dc875-b5s9d    Back-off pulling image "localhost:5001/securerag-hub-audit-security-service:dev"
-2m57s       Normal    Pulled                         pod/postgres-auth-867ddc6dc8-w9xgr            Container image "postgres:16-alpine" already present on machine
-2m57s       Warning   Failed                         pod/postgres-auth-867ddc6dc8-w9xgr            Error: secret "securerag-common-secrets" not found
-2m53s       Warning   FailedGetResourceMetric        horizontalpodautoscaler/portal-web            failed to get cpu utilization: unable to get metrics for resource cpu: unable to fetch metrics from resource metrics API: the server is currently unable to handle the request (get pods.metrics.k8s.io)
-2m52s       Warning   Failed                         pod/auth-users-c4b94d64b-t6k79                Error: ImagePullBackOff
-2m51s       Warning   Failed                         pod/conversation-service-778479dbbf-wwfcx     Error: ImagePullBackOff
+LAST SEEN   TYPE      REASON                    OBJECT                                      MESSAGE
+5m56s       Warning   PolicyViolation           service/postgres-auth                       policy securerag-restrict-service-exposure/allow-nodeport-only-for-portal-web fail: Only portal-web may use NodePort in the local demo overlay; LoadBalancer is forbidden.
+108s        Normal    Pulled                    pod/curl-smoke-1783252650                   Container image "curlimages/curl:8.11.1" already present on machine
+108s        Normal    Scheduled                 pod/curl-smoke-1783252650                   Successfully assigned securerag-hub/curl-smoke-1783252650 to securerag-dev-worker
+107s        Normal    Created                   pod/curl-smoke-1783252650                   Created container: curl-smoke-1783252650
+107s        Normal    Started                   pod/curl-smoke-1783252650                   Started container curl-smoke-1783252650
+104s        Normal    Scheduled                 pod/curl-sec-smoke-1783252655               Successfully assigned securerag-hub/curl-sec-smoke-1783252655 to securerag-dev-worker
+103s        Normal    Started                   pod/curl-sec-smoke-1783252655               Started container curl-sec-smoke-1783252655
+103s        Normal    Created                   pod/curl-sec-smoke-1783252655               Created container: curl-sec-smoke-1783252655
+103s        Normal    Pulled                    pod/curl-sec-smoke-1783252655               Container image "curlimages/curl:8.11.1" already present on machine
+100s        Normal    Scheduled                 pod/e2e-functional-check-1783252659         Successfully assigned securerag-hub/e2e-functional-check-1783252659 to securerag-dev-worker
+99s         Normal    Created                   pod/e2e-functional-check-1783252659         Created container: e2e-functional-check-1783252659
+99s         Normal    Pulled                    pod/e2e-functional-check-1783252659         Container image "curlimages/curl:8.11.1" already present on machine
+98s         Normal    Started                   pod/e2e-functional-check-1783252659         Started container e2e-functional-check-1783252659
+96s         Normal    Scheduled                 pod/auditor-availability-check-1783252663   Successfully assigned securerag-hub/auditor-availability-check-1783252663 to securerag-dev-worker
+96s         Normal    Pulled                    pod/auditor-availability-check-1783252663   Container image "curlimages/curl:8.11.1" already present on machine
+95s         Normal    Created                   pod/auditor-availability-check-1783252663   Created container: auditor-availability-check-1783252663
+95s         Normal    Started                   pod/auditor-availability-check-1783252663   Started container auditor-availability-check-1783252663
+93s         Normal    Scheduled                 pod/auditor-endpoint-check-1783252663       Successfully assigned securerag-hub/auditor-endpoint-check-1783252663 to securerag-dev-worker
+92s         Normal    Pulled                    pod/auditor-endpoint-check-1783252663       Container image "curlimages/curl:8.11.1" already present on machine
+92s         Normal    Started                   pod/auditor-endpoint-check-1783252663       Started container auditor-endpoint-check-1783252663
+92s         Normal    Created                   pod/auditor-endpoint-check-1783252663       Created container: auditor-endpoint-check-1783252663
+35s         Warning   FailedGetResourceMetric   horizontalpodautoscaler/portal-web          failed to get cpu utilization: unable to get metrics for resource cpu: unable to fetch metrics from resource metrics API: the server could not find the requested resource (get pods.metrics.k8s.io)
+26s         Normal    Scheduled                 pod/curl-smoke-1783252733                   Successfully assigned securerag-hub/curl-smoke-1783252733 to securerag-dev-worker
+25s         Normal    Created                   pod/curl-smoke-1783252733                   Created container: curl-smoke-1783252733
+25s         Normal    Pulled                    pod/curl-smoke-1783252733                   Container image "curlimages/curl:8.11.1" already present on machine
+24s         Normal    Started                   pod/curl-smoke-1783252733                   Started container curl-smoke-1783252733
+22s         Normal    Scheduled                 pod/curl-sec-smoke-1783252737               Successfully assigned securerag-hub/curl-sec-smoke-1783252737 to securerag-dev-worker
+21s         Normal    Created                   pod/curl-sec-smoke-1783252737               Created container: curl-sec-smoke-1783252737
+21s         Normal    Pulled                    pod/curl-sec-smoke-1783252737               Container image "curlimages/curl:8.11.1" already present on machine
+20s         Normal    Started                   pod/curl-sec-smoke-1783252737               Started container curl-sec-smoke-1783252737
+18s         Normal    Scheduled                 pod/e2e-functional-check-1783252741         Successfully assigned securerag-hub/e2e-functional-check-1783252741 to securerag-dev-worker
+17s         Normal    Created                   pod/e2e-functional-check-1783252741         Created container: e2e-functional-check-1783252741
+17s         Normal    Pulled                    pod/e2e-functional-check-1783252741         Container image "curlimages/curl:8.11.1" already present on machine
+16s         Normal    Started                   pod/e2e-functional-check-1783252741         Started container e2e-functional-check-1783252741
+14s         Normal    Scheduled                 pod/auditor-availability-check-1783252745   Successfully assigned securerag-hub/auditor-availability-check-1783252745 to securerag-dev-worker
+13s         Normal    Pulled                    pod/auditor-availability-check-1783252745   Container image "curlimages/curl:8.11.1" already present on machine
+13s         Normal    Created                   pod/auditor-availability-check-1783252745   Created container: auditor-availability-check-1783252745
+12s         Normal    Started                   pod/auditor-availability-check-1783252745   Started container auditor-availability-check-1783252745
+11s         Normal    Scheduled                 pod/auditor-endpoint-check-1783252745       Successfully assigned securerag-hub/auditor-endpoint-check-1783252745 to securerag-dev-worker
+10s         Normal    Pulled                    pod/auditor-endpoint-check-1783252745       Container image "curlimages/curl:8.11.1" already present on machine
+10s         Normal    Created                   pod/auditor-endpoint-check-1783252745       Created container: auditor-endpoint-check-1783252745
+9s          Normal    Started                   pod/auditor-endpoint-check-1783252745       Started container auditor-endpoint-check-1783252745
 ```
 
 ## Logs deployment/auth-users
 
 ```text
-Found 2 pods, using pod/auth-users-799b8b5664-whwzb
-Error from server (BadRequest): container "auth-users" in pod "auth-users-799b8b5664-whwzb" is waiting to start: trying and failing to pull image
+Found 3 pods, using pod/auth-users-8678978685-bfl4l
+  2026-07-05 11:50:34 /health ...................................... ~ 0.09ms
+  2026-07-05 11:50:43 /health ...................................... ~ 0.08ms
+  2026-07-05 11:50:44 /health ...................................... ~ 0.10ms
+  2026-07-05 11:50:54 /health ...................................... ~ 0.08ms
+  2026-07-05 11:51:03 /health ...................................... ~ 0.10ms
+  2026-07-05 11:51:04 /health ...................................... ~ 0.10ms
+  2026-07-05 11:51:14 /health ...................................... ~ 0.09ms
+  2026-07-05 11:51:23 /health ...................................... ~ 0.11ms
+  2026-07-05 11:51:24 /health ...................................... ~ 0.08ms
+  2026-07-05 11:51:34 /health ...................................... ~ 0.15ms
+  2026-07-05 11:51:43 /health ...................................... ~ 0.08ms
+  2026-07-05 11:51:44 /health ...................................... ~ 0.09ms
+  2026-07-05 11:51:54 /health ...................................... ~ 0.10ms
+  2026-07-05 11:52:03 /health ...................................... ~ 0.10ms
+  2026-07-05 11:52:04 /health ...................................... ~ 0.08ms
+  2026-07-05 11:52:14 /health ...................................... ~ 0.07ms
+  2026-07-05 11:52:23 /health ...................................... ~ 0.09ms
+  2026-07-05 11:52:24 /health ...................................... ~ 0.10ms
+  2026-07-05 11:52:34 /health ...................................... ~ 0.10ms
+  2026-07-05 11:52:43 /health ...................................... ~ 0.09ms
+  2026-07-05 11:52:44 /health ...................................... ~ 0.11ms
+  2026-07-05 11:52:54 /health ...................................... ~ 0.10ms
+  2026-07-05 11:53:03 /health ...................................... ~ 0.09ms
+  2026-07-05 11:53:04 /health ...................................... ~ 0.10ms
+  2026-07-05 11:53:14 /health ...................................... ~ 0.12ms
+  2026-07-05 11:53:23 /health ...................................... ~ 0.25ms
+  2026-07-05 11:53:24 /health ...................................... ~ 0.13ms
+  2026-07-05 11:53:34 /health ...................................... ~ 0.07ms
+  2026-07-05 11:53:43 /health ...................................... ~ 0.08ms
+  2026-07-05 11:53:44 /health ...................................... ~ 0.11ms
+  2026-07-05 11:53:54 /health ...................................... ~ 0.08ms
+  2026-07-05 11:54:03 /health ...................................... ~ 0.11ms
+  2026-07-05 11:54:04 /health ...................................... ~ 0.08ms
+  2026-07-05 11:54:14 /health ...................................... ~ 0.10ms
+  2026-07-05 11:54:23 /health ...................................... ~ 0.10ms
+  2026-07-05 11:54:24 /health ...................................... ~ 0.16ms
+  2026-07-05 11:54:34 /health ...................................... ~ 0.11ms
+  2026-07-05 11:54:43 /health ...................................... ~ 0.08ms
+  2026-07-05 11:54:44 /health ...................................... ~ 0.09ms
+  2026-07-05 11:54:54 /health ...................................... ~ 0.08ms
+  2026-07-05 11:55:03 /health ...................................... ~ 0.11ms
+  2026-07-05 11:55:04 /health ...................................... ~ 0.07ms
+  2026-07-05 11:55:14 /health ...................................... ~ 0.09ms
+  2026-07-05 11:55:23 /health ...................................... ~ 0.10ms
+  2026-07-05 11:55:24 /health ...................................... ~ 0.08ms
+  2026-07-05 11:55:34 /health ...................................... ~ 0.09ms
+  2026-07-05 11:55:43 /health ...................................... ~ 0.11ms
+  2026-07-05 11:55:44 /health ...................................... ~ 0.14ms
+  2026-07-05 11:55:54 /health ...................................... ~ 0.13ms
+  2026-07-05 11:56:03 /health ...................................... ~ 0.08ms
+  2026-07-05 11:56:04 /health ...................................... ~ 0.08ms
+  2026-07-05 11:56:14 /health ...................................... ~ 0.11ms
+  2026-07-05 11:56:23 /health ...................................... ~ 0.09ms
+  2026-07-05 11:56:24 /health ...................................... ~ 0.10ms
+  2026-07-05 11:56:34 /health ...................................... ~ 0.08ms
+  2026-07-05 11:56:43 /health ...................................... ~ 0.10ms
+  2026-07-05 11:56:44 /health ...................................... ~ 0.09ms
+  2026-07-05 11:56:54 /health ...................................... ~ 0.08ms
+  2026-07-05 11:57:03 /health ...................................... ~ 0.40ms
+  2026-07-05 11:57:04 /health ...................................... ~ 0.08ms
+  2026-07-05 11:57:14 /health ...................................... ~ 0.13ms
+  2026-07-05 11:57:23 /health ...................................... ~ 0.07ms
+  2026-07-05 11:57:24 /health ...................................... ~ 0.10ms
+  2026-07-05 11:57:34 /health ...................................... ~ 0.10ms
+  2026-07-05 11:57:43 /health ...................................... ~ 0.07ms
+  2026-07-05 11:57:44 /health ...................................... ~ 0.08ms
+  2026-07-05 11:57:54 /health ...................................... ~ 0.14ms
+  2026-07-05 11:58:03 /health ...................................... ~ 0.08ms
+  2026-07-05 11:58:04 /health ...................................... ~ 0.08ms
+  2026-07-05 11:58:14 /health ...................................... ~ 0.11ms
+  2026-07-05 11:58:23 /health ...................................... ~ 0.13ms
+  2026-07-05 11:58:24 /health ...................................... ~ 0.08ms
+  2026-07-05 11:58:34 /health ...................................... ~ 0.10ms
+  2026-07-05 11:58:43 /health ...................................... ~ 0.08ms
+  2026-07-05 11:58:44 /health ...................................... ~ 0.09ms
+  2026-07-05 11:58:54 /health ...................................... ~ 0.14ms
+  2026-07-05 11:58:55 /health ...................................... ~ 0.13ms
+  2026-07-05 11:59:03 /health ...................................... ~ 0.08ms
+  2026-07-05 11:59:04 /health ...................................... ~ 0.12ms
+  2026-07-05 11:59:14 /health ...................................... ~ 0.11ms
 ```
 
 ## Logs deployment/chatbot-manager
 
 ```text
-Found 2 pods, using pod/chatbot-manager-779b7cc44b-bskxh
-Error from server (BadRequest): container "chatbot-manager" in pod "chatbot-manager-779b7cc44b-bskxh" is waiting to start: trying and failing to pull image
+  2026-07-05 11:50:54 /health ...................................... ~ 0.13ms
+  2026-07-05 11:51:03 /health ...................................... ~ 0.08ms
+  2026-07-05 11:51:04 /health ...................................... ~ 0.10ms
+  2026-07-05 11:51:14 /health ...................................... ~ 0.08ms
+  2026-07-05 11:51:23 /health ...................................... ~ 0.10ms
+  2026-07-05 11:51:24 /health ...................................... ~ 0.09ms
+  2026-07-05 11:51:34 /health ...................................... ~ 0.10ms
+  2026-07-05 11:51:43 /health ...................................... ~ 0.10ms
+  2026-07-05 11:51:44 /health ...................................... ~ 0.12ms
+  2026-07-05 11:51:54 /health ...................................... ~ 0.11ms
+  2026-07-05 11:52:03 /health ...................................... ~ 0.09ms
+  2026-07-05 11:52:04 /health ...................................... ~ 0.13ms
+  2026-07-05 11:52:14 /health ...................................... ~ 0.10ms
+  2026-07-05 11:52:23 /health ...................................... ~ 0.08ms
+  2026-07-05 11:52:24 /health ...................................... ~ 0.09ms
+  2026-07-05 11:52:34 /health ...................................... ~ 0.08ms
+  2026-07-05 11:52:43 /health ...................................... ~ 0.09ms
+  2026-07-05 11:52:44 /health ...................................... ~ 0.12ms
+  2026-07-05 11:52:54 /health ...................................... ~ 0.08ms
+  2026-07-05 11:53:03 /health ...................................... ~ 0.12ms
+  2026-07-05 11:53:04 /health ...................................... ~ 0.09ms
+  2026-07-05 11:53:14 /health ...................................... ~ 0.08ms
+  2026-07-05 11:53:23 /health ...................................... ~ 0.14ms
+  2026-07-05 11:53:24 /health ...................................... ~ 0.20ms
+  2026-07-05 11:53:34 /health ...................................... ~ 0.10ms
+  2026-07-05 11:53:43 /health ...................................... ~ 0.09ms
+  2026-07-05 11:53:44 /health ...................................... ~ 0.10ms
+  2026-07-05 11:53:54 /health ...................................... ~ 0.08ms
+  2026-07-05 11:54:03 /health ...................................... ~ 0.10ms
+  2026-07-05 11:54:04 /health ...................................... ~ 0.07ms
+  2026-07-05 11:54:14 /health ...................................... ~ 0.10ms
+  2026-07-05 11:54:23 /health ...................................... ~ 0.10ms
+  2026-07-05 11:54:24 /health ...................................... ~ 0.08ms
+  2026-07-05 11:54:34 /health ...................................... ~ 0.10ms
+  2026-07-05 11:54:43 /health ...................................... ~ 0.07ms
+  2026-07-05 11:54:44 /health ...................................... ~ 0.07ms
+  2026-07-05 11:54:54 /health ...................................... ~ 0.16ms
+  2026-07-05 11:55:03 /health ...................................... ~ 0.10ms
+  2026-07-05 11:55:04 /health ...................................... ~ 0.10ms
+  2026-07-05 11:55:14 /health ...................................... ~ 0.12ms
+  2026-07-05 11:55:23 /health ...................................... ~ 0.08ms
+  2026-07-05 11:55:24 /health ...................................... ~ 0.11ms
+  2026-07-05 11:55:34 /health ...................................... ~ 0.15ms
+  2026-07-05 11:55:43 /health ...................................... ~ 0.10ms
+  2026-07-05 11:55:44 /health ...................................... ~ 0.11ms
+  2026-07-05 11:55:54 /health ...................................... ~ 0.08ms
+  2026-07-05 11:56:03 /health ...................................... ~ 0.09ms
+  2026-07-05 11:56:04 /health ...................................... ~ 0.08ms
+  2026-07-05 11:56:14 /health ...................................... ~ 0.09ms
+  2026-07-05 11:56:23 /health ...................................... ~ 0.08ms
+  2026-07-05 11:56:24 /health ...................................... ~ 0.09ms
+  2026-07-05 11:56:34 /health ...................................... ~ 0.07ms
+  2026-07-05 11:56:43 /health ...................................... ~ 0.10ms
+  2026-07-05 11:56:44 /health ...................................... ~ 0.10ms
+  2026-07-05 11:56:54 /health ...................................... ~ 0.08ms
+  2026-07-05 11:57:03 /health ...................................... ~ 0.10ms
+  2026-07-05 11:57:04 /health ...................................... ~ 0.07ms
+  2026-07-05 11:57:14 /health ...................................... ~ 0.08ms
+  2026-07-05 11:57:23 /health ...................................... ~ 0.07ms
+  2026-07-05 11:57:24 /health ...................................... ~ 0.10ms
+  2026-07-05 11:57:32 /health ...................................... ~ 0.07ms
+  2026-07-05 11:57:34 /health ...................................... ~ 0.12ms
+  2026-07-05 11:57:41 /health ...................................... ~ 0.08ms
+  2026-07-05 11:57:43 /health ...................................... ~ 0.11ms
+  2026-07-05 11:57:44 /health ...................................... ~ 0.09ms
+  2026-07-05 11:57:54 /health ...................................... ~ 0.09ms
+  2026-07-05 11:58:03 /health ...................................... ~ 0.08ms
+  2026-07-05 11:58:04 /health ...................................... ~ 0.08ms
+  2026-07-05 11:58:14 /health ...................................... ~ 0.11ms
+  2026-07-05 11:58:23 /health ...................................... ~ 0.09ms
+  2026-07-05 11:58:24 /health ...................................... ~ 0.10ms
+  2026-07-05 11:58:34 /health ...................................... ~ 0.10ms
+  2026-07-05 11:58:43 /health ...................................... ~ 0.08ms
+  2026-07-05 11:58:44 /health ...................................... ~ 0.07ms
+  2026-07-05 11:58:54 /health ...................................... ~ 0.07ms
+  2026-07-05 11:58:55 /health ...................................... ~ 0.10ms
+  2026-07-05 11:59:03 /health ...................................... ~ 0.07ms
+  2026-07-05 11:59:03 /health ...................................... ~ 0.08ms
+  2026-07-05 11:59:04 /health ...................................... ~ 0.08ms
+  2026-07-05 11:59:14 /health ...................................... ~ 0.13ms
 ```
 
 ## Logs deployment/conversation-service
 
 ```text
-Found 2 pods, using pod/conversation-service-778479dbbf-wwfcx
-Error from server (BadRequest): container "conversation-service" in pod "conversation-service-778479dbbf-wwfcx" is waiting to start: trying and failing to pull image
+  2026-07-05 11:50:54 /health ...................................... ~ 0.14ms
+  2026-07-05 11:51:03 /health ...................................... ~ 0.08ms
+  2026-07-05 11:51:04 /health ...................................... ~ 0.10ms
+  2026-07-05 11:51:14 /health ...................................... ~ 0.09ms
+  2026-07-05 11:51:23 /health ...................................... ~ 0.11ms
+  2026-07-05 11:51:24 /health ...................................... ~ 0.08ms
+  2026-07-05 11:51:34 /health ...................................... ~ 0.09ms
+  2026-07-05 11:51:43 /health ...................................... ~ 0.09ms
+  2026-07-05 11:51:44 /health ...................................... ~ 0.10ms
+  2026-07-05 11:51:54 /health ...................................... ~ 0.08ms
+  2026-07-05 11:52:03 /health ...................................... ~ 0.08ms
+  2026-07-05 11:52:04 /health ...................................... ~ 0.10ms
+  2026-07-05 11:52:14 /health ...................................... ~ 0.09ms
+  2026-07-05 11:52:23 /health ...................................... ~ 0.10ms
+  2026-07-05 11:52:24 /health ...................................... ~ 0.08ms
+  2026-07-05 11:52:34 /health ...................................... ~ 0.13ms
+  2026-07-05 11:52:43 /health ...................................... ~ 0.09ms
+  2026-07-05 11:52:44 /health ...................................... ~ 0.12ms
+  2026-07-05 11:52:54 /health ...................................... ~ 0.10ms
+  2026-07-05 11:53:03 /health ...................................... ~ 0.10ms
+  2026-07-05 11:53:04 /health ...................................... ~ 0.08ms
+  2026-07-05 11:53:14 /health ...................................... ~ 0.09ms
+  2026-07-05 11:53:23 /health ...................................... ~ 0.11ms
+  2026-07-05 11:53:24 /health ...................................... ~ 0.10ms
+  2026-07-05 11:53:34 /health ...................................... ~ 0.12ms
+  2026-07-05 11:53:43 /health ...................................... ~ 0.09ms
+  2026-07-05 11:53:44 /health ...................................... ~ 0.08ms
+  2026-07-05 11:53:54 /health ...................................... ~ 0.08ms
+  2026-07-05 11:54:03 /health ...................................... ~ 0.08ms
+  2026-07-05 11:54:04 /health ...................................... ~ 0.08ms
+  2026-07-05 11:54:14 /health ...................................... ~ 0.10ms
+  2026-07-05 11:54:23 /health ...................................... ~ 0.12ms
+  2026-07-05 11:54:24 /health ...................................... ~ 0.09ms
+  2026-07-05 11:54:34 /health ...................................... ~ 0.09ms
+  2026-07-05 11:54:43 /health ...................................... ~ 0.10ms
+  2026-07-05 11:54:44 /health ...................................... ~ 0.09ms
+  2026-07-05 11:54:54 /health ...................................... ~ 0.16ms
+  2026-07-05 11:55:03 /health ...................................... ~ 0.12ms
+  2026-07-05 11:55:04 /health ...................................... ~ 0.11ms
+  2026-07-05 11:55:14 /health ...................................... ~ 0.21ms
+  2026-07-05 11:55:23 /health ...................................... ~ 0.10ms
+  2026-07-05 11:55:24 /health ...................................... ~ 0.09ms
+  2026-07-05 11:55:34 /health ...................................... ~ 0.08ms
+  2026-07-05 11:55:43 /health ...................................... ~ 0.08ms
+  2026-07-05 11:55:44 /health ...................................... ~ 0.08ms
+  2026-07-05 11:55:54 /health ...................................... ~ 0.10ms
+  2026-07-05 11:56:03 /health ...................................... ~ 0.10ms
+  2026-07-05 11:56:04 /health ...................................... ~ 0.08ms
+  2026-07-05 11:56:14 /health ...................................... ~ 0.08ms
+  2026-07-05 11:56:23 /health ...................................... ~ 0.11ms
+  2026-07-05 11:56:24 /health ...................................... ~ 0.85ms
+  2026-07-05 11:56:34 /health ...................................... ~ 0.09ms
+  2026-07-05 11:56:43 /health ...................................... ~ 0.11ms
+  2026-07-05 11:56:44 /health ...................................... ~ 0.20ms
+  2026-07-05 11:56:54 /health ...................................... ~ 0.09ms
+  2026-07-05 11:57:03 /health ...................................... ~ 0.08ms
+  2026-07-05 11:57:04 /health ...................................... ~ 0.07ms
+  2026-07-05 11:57:14 /health ...................................... ~ 0.08ms
+  2026-07-05 11:57:23 /health ...................................... ~ 0.07ms
+  2026-07-05 11:57:24 /health ...................................... ~ 0.07ms
+  2026-07-05 11:57:33 /health ...................................... ~ 0.09ms
+  2026-07-05 11:57:34 /health ...................................... ~ 0.08ms
+  2026-07-05 11:57:41 /health ...................................... ~ 0.08ms
+  2026-07-05 11:57:43 /health ...................................... ~ 0.08ms
+  2026-07-05 11:57:44 /health ...................................... ~ 0.07ms
+  2026-07-05 11:57:54 /health ...................................... ~ 0.09ms
+  2026-07-05 11:58:03 /health ...................................... ~ 0.10ms
+  2026-07-05 11:58:04 /health ...................................... ~ 0.08ms
+  2026-07-05 11:58:14 /health ...................................... ~ 0.09ms
+  2026-07-05 11:58:23 /health ...................................... ~ 0.07ms
+  2026-07-05 11:58:24 /health .................................... ~ 500.33ms
+  2026-07-05 11:58:34 /health .................................... ~ 500.39ms
+  2026-07-05 11:58:43 /health ...................................... ~ 0.07ms
+  2026-07-05 11:58:44 /health ...................................... ~ 0.02ms
+  2026-07-05 11:58:54 /health ...................................... ~ 0.07ms
+  2026-07-05 11:58:55 /health ...................................... ~ 0.08ms
+  2026-07-05 11:59:03 /health ...................................... ~ 0.11ms
+  2026-07-05 11:59:03 /health ...................................... ~ 0.67ms
+  2026-07-05 11:59:04 /health ...................................... ~ 0.12ms
+  2026-07-05 11:59:14 /health ...................................... ~ 0.08ms
 ```
 
 ## Logs deployment/audit-security-service
 
 ```text
-Found 2 pods, using pod/audit-security-service-5fddbb654-n5ltk
-Error from server (BadRequest): container "audit-security-service" in pod "audit-security-service-5fddbb654-n5ltk" is waiting to start: trying and failing to pull image
+  2026-07-05 11:51:23 /health ...................................... ~ 0.11ms
+  2026-07-05 11:51:24 /health ...................................... ~ 0.09ms
+  2026-07-05 11:51:34 /health ...................................... ~ 0.12ms
+  2026-07-05 11:51:43 /health ...................................... ~ 0.13ms
+  2026-07-05 11:51:44 /health ...................................... ~ 0.08ms
+  2026-07-05 11:51:54 /health ...................................... ~ 0.09ms
+  2026-07-05 11:52:03 /health ...................................... ~ 0.08ms
+  2026-07-05 11:52:04 /health ...................................... ~ 0.20ms
+  2026-07-05 11:52:14 /health ...................................... ~ 0.09ms
+  2026-07-05 11:52:23 /health ...................................... ~ 0.08ms
+  2026-07-05 11:52:24 /health ...................................... ~ 0.09ms
+  2026-07-05 11:52:34 /health ...................................... ~ 0.08ms
+  2026-07-05 11:52:43 /health ...................................... ~ 0.10ms
+  2026-07-05 11:52:44 /health ...................................... ~ 0.08ms
+  2026-07-05 11:52:54 /health ...................................... ~ 0.07ms
+  2026-07-05 11:53:03 /health ...................................... ~ 0.12ms
+  2026-07-05 11:53:04 /health ...................................... ~ 0.09ms
+  2026-07-05 11:53:14 /health ...................................... ~ 0.11ms
+  2026-07-05 11:53:23 /health ...................................... ~ 0.08ms
+  2026-07-05 11:53:24 /health ...................................... ~ 0.13ms
+  2026-07-05 11:53:34 /health ...................................... ~ 0.15ms
+  2026-07-05 11:53:43 /health ...................................... ~ 0.14ms
+  2026-07-05 11:53:44 /health ...................................... ~ 0.10ms
+  2026-07-05 11:53:54 /health ...................................... ~ 0.08ms
+  2026-07-05 11:54:03 /health ...................................... ~ 0.19ms
+  2026-07-05 11:54:04 /health ...................................... ~ 0.10ms
+  2026-07-05 11:54:14 /health ...................................... ~ 0.11ms
+  2026-07-05 11:54:23 /health ...................................... ~ 0.09ms
+  2026-07-05 11:54:24 /health ...................................... ~ 0.07ms
+  2026-07-05 11:54:34 /health ...................................... ~ 0.09ms
+  2026-07-05 11:54:43 /health ...................................... ~ 0.08ms
+  2026-07-05 11:54:44 /health ...................................... ~ 0.08ms
+  2026-07-05 11:54:54 /health ...................................... ~ 0.10ms
+  2026-07-05 11:55:03 /health ...................................... ~ 0.08ms
+  2026-07-05 11:55:04 /health ...................................... ~ 0.08ms
+  2026-07-05 11:55:14 /health ...................................... ~ 0.09ms
+  2026-07-05 11:55:23 /health ...................................... ~ 0.08ms
+  2026-07-05 11:55:24 /health ...................................... ~ 0.10ms
+  2026-07-05 11:55:34 /health ...................................... ~ 0.12ms
+  2026-07-05 11:55:43 /health ...................................... ~ 0.09ms
+  2026-07-05 11:55:44 /health ...................................... ~ 0.12ms
+  2026-07-05 11:55:54 /health ...................................... ~ 0.14ms
+  2026-07-05 11:56:03 /health ...................................... ~ 0.08ms
+  2026-07-05 11:56:04 /health ...................................... ~ 0.13ms
+  2026-07-05 11:56:14 /health ...................................... ~ 0.13ms
+  2026-07-05 11:56:23 /health ...................................... ~ 0.09ms
+  2026-07-05 11:56:24 /health ...................................... ~ 0.09ms
+  2026-07-05 11:56:34 /health ...................................... ~ 0.09ms
+  2026-07-05 11:56:43 /health ...................................... ~ 0.09ms
+  2026-07-05 11:56:44 /health ...................................... ~ 0.08ms
+  2026-07-05 11:56:54 /health ...................................... ~ 0.17ms
+  2026-07-05 11:57:03 /health ...................................... ~ 0.10ms
+  2026-07-05 11:57:04 /health ...................................... ~ 0.13ms
+  2026-07-05 11:57:14 /health ...................................... ~ 0.07ms
+  2026-07-05 11:57:23 /health ...................................... ~ 0.14ms
+  2026-07-05 11:57:24 /health ...................................... ~ 0.07ms
+  2026-07-05 11:57:33 /health ...................................... ~ 0.11ms
+  2026-07-05 11:57:34 /health ...................................... ~ 0.08ms
+  2026-07-05 11:57:41 /health ...................................... ~ 0.07ms
+  2026-07-05 11:57:43 /health ...................................... ~ 0.08ms
+  2026-07-05 11:57:44 /health ...................................... ~ 0.11ms
+  2026-07-05 11:57:44 /health ...................................... ~ 0.10ms
+  2026-07-05 11:57:47 /api/v1/audit-logs ........................... ~ 0.20ms
+  2026-07-05 11:57:54 /health ...................................... ~ 0.07ms
+  2026-07-05 11:58:03 /health ...................................... ~ 0.16ms
+  2026-07-05 11:58:04 /health ...................................... ~ 0.07ms
+  2026-07-05 11:58:14 /health ...................................... ~ 0.09ms
+  2026-07-05 11:58:23 /health ...................................... ~ 0.11ms
+  2026-07-05 11:58:24 /health ...................................... ~ 0.16ms
+  2026-07-05 11:58:34 /health ...................................... ~ 0.14ms
+  2026-07-05 11:58:43 /health ...................................... ~ 0.09ms
+  2026-07-05 11:58:44 /health ...................................... ~ 0.07ms
+  2026-07-05 11:58:54 /health ...................................... ~ 0.08ms
+  2026-07-05 11:58:55 /health ...................................... ~ 0.10ms
+  2026-07-05 11:59:03 /health ...................................... ~ 0.08ms
+  2026-07-05 11:59:03 /health ...................................... ~ 0.03ms
+  2026-07-05 11:59:04 /health ...................................... ~ 0.08ms
+  2026-07-05 11:59:07 /health ...................................... ~ 0.10ms
+  2026-07-05 11:59:10 /api/v1/audit-logs ........................... ~ 0.08ms
+  2026-07-05 11:59:14 /health ...................................... ~ 0.10ms
 ```
 
 ## Logs deployment/portal-web
 
 ```text
-Found 2 pods, using pod/portal-web-68d97f97f-2sjcd
-Error from server (BadRequest): container "portal-web" in pod "portal-web-68d97f97f-2sjcd" is waiting to start: trying and failing to pull image
+Found 3 pods, using pod/portal-web-859c78db95-z68jt
+  2026-07-05 11:51:29 /health ...................................... ~ 0.09ms
+  2026-07-05 11:51:39 /health ...................................... ~ 0.10ms
+  2026-07-05 11:51:43 /health ...................................... ~ 0.08ms
+  2026-07-05 11:51:49 /health ...................................... ~ 0.10ms
+  2026-07-05 11:51:59 /health ...................................... ~ 0.08ms
+  2026-07-05 11:52:03 /health ...................................... ~ 0.11ms
+  2026-07-05 11:52:09 /health ...................................... ~ 0.11ms
+  2026-07-05 11:52:19 /health ...................................... ~ 0.08ms
+  2026-07-05 11:52:23 /health .................................... ~ 500.44ms
+  2026-07-05 11:52:29 /health ...................................... ~ 0.09ms
+  2026-07-05 11:52:39 /health ...................................... ~ 0.09ms
+  2026-07-05 11:52:43 /health .................................... ~ 500.31ms
+  2026-07-05 11:52:49 /health ...................................... ~ 0.07ms
+  2026-07-05 11:52:59 /health ...................................... ~ 0.12ms
+  2026-07-05 11:53:03 /health ...................................... ~ 0.11ms
+  2026-07-05 11:53:09 /health ...................................... ~ 0.08ms
+  2026-07-05 11:53:19 /health ...................................... ~ 0.08ms
+  2026-07-05 11:53:23 /health ...................................... ~ 0.10ms
+  2026-07-05 11:53:29 /health ...................................... ~ 0.11ms
+  2026-07-05 11:53:39 /health ...................................... ~ 0.08ms
+  2026-07-05 11:53:43 /health ...................................... ~ 0.09ms
+  2026-07-05 11:53:49 /health ...................................... ~ 0.10ms
+  2026-07-05 11:53:59 /health ...................................... ~ 0.09ms
+  2026-07-05 11:54:03 /health ...................................... ~ 0.08ms
+  2026-07-05 11:54:09 /health ...................................... ~ 0.10ms
+  2026-07-05 11:54:19 /health ...................................... ~ 0.12ms
+  2026-07-05 11:54:23 /health ...................................... ~ 0.12ms
+  2026-07-05 11:54:29 /health ...................................... ~ 0.08ms
+  2026-07-05 11:54:39 /health ...................................... ~ 0.09ms
+  2026-07-05 11:54:43 /health ...................................... ~ 0.10ms
+  2026-07-05 11:54:49 /health ...................................... ~ 0.09ms
+  2026-07-05 11:54:59 /health ...................................... ~ 0.10ms
+  2026-07-05 11:55:03 /health ...................................... ~ 0.11ms
+  2026-07-05 11:55:09 /health ...................................... ~ 0.08ms
+  2026-07-05 11:55:19 /health ...................................... ~ 0.09ms
+  2026-07-05 11:55:23 /health ...................................... ~ 0.16ms
+  2026-07-05 11:55:29 /health ...................................... ~ 0.10ms
+  2026-07-05 11:55:39 /health ...................................... ~ 0.08ms
+  2026-07-05 11:55:43 /health ...................................... ~ 0.09ms
+  2026-07-05 11:55:49 /health ...................................... ~ 0.09ms
+  2026-07-05 11:55:59 /health ...................................... ~ 0.14ms
+  2026-07-05 11:56:03 /health ...................................... ~ 0.09ms
+  2026-07-05 11:56:09 /health ...................................... ~ 0.10ms
+  2026-07-05 11:56:19 /health ...................................... ~ 0.10ms
+  2026-07-05 11:56:23 /health ...................................... ~ 0.12ms
+  2026-07-05 11:56:29 /health ...................................... ~ 0.10ms
+  2026-07-05 11:56:39 /health ...................................... ~ 0.11ms
+  2026-07-05 11:56:43 /health ...................................... ~ 0.10ms
+  2026-07-05 11:56:49 /health ...................................... ~ 0.08ms
+  2026-07-05 11:56:59 /health ...................................... ~ 0.08ms
+  2026-07-05 11:57:03 /health ...................................... ~ 0.10ms
+  2026-07-05 11:57:09 /health ...................................... ~ 0.09ms
+  2026-07-05 11:57:19 /health ...................................... ~ 0.10ms
+  2026-07-05 11:57:23 /health ...................................... ~ 0.09ms
+  2026-07-05 11:57:29 /health ...................................... ~ 0.09ms
+  2026-07-05 11:57:32 / ............................................ ~ 0.09ms
+  2026-07-05 11:57:36 /.env ........................................ ~ 0.08ms
+  2026-07-05 11:57:36 /admin ....................................... ~ 0.04ms
+  2026-07-05 11:57:39 /health .................................... ~ 500.37ms
+  2026-07-05 11:57:41 /health ...................................... ~ 0.11ms
+  2026-07-05 11:57:43 /health ...................................... ~ 0.09ms
+  2026-07-05 11:57:49 /health .................................... ~ 500.29ms
+  2026-07-05 11:57:59 /health ...................................... ~ 0.07ms
+  2026-07-05 11:58:03 /health ...................................... ~ 0.08ms
+  2026-07-05 11:58:09 /health ...................................... ~ 0.10ms
+  2026-07-05 11:58:19 /health ...................................... ~ 0.08ms
+  2026-07-05 11:58:23 /health ...................................... ~ 0.11ms
+  2026-07-05 11:58:29 /health ...................................... ~ 0.08ms
+  2026-07-05 11:58:39 /health ...................................... ~ 0.09ms
+  2026-07-05 11:58:43 /health ...................................... ~ 0.09ms
+  2026-07-05 11:58:49 /health ...................................... ~ 0.10ms
+  2026-07-05 11:58:55 /health ...................................... ~ 0.08ms
+  2026-07-05 11:58:55 / ............................................ ~ 0.11ms
+  2026-07-05 11:58:59 /health ...................................... ~ 0.09ms
+  2026-07-05 11:58:59 /storage/ .................................... ~ 0.17ms
+  2026-07-05 11:59:03 /health ...................................... ~ 0.11ms
+  2026-07-05 11:59:03 /health ...................................... ~ 0.08ms
+  2026-07-05 11:59:05 /health ...................................... ~ 0.15ms
+  2026-07-05 11:59:09 /health ...................................... ~ 0.09ms
+  2026-07-05 11:59:19 /health ...................................... ~ 0.09ms
 ```

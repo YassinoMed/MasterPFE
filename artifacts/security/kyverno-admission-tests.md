@@ -1,6 +1,6 @@
 # Kyverno admission tests — SecureRAG Hub
 
-- Generated UTC: `2026-06-23T06:02:18Z`
+- Generated UTC: `2026-07-05T12:04:21Z`
 - Status: `PARTIEL`
 - Pass: `1`  Fail: `5`
 

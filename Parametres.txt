@@ -1,0 +1,15 @@
+Mohamed Yassine Bouneb <med.yassine.bouneb@proton.me>
+	Paramètres VPN :
+	Login : medysbneb
+	Mot de passe : MlollJ5412J*ssf
+
+Paramètres Bureau à distance machine GPU :
+	Adresse IP : 10.15.10.119
+	Login : User
+	Mot de passe : gpu2030gpu**
+
+Paramètres Anydesk machine GPU :
+	ID Anydesk : 1 251 601 466
+	Mot de passe Anydesk : MlollJ5412J*ssf
+	Login Windows : User
+	Mot de passe Windows : gpu2030gpu**

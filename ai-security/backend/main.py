@@ -35,7 +35,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-INFERENCE_SERVICE_URL = os.getenv("INFERENCE_SERVICE_URL", "http://localhost:8000")
+INFERENCE_SERVICE_URL = os.getenv("INFERENCE_SERVICE_URL", "http://10.15.10.119:8000")
 
 
 @app.on_event("startup")

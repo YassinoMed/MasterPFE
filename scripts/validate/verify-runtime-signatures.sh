@@ -37,11 +37,12 @@ if kubectl get namespace "${NS}" > /dev/null 2>&1; then
   cluster_available=true
 fi
 
-  case "${REGISTRY_HOST}" in
-    localhost:*|127.0.0.1:*|0.0.0.0:*)
-      ;;
-  esac
-fi
+cosign_flags=()
+case "${REGISTRY_HOST}" in
+  localhost:*|127.0.0.1:*|0.0.0.0:*)
+    cosign_flags=("--allow-http-registry" "--allow-insecure-registry")
+    ;;
+esac
 
 FAILURES=0
 VERIFIED=0
@@ -113,10 +114,7 @@ for service in "${official_services[@]}"; do
   fi
 
   # Attempt Cosign verification
-  cosign_env=()
-  fi
-
-  if "${cosign_env[@]+"${cosign_env[@]}"}" cosign verify --key "${COSIGN_PUBLIC_KEY}" "${image}" > /dev/null 2>&1; then
+  if cosign verify --key "${COSIGN_PUBLIC_KEY}" "${cosign_flags[@]}" "${image}" > /dev/null 2>&1; then
     printf '| `%s` | `%s` | ✅ Verified | OK |\n' "${service}" "${image}" >> "${REPORT_FILE}"
     VERIFIED=$((VERIFIED + 1))
     printf '[PASS] %s: signature verified\n' "${service}"

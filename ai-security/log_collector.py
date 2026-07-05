@@ -9,7 +9,7 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(me
 logger = logging.getLogger("log-collector")
 
 # Configuration from environment
-BACKEND_URL = os.getenv("BACKEND_URL", "http://localhost:8080")
+BACKEND_URL = os.getenv("BACKEND_URL", "http://10.15.10.119:8082")
 LOKI_URL = os.getenv("LOKI_URL", "http://loki.securerag-monitoring.svc:3100")
 PROMETHEUS_ALERTS_URL = os.getenv("PROMETHEUS_ALERTS_URL", "http://prometheus-alertmanager.securerag-monitoring.svc:9093")
 POLL_INTERVAL = int(os.getenv("POLL_INTERVAL", "15"))  # seconds

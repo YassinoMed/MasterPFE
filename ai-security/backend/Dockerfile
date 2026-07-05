@@ -27,7 +27,7 @@ EXPOSE 8080
 # Environment variables
 ENV PYTHONUNBUFFERED=1
 ENV DATABASE_URL=postgresql://postgres:postgres@localhost:5432/ai_security
-ENV INFERENCE_SERVICE_URL=http://localhost:8000
+ENV INFERENCE_SERVICE_URL=http://10.15.10.119:8000
 
 # Expose non-root user for security standards
 USER 65534:65534
