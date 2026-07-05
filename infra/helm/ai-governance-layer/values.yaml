@@ -1,0 +1,142 @@
+# Default values for ai-governance-layer.
+# This is a YAML-formatted file.
+
+namespace: ai-security
+
+# Base settings for components
+components:
+  ai-orchestrator:
+    replicaCount: 1
+    image:
+      repository: localhost:5001/ai-security-orchestrator
+      tag: production
+      pullPolicy: IfNotPresent
+    service:
+      type: ClusterIP
+      port: 8091
+    resources:
+      limits:
+        cpu: 300m
+        memory: 256Mi
+      requests:
+        cpu: 100m
+        memory: 128Mi
+
+  ai-risk-engine:
+    replicaCount: 1
+    image:
+      repository: localhost:5001/ai-security-risk-engine
+      tag: production
+      pullPolicy: IfNotPresent
+    service:
+      type: ClusterIP
+      port: 8092
+    resources:
+      limits:
+        cpu: 200m
+        memory: 256Mi
+      requests:
+        cpu: 100m
+        memory: 128Mi
+
+  ai-trust-engine:
+    replicaCount: 1
+    image:
+      repository: localhost:5001/ai-security-trust-engine
+      tag: production
+      pullPolicy: IfNotPresent
+    service:
+      type: ClusterIP
+      port: 8093
+    resources:
+      limits:
+        cpu: 200m
+        memory: 256Mi
+      requests:
+        cpu: 100m
+        memory: 128Mi
+
+  ai-explainability:
+    replicaCount: 1
+    image:
+      repository: localhost:5001/ai-security-explainability
+      tag: production
+      pullPolicy: IfNotPresent
+    service:
+      type: ClusterIP
+      port: 8094
+    resources:
+      limits:
+        cpu: 200m
+        memory: 256Mi
+      requests:
+        cpu: 100m
+        memory: 128Mi
+
+  ai-memory:
+    replicaCount: 1
+    image:
+      repository: localhost:5001/ai-security-memory
+      tag: production
+      pullPolicy: IfNotPresent
+    service:
+      type: ClusterIP
+      port: 8095
+    resources:
+      limits:
+        cpu: 300m
+        memory: 512Mi
+      requests:
+        cpu: 150m
+        memory: 256Mi
+
+  ai-knowledge:
+    replicaCount: 1
+    image:
+      repository: localhost:5001/ai-security-knowledge
+      tag: production
+      pullPolicy: IfNotPresent
+    service:
+      type: ClusterIP
+      port: 8096
+    resources:
+      limits:
+        cpu: 300m
+        memory: 512Mi
+      requests:
+        cpu: 150m
+        memory: 256Mi
+
+  ai-feedback-engine:
+    replicaCount: 1
+    image:
+      repository: localhost:5001/ai-security-feedback-engine
+      tag: production
+      pullPolicy: IfNotPresent
+    service:
+      type: ClusterIP
+      port: 8097
+    resources:
+      limits:
+        cpu: 200m
+        memory: 256Mi
+      requests:
+        cpu: 100m
+        memory: 128Mi
+
+  ai-metrics:
+    replicaCount: 1
+    image:
+      repository: localhost:5001/ai-security-metrics
+      tag: production
+      pullPolicy: IfNotPresent
+    service:
+      type: ClusterIP
+      port: 8098
+    resources:
+      limits:
+        cpu: 200m
+        memory: 256Mi
+      requests:
+        cpu: 100m
+        memory: 128Mi

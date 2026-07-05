@@ -1,0 +1,3021 @@
+apiVersion: v1
+items:
+- apiVersion: wgpolicyk8s.io/v1alpha2
+  kind: PolicyReport
+  metadata:
+    creationTimestamp: "2026-06-21T09:02:00Z"
+    generation: 2
+    labels:
+      app.kubernetes.io/managed-by: kyverno
+    name: 02177cb2-a975-43cf-b9cc-34095a19f9f6
+    namespace: securerag-hub
+    ownerReferences:
+    - apiVersion: v1
+      kind: Pod
+      name: portal-web-6ff6cd4545-swmh5
+      uid: 02177cb2-a975-43cf-b9cc-34095a19f9f6
+    resourceVersion: "3644"
+    uid: d87bb2f3-ea01-43f5-9aec-8df029b05be2
+  results:
+  - category: Network Security
+    message: Validation rule 'audit-literal-http-env-without-risk-acceptance' passed.
+    policy: securerag-audit-cleartext-env-values
+    properties:
+      process: background scan
+    result: pass
+    rule: audit-literal-http-env-without-risk-acceptance
+    scored: true
+    severity: medium
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032540
+  - category: Pod Security
+    message: validation rule 'disallow-default-service-account' passed.
+    policy: securerag-require-pod-security
+    properties:
+      process: background scan
+    result: pass
+    rule: disallow-default-service-account
+    scored: true
+    severity: medium
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032540
+  - category: Pod Security
+    message: validation rule 'require-seccomp-serviceaccount-and-resource-guards'
+      passed.
+    policy: securerag-require-pod-security
+    properties:
+      process: background scan
+    result: pass
+    rule: require-seccomp-serviceaccount-and-resource-guards
+    scored: true
+    severity: medium
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032540
+  - category: Software Supply Chain Security
+    message: rule passed
+    policy: securerag-restrict-image-references
+    properties:
+      process: background scan
+    result: pass
+    rule: disallow-latest-tags
+    scored: true
+    severity: high
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032540
+  - category: Software Supply Chain Security
+    message: rule passed
+    policy: securerag-restrict-image-references
+    properties:
+      process: background scan
+    result: pass
+    rule: restrict-registries
+    scored: true
+    severity: high
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032540
+  - category: Pod Security
+    message: validation rule 'disallow-hostpath-volumes' passed.
+    policy: securerag-restrict-volume-types
+    properties:
+      process: background scan
+    result: pass
+    rule: disallow-hostpath-volumes
+    scored: true
+    severity: high
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032540
+  scope:
+    apiVersion: v1
+    kind: Pod
+    name: portal-web-6ff6cd4545-swmh5
+    namespace: securerag-hub
+    uid: 02177cb2-a975-43cf-b9cc-34095a19f9f6
+  summary:
+    error: 0
+    fail: 0
+    pass: 6
+    skip: 0
+    warn: 0
+- apiVersion: wgpolicyk8s.io/v1alpha2
+  kind: PolicyReport
+  metadata:
+    creationTimestamp: "2026-06-21T09:02:00Z"
+    generation: 2
+    labels:
+      app.kubernetes.io/managed-by: kyverno
+    name: 0af2c865-3b0d-49a5-a7da-804ce361d6fc
+    namespace: securerag-hub
+    ownerReferences:
+    - apiVersion: apps/v1
+      kind: Deployment
+      name: portal-web
+      uid: 0af2c865-3b0d-49a5-a7da-804ce361d6fc
+    resourceVersion: "3634"
+    uid: f0104eec-e6f9-4ffa-8a14-3b121365040f
+  results:
+  - category: Network Security
+    message: Validation rule 'autogen-audit-literal-http-env-without-risk-acceptance'
+      passed.
+    policy: securerag-audit-cleartext-env-values
+    properties:
+      process: background scan
+    result: pass
+    rule: autogen-audit-literal-http-env-without-risk-acceptance
+    scored: true
+    severity: medium
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032540
+  - category: Pod Security
+    message: validation rule 'autogen-disallow-default-service-account' passed.
+    policy: securerag-require-pod-security
+    properties:
+      process: background scan
+    result: pass
+    rule: autogen-disallow-default-service-account
+    scored: true
+    severity: medium
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032540
+  - category: Pod Security
+    message: validation rule 'autogen-require-seccomp-serviceaccount-and-resource-guards'
+      passed.
+    policy: securerag-require-pod-security
+    properties:
+      process: background scan
+    result: pass
+    rule: autogen-require-seccomp-serviceaccount-and-resource-guards
+    scored: true
+    severity: medium
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032540
+  - category: Availability, Pod Security
+    message: rule passed
+    policy: securerag-require-workload-controls
+    properties:
+      process: background scan
+    result: pass
+    rule: require-container-health-probes
+    scored: true
+    severity: medium
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032540
+  - category: Availability, Pod Security
+    message: validation rule 'require-pod-template-service-account-token-disabled'
+      passed.
+    policy: securerag-require-workload-controls
+    properties:
+      process: background scan
+    result: pass
+    rule: require-pod-template-service-account-token-disabled
+    scored: true
+    severity: medium
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032540
+  - category: Pod Security
+    message: validation rule 'autogen-disallow-hostpath-volumes' passed.
+    policy: securerag-restrict-volume-types
+    properties:
+      process: background scan
+    result: pass
+    rule: autogen-disallow-hostpath-volumes
+    scored: true
+    severity: high
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032540
+  scope:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: portal-web
+    namespace: securerag-hub
+    uid: 0af2c865-3b0d-49a5-a7da-804ce361d6fc
+  summary:
+    error: 0
+    fail: 0
+    pass: 6
+    skip: 0
+    warn: 0
+- apiVersion: wgpolicyk8s.io/v1alpha2
+  kind: PolicyReport
+  metadata:
+    creationTimestamp: "2026-06-21T09:02:00Z"
+    generation: 2
+    labels:
+      app.kubernetes.io/managed-by: kyverno
+    name: 0fe2bf13-3895-45a1-9c6c-a69487ef6a1f
+    namespace: securerag-hub
+    ownerReferences:
+    - apiVersion: v1
+      kind: Pod
+      name: auth-users-c4b94d64b-t6k79
+      uid: 0fe2bf13-3895-45a1-9c6c-a69487ef6a1f
+    resourceVersion: "3645"
+    uid: bc6d4cc9-18f5-498b-9861-b5782ef46fbf
+  results:
+  - category: Network Security
+    message: Validation rule 'audit-literal-http-env-without-risk-acceptance' passed.
+    policy: securerag-audit-cleartext-env-values
+    properties:
+      process: background scan
+    result: pass
+    rule: audit-literal-http-env-without-risk-acceptance
+    scored: true
+    severity: medium
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032540
+  - category: Pod Security
+    message: validation rule 'disallow-default-service-account' passed.
+    policy: securerag-require-pod-security
+    properties:
+      process: background scan
+    result: pass
+    rule: disallow-default-service-account
+    scored: true
+    severity: medium
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032540
+  - category: Pod Security
+    message: validation rule 'require-seccomp-serviceaccount-and-resource-guards'
+      passed.
+    policy: securerag-require-pod-security
+    properties:
+      process: background scan
+    result: pass
+    rule: require-seccomp-serviceaccount-and-resource-guards
+    scored: true
+    severity: medium
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032540
+  - category: Software Supply Chain Security
+    message: rule passed
+    policy: securerag-restrict-image-references
+    properties:
+      process: background scan
+    result: pass
+    rule: disallow-latest-tags
+    scored: true
+    severity: high
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032540
+  - category: Software Supply Chain Security
+    message: rule passed
+    policy: securerag-restrict-image-references
+    properties:
+      process: background scan
+    result: pass
+    rule: restrict-registries
+    scored: true
+    severity: high
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032540
+  - category: Pod Security
+    message: validation rule 'disallow-hostpath-volumes' passed.
+    policy: securerag-restrict-volume-types
+    properties:
+      process: background scan
+    result: pass
+    rule: disallow-hostpath-volumes
+    scored: true
+    severity: high
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032540
+  scope:
+    apiVersion: v1
+    kind: Pod
+    name: auth-users-c4b94d64b-t6k79
+    namespace: securerag-hub
+    uid: 0fe2bf13-3895-45a1-9c6c-a69487ef6a1f
+  summary:
+    error: 0
+    fail: 0
+    pass: 6
+    skip: 0
+    warn: 0
+- apiVersion: wgpolicyk8s.io/v1alpha2
+  kind: PolicyReport
+  metadata:
+    creationTimestamp: "2026-06-21T09:02:01Z"
+    generation: 2
+    labels:
+      app.kubernetes.io/managed-by: kyverno
+    name: 10830846-6264-4388-aafd-f1e94ec58b2e
+    namespace: securerag-hub
+    ownerReferences:
+    - apiVersion: v1
+      kind: Service
+      name: audit-security-service
+      uid: 10830846-6264-4388-aafd-f1e94ec58b2e
+    resourceVersion: "3670"
+    uid: b8fcf8de-8948-415a-8ed8-3850fdda03f0
+  results:
+  - category: Network Security
+    message: validation rule 'allow-nodeport-only-for-portal-web' passed.
+    policy: securerag-restrict-service-exposure
+    properties:
+      process: background scan
+    result: pass
+    rule: allow-nodeport-only-for-portal-web
+    scored: true
+    severity: high
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032540
+  scope:
+    apiVersion: v1
+    kind: Service
+    name: audit-security-service
+    namespace: securerag-hub
+    uid: 10830846-6264-4388-aafd-f1e94ec58b2e
+  summary:
+    error: 0
+    fail: 0
+    pass: 1
+    skip: 0
+    warn: 0
+- apiVersion: wgpolicyk8s.io/v1alpha2
+  kind: PolicyReport
+  metadata:
+    creationTimestamp: "2026-06-21T09:02:00Z"
+    generation: 2
+    labels:
+      app.kubernetes.io/managed-by: kyverno
+    name: 10f26d7a-9da3-4ed5-9b82-cfe2edcd975d
+    namespace: securerag-hub
+    ownerReferences:
+    - apiVersion: apps/v1
+      kind: ReplicaSet
+      name: conversation-service-64f99b44db
+      uid: 10f26d7a-9da3-4ed5-9b82-cfe2edcd975d
+    resourceVersion: "3613"
+    uid: 186f49a7-e201-4de1-86d1-27dfcf6e7352
+  results:
+  - category: Network Security
+    message: Validation rule 'autogen-audit-literal-http-env-without-risk-acceptance'
+      passed.
+    policy: securerag-audit-cleartext-env-values
+    properties:
+      process: background scan
+    result: pass
+    rule: autogen-audit-literal-http-env-without-risk-acceptance
+    scored: true
+    severity: medium
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032539
+  - category: Pod Security
+    message: validation rule 'autogen-disallow-default-service-account' passed.
+    policy: securerag-require-pod-security
+    properties:
+      process: background scan
+    result: pass
+    rule: autogen-disallow-default-service-account
+    scored: true
+    severity: medium
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032539
+  - category: Pod Security
+    message: validation rule 'autogen-require-seccomp-serviceaccount-and-resource-guards'
+      passed.
+    policy: securerag-require-pod-security
+    properties:
+      process: background scan
+    result: pass
+    rule: autogen-require-seccomp-serviceaccount-and-resource-guards
+    scored: true
+    severity: medium
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032539
+  - category: Pod Security
+    message: validation rule 'autogen-disallow-hostpath-volumes' passed.
+    policy: securerag-restrict-volume-types
+    properties:
+      process: background scan
+    result: pass
+    rule: autogen-disallow-hostpath-volumes
+    scored: true
+    severity: high
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032539
+  scope:
+    apiVersion: apps/v1
+    kind: ReplicaSet
+    name: conversation-service-64f99b44db
+    namespace: securerag-hub
+    uid: 10f26d7a-9da3-4ed5-9b82-cfe2edcd975d
+  summary:
+    error: 0
+    fail: 0
+    pass: 4
+    skip: 0
+    warn: 0
+- apiVersion: wgpolicyk8s.io/v1alpha2
+  kind: PolicyReport
+  metadata:
+    creationTimestamp: "2026-06-21T09:02:00Z"
+    generation: 2
+    labels:
+      app.kubernetes.io/managed-by: kyverno
+    name: 1d20f675-dcad-44af-8df9-c109e1bd88ca
+    namespace: securerag-hub
+    ownerReferences:
+    - apiVersion: apps/v1
+      kind: ReplicaSet
+      name: postgres-auth-867ddc6dc8
+      uid: 1d20f675-dcad-44af-8df9-c109e1bd88ca
+    resourceVersion: "3601"
+    uid: b70da8aa-080f-42ca-b306-3cdc4428ce19
+  results:
+  - category: Network Security
+    message: Validation rule 'autogen-audit-literal-http-env-without-risk-acceptance'
+      passed.
+    policy: securerag-audit-cleartext-env-values
+    properties:
+      process: background scan
+    result: pass
+    rule: autogen-audit-literal-http-env-without-risk-acceptance
+    scored: true
+    severity: medium
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032539
+  - category: Pod Security
+    message: validation rule 'autogen-disallow-default-service-account' passed.
+    policy: securerag-require-pod-security
+    properties:
+      process: background scan
+    result: pass
+    rule: autogen-disallow-default-service-account
+    scored: true
+    severity: medium
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032539
+  - category: Pod Security
+    message: validation rule 'autogen-require-seccomp-serviceaccount-and-resource-guards'
+      passed.
+    policy: securerag-require-pod-security
+    properties:
+      process: background scan
+    result: pass
+    rule: autogen-require-seccomp-serviceaccount-and-resource-guards
+    scored: true
+    severity: medium
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032539
+  - category: Pod Security
+    message: validation rule 'autogen-disallow-hostpath-volumes' passed.
+    policy: securerag-restrict-volume-types
+    properties:
+      process: background scan
+    result: pass
+    rule: autogen-disallow-hostpath-volumes
+    scored: true
+    severity: high
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032539
+  scope:
+    apiVersion: apps/v1
+    kind: ReplicaSet
+    name: postgres-auth-867ddc6dc8
+    namespace: securerag-hub
+    uid: 1d20f675-dcad-44af-8df9-c109e1bd88ca
+  summary:
+    error: 0
+    fail: 0
+    pass: 4
+    skip: 0
+    warn: 0
+- apiVersion: wgpolicyk8s.io/v1alpha2
+  kind: PolicyReport
+  metadata:
+    creationTimestamp: "2026-06-21T09:01:59Z"
+    generation: 2
+    labels:
+      app.kubernetes.io/managed-by: kyverno
+    name: 23d605ae-917e-4db5-aee5-de8763ef1892
+    namespace: securerag-hub
+    ownerReferences:
+    - apiVersion: v1
+      kind: Pod
+      name: conversation-service-64f99b44db-6n2vv
+      uid: 23d605ae-917e-4db5-aee5-de8763ef1892
+    resourceVersion: "3652"
+    uid: 4d0be390-8214-43e1-a623-6a5a63721179
+  results:
+  - category: Network Security
+    message: Validation rule 'audit-literal-http-env-without-risk-acceptance' passed.
+    policy: securerag-audit-cleartext-env-values
+    properties:
+      process: background scan
+    result: pass
+    rule: audit-literal-http-env-without-risk-acceptance
+    scored: true
+    severity: medium
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032540
+  - category: Pod Security
+    message: validation rule 'disallow-default-service-account' passed.
+    policy: securerag-require-pod-security
+    properties:
+      process: background scan
+    result: pass
+    rule: disallow-default-service-account
+    scored: true
+    severity: medium
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032540
+  - category: Pod Security
+    message: validation rule 'require-seccomp-serviceaccount-and-resource-guards'
+      passed.
+    policy: securerag-require-pod-security
+    properties:
+      process: background scan
+    result: pass
+    rule: require-seccomp-serviceaccount-and-resource-guards
+    scored: true
+    severity: medium
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032540
+  - category: Software Supply Chain Security
+    message: rule passed
+    policy: securerag-restrict-image-references
+    properties:
+      process: background scan
+    result: pass
+    rule: disallow-latest-tags
+    scored: true
+    severity: high
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032540
+  - category: Software Supply Chain Security
+    message: rule passed
+    policy: securerag-restrict-image-references
+    properties:
+      process: background scan
+    result: pass
+    rule: restrict-registries
+    scored: true
+    severity: high
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032540
+  - category: Pod Security
+    message: validation rule 'disallow-hostpath-volumes' passed.
+    policy: securerag-restrict-volume-types
+    properties:
+      process: background scan
+    result: pass
+    rule: disallow-hostpath-volumes
+    scored: true
+    severity: high
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032540
+  scope:
+    apiVersion: v1
+    kind: Pod
+    name: conversation-service-64f99b44db-6n2vv
+    namespace: securerag-hub
+    uid: 23d605ae-917e-4db5-aee5-de8763ef1892
+  summary:
+    error: 0
+    fail: 0
+    pass: 6
+    skip: 0
+    warn: 0
+- apiVersion: wgpolicyk8s.io/v1alpha2
+  kind: PolicyReport
+  metadata:
+    creationTimestamp: "2026-06-21T09:02:00Z"
+    generation: 2
+    labels:
+      app.kubernetes.io/managed-by: kyverno
+    name: 25c40f4e-5780-4f17-b412-fae7b23694c9
+    namespace: securerag-hub
+    ownerReferences:
+    - apiVersion: apps/v1
+      kind: ReplicaSet
+      name: portal-web-6ff6cd4545
+      uid: 25c40f4e-5780-4f17-b412-fae7b23694c9
+    resourceVersion: "3621"
+    uid: df94df50-8e45-4d60-95f7-a12b37a24766
+  results:
+  - category: Network Security
+    message: Validation rule 'autogen-audit-literal-http-env-without-risk-acceptance'
+      passed.
+    policy: securerag-audit-cleartext-env-values
+    properties:
+      process: background scan
+    result: pass
+    rule: autogen-audit-literal-http-env-without-risk-acceptance
+    scored: true
+    severity: medium
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032540
+  - category: Pod Security
+    message: validation rule 'autogen-disallow-default-service-account' passed.
+    policy: securerag-require-pod-security
+    properties:
+      process: background scan
+    result: pass
+    rule: autogen-disallow-default-service-account
+    scored: true
+    severity: medium
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032540
+  - category: Pod Security
+    message: validation rule 'autogen-require-seccomp-serviceaccount-and-resource-guards'
+      passed.
+    policy: securerag-require-pod-security
+    properties:
+      process: background scan
+    result: pass
+    rule: autogen-require-seccomp-serviceaccount-and-resource-guards
+    scored: true
+    severity: medium
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032540
+  - category: Pod Security
+    message: validation rule 'autogen-disallow-hostpath-volumes' passed.
+    policy: securerag-restrict-volume-types
+    properties:
+      process: background scan
+    result: pass
+    rule: autogen-disallow-hostpath-volumes
+    scored: true
+    severity: high
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032540
+  scope:
+    apiVersion: apps/v1
+    kind: ReplicaSet
+    name: portal-web-6ff6cd4545
+    namespace: securerag-hub
+    uid: 25c40f4e-5780-4f17-b412-fae7b23694c9
+  summary:
+    error: 0
+    fail: 0
+    pass: 4
+    skip: 0
+    warn: 0
+- apiVersion: wgpolicyk8s.io/v1alpha2
+  kind: PolicyReport
+  metadata:
+    creationTimestamp: "2026-06-21T09:02:01Z"
+    generation: 2
+    labels:
+      app.kubernetes.io/managed-by: kyverno
+    name: 2b96f891-7d77-432a-a657-2f4cf7a67833
+    namespace: securerag-hub
+    ownerReferences:
+    - apiVersion: v1
+      kind: Service
+      name: chatbot-manager
+      uid: 2b96f891-7d77-432a-a657-2f4cf7a67833
+    resourceVersion: "3664"
+    uid: 22f4ab2b-24b6-41e4-842b-2f5d61c738a8
+  results:
+  - category: Network Security
+    message: validation rule 'allow-nodeport-only-for-portal-web' passed.
+    policy: securerag-restrict-service-exposure
+    properties:
+      process: background scan
+    result: pass
+    rule: allow-nodeport-only-for-portal-web
+    scored: true
+    severity: high
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032540
+  scope:
+    apiVersion: v1
+    kind: Service
+    name: chatbot-manager
+    namespace: securerag-hub
+    uid: 2b96f891-7d77-432a-a657-2f4cf7a67833
+  summary:
+    error: 0
+    fail: 0
+    pass: 1
+    skip: 0
+    warn: 0
+- apiVersion: wgpolicyk8s.io/v1alpha2
+  kind: PolicyReport
+  metadata:
+    creationTimestamp: "2026-06-21T09:02:00Z"
+    generation: 2
+    labels:
+      app.kubernetes.io/managed-by: kyverno
+    name: 3bbde1fc-579f-4c67-9b3a-bfcf87521c1b
+    namespace: securerag-hub
+    ownerReferences:
+    - apiVersion: v1
+      kind: Pod
+      name: audit-security-service-b478dc875-b5s9d
+      uid: 3bbde1fc-579f-4c67-9b3a-bfcf87521c1b
+    resourceVersion: "3640"
+    uid: 205a878c-8a16-4573-8eb2-c3a259b66a5d
+  results:
+  - category: Network Security
+    message: Validation rule 'audit-literal-http-env-without-risk-acceptance' passed.
+    policy: securerag-audit-cleartext-env-values
+    properties:
+      process: background scan
+    result: pass
+    rule: audit-literal-http-env-without-risk-acceptance
+    scored: true
+    severity: medium
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032540
+  - category: Pod Security
+    message: validation rule 'disallow-default-service-account' passed.
+    policy: securerag-require-pod-security
+    properties:
+      process: background scan
+    result: pass
+    rule: disallow-default-service-account
+    scored: true
+    severity: medium
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032540
+  - category: Pod Security
+    message: validation rule 'require-seccomp-serviceaccount-and-resource-guards'
+      passed.
+    policy: securerag-require-pod-security
+    properties:
+      process: background scan
+    result: pass
+    rule: require-seccomp-serviceaccount-and-resource-guards
+    scored: true
+    severity: medium
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032540
+  - category: Software Supply Chain Security
+    message: rule passed
+    policy: securerag-restrict-image-references
+    properties:
+      process: background scan
+    result: pass
+    rule: disallow-latest-tags
+    scored: true
+    severity: high
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032540
+  - category: Software Supply Chain Security
+    message: rule passed
+    policy: securerag-restrict-image-references
+    properties:
+      process: background scan
+    result: pass
+    rule: restrict-registries
+    scored: true
+    severity: high
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032540
+  - category: Pod Security
+    message: validation rule 'disallow-hostpath-volumes' passed.
+    policy: securerag-restrict-volume-types
+    properties:
+      process: background scan
+    result: pass
+    rule: disallow-hostpath-volumes
+    scored: true
+    severity: high
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032540
+  scope:
+    apiVersion: v1
+    kind: Pod
+    name: audit-security-service-b478dc875-b5s9d
+    namespace: securerag-hub
+    uid: 3bbde1fc-579f-4c67-9b3a-bfcf87521c1b
+  summary:
+    error: 0
+    fail: 0
+    pass: 6
+    skip: 0
+    warn: 0
+- apiVersion: wgpolicyk8s.io/v1alpha2
+  kind: PolicyReport
+  metadata:
+    creationTimestamp: "2026-06-21T09:01:59Z"
+    generation: 2
+    labels:
+      app.kubernetes.io/managed-by: kyverno
+    name: 4209f692-729b-4575-a1cd-a95e38138066
+    namespace: securerag-hub
+    ownerReferences:
+    - apiVersion: v1
+      kind: Pod
+      name: audit-security-service-5fddbb654-n5ltk
+      uid: 4209f692-729b-4575-a1cd-a95e38138066
+    resourceVersion: "3648"
+    uid: 76dcfb81-2453-4a2c-b14a-4cd4baf18249
+  results:
+  - category: Network Security
+    message: Validation rule 'audit-literal-http-env-without-risk-acceptance' passed.
+    policy: securerag-audit-cleartext-env-values
+    properties:
+      process: background scan
+    result: pass
+    rule: audit-literal-http-env-without-risk-acceptance
+    scored: true
+    severity: medium
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032540
+  - category: Pod Security
+    message: validation rule 'disallow-default-service-account' passed.
+    policy: securerag-require-pod-security
+    properties:
+      process: background scan
+    result: pass
+    rule: disallow-default-service-account
+    scored: true
+    severity: medium
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032540
+  - category: Pod Security
+    message: validation rule 'require-seccomp-serviceaccount-and-resource-guards'
+      passed.
+    policy: securerag-require-pod-security
+    properties:
+      process: background scan
+    result: pass
+    rule: require-seccomp-serviceaccount-and-resource-guards
+    scored: true
+    severity: medium
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032540
+  - category: Software Supply Chain Security
+    message: rule passed
+    policy: securerag-restrict-image-references
+    properties:
+      process: background scan
+    result: pass
+    rule: disallow-latest-tags
+    scored: true
+    severity: high
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032540
+  - category: Software Supply Chain Security
+    message: rule passed
+    policy: securerag-restrict-image-references
+    properties:
+      process: background scan
+    result: pass
+    rule: restrict-registries
+    scored: true
+    severity: high
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032540
+  - category: Pod Security
+    message: validation rule 'disallow-hostpath-volumes' passed.
+    policy: securerag-restrict-volume-types
+    properties:
+      process: background scan
+    result: pass
+    rule: disallow-hostpath-volumes
+    scored: true
+    severity: high
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032540
+  scope:
+    apiVersion: v1
+    kind: Pod
+    name: audit-security-service-5fddbb654-n5ltk
+    namespace: securerag-hub
+    uid: 4209f692-729b-4575-a1cd-a95e38138066
+  summary:
+    error: 0
+    fail: 0
+    pass: 6
+    skip: 0
+    warn: 0
+- apiVersion: wgpolicyk8s.io/v1alpha2
+  kind: PolicyReport
+  metadata:
+    creationTimestamp: "2026-06-21T09:02:01Z"
+    generation: 2
+    labels:
+      app.kubernetes.io/managed-by: kyverno
+    name: 5b36bbc6-f77e-4689-94db-209c0e890d24
+    namespace: securerag-hub
+    ownerReferences:
+    - apiVersion: v1
+      kind: Service
+      name: auth-users
+      uid: 5b36bbc6-f77e-4689-94db-209c0e890d24
+    resourceVersion: "3663"
+    uid: b4b0db09-9125-449a-b389-90a5d896301f
+  results:
+  - category: Network Security
+    message: validation rule 'allow-nodeport-only-for-portal-web' passed.
+    policy: securerag-restrict-service-exposure
+    properties:
+      process: background scan
+    result: pass
+    rule: allow-nodeport-only-for-portal-web
+    scored: true
+    severity: high
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032540
+  scope:
+    apiVersion: v1
+    kind: Service
+    name: auth-users
+    namespace: securerag-hub
+    uid: 5b36bbc6-f77e-4689-94db-209c0e890d24
+  summary:
+    error: 0
+    fail: 0
+    pass: 1
+    skip: 0
+    warn: 0
+- apiVersion: wgpolicyk8s.io/v1alpha2
+  kind: PolicyReport
+  metadata:
+    creationTimestamp: "2026-06-21T09:02:00Z"
+    generation: 2
+    labels:
+      app.kubernetes.io/managed-by: kyverno
+    name: 5f6a66e2-d4aa-4c42-98b6-13faaf3d6c6a
+    namespace: securerag-hub
+    ownerReferences:
+    - apiVersion: apps/v1
+      kind: ReplicaSet
+      name: auth-users-c4b94d64b
+      uid: 5f6a66e2-d4aa-4c42-98b6-13faaf3d6c6a
+    resourceVersion: "3611"
+    uid: efc3c409-85fd-4e75-ad92-0ebbb5c0f0a0
+  results:
+  - category: Network Security
+    message: Validation rule 'autogen-audit-literal-http-env-without-risk-acceptance'
+      passed.
+    policy: securerag-audit-cleartext-env-values
+    properties:
+      process: background scan
+    result: pass
+    rule: autogen-audit-literal-http-env-without-risk-acceptance
+    scored: true
+    severity: medium
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032539
+  - category: Pod Security
+    message: validation rule 'autogen-disallow-default-service-account' passed.
+    policy: securerag-require-pod-security
+    properties:
+      process: background scan
+    result: pass
+    rule: autogen-disallow-default-service-account
+    scored: true
+    severity: medium
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032539
+  - category: Pod Security
+    message: validation rule 'autogen-require-seccomp-serviceaccount-and-resource-guards'
+      passed.
+    policy: securerag-require-pod-security
+    properties:
+      process: background scan
+    result: pass
+    rule: autogen-require-seccomp-serviceaccount-and-resource-guards
+    scored: true
+    severity: medium
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032539
+  - category: Pod Security
+    message: validation rule 'autogen-disallow-hostpath-volumes' passed.
+    policy: securerag-restrict-volume-types
+    properties:
+      process: background scan
+    result: pass
+    rule: autogen-disallow-hostpath-volumes
+    scored: true
+    severity: high
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032539
+  scope:
+    apiVersion: apps/v1
+    kind: ReplicaSet
+    name: auth-users-c4b94d64b
+    namespace: securerag-hub
+    uid: 5f6a66e2-d4aa-4c42-98b6-13faaf3d6c6a
+  summary:
+    error: 0
+    fail: 0
+    pass: 4
+    skip: 0
+    warn: 0
+- apiVersion: wgpolicyk8s.io/v1alpha2
+  kind: PolicyReport
+  metadata:
+    creationTimestamp: "2026-06-21T09:02:00Z"
+    generation: 2
+    labels:
+      app.kubernetes.io/managed-by: kyverno
+    name: 609c3fc4-1423-4b8d-94f9-6caf8d95dedc
+    namespace: securerag-hub
+    ownerReferences:
+    - apiVersion: v1
+      kind: Pod
+      name: auth-users-799b8b5664-whwzb
+      uid: 609c3fc4-1423-4b8d-94f9-6caf8d95dedc
+    resourceVersion: "3641"
+    uid: ea8e5c11-3b4b-44df-9d8d-ff7653a6ad75
+  results:
+  - category: Network Security
+    message: Validation rule 'audit-literal-http-env-without-risk-acceptance' passed.
+    policy: securerag-audit-cleartext-env-values
+    properties:
+      process: background scan
+    result: pass
+    rule: audit-literal-http-env-without-risk-acceptance
+    scored: true
+    severity: medium
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032540
+  - category: Pod Security
+    message: validation rule 'disallow-default-service-account' passed.
+    policy: securerag-require-pod-security
+    properties:
+      process: background scan
+    result: pass
+    rule: disallow-default-service-account
+    scored: true
+    severity: medium
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032540
+  - category: Pod Security
+    message: validation rule 'require-seccomp-serviceaccount-and-resource-guards'
+      passed.
+    policy: securerag-require-pod-security
+    properties:
+      process: background scan
+    result: pass
+    rule: require-seccomp-serviceaccount-and-resource-guards
+    scored: true
+    severity: medium
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032540
+  - category: Software Supply Chain Security
+    message: rule passed
+    policy: securerag-restrict-image-references
+    properties:
+      process: background scan
+    result: pass
+    rule: disallow-latest-tags
+    scored: true
+    severity: high
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032540
+  - category: Software Supply Chain Security
+    message: rule passed
+    policy: securerag-restrict-image-references
+    properties:
+      process: background scan
+    result: pass
+    rule: restrict-registries
+    scored: true
+    severity: high
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032540
+  - category: Pod Security
+    message: validation rule 'disallow-hostpath-volumes' passed.
+    policy: securerag-restrict-volume-types
+    properties:
+      process: background scan
+    result: pass
+    rule: disallow-hostpath-volumes
+    scored: true
+    severity: high
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032540
+  scope:
+    apiVersion: v1
+    kind: Pod
+    name: auth-users-799b8b5664-whwzb
+    namespace: securerag-hub
+    uid: 609c3fc4-1423-4b8d-94f9-6caf8d95dedc
+  summary:
+    error: 0
+    fail: 0
+    pass: 6
+    skip: 0
+    warn: 0
+- apiVersion: wgpolicyk8s.io/v1alpha2
+  kind: PolicyReport
+  metadata:
+    creationTimestamp: "2026-06-21T09:02:00Z"
+    generation: 2
+    labels:
+      app.kubernetes.io/managed-by: kyverno
+    name: 685da5a9-4050-42fa-b69f-263a00ebfcbc
+    namespace: securerag-hub
+    ownerReferences:
+    - apiVersion: apps/v1
+      kind: ReplicaSet
+      name: audit-security-service-b478dc875
+      uid: 685da5a9-4050-42fa-b69f-263a00ebfcbc
+    resourceVersion: "3615"
+    uid: fae796ad-7fb2-432b-9dde-e58413f6e12b
+  results:
+  - category: Network Security
+    message: Validation rule 'autogen-audit-literal-http-env-without-risk-acceptance'
+      passed.
+    policy: securerag-audit-cleartext-env-values
+    properties:
+      process: background scan
+    result: pass
+    rule: autogen-audit-literal-http-env-without-risk-acceptance
+    scored: true
+    severity: medium
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032540
+  - category: Pod Security
+    message: validation rule 'autogen-disallow-default-service-account' passed.
+    policy: securerag-require-pod-security
+    properties:
+      process: background scan
+    result: pass
+    rule: autogen-disallow-default-service-account
+    scored: true
+    severity: medium
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032540
+  - category: Pod Security
+    message: validation rule 'autogen-require-seccomp-serviceaccount-and-resource-guards'
+      passed.
+    policy: securerag-require-pod-security
+    properties:
+      process: background scan
+    result: pass
+    rule: autogen-require-seccomp-serviceaccount-and-resource-guards
+    scored: true
+    severity: medium
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032540
+  - category: Pod Security
+    message: validation rule 'autogen-disallow-hostpath-volumes' passed.
+    policy: securerag-restrict-volume-types
+    properties:
+      process: background scan
+    result: pass
+    rule: autogen-disallow-hostpath-volumes
+    scored: true
+    severity: high
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032540
+  scope:
+    apiVersion: apps/v1
+    kind: ReplicaSet
+    name: audit-security-service-b478dc875
+    namespace: securerag-hub
+    uid: 685da5a9-4050-42fa-b69f-263a00ebfcbc
+  summary:
+    error: 0
+    fail: 0
+    pass: 4
+    skip: 0
+    warn: 0
+- apiVersion: wgpolicyk8s.io/v1alpha2
+  kind: PolicyReport
+  metadata:
+    creationTimestamp: "2026-06-21T09:01:59Z"
+    generation: 2
+    labels:
+      app.kubernetes.io/managed-by: kyverno
+    name: 766e969b-569f-407e-a6ae-a067c015f512
+    namespace: securerag-hub
+    ownerReferences:
+    - apiVersion: v1
+      kind: Pod
+      name: chatbot-manager-779b7cc44b-bskxh
+      uid: 766e969b-569f-407e-a6ae-a067c015f512
+    resourceVersion: "3650"
+    uid: 481693fe-7327-4814-bb76-a55a5f051cf8
+  results:
+  - category: Network Security
+    message: Validation rule 'audit-literal-http-env-without-risk-acceptance' passed.
+    policy: securerag-audit-cleartext-env-values
+    properties:
+      process: background scan
+    result: pass
+    rule: audit-literal-http-env-without-risk-acceptance
+    scored: true
+    severity: medium
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032540
+  - category: Pod Security
+    message: validation rule 'disallow-default-service-account' passed.
+    policy: securerag-require-pod-security
+    properties:
+      process: background scan
+    result: pass
+    rule: disallow-default-service-account
+    scored: true
+    severity: medium
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032540
+  - category: Pod Security
+    message: validation rule 'require-seccomp-serviceaccount-and-resource-guards'
+      passed.
+    policy: securerag-require-pod-security
+    properties:
+      process: background scan
+    result: pass
+    rule: require-seccomp-serviceaccount-and-resource-guards
+    scored: true
+    severity: medium
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032540
+  - category: Software Supply Chain Security
+    message: rule passed
+    policy: securerag-restrict-image-references
+    properties:
+      process: background scan
+    result: pass
+    rule: disallow-latest-tags
+    scored: true
+    severity: high
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032540
+  - category: Software Supply Chain Security
+    message: rule passed
+    policy: securerag-restrict-image-references
+    properties:
+      process: background scan
+    result: pass
+    rule: restrict-registries
+    scored: true
+    severity: high
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032540
+  - category: Pod Security
+    message: validation rule 'disallow-hostpath-volumes' passed.
+    policy: securerag-restrict-volume-types
+    properties:
+      process: background scan
+    result: pass
+    rule: disallow-hostpath-volumes
+    scored: true
+    severity: high
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032540
+  scope:
+    apiVersion: v1
+    kind: Pod
+    name: chatbot-manager-779b7cc44b-bskxh
+    namespace: securerag-hub
+    uid: 766e969b-569f-407e-a6ae-a067c015f512
+  summary:
+    error: 0
+    fail: 0
+    pass: 6
+    skip: 0
+    warn: 0
+- apiVersion: wgpolicyk8s.io/v1alpha2
+  kind: PolicyReport
+  metadata:
+    creationTimestamp: "2026-06-21T09:02:01Z"
+    generation: 2
+    labels:
+      app.kubernetes.io/managed-by: kyverno
+    name: 7f8a19b2-19ee-4239-9aab-d77c8429e96d
+    namespace: securerag-hub
+    ownerReferences:
+    - apiVersion: v1
+      kind: Service
+      name: postgres-auth
+      uid: 7f8a19b2-19ee-4239-9aab-d77c8429e96d
+    resourceVersion: "3667"
+    uid: 827c6e09-6047-47ae-afde-9d6fb88bbfbf
+  results:
+  - category: Network Security
+    message: Only portal-web may use NodePort in the local demo overlay; LoadBalancer
+      is forbidden.
+    policy: securerag-restrict-service-exposure
+    properties:
+      process: background scan
+    result: fail
+    rule: allow-nodeport-only-for-portal-web
+    scored: true
+    severity: high
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032540
+  scope:
+    apiVersion: v1
+    kind: Service
+    name: postgres-auth
+    namespace: securerag-hub
+    uid: 7f8a19b2-19ee-4239-9aab-d77c8429e96d
+  summary:
+    error: 0
+    fail: 1
+    pass: 0
+    skip: 0
+    warn: 0
+- apiVersion: wgpolicyk8s.io/v1alpha2
+  kind: PolicyReport
+  metadata:
+    creationTimestamp: "2026-06-21T09:02:00Z"
+    generation: 2
+    labels:
+      app.kubernetes.io/managed-by: kyverno
+    name: 815a6cf6-65d1-41a3-9c66-b0e3257ac10b
+    namespace: securerag-hub
+    ownerReferences:
+    - apiVersion: apps/v1
+      kind: Deployment
+      name: auth-users
+      uid: 815a6cf6-65d1-41a3-9c66-b0e3257ac10b
+    resourceVersion: "3630"
+    uid: c428194d-1b31-4ff3-ba6e-23aaba511e72
+  results:
+  - category: Network Security
+    message: Validation rule 'autogen-audit-literal-http-env-without-risk-acceptance'
+      passed.
+    policy: securerag-audit-cleartext-env-values
+    properties:
+      process: background scan
+    result: pass
+    rule: autogen-audit-literal-http-env-without-risk-acceptance
+    scored: true
+    severity: medium
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032540
+  - category: Pod Security
+    message: validation rule 'autogen-disallow-default-service-account' passed.
+    policy: securerag-require-pod-security
+    properties:
+      process: background scan
+    result: pass
+    rule: autogen-disallow-default-service-account
+    scored: true
+    severity: medium
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032540
+  - category: Pod Security
+    message: validation rule 'autogen-require-seccomp-serviceaccount-and-resource-guards'
+      passed.
+    policy: securerag-require-pod-security
+    properties:
+      process: background scan
+    result: pass
+    rule: autogen-require-seccomp-serviceaccount-and-resource-guards
+    scored: true
+    severity: medium
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032540
+  - category: Availability, Pod Security
+    message: rule passed
+    policy: securerag-require-workload-controls
+    properties:
+      process: background scan
+    result: pass
+    rule: require-container-health-probes
+    scored: true
+    severity: medium
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032540
+  - category: Availability, Pod Security
+    message: validation rule 'require-pod-template-service-account-token-disabled'
+      passed.
+    policy: securerag-require-workload-controls
+    properties:
+      process: background scan
+    result: pass
+    rule: require-pod-template-service-account-token-disabled
+    scored: true
+    severity: medium
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032540
+  - category: Pod Security
+    message: validation rule 'autogen-disallow-hostpath-volumes' passed.
+    policy: securerag-restrict-volume-types
+    properties:
+      process: background scan
+    result: pass
+    rule: autogen-disallow-hostpath-volumes
+    scored: true
+    severity: high
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032540
+  scope:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: auth-users
+    namespace: securerag-hub
+    uid: 815a6cf6-65d1-41a3-9c66-b0e3257ac10b
+  summary:
+    error: 0
+    fail: 0
+    pass: 6
+    skip: 0
+    warn: 0
+- apiVersion: wgpolicyk8s.io/v1alpha2
+  kind: PolicyReport
+  metadata:
+    creationTimestamp: "2026-06-21T09:02:00Z"
+    generation: 2
+    labels:
+      app.kubernetes.io/managed-by: kyverno
+    name: 819080ea-ed29-482c-b6da-9fce980be1ea
+    namespace: securerag-hub
+    ownerReferences:
+    - apiVersion: apps/v1
+      kind: ReplicaSet
+      name: chatbot-manager-779b7cc44b
+      uid: 819080ea-ed29-482c-b6da-9fce980be1ea
+    resourceVersion: "3603"
+    uid: 998ab385-12ec-4e9e-8662-eece5cc2dcf4
+  results:
+  - category: Network Security
+    message: Validation rule 'autogen-audit-literal-http-env-without-risk-acceptance'
+      passed.
+    policy: securerag-audit-cleartext-env-values
+    properties:
+      process: background scan
+    result: pass
+    rule: autogen-audit-literal-http-env-without-risk-acceptance
+    scored: true
+    severity: medium
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032539
+  - category: Pod Security
+    message: validation rule 'autogen-disallow-default-service-account' passed.
+    policy: securerag-require-pod-security
+    properties:
+      process: background scan
+    result: pass
+    rule: autogen-disallow-default-service-account
+    scored: true
+    severity: medium
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032539
+  - category: Pod Security
+    message: validation rule 'autogen-require-seccomp-serviceaccount-and-resource-guards'
+      passed.
+    policy: securerag-require-pod-security
+    properties:
+      process: background scan
+    result: pass
+    rule: autogen-require-seccomp-serviceaccount-and-resource-guards
+    scored: true
+    severity: medium
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032539
+  - category: Pod Security
+    message: validation rule 'autogen-disallow-hostpath-volumes' passed.
+    policy: securerag-restrict-volume-types
+    properties:
+      process: background scan
+    result: pass
+    rule: autogen-disallow-hostpath-volumes
+    scored: true
+    severity: high
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032539
+  scope:
+    apiVersion: apps/v1
+    kind: ReplicaSet
+    name: chatbot-manager-779b7cc44b
+    namespace: securerag-hub
+    uid: 819080ea-ed29-482c-b6da-9fce980be1ea
+  summary:
+    error: 0
+    fail: 0
+    pass: 4
+    skip: 0
+    warn: 0
+- apiVersion: wgpolicyk8s.io/v1alpha2
+  kind: PolicyReport
+  metadata:
+    creationTimestamp: "2026-06-21T09:02:01Z"
+    generation: 2
+    labels:
+      app.kubernetes.io/managed-by: kyverno
+    name: 823cb9df-09d9-409a-b559-9a017d2b039e
+    namespace: securerag-hub
+    ownerReferences:
+    - apiVersion: v1
+      kind: Service
+      name: portal-web
+      uid: 823cb9df-09d9-409a-b559-9a017d2b039e
+    resourceVersion: "3661"
+    uid: 1045e4eb-c242-41e1-847b-306dcaf60811
+  results:
+  - category: Network Security
+    message: validation rule 'allow-nodeport-only-for-portal-web' passed.
+    policy: securerag-restrict-service-exposure
+    properties:
+      process: background scan
+    result: pass
+    rule: allow-nodeport-only-for-portal-web
+    scored: true
+    severity: high
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032540
+  scope:
+    apiVersion: v1
+    kind: Service
+    name: portal-web
+    namespace: securerag-hub
+    uid: 823cb9df-09d9-409a-b559-9a017d2b039e
+  summary:
+    error: 0
+    fail: 0
+    pass: 1
+    skip: 0
+    warn: 0
+- apiVersion: wgpolicyk8s.io/v1alpha2
+  kind: PolicyReport
+  metadata:
+    creationTimestamp: "2026-06-21T09:02:00Z"
+    generation: 2
+    labels:
+      app.kubernetes.io/managed-by: kyverno
+    name: 84f8448f-378d-4597-9353-c6213983f615
+    namespace: securerag-hub
+    ownerReferences:
+    - apiVersion: v1
+      kind: Pod
+      name: chatbot-manager-976899cb8-jprbg
+      uid: 84f8448f-378d-4597-9353-c6213983f615
+    resourceVersion: "3637"
+    uid: cb392ab3-d5d3-4ed1-9e24-bd2dd8347ebc
+  results:
+  - category: Network Security
+    message: Validation rule 'audit-literal-http-env-without-risk-acceptance' passed.
+    policy: securerag-audit-cleartext-env-values
+    properties:
+      process: background scan
+    result: pass
+    rule: audit-literal-http-env-without-risk-acceptance
+    scored: true
+    severity: medium
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032540
+  - category: Pod Security
+    message: validation rule 'disallow-default-service-account' passed.
+    policy: securerag-require-pod-security
+    properties:
+      process: background scan
+    result: pass
+    rule: disallow-default-service-account
+    scored: true
+    severity: medium
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032540
+  - category: Pod Security
+    message: validation rule 'require-seccomp-serviceaccount-and-resource-guards'
+      passed.
+    policy: securerag-require-pod-security
+    properties:
+      process: background scan
+    result: pass
+    rule: require-seccomp-serviceaccount-and-resource-guards
+    scored: true
+    severity: medium
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032540
+  - category: Software Supply Chain Security
+    message: rule passed
+    policy: securerag-restrict-image-references
+    properties:
+      process: background scan
+    result: pass
+    rule: disallow-latest-tags
+    scored: true
+    severity: high
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032540
+  - category: Software Supply Chain Security
+    message: rule passed
+    policy: securerag-restrict-image-references
+    properties:
+      process: background scan
+    result: pass
+    rule: restrict-registries
+    scored: true
+    severity: high
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032540
+  - category: Pod Security
+    message: validation rule 'disallow-hostpath-volumes' passed.
+    policy: securerag-restrict-volume-types
+    properties:
+      process: background scan
+    result: pass
+    rule: disallow-hostpath-volumes
+    scored: true
+    severity: high
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032540
+  scope:
+    apiVersion: v1
+    kind: Pod
+    name: chatbot-manager-976899cb8-jprbg
+    namespace: securerag-hub
+    uid: 84f8448f-378d-4597-9353-c6213983f615
+  summary:
+    error: 0
+    fail: 0
+    pass: 6
+    skip: 0
+    warn: 0
+- apiVersion: wgpolicyk8s.io/v1alpha2
+  kind: PolicyReport
+  metadata:
+    creationTimestamp: "2026-06-21T09:02:01Z"
+    generation: 2
+    labels:
+      app.kubernetes.io/managed-by: kyverno
+    name: 868ed9d4-86e1-4b4d-a066-23e3fc1c45af
+    namespace: securerag-hub
+    ownerReferences:
+    - apiVersion: v1
+      kind: Service
+      name: conversation-service
+      uid: 868ed9d4-86e1-4b4d-a066-23e3fc1c45af
+    resourceVersion: "3659"
+    uid: 603a8de1-a1b1-407f-98aa-a5cdbd526cf6
+  results:
+  - category: Network Security
+    message: validation rule 'allow-nodeport-only-for-portal-web' passed.
+    policy: securerag-restrict-service-exposure
+    properties:
+      process: background scan
+    result: pass
+    rule: allow-nodeport-only-for-portal-web
+    scored: true
+    severity: high
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032540
+  scope:
+    apiVersion: v1
+    kind: Service
+    name: conversation-service
+    namespace: securerag-hub
+    uid: 868ed9d4-86e1-4b4d-a066-23e3fc1c45af
+  summary:
+    error: 0
+    fail: 0
+    pass: 1
+    skip: 0
+    warn: 0
+- apiVersion: wgpolicyk8s.io/v1alpha2
+  kind: PolicyReport
+  metadata:
+    creationTimestamp: "2026-06-21T09:01:59Z"
+    generation: 2
+    labels:
+      app.kubernetes.io/managed-by: kyverno
+    name: 8f63f457-7089-4f26-969c-86663c792739
+    namespace: securerag-hub
+    ownerReferences:
+    - apiVersion: v1
+      kind: Pod
+      name: postgres-auth-867ddc6dc8-w9xgr
+      uid: 8f63f457-7089-4f26-969c-86663c792739
+    resourceVersion: "3654"
+    uid: 07a8e1dd-cb52-484b-aeae-ad154aa69811
+  results:
+  - category: Network Security
+    message: Validation rule 'audit-literal-http-env-without-risk-acceptance' passed.
+    policy: securerag-audit-cleartext-env-values
+    properties:
+      process: background scan
+    result: pass
+    rule: audit-literal-http-env-without-risk-acceptance
+    scored: true
+    severity: medium
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032540
+  - category: Pod Security
+    message: validation rule 'disallow-default-service-account' passed.
+    policy: securerag-require-pod-security
+    properties:
+      process: background scan
+    result: pass
+    rule: disallow-default-service-account
+    scored: true
+    severity: medium
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032540
+  - category: Pod Security
+    message: validation rule 'require-seccomp-serviceaccount-and-resource-guards'
+      passed.
+    policy: securerag-require-pod-security
+    properties:
+      process: background scan
+    result: pass
+    rule: require-seccomp-serviceaccount-and-resource-guards
+    scored: true
+    severity: medium
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032540
+  - category: Software Supply Chain Security
+    message: rule passed
+    policy: securerag-restrict-image-references
+    properties:
+      process: background scan
+    result: pass
+    rule: disallow-latest-tags
+    scored: true
+    severity: high
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032540
+  - category: Software Supply Chain Security
+    message: 'validation failure: validation error: Runtime images must come from
+      localhost:5001 or ghcr.io. rule restrict-registries[0] failed at path /image/
+      rule restrict-registries[1] failed at path /image/'
+    policy: securerag-restrict-image-references
+    properties:
+      process: background scan
+    result: fail
+    rule: restrict-registries
+    scored: true
+    severity: high
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032540
+  - category: Pod Security
+    message: validation rule 'disallow-hostpath-volumes' passed.
+    policy: securerag-restrict-volume-types
+    properties:
+      process: background scan
+    result: pass
+    rule: disallow-hostpath-volumes
+    scored: true
+    severity: high
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032540
+  scope:
+    apiVersion: v1
+    kind: Pod
+    name: postgres-auth-867ddc6dc8-w9xgr
+    namespace: securerag-hub
+    uid: 8f63f457-7089-4f26-969c-86663c792739
+  summary:
+    error: 0
+    fail: 1
+    pass: 5
+    skip: 0
+    warn: 0
+- apiVersion: wgpolicyk8s.io/v1alpha2
+  kind: PolicyReport
+  metadata:
+    creationTimestamp: "2026-06-21T09:02:00Z"
+    generation: 2
+    labels:
+      app.kubernetes.io/managed-by: kyverno
+    name: 92fc148d-803c-4129-a59e-070e1605f256
+    namespace: securerag-hub
+    ownerReferences:
+    - apiVersion: apps/v1
+      kind: ReplicaSet
+      name: conversation-service-778479dbbf
+      uid: 92fc148d-803c-4129-a59e-070e1605f256
+    resourceVersion: "3620"
+    uid: a47327f4-344f-4a7c-afe8-a19f693f060a
+  results:
+  - category: Network Security
+    message: Validation rule 'autogen-audit-literal-http-env-without-risk-acceptance'
+      passed.
+    policy: securerag-audit-cleartext-env-values
+    properties:
+      process: background scan
+    result: pass
+    rule: autogen-audit-literal-http-env-without-risk-acceptance
+    scored: true
+    severity: medium
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032540
+  - category: Pod Security
+    message: validation rule 'autogen-disallow-default-service-account' passed.
+    policy: securerag-require-pod-security
+    properties:
+      process: background scan
+    result: pass
+    rule: autogen-disallow-default-service-account
+    scored: true
+    severity: medium
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032540
+  - category: Pod Security
+    message: validation rule 'autogen-require-seccomp-serviceaccount-and-resource-guards'
+      passed.
+    policy: securerag-require-pod-security
+    properties:
+      process: background scan
+    result: pass
+    rule: autogen-require-seccomp-serviceaccount-and-resource-guards
+    scored: true
+    severity: medium
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032540
+  - category: Pod Security
+    message: validation rule 'autogen-disallow-hostpath-volumes' passed.
+    policy: securerag-restrict-volume-types
+    properties:
+      process: background scan
+    result: pass
+    rule: autogen-disallow-hostpath-volumes
+    scored: true
+    severity: high
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032540
+  scope:
+    apiVersion: apps/v1
+    kind: ReplicaSet
+    name: conversation-service-778479dbbf
+    namespace: securerag-hub
+    uid: 92fc148d-803c-4129-a59e-070e1605f256
+  summary:
+    error: 0
+    fail: 0
+    pass: 4
+    skip: 0
+    warn: 0
+- apiVersion: wgpolicyk8s.io/v1alpha2
+  kind: PolicyReport
+  metadata:
+    creationTimestamp: "2026-06-21T09:02:00Z"
+    generation: 2
+    labels:
+      app.kubernetes.io/managed-by: kyverno
+    name: 9628a5b1-1536-434b-9b79-da5bc5bf96bb
+    namespace: securerag-hub
+    ownerReferences:
+    - apiVersion: apps/v1
+      kind: Deployment
+      name: chatbot-manager
+      uid: 9628a5b1-1536-434b-9b79-da5bc5bf96bb
+    resourceVersion: "3625"
+    uid: 19780f8a-80c8-4512-903d-c011f8915d3d
+  results:
+  - category: Network Security
+    message: Validation rule 'autogen-audit-literal-http-env-without-risk-acceptance'
+      passed.
+    policy: securerag-audit-cleartext-env-values
+    properties:
+      process: background scan
+    result: pass
+    rule: autogen-audit-literal-http-env-without-risk-acceptance
+    scored: true
+    severity: medium
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032540
+  - category: Pod Security
+    message: validation rule 'autogen-disallow-default-service-account' passed.
+    policy: securerag-require-pod-security
+    properties:
+      process: background scan
+    result: pass
+    rule: autogen-disallow-default-service-account
+    scored: true
+    severity: medium
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032540
+  - category: Pod Security
+    message: validation rule 'autogen-require-seccomp-serviceaccount-and-resource-guards'
+      passed.
+    policy: securerag-require-pod-security
+    properties:
+      process: background scan
+    result: pass
+    rule: autogen-require-seccomp-serviceaccount-and-resource-guards
+    scored: true
+    severity: medium
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032540
+  - category: Availability, Pod Security
+    message: rule passed
+    policy: securerag-require-workload-controls
+    properties:
+      process: background scan
+    result: pass
+    rule: require-container-health-probes
+    scored: true
+    severity: medium
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032540
+  - category: Availability, Pod Security
+    message: validation rule 'require-pod-template-service-account-token-disabled'
+      passed.
+    policy: securerag-require-workload-controls
+    properties:
+      process: background scan
+    result: pass
+    rule: require-pod-template-service-account-token-disabled
+    scored: true
+    severity: medium
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032540
+  - category: Pod Security
+    message: validation rule 'autogen-disallow-hostpath-volumes' passed.
+    policy: securerag-restrict-volume-types
+    properties:
+      process: background scan
+    result: pass
+    rule: autogen-disallow-hostpath-volumes
+    scored: true
+    severity: high
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032540
+  scope:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: chatbot-manager
+    namespace: securerag-hub
+    uid: 9628a5b1-1536-434b-9b79-da5bc5bf96bb
+  summary:
+    error: 0
+    fail: 0
+    pass: 6
+    skip: 0
+    warn: 0
+- apiVersion: wgpolicyk8s.io/v1alpha2
+  kind: PolicyReport
+  metadata:
+    creationTimestamp: "2026-06-21T09:02:00Z"
+    generation: 2
+    labels:
+      app.kubernetes.io/managed-by: kyverno
+    name: 9bd25686-b67e-43a7-8b3b-7d9f702956d0
+    namespace: securerag-hub
+    ownerReferences:
+    - apiVersion: apps/v1
+      kind: Deployment
+      name: audit-security-service
+      uid: 9bd25686-b67e-43a7-8b3b-7d9f702956d0
+    resourceVersion: "3624"
+    uid: e2e6b7c0-866a-4165-9eac-a9d2da3c2cfb
+  results:
+  - category: Network Security
+    message: Validation rule 'autogen-audit-literal-http-env-without-risk-acceptance'
+      passed.
+    policy: securerag-audit-cleartext-env-values
+    properties:
+      process: background scan
+    result: pass
+    rule: autogen-audit-literal-http-env-without-risk-acceptance
+    scored: true
+    severity: medium
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032540
+  - category: Pod Security
+    message: validation rule 'autogen-disallow-default-service-account' passed.
+    policy: securerag-require-pod-security
+    properties:
+      process: background scan
+    result: pass
+    rule: autogen-disallow-default-service-account
+    scored: true
+    severity: medium
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032540
+  - category: Pod Security
+    message: validation rule 'autogen-require-seccomp-serviceaccount-and-resource-guards'
+      passed.
+    policy: securerag-require-pod-security
+    properties:
+      process: background scan
+    result: pass
+    rule: autogen-require-seccomp-serviceaccount-and-resource-guards
+    scored: true
+    severity: medium
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032540
+  - category: Availability, Pod Security
+    message: rule passed
+    policy: securerag-require-workload-controls
+    properties:
+      process: background scan
+    result: pass
+    rule: require-container-health-probes
+    scored: true
+    severity: medium
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032540
+  - category: Availability, Pod Security
+    message: validation rule 'require-pod-template-service-account-token-disabled'
+      passed.
+    policy: securerag-require-workload-controls
+    properties:
+      process: background scan
+    result: pass
+    rule: require-pod-template-service-account-token-disabled
+    scored: true
+    severity: medium
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032540
+  - category: Pod Security
+    message: validation rule 'autogen-disallow-hostpath-volumes' passed.
+    policy: securerag-restrict-volume-types
+    properties:
+      process: background scan
+    result: pass
+    rule: autogen-disallow-hostpath-volumes
+    scored: true
+    severity: high
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032540
+  scope:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: audit-security-service
+    namespace: securerag-hub
+    uid: 9bd25686-b67e-43a7-8b3b-7d9f702956d0
+  summary:
+    error: 0
+    fail: 0
+    pass: 6
+    skip: 0
+    warn: 0
+- apiVersion: wgpolicyk8s.io/v1alpha2
+  kind: PolicyReport
+  metadata:
+    creationTimestamp: "2026-06-21T09:02:00Z"
+    generation: 2
+    labels:
+      app.kubernetes.io/managed-by: kyverno
+    name: a53b69a9-54f7-416e-ba4b-702605a564ca
+    namespace: securerag-hub
+    ownerReferences:
+    - apiVersion: apps/v1
+      kind: Deployment
+      name: postgres-auth
+      uid: a53b69a9-54f7-416e-ba4b-702605a564ca
+    resourceVersion: "3628"
+    uid: fa7b9b65-5547-4ed3-bfe4-df3229e7a5bf
+  results:
+  - category: Network Security
+    message: Validation rule 'autogen-audit-literal-http-env-without-risk-acceptance'
+      passed.
+    policy: securerag-audit-cleartext-env-values
+    properties:
+      process: background scan
+    result: pass
+    rule: autogen-audit-literal-http-env-without-risk-acceptance
+    scored: true
+    severity: medium
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032540
+  - category: Pod Security
+    message: validation rule 'autogen-disallow-default-service-account' passed.
+    policy: securerag-require-pod-security
+    properties:
+      process: background scan
+    result: pass
+    rule: autogen-disallow-default-service-account
+    scored: true
+    severity: medium
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032540
+  - category: Pod Security
+    message: validation rule 'autogen-require-seccomp-serviceaccount-and-resource-guards'
+      passed.
+    policy: securerag-require-pod-security
+    properties:
+      process: background scan
+    result: pass
+    rule: autogen-require-seccomp-serviceaccount-and-resource-guards
+    scored: true
+    severity: medium
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032540
+  - category: Availability, Pod Security
+    message: rule passed
+    policy: securerag-require-workload-controls
+    properties:
+      process: background scan
+    result: pass
+    rule: require-container-health-probes
+    scored: true
+    severity: medium
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032540
+  - category: Availability, Pod Security
+    message: validation rule 'require-pod-template-service-account-token-disabled'
+      passed.
+    policy: securerag-require-workload-controls
+    properties:
+      process: background scan
+    result: pass
+    rule: require-pod-template-service-account-token-disabled
+    scored: true
+    severity: medium
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032540
+  - category: Pod Security
+    message: validation rule 'autogen-disallow-hostpath-volumes' passed.
+    policy: securerag-restrict-volume-types
+    properties:
+      process: background scan
+    result: pass
+    rule: autogen-disallow-hostpath-volumes
+    scored: true
+    severity: high
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032540
+  scope:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: postgres-auth
+    namespace: securerag-hub
+    uid: a53b69a9-54f7-416e-ba4b-702605a564ca
+  summary:
+    error: 0
+    fail: 0
+    pass: 6
+    skip: 0
+    warn: 0
+- apiVersion: wgpolicyk8s.io/v1alpha2
+  kind: PolicyReport
+  metadata:
+    creationTimestamp: "2026-06-21T09:02:00Z"
+    generation: 2
+    labels:
+      app.kubernetes.io/managed-by: kyverno
+    name: af637b0d-f110-4122-8983-4ce3bbaed2c0
+    namespace: securerag-hub
+    ownerReferences:
+    - apiVersion: v1
+      kind: Pod
+      name: portal-web-68d97f97f-2sjcd
+      uid: af637b0d-f110-4122-8983-4ce3bbaed2c0
+    resourceVersion: "3636"
+    uid: 6665be35-ac17-4a74-8082-f7fd56ec968c
+  results:
+  - category: Network Security
+    message: Validation rule 'audit-literal-http-env-without-risk-acceptance' passed.
+    policy: securerag-audit-cleartext-env-values
+    properties:
+      process: background scan
+    result: pass
+    rule: audit-literal-http-env-without-risk-acceptance
+    scored: true
+    severity: medium
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032540
+  - category: Pod Security
+    message: validation rule 'disallow-default-service-account' passed.
+    policy: securerag-require-pod-security
+    properties:
+      process: background scan
+    result: pass
+    rule: disallow-default-service-account
+    scored: true
+    severity: medium
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032540
+  - category: Pod Security
+    message: validation rule 'require-seccomp-serviceaccount-and-resource-guards'
+      passed.
+    policy: securerag-require-pod-security
+    properties:
+      process: background scan
+    result: pass
+    rule: require-seccomp-serviceaccount-and-resource-guards
+    scored: true
+    severity: medium
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032540
+  - category: Software Supply Chain Security
+    message: rule passed
+    policy: securerag-restrict-image-references
+    properties:
+      process: background scan
+    result: pass
+    rule: disallow-latest-tags
+    scored: true
+    severity: high
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032540
+  - category: Software Supply Chain Security
+    message: rule passed
+    policy: securerag-restrict-image-references
+    properties:
+      process: background scan
+    result: pass
+    rule: restrict-registries
+    scored: true
+    severity: high
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032540
+  - category: Pod Security
+    message: validation rule 'disallow-hostpath-volumes' passed.
+    policy: securerag-restrict-volume-types
+    properties:
+      process: background scan
+    result: pass
+    rule: disallow-hostpath-volumes
+    scored: true
+    severity: high
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032540
+  scope:
+    apiVersion: v1
+    kind: Pod
+    name: portal-web-68d97f97f-2sjcd
+    namespace: securerag-hub
+    uid: af637b0d-f110-4122-8983-4ce3bbaed2c0
+  summary:
+    error: 0
+    fail: 0
+    pass: 6
+    skip: 0
+    warn: 0
+- apiVersion: wgpolicyk8s.io/v1alpha2
+  kind: PolicyReport
+  metadata:
+    creationTimestamp: "2026-06-21T09:02:00Z"
+    generation: 2
+    labels:
+      app.kubernetes.io/managed-by: kyverno
+    name: b3f4cb53-6c92-499d-a2b3-901fe2b3a82f
+    namespace: securerag-hub
+    ownerReferences:
+    - apiVersion: apps/v1
+      kind: ReplicaSet
+      name: chatbot-manager-976899cb8
+      uid: b3f4cb53-6c92-499d-a2b3-901fe2b3a82f
+    resourceVersion: "3604"
+    uid: 5a45308e-0cbc-4ca3-b212-bd20beaec4b6
+  results:
+  - category: Network Security
+    message: Validation rule 'autogen-audit-literal-http-env-without-risk-acceptance'
+      passed.
+    policy: securerag-audit-cleartext-env-values
+    properties:
+      process: background scan
+    result: pass
+    rule: autogen-audit-literal-http-env-without-risk-acceptance
+    scored: true
+    severity: medium
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032539
+  - category: Pod Security
+    message: validation rule 'autogen-disallow-default-service-account' passed.
+    policy: securerag-require-pod-security
+    properties:
+      process: background scan
+    result: pass
+    rule: autogen-disallow-default-service-account
+    scored: true
+    severity: medium
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032539
+  - category: Pod Security
+    message: validation rule 'autogen-require-seccomp-serviceaccount-and-resource-guards'
+      passed.
+    policy: securerag-require-pod-security
+    properties:
+      process: background scan
+    result: pass
+    rule: autogen-require-seccomp-serviceaccount-and-resource-guards
+    scored: true
+    severity: medium
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032539
+  - category: Pod Security
+    message: validation rule 'autogen-disallow-hostpath-volumes' passed.
+    policy: securerag-restrict-volume-types
+    properties:
+      process: background scan
+    result: pass
+    rule: autogen-disallow-hostpath-volumes
+    scored: true
+    severity: high
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032539
+  scope:
+    apiVersion: apps/v1
+    kind: ReplicaSet
+    name: chatbot-manager-976899cb8
+    namespace: securerag-hub
+    uid: b3f4cb53-6c92-499d-a2b3-901fe2b3a82f
+  summary:
+    error: 0
+    fail: 0
+    pass: 4
+    skip: 0
+    warn: 0
+- apiVersion: wgpolicyk8s.io/v1alpha2
+  kind: PolicyReport
+  metadata:
+    creationTimestamp: "2026-06-21T09:02:00Z"
+    generation: 2
+    labels:
+      app.kubernetes.io/managed-by: kyverno
+    name: c4ac0686-47c1-443c-8a88-ec1714ddaea3
+    namespace: securerag-hub
+    ownerReferences:
+    - apiVersion: apps/v1
+      kind: ReplicaSet
+      name: audit-security-service-5fddbb654
+      uid: c4ac0686-47c1-443c-8a88-ec1714ddaea3
+    resourceVersion: "3609"
+    uid: 919547a7-8e33-4ed2-b492-219712dc3925
+  results:
+  - category: Network Security
+    message: Validation rule 'autogen-audit-literal-http-env-without-risk-acceptance'
+      passed.
+    policy: securerag-audit-cleartext-env-values
+    properties:
+      process: background scan
+    result: pass
+    rule: autogen-audit-literal-http-env-without-risk-acceptance
+    scored: true
+    severity: medium
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032539
+  - category: Pod Security
+    message: validation rule 'autogen-disallow-default-service-account' passed.
+    policy: securerag-require-pod-security
+    properties:
+      process: background scan
+    result: pass
+    rule: autogen-disallow-default-service-account
+    scored: true
+    severity: medium
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032539
+  - category: Pod Security
+    message: validation rule 'autogen-require-seccomp-serviceaccount-and-resource-guards'
+      passed.
+    policy: securerag-require-pod-security
+    properties:
+      process: background scan
+    result: pass
+    rule: autogen-require-seccomp-serviceaccount-and-resource-guards
+    scored: true
+    severity: medium
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032539
+  - category: Pod Security
+    message: validation rule 'autogen-disallow-hostpath-volumes' passed.
+    policy: securerag-restrict-volume-types
+    properties:
+      process: background scan
+    result: pass
+    rule: autogen-disallow-hostpath-volumes
+    scored: true
+    severity: high
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032539
+  scope:
+    apiVersion: apps/v1
+    kind: ReplicaSet
+    name: audit-security-service-5fddbb654
+    namespace: securerag-hub
+    uid: c4ac0686-47c1-443c-8a88-ec1714ddaea3
+  summary:
+    error: 0
+    fail: 0
+    pass: 4
+    skip: 0
+    warn: 0
+- apiVersion: wgpolicyk8s.io/v1alpha2
+  kind: PolicyReport
+  metadata:
+    creationTimestamp: "2026-06-21T09:02:00Z"
+    generation: 2
+    labels:
+      app.kubernetes.io/managed-by: kyverno
+    name: d9707dd8-805d-4f50-a777-82ee2269df80
+    namespace: securerag-hub
+    ownerReferences:
+    - apiVersion: apps/v1
+      kind: ReplicaSet
+      name: auth-users-799b8b5664
+      uid: d9707dd8-805d-4f50-a777-82ee2269df80
+    resourceVersion: "3616"
+    uid: faf39e22-ce34-4f7c-923e-e552625149ac
+  results:
+  - category: Network Security
+    message: Validation rule 'autogen-audit-literal-http-env-without-risk-acceptance'
+      passed.
+    policy: securerag-audit-cleartext-env-values
+    properties:
+      process: background scan
+    result: pass
+    rule: autogen-audit-literal-http-env-without-risk-acceptance
+    scored: true
+    severity: medium
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032540
+  - category: Pod Security
+    message: validation rule 'autogen-disallow-default-service-account' passed.
+    policy: securerag-require-pod-security
+    properties:
+      process: background scan
+    result: pass
+    rule: autogen-disallow-default-service-account
+    scored: true
+    severity: medium
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032540
+  - category: Pod Security
+    message: validation rule 'autogen-require-seccomp-serviceaccount-and-resource-guards'
+      passed.
+    policy: securerag-require-pod-security
+    properties:
+      process: background scan
+    result: pass
+    rule: autogen-require-seccomp-serviceaccount-and-resource-guards
+    scored: true
+    severity: medium
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032540
+  - category: Pod Security
+    message: validation rule 'autogen-disallow-hostpath-volumes' passed.
+    policy: securerag-restrict-volume-types
+    properties:
+      process: background scan
+    result: pass
+    rule: autogen-disallow-hostpath-volumes
+    scored: true
+    severity: high
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032540
+  scope:
+    apiVersion: apps/v1
+    kind: ReplicaSet
+    name: auth-users-799b8b5664
+    namespace: securerag-hub
+    uid: d9707dd8-805d-4f50-a777-82ee2269df80
+  summary:
+    error: 0
+    fail: 0
+    pass: 4
+    skip: 0
+    warn: 0
+- apiVersion: wgpolicyk8s.io/v1alpha2
+  kind: PolicyReport
+  metadata:
+    creationTimestamp: "2026-06-21T09:02:00Z"
+    generation: 2
+    labels:
+      app.kubernetes.io/managed-by: kyverno
+    name: db5d9e32-aae8-4dde-805f-bcfc8f026cc0
+    namespace: securerag-hub
+    ownerReferences:
+    - apiVersion: v1
+      kind: Pod
+      name: conversation-service-778479dbbf-wwfcx
+      uid: db5d9e32-aae8-4dde-805f-bcfc8f026cc0
+    resourceVersion: "3656"
+    uid: f691100a-67e5-4256-be24-d69b68d8790e
+  results:
+  - category: Network Security
+    message: Validation rule 'audit-literal-http-env-without-risk-acceptance' passed.
+    policy: securerag-audit-cleartext-env-values
+    properties:
+      process: background scan
+    result: pass
+    rule: audit-literal-http-env-without-risk-acceptance
+    scored: true
+    severity: medium
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032540
+  - category: Pod Security
+    message: validation rule 'disallow-default-service-account' passed.
+    policy: securerag-require-pod-security
+    properties:
+      process: background scan
+    result: pass
+    rule: disallow-default-service-account
+    scored: true
+    severity: medium
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032540
+  - category: Pod Security
+    message: validation rule 'require-seccomp-serviceaccount-and-resource-guards'
+      passed.
+    policy: securerag-require-pod-security
+    properties:
+      process: background scan
+    result: pass
+    rule: require-seccomp-serviceaccount-and-resource-guards
+    scored: true
+    severity: medium
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032540
+  - category: Software Supply Chain Security
+    message: rule passed
+    policy: securerag-restrict-image-references
+    properties:
+      process: background scan
+    result: pass
+    rule: disallow-latest-tags
+    scored: true
+    severity: high
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032540
+  - category: Software Supply Chain Security
+    message: rule passed
+    policy: securerag-restrict-image-references
+    properties:
+      process: background scan
+    result: pass
+    rule: restrict-registries
+    scored: true
+    severity: high
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032540
+  - category: Pod Security
+    message: validation rule 'disallow-hostpath-volumes' passed.
+    policy: securerag-restrict-volume-types
+    properties:
+      process: background scan
+    result: pass
+    rule: disallow-hostpath-volumes
+    scored: true
+    severity: high
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032540
+  scope:
+    apiVersion: v1
+    kind: Pod
+    name: conversation-service-778479dbbf-wwfcx
+    namespace: securerag-hub
+    uid: db5d9e32-aae8-4dde-805f-bcfc8f026cc0
+  summary:
+    error: 0
+    fail: 0
+    pass: 6
+    skip: 0
+    warn: 0
+- apiVersion: wgpolicyk8s.io/v1alpha2
+  kind: PolicyReport
+  metadata:
+    creationTimestamp: "2026-06-21T09:02:00Z"
+    generation: 2
+    labels:
+      app.kubernetes.io/managed-by: kyverno
+    name: f50b3b4a-7035-46ba-9337-488f1ee6a07c
+    namespace: securerag-hub
+    ownerReferences:
+    - apiVersion: apps/v1
+      kind: ReplicaSet
+      name: portal-web-68d97f97f
+      uid: f50b3b4a-7035-46ba-9337-488f1ee6a07c
+    resourceVersion: "3607"
+    uid: f0e6bca3-6238-4270-ade1-600a85aca307
+  results:
+  - category: Network Security
+    message: Validation rule 'autogen-audit-literal-http-env-without-risk-acceptance'
+      passed.
+    policy: securerag-audit-cleartext-env-values
+    properties:
+      process: background scan
+    result: pass
+    rule: autogen-audit-literal-http-env-without-risk-acceptance
+    scored: true
+    severity: medium
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032539
+  - category: Pod Security
+    message: validation rule 'autogen-disallow-default-service-account' passed.
+    policy: securerag-require-pod-security
+    properties:
+      process: background scan
+    result: pass
+    rule: autogen-disallow-default-service-account
+    scored: true
+    severity: medium
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032539
+  - category: Pod Security
+    message: validation rule 'autogen-require-seccomp-serviceaccount-and-resource-guards'
+      passed.
+    policy: securerag-require-pod-security
+    properties:
+      process: background scan
+    result: pass
+    rule: autogen-require-seccomp-serviceaccount-and-resource-guards
+    scored: true
+    severity: medium
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032539
+  - category: Pod Security
+    message: validation rule 'autogen-disallow-hostpath-volumes' passed.
+    policy: securerag-restrict-volume-types
+    properties:
+      process: background scan
+    result: pass
+    rule: autogen-disallow-hostpath-volumes
+    scored: true
+    severity: high
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032539
+  scope:
+    apiVersion: apps/v1
+    kind: ReplicaSet
+    name: portal-web-68d97f97f
+    namespace: securerag-hub
+    uid: f50b3b4a-7035-46ba-9337-488f1ee6a07c
+  summary:
+    error: 0
+    fail: 0
+    pass: 4
+    skip: 0
+    warn: 0
+- apiVersion: wgpolicyk8s.io/v1alpha2
+  kind: PolicyReport
+  metadata:
+    creationTimestamp: "2026-06-21T09:02:00Z"
+    generation: 2
+    labels:
+      app.kubernetes.io/managed-by: kyverno
+    name: fa6b373e-acf4-4955-b39c-e6af826a73bf
+    namespace: securerag-hub
+    ownerReferences:
+    - apiVersion: apps/v1
+      kind: Deployment
+      name: conversation-service
+      uid: fa6b373e-acf4-4955-b39c-e6af826a73bf
+    resourceVersion: "3632"
+    uid: 8ac326c5-de96-4024-818c-15aa9c1f3112
+  results:
+  - category: Network Security
+    message: Validation rule 'autogen-audit-literal-http-env-without-risk-acceptance'
+      passed.
+    policy: securerag-audit-cleartext-env-values
+    properties:
+      process: background scan
+    result: pass
+    rule: autogen-audit-literal-http-env-without-risk-acceptance
+    scored: true
+    severity: medium
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032540
+  - category: Pod Security
+    message: validation rule 'autogen-disallow-default-service-account' passed.
+    policy: securerag-require-pod-security
+    properties:
+      process: background scan
+    result: pass
+    rule: autogen-disallow-default-service-account
+    scored: true
+    severity: medium
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032540
+  - category: Pod Security
+    message: validation rule 'autogen-require-seccomp-serviceaccount-and-resource-guards'
+      passed.
+    policy: securerag-require-pod-security
+    properties:
+      process: background scan
+    result: pass
+    rule: autogen-require-seccomp-serviceaccount-and-resource-guards
+    scored: true
+    severity: medium
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032540
+  - category: Availability, Pod Security
+    message: rule passed
+    policy: securerag-require-workload-controls
+    properties:
+      process: background scan
+    result: pass
+    rule: require-container-health-probes
+    scored: true
+    severity: medium
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032540
+  - category: Availability, Pod Security
+    message: validation rule 'require-pod-template-service-account-token-disabled'
+      passed.
+    policy: securerag-require-workload-controls
+    properties:
+      process: background scan
+    result: pass
+    rule: require-pod-template-service-account-token-disabled
+    scored: true
+    severity: medium
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032540
+  - category: Pod Security
+    message: validation rule 'autogen-disallow-hostpath-volumes' passed.
+    policy: securerag-restrict-volume-types
+    properties:
+      process: background scan
+    result: pass
+    rule: autogen-disallow-hostpath-volumes
+    scored: true
+    severity: high
+    source: kyverno
+    timestamp:
+      nanos: 0
+      seconds: 1782032540
+  scope:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: conversation-service
+    namespace: securerag-hub
+    uid: fa6b373e-acf4-4955-b39c-e6af826a73bf
+  summary:
+    error: 0
+    fail: 0
+    pass: 6
+    skip: 0
+    warn: 0
+kind: List
+metadata:
+  resourceVersion: ""
