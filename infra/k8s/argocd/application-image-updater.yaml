@@ -21,6 +21,16 @@ spec:
               prefix: localhost:5001
               api_url: https://localhost:5001
               insecure: true
+        podSecurityContext:
+          runAsNonRoot: true
+          seccompProfile:
+            type: RuntimeDefault
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+              - ALL
   destination:
     server: https://kubernetes.default.svc
     namespace: argocd
