@@ -12,6 +12,7 @@ spec:
   sourceRepos:
     - https://github.com/YassinoMed/MasterPFE.git
     - https://github.com/argoproj/argo-helm
+    - https://argoproj.github.io/argo-helm
     - https://helm.releases.hashicorp.com
     - https://charts.external-secrets.io
     - https://charts.jetstack.io
