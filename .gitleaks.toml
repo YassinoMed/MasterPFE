@@ -6,6 +6,8 @@ useDefault = true
 [allowlist]
 description = "Allow generated reports, documentation samples, and test fixtures with fake credentials."
 paths = [
+  '''(^|/)Parametres\.txt$''',
+  '''(^|/)SRV_VPN_medysbneb\.ovpn$''',
   '''(^|/)\.coverage-artifacts/''',
   '''(^|/)security/reports/''',
   '''(^|/)security/adversarial/''',
