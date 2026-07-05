@@ -16,7 +16,7 @@ spec:
     - https://helm.releases.hashicorp.com
     - https://charts.external-secrets.io
     - https://charts.jetstack.io
-    - https://helm.harbor.io
+    - https://helm.goharbor.io
     - https://vmware-tanzu.github.io/helm-charts
   destinations:
     - server: https://kubernetes.default.svc
