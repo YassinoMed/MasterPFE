@@ -50,10 +50,7 @@ spec:
         metrics:
           enabled: true
           scrapeInterval: 30s
-        kubectl:
-          image:
-            repository: alpine/k8s
-            tag: 1.28.2
+        upgradeCRDs: false
   destination:
     server: https://kubernetes.default.svc
     namespace: velero
