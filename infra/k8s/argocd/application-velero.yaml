@@ -52,8 +52,8 @@ spec:
           scrapeInterval: 30s
         kubectl:
           image:
-            repository: rancher/kubectl
-            tag: v1.28.0
+            repository: alpine/k8s
+            tag: 1.28.2
   destination:
     server: https://kubernetes.default.svc
     namespace: velero
