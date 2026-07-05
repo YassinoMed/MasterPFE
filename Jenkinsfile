@@ -57,6 +57,9 @@ pipeline {
       steps {
         sh '''
           set -euo pipefail
+          echo "[INFO] Installing Python dependencies for AI agents..."
+          python3 -m pip install --break-system-packages --user httpx PyYAML || python3 -m pip install --user httpx PyYAML || python3 -m pip install httpx PyYAML || true
+
           echo "[INFO] Installing Laravel dependencies..."
           mkdir -p "${COMPOSER_CACHE_DIR}" "${NPM_CONFIG_CACHE}"
           for app in ${LARAVEL_APPS}; do
