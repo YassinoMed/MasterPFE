@@ -8,6 +8,12 @@ description = "Allow generated reports, documentation samples, and test fixtures
 paths = [
   '''(^|/)Parametres\.txt$''',
   '''(^|/)SRV_VPN_medysbneb\.ovpn$''',
+  '''(^|/)TutoClientVPN\.docx$''',
+  '''(^|/)tests/vpn_load_test\.py$''',
+  '''(^|/)docs/security/.*''',
+  '''(^|/)Me_moirePFE__3_/.*''',
+  '''(^|/)scripts/ai-agents/.*''',
+  '''(^|/)real-data/.*''',
   '''(^|/)\.coverage-artifacts/''',
   '''(^|/)security/reports/''',
   '''(^|/)security/adversarial/''',
