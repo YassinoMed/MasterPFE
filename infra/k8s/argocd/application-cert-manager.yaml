@@ -18,9 +18,9 @@ spec:
       values: |
         installCRDs: true
         prometheus:
-          enabled: true
+          enabled: false
           servicemonitor:
-            enabled: true
+            enabled: false
   destination:
     server: https://kubernetes.default.svc
     namespace: cert-manager
