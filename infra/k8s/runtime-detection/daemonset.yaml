@@ -37,6 +37,10 @@ spec:
             - engine.kind=modern_ebpf
             - -o
             - watch_config_files=false
+            - -o
+            - libs_logger.enabled=true
+            - -o
+            - libs_logger.severity=debug
           securityContext:
             privileged: true
           env:
