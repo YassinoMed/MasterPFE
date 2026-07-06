@@ -29,7 +29,7 @@ spec:
           operator: Exists
       containers:
         - name: falco
-          image: falcosecurity/falco-no-driver:0.38.2
+          image: falcosecurity/falco:0.39.2
           imagePullPolicy: IfNotPresent
           args:
             - /usr/bin/falco
@@ -39,6 +39,13 @@ spec:
             - watch_config_files=false
           securityContext:
             privileged: true
+            capabilities:
+              add:
+                - SYS_ADMIN
+                - SYS_RESOURCE
+                - SYS_PTRACE
+                - BPF
+                - PERFMON
           env:
             - name: HOST_ROOT
               value: /host
@@ -56,6 +63,7 @@ spec:
             - { name: usr-fs, mountPath: /host/usr, readOnly: true }
             - { name: etc-fs, mountPath: /host/etc, readOnly: true }
             - { name: sys-fs, mountPath: /sys/kernel/debug, readOnly: true }
+            - { name: tracing-fs, mountPath: /sys/kernel/tracing, readOnly: true }
             - { name: falco-bpf-probe, mountPath: /root/.falco }
       volumes:
         - { name: rules, configMap: { name: falco-rules } }
@@ -66,4 +74,5 @@ spec:
         - { name: usr-fs, hostPath: { path: /usr } }
         - { name: etc-fs, hostPath: { path: /etc } }
         - { name: sys-fs, hostPath: { path: /sys/kernel/debug } }
+        - { name: tracing-fs, hostPath: { path: /sys/kernel/tracing } }
         - { name: falco-bpf-probe, emptyDir: {} }
