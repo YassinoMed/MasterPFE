@@ -30,7 +30,10 @@ data:
     stdout_output:
       enabled: true
     http_output:
-      enabled: false
+      enabled: true
+      url: "http://falcosidekick.falco.svc.cluster.local:2801"
+      user_agent: "falcosecurity/falco"
+      insecure: true
     grpc:
       enabled: false
     grpc_output:
