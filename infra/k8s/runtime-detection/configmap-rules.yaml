@@ -35,6 +35,13 @@ data:
       enabled: false
     grpc_output:
       enabled: false
+    container_engines:
+      docker:
+        enabled: false
+      cri:
+        enabled: true
+        sockets: ["/run/containerd/containerd.sock"]
+        disable_async: false
   securerag_rules.yaml: |
     # Custom Falco rules for SecureRAG Hub.
     - macro: securerag_namespace
