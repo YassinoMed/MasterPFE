@@ -27,34 +27,6 @@ spec:
           operator: Exists
         - effect: NoExecute
           operator: Exists
-      initContainers:
-        - name: falco-driver-loader
-          image: falcosecurity/falco-driver-loader:0.38.2
-          imagePullPolicy: IfNotPresent
-          args:
-            - ebpf
-          env:
-            - name: HOST_ROOT
-              value: /host
-          securityContext:
-            privileged: true
-          volumeMounts:
-            - name: proc-fs
-              mountPath: /host/proc
-              readOnly: true
-            - name: boot-fs
-              mountPath: /host/boot
-              readOnly: true
-            - name: lib-modules
-              mountPath: /host/lib/modules
-            - name: usr-fs
-              mountPath: /host/usr
-              readOnly: true
-            - name: etc-fs
-              mountPath: /host/etc
-              readOnly: true
-            - name: falco-bpf-probe
-              mountPath: /root/.falco
       containers:
         - name: falco
           image: falcosecurity/falco-no-driver:0.38.2
@@ -62,7 +34,7 @@ spec:
           args:
             - /usr/bin/falco
             - -o
-            - engine.kind=ebpf
+            - engine.kind=modern_ebpf
             - -o
             - watch_config_files=false
           securityContext:
@@ -70,8 +42,6 @@ spec:
           env:
             - name: HOST_ROOT
               value: /host
-            - name: FALCO_BPF_PROBE
-              value: /root/.falco/falco-bpf.o
           resources:
             requests: { cpu: 100m, memory: 256Mi }
             limits: { cpu: 1, memory: 1Gi }
