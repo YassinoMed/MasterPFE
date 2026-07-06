@@ -64,6 +64,7 @@ spec:
             - { name: etc-fs, mountPath: /host/etc, readOnly: true }
             - { name: sys-fs, mountPath: /sys/kernel/debug, readOnly: true }
             - { name: tracing-fs, mountPath: /sys/kernel/tracing, readOnly: true }
+            - { name: containerd-socket, mountPath: /run/containerd/containerd.sock, readOnly: true }
             - { name: falco-bpf-probe, mountPath: /root/.falco }
       volumes:
         - { name: rules, configMap: { name: falco-rules } }
@@ -75,4 +76,5 @@ spec:
         - { name: etc-fs, hostPath: { path: /etc } }
         - { name: sys-fs, hostPath: { path: /sys/kernel/debug } }
         - { name: tracing-fs, hostPath: { path: /sys/kernel/tracing } }
+        - { name: containerd-socket, hostPath: { path: /run/containerd/containerd.sock } }
         - { name: falco-bpf-probe, emptyDir: {} }
