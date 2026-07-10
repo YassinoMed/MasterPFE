@@ -3,4 +3,4 @@ kind: Kustomization
 
 resources:
   - ../demo
-  - ../../policies/kyverno-enforce
+  - ../../policies/kyverno/enforce

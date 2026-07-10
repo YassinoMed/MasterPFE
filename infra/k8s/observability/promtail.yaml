@@ -80,11 +80,29 @@ spec:
       serviceAccountName: promtail
       tolerations:
         - operator: Exists
+      securityContext:
+        runAsUser: 0
+        runAsGroup: 0
       containers:
         - name: promtail
           image: grafana/promtail:3.1.1
           args:
             - -config.file=/etc/promtail/promtail.yaml
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+              add:
+                - DAC_READ_SEARCH
+          resources:
+            requests:
+              cpu: 10m
+              memory: 64Mi
+            limits:
+              cpu: 100m
+              memory: 128Mi
           volumeMounts:
             - name: config
               mountPath: /etc/promtail
@@ -92,9 +110,12 @@ spec:
               mountPath: /run/promtail
             - name: varlog
               mountPath: /var/log
+              readOnly: true
             - name: varlibdockercontainers
               mountPath: /var/lib/docker/containers
               readOnly: true
+            - name: positions
+              mountPath: /tmp
       volumes:
         - name: config
           configMap:
@@ -108,3 +129,5 @@ spec:
         - name: varlibdockercontainers
           hostPath:
             path: /var/lib/docker/containers
+        - name: positions
+          emptyDir: {}

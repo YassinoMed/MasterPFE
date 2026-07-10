@@ -8,6 +8,7 @@ resources:
 
 configMapGenerator:
   - name: securerag-common-config
+    behavior: merge
     envs:
       - configmap-env.env
 

@@ -15,7 +15,10 @@ resources:
   - alertmanager.yaml
   - alertmanager-external-secret.yaml
   - networkpolicy.yaml
+  - kube-state-metrics.yaml
 labels:
   - pairs:
       app.kubernetes.io/part-of: securerag-hub
       app.kubernetes.io/component: observability
+    includeSelectors: false
+

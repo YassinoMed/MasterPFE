@@ -13,6 +13,7 @@ resources:
   - networkpolicy-validation-egress.yaml
   - rbac-runtime-readonly.yaml
   - validation/serviceaccount.yaml
+  - common-configmap.yaml
 
   - portal-web/serviceaccount.yaml
   - portal-web/deployment.yaml
