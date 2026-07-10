@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: securerag-common-config
+data:
+  APP_ENV: dev
+  APP_DEBUG: "true"
+  FEATURE_OTEL_ENABLED: "false"
