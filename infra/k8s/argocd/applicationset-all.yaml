@@ -12,21 +12,27 @@ spec:
         elements:
           - env: dev
             path: infra/k8s/overlays/dev
+            namespace: securerag-dev
             wave: "10"
           - env: demo
             path: infra/k8s/overlays/demo
+            namespace: securerag-hub
             wave: "10"
           - env: recette
             path: infra/k8s/overlays/recette
+            namespace: securerag-recette
             wave: "15"
           - env: staging
             path: infra/k8s/overlays/staging
+            namespace: securerag-staging
             wave: "25"
           - env: production
             path: infra/k8s/overlays/production
+            namespace: securerag-production
             wave: "30"
           - env: dr
             path: infra/k8s/overlays/dr
+            namespace: securerag-dr
             wave: "35"
   template:
     metadata:
@@ -43,7 +49,7 @@ spec:
         path: '{{path}}'
       destination:
         server: https://kubernetes.default.svc
-        namespace: securerag-hub
+        namespace: '{{namespace}}'
       syncPolicy:
         automated:
           prune: true
