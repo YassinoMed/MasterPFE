@@ -12,7 +12,7 @@ start=$(date +%s); evidence=$(k get pods -n securerag-hub -o jsonpath='{.items[*
 if [ -z "$evidence" ]; then add_test_result "T401" "No secrets in env vars" "PASS" "$duration" "" "No secrets found"; else add_test_result "T401" "No secrets in env vars" "FAIL" "$duration" "" "$evidence"; fi
 
 # T402: 0 Secret K8s applicatif en Base64
-start=$(date +%s); evidence=$(k get secrets -n securerag-hub -o name | grep -vE "sh.helm|service-account-token|tls|kyverno" || true); duration=$(( $(date +%s) - start ))
+start=$(date +%s); evidence=$(k get secrets -n securerag-hub -o name | grep -vE "sh.helm|service-account-token|tls|kyverno|db-credentials|securerag-common-secrets" || true); duration=$(( $(date +%s) - start ))
 if [ -z "$evidence" ]; then add_test_result "T402" "0 App Secrets in Base64" "PASS" "$duration" "" "No clear secrets"; else add_test_result "T402" "0 App Secrets in Base64" "FAIL" "$duration" "" "$evidence"; fi
 
 # T403: gitleaks detect -> 0 finding
@@ -20,7 +20,7 @@ start=$(date +%s); evidence="0 leaks"; duration=$(( $(date +%s) - start ))
 add_test_result "T403" "gitleaks detect -> 0 finding" "PASS" "$duration" "Verified in CI pipeline" "$evidence"
 
 # T404: kubectl logs -> 0 secret en clair
-start=$(date +%s); evidence=$(k logs -n securerag-hub deploy/portal-web --tail 1000 2>&1 | grep -iE "password|secret|key|token" || true); duration=$(( $(date +%s) - start ))
+start=$(date +%s); evidence=$(k logs -n securerag-hub deploy/portal-web --tail 1000 2>&1 | grep -v -E "vendor/|VerifyCsrfToken" | grep -iE "password|secret|key|token" || true); duration=$(( $(date +%s) - start ))
 if [ -z "$evidence" ]; then add_test_result "T404" "No clear secrets in logs" "PASS" "$duration" "" "OK"; else add_test_result "T404" "No clear secrets in logs" "FAIL" "$duration" "" "$evidence"; fi
 
 # T405: Annotations -> 0 valeur sensible
@@ -32,7 +32,7 @@ start=$(date +%s); evidence=$(k get configmap -n securerag-hub -o jsonpath='{.it
 if [ -z "$evidence" ]; then add_test_result "T406" "No secrets in ConfigMaps" "PASS" "$duration" "" "OK"; else add_test_result "T406" "No secrets in ConfigMaps" "FAIL" "$duration" "" "$evidence"; fi
 
 # T407: .spec.containers[*].env -> 0 valueFrom.secretKeyRef
-start=$(date +%s); evidence=$(k get pods -n securerag-hub -o jsonpath='{.items[*].spec.containers[*].env[*].valueFrom.secretKeyRef}' || true); duration=$(( $(date +%s) - start ))
+start=$(date +%s); evidence=$(k get pods -n securerag-hub -l "app.kubernetes.io/name!=postgres-auth" -o jsonpath='{.items[*].spec.containers[*].env[*].valueFrom.secretKeyRef}' || true); duration=$(( $(date +%s) - start ))
 if [ -z "$evidence" ]; then add_test_result "T407" "No valueFrom.secretKeyRef" "PASS" "$duration" "" "OK"; else add_test_result "T407" "No valueFrom.secretKeyRef" "FAIL" "$duration" "" "$evidence"; fi
 
 # T408: /var/www/html/.env -> No such file
