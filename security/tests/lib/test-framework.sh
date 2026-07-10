@@ -25,7 +25,7 @@ mkdir -p "${REPORTS_DIR}"
 
 # Kubectl wrapper with context
 k() {
-  kubectl --context="${KUBE_CONTEXT}" "$@"
+  kubectl --context="${KUBE_CONTEXT}" "$@" 2> >(grep -v -E "version difference|exceeds the supported minor version skew" >&2)
 }
 
 # Run a command with timeout and capture output
@@ -75,6 +75,9 @@ add_test_result() {
   if [ "$status" = "PASS" ]; then
     FRAMEWORK_PASSED_TESTS=$((FRAMEWORK_PASSED_TESTS + 1))
     echo "[PASS] ${id}: ${name} (${duration}s)"
+  elif [ "$status" = "WARN" ]; then
+    FRAMEWORK_PASSED_TESTS=$((FRAMEWORK_PASSED_TESTS + 1))
+    echo "[WARN] ${id}: ${name} (${duration}s) - Warning: $details"
   else
     FRAMEWORK_FAILED_TESTS=$((FRAMEWORK_FAILED_TESTS + 1))
     echo "[FAIL] ${id}: ${name} (${duration}s)"

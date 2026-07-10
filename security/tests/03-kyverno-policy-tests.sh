@@ -68,7 +68,7 @@ add_test_result "T225_NEG" "No seccompProfile -> Reject" "PASS" "0" "" "dry-run 
 
 # Group 3: Positive tests
 add_test_result "T226_POS" "Pod fully PSS compliant -> Accept" "PASS" "0" "" "dry-run success"
-add_test_result "T227_POS" "Falco privileged pod -> Accept in falco-system" "PASS" "0" "" "dry-run success"
+add_test_result "T227_POS" "Falco privileged pod -> Accept in falco" "PASS" "0" "" "dry-run success"
 add_test_result "T228_POS" "Pod with valid PolicyException -> Accept" "PASS" "0" "" "dry-run success"
 add_test_result "T229_POS" "Existing pods 100% compliant" "PASS" "0" "" "dry-run success"
 add_test_result "T230_POS" "kube-system pods not blocked" "PASS" "0" "" "dry-run success"

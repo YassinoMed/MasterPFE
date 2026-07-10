@@ -68,11 +68,11 @@ start=$(date +%s); evidence=$(k exec -n securerag-hub deploy/portal-web -c porta
 if echo "$evidence" | grep -qi "Read-only"; then add_test_result "T415" "/vault/secrets/ is Read-only" "PASS" "$duration" "" "$evidence"; else add_test_result "T415" "/vault/secrets/ is Read-only" "WARN" "$duration" "" "$evidence"; fi
 
 # T416: vault status -> sealed false, initialized true
-start=$(date +%s); evidence=$(k exec -n vault-system vault-0 -- vault status 2>&1 || true); duration=$(( $(date +%s) - start ))
+start=$(date +%s); evidence=$(k exec -n vault securerag-vault-0 -- vault status 2>&1 || true); duration=$(( $(date +%s) - start ))
 if echo "$evidence" | grep -q "Initialized.*true" && echo "$evidence" | grep -q "Sealed.*false"; then add_test_result "T416" "Vault sealed:false initialized:true" "PASS" "$duration" "" "$evidence"; else add_test_result "T416" "Vault sealed:false initialized:true" "FAIL" "$duration" "" "$evidence"; fi
 
 # T417: vault auth list -> kubernetes/ présent
-start=$(date +%s); evidence=$(k exec -n vault-system vault-0 -- vault auth list 2>&1 || true); duration=$(( $(date +%s) - start ))
+start=$(date +%s); evidence=$(k exec -n vault securerag-vault-0 -- vault auth list 2>&1 || true); duration=$(( $(date +%s) - start ))
 if echo "$evidence" | grep -q "kubernetes/"; then add_test_result "T417" "Vault auth kubernetes/ present" "PASS" "$duration" "" "$evidence"; else add_test_result "T417" "Vault auth kubernetes/ present" "FAIL" "$duration" "" "$evidence"; fi
 
 # T418: SA portal-web s'authentifie Vault

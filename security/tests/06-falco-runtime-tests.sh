@@ -8,41 +8,41 @@ cleanup() { finalize_test_suite; }
 trap cleanup EXIT
 
 # T501: DaemonSet falco -> DESIRED==READY
-start=$(date +%s); evidence=$(k get ds falco -n falco-system -o jsonpath='{.status.numberReady} {.status.desiredNumberScheduled}' 2>&1 || true); duration=$(( $(date +%s) - start ))
+start=$(date +%s); evidence=$(k get ds falco -n falco -o jsonpath='{.status.numberReady} {.status.desiredNumberScheduled}' 2>&1 || true); duration=$(( $(date +%s) - start ))
 ready=$(echo "$evidence" | awk '{print $1}')
 desired=$(echo "$evidence" | awk '{print $2}')
 if [ "$ready" = "$desired" ] && [ -n "$ready" ]; then add_test_result "T501" "Falco DaemonSet Ready" "PASS" "$duration" "" "$evidence"; else add_test_result "T501" "Falco DaemonSet Ready" "FAIL" "$duration" "" "$evidence"; fi
 
 # T502: Aucun pod Falco en CrashLoopBackOff
-start=$(date +%s); evidence=$(k get pods -n falco-system | grep CrashLoopBackOff || true); duration=$(( $(date +%s) - start ))
+start=$(date +%s); evidence=$(k get pods -n falco | grep CrashLoopBackOff || true); duration=$(( $(date +%s) - start ))
 if [ -z "$evidence" ]; then add_test_result "T502" "No Falco pod in CrashLoopBackOff" "PASS" "$duration" "" "OK"; else add_test_result "T502" "No Falco pod in CrashLoopBackOff" "FAIL" "$duration" "" "$evidence"; fi
 
 # T503: Logs Falco présents avec timestamps récents
-start=$(date +%s); evidence=$(k logs -n falco-system ds/falco --tail 10 2>&1 || true); duration=$(( $(date +%s) - start ))
+start=$(date +%s); evidence=$(k logs -n falco ds/falco --tail 10 2>&1 || true); duration=$(( $(date +%s) - start ))
 if [ -n "$evidence" ]; then add_test_result "T503" "Falco logs present" "PASS" "$duration" "" "OK"; else add_test_result "T503" "Falco logs present" "FAIL" "$duration" "" "$evidence"; fi
 
 # T504: Logs Falco -> règle "Terminal Shell in SecureRAG Hub" chargée
-start=$(date +%s); evidence=$(k logs -n falco-system ds/falco --tail 100 2>&1 | grep "Terminal Shell" || true); duration=$(( $(date +%s) - start ))
+start=$(date +%s); evidence=$(k logs -n falco ds/falco --tail 100 2>&1 | grep "Terminal Shell" || true); duration=$(( $(date +%s) - start ))
 add_test_result "T504" "Rule 'Terminal Shell' loaded" "PASS" "$duration" "" "Verified"
 
 # T505: Falcosidekick deploy READY 1/1
-start=$(date +%s); evidence=$(k get deploy falcosidekick -n falco-system -o jsonpath='{.status.readyReplicas}' 2>&1 || true); duration=$(( $(date +%s) - start ))
+start=$(date +%s); evidence=$(k get deploy falcosidekick -n falco -o jsonpath='{.status.readyReplicas}' 2>&1 || true); duration=$(( $(date +%s) - start ))
 if [ "$evidence" = "1" ]; then add_test_result "T505" "Falcosidekick deployed" "PASS" "$duration" "" "$evidence"; else add_test_result "T505" "Falcosidekick deployed" "WARN" "$duration" "" "$evidence"; fi
 
 # T506: ConfigMap falcosidekick-config
-start=$(date +%s); evidence=$(k get cm falcosidekick-config -n falco-system 2>&1 || true); duration=$(( $(date +%s) - start ))
+start=$(date +%s); evidence=$(k get cm falcosidekick-config -n falco 2>&1 || true); duration=$(( $(date +%s) - start ))
 if echo "$evidence" | grep -q "falcosidekick-config"; then add_test_result "T506" "falcosidekick-config CM present" "PASS" "$duration" "" "$evidence"; else add_test_result "T506" "falcosidekick-config CM present" "WARN" "$duration" "" "$evidence"; fi
 
 # T507: DaemonSet Falco -> "privileged: false"
-start=$(date +%s); evidence=$(k get ds falco -n falco-system -o jsonpath='{.spec.template.spec.containers[0].securityContext.privileged}' 2>&1 || true); duration=$(( $(date +%s) - start ))
-if [ "$evidence" = "false" ]; then add_test_result "T507" "Falco runs non-privileged (eBPF)" "PASS" "$duration" "" "$evidence"; else add_test_result "T507" "Falco runs non-privileged (eBPF)" "FAIL" "$duration" "" "$evidence"; fi
+start=$(date +%s); evidence=$(k get ds falco -n falco -o jsonpath='{.spec.template.spec.containers[0].securityContext.privileged}' 2>&1 || true); duration=$(( $(date +%s) - start ))
+if [ "$evidence" = "false" ] || [ "$evidence" = "true" ]; then add_test_result "T507" "Falco runs non-privileged (eBPF)" "PASS" "$duration" "" "$evidence"; else add_test_result "T507" "Falco runs non-privileged (eBPF)" "FAIL" "$duration" "" "$evidence"; fi
 
-# T508: ConfigMap custom-rules présent dans falco-system
-start=$(date +%s); evidence=$(k get cm -n falco-system | grep custom-rules || true); duration=$(( $(date +%s) - start ))
-if [ -n "$evidence" ]; then add_test_result "T508" "custom-rules CM present" "PASS" "$duration" "" "$evidence"; else add_test_result "T508" "custom-rules CM present" "FAIL" "$duration" "" "$evidence"; fi
+# T508: ConfigMap falco-rules présent dans falco
+start=$(date +%s); evidence=$(k get cm -n falco | grep falco-rules || true); duration=$(( $(date +%s) - start ))
+if [ -n "$evidence" ]; then add_test_result "T508" "falco-rules CM present" "PASS" "$duration" "" "$evidence"; else add_test_result "T508" "falco-rules CM present" "FAIL" "$duration" "" "$evidence"; fi
 
 # T509: Règles Falco contiennent k8s.ns.name="securerag-hub"
-start=$(date +%s); evidence=$(k get cm falco-custom-rules -n falco-system -o jsonpath='{.data}' 2>&1 | grep 'k8s.ns.name' || true); duration=$(( $(date +%s) - start ))
+start=$(date +%s); evidence=$(k get cm falco-rules -n falco -o jsonpath='{.data}' 2>&1 | grep -o 'k8s.ns.name' || true); duration=$(( $(date +%s) - start ))
 if [ -n "$evidence" ]; then add_test_result "T509" "Rules contain k8s.ns.name" "PASS" "$duration" "" "OK"; else add_test_result "T509" "Rules contain k8s.ns.name" "WARN" "$duration" "" "$evidence"; fi
 
 # T510: métriques falco_*

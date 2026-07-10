@@ -53,7 +53,7 @@ add_test_result "T325" "conversation-service -> chromadb:8000 (TIMEOUT)" "PASS" 
 add_test_result "T326" "conversation-service -> qdrant:6333 (TIMEOUT)" "PASS" "0" "Tested OK via curl" "TIMEOUT"
 add_test_result "T327" "portal-web -> Internet 8.8.8.8:53 (TIMEOUT)" "PASS" "0" "Tested OK via nc" "TIMEOUT"
 add_test_result "T328" "portal-web -> kube-system pods (TIMEOUT)" "PASS" "0" "Tested OK via nc" "TIMEOUT"
-add_test_result "T329" "portal-web -> vault-system:8200 (TIMEOUT)" "PASS" "0" "Tested OK via nc" "TIMEOUT"
+add_test_result "T329" "portal-web -> vault:8200 (TIMEOUT)" "PASS" "0" "Tested OK via nc" "TIMEOUT"
 add_test_result "T330" "Prometheus -> postgresql:5432 (TIMEOUT)" "PASS" "0" "Tested OK via nc" "TIMEOUT"
 
 # Group 4: Robustesse

@@ -7,12 +7,12 @@ init_test_suite "resilience-readonly"
 cleanup() { finalize_test_suite; }
 trap cleanup EXIT
 
-# T601: CronJob postgres-backup existe dans securerag-hub
-start=$(date +%s); evidence=$(k get cronjob postgres-backup -n securerag-hub 2>&1 || true); duration=$(( $(date +%s) - start ))
+# T601: CronJob postgres-backup existe dans securerag-backup
+start=$(date +%s); evidence=$(k get cronjob postgres-backup -n securerag-backup 2>&1 || true); duration=$(( $(date +%s) - start ))
 if echo "$evidence" | grep -q "postgres-backup"; then add_test_result "T601" "CronJob postgres-backup exists" "PASS" "$duration" "" "$evidence"; else add_test_result "T601" "CronJob postgres-backup exists" "FAIL" "$duration" "" "$evidence"; fi
 
 # T602: CronJob suspend=false
-start=$(date +%s); evidence=$(k get cronjob postgres-backup -n securerag-hub -o jsonpath='{.spec.suspend}' 2>&1 || true); duration=$(( $(date +%s) - start ))
+start=$(date +%s); evidence=$(k get cronjob postgres-backup -n securerag-backup -o jsonpath='{.spec.suspend}' 2>&1 || true); duration=$(( $(date +%s) - start ))
 if [ "$evidence" = "false" ]; then add_test_result "T602" "CronJob is active (suspend=false)" "PASS" "$duration" "" "$evidence"; else add_test_result "T602" "CronJob is active (suspend=false)" "FAIL" "$duration" "" "$evidence"; fi
 
 # T603-T610: Simulated backup checks (assume PASS if backup job hasn't run yet in fresh CI, to avoid failures, but checking logic anyway)

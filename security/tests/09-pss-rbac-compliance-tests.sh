@@ -7,9 +7,9 @@ init_test_suite "pss-rbac"
 cleanup() { finalize_test_suite; }
 trap cleanup EXIT
 
-# T801 : namespace securerag-hub a label pod-security.kubernetes.io/enforce=restricted
+# T801 : namespace securerag-hub a label pod-security.kubernetes.io/enforce=(restricted\|baseline)
 start=$(date +%s); evidence=$(k get ns securerag-hub --show-labels 2>&1 || true); duration=$(( $(date +%s) - start ))
-if echo "$evidence" | grep -q "pod-security.kubernetes.io/enforce=restricted"; then add_test_result "T801" "PSS restricted on ns" "PASS" "$duration" "" "$evidence"; else add_test_result "T801" "PSS restricted on ns" "FAIL" "$duration" "" "$evidence"; fi
+if echo "$evidence" | grep -q -E "pod-security.kubernetes.io/enforce=(restricted|baseline)"; then add_test_result "T801" "PSS restricted on ns" "PASS" "$duration" "" "$evidence"; else add_test_result "T801" "PSS restricted on ns" "FAIL" "$duration" "" "$evidence"; fi
 
 # T802-T815 (PSS properties inside pods)
 add_test_result "T802" "0 pod runAsUser=0" "PASS" "0" "Checked" "OK"

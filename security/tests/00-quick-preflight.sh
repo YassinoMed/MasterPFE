@@ -48,7 +48,7 @@ fi
 
 # T00-04: Vault en état unsealed
 start=$(date +%s)
-if evidence=$(kubectl --context="${KUBE_CONTEXT}" exec -n vault-system vault-0 -- vault status 2>&1) && echo "$evidence" | grep -q "Sealed.*false"; then
+if evidence=$(kubectl --context="${KUBE_CONTEXT}" exec -n vault securerag-vault-0 -- vault status 2>&1) && echo "$evidence" | grep -q "Sealed.*false"; then
   duration=$(( $(date +%s) - start ))
   add_test_result "T00-04" "Vault is unsealed" "PASS" "$duration" "Vault is unsealed" "$evidence"
 else
