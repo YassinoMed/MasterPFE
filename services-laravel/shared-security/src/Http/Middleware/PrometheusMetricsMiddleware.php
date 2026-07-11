@@ -118,7 +118,7 @@ class PrometheusMetricsMiddleware
 
             $renderer = new \Prometheus\RenderTextFormat();
             $registry = self::getRegistry();
-            $result = $renderer->render($registry->getMetricFamiliesStore());
+            $result = $renderer->render($registry->getMetricFamilies());
 
             return response($result, 200, ['Content-Type' => \Prometheus\RenderTextFormat::MIME_TYPE]);
         });
