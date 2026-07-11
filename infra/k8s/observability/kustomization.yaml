@@ -16,6 +16,7 @@ resources:
   - alertmanager-external-secret.yaml
   - networkpolicy.yaml
   - kube-state-metrics.yaml
+  - tempo/tempo-deployment.yaml
 labels:
   - pairs:
       app.kubernetes.io/part-of: securerag-hub

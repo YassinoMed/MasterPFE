@@ -13,7 +13,7 @@ spec:
             - name: OTEL_TRACES_EXPORTER
               value: "otlp"
             - name: OTEL_EXPORTER_OTLP_ENDPOINT
-              value: "http://otel-collector.otel-system.svc.cluster.local:4318"
+              value: "$(INTERNAL_SERVICE_SCHEME)://otel-collector.otel-system.svc.cluster.local:4318"
             - name: OTEL_SERVICE_NAME
               value: "auth-users"
 ---
@@ -32,7 +32,7 @@ spec:
             - name: OTEL_TRACES_EXPORTER
               value: "otlp"
             - name: OTEL_EXPORTER_OTLP_ENDPOINT
-              value: "http://otel-collector.otel-system.svc.cluster.local:4318"
+              value: "$(INTERNAL_SERVICE_SCHEME)://otel-collector.otel-system.svc.cluster.local:4318"
             - name: OTEL_SERVICE_NAME
               value: "chatbot-manager"
 ---
@@ -51,7 +51,7 @@ spec:
             - name: OTEL_TRACES_EXPORTER
               value: "otlp"
             - name: OTEL_EXPORTER_OTLP_ENDPOINT
-              value: "http://otel-collector.otel-system.svc.cluster.local:4318"
+              value: "$(INTERNAL_SERVICE_SCHEME)://otel-collector.otel-system.svc.cluster.local:4318"
             - name: OTEL_SERVICE_NAME
               value: "conversation-service"
 ---
@@ -70,6 +70,6 @@ spec:
             - name: OTEL_TRACES_EXPORTER
               value: "otlp"
             - name: OTEL_EXPORTER_OTLP_ENDPOINT
-              value: "http://otel-collector.otel-system.svc.cluster.local:4318"
+              value: "$(INTERNAL_SERVICE_SCHEME)://otel-collector.otel-system.svc.cluster.local:4318"
             - name: OTEL_SERVICE_NAME
               value: "audit-security-service"

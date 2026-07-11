@@ -15,6 +15,8 @@ spec:
       labels: { app.kubernetes.io/name: falco }
       annotations:
         container.apparmor.security.beta.kubernetes.io/falco: unconfined
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8765"
     spec:
       serviceAccountName: falco
       hostPID: true
@@ -31,6 +33,10 @@ spec:
         - name: falco
           image: falcosecurity/falco:0.39.2
           imagePullPolicy: IfNotPresent
+          ports:
+            - name: metrics
+              containerPort: 8765
+              protocol: TCP
           args:
             - /usr/bin/falco
             - -o

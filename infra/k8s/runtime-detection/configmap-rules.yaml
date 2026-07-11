@@ -34,6 +34,10 @@ data:
       url: "http://falcosidekick.falco.svc.cluster.local:2801"
       user_agent: "falcosecurity/falco"
       insecure: true
+    webserver:
+      enabled: true
+      listen_port: 8765
+      listen_address: 0.0.0.0
     grpc:
       enabled: false
     grpc_output:
@@ -97,19 +101,37 @@ data:
       priority: ERROR
       tags: [securerag, runtime, privilege]
   securerag_mitre_rules.yaml: |
-    # SecureRAG Hub — MITRE ATT&CK aligned rules.
-    # Canonical source: security/falco/custom-rules.yaml
-    # Keep these two files in sync.
-    - macro: securerag_ns
+    # SecureRAG Hub — Custom Falco rules (MITRE ATT&CK aligned)
+    # Audience: runtime detection in namespace `securerag-hub`.
+    # Scope: Laravel services + portal-web. Tuned to existing manifests
+    # (runAsNonRoot, RO rootfs, drop ALL caps). Designed to minimise FPs.
+    #
+    # Tuning guidance:
+    #   - Add new known-good destinations to `securerag_egress_ports`.
+    #   - Whitelist legitimate processes via `securerag_known_procs` macro.
+    #   - All rules are PRECISE (namespace+container scoped) to avoid noise.
+    #
+    # Test commands (harmless triggers): see security/falco/test-triggers.sh
+
+    - required_engine_version: 0.31.0
+
+    # ----------------------------- Macros -----------------------------
+    - macro: securerag_namespace
       condition: (k8s.ns.name = "securerag-hub")
 
-    - macro: securerag_ctr
-      condition: (container and securerag_ns)
+    - macro: securerag_container
+      condition: (container and securerag_namespace)
 
     - macro: securerag_egress_ports
+      # Allowed outbound destinations from app pods (DNS, HTTP/S, Postgres,
+      # Redis, MinIO, Prometheus scrape, Loki push, Alertmanager, internal svc).
       condition: (fd.sport in (53, 80, 443, 5432, 6379, 8000, 9000, 9090, 3100, 9093))
 
-    - macro: pkg_mgr_proc
+    - macro: securerag_known_procs
+      # Processes that may legitimately exec inside Laravel/portal containers.
+      condition: (proc.name in (php, php-fpm, php-cgi, artisan, nginx, supervisord))
+
+    - macro: package_manager_proc
       condition: >
         (proc.name in (apt, apt-get, dpkg, yum, rpm, dnf, microdnf, apk,
                        composer, npm, yarn, pnpm, pip, pip3, gem, go))
@@ -117,52 +139,100 @@ data:
     - macro: shell_proc
       condition: (proc.name in (bash, sh, zsh, dash, ksh, ash, fish))
 
-    # T1059 — reverse shell heuristic
-    - rule: SecureRAG Reverse Shell Indicator
-      desc: Process exec with TTY redirected to a network socket.
+    - macro: container_write
+      condition: (evt.type in (open, openat, openat2, creat) and
+                  (evt.is_open_write = true) and fd.typechar = 'f')
+
+    # -------------------------- Rules ------------------------------------
+    # T1059 — Command and Scripting Interpreter
+    - rule: SecureRAG Shell in Container
+      desc: Interactive/sub-shell in a SecureRAG application container.
       condition: >
-        spawned_process and securerag_ctr and shell_proc and
+        spawned_process
+        and k8s.ns.name = "securerag-hub"
+        and container.id != host
+        and proc.name in (bash, sh, zsh, dash, ksh)
+        and not (proc.pname = "php" and proc.pcmdline contains "artisan")
+      output: >
+        Shell spawned in SecureRAG pod
+        (user=%user.name pod=%k8s.pod.name container=%container.name
+         image=%container.image.repository proc=%proc.cmdline parent=%proc.pname)
+      priority: WARNING
+      tags: [securerag, mitre_execution, T1059, runtime]
+
+    # Bonus Rule: Detect curl/wget in containers
+    - rule: SecureRAG Network Tool Executed in Container
+      desc: Detection of network download tools like curl or wget inside application containers.
+      condition: >
+        spawned_process
+        and k8s.ns.name = "securerag-hub"
+        and container.id != host
+        and proc.name in (curl, wget)
+      output: >
+        Network download tool executed in SecureRAG pod
+        (user=%user.name pod=%k8s.pod.name container=%container.name proc=%proc.cmdline)
+      priority: WARNING
+      tags: [securerag, mitre_execution, T1105, T1059, runtime]
+
+    # Bonus Rule: Detect writing to /etc/
+    - rule: SecureRAG Write to etc Directory
+      desc: Detection of file write activities inside the /etc/ folder.
+      condition: >
+        container_write
+        and k8s.ns.name = "securerag-hub"
+        and container.id != host
+        and fd.name startswith /etc/
+      output: >
+        Write attempt to sensitive directory /etc detected in SecureRAG pod
+        (file=%fd.name proc=%proc.cmdline pod=%k8s.pod.name container=%container.name)
+      priority: WARNING
+      tags: [securerag, mitre_persistence, T1059, file_integrity, runtime]
+
+    # T1059 — Reverse-shell heuristic
+    - rule: SecureRAG Reverse Shell Indicator
+      desc: Process exec with TTY redirected to a network socket (reverse shell).
+      condition: >
+        spawned_process and securerag_container and shell_proc and
         (proc.cmdline contains "/dev/tcp/" or proc.cmdline contains "/dev/udp/" or
          proc.cmdline contains "bash -i" or proc.cmdline contains "nc -e" or
          proc.cmdline contains "ncat -e" or proc.cmdline contains "socat ")
       output: >
-        Reverse shell pattern in SecureRAG pod
+        Reverse shell pattern detected in SecureRAG pod
         (pod=%k8s.pod.name proc=%proc.cmdline parent=%proc.pname)
       priority: CRITICAL
       tags: [securerag, mitre_execution, T1059, reverse_shell]
 
-    # T1136 — local account creation
-    - rule: SecureRAG User Account Mutation
-      desc: Attempt to create or modify local users in app pods.
-      condition: >
-        spawned_process and securerag_ctr and
-        proc.name in (useradd, usermod, adduser, groupadd, passwd, chpasswd)
-      output: >
-        Local user mutation in SecureRAG pod
-        (pod=%k8s.pod.name proc=%proc.cmdline)
-      priority: CRITICAL
-      tags: [securerag, mitre_persistence, T1136]
-
-    # T1505 / T1136 — write below sensitive paths
+    # T1505.003 / T1136 — New user / web shell artefacts
     - rule: SecureRAG Write Below Sensitive Path
-      desc: Writes outside expected app paths.
+      desc: Write to /etc, /usr, /var/www/html outside expected app paths.
       condition: >
-        evt.is_open_write=true and fd.typechar='f' and securerag_ctr and
+        container_write and securerag_container and
         (fd.name startswith /etc/ or fd.name startswith /usr/ or
-         (fd.name startswith /var/www/html/ and
-          not fd.name startswith /var/www/html/storage/ and
-          not fd.name startswith /var/www/html/bootstrap/cache/))
+         (fd.name startswith /var/www/html/ and not fd.name startswith /var/www/html/storage/
+          and not fd.name startswith /var/www/html/bootstrap/cache/))
       output: >
         Write below sensitive path in SecureRAG pod
         (file=%fd.name proc=%proc.cmdline pod=%k8s.pod.name)
       priority: ERROR
-      tags: [securerag, mitre_persistence, T1505, T1136]
+      tags: [securerag, mitre_persistence, T1505, T1136, file_integrity]
 
-    # T1543 — persistence via cron/systemd
+    # T1136.001 — Local Account creation
+    - rule: SecureRAG User Account Mutation
+      desc: Detect attempts to create or modify local users in app containers.
+      condition: >
+        spawned_process and securerag_container and
+        proc.name in (useradd, usermod, adduser, groupadd, passwd, chpasswd)
+      output: >
+        Local user mutation attempted in SecureRAG pod
+        (pod=%k8s.pod.name proc=%proc.cmdline)
+      priority: CRITICAL
+      tags: [securerag, mitre_persistence, T1136]
+
+    # T1543 — Persistence via service / cron
     - rule: SecureRAG Persistence Mechanism Touched
       desc: Modification of cron/systemd/init artefacts inside container.
       condition: >
-        evt.is_open_write=true and fd.typechar='f' and securerag_ctr and
+        container_write and securerag_container and
         (fd.name startswith /etc/cron or fd.name startswith /var/spool/cron or
          fd.name startswith /etc/systemd/ or fd.name startswith /etc/init.d/)
       output: >
@@ -171,49 +241,67 @@ data:
       priority: ERROR
       tags: [securerag, mitre_persistence, T1543]
 
-    # T1059 / T1105 — package manager exec at runtime
+    # T1059 / T1105 — Package manager exec inside running container
     - rule: SecureRAG Package Manager in Container
-      desc: Package manager invoked inside a SecureRAG pod.
-      condition: spawned_process and securerag_ctr and pkg_mgr_proc
+      desc: A package manager ran inside a SecureRAG pod (no install at runtime).
+      condition: spawned_process and securerag_container and package_manager_proc
       output: >
         Package manager invoked in SecureRAG pod
         (pod=%k8s.pod.name proc=%proc.cmdline parent=%proc.pname)
       priority: ERROR
       tags: [securerag, mitre_execution, T1059, T1105, supply_chain]
 
-    # T1611 / T1548 — privilege escalation indicators
-    - rule: SecureRAG Privilege Escalation Attempt
-      desc: setuid binaries or privilege-raising processes spawned.
+    # T1552.001 — Credentials in files (secret/config access)
+    - rule: SecureRAG Sensitive File Read
+      desc: Read of OS, k8s SA, or app secret material from app container.
       condition: >
-        spawned_process and securerag_ctr and
-        proc.name in (sudo, su, doas, pkexec, chroot, mount, umount,
-                      capsh, setpriv, runuser)
+        open_read and securerag_container and
+        (fd.name in (/etc/shadow, /etc/passwd-, /etc/gshadow,
+                     /root/.kube/config, /root/.ssh/id_rsa,
+                     /home/app/.aws/credentials) or
+         fd.name startswith /var/run/secrets/kubernetes.io/serviceaccount/ or
+         fd.name startswith /run/secrets/ or
+         fd.name endswith ".env" or
+         fd.name endswith ".pem" or
+         fd.name endswith ".key")
+      output: >
+        Sensitive file read in SecureRAG pod
+        (file=%fd.name proc=%proc.cmdline pod=%k8s.pod.name)
+      priority: ERROR
+      tags: [securerag, mitre_credential_access, T1552]
+
+    # T1611 — Privilege escalation indicators
+    - rule: SecureRAG Privilege Escalation Attempt
+      desc: setuid/setgid binaries or privilege-raising processes spawned.
+      condition: >
+        spawned_process and securerag_container and
+        (proc.name in (sudo, su, doas, pkexec, chroot, mount, umount, capsh,
+                       setpriv, runuser))
       output: >
         Privilege escalation attempt in SecureRAG pod
         (pod=%k8s.pod.name proc=%proc.cmdline user=%user.name)
       priority: CRITICAL
       tags: [securerag, mitre_privilege_escalation, T1611, T1548]
 
-    # T1070 — log tampering
+    # T1070 — Indicator removal (log tampering)
     - rule: SecureRAG Log Tampering
-      desc: Truncation or deletion of log paths.
+      desc: Truncation or deletion of common log/audit paths.
       condition: >
-        ((evt.type in (unlink, unlinkat, rename, renameat)) or
-         (evt.type=ftruncate and evt.dir=>)) and securerag_ctr and
-        (fd.name startswith /var/log/ or
-         fd.name startswith /var/www/html/storage/logs/ or
-         fd.name startswith /tmp/securerag-runtime/storage/logs/)
+        (evt.type in (unlink, unlinkat, rename, renameat) or
+         (evt.type = ftruncate and evt.dir = >)) and securerag_container and
+        (fd.name startswith /var/log/ or fd.name startswith /var/www/html/storage/logs/
+         or fd.name startswith /tmp/securerag-runtime/storage/logs/)
       output: >
         Log artefact removal/truncation in SecureRAG pod
         (file=%fd.name proc=%proc.cmdline pod=%k8s.pod.name)
       priority: WARNING
       tags: [securerag, mitre_defense_evasion, T1070]
 
-    # TA0011 — refined unexpected egress (replaces noisier broad rule).
-    - rule: SecureRAG Outbound Unexpected Port (Refined)
-      desc: Outbound from app pod outside the documented allow-list.
+    # TA0011 — C2 / unexpected egress
+    - rule: SecureRAG Outbound Unexpected Port
+      desc: Outbound connection from app pod to a port not on the allow-list.
       condition: >
-        outbound and securerag_ctr and not securerag_egress_ports and
+        outbound and securerag_container and not securerag_egress_ports and
         not fd.rip in (127.0.0.1, ::1)
       output: >
         Unexpected outbound connection from SecureRAG pod
@@ -221,36 +309,49 @@ data:
       priority: WARNING
       tags: [securerag, mitre_command_and_control, TA0011]
 
-    # T1552.001 — broader credential file read
-    - rule: SecureRAG Credential File Read
-      desc: Read of .env, .pem, .key or cloud credential files.
-      condition: >
-        open_read and securerag_ctr and
-        (fd.name endswith ".env" or fd.name endswith ".pem" or
-         fd.name endswith ".key" or
-         fd.name startswith /run/secrets/)
-      output: >
-        Credential file read in SecureRAG pod
-        (file=%fd.name proc=%proc.cmdline pod=%k8s.pod.name)
-      priority: ERROR
-      tags: [securerag, mitre_credential_access, T1552]
-
-    # T1610 / T1613 — suspicious K8s API audit events
+    # T1610 / T1613 — Suspicious K8s API access (audit-side)
     - rule: SecureRAG Suspicious K8s API Verb
-      desc: SA in securerag-hub used for sensitive verbs.
+      desc: SA from securerag-hub used for sensitive K8s verbs (audit log).
       condition: >
         ka.verb in (create, delete, deletecollection, patch) and
         ka.target.namespace = "securerag-hub" and
-        ka.target.resource in (pods/exec, pods/attach, secrets,
-                               serviceaccounts, clusterrolebindings,
-                               roles, rolebindings) and
+        ka.target.resource in (pods/exec, pods/attach, secrets, serviceaccounts,
+                               clusterrolebindings, roles, rolebindings) and
         not ka.user.name in (system:apiserver,
                              system:kube-controller-manager,
                              system:kube-scheduler)
       output: >
-        Suspicious K8s API verb in SecureRAG namespace
+        Suspicious K8s API verb from SecureRAG namespace
         (user=%ka.user.name verb=%ka.verb resource=%ka.target.resource
          name=%ka.target.name)
       priority: WARNING
       source: k8s_audit
       tags: [securerag, mitre_discovery, T1613, k8s_audit]
+
+    # T1496 — Crypto Miner Detection
+    - rule: SecureRAG Crypto Miner Process
+      desc: Detect cryptocurrency mining processes spawned in SecureRAG pods.
+      condition: >
+        spawned_process and securerag_container and
+        (proc.name in (xmrig, cpuminer, minergate, stratum, cgminer, bfgminer) or
+         proc.cmdline contains "xmrig" or proc.cmdline contains "pool")
+      output: >
+        Cryptocurrency miner process detected in SecureRAG pod
+        (proc=%proc.cmdline pod=%k8s.pod.name container=%container.name)
+      priority: CRITICAL
+      tags: [securerag, mitre_impact, T1496, crypto_miner]
+
+    # T1611 — Container Escape Attempt
+    - rule: SecureRAG Container Escape Attempt
+      desc: Detect potential container escape actions (namespace modification or host access).
+      condition: >
+        spawned_process and securerag_container and
+        (proc.name in (nsenter, unshare) or
+         proc.cmdline contains "nsenter" or proc.cmdline contains "unshare" or
+         proc.cmdline contains "--net" or proc.cmdline contains "--pid" or
+         proc.cmdline contains "--ipc" or proc.cmdline contains "--mount")
+      output: >
+        Potential container escape attempt detected in SecureRAG pod
+        (proc=%proc.cmdline pod=%k8s.pod.name container=%container.name)
+      priority: CRITICAL
+      tags: [securerag, mitre_privilege_escalation, T1611, container_escape]

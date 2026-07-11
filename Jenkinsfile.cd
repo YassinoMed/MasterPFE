@@ -451,7 +451,8 @@ spec:
 
   post {
     always {
-      archiveArtifacts allowEmptyArchive: true, artifacts: 'artifacts/sbom/**,artifacts/release/**,artifacts/validation/**'
+      sh 'bash scripts/dora/generate-dora-evidence.sh || true'
+      archiveArtifacts allowEmptyArchive: true, artifacts: 'artifacts/sbom/**,artifacts/release/**,artifacts/validation/**,evidence/**'
       cleanWs deleteDirs: true, notFailBuild: true
     }
     success {

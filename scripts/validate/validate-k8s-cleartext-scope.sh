@@ -6,7 +6,7 @@ OUT="${OUT:-${ARTIFACT_DIR}/k8s-cleartext-scope.md}"
 
 mkdir -p "${ARTIFACT_DIR}"
 
-allowed_hosts="auth-users chatbot-manager conversation-service audit-security-service portal-web"
+allowed_hosts="auth-users chatbot-manager conversation-service audit-security-service portal-web otel-collector.otel-system.svc.cluster.local prometheus.securerag-monitoring.svc loki.securerag-monitoring.svc falco.falco.svc securerag-vault.vault.svc"
 overlays=(
   "infra/k8s/overlays/dev"
   "infra/k8s/overlays/demo"

@@ -14,25 +14,25 @@ patches:
     patch: |-
       - op: replace
         path: /aggregationRule/clusterRoleSelectors/1/matchLabels/app.kubernetes.io~1instance
-        value: securerag-kyverno
+        value: kyverno
   - target:
       kind: ClusterRole
       name: kyverno:background-controller
     patch: |-
       - op: replace
         path: /aggregationRule/clusterRoleSelectors/1/matchLabels/app.kubernetes.io~1instance
-        value: securerag-kyverno
+        value: kyverno
   - target:
       kind: ClusterRole
       name: kyverno:cleanup-controller
     patch: |-
       - op: replace
         path: /aggregationRule/clusterRoleSelectors/1/matchLabels/app.kubernetes.io~1instance
-        value: securerag-kyverno
+        value: kyverno
   - target:
       kind: ClusterRole
       name: kyverno:reports-controller
     patch: |-
       - op: replace
         path: /aggregationRule/clusterRoleSelectors/1/matchLabels/app.kubernetes.io~1instance
-        value: securerag-kyverno
+        value: kyverno

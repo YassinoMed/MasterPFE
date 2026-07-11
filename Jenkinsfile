@@ -627,7 +627,8 @@ EOF
 
   post {
     always {
-      archiveArtifacts allowEmptyArchive: true, artifacts: 'artifacts/sbom/**,artifacts/release/**,security/reports/**,reports/postdeploy/**,.coverage-artifacts/**'
+      sh 'bash scripts/dora/generate-dora-evidence.sh || true'
+      archiveArtifacts allowEmptyArchive: true, artifacts: 'artifacts/sbom/**,artifacts/release/**,security/reports/**,reports/postdeploy/**,.coverage-artifacts/**,evidence/**'
       cleanWs deleteDirs: true, notFailBuild: true
     }
     success {

@@ -224,3 +224,31 @@
   priority: WARNING
   source: k8s_audit
   tags: [securerag, mitre_discovery, T1613, k8s_audit]
+
+# T1496 — Crypto Miner Detection
+- rule: SecureRAG Crypto Miner Process
+  desc: Detect cryptocurrency mining processes spawned in SecureRAG pods.
+  condition: >
+    spawned_process and securerag_container and
+    (proc.name in (xmrig, cpuminer, minergate, stratum, cgminer, bfgminer) or
+     proc.cmdline contains "xmrig" or proc.cmdline contains "pool")
+  output: >
+    Cryptocurrency miner process detected in SecureRAG pod
+    (proc=%proc.cmdline pod=%k8s.pod.name container=%container.name)
+  priority: CRITICAL
+  tags: [securerag, mitre_impact, T1496, crypto_miner]
+
+# T1611 — Container Escape Attempt
+- rule: SecureRAG Container Escape Attempt
+  desc: Detect potential container escape actions (namespace modification or host access).
+  condition: >
+    spawned_process and securerag_container and
+    (proc.name in (nsenter, unshare) or
+     proc.cmdline contains "nsenter" or proc.cmdline contains "unshare" or
+     proc.cmdline contains "--net" or proc.cmdline contains "--pid" or
+     proc.cmdline contains "--ipc" or proc.cmdline contains "--mount")
+  output: >
+    Potential container escape attempt detected in SecureRAG pod
+    (proc=%proc.cmdline pod=%k8s.pod.name container=%container.name)
+  priority: CRITICAL
+  tags: [securerag, mitre_privilege_escalation, T1611, container_escape]

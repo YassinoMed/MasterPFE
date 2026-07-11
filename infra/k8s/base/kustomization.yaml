@@ -28,7 +28,9 @@ resources:
   - auth-users/networkpolicy.yaml
   - auth-users/pdb.yaml
 
+  - postgres-auth/serviceaccount.yaml
   - postgres-auth/deployment.yaml
+  - postgres-auth/service.yaml
   - postgres-auth/networkpolicy.yaml
 
   - chatbot-manager/serviceaccount.yaml
