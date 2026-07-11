@@ -1,0 +1,3 @@
+NAME                          CPU(cores)   CPU(%)   MEMORY(bytes)   MEMORY(%)   
+securerag-dev-control-plane   267m         6%       1617Mi          6%          
+securerag-dev-worker          425m         10%      5018Mi          20%         

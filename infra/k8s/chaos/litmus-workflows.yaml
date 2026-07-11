@@ -1,0 +1,190 @@
+# Chaos Engineering — LitmusChaos Workflow Experiments
+# Tests resilience of SecureRAG Hub components.
+---
+# Experiment 1: Pod Failure
+apiVersion: litmuschaos.io/v1alpha1
+kind: ChaosEngine
+metadata:
+  name: securerag-pod-failure
+  namespace: securerag-hub
+  labels:
+    app.kubernetes.io/part-of: securerag-hub
+    chaos.securerag.dev/type: pod-failure
+spec:
+  engineState: active
+  appinfo:
+    appns: securerag-hub
+    applabel: app.kubernetes.io/part-of=securerag-hub
+    appkind: deployment
+  chaosServiceAccount: litmus-admin
+  experiments:
+    - name: pod-delete
+      spec:
+        components:
+          env:
+            - name: TOTAL_CHAOS_DURATION
+              value: "60"
+            - name: CHAOS_INTERVAL
+              value: "10"
+            - name: FORCE
+              value: "false"
+            - name: PODS_AFFECTED_PERC
+              value: "50"
+
+---
+# Experiment 2: Node Failure (drain simulation)
+apiVersion: litmuschaos.io/v1alpha1
+kind: ChaosEngine
+metadata:
+  name: securerag-node-drain
+  namespace: securerag-hub
+  labels:
+    chaos.securerag.dev/type: node-failure
+spec:
+  engineState: active
+  appinfo:
+    appns: securerag-hub
+    applabel: app.kubernetes.io/part-of=securerag-hub
+    appkind: deployment
+  chaosServiceAccount: litmus-admin
+  experiments:
+    - name: node-drain
+      spec:
+        components:
+          env:
+            - name: TOTAL_CHAOS_DURATION
+              value: "120"
+            - name: APP_NODE
+              value: ""
+
+---
+# Experiment 3: Network Loss
+apiVersion: litmuschaos.io/v1alpha1
+kind: ChaosEngine
+metadata:
+  name: securerag-network-loss
+  namespace: securerag-hub
+  labels:
+    chaos.securerag.dev/type: network-failure
+spec:
+  engineState: active
+  appinfo:
+    appns: securerag-hub
+    applabel: app.kubernetes.io/name=portal-web
+    appkind: deployment
+  chaosServiceAccount: litmus-admin
+  experiments:
+    - name: pod-network-loss
+      spec:
+        components:
+          env:
+            - name: TOTAL_CHAOS_DURATION
+              value: "60"
+            - name: NETWORK_INTERFACE
+              value: "eth0"
+            - name: NETWORK_PACKET_LOSS_PERCENTAGE
+              value: "100"
+            - name: CONTAINER_RUNTIME
+              value: "containerd"
+
+---
+# Experiment 4: Vault Failure (pod kill)
+apiVersion: litmuschaos.io/v1alpha1
+kind: ChaosEngine
+metadata:
+  name: securerag-vault-failure
+  namespace: vault
+  labels:
+    chaos.securerag.dev/type: vault-failure
+spec:
+  engineState: active
+  appinfo:
+    appns: vault
+    applabel: app.kubernetes.io/name=vault
+    appkind: statefulset
+  chaosServiceAccount: litmus-admin
+  experiments:
+    - name: pod-delete
+      spec:
+        components:
+          env:
+            - name: TOTAL_CHAOS_DURATION
+              value: "30"
+            - name: FORCE
+              value: "false"
+
+---
+# Experiment 5: Harbor Failure
+apiVersion: litmuschaos.io/v1alpha1
+kind: ChaosEngine
+metadata:
+  name: securerag-harbor-failure
+  namespace: harbor
+  labels:
+    chaos.securerag.dev/type: harbor-failure
+spec:
+  engineState: active
+  appinfo:
+    appns: harbor
+    applabel: app=harbor
+    appkind: deployment
+  chaosServiceAccount: litmus-admin
+  experiments:
+    - name: pod-delete
+      spec:
+        components:
+          env:
+            - name: TOTAL_CHAOS_DURATION
+              value: "60"
+
+---
+# Experiment 6: ArgoCD Failure
+apiVersion: litmuschaos.io/v1alpha1
+kind: ChaosEngine
+metadata:
+  name: securerag-argocd-failure
+  namespace: argocd
+  labels:
+    chaos.securerag.dev/type: argocd-failure
+spec:
+  engineState: active
+  appinfo:
+    appns: argocd
+    applabel: app.kubernetes.io/name=argocd-server
+    appkind: deployment
+  chaosServiceAccount: litmus-admin
+  experiments:
+    - name: pod-delete
+      spec:
+        components:
+          env:
+            - name: TOTAL_CHAOS_DURATION
+              value: "60"
+
+---
+# Experiment 7: Volume Failure (disk fill)
+apiVersion: litmuschaos.io/v1alpha1
+kind: ChaosEngine
+metadata:
+  name: securerag-disk-fill
+  namespace: securerag-hub
+  labels:
+    chaos.securerag.dev/type: volume-failure
+spec:
+  engineState: active
+  appinfo:
+    appns: securerag-hub
+    applabel: app.kubernetes.io/name=portal-web
+    appkind: deployment
+  chaosServiceAccount: litmus-admin
+  experiments:
+    - name: disk-fill
+      spec:
+        components:
+          env:
+            - name: TOTAL_CHAOS_DURATION
+              value: "60"
+            - name: FILL_PERCENTAGE
+              value: "90"
+            - name: EPHEMERAL_STORAGE_MEBIBYTES
+              value: "500"

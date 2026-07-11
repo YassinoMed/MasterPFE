@@ -1,0 +1,51 @@
+# ArgoCD Image Updater Configuration
+# Watches Harbor registry for new image tags and updates Git repository
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: argocd-image-updater-config
+  namespace: argocd
+  labels:
+    app.kubernetes.io/part-of: securerag-hub
+    app.kubernetes.io/managed-by: argocd
+data:
+  # Registry configurations
+  registries.conf: |
+    registries:
+      - name: Harbor Registry
+        api_url: https://harbor.securerag.local
+        prefix: harbor.securerag.local
+        credentials: pullsecret:argocd/harbor-registry-credentials
+        default: true
+        insecure: false
+      - name: Local Registry
+        api_url: http://localhost:5001
+        prefix: localhost:5001
+        default: false
+        insecure: true
+
+  # Git write-back configuration
+  git.commit-message-template: |
+    build: update image {{ .AppName }} to {{ .NewImage }}
+
+    Automated by ArgoCD Image Updater.
+    Previous: {{ .OldImage }}
+    New: {{ .NewImage }}
+
+  # Log level
+  log.level: info
+
+---
+# ArgoCD Image Updater Application annotations
+# These annotations should be added to the Applications that need image updates.
+# Example usage on an ArgoCD Application:
+#
+# metadata:
+#   annotations:
+#     argocd-image-updater.argoproj.io/image-list: |
+#       portal-web=localhost:5001/securerag-hub-portal-web
+#       auth-users=localhost:5001/securerag-hub-auth-users
+#     argocd-image-updater.argoproj.io/portal-web.update-strategy: digest
+#     argocd-image-updater.argoproj.io/auth-users.update-strategy: digest
+#     argocd-image-updater.argoproj.io/write-back-method: git
+#     argocd-image-updater.argoproj.io/write-back-target: kustomization

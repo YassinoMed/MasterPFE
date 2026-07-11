@@ -1,0 +1,8 @@
+audit-security-service-667b7997b4-j5m7r	localhost:5001/securerag-hub-audit-security-service:demo	localhost:5001/securerag-hub-audit-security-service@sha256:6cf5cd864a1eb4b9179869b55519c1ba7b86d03f355b28506d3b7de97325d9bb
+auth-users-8678978685-bfl4l	localhost:5001/securerag-hub-auth-users:demo	localhost:5001/securerag-hub-auth-users@sha256:7b24d8aa5f36d0db05d10fb2a46286711cc4a2304f47dde84ba796362aef5522
+auth-users-8678978685-l7968	localhost:5001/securerag-hub-auth-users:demo	localhost:5001/securerag-hub-auth-users@sha256:7b24d8aa5f36d0db05d10fb2a46286711cc4a2304f47dde84ba796362aef5522
+auth-users-8678978685-zrn25	localhost:5001/securerag-hub-auth-users:demo	localhost:5001/securerag-hub-auth-users@sha256:7b24d8aa5f36d0db05d10fb2a46286711cc4a2304f47dde84ba796362aef5522
+chatbot-manager-79b79d59c4-lvgtp	localhost:5001/securerag-hub-chatbot-manager:demo	localhost:5001/securerag-hub-chatbot-manager@sha256:086ed526afb4439f6d4c5590326be3a757574ccda5e894ce1b652054bde84513
+conversation-service-6bc4c7dbc6-pq7xf	localhost:5001/securerag-hub-conversation-service:demo	localhost:5001/securerag-hub-conversation-service@sha256:35f53f4cd274b54021812ed48b95991af875c7e8e0aa66c53bb06df65fe4e03f
+portal-web-859c78db95-z68jt	localhost:5001/securerag-hub-portal-web:demo	localhost:5001/securerag-hub-portal-web@sha256:fa1fc37b44b4cedc7e32c38940f1971f5e9af7c7b6d425d66d3214cd4bc18f80
+postgres-auth-fbf55db78-kwlh4	docker.io/library/postgres:16-alpine	docker.io/library/postgres@sha256:e013e867e712fec275706a6c51c966f0bb0c93cfa8f51000f85a15f9865a28cb

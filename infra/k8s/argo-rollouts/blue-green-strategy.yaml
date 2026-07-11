@@ -1,0 +1,144 @@
+# Argo Rollouts — Blue/Green Deployment Strategy for portal-web
+# The portal-web frontend uses Blue/Green to ensure zero-downtime
+# cutover with instant rollback capability.
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: portal-web-bluegreen
+  namespace: securerag-hub
+  labels:
+    app.kubernetes.io/name: portal-web
+    app.kubernetes.io/part-of: securerag-hub
+    app.kubernetes.io/managed-by: argo-rollouts
+  annotations:
+    argocd.argoproj.io/sync-wave: "30"
+spec:
+  replicas: 2
+  revisionHistoryLimit: 5
+  strategy:
+    blueGreen:
+      activeService: portal-web
+      previewService: portal-web-preview
+      autoPromotionEnabled: false
+      scaleDownDelaySeconds: 300
+      prePromotionAnalysis:
+        templates:
+          - templateName: portal-web-bluegreen-analysis
+        args:
+          - name: service-name
+            value: portal-web-preview
+      antiAffinity:
+        preferredDuringSchedulingIgnoredDuringExecution:
+          weight: 100
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: portal-web
+      rollout: bluegreen
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: portal-web
+        app.kubernetes.io/part-of: securerag-hub
+        rollout: bluegreen
+    spec:
+      serviceAccountName: portal-web
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: portal-web
+          image: localhost:5001/securerag-hub-portal-web:production
+          ports:
+            - name: http
+              containerPort: 8000
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            failureThreshold: 6
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 20
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: [ALL]
+
+---
+# Preview Service for Blue/Green
+apiVersion: v1
+kind: Service
+metadata:
+  name: portal-web-preview
+  namespace: securerag-hub
+  labels:
+    app.kubernetes.io/name: portal-web-preview
+    app.kubernetes.io/part-of: securerag-hub
+spec:
+  ports:
+    - port: 80
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    app.kubernetes.io/name: portal-web
+    rollout: bluegreen
+
+---
+# Blue/Green Pre-promotion Analysis
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata:
+  name: portal-web-bluegreen-analysis
+  namespace: securerag-hub
+spec:
+  args:
+    - name: service-name
+  metrics:
+    - name: error-rate
+      interval: 30s
+      count: 10
+      successCondition: result < 0.02
+      failureLimit: 3
+      provider:
+        prometheus:
+          address: http://prometheus.securerag-monitoring.svc:9090
+          query: |
+            sum(rate(http_server_requests_total{namespace="securerag-hub",service="{{args.service-name}}",status=~"5.."}[2m]))
+            / sum(rate(http_server_requests_total{namespace="securerag-hub",service="{{args.service-name}}"}[2m]))
+    - name: p99-latency
+      interval: 30s
+      count: 10
+      successCondition: result < 1.0
+      failureLimit: 3
+      provider:
+        prometheus:
+          address: http://prometheus.securerag-monitoring.svc:9090
+          query: |
+            histogram_quantile(0.99, sum(rate(http_server_request_duration_seconds_bucket{namespace="securerag-hub",service="{{args.service-name}}"}[2m])) by (le))
+    - name: availability
+      interval: 30s
+      count: 10
+      successCondition: result > 0.99
+      failureLimit: 2
+      provider:
+        prometheus:
+          address: http://prometheus.securerag-monitoring.svc:9090
+          query: |
+            sum(rate(http_server_requests_total{namespace="securerag-hub",service="{{args.service-name}}",status!~"5.."}[2m]))
+            / sum(rate(http_server_requests_total{namespace="securerag-hub",service="{{args.service-name}}"}[2m]))

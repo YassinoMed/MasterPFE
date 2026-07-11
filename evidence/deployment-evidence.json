@@ -1,0 +1,7 @@
+{
+  "namespace": "securerag-hub",
+  "deployed_images": [{"deployment": "portal-web", "image": "localhost:5001/securerag-hub-portal-web:demo", "digest": "localhost:5001/securerag-hub-portal-web@sha256:f9be42bd70b1fd9467c5f99e7453d8a0d911571cb91c007b44493ba129d4d12e"},{"deployment": "auth-users", "image": "localhost:5001/securerag-hub-auth-users:demo", "digest": "localhost:5001/securerag-hub-auth-users@sha256:4612ed10fb2793c5c246f02c446d861f21a9c87ecf8b3b53032307f388c75006"},{"deployment": "chatbot-manager", "image": "localhost:5001/securerag-hub-chatbot-manager:demo", "digest": "localhost:5001/securerag-hub-chatbot-manager@sha256:54dc18c5a52d9233d692039160858568e45baafd60c3df669188895e6e735167"},{"deployment": "conversation-service", "image": "localhost:5001/securerag-hub-conversation-service:demo", "digest": "localhost:5001/securerag-hub-conversation-service@sha256:31fec2e7395963f7aae5efd909ad73d90c4126505eb231234a9cea886dda4072"},{"deployment": "audit-security-service", "image": "localhost:5001/securerag-hub-audit-security-service:demo", "digest": "localhost:5001/securerag-hub-audit-security-service@sha256:dfc420d534411f8a6256ef36c2ca5b8d82ad5e1af8ee1d7886ae5363b8804f16"}],
+  "rollout_status": [{"deployment": "portal-web", "status": "Success"},{"deployment": "auth-users", "status": "Success"},{"deployment": "chatbot-manager", "status": "Success"},{"deployment": "conversation-service", "status": "Success"},{"deployment": "audit-security-service", "status": "Success"}],
+  "smoke_tests_passed": false,
+  "overall_deployment_healthy": true
+}

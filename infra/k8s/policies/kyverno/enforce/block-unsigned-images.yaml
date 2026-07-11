@@ -1,0 +1,48 @@
+# ClusterPolicy: Block Unsigned Images
+# Refuses admission of any container image without a valid Cosign signature
+# in the securerag-hub namespace.
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: block-unsigned-images
+  labels:
+    app.kubernetes.io/part-of: securerag-hub
+    app.kubernetes.io/managed-by: kyverno
+  annotations:
+    policies.kyverno.io/title: Block Unsigned Container Images
+    policies.kyverno.io/category: Supply Chain Security
+    policies.kyverno.io/severity: critical
+    policies.kyverno.io/subject: Pod
+    policies.kyverno.io/description: >-
+      All container images deployed in securerag-hub must have a valid
+      cryptographic signature verified by Cosign. Unsigned images are
+      rejected at admission time.
+spec:
+  validationFailureAction: Enforce
+  background: false
+  webhookTimeoutSeconds: 30
+  failurePolicy: Fail
+  rules:
+    - name: verify-image-signature
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+              namespaces:
+                - securerag-hub
+      verifyImages:
+        - imageReferences:
+            - "localhost:5001/securerag-hub-*"
+            - "harbor.securerag.local/securerag-hub/*"
+          mutateDigest: true
+          verifyDigest: true
+          required: true
+          attestors:
+            - count: 1
+              entries:
+                - keyless:
+                    subject: "https://github.com/YassinoMed/MasterPFE/.github/workflows/*"
+                    issuer: "https://token.actions.githubusercontent.com"
+                    rekor:
+                      url: https://rekor.sigstore.dev

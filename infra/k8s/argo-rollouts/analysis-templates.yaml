@@ -1,0 +1,147 @@
+# AnalysisTemplate: Error Rate Analysis
+# Used by both Canary and Blue/Green rollouts
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata:
+  name: error-rate-analysis
+  namespace: securerag-hub
+  labels:
+    app.kubernetes.io/part-of: securerag-hub
+    app.kubernetes.io/component: progressive-delivery
+spec:
+  args:
+    - name: service-name
+  metrics:
+    - name: error-rate-5xx
+      interval: 30s
+      count: 10
+      successCondition: result < 0.05
+      failureLimit: 3
+      provider:
+        prometheus:
+          address: http://prometheus.securerag-monitoring.svc:9090
+          query: |
+            sum(rate(http_server_requests_total{namespace="securerag-hub",service="{{args.service-name}}",status=~"5.."}[2m]))
+            / sum(rate(http_server_requests_total{namespace="securerag-hub",service="{{args.service-name}}"}[2m]))
+    - name: error-rate-4xx
+      interval: 30s
+      count: 10
+      # Allow up to 10% client errors (normal auth failures etc.)
+      successCondition: result < 0.10
+      failureLimit: 5
+      provider:
+        prometheus:
+          address: http://prometheus.securerag-monitoring.svc:9090
+          query: |
+            sum(rate(http_server_requests_total{namespace="securerag-hub",service="{{args.service-name}}",status=~"4.."}[2m]))
+            / sum(rate(http_server_requests_total{namespace="securerag-hub",service="{{args.service-name}}"}[2m]))
+
+---
+# AnalysisTemplate: Latency Analysis
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata:
+  name: latency-analysis
+  namespace: securerag-hub
+  labels:
+    app.kubernetes.io/part-of: securerag-hub
+    app.kubernetes.io/component: progressive-delivery
+spec:
+  args:
+    - name: service-name
+  metrics:
+    - name: p95-latency
+      interval: 30s
+      count: 10
+      successCondition: result < 0.5
+      failureLimit: 3
+      provider:
+        prometheus:
+          address: http://prometheus.securerag-monitoring.svc:9090
+          query: |
+            histogram_quantile(0.95, sum(rate(http_server_request_duration_seconds_bucket{namespace="securerag-hub",service="{{args.service-name}}"}[2m])) by (le))
+    - name: p99-latency
+      interval: 30s
+      count: 10
+      successCondition: result < 1.0
+      failureLimit: 3
+      provider:
+        prometheus:
+          address: http://prometheus.securerag-monitoring.svc:9090
+          query: |
+            histogram_quantile(0.99, sum(rate(http_server_request_duration_seconds_bucket{namespace="securerag-hub",service="{{args.service-name}}"}[2m])) by (le))
+
+---
+# AnalysisTemplate: Saturation Analysis
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata:
+  name: saturation-analysis
+  namespace: securerag-hub
+  labels:
+    app.kubernetes.io/part-of: securerag-hub
+    app.kubernetes.io/component: progressive-delivery
+spec:
+  args:
+    - name: service-name
+  metrics:
+    - name: cpu-utilization
+      interval: 60s
+      count: 5
+      successCondition: result < 0.80
+      failureLimit: 2
+      provider:
+        prometheus:
+          address: http://prometheus.securerag-monitoring.svc:9090
+          query: |
+            avg(rate(container_cpu_usage_seconds_total{namespace="securerag-hub",pod=~"{{args.service-name}}.*"}[5m]))
+            / avg(kube_pod_container_resource_limits{namespace="securerag-hub",pod=~"{{args.service-name}}.*",resource="cpu"})
+    - name: memory-utilization
+      interval: 60s
+      count: 5
+      successCondition: result < 0.85
+      failureLimit: 2
+      provider:
+        prometheus:
+          address: http://prometheus.securerag-monitoring.svc:9090
+          query: |
+            avg(container_memory_working_set_bytes{namespace="securerag-hub",pod=~"{{args.service-name}}.*"})
+            / avg(kube_pod_container_resource_limits{namespace="securerag-hub",pod=~"{{args.service-name}}.*",resource="memory"})
+
+---
+# AnalysisTemplate: AI Risk Score Analysis
+# Queries the AI Security Orchestrator for real-time risk assessment
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata:
+  name: ai-risk-analysis
+  namespace: securerag-hub
+  labels:
+    app.kubernetes.io/part-of: securerag-hub
+    app.kubernetes.io/component: progressive-delivery
+spec:
+  args:
+    - name: service-name
+  metrics:
+    - name: ai-risk-score
+      interval: 60s
+      count: 3
+      # PASS if risk score < 50, BLOCK if >= 50
+      successCondition: result < 50
+      failureLimit: 1
+      provider:
+        prometheus:
+          address: http://prometheus.securerag-monitoring.svc:9090
+          query: |
+            ai_security_risk_score{namespace="securerag-hub",service="{{args.service-name}}"}
+    - name: ai-consensus-score
+      interval: 60s
+      count: 3
+      # Require at least 70% consensus among AI agents
+      successCondition: result >= 70
+      failureLimit: 1
+      provider:
+        prometheus:
+          address: http://prometheus.securerag-monitoring.svc:9090
+          query: |
+            ai_consensus_score{namespace="securerag-hub",service="{{args.service-name}}"}

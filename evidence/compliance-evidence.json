@@ -1,0 +1,11 @@
+{
+  "kyverno_policies_count": 8,
+  "kyverno_violations_count": 1,
+  "pod_security_standards": {
+    "enforce": "restricted",
+    "audit": "restricted"
+  },
+  "rbac_service_accounts_count": 8,
+  "network_policies_count": 11,
+  "external_secrets_count": 3
+}

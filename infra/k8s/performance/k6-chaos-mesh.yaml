@@ -1,0 +1,74 @@
+# Chaos Mesh — Performance Test Resiliency Injectors
+# Used to validate the system resilience and retry strategies under heavy load.
+# ═══════════════════════════════════════════════════════════════════════
+# Execute during load plateau:
+#   kubectl apply -f infra/k8s/performance/k6-chaos-mesh.yaml
+#
+# Rollback / Cleanup:
+#   kubectl delete -f infra/k8s/performance/k6-chaos-mesh.yaml
+# ═══════════════════════════════════════════════════════════════════════
+
+---
+apiVersion: chaos-mesh.org/v1alpha1
+kind: NetworkChaos
+metadata:
+  name: k6-load-network-latency
+  namespace: chaos-mesh
+  labels:
+    app.kubernetes.io/part-of: securerag-hub
+    app.kubernetes.io/component: chaos-test
+spec:
+  action: delay
+  mode: all
+  selector:
+    namespaces:
+      - securerag-hub
+    labelSelectors:
+      app.kubernetes.io/part-of: securerag-hub
+  delay:
+    latency: "200ms"
+    correlation: "50"
+    jitter: "20ms"
+  duration: "5m"
+  direction: to
+
+---
+apiVersion: chaos-mesh.org/v1alpha1
+kind: NetworkChaos
+metadata:
+  name: k6-load-packet-loss
+  namespace: chaos-mesh
+  labels:
+    app.kubernetes.io/part-of: securerag-hub
+    app.kubernetes.io/component: chaos-test
+spec:
+  action: corrupt
+  mode: fixed
+  value: "5%" # Inject 5% packet corruption/loss
+  selector:
+    namespaces:
+      - securerag-hub
+    labelSelectors:
+      app.kubernetes.io/part-of: securerag-hub
+  duration: "3m"
+  direction: to
+
+---
+apiVersion: chaos-mesh.org/v1alpha1
+kind: PodChaos
+metadata:
+  name: k6-load-pod-failures
+  namespace: chaos-mesh
+  labels:
+    app.kubernetes.io/part-of: securerag-hub
+    app.kubernetes.io/component: chaos-test
+spec:
+  action: pod-failure
+  mode: fixed
+  value: "1" # Keep 1 pod down continuously to check service HA
+  selector:
+    namespaces:
+      - securerag-hub
+    labelSelectors:
+      app: conversation-service # Target conversation service to trigger retry logs
+  duration: "4m"

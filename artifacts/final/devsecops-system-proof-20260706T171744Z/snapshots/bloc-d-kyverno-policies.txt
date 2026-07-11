@@ -1,0 +1,9 @@
+NAME                                   ADMISSION   BACKGROUND   READY   AGE   MESSAGE
+securerag-audit-cleartext-env-values   true        true         True    12d   Ready
+securerag-disallow-host-network        true        true         True    11d   Ready
+securerag-disallow-root-containers     true        true         True    11d   Ready
+securerag-require-workload-controls    true        true         True    12d   Ready
+securerag-restrict-image-references    true        true         True    12d   Ready
+securerag-restrict-service-exposure    true        true         True    12d   Ready
+securerag-restrict-volume-types        true        true         True    12d   Ready
+securerag-verify-cosign-images         true        false        True    21h   Ready

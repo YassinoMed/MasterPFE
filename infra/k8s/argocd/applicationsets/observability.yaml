@@ -1,0 +1,65 @@
+# ApplicationSet: Observability Stack
+# Deploys Prometheus, Grafana, Loki, Tempo, OTel
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: securerag-observability
+  namespace: argocd
+  labels:
+    app.kubernetes.io/part-of: securerag-hub
+    app.kubernetes.io/managed-by: argocd
+spec:
+  generators:
+    - list:
+        elements:
+          - name: prometheus
+            namespace: securerag-monitoring
+            path: infra/k8s/observability
+            wave: "6"
+          - name: otel-collector
+            namespace: otel-system
+            path: infra/k8s/otel
+            wave: "7"
+          - name: tempo
+            namespace: securerag-monitoring
+            path: infra/k8s/observability/tempo
+            wave: "7"
+  template:
+    metadata:
+      name: 'observability-{{name}}'
+      namespace: argocd
+      annotations:
+        argocd.argoproj.io/sync-wave: '{{wave}}'
+        notifications.argoproj.io/subscribe.on-sync-failed.slack: securerag-alerts
+        notifications.argoproj.io/subscribe.on-health-degraded.slack: securerag-alerts
+      finalizers:
+        - resources-finalizer.argocd.argoproj.io
+    spec:
+      project: observability
+      source:
+        repoURL: https://github.com/YassinoMed/MasterPFE.git
+        targetRevision: main
+        path: '{{path}}'
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: '{{namespace}}'
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
+          - ApplyOutOfSyncOnly=true
+          - ServerSideApply=true
+        retry:
+          limit: 5
+          backoff:
+            duration: 10s
+            factor: 2
+            maxDuration: 3m
+      ignoreDifferences:
+        - group: ""
+          kind: ConfigMap
+          jsonPointers:
+            - /data
+      revisionHistoryLimit: 10

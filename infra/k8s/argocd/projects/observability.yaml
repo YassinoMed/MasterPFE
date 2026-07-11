@@ -1,0 +1,50 @@
+# AppProject: Observability — isolates monitoring/tracing/logging stack.
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: observability
+  namespace: argocd
+  labels:
+    app.kubernetes.io/part-of: securerag-hub
+    app.kubernetes.io/managed-by: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  description: "Observability stack — Prometheus, Grafana, Loki, Tempo, OTel"
+  sourceRepos:
+    - https://github.com/YassinoMed/MasterPFE.git
+    - https://prometheus-community.github.io/helm-charts
+    - https://grafana.github.io/helm-charts
+    - https://open-telemetry.github.io/opentelemetry-helm-charts
+  destinations:
+    - server: https://kubernetes.default.svc
+      namespace: securerag-monitoring
+    - server: https://kubernetes.default.svc
+      namespace: otel-system
+  clusterResourceWhitelist:
+    - group: ""
+      kind: Namespace
+    - group: rbac.authorization.k8s.io
+      kind: ClusterRole
+    - group: rbac.authorization.k8s.io
+      kind: ClusterRoleBinding
+    - group: monitoring.coreos.com
+      kind: PrometheusRule
+    - group: monitoring.coreos.com
+      kind: ServiceMonitor
+    - group: monitoring.coreos.com
+      kind: PodMonitor
+  namespaceResourceWhitelist:
+    - group: "*"
+      kind: "*"
+  orphanedResources:
+    warn: true
+  roles:
+    - name: observability-admin
+      description: "Full access to observability stack"
+      policies:
+        - p, proj:observability:observability-admin, applications, *, observability/*, allow
+    - name: read-only
+      description: "Read-only access"
+      policies:
+        - p, proj:observability:read-only, applications, get, observability/*, allow

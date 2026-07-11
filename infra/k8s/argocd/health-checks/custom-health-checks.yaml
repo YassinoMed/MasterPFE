@@ -1,0 +1,132 @@
+# ArgoCD Custom Health Checks
+# Extends default health assessments for SecureRAG-specific resources
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: argocd-cm-health-checks
+  namespace: argocd
+  labels:
+    app.kubernetes.io/part-of: securerag-hub
+data:
+  # Custom health check for Kyverno ClusterPolicies
+  resource.customizations.health.kyverno.io_ClusterPolicy: |
+    hs = {}
+    if obj.status ~= nil then
+      if obj.status.conditions ~= nil then
+        for i, condition in ipairs(obj.status.conditions) do
+          if condition.type == "Ready" and condition.status == "True" then
+            hs.status = "Healthy"
+            hs.message = condition.message
+            return hs
+          end
+          if condition.type == "Ready" and condition.status == "False" then
+            hs.status = "Degraded"
+            hs.message = condition.message
+            return hs
+          end
+        end
+      end
+    end
+    hs.status = "Progressing"
+    hs.message = "Waiting for policy to be ready"
+    return hs
+
+  # Custom health check for External Secrets
+  resource.customizations.health.external-secrets.io_ExternalSecret: |
+    hs = {}
+    if obj.status ~= nil then
+      if obj.status.conditions ~= nil then
+        for i, condition in ipairs(obj.status.conditions) do
+          if condition.type == "Ready" and condition.status == "True" then
+            hs.status = "Healthy"
+            hs.message = "Secret synced successfully"
+            return hs
+          end
+          if condition.type == "Ready" and condition.status == "False" then
+            hs.status = "Degraded"
+            hs.message = condition.message or "Secret sync failed"
+            return hs
+          end
+        end
+      end
+    end
+    hs.status = "Progressing"
+    hs.message = "Waiting for secret sync"
+    return hs
+
+  # Custom health check for Velero Backups
+  resource.customizations.health.velero.io_Backup: |
+    hs = {}
+    if obj.status ~= nil then
+      if obj.status.phase == "Completed" then
+        hs.status = "Healthy"
+        hs.message = "Backup completed"
+        return hs
+      end
+      if obj.status.phase == "Failed" or obj.status.phase == "PartiallyFailed" then
+        hs.status = "Degraded"
+        hs.message = "Backup failed: " .. (obj.status.failureReason or "unknown")
+        return hs
+      end
+      if obj.status.phase == "InProgress" then
+        hs.status = "Progressing"
+        hs.message = "Backup in progress"
+        return hs
+      end
+    end
+    hs.status = "Progressing"
+    hs.message = "Waiting for backup status"
+    return hs
+
+  # Custom health check for Argo Rollouts
+  resource.customizations.health.argoproj.io_Rollout: |
+    hs = {}
+    if obj.status ~= nil then
+      if obj.status.phase == "Healthy" then
+        hs.status = "Healthy"
+        hs.message = "Rollout is healthy"
+        return hs
+      end
+      if obj.status.phase == "Degraded" then
+        hs.status = "Degraded"
+        hs.message = obj.status.message or "Rollout degraded"
+        return hs
+      end
+      if obj.status.phase == "Paused" then
+        hs.status = "Suspended"
+        hs.message = "Rollout paused — awaiting promotion"
+        return hs
+      end
+      if obj.status.phase == "Progressing" then
+        hs.status = "Progressing"
+        hs.message = "Rollout in progress"
+        return hs
+      end
+    end
+    hs.status = "Progressing"
+    hs.message = "Waiting for rollout status"
+    return hs
+
+  # Custom health check for Argo AnalysisRun
+  resource.customizations.health.argoproj.io_AnalysisRun: |
+    hs = {}
+    if obj.status ~= nil then
+      if obj.status.phase == "Successful" then
+        hs.status = "Healthy"
+        hs.message = "Analysis passed"
+        return hs
+      end
+      if obj.status.phase == "Failed" then
+        hs.status = "Degraded"
+        hs.message = "Analysis failed — rollback may trigger"
+        return hs
+      end
+      if obj.status.phase == "Running" then
+        hs.status = "Progressing"
+        hs.message = "Analysis running"
+        return hs
+      end
+    end
+    hs.status = "Progressing"
+    hs.message = "Waiting for analysis"
+    return hs

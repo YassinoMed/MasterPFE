@@ -1,0 +1,189 @@
+# AI Security Orchestrator — Kubernetes Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ai-security-orchestrator
+  namespace: securerag-hub
+  labels:
+    app.kubernetes.io/name: ai-security-orchestrator
+    app.kubernetes.io/part-of: securerag-hub
+    app.kubernetes.io/component: ai-governance
+    app.kubernetes.io/managed-by: argocd
+  annotations:
+    securerag.dev/owner: ai-team
+    securerag.dev/team: devsecops
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: ai-security-orchestrator
+  template:
+    metadata:
+      annotations:
+        security.securerag.dev/internal-cleartext-scope: cluster-only-networkpolicy
+      labels:
+        app.kubernetes.io/name: ai-security-orchestrator
+        app.kubernetes.io/part-of: securerag-hub
+        app.kubernetes.io/component: ai-governance
+    spec:
+      serviceAccountName: ai-security-orchestrator
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: orchestrator
+          image: localhost:5001/securerag-hub-ai-security-orchestrator:dev
+          ports:
+            - name: http
+              containerPort: 8100
+            - name: metrics
+              containerPort: 8100
+          envFrom:
+            - configMapRef:
+                name: securerag-common-config
+          env:
+            - name: APP_ENV
+              valueFrom:
+                configMapKeyRef:
+                  name: securerag-common-config
+                  key: APP_ENV
+                  optional: true
+            - name: PROMETHEUS_URL
+              value: "$(INTERNAL_SERVICE_SCHEME)://prometheus.securerag-monitoring.svc:9090"
+            - name: LOKI_URL
+              value: "$(INTERNAL_SERVICE_SCHEME)://loki.securerag-monitoring.svc:3100"
+            - name: FALCO_URL
+              value: "$(INTERNAL_SERVICE_SCHEME)://falco.falco.svc:8765"
+            - name: VAULT_URL
+              value: "$(INTERNAL_SERVICE_SCHEME)://securerag-vault.vault.svc:8200"
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 6
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 15
+            periodSeconds: 20
+            timeoutSeconds: 3
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: [ALL]
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: tmp
+          emptyDir:
+            sizeLimit: 100Mi
+
+---
+# Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: ai-security-orchestrator
+  namespace: securerag-hub
+  labels:
+    app.kubernetes.io/name: ai-security-orchestrator
+    app.kubernetes.io/part-of: securerag-hub
+spec:
+  ports:
+    - port: 8100
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    app.kubernetes.io/name: ai-security-orchestrator
+
+---
+# ServiceAccount
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: ai-security-orchestrator
+  namespace: securerag-hub
+  labels:
+    app.kubernetes.io/name: ai-security-orchestrator
+
+---
+# NetworkPolicy
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: ai-security-orchestrator
+  namespace: securerag-hub
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: ai-security-orchestrator
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: securerag-hub
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: securerag-monitoring
+      ports:
+        - port: 8100
+          protocol: TCP
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: securerag-monitoring
+      ports:
+        - port: 9090  # Prometheus
+        - port: 3100  # Loki
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: falco
+      ports:
+        - port: 8765  # Falco
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: vault
+      ports:
+        - port: 8200  # Vault
+    - to:  # DNS
+        - namespaceSelector: {}
+      ports:
+        - port: 53
+          protocol: UDP
+        - port: 53
+          protocol: TCP
+
+---
+# PodDisruptionBudget
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: ai-security-orchestrator
+  namespace: securerag-hub
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: ai-security-orchestrator

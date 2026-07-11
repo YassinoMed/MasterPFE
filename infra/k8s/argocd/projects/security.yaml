@@ -1,0 +1,55 @@
+# AppProject: Security — isolates security enforcement components.
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: security
+  namespace: argocd
+  labels:
+    app.kubernetes.io/part-of: securerag-hub
+    app.kubernetes.io/managed-by: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  description: "Security stack — Kyverno, Falco, Falco Talon, policies"
+  sourceRepos:
+    - https://github.com/YassinoMed/MasterPFE.git
+    - https://kyverno.github.io/kyverno
+    - https://falcosecurity.github.io/charts
+  destinations:
+    - server: https://kubernetes.default.svc
+      namespace: kyverno
+    - server: https://kubernetes.default.svc
+      namespace: falco
+    - server: https://kubernetes.default.svc
+      namespace: securerag-hub
+  clusterResourceWhitelist:
+    - group: ""
+      kind: Namespace
+    - group: kyverno.io
+      kind: ClusterPolicy
+    - group: kyverno.io
+      kind: Policy
+    - group: rbac.authorization.k8s.io
+      kind: ClusterRole
+    - group: rbac.authorization.k8s.io
+      kind: ClusterRoleBinding
+    - group: admissionregistration.k8s.io
+      kind: ValidatingWebhookConfiguration
+    - group: admissionregistration.k8s.io
+      kind: MutatingWebhookConfiguration
+    - group: networking.k8s.io
+      kind: NetworkPolicy
+  namespaceResourceWhitelist:
+    - group: "*"
+      kind: "*"
+  orphanedResources:
+    warn: true
+  roles:
+    - name: security-admin
+      description: "Full access to security components"
+      policies:
+        - p, proj:security:security-admin, applications, *, security/*, allow
+    - name: read-only
+      description: "Read-only access for auditors"
+      policies:
+        - p, proj:security:read-only, applications, get, security/*, allow

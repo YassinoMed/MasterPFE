@@ -1,0 +1,221 @@
+{
+  "build": {
+  "build_number": "1783754628",
+  "commit_sha": "90a6b7a34327c6c9a4e34048d673d9930286c9c9",
+  "branch": "main",
+  "author": "Jenkins GitOps Bot <jenkins@securerag.local>",
+  "timestamp": "2026-07-11T07:23:48Z"
+},
+  "security": {
+  "trivy_fs_vulnerabilities": 0,
+  "semgrep_sast_findings": 0,
+  "gitleaks_secret_findings": 0,
+  "grype_dependency_vulnerabilities": 0,
+  "sbom_files": [
+  ""
+],
+  "cosign_signatures": [
+  ""
+],
+  "slsa_provenance_attestation_present": false
+},
+  "deployment": {
+  "namespace": "securerag-hub",
+  "deployed_images": [{"deployment": "portal-web", "image": "localhost:5001/securerag-hub-portal-web:demo", "digest": "localhost:5001/securerag-hub-portal-web@sha256:f9be42bd70b1fd9467c5f99e7453d8a0d911571cb91c007b44493ba129d4d12e"},{"deployment": "auth-users", "image": "localhost:5001/securerag-hub-auth-users:demo", "digest": "localhost:5001/securerag-hub-auth-users@sha256:4612ed10fb2793c5c246f02c446d861f21a9c87ecf8b3b53032307f388c75006"},{"deployment": "chatbot-manager", "image": "localhost:5001/securerag-hub-chatbot-manager:demo", "digest": "localhost:5001/securerag-hub-chatbot-manager@sha256:54dc18c5a52d9233d692039160858568e45baafd60c3df669188895e6e735167"},{"deployment": "conversation-service", "image": "localhost:5001/securerag-hub-conversation-service:demo", "digest": "localhost:5001/securerag-hub-conversation-service@sha256:31fec2e7395963f7aae5efd909ad73d90c4126505eb231234a9cea886dda4072"},{"deployment": "audit-security-service", "image": "localhost:5001/securerag-hub-audit-security-service:demo", "digest": "localhost:5001/securerag-hub-audit-security-service@sha256:dfc420d534411f8a6256ef36c2ca5b8d82ad5e1af8ee1d7886ae5363b8804f16"}],
+  "rollout_status": [{"deployment": "portal-web", "status": "Success"},{"deployment": "auth-users", "status": "Success"},{"deployment": "chatbot-manager", "status": "Success"},{"deployment": "conversation-service", "status": "Success"},{"deployment": "audit-security-service", "status": "Success"}],
+  "smoke_tests_passed": false,
+  "overall_deployment_healthy": true
+},
+  "compliance": {
+  "kyverno_policies_count": 8,
+  "kyverno_violations_count": 1,
+  "pod_security_standards": {
+    "enforce": "restricted",
+    "audit": "restricted"
+  },
+  "rbac_service_accounts_count": 8,
+  "network_policies_count": 11,
+  "external_secrets_count": 3
+},
+  "audit": {
+  "jenkins_build_url": "http://localhost:8085/job/SecureRAG-Hub/1783754628/",
+  "git_history_snippet": [
+  "90a6b7a3 gitops: update digest for auth-users to sha256:fbed57efc57fecbae934c80acde99284c1cd2930069d7e2a0364347fdfb80d26",
+  "c51080e7 fix: exclude database and framework false positives in secrets management tests",
+  "fb905d64 fix: align security test scripts with Kind cluster environment namespaces and resources",
+  "055bb5ba fix: revert auth-users DB_HOST and remove DB_PASSWORD override",
+  "1b788ba4 fix: isolate environment namespaces in ApplicationSet"
+],
+  "argocd_apps_status": [
+  {
+    "name": "securerag-backup",
+    "sync": "Synced",
+    "health": "Healthy"
+  },
+  {
+    "name": "securerag-cert-manager",
+    "sync": "Synced",
+    "health": "Healthy"
+  },
+  {
+    "name": "securerag-demo",
+    "sync": "Synced",
+    "health": "Healthy"
+  },
+  {
+    "name": "securerag-dev",
+    "sync": "Unknown",
+    "health": "Unknown"
+  },
+  {
+    "name": "securerag-dr",
+    "sync": "Unknown",
+    "health": "Unknown"
+  },
+  {
+    "name": "securerag-eso",
+    "sync": "OutOfSync",
+    "health": "Healthy"
+  },
+  {
+    "name": "securerag-falco-talon",
+    "sync": "Synced",
+    "health": "Healthy"
+  },
+  {
+    "name": "securerag-harbor",
+    "sync": "Synced",
+    "health": "Healthy"
+  },
+  {
+    "name": "securerag-image-updater",
+    "sync": "Synced",
+    "health": "Healthy"
+  },
+  {
+    "name": "securerag-kyverno",
+    "sync": "Synced",
+    "health": "Degraded"
+  },
+  {
+    "name": "securerag-kyverno-policies",
+    "sync": "OutOfSync",
+    "health": "Healthy"
+  },
+  {
+    "name": "securerag-metrics-server",
+    "sync": "Synced",
+    "health": "Healthy"
+  },
+  {
+    "name": "securerag-observability",
+    "sync": "OutOfSync",
+    "health": "Healthy"
+  },
+  {
+    "name": "securerag-otel",
+    "sync": "Synced",
+    "health": "Healthy"
+  },
+  {
+    "name": "securerag-production",
+    "sync": "Unknown",
+    "health": "Unknown"
+  },
+  {
+    "name": "securerag-psa-policies",
+    "sync": "OutOfSync",
+    "health": "Healthy"
+  },
+  {
+    "name": "securerag-recette",
+    "sync": "Unknown",
+    "health": "Unknown"
+  },
+  {
+    "name": "securerag-root",
+    "sync": "OutOfSync",
+    "health": "Healthy"
+  },
+  {
+    "name": "securerag-runtime-detection",
+    "sync": "Synced",
+    "health": "Healthy"
+  },
+  {
+    "name": "securerag-secrets",
+    "sync": "OutOfSync",
+    "health": "Healthy"
+  },
+  {
+    "name": "securerag-staging",
+    "sync": "Unknown",
+    "health": "Unknown"
+  },
+  {
+    "name": "securerag-vault",
+    "sync": "OutOfSync",
+    "health": "Healthy"
+  },
+  {
+    "name": "securerag-velero",
+    "sync": "Synced",
+    "health": "Healthy"
+  }
+],
+  "kubernetes_recent_events": [
+  {
+    "time": "2026-07-11T07:20:58Z",
+    "reason": "Scheduled",
+    "message": "Successfully assigned securerag-hub/portal-web-84bd8bb87c-8nz4f to securerag-dev-worker"
+  },
+  {
+    "time": "2026-07-11T07:20:58Z",
+    "reason": "Scheduled",
+    "message": "Successfully assigned securerag-hub/portal-web-84bd8bb87c-vh27h to securerag-dev-worker"
+  },
+  {
+    "time": "2026-07-11T07:20:59Z",
+    "reason": "Pulled",
+    "message": "Successfully pulled image \"localhost:5001/securerag-hub-portal-web:demo\" in 58ms (58ms including waiting). Image size: 266679540 bytes."
+  },
+  {
+    "time": "2026-07-11T07:20:59Z",
+    "reason": "Started",
+    "message": "Started container portal-web"
+  },
+  {
+    "time": "2026-07-11T07:20:59Z",
+    "reason": "Created",
+    "message": "Created container: portal-web"
+  },
+  {
+    "time": "2026-07-11T07:20:59Z",
+    "reason": "Pulled",
+    "message": "Successfully pulled image \"localhost:5001/securerag-hub-portal-web:demo\" in 77ms (77ms including waiting). Image size: 266679540 bytes."
+  },
+  {
+    "time": "2026-07-11T07:20:59Z",
+    "reason": "Pulling",
+    "message": "Pulling image \"localhost:5001/securerag-hub-portal-web:demo\""
+  },
+  {
+    "time": "2026-07-11T07:20:59Z",
+    "reason": "Started",
+    "message": "Started container portal-web"
+  },
+  {
+    "time": "2026-07-11T07:20:59Z",
+    "reason": "Created",
+    "message": "Created container: portal-web"
+  },
+  {
+    "time": "2026-07-11T07:20:59Z",
+    "reason": "Pulling",
+    "message": "Pulling image \"localhost:5001/securerag-hub-portal-web:demo\""
+  }
+],
+  "falco_recent_log_warnings": 0,
+  "falco_recent_log_criticals": 1516
+}
+}

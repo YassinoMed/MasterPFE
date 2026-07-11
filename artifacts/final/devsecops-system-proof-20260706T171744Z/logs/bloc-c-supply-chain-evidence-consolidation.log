@@ -1,0 +1,7 @@
+make[1]: Entering directory '/root/MasterPFE'
+[INFO] Release attestation written to artifacts/release/release-attestation.json and artifacts/release/release-attestation.md
+[WARN] Release attestation is partial; supply-chain execute evidence is incomplete.
+[INFO] Provenance statement written to artifacts/release/provenance.slsa.json and artifacts/release/provenance.slsa.md
+[INFO] Supply-chain evidence pack written to artifacts/secure-supply-chain-pack-20260706T171754Z.tar.gz
+[INFO] Supply-chain evidence written to artifacts/release/supply-chain-evidence.md
+make[1]: Leaving directory '/root/MasterPFE'

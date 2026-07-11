@@ -1,0 +1,5 @@
+NAME                                             READY   STATUS    RESTARTS   AGE   IP            NODE                   NOMINATED NODE   READINESS GATES
+kyverno-admission-controller-7ff48568bf-rfmrc    1/1     Running   0          11d   10.244.1.79   securerag-dev-worker   <none>           <none>
+kyverno-background-controller-85999778c9-njbsr   1/1     Running   0          11d   10.244.1.80   securerag-dev-worker   <none>           <none>
+kyverno-cleanup-controller-7b74646946-4zh7c      1/1     Running   0          11d   10.244.1.81   securerag-dev-worker   <none>           <none>
+kyverno-reports-controller-86d8747f78-r7rbq      1/1     Running   0          11d   10.244.1.82   securerag-dev-worker   <none>           <none>

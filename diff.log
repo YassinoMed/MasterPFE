@@ -1,0 +1,75 @@
+=== securerag-eso ===
+
+===== apps/Deployment external-secrets/securerag-eso-external-secrets ======
+172a173
+>           fsGroup: 10001
+181a183
+>       hostNetwork: false
+
+===== apps/Deployment external-secrets/securerag-eso-external-secrets-cert-controller ======
+200a201
+>           fsGroup: 10001
+209a211
+>       hostNetwork: false
+
+===== apps/Deployment external-secrets/securerag-eso-external-secrets-webhook ======
+223a224
+>           fsGroup: 10001
+236a238
+>       hostNetwork: false
+=== securerag-vault ===
+
+===== admissionregistration.k8s.io/MutatingWebhookConfiguration /securerag-vault-agent-injector-cfg ======
+70d69
+<     caBundle: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUNTVENDQWU2Z0F3SUJBZ0lVRjdRa3lwYUdJanZ1ODNLb2l1M1k1TWoySWxRd0NnWUlLb1pJemowRUF3SXcKR2pFWU1CWUdBMVVFQXhNUFFXZGxiblFnU1c1cVpXTjBJRU5CTUI0WERUSTJNRFl5TkRFNE5Ea3dNMW9YRFRNMgpNRFl5TVRFNE5UQXdNMW93R2pFWU1CWUdBMVVFQXhNUFFXZGxiblFnU1c1cVpXTjBJRU5CTUZrd0V3WUhLb1pJCnpqMENBUVlJS29aSXpqMERBUWNEUWdBRVFYRTB0c1lPSFh5TUE1UDRhbXViQVlwd1ZUaE9tTXNPMmRUQ1VXWEkKSGUvWUZQRlhiOU96UW5VMkFDTFJPb2o1TXBvaEFtRkxDeWExOUp3MzdFM0lES09DQVJBd2dnRU1NQTRHQTFVZApEd0VCL3dRRUF3SUNoREFUQmdOVkhTVUVEREFLQmdnckJnRUZCUWNEQVRBUEJnTlZIUk1CQWY4RUJUQURBUUgvCk1HZ0dBMVVkRGdSaEJGOWtaam95TkRvMllUbzROem95TkRvell6cGpORG80TkRvMU5EcGlPRG8yTWpwak9UbzAKTnpveU5UcGlPRHBqTnpwaE1Eb3dPRG8wTURwbVpEcGtZVHBqWmpwak16b3lNRG8xWVRvNU56cGxNem8xTURwaApNRG8yWkRvNU16bzBOekJxQmdOVkhTTUVZekJoZ0Y5a1pqb3lORG8yWVRvNE56b3lORG96WXpwak5EbzRORG8xCk5EcGlPRG8yTWpwak9UbzBOem95TlRwaU9EcGpOenBoTURvd09EbzBNRHBtWkRwa1lUcGpaanBqTXpveU1EbzEKWVRvNU56cGxNem8xTURwaE1EbzJaRG81TXpvME56QUtCZ2dxaGtqT1BRUURBZ05KQURCR0FpRUFvS3prbHdzNgpHT1dkYS9NU0JRM2RoTjRobmYxNGsySWhWRlBMZVVVSEx1Y0NJUUNHZ3ZIRldYNGgvK251SUk4ZE4ybUhjdmllCk14eHlZSVF2ZVE2WUY3V1drZz09Ci0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS0K
+=== securerag-kyverno-policies ===
+=== securerag-root ===
+
+===== argoproj.io/Application argocd/securerag-demo ======
+8a9,10
+>   labels:
+>     argocd.argoproj.io/instance: securerag-root
+159c161
+<         maxDuration: 3m
+---
+>         maxDuration: 5m
+163a166,167
+>     - PrunePropagationPolicy=foreground
+>     - PruneLast=true
+
+===== argoproj.io/Application argocd/securerag-production ======
+5c5,6
+<     argocd.argoproj.io/sync-wave: "30"
+---
+>     argocd.argoproj.io/sync-options: PruneLast=true
+>     argocd.argoproj.io/sync-wave: "20"
+8a10,11
+>   labels:
+>     argocd.argoproj.io/instance: securerag-root
+141c144
+<     namespace: securerag-production
+---
+>     namespace: securerag-hub
+142a146,150
+>   ignoreDifferences:
+>   - group: apps
+>     jsonPointers:
+>     - /spec/replicas
+>     kind: Deployment
+144c152
+<   revisionHistoryLimit: 10
+---
+>   revisionHistoryLimit: 20
+155c163
+<         duration: 10s
+---
+>         duration: 30s
+157,158c165,166
+<         maxDuration: 3m
+<       limit: 5
+---
+>         maxDuration: 10m
+>       limit: 3
+162a171
+>     - RespectIgnoreDifferences=true
+=== securerag-secrets ===

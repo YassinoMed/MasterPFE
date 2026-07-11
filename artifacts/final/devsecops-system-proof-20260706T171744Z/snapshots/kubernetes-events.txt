@@ -1,0 +1,40 @@
+LAST SEEN   TYPE      REASON              OBJECT                                      MESSAGE
+19m         Normal    Scheduled           pod/k6-runner                               Successfully assigned securerag-hub/k6-runner to securerag-dev-worker
+19m         Normal    Pulled              pod/k6-runner                               Container image "grafana/k6:0.56.0" already present on machine
+19m         Normal    Created             pod/k6-runner                               Created container: k6
+19m         Normal    Started             pod/k6-runner                               Started container k6
+18m         Normal    Killing             pod/k6-runner                               Stopping container k6
+17m         Normal    Scheduled           pod/k6-runner                               Successfully assigned securerag-hub/k6-runner to securerag-dev-worker
+17m         Normal    Pulled              pod/k6-runner                               Container image "grafana/k6:0.56.0" already present on machine
+17m         Normal    Created             pod/k6-runner                               Created container: k6
+17m         Normal    Started             pod/k6-runner                               Started container k6
+16m         Normal    Killing             pod/k6-runner                               Stopping container k6
+15m         Normal    Scheduled           pod/k6-runner                               Successfully assigned securerag-hub/k6-runner to securerag-dev-worker
+15m         Normal    Pulled              pod/k6-runner                               Container image "grafana/k6:0.56.0" already present on machine
+15m         Normal    Created             pod/k6-runner                               Created container: k6
+15m         Normal    Started             pod/k6-runner                               Started container k6
+14m         Normal    Killing             pod/k6-runner                               Stopping container k6
+14m         Normal    Scheduled           pod/k6-runner                               Successfully assigned securerag-hub/k6-runner to securerag-dev-worker
+14m         Normal    Pulled              pod/k6-runner                               Container image "grafana/k6:0.56.0" already present on machine
+14m         Normal    Created             pod/k6-runner                               Created container: k6
+14m         Normal    Started             pod/k6-runner                               Started container k6
+14m         Normal    Scheduled           pod/k6-runner                               Successfully assigned securerag-hub/k6-runner to securerag-dev-worker
+14m         Normal    Created             pod/k6-runner                               Created container: k6
+14m         Normal    Started             pod/k6-runner                               Started container k6
+14m         Normal    Pulled              pod/k6-runner                               Container image "grafana/k6:0.56.0" already present on machine
+6m3s        Normal    Created             pod/k6-runner                               Created container: k6
+6m3s        Normal    Scheduled           pod/k6-runner                               Successfully assigned securerag-hub/k6-runner to securerag-dev-worker
+6m3s        Normal    Pulled              pod/k6-runner                               Container image "grafana/k6:0.56.0" already present on machine
+6m2s        Normal    Started             pod/k6-runner                               Started container k6
+5m52s       Warning   Unhealthy           pod/portal-web-859c78db95-z68jt             Readiness probe failed: Get "http://10.244.1.222:8000/health": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
+5m33s       Normal    SuccessfulRescale   horizontalpodautoscaler/portal-web          New size: 3; reason: cpu resource utilization (percentage of request) above target
+5m32s       Normal    ScalingReplicaSet   deployment/portal-web                       Scaled up replica set portal-web-859c78db95 from 1 to 3
+5m31s       Warning   Unhealthy           pod/conversation-service-6bc4c7dbc6-pq7xf   Liveness probe failed: Get "http://10.244.1.225:8000/health": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
+5m30s       Warning   Unhealthy           pod/conversation-service-6bc4c7dbc6-pq7xf   Readiness probe failed: Get "http://10.244.1.225:8000/health": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
+5m7s        Normal    Scheduled           pod/k6-runner                               Successfully assigned securerag-hub/k6-runner to securerag-dev-worker
+5m7s        Normal    Created             pod/k6-runner                               Created container: k6
+5m7s        Normal    Pulled              pod/k6-runner                               Container image "grafana/k6:0.56.0" already present on machine
+5m7s        Normal    Killing             pod/k6-runner                               Stopping container k6
+5m6s        Normal    Started             pod/k6-runner                               Started container k6
+3m58s       Normal    Killing             pod/k6-runner                               Stopping container k6
+3s          Warning   FailedCreate        replicaset/portal-web-859c78db95            Error creating: admission webhook "mutate.kyverno.svc-fail" denied the request: ...

@@ -1,0 +1,41 @@
+# AppProject: AI Services — isolates AI governance layer components.
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: ai-services
+  namespace: argocd
+  labels:
+    app.kubernetes.io/part-of: securerag-hub
+    app.kubernetes.io/managed-by: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  description: "AI Governance Layer — orchestrator, risk engine, knowledge graph"
+  sourceRepos:
+    - https://github.com/YassinoMed/MasterPFE.git
+  destinations:
+    - server: https://kubernetes.default.svc
+      namespace: securerag-hub
+    - server: https://kubernetes.default.svc
+      namespace: securerag-ai
+  clusterResourceWhitelist:
+    - group: ""
+      kind: Namespace
+    - group: rbac.authorization.k8s.io
+      kind: ClusterRole
+    - group: rbac.authorization.k8s.io
+      kind: ClusterRoleBinding
+  namespaceResourceWhitelist:
+    - group: "*"
+      kind: "*"
+  orphanedResources:
+    warn: true
+  roles:
+    - name: ai-admin
+      description: "Full access to AI services"
+      policies:
+        - p, proj:ai-services:ai-admin, applications, *, ai-services/*, allow
+    - name: read-only
+      description: "Read-only access"
+      policies:
+        - p, proj:ai-services:read-only, applications, get, ai-services/*, allow

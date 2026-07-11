@@ -1,0 +1,91 @@
+# AI Knowledge Graph — K8s Manifests
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ai-knowledge-graph
+  namespace: securerag-hub
+  labels:
+    app.kubernetes.io/name: ai-knowledge-graph
+    app.kubernetes.io/part-of: securerag-hub
+    app.kubernetes.io/component: ai-governance
+    app.kubernetes.io/managed-by: argocd
+  annotations:
+    securerag.dev/owner: ai-team
+    securerag.dev/team: devsecops
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: ai-knowledge-graph
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: ai-knowledge-graph
+        app.kubernetes.io/part-of: securerag-hub
+        app.kubernetes.io/component: ai-governance
+    spec:
+      serviceAccountName: ai-knowledge-graph
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: knowledge-graph
+          image: localhost:5001/securerag-hub-ai-knowledge-graph:dev
+          ports:
+            - name: http
+              containerPort: 8110
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 15
+            periodSeconds: 30
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: 300m
+              memory: 512Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: [ALL]
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: tmp
+          emptyDir:
+            sizeLimit: 50Mi
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ai-knowledge-graph
+  namespace: securerag-hub
+  labels:
+    app.kubernetes.io/name: ai-knowledge-graph
+spec:
+  ports:
+    - port: 8110
+      targetPort: http
+      name: http
+  selector:
+    app.kubernetes.io/name: ai-knowledge-graph
+
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: ai-knowledge-graph
+  namespace: securerag-hub

@@ -1,0 +1,13 @@
+{
+  "trivy_fs_vulnerabilities": 0,
+  "semgrep_sast_findings": 0,
+  "gitleaks_secret_findings": 0,
+  "grype_dependency_vulnerabilities": 0,
+  "sbom_files": [
+  ""
+],
+  "cosign_signatures": [
+  ""
+],
+  "slsa_provenance_attestation_present": false
+}

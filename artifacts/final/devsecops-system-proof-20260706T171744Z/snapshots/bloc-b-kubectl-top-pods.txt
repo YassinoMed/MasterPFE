@@ -1,0 +1,9 @@
+NAME                                      CPU(cores)   MEMORY(bytes)   
+audit-security-service-667b7997b4-j5m7r   2m           74Mi            
+auth-users-8678978685-bfl4l               4m           204Mi           
+auth-users-8678978685-l7968               4m           203Mi           
+auth-users-8678978685-zrn25               4m           205Mi           
+chatbot-manager-79b79d59c4-lvgtp          1m           78Mi            
+conversation-service-6bc4c7dbc6-pq7xf     3m           77Mi            
+portal-web-859c78db95-z68jt               3m           186Mi           
+postgres-auth-fbf55db78-kwlh4             12m          34Mi            

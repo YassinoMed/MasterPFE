@@ -1,0 +1,15 @@
+Filesystem      Size  Used Avail Use% Mounted on
+tmpfs           2.4G  1.7M  2.4G   1% /run
+/dev/sda2       197G   75G  115G  40% /
+tmpfs            12G     0   12G   0% /dev/shm
+tmpfs           5.0M     0  5.0M   0% /run/lock
+tmpfs            12G     0   12G   0% /run/qemu
+tmpfs           2.4G  8.0K  2.4G   1% /run/user/0
+overlay         197G   75G  115G  40% /var/lib/docker/rootfs/overlayfs/f1181c8bf34d8a6902a192513532c6da78eb0e891467d332d8a158a3363dfea0
+overlay         197G   75G  115G  40% /var/lib/docker/rootfs/overlayfs/245c46a81b605c3461f0f074fb446885f4dd640f27fa7dd1608ed835d2ca586e
+overlay         197G   75G  115G  40% /var/lib/docker/rootfs/overlayfs/fafb9ba2a97c591b34df151a66bf6424d53d2e7e9548ba107abdcd527a673d58
+overlay         197G   75G  115G  40% /var/lib/docker/rootfs/overlayfs/c844c10315c0a8e4927d42743ca8730a3ceca02242ffbcd54a8da44c7e172ea4
+
+               total        used        free      shared  buff/cache   available
+Mem:            23Gi       8.3Gi       951Mi       761Mi        15Gi        15Gi
+Swap:          1.0Gi       562Mi       461Mi

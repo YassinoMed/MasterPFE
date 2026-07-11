@@ -1,0 +1,100 @@
+pipeline {
+  agent any
+
+  options {
+    timestamps()
+    disableConcurrentBuilds()
+    buildDiscarder(logRotator(numToKeepStr: '10'))
+    timeout(time: 120, unit: 'MINUTES') // 2h timeout for long load/soak tests
+    ansiColor('xterm')
+  }
+
+  parameters {
+    choice(name: 'TEST_TYPE', choices: ['smoke', 'load', 'stress', 'spike', 'soak'], description: 'Type of load test to execute')
+    string(name: 'VUS_SCALE_FACTOR', defaultValue: '0.01', description: 'Scale factor for VUs (e.g. 0.01 = 1% scale, 1.0 = full 30,000 users)')
+    string(name: 'MAX_VUS', defaultValue: '30000', description: 'Max virtual users target at 1.0 scale factor')
+    choice(name: 'SLO_STRICT', choices: ['true', 'false'], description: 'If true, fail pipeline on performance SLO breach')
+    string(name: 'NAMESPACE', defaultValue: 'securerag-hub', description: 'Kubernetes namespace of microservices')
+    string(name: 'BASE_URL', defaultValue: '', description: 'Override base URL of web portal (empty to auto-detect)')
+  }
+
+  environment {
+    REPORT_DIR = 'reports/k6'
+    K6_VERBOSE = 'false'
+  }
+
+  stages {
+    stage('Checkout Code') {
+      steps {
+        checkout scm
+      }
+    }
+
+    stage('Prepare Environment') {
+      steps {
+        sh '''
+          set -euo pipefail
+          echo "[INFO] Cleaning old reports..."
+          rm -rf "${REPORT_DIR}"
+          mkdir -p "${REPORT_DIR}"
+          chmod +x scripts/performance/*.sh
+        '''
+      }
+    }
+
+    stage('Performance Testing (k6)') {
+      steps {
+        script {
+          echo "═══ STARTING k6 PERFORMANCE TEST: ${params.TEST_TYPE} (Scale: ${params.VUS_SCALE_FACTOR}) ═══"
+          
+          withEnv([
+            "VUS_SCALE_FACTOR=${params.VUS_SCALE_FACTOR}",
+            "MAX_VUS=${params.MAX_VUS}",
+            "TEST_TYPE=${params.TEST_TYPE}",
+            "K6_TESTS=scale-multi",
+            "SLO_STRICT=${params.SLO_STRICT}",
+            "NAMESPACE=${params.NAMESPACE}",
+            "BASE_URL=${params.BASE_URL}"
+          ]) {
+            sh 'bash scripts/performance/k6-jenkins-stage.sh'
+          }
+        }
+      }
+    }
+  }
+
+  post {
+    always {
+      script {
+        echo "═══ PUBLISHING PERFORMANCE REPORTS ═══"
+        
+        // Find report output directory
+        def reports = findFiles(glob: 'reports/k6/**/*.html')
+        if (reports.length > 0) {
+          def reportFile = reports[0].path
+          def reportDir = reportFile.substring(0, reportFile.lastIndexOf('/'))
+          
+          archiveArtifacts artifacts: "${reportDir}/**"
+          
+          // Publish HTML reports using Jenkins HTML Publisher Plugin
+          publishHTML([
+            allowMissing: false,
+            alwaysLinkToLastBuild: true,
+            keepAll: true,
+            reportDir: reportDir,
+            reportFiles: 'k6-report-scale-multi.html',
+            reportName: 'k6 Scale-Multi Performance Report'
+          ])
+        } else {
+          echo "[WARNING] No HTML performance report found to publish"
+        }
+      }
+    }
+    success {
+      echo "═══ PERFORMANCE TEST COMPLETED SUCCESSFULLY (All SLOs met) ═══"
+    }
+    failure {
+      echo "═══ PERFORMANCE TEST FAILED (SLA/SLO thresholds breached or execution error) ═══"
+    }
+  }
+}

@@ -1,0 +1,56 @@
+# ApplicationSet: AI Governance Layer
+# Deploys AI Security Orchestrator, Knowledge Graph, and related services
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: securerag-ai-governance
+  namespace: argocd
+  labels:
+    app.kubernetes.io/part-of: securerag-hub
+    app.kubernetes.io/managed-by: argocd
+spec:
+  generators:
+    - list:
+        elements:
+          - name: ai-security-orchestrator
+            namespace: securerag-hub
+            path: infra/k8s/base/ai-security-orchestrator
+            wave: "20"
+          - name: ai-knowledge-graph
+            namespace: securerag-hub
+            path: infra/k8s/base/ai-knowledge-graph
+            wave: "21"
+  template:
+    metadata:
+      name: 'ai-{{name}}'
+      namespace: argocd
+      annotations:
+        argocd.argoproj.io/sync-wave: '{{wave}}'
+        notifications.argoproj.io/subscribe.on-sync-failed.slack: securerag-alerts
+        notifications.argoproj.io/subscribe.on-health-degraded.slack: securerag-alerts
+      finalizers:
+        - resources-finalizer.argocd.argoproj.io
+    spec:
+      project: ai-services
+      source:
+        repoURL: https://github.com/YassinoMed/MasterPFE.git
+        targetRevision: main
+        path: '{{path}}'
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: '{{namespace}}'
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
+          - ApplyOutOfSyncOnly=true
+          - ServerSideApply=true
+        retry:
+          limit: 5
+          backoff:
+            duration: 15s
+            factor: 2
+            maxDuration: 5m
+      revisionHistoryLimit: 10
