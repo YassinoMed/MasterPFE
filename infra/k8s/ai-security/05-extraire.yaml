@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: extraire
+  namespace: ai-security
+  labels:
+    app: extraire
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: extraire
+  template:
+    metadata:
+      labels:
+        app: extraire
+    spec:
+      containers:
+      - name: extraire
+        image: securerag-hub-extraire:dev
+        imagePullPolicy: IfNotPresent
+        command: ["python", "-m", "src.webapp"]
+        ports:
+        - containerPort: 5000
+        resources:
+          requests:
+            cpu: 100m
+            memory: 256Mi
+          limits:
+            cpu: 500m
+            memory: 1Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: extraire
+  namespace: ai-security
+spec:
+  selector:
+    app: extraire
+  ports:
+  - port: 80
+    targetPort: 5000

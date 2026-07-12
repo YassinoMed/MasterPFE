@@ -112,6 +112,7 @@ pipeline {
               set -euo pipefail
               echo "[INFO] Running unit tests..."
               bash scripts/ci/run-tests.sh || echo "[WARN] Unit tests finished with errors"
+              bash scripts/ci/run-python-tests.sh || echo "[WARN] Python tests finished with errors"
               bash scripts/ci/collect-coverage.sh || echo "[WARN] Coverage collection had issues"
             '''
           }

@@ -37,6 +37,7 @@ DEFAULT_COMPONENTS=(
   conversation-service=services-laravel/conversation-service
   audit-security-service=services-laravel/audit-security-service
   portal-web=platform/portal-web
+  extraire=services/extraire
 )
 
 if [[ -n "${COMPONENTS:-}" ]]; then
