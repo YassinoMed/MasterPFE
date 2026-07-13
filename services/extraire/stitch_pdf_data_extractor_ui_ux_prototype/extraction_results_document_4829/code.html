@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Results - PDF Extract Pro</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;600;700&amp;family=Inter:wght@400;600&amp;family=JetBrains+Mono&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "primary-container": "#2563eb",
+                      "surface-tint": "#0053db",
+                      "outline": "#737686",
+                      "on-primary-fixed": "#00174b",
+                      "on-primary-container": "#eeefff",
+                      "background": "#f8f9ff",
+                      "on-surface": "#0b1c30",
+                      "surface-container-high": "#dce9ff",
+                      "primary-fixed": "#dbe1ff",
+                      "on-secondary-fixed": "#002113",
+                      "on-tertiary-fixed": "#07006c",
+                      "on-secondary-fixed-variant": "#005236",
+                      "border-slate": "#E2E8F0",
+                      "on-tertiary": "#ffffff",
+                      "on-primary-fixed-variant": "#003ea8",
+                      "on-background": "#0b1c30",
+                      "inverse-primary": "#b4c5ff",
+                      "on-secondary-container": "#00714d",
+                      "data-highlight": "#D1FAE5",
+                      "outline-variant": "#c3c6d7",
+                      "surface-dark": "#1E293B",
+                      "surface-container": "#e5eeff",
+                      "surface-container-highest": "#d3e4fe",
+                      "secondary-container": "#6cf8bb",
+                      "tertiary-fixed": "#e1e0ff",
+                      "inverse-on-surface": "#eaf1ff",
+                      "primary": "#004ac6",
+                      "tertiary-container": "#585be6",
+                      "on-primary": "#ffffff",
+                      "surface-variant": "#d3e4fe",
+                      "on-secondary": "#ffffff",
+                      "tertiary": "#3e3fcc",
+                      "error": "#ba1a1a",
+                      "error-container": "#ffdad6",
+                      "secondary-fixed": "#6ffbbe",
+                      "surface": "#f8f9ff",
+                      "on-tertiary-fixed-variant": "#2f2ebe",
+                      "surface-container-lowest": "#ffffff",
+                      "on-tertiary-container": "#f1eeff",
+                      "primary-fixed-dim": "#b4c5ff",
+                      "inverse-surface": "#213145",
+                      "on-error-container": "#93000a",
+                      "on-surface-variant": "#434655",
+                      "on-error": "#ffffff",
+                      "surface-dim": "#cbdbf5",
+                      "secondary": "#006c49",
+                      "background-dark": "#0F172A",
+                      "surface-bright": "#f8f9ff",
+                      "surface-container-low": "#eff4ff",
+                      "tertiary-fixed-dim": "#c0c1ff",
+                      "secondary-fixed-dim": "#4edea3"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "margin-desktop": "32px",
+                      "max-width": "1440px",
+                      "base": "4px",
+                      "margin-mobile": "16px",
+                      "gutter": "16px"
+              },
+              "fontFamily": {
+                      "label-caps": [
+                              "Inter"
+                      ],
+                      "headline-lg": [
+                              "Geist"
+                      ],
+                      "headline-lg-mobile": [
+                              "Geist"
+                      ],
+                      "body-sm": [
+                              "Inter"
+                      ],
+                      "headline-xl": [
+                              "Geist"
+                      ],
+                      "body-md": [
+                              "Inter"
+                      ],
+                      "code-md": [
+                              "JetBrains Mono"
+                      ]
+              },
+              "fontSize": {
+                      "label-caps": [
+                              "12px",
+                              {
+                                      "lineHeight": "16px",
+                                      "letterSpacing": "0.05em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "headline-lg": [
+                              "32px",
+                              {
+                                      "lineHeight": "40px",
+                                      "letterSpacing": "-0.01em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "headline-lg-mobile": [
+                              "24px",
+                              {
+                                      "lineHeight": "32px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "body-sm": [
+                              "14px",
+                              {
+                                      "lineHeight": "20px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "headline-xl": [
+                              "40px",
+                              {
+                                      "lineHeight": "48px",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "body-md": [
+                              "16px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "code-md": [
+                              "14px",
+                              {
+                                      "lineHeight": "22px",
+                                      "fontWeight": "400"
+                              }
+                      ]
+              }
+      },
+          },
+        }
+    </script>
+</head>
+<body class="bg-background text-on-background font-body-md text-body-md overflow-x-hidden min-h-screen">
+<!-- SideNavBar -->
+<nav class="fixed left-0 top-0 h-full w-[280px] bg-background dark:bg-background-dark border-r border-border-slate dark:border-outline-variant flex flex-col py-spacing-margin-desktop z-40 hidden md:flex">
+<div class="px-6 mb-8 flex items-center gap-3">
+<div class="w-8 h-8 rounded bg-primary flex items-center justify-center text-on-primary">
+<span class="material-symbols-outlined text-[20px]">document_scanner</span>
+</div>
+<div>
+<h1 class="font-headline-lg text-[20px] leading-tight font-bold text-primary dark:text-inverse-primary">PDF Extract Pro</h1>
+<p class="font-label-caps text-[10px] text-on-surface-variant">Enterprise Workspace</p>
+</div>
+</div>
+<div class="px-4 mb-6">
+<button class="w-full bg-primary hover:bg-surface-tint text-on-primary py-2 px-4 rounded font-label-caps text-label-caps transition-colors flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[18px]">add</span>
+                New Document
+            </button>
+</div>
+<ul class="flex-1 px-3 space-y-1">
+<li>
+<a class="flex items-center gap-3 px-3 py-2 rounded text-on-surface-variant dark:text-outline hover:text-primary dark:hover:text-inverse-primary hover:bg-surface-container-low dark:hover:bg-surface-dark transition-colors duration-200" href="#">
+<span class="material-symbols-outlined text-[20px]">dashboard</span>
+<span class="font-body-md text-body-md font-medium">Dashboard</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-3 px-3 py-2 rounded text-on-surface-variant dark:text-outline hover:text-primary dark:hover:text-inverse-primary hover:bg-surface-container-low dark:hover:bg-surface-dark transition-colors duration-200" href="#">
+<span class="material-symbols-outlined text-[20px]">upload_file</span>
+<span class="font-body-md text-body-md font-medium">Upload</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-3 px-3 py-2 rounded bg-surface-container-low text-primary dark:text-inverse-primary font-bold border-r-4 border-primary dark:border-inverse-primary scale-[0.98] transition-all" href="#">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">history</span>
+<span class="font-body-md text-body-md font-medium">History</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-3 px-3 py-2 rounded text-on-surface-variant dark:text-outline hover:text-primary dark:hover:text-inverse-primary hover:bg-surface-container-low dark:hover:bg-surface-dark transition-colors duration-200" href="#">
+<span class="material-symbols-outlined text-[20px]">settings</span>
+<span class="font-body-md text-body-md font-medium">Settings</span>
+</a>
+</li>
+</ul>
+<ul class="px-3 space-y-1 mt-auto">
+<li>
+<a class="flex items-center gap-3 px-3 py-2 rounded text-on-surface-variant dark:text-outline hover:text-primary dark:hover:text-inverse-primary hover:bg-surface-container-low dark:hover:bg-surface-dark transition-colors duration-200" href="#">
+<span class="material-symbols-outlined text-[20px]">help</span>
+<span class="font-body-md text-body-md font-medium">Support</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-3 px-3 py-2 rounded text-on-surface-variant dark:text-outline hover:text-primary dark:hover:text-inverse-primary hover:bg-surface-container-low dark:hover:bg-surface-dark transition-colors duration-200" href="#">
+<span class="material-symbols-outlined text-[20px]">manage_accounts</span>
+<span class="font-body-md text-body-md font-medium">Account</span>
+</a>
+</li>
+</ul>
+</nav>
+<!-- TopNavBar -->
+<header class="bg-surface-container-lowest dark:bg-surface-dark border-b border-border-slate dark:border-outline-variant flex justify-between items-center w-full h-16 px-spacing-margin-desktop sticky top-0 z-30 md:ml-[280px] md:max-w-[calc(100%-280px)]">
+<div class="flex items-center">
+<!-- Search hidden for specific layout, or shown if required -->
+</div>
+<div class="flex items-center gap-6">
+<div class="font-label-caps text-label-caps text-on-surface-variant">
+                Credits: 1,240
+            </div>
+<div class="flex items-center gap-4 text-on-surface-variant">
+<button class="hover:text-primary transition-colors">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="hover:text-primary transition-colors">
+<span class="material-symbols-outlined">help_outline</span>
+</button>
+<img alt="User Profile Avatar" class="w-8 h-8 rounded-full border border-border-slate object-cover" data-alt="A small, professional user avatar portrait of a person in a corporate setting, soft lighting, modern tech vibe, 100x100 resolution." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCEndwhhEkK0ynTl_fgukEWTOjbkAVI0iqOjSBD50XbPXFDbnj9AQ_NpbkJhNn51PxWYTLD_wZKeGA8qPyz8idxSvc_oCqqEFLs5CqWvBQwHyNSVjAhegv8Ab696hRNwiRkgffwSB9ztoZt0JY-pQ3cwbRF-0bJLzXR4ldgExZgnAR_IBMNpaYLdO_1WHkbYoXgiz6zfOgnw9A2TvC5McmYcvPY1ZPGaAoC6lsVBJhQ-UZFoIY0Tk3YL_ZMAxxVnm6_c8lfgzqoSbOH"/>
+</div>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="md:ml-[280px] p-spacing-margin-desktop min-h-[calc(100vh-64px)] flex flex-col">
+<!-- Action Bar -->
+<div class="flex justify-between items-center mb-6">
+<div>
+<h2 class="font-headline-lg text-[24px] text-on-surface font-semibold flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">description</span>
+                    invoice_INV-2023-089.pdf
+                </h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1">Processed on Oct 24, 2023 14:32 • <span class="text-secondary font-medium">Verification Complete</span></p>
+</div>
+<div class="flex items-center gap-3 relative">
+<button class="bg-surface-container text-primary font-label-caps text-label-caps px-4 py-2 rounded flex items-center gap-2 hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined text-[18px]">share</span>
+                    Share
+                </button>
+<div class="relative group">
+<button class="bg-primary text-on-primary font-label-caps text-label-caps px-4 py-2 rounded flex items-center gap-2 hover:bg-surface-tint transition-colors shadow-sm">
+<span class="material-symbols-outlined text-[18px]">download</span>
+                        Export Data
+                        <span class="material-symbols-outlined text-[16px]">expand_more</span>
+</button>
+<!-- Dropdown -->
+<div class="absolute right-0 mt-1 w-48 bg-surface-container-lowest border border-border-slate rounded shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-20">
+<ul class="py-1">
+<li><a class="block px-4 py-2 font-body-sm text-body-sm hover:bg-surface-container-low text-on-surface" href="#">To Excel (.xlsx)</a></li>
+<li><a class="block px-4 py-2 font-body-sm text-body-sm hover:bg-surface-container-low text-on-surface" href="#">To JSON</a></li>
+<li><a class="block px-4 py-2 font-body-sm text-body-sm hover:bg-surface-container-low text-on-surface" href="#">To CSV</a></li>
+<li><a class="block px-4 py-2 font-body-sm text-body-sm hover:bg-surface-container-low text-on-surface" href="#">To XML</a></li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<!-- Split View -->
+<div class="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-6 min-h-[600px]">
+<!-- Left: PDF Viewer -->
+<div class="bg-surface-container-lowest border border-border-slate rounded-lg flex flex-col overflow-hidden relative shadow-sm">
+<div class="bg-surface-container-low border-b border-border-slate p-3 flex justify-between items-center z-10">
+<div class="flex items-center gap-2">
+<button class="p-1 hover:bg-border-slate rounded text-on-surface-variant"><span class="material-symbols-outlined text-[18px]">zoom_out</span></button>
+<span class="font-body-sm text-body-sm w-12 text-center">100%</span>
+<button class="p-1 hover:bg-border-slate rounded text-on-surface-variant"><span class="material-symbols-outlined text-[18px]">zoom_in</span></button>
+</div>
+<div class="font-body-sm text-body-sm text-on-surface-variant">
+                        Page 1 of 1
+                    </div>
+</div>
+<div class="flex-1 bg-[#E2E8F0] p-4 overflow-auto relative flex justify-center">
+<!-- PDF Mock -->
+<div class="w-[600px] h-[800px] bg-white shadow-sm relative p-8">
+<div class="border-b-2 border-slate-200 pb-4 mb-6">
+<h3 class="text-2xl font-bold text-slate-800">Acme Corp</h3>
+<p class="text-sm text-slate-500">123 Business Rd, Tech City, TC 90210</p>
+</div>
+<div class="flex justify-between mb-8">
+<div>
+<p class="text-sm font-bold text-slate-600">BILL TO:</p>
+<p class="text-base text-slate-800">Global Industries</p>
+<p class="text-sm text-slate-600">456 Corporate Blvd</p>
+</div>
+<div class="text-right">
+<!-- Bounding Box - High Confidence -->
+<div class="absolute border-2 border-secondary bg-secondary/10 rounded px-1 -ml-1 -mt-1 cursor-pointer hover:bg-secondary/20 transition-colors group">
+<span class="absolute -top-5 left-0 bg-secondary text-white text-[10px] px-1 rounded hidden group-hover:block whitespace-nowrap">Invoice #: INV-2023-089 (99%)</span>
+<p class="text-base font-bold text-slate-800">Invoice: INV-2023-089</p>
+</div>
+<div class="h-6"></div> <!-- Spacer for absolute pos -->
+<!-- Bounding Box - Med Confidence -->
+<div class="absolute border-2 border-yellow-500 bg-yellow-500/10 rounded px-1 -ml-1 -mt-1 cursor-pointer hover:bg-yellow-500/20 transition-colors group">
+<span class="absolute -top-5 right-0 bg-yellow-500 text-white text-[10px] px-1 rounded hidden group-hover:block whitespace-nowrap">Date: Oct 20, 2023 (85%)</span>
+<p class="text-sm text-slate-600">Date: Oct 20, 2023</p>
+</div>
+</div>
+</div>
+<!-- Table Mock in PDF -->
+<div class="mt-12">
+<div class="grid grid-cols-4 border-b-2 border-slate-800 pb-2 mb-2 font-bold text-sm">
+<div class="col-span-2">Description</div>
+<div>Qty</div>
+<div class="text-right">Amount</div>
+</div>
+<div class="grid grid-cols-4 border-b border-slate-200 py-2 text-sm relative">
+<!-- Row Bounding Box -->
+<div class="absolute inset-0 border-2 border-secondary bg-secondary/5 rounded -m-1 pointer-events-none"></div>
+<div class="col-span-2">Enterprise Software License</div>
+<div>1</div>
+<div class="text-right">$12,500.00</div>
+</div>
+<div class="grid grid-cols-4 border-b border-slate-200 py-2 text-sm relative">
+<div class="absolute inset-0 border-2 border-red-500 bg-red-500/5 rounded -m-1 pointer-events-none"></div>
+<div class="col-span-2">Cloud Storage (1TB)</div>
+<div class="text-red-600 font-bold">??</div>
+<div class="text-right">$450.00</div>
+</div>
+</div>
+<div class="mt-8 flex justify-end">
+<div class="w-48">
+<div class="flex justify-between py-1 border-t-2 border-slate-800 font-bold text-lg relative">
+<!-- Total Bounding Box -->
+<div class="absolute inset-0 border-2 border-secondary bg-secondary/10 rounded -m-1 pointer-events-none"></div>
+<span>Total:</span>
+<span>$12,950.00</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Right: Extraction Tabs -->
+<div class="bg-surface-container-lowest border border-border-slate rounded-lg flex flex-col shadow-sm">
+<!-- Tabs Header -->
+<div class="flex border-b border-border-slate px-2">
+<button class="px-4 py-3 font-label-caps text-label-caps text-on-surface-variant hover:text-primary transition-colors border-b-2 border-transparent">Raw Text</button>
+<button class="px-4 py-3 font-label-caps text-label-caps text-primary border-b-2 border-primary font-bold">Structured Data</button>
+<button class="px-4 py-3 font-label-caps text-label-caps text-on-surface-variant hover:text-primary transition-colors border-b-2 border-transparent">JSON Preview</button>
+</div>
+<!-- Structured Data Content -->
+<div class="flex-1 p-4 overflow-auto bg-surface-bright">
+<div class="mb-6">
+<h4 class="font-label-caps text-label-caps text-on-surface-variant mb-3">Document Header Fields</h4>
+<div class="space-y-3">
+<!-- Field 1 - Validated -->
+<div class="bg-surface-container-lowest border border-secondary/30 rounded p-3 flex items-start gap-4 hover:border-secondary transition-colors group">
+<div class="mt-1">
+<span class="material-symbols-outlined text-secondary text-[20px]">check_circle</span>
+</div>
+<div class="flex-1">
+<label class="block font-label-caps text-[10px] text-on-surface-variant mb-1">Invoice Number</label>
+<input class="w-full bg-transparent border-none p-0 font-body-sm text-body-sm font-medium focus:ring-0 text-on-surface" type="text" value="INV-2023-089"/>
+</div>
+<div class="text-right">
+<span class="inline-block bg-secondary/10 text-secondary text-[10px] font-bold px-2 py-0.5 rounded-full">99%</span>
+</div>
+</div>
+<!-- Field 2 - Review -->
+<div class="bg-surface-container-lowest border border-yellow-500/50 rounded p-3 flex items-start gap-4 hover:border-yellow-500 transition-colors shadow-[0_0_0_1px_rgba(234,179,8,0.2)]">
+<div class="mt-1">
+<span class="material-symbols-outlined text-yellow-500 text-[20px]">warning</span>
+</div>
+<div class="flex-1">
+<label class="block font-label-caps text-[10px] text-on-surface-variant mb-1">Date</label>
+<input class="w-full bg-transparent border-b border-dashed border-yellow-500 p-0 font-body-sm text-body-sm font-medium focus:ring-0 text-on-surface pb-1" type="text" value="Oct 20, 2023"/>
+</div>
+<div class="text-right">
+<span class="inline-block bg-yellow-500/10 text-yellow-600 text-[10px] font-bold px-2 py-0.5 rounded-full">85%</span>
+</div>
+</div>
+<!-- Field 3 - Validated -->
+<div class="bg-surface-container-lowest border border-secondary/30 rounded p-3 flex items-start gap-4 hover:border-secondary transition-colors">
+<div class="mt-1">
+<span class="material-symbols-outlined text-secondary text-[20px]">check_circle</span>
+</div>
+<div class="flex-1">
+<label class="block font-label-caps text-[10px] text-on-surface-variant mb-1">Vendor</label>
+<input class="w-full bg-transparent border-none p-0 font-body-sm text-body-sm font-medium focus:ring-0 text-on-surface" type="text" value="Acme Corp"/>
+</div>
+<div class="text-right">
+<span class="inline-block bg-secondary/10 text-secondary text-[10px] font-bold px-2 py-0.5 rounded-full">98%</span>
+</div>
+</div>
+</div>
+</div>
+<div>
+<div class="flex justify-between items-center mb-3">
+<h4 class="font-label-caps text-label-caps text-on-surface-variant">Line Items</h4>
+<span class="bg-surface-container text-primary text-[10px] px-2 py-1 rounded font-bold">2 Rows Extracted</span>
+</div>
+<div class="bg-surface-container-lowest border border-border-slate rounded overflow-hidden">
+<table class="w-full text-left border-collapse">
+<thead class="bg-surface-container-low font-label-caps text-[11px] text-on-surface-variant">
+<tr>
+<th class="p-2 font-medium">Description</th>
+<th class="p-2 font-medium w-16">Qty</th>
+<th class="p-2 font-medium text-right">Amount</th>
+<th class="p-2 w-8"></th>
+</tr>
+</thead>
+<tbody class="font-body-sm text-body-sm">
+<tr class="border-t border-border-slate hover:bg-surface-container-lowest transition-colors">
+<td class="p-2"><input class="w-full bg-transparent border-none p-0 text-sm focus:ring-0" type="text" value="Enterprise Software License"/></td>
+<td class="p-2"><input class="w-full bg-transparent border-none p-0 text-sm focus:ring-0" type="text" value="1"/></td>
+<td class="p-2 text-right"><input class="w-full bg-transparent border-none p-0 text-sm focus:ring-0 text-right" type="text" value="12500.00"/></td>
+<td class="p-2 text-center"><span class="material-symbols-outlined text-secondary text-[16px]">check_circle</span></td>
+</tr>
+<tr class="border-t border-border-slate bg-red-50/50">
+<td class="p-2"><input class="w-full bg-transparent border-none p-0 text-sm focus:ring-0" type="text" value="Cloud Storage (1TB)"/></td>
+<td class="p-2"><input class="w-full bg-white border border-red-300 rounded px-1 py-0.5 text-sm focus:ring-1 focus:ring-red-500 focus:border-red-500" placeholder="Missing" type="text" value=""/></td>
+<td class="p-2 text-right"><input class="w-full bg-transparent border-none p-0 text-sm focus:ring-0 text-right" type="text" value="450.00"/></td>
+<td class="p-2 text-center"><span class="material-symbols-outlined text-red-500 text-[16px]">error</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<!-- Bottom Action Bar for Edits -->
+<div class="border-t border-border-slate p-4 bg-surface-container-lowest flex justify-end gap-3">
+<button class="px-4 py-2 text-on-surface-variant font-label-caps text-label-caps hover:bg-surface-container-low rounded transition-colors">Discard Changes</button>
+<button class="px-4 py-2 bg-primary text-on-primary font-label-caps text-label-caps rounded hover:bg-surface-tint transition-colors shadow-sm flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">save</span>
+                        Save Edits
+                    </button>
+</div>
+</div>
+</div>
+</main>
+</body></html>

@@ -1,0 +1,6 @@
+tesseract:
+  languages: ["eng", "fra"]
+  psm: 6
+  oem: 1
+easyocr:
+  gpu: false

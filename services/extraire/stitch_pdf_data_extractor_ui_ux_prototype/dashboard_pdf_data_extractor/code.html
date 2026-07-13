@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>PDF Extract Pro - Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&amp;family=Geist:wght@600;700&amp;family=JetBrains+Mono:wght@400&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary-container": "#2563eb",
+                        "surface-tint": "#0053db",
+                        "outline": "#737686",
+                        "on-primary-fixed": "#00174b",
+                        "on-primary-container": "#eeefff",
+                        "background": "#f8f9ff",
+                        "on-surface": "#0b1c30",
+                        "surface-container-high": "#dce9ff",
+                        "primary-fixed": "#dbe1ff",
+                        "on-secondary-fixed": "#002113",
+                        "on-tertiary-fixed": "#07006c",
+                        "on-secondary-fixed-variant": "#005236",
+                        "border-slate": "#E2E8F0",
+                        "on-tertiary": "#ffffff",
+                        "on-primary-fixed-variant": "#003ea8",
+                        "on-background": "#0b1c30",
+                        "inverse-primary": "#b4c5ff",
+                        "on-secondary-container": "#00714d",
+                        "data-highlight": "#D1FAE5",
+                        "outline-variant": "#c3c6d7",
+                        "surface-dark": "#1E293B",
+                        "surface-container": "#e5eeff",
+                        "surface-container-highest": "#d3e4fe",
+                        "secondary-container": "#6cf8bb",
+                        "tertiary-fixed": "#e1e0ff",
+                        "inverse-on-surface": "#eaf1ff",
+                        "primary": "#004ac6",
+                        "tertiary-container": "#585be6",
+                        "on-primary": "#ffffff",
+                        "surface-variant": "#d3e4fe",
+                        "on-secondary": "#ffffff",
+                        "tertiary": "#3e3fcc",
+                        "error": "#ba1a1a",
+                        "error-container": "#ffdad6",
+                        "secondary-fixed": "#6ffbbe",
+                        "surface": "#f8f9ff",
+                        "on-tertiary-fixed-variant": "#2f2ebe",
+                        "surface-container-lowest": "#ffffff",
+                        "on-tertiary-container": "#f1eeff",
+                        "primary-fixed-dim": "#b4c5ff",
+                        "inverse-surface": "#213145",
+                        "on-error-container": "#93000a",
+                        "on-surface-variant": "#434655",
+                        "on-error": "#ffffff",
+                        "surface-dim": "#cbdbf5",
+                        "secondary": "#006c49",
+                        "background-dark": "#0F172A",
+                        "surface-bright": "#f8f9ff",
+                        "surface-container-low": "#eff4ff",
+                        "tertiary-fixed-dim": "#c0c1ff",
+                        "secondary-fixed-dim": "#4edea3"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "margin-desktop": "32px",
+                        "max-width": "1440px",
+                        "base": "4px",
+                        "margin-mobile": "16px",
+                        "gutter": "16px"
+                    },
+                    "fontFamily": {
+                        "label-caps": ["Inter"],
+                        "headline-lg": ["Geist"],
+                        "headline-lg-mobile": ["Geist"],
+                        "body-sm": ["Inter"],
+                        "headline-xl": ["Geist"],
+                        "body-md": ["Inter"],
+                        "code-md": ["JetBrains Mono"]
+                    },
+                    "fontSize": {
+                        "label-caps": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "headline-lg-mobile": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "body-sm": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "headline-xl": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "code-md": ["14px", { "lineHeight": "22px", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-background dark:bg-background-dark text-on-background min-h-screen flex font-body-md text-body-md">
+<!-- SideNavBar -->
+<nav class="fixed left-0 top-0 h-full w-[280px] bg-background dark:bg-background-dark border-r border-border-slate dark:border-outline-variant flex flex-col py-spacing-margin-desktop z-40 hidden md:flex">
+<div class="px-6 mb-8 flex items-center gap-3">
+<div class="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-on-primary font-headline-lg text-headline-lg">
+<span class="material-symbols-outlined text-xl" style="font-variation-settings: 'FILL' 1;">insert_drive_file</span>
+</div>
+<div>
+<h1 class="font-headline-lg text-[20px] leading-[24px] font-bold text-primary dark:text-inverse-primary tracking-tight">PDF Extract Pro</h1>
+<p class="font-label-caps text-[10px] text-on-surface-variant">Enterprise Workspace</p>
+</div>
+</div>
+<div class="px-4 mb-6">
+<button class="w-full bg-primary hover:bg-on-primary-fixed-variant text-on-primary font-label-caps text-label-caps py-3 rounded-lg flex items-center justify-center gap-2 transition-all hover:scale-[0.98]">
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">add</span>
+                New Document
+            </button>
+</div>
+<ul class="flex-1 px-4 space-y-1">
+<li>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-primary dark:text-inverse-primary font-bold border-l-4 border-primary dark:border-inverse-primary bg-surface-container-low dark:bg-surface-dark transition-colors duration-200 hover:bg-surface-container-low" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">dashboard</span>
+                    Dashboard
+                </a>
+</li>
+<li>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-surface-variant dark:text-outline hover:text-primary dark:hover:text-inverse-primary hover:bg-surface-container-low dark:hover:bg-surface-dark transition-colors duration-200" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">upload_file</span>
+                    Upload
+                </a>
+</li>
+<li>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-surface-variant dark:text-outline hover:text-primary dark:hover:text-inverse-primary hover:bg-surface-container-low dark:hover:bg-surface-dark transition-colors duration-200" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">history</span>
+                    History
+                </a>
+</li>
+<li>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-surface-variant dark:text-outline hover:text-primary dark:hover:text-inverse-primary hover:bg-surface-container-low dark:hover:bg-surface-dark transition-colors duration-200" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">settings</span>
+                    Settings
+                </a>
+</li>
+</ul>
+<div class="px-4 mt-auto space-y-1 border-t border-border-slate dark:border-outline-variant pt-4">
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-surface-variant dark:text-outline hover:text-primary dark:hover:text-inverse-primary hover:bg-surface-container-low dark:hover:bg-surface-dark transition-colors duration-200" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">help</span>
+                Support
+            </a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-surface-variant dark:text-outline hover:text-primary dark:hover:text-inverse-primary hover:bg-surface-container-low dark:hover:bg-surface-dark transition-colors duration-200" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">manage_accounts</span>
+                Account
+            </a>
+</div>
+</nav>
+<!-- Main Content Wrapper -->
+<div class="flex-1 flex flex-col md:ml-[280px] min-h-screen">
+<!-- TopNavBar -->
+<header class="flex justify-between items-center w-full h-16 px-spacing-margin-desktop sticky top-0 z-50 bg-surface-container-lowest dark:bg-surface-dark border-b border-border-slate dark:border-outline-variant">
+<div class="flex-1 flex items-center">
+<!-- Search could go here if specified -->
+</div>
+<div class="flex items-center gap-6">
+<span class="font-label-caps text-label-caps text-primary dark:text-inverse-primary bg-primary-fixed dark:bg-primary-fixed-dim px-3 py-1 rounded-full">
+                    Credits: 1,240
+                </span>
+<div class="flex items-center gap-4 text-on-surface-variant dark:text-outline">
+<button class="hover:text-primary dark:hover:text-inverse-primary transition-colors">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">notifications</span>
+</button>
+<button class="hover:text-primary dark:hover:text-inverse-primary transition-colors">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">help_outline</span>
+</button>
+</div>
+<div class="w-8 h-8 rounded-full bg-surface-dim overflow-hidden border border-border-slate cursor-pointer hover:opacity-80 transition-opacity">
+<img alt="User Profile Avatar" class="w-full h-full object-cover" data-alt="A clean, modern headshot of a professional user against a neutral grey background, high resolution, soft lighting, corporate tech aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuATvhKmH19EWKchfKmja5GQl6PtXEmTwPZ5dy5hLI9N0Qv0ukr5LQsMpShPcrltSWjPdIB6AuwtzDRjHzXujRwZiMpY4orhXtw96MyCuGxCZ9oqTalLOY2P0BvcClWFaWuLCzF-rSXqxRSPJBORlSwaElcPJmoJXiC0daWck8kFXTdOhzB1OIIul5p4_90OLZFYIapZvUAQ_VLtFCXYcjKyz879llWY9TwsV9mtH7sH5nhZu813U3WytymsGCxkK8_05H9R37s3xFMq"/>
+</div>
+</div>
+</header>
+<!-- Dashboard Canvas -->
+<main class="flex-1 p-6 md:p-8 max-w-[1440px] mx-auto w-full">
+<div class="mb-8 flex justify-between items-end">
+<div>
+<h2 class="font-headline-xl text-[32px] leading-[40px] md:text-headline-xl font-bold text-on-surface dark:text-inverse-on-surface tracking-tight mb-1">Overview</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Monitor your extraction pipeline and credit usage.</p>
+</div>
+<button class="bg-primary hover:bg-on-primary-fixed-variant text-on-primary font-label-caps text-label-caps px-4 py-2.5 rounded-lg flex items-center gap-2 shadow-sm transition-all active:scale-[0.98]">
+<span class="material-symbols-outlined text-[18px]">cloud_upload</span>
+                    Upload Document
+                </button>
+</div>
+<!-- Bento Grid Layout -->
+<div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
+<!-- Stat Cards -->
+<div class="bg-surface-container-lowest border border-border-slate rounded-xl p-5 flex flex-col justify-between shadow-sm lg:col-span-1">
+<div class="flex justify-between items-start mb-4">
+<div class="w-10 h-10 rounded-lg bg-surface-container-low flex items-center justify-center text-primary">
+<span class="material-symbols-outlined">document_scanner</span>
+</div>
+<span class="text-secondary font-label-caps text-label-caps flex items-center gap-1 bg-data-highlight px-2 py-1 rounded-full">
+<span class="material-symbols-outlined text-[14px]">trending_up</span> +12%
+                        </span>
+</div>
+<div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-1">Total Extractions</p>
+<h3 class="font-headline-xl text-[32px] leading-none font-bold text-on-surface">24,592</h3>
+</div>
+</div>
+<div class="bg-surface-container-lowest border border-border-slate rounded-xl p-5 flex flex-col justify-between shadow-sm lg:col-span-1">
+<div class="flex justify-between items-start mb-4">
+<div class="w-10 h-10 rounded-lg bg-surface-container-low flex items-center justify-center text-primary">
+<span class="material-symbols-outlined">verified</span>
+</div>
+<span class="text-on-surface-variant font-label-caps text-label-caps flex items-center gap-1 bg-surface-dim px-2 py-1 rounded-full">
+                            Last 30 Days
+                        </span>
+</div>
+<div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-1">Success Rate</p>
+<h3 class="font-headline-xl text-[32px] leading-none font-bold text-on-surface">99.4%</h3>
+</div>
+</div>
+<div class="bg-surface-container-lowest border border-border-slate rounded-xl p-5 flex flex-col justify-between shadow-sm lg:col-span-1">
+<div class="flex justify-between items-start mb-4">
+<div class="w-10 h-10 rounded-lg bg-surface-container-low flex items-center justify-center text-primary">
+<span class="material-symbols-outlined">database</span>
+</div>
+<span class="text-secondary font-label-caps text-label-caps flex items-center gap-1">
+                            Refills in 12d
+                        </span>
+</div>
+<div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-1">Credits Remaining</p>
+<h3 class="font-headline-xl text-[32px] leading-none font-bold text-on-surface">1,240</h3>
+<div class="w-full bg-border-slate h-1.5 rounded-full mt-3 overflow-hidden">
+<div class="bg-primary h-full rounded-full" style="width: 35%"></div>
+</div>
+</div>
+</div>
+<!-- Volume Chart (Placeholder) -->
+<div class="bg-surface-container-lowest border border-border-slate rounded-xl p-5 flex flex-col shadow-sm md:col-span-3 lg:col-span-2 lg:row-span-2">
+<div class="flex justify-between items-center mb-6">
+<h3 class="font-headline-lg text-[18px] font-bold text-on-surface">Extraction Volume</h3>
+<select class="bg-surface-container-low border-none text-on-surface font-body-sm text-body-sm rounded-lg py-1 px-3 focus:ring-1 focus:ring-primary">
+<option>This Week</option>
+<option>This Month</option>
+</select>
+</div>
+<div class="flex-1 min-h-[200px] w-full relative flex items-end justify-between gap-2 pb-6">
+<!-- CSS Bar Chart Representation -->
+<div class="w-full flex justify-between items-end h-full gap-2 px-2 border-b border-border-slate relative">
+<!-- Grid lines -->
+<div class="absolute w-full h-[1px] bg-border-slate bottom-1/4"></div>
+<div class="absolute w-full h-[1px] bg-border-slate bottom-2/4"></div>
+<div class="absolute w-full h-[1px] bg-border-slate bottom-3/4"></div>
+<!-- Bars -->
+<div class="w-1/7 bg-primary-fixed hover:bg-primary transition-colors rounded-t-sm relative z-10 group" style="height: 40%">
+<div class="absolute -top-8 left-1/2 -translate-x-1/2 bg-inverse-surface text-inverse-on-surface font-label-caps text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">Mon: 1.2k</div>
+</div>
+<div class="w-1/7 bg-primary rounded-t-sm relative z-10 group" style="height: 75%">
+<div class="absolute -top-8 left-1/2 -translate-x-1/2 bg-inverse-surface text-inverse-on-surface font-label-caps text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">Tue: 2.4k</div>
+</div>
+<div class="w-1/7 bg-primary-fixed hover:bg-primary transition-colors rounded-t-sm relative z-10 group" style="height: 55%"></div>
+<div class="w-1/7 bg-primary-fixed hover:bg-primary transition-colors rounded-t-sm relative z-10 group" style="height: 90%"></div>
+<div class="w-1/7 bg-primary-fixed hover:bg-primary transition-colors rounded-t-sm relative z-10 group" style="height: 60%"></div>
+<div class="w-1/7 bg-primary-fixed hover:bg-primary transition-colors rounded-t-sm relative z-10 group" style="height: 30%"></div>
+<div class="w-1/7 bg-primary-fixed hover:bg-primary transition-colors rounded-t-sm relative z-10 group" style="height: 20%"></div>
+</div>
+<!-- X-axis labels -->
+<div class="absolute bottom-0 w-full flex justify-between px-4 font-label-caps text-[10px] text-on-surface-variant">
+<span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span><span>S</span>
+</div>
+</div>
+</div>
+<!-- Recent Activity Feed -->
+<div class="bg-surface-container-lowest border border-border-slate rounded-xl p-0 flex flex-col shadow-sm md:col-span-3 lg:col-span-2 lg:row-span-2 overflow-hidden">
+<div class="flex justify-between items-center p-5 border-b border-border-slate bg-surface-bright">
+<h3 class="font-headline-lg text-[18px] font-bold text-on-surface">Recent Activity</h3>
+<a class="text-primary font-label-caps text-label-caps hover:underline" href="#">View All</a>
+</div>
+<div class="flex-1 overflow-y-auto">
+<div class="divide-y divide-border-slate">
+<!-- Activity Item 1 -->
+<div class="p-4 hover:bg-surface-container-low transition-colors flex items-start gap-4">
+<div class="w-8 h-8 rounded-full bg-data-highlight text-secondary flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[16px]">check_circle</span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-baseline mb-1">
+<p class="font-body-md text-body-md text-on-surface font-medium truncate">Invoice_AcmeCorp_Q3.pdf</p>
+<span class="font-label-caps text-[10px] text-on-surface-variant shrink-0 ml-2">2 min ago</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant truncate">Extracted 24 fields · Confidence 99%</p>
+</div>
+</div>
+<!-- Activity Item 2 -->
+<div class="p-4 hover:bg-surface-container-low transition-colors flex items-start gap-4">
+<div class="w-8 h-8 rounded-full bg-primary-fixed text-primary flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[16px]">sync</span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-baseline mb-1">
+<p class="font-body-md text-body-md text-on-surface font-medium truncate">Tax_Returns_2023_Batch.zip</p>
+<span class="font-label-caps text-[10px] text-on-surface-variant shrink-0 ml-2">15 min ago</span>
+</div>
+<p class="font-body-sm text-body-sm text-primary truncate">Processing (45/120 pages)...</p>
+</div>
+</div>
+<!-- Activity Item 3 -->
+<div class="p-4 hover:bg-surface-container-low transition-colors flex items-start gap-4">
+<div class="w-8 h-8 rounded-full bg-error-container text-error flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[16px]">error</span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-baseline mb-1">
+<p class="font-body-md text-body-md text-on-surface font-medium truncate">Scanned_Receipts_Blurry.pdf</p>
+<span class="font-label-caps text-[10px] text-on-surface-variant shrink-0 ml-2">1 hr ago</span>
+</div>
+<p class="font-body-sm text-body-sm text-error truncate">Failed to extract: Illegible text on page 2.</p>
+</div>
+</div>
+<!-- Activity Item 4 -->
+<div class="p-4 hover:bg-surface-container-low transition-colors flex items-start gap-4">
+<div class="w-8 h-8 rounded-full bg-data-highlight text-secondary flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[16px]">check_circle</span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-baseline mb-1">
+<p class="font-body-md text-body-md text-on-surface font-medium truncate">Contract_Renewal_Signed.pdf</p>
+<span class="font-label-caps text-[10px] text-on-surface-variant shrink-0 ml-2">3 hrs ago</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant truncate">Extracted 8 fields · Confidence 98%</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+</body></html>

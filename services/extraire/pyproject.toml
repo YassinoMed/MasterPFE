@@ -1,0 +1,44 @@
+[build-system]
+requires = ["setuptools>=42", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pdf-data-extractor"
+version = "0.3.0"
+description = "Extract structured text, tables, and images from typed and scanned PDFs"
+requires-python = ">=3.9"
+dependencies = [
+    "PyPDF2",
+    "pdf2image",
+    "pdfplumber",
+    "PyYAML",
+    "opencv-python",
+    "Pillow",
+    "pytesseract",
+    "easyocr",
+    "pandas",
+    "openpyxl",
+    "xlsxwriter",
+    "numpy",
+    "tqdm",
+    "flask",
+    "werkzeug",
+]
+
+[project.optional-dependencies]
+dev = [
+    "mypy",
+    "pytest",
+    "pytest-cov",
+    "black",
+    "isort",
+    "flake8",
+    "fpdf2",
+]
+
+[project.scripts]
+pdf-extract = "src.cli:main"
+pdf-web = "src.webapp:main"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

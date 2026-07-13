@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Settings - PDF Extract Pro</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&amp;family=Geist:wght@600;700&amp;family=JetBrains+Mono:wght@400&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "primary-container": "#2563eb",
+                    "surface-tint": "#0053db",
+                    "outline": "#737686",
+                    "on-primary-fixed": "#00174b",
+                    "on-primary-container": "#eeefff",
+                    "background": "#f8f9ff",
+                    "on-surface": "#0b1c30",
+                    "surface-container-high": "#dce9ff",
+                    "primary-fixed": "#dbe1ff",
+                    "on-secondary-fixed": "#002113",
+                    "on-tertiary-fixed": "#07006c",
+                    "on-secondary-fixed-variant": "#005236",
+                    "border-slate": "#E2E8F0",
+                    "on-tertiary": "#ffffff",
+                    "on-primary-fixed-variant": "#003ea8",
+                    "on-background": "#0b1c30",
+                    "inverse-primary": "#b4c5ff",
+                    "on-secondary-container": "#00714d",
+                    "data-highlight": "#D1FAE5",
+                    "outline-variant": "#c3c6d7",
+                    "surface-dark": "#1E293B",
+                    "surface-container": "#e5eeff",
+                    "surface-container-highest": "#d3e4fe",
+                    "secondary-container": "#6cf8bb",
+                    "tertiary-fixed": "#e1e0ff",
+                    "inverse-on-surface": "#eaf1ff",
+                    "primary": "#004ac6",
+                    "tertiary-container": "#585be6",
+                    "on-primary": "#ffffff",
+                    "surface-variant": "#d3e4fe",
+                    "on-secondary": "#ffffff",
+                    "tertiary": "#3e3fcc",
+                    "error": "#ba1a1a",
+                    "error-container": "#ffdad6",
+                    "secondary-fixed": "#6ffbbe",
+                    "surface": "#f8f9ff",
+                    "on-tertiary-fixed-variant": "#2f2ebe",
+                    "surface-container-lowest": "#ffffff",
+                    "on-tertiary-container": "#f1eeff",
+                    "primary-fixed-dim": "#b4c5ff",
+                    "inverse-surface": "#213145",
+                    "on-error-container": "#93000a",
+                    "on-surface-variant": "#434655",
+                    "on-error": "#ffffff",
+                    "surface-dim": "#cbdbf5",
+                    "secondary": "#006c49",
+                    "background-dark": "#0F172A",
+                    "surface-bright": "#f8f9ff",
+                    "surface-container-low": "#eff4ff",
+                    "tertiary-fixed-dim": "#c0c1ff",
+                    "secondary-fixed-dim": "#4edea3"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "margin-desktop": "32px",
+                    "max-width": "1440px",
+                    "base": "4px",
+                    "margin-mobile": "16px",
+                    "gutter": "16px"
+            },
+            "fontFamily": {
+                    "label-caps": [
+                            "Inter"
+                    ],
+                    "headline-lg": [
+                            "Geist"
+                    ],
+                    "headline-lg-mobile": [
+                            "Geist"
+                    ],
+                    "body-sm": [
+                            "Inter"
+                    ],
+                    "headline-xl": [
+                            "Geist"
+                    ],
+                    "body-md": [
+                            "Inter"
+                    ],
+                    "code-md": [
+                            "JetBrains Mono"
+                    ]
+            },
+            "fontSize": {
+                    "label-caps": [
+                            "12px",
+                            {
+                                    "lineHeight": "16px",
+                                    "letterSpacing": "0.05em",
+                                    "fontWeight": "600"
+                            }
+                    ],
+                    "headline-lg": [
+                            "32px",
+                            {
+                                    "lineHeight": "40px",
+                                    "letterSpacing": "-0.01em",
+                                    "fontWeight": "600"
+                            }
+                    ],
+                    "headline-lg-mobile": [
+                            "24px",
+                            {
+                                    "lineHeight": "32px",
+                                    "fontWeight": "600"
+                            }
+                    ],
+                    "body-sm": [
+                            "14px",
+                            {
+                                    "lineHeight": "20px",
+                                    "fontWeight": "400"
+                            }
+                    ],
+                    "headline-xl": [
+                            "40px",
+                            {
+                                    "lineHeight": "48px",
+                                    "letterSpacing": "-0.02em",
+                                    "fontWeight": "700"
+                            }
+                    ],
+                    "body-md": [
+                            "16px",
+                            {
+                                    "lineHeight": "24px",
+                                    "fontWeight": "400"
+                            }
+                    ],
+                    "code-md": [
+                            "14px",
+                            {
+                                    "lineHeight": "22px",
+                                    "fontWeight": "400"
+                            }
+                    ]
+            }
+    },
+        },
+      }
+    </script>
+</head>
+<body class="bg-background text-on-surface font-body-md min-h-screen flex">
+<!-- SideNavBar -->
+<aside class="fixed left-0 top-0 h-full w-[280px] bg-background border-r border-border-slate flex flex-col py-spacing-margin-desktop z-40 hidden md:flex">
+<div class="px-6 mb-8">
+<div class="flex items-center gap-3 mb-6">
+<div class="w-10 h-10 rounded-lg bg-primary flex items-center justify-center text-on-primary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">description</span>
+</div>
+<div>
+<h1 class="font-headline-lg text-headline-lg font-bold text-primary" style="font-size: 20px; line-height: 28px;">PDF Extract Pro</h1>
+<p class="font-label-caps text-label-caps text-on-surface-variant">Enterprise Workspace</p>
+</div>
+</div>
+<button class="w-full bg-primary text-on-primary font-label-caps text-label-caps py-3 rounded-DEFAULT hover:opacity-90 transition-opacity flex items-center justify-center gap-2">
+<span class="material-symbols-outlined">add</span>
+                New Document
+            </button>
+</div>
+<nav class="flex-1 px-4 space-y-2">
+<a class="flex items-center gap-3 px-4 py-3 rounded-DEFAULT text-on-surface-variant hover:bg-surface-container-low transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+                Dashboard
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-DEFAULT text-on-surface-variant hover:bg-surface-container-low transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">upload_file</span>
+                Upload
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-DEFAULT text-on-surface-variant hover:bg-surface-container-low transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">history</span>
+                History
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-DEFAULT text-primary font-bold border-r-4 border-primary bg-surface-container-low" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">settings</span>
+                Settings
+            </a>
+</nav>
+<div class="px-4 mt-auto border-t border-border-slate pt-4 space-y-2">
+<a class="flex items-center gap-3 px-4 py-3 rounded-DEFAULT text-on-surface-variant hover:bg-surface-container-low transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">help</span>
+                Support
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-DEFAULT text-on-surface-variant hover:bg-surface-container-low transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">manage_accounts</span>
+                Account
+            </a>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-1 ml-0 md:ml-[280px] w-full max-w-full">
+<!-- TopNavBar -->
+<header class="flex justify-between items-center w-full h-16 px-spacing-margin-desktop sticky top-0 z-50 bg-surface-container-lowest border-b border-border-slate hidden md:flex">
+<div class="flex-1 flex items-center gap-4">
+<div class="relative w-64">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline">search</span>
+<input class="w-full bg-surface py-2 pl-10 pr-4 rounded-DEFAULT border-border-slate focus:border-primary focus:ring-1 focus:ring-primary text-body-sm" placeholder="Search..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<span class="font-label-caps text-label-caps text-primary bg-primary-fixed px-3 py-1 rounded-full">Credits: 1,240</span>
+<div class="flex items-center gap-4 border-l border-border-slate pl-6 text-on-surface-variant">
+<button class="hover:text-primary transition-colors"><span class="material-symbols-outlined">notifications</span></button>
+<button class="hover:text-primary transition-colors"><span class="material-symbols-outlined">help_outline</span></button>
+<img alt="User Profile Avatar" class="w-8 h-8 rounded-full object-cover border border-border-slate" data-alt="A small, professional user avatar portrait of a person in a corporate setting. Clean lighting, neutral background, modern business aesthetic, focused on head and shoulders." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB0nqONiAwZpzt993HYkhDCiZpqtr0y6GPcLPdGDPshMXUkI3kLpfVLc1wEREI2mwUv9CQr1z8tqt_WxXN2CjjEvawMjE7pwbuESAoQYOeCAwIv8aE9BdQUkBJvt8W995i0eqb7Ol3cB5x7i_XuVLsV1hLPLeu71SRzMkKTyoyEs4FmvlfWvRuVUPxoqjocHHy6q7ThYhFilH4f8z5a3qnn42-8IfTzWV09uBTjZJt0q3GAxYbFunruKJRsPsA_5wWLt48ISa1TYtq_"/>
+</div>
+</div>
+</header>
+<!-- Page Content -->
+<div class="p-4 md:p-8 max-w-5xl mx-auto space-y-8">
+<div>
+<h2 class="font-headline-xl text-headline-xl text-on-surface mb-2">Settings</h2>
+<p class="text-on-surface-variant font-body-sm">Manage your extraction engine, billing, and API preferences.</p>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+<!-- Settings Navigation (Bento Left Column) -->
+<div class="lg:col-span-1 space-y-2">
+<nav class="sticky top-24 space-y-1">
+<a class="block px-4 py-3 rounded-lg bg-surface-container-highest text-primary font-label-caps text-label-caps border border-border-slate" href="#ocr">Engine &amp; Models</a>
+<a class="block px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-low font-label-caps text-label-caps transition-colors" href="#api">API Keys</a>
+<a class="block px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-low font-label-caps text-label-caps transition-colors" href="#export">Export Presets</a>
+<a class="block px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-low font-label-caps text-label-caps transition-colors" href="#billing">Billing &amp; Org</a>
+</nav>
+</div>
+<!-- Settings Content (Bento Right Column) -->
+<div class="lg:col-span-2 space-y-8 pb-24">
+<!-- Engine & Models Section -->
+<section class="bg-surface-container-lowest border border-border-slate rounded-xl p-6" id="ocr">
+<h3 class="font-headline-lg text-headline-lg-mobile md:text-[24px] mb-6 border-b border-border-slate pb-4">OCR Configuration</h3>
+<div class="space-y-6">
+<div>
+<label class="font-label-caps text-label-caps text-on-surface-variant block mb-2">Primary OCR Engine</label>
+<div class="grid grid-cols-2 gap-4">
+<label class="relative flex cursor-pointer rounded-lg border bg-surface-container-low p-4 focus:outline-none border-primary ring-1 ring-primary">
+<input checked="" class="sr-only" name="ocr_engine" type="radio" value="tesseract"/>
+<div class="flex w-full items-center justify-between">
+<div class="flex items-center">
+<div class="text-sm">
+<p class="font-bold text-on-surface">Tesseract OCR</p>
+<p class="text-on-surface-variant font-body-sm mt-1">Best for standard text documents.</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+</label>
+<label class="relative flex cursor-pointer rounded-lg border border-border-slate bg-surface-container-lowest p-4 hover:bg-surface-container-low transition-colors">
+<input class="sr-only" name="ocr_engine" type="radio" value="easyocr"/>
+<div class="flex w-full items-center justify-between">
+<div class="flex items-center">
+<div class="text-sm">
+<p class="font-bold text-on-surface">EasyOCR</p>
+<p class="text-on-surface-variant font-body-sm mt-1">Better for complex layouts &amp; tables.</p>
+</div>
+</div>
+</div>
+</label>
+</div>
+</div>
+<div>
+<label class="font-label-caps text-label-caps text-on-surface-variant block mb-2">ML Model Preference</label>
+<select class="w-full bg-surface-container-lowest border border-border-slate rounded-DEFAULT py-3 px-4 font-body-md text-on-surface focus:border-primary focus:ring-1 focus:ring-primary">
+<option value="balanced">Balanced (Speed &amp; Accuracy)</option>
+<option value="accuracy">High Accuracy (Slower processing)</option>
+<option value="speed">Fast Draft (Lower accuracy)</option>
+</select>
+</div>
+<div class="flex items-center gap-3 pt-2">
+<input checked="" class="rounded text-primary border-outline-variant focus:ring-primary" id="auto_rotate" type="checkbox"/>
+<label class="font-body-sm text-on-surface" for="auto_rotate">Auto-detect and rotate pages before extraction</label>
+</div>
+</div>
+</section>
+<!-- API Keys Section -->
+<section class="bg-surface-container-lowest border border-border-slate rounded-xl p-6" id="api">
+<div class="flex justify-between items-center mb-6 border-b border-border-slate pb-4">
+<h3 class="font-headline-lg text-headline-lg-mobile md:text-[24px]">API Key Management</h3>
+<button class="text-primary font-label-caps text-label-caps hover:bg-surface-container-low px-3 py-1.5 rounded transition-colors flex items-center gap-1">
+<span class="material-symbols-outlined text-[18px]">add</span> Generate Key
+                            </button>
+</div>
+<div class="space-y-4">
+<div class="flex items-center justify-between p-4 bg-surface-container-low rounded-lg border border-border-slate">
+<div>
+<div class="flex items-center gap-2 mb-1">
+<span class="font-bold font-body-sm">Production Key - Web App</span>
+<span class="bg-data-highlight text-secondary px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-wider">Active</span>
+</div>
+<p class="font-code-md text-code-md text-on-surface-variant">pk_live_8f92...a31b</p>
+</div>
+<div class="flex gap-2">
+<button class="p-2 text-outline hover:text-primary transition-colors rounded"><span class="material-symbols-outlined">content_copy</span></button>
+<button class="p-2 text-outline hover:text-error transition-colors rounded"><span class="material-symbols-outlined">delete</span></button>
+</div>
+</div>
+</div>
+</section>
+</div>
+</div>
+</div>
+<!-- Sticky Footer Actions -->
+<div class="fixed bottom-0 left-0 md:left-[280px] right-0 bg-surface/80 backdrop-blur-md border-t border-border-slate p-4 z-30">
+<div class="max-w-5xl mx-auto flex justify-end gap-4">
+<button class="px-6 py-2.5 rounded-DEFAULT font-label-caps text-label-caps border border-border-slate text-on-surface-variant hover:bg-surface-container-low transition-colors">Reset Defaults</button>
+<button class="px-6 py-2.5 rounded-DEFAULT font-label-caps text-label-caps bg-primary text-on-primary hover:opacity-90 transition-opacity">Save Changes</button>
+</div>
+</div>
+</main>
+</body></html>

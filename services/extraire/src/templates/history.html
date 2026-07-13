@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Document History - PDF Extract Pro</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&amp;family=Geist:wght@600;700&amp;family=JetBrains+Mono:wght@400&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "primary-container": "#2563eb",
+                      "surface-tint": "#0053db",
+                      "outline": "#737686",
+                      "on-primary-fixed": "#00174b",
+                      "on-primary-container": "#eeefff",
+                      "background": "#f8f9ff",
+                      "on-surface": "#0b1c30",
+                      "surface-container-high": "#dce9ff",
+                      "primary-fixed": "#dbe1ff",
+                      "on-secondary-fixed": "#002113",
+                      "on-tertiary-fixed": "#07006c",
+                      "on-secondary-fixed-variant": "#005236",
+                      "border-slate": "#E2E8F0",
+                      "on-tertiary": "#ffffff",
+                      "on-primary-fixed-variant": "#003ea8",
+                      "on-background": "#0b1c30",
+                      "inverse-primary": "#b4c5ff",
+                      "on-secondary-container": "#00714d",
+                      "data-highlight": "#D1FAE5",
+                      "outline-variant": "#c3c6d7",
+                      "surface-dark": "#1E293B",
+                      "surface-container": "#e5eeff",
+                      "surface-container-highest": "#d3e4fe",
+                      "secondary-container": "#6cf8bb",
+                      "tertiary-fixed": "#e1e0ff",
+                      "inverse-on-surface": "#eaf1ff",
+                      "primary": "#004ac6",
+                      "tertiary-container": "#585be6",
+                      "on-primary": "#ffffff",
+                      "surface-variant": "#d3e4fe",
+                      "on-secondary": "#ffffff",
+                      "tertiary": "#3e3fcc",
+                      "error": "#ba1a1a",
+                      "error-container": "#ffdad6",
+                      "secondary-fixed": "#6ffbbe",
+                      "surface": "#f8f9ff",
+                      "on-tertiary-fixed-variant": "#2f2ebe",
+                      "surface-container-lowest": "#ffffff",
+                      "on-tertiary-container": "#f1eeff",
+                      "primary-fixed-dim": "#b4c5ff",
+                      "inverse-surface": "#213145",
+                      "on-error-container": "#93000a",
+                      "on-surface-variant": "#434655",
+                      "on-error": "#ffffff",
+                      "surface-dim": "#cbdbf5",
+                      "secondary": "#006c49",
+                      "background-dark": "#0F172A",
+                      "surface-bright": "#f8f9ff",
+                      "surface-container-low": "#eff4ff",
+                      "tertiary-fixed-dim": "#c0c1ff",
+                      "secondary-fixed-dim": "#4edea3"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "margin-desktop": "32px",
+                      "max-width": "1440px",
+                      "base": "4px",
+                      "margin-mobile": "16px",
+                      "gutter": "16px"
+              },
+              "fontFamily": {
+                      "label-caps": [
+                              "Inter"
+                      ],
+                      "headline-lg": [
+                              "Geist"
+                      ],
+                      "headline-lg-mobile": [
+                              "Geist"
+                      ],
+                      "body-sm": [
+                              "Inter"
+                      ],
+                      "headline-xl": [
+                              "Geist"
+                      ],
+                      "body-md": [
+                              "Inter"
+                      ],
+                      "code-md": [
+                              "JetBrains Mono"
+                      ]
+              },
+              "fontSize": {
+                      "label-caps": [
+                              "12px",
+                              {
+                                      "lineHeight": "16px",
+                                      "letterSpacing": "0.05em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "headline-lg": [
+                              "32px",
+                              {
+                                      "lineHeight": "40px",
+                                      "letterSpacing": "-0.01em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "headline-lg-mobile": [
+                              "24px",
+                              {
+                                      "lineHeight": "32px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "body-sm": [
+                              "14px",
+                              {
+                                      "lineHeight": "20px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "headline-xl": [
+                              "40px",
+                              {
+                                      "lineHeight": "48px",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "body-md": [
+                              "16px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "code-md": [
+                              "14px",
+                              {
+                                      "lineHeight": "22px",
+                                      "fontWeight": "400"
+                              }
+                      ]
+              }
+      },
+          },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .icon-fill {
+            font-variation-settings: 'FILL' 1;
+        }
+        /* Custom scrollbar for data tables */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8; 
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface font-body-md antialiased min-h-screen flex">
+<!-- SideNavBar -->
+<nav class="hidden md:flex flex-col h-full py-spacing-margin-desktop bg-background dark:bg-background-dark font-body-md text-body-md fixed left-0 top-0 w-[280px] border-r border-border-slate dark:border-outline-variant z-40">
+<!-- Header -->
+<div class="px-6 mb-8 flex items-center gap-3">
+<div class="w-10 h-10 rounded bg-primary-container text-on-primary flex items-center justify-center shrink-0 shadow-sm">
+<span class="material-symbols-outlined icon-fill">document_scanner</span>
+</div>
+<div>
+<h1 class="font-headline-lg text-headline-lg font-bold text-primary dark:text-inverse-primary text-xl truncate tracking-tight">PDF Extract Pro</h1>
+<p class="font-body-sm text-body-sm text-on-surface-variant truncate">Enterprise Workspace</p>
+</div>
+</div>
+<!-- CTA -->
+<div class="px-6 mb-8">
+<button class="w-full bg-primary hover:bg-on-primary-fixed-variant text-on-primary font-label-caps text-label-caps py-3 rounded transition-colors shadow-sm flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[18px]">add</span>
+                New Document
+            </button>
+</div>
+<!-- Main Navigation -->
+<div class="flex-1 px-4 space-y-1">
+<a class="flex items-center gap-3 px-4 py-3 rounded text-on-surface-variant dark:text-outline hover:text-primary dark:hover:text-inverse-primary hover:bg-surface-container-low dark:hover:bg-surface-dark transition-colors duration-200 group" href="#">
+<span class="material-symbols-outlined group-hover:icon-fill">dashboard</span>
+                Dashboard
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 rounded text-on-surface-variant dark:text-outline hover:text-primary dark:hover:text-inverse-primary hover:bg-surface-container-low dark:hover:bg-surface-dark transition-colors duration-200 group" href="#">
+<span class="material-symbols-outlined group-hover:icon-fill">upload_file</span>
+                Upload
+            </a>
+<!-- Active Tab: History -->
+<a class="flex items-center gap-3 px-4 py-3 bg-surface-container-low text-primary dark:text-inverse-primary font-bold border-r-4 border-primary dark:border-inverse-primary transition-all rounded-l" href="#">
+<span class="material-symbols-outlined icon-fill">history</span>
+                History
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 rounded text-on-surface-variant dark:text-outline hover:text-primary dark:hover:text-inverse-primary hover:bg-surface-container-low dark:hover:bg-surface-dark transition-colors duration-200 group" href="#">
+<span class="material-symbols-outlined group-hover:icon-fill">settings</span>
+                Settings
+            </a>
+</div>
+<!-- Footer Navigation -->
+<div class="mt-auto px-4 space-y-1 border-t border-border-slate pt-4 mx-4">
+<a class="flex items-center gap-3 px-4 py-2 rounded text-on-surface-variant dark:text-outline hover:text-primary dark:hover:text-inverse-primary hover:bg-surface-container-low dark:hover:bg-surface-dark transition-colors duration-200 group" href="#">
+<span class="material-symbols-outlined group-hover:icon-fill">help</span>
+                Support
+            </a>
+<a class="flex items-center gap-3 px-4 py-2 rounded text-on-surface-variant dark:text-outline hover:text-primary dark:hover:text-inverse-primary hover:bg-surface-container-low dark:hover:bg-surface-dark transition-colors duration-200 group" href="#">
+<span class="material-symbols-outlined group-hover:icon-fill">manage_accounts</span>
+                Account
+            </a>
+</div>
+</nav>
+<!-- Main Content Area Wrapper -->
+<div class="flex-1 flex flex-col md:ml-[280px] min-h-screen">
+<!-- TopNavBar -->
+<header class="flex justify-between items-center w-full h-16 px-spacing-margin-desktop sticky top-0 z-50 bg-surface-container-lowest dark:bg-surface-dark border-b border-border-slate dark:border-outline-variant font-label-caps text-label-caps">
+<!-- Mobile Brand/Menu Trigger -->
+<div class="flex items-center gap-4 md:hidden">
+<button class="text-on-surface-variant">
+<span class="material-symbols-outlined">menu</span>
+</button>
+<span class="font-headline-lg-mobile text-headline-lg-mobile font-black text-on-surface truncate">PDF Extract Pro</span>
+</div>
+<!-- Search Bar (on_left) -->
+<div class="hidden md:flex flex-1 max-w-md relative mr-8">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-[20px]">search</span>
+<input class="w-full bg-surface py-2 pl-10 pr-4 rounded border-border-slate focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all font-body-sm text-body-sm placeholder:text-outline" placeholder="Search extractions..." type="text"/>
+</div>
+<!-- Right Actions -->
+<div class="flex items-center gap-6 shrink-0">
+<div class="hidden sm:block text-primary dark:text-inverse-primary font-bold">
+                    Credits: 1,240
+                </div>
+<div class="flex items-center gap-3">
+<button class="text-on-surface-variant dark:text-outline hover:text-primary dark:hover:text-inverse-primary transition-colors relative">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-0 right-0 w-2 h-2 bg-error rounded-full"></span>
+</button>
+<button class="text-on-surface-variant dark:text-outline hover:text-primary dark:hover:text-inverse-primary transition-colors hidden sm:block">
+<span class="material-symbols-outlined">help_outline</span>
+</button>
+</div>
+<div class="w-8 h-8 rounded-full bg-surface-dim border border-border-slate overflow-hidden cursor-pointer hover:opacity-80 transition-opacity">
+<img alt="User Profile Avatar" class="w-full h-full object-cover" data-alt="A professional headshot of a person looking at the camera in a modern office setting. High key lighting, clean corporate aesthetic, bright, sharp, reliable tone. Wearing business casual." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBm5mHGXdxPOrcTGg9WYi0m3ntgmsEdgX1pcrVYnBQuhSNfdiPZ7xpv-Y9HJ6gRXeTk37pp8tX5fk_SDH1FbIeQmbKLXqJJNoZm-jeQ0Jf7EnX9OSEdDoLbHHRiwOgAjPnKszFVTvu3-W0NsYw7W6oNAyiAgQdfRZwmlbcMm_4UDrOzmYSIVQldDLe78MnTumkYbNYisiXK6RcITGHsRJgVEs22FMm31hRV_7mwgvG7E3ppjG21SwaJpTG8uGK4i6-sMU5twTCK34Qk"/>
+</div>
+</div>
+</header>
+<!-- Page Content Canvas -->
+<main class="flex-1 p-spacing-margin-mobile md:p-spacing-margin-desktop overflow-x-hidden max-w-max-width mx-auto w-full">
+<!-- Page Header -->
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+<div>
+<h2 class="font-headline-xl text-headline-xl text-on-surface mb-1">Extraction History</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">Manage and review past document processing jobs.</p>
+</div>
+<div class="flex gap-3">
+<button class="px-4 py-2 border border-border-slate rounded bg-surface-container-lowest text-on-surface font-label-caps text-label-caps hover:bg-surface-container-low transition-colors flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">filter_list</span>
+                        Filter
+                    </button>
+<button class="px-4 py-2 bg-primary text-on-primary rounded font-label-caps text-label-caps hover:bg-on-primary-fixed-variant transition-colors flex items-center gap-2 shadow-sm">
+<span class="material-symbols-outlined text-[18px]">download</span>
+                        Export List
+                    </button>
+</div>
+</div>
+<!-- Stats/Bento Area (Optional visual interest) -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+<div class="bg-surface-container-lowest border border-border-slate rounded-lg p-6 shadow-sm">
+<div class="flex justify-between items-start mb-4">
+<div class="p-2 bg-primary-fixed rounded text-on-primary-fixed">
+<span class="material-symbols-outlined">description</span>
+</div>
+<span class="text-secondary font-label-caps text-label-caps flex items-center bg-secondary-fixed/20 px-2 py-1 rounded">
+<span class="material-symbols-outlined text-[14px] mr-1">trending_up</span> 12%
+                        </span>
+</div>
+<div class="font-body-sm text-body-sm text-on-surface-variant">Total Processed</div>
+<div class="font-headline-xl text-headline-xl mt-1">24,592</div>
+</div>
+<div class="bg-surface-container-lowest border border-border-slate rounded-lg p-6 shadow-sm">
+<div class="flex justify-between items-start mb-4">
+<div class="p-2 bg-error-container rounded text-on-error-container">
+<span class="material-symbols-outlined">error</span>
+</div>
+</div>
+<div class="font-body-sm text-body-sm text-on-surface-variant">Failed Extractions</div>
+<div class="font-headline-xl text-headline-xl mt-1 text-on-surface">143</div>
+</div>
+<div class="bg-surface-container-lowest border border-border-slate rounded-lg p-6 shadow-sm flex flex-col justify-center relative overflow-hidden">
+<div class="absolute inset-0 opacity-10 pointer-events-none" style="background-image: url('data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23004ac6\' fill-opacity=\'1\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E');"></div>
+<div class="font-label-caps text-label-caps text-primary mb-2">Pro Tip</div>
+<div class="font-body-sm text-body-sm text-on-surface-variant z-10">Use bulk actions to re-process failed documents up to 50 at a time without consuming additional credits.</div>
+</div>
+</div>
+<!-- Data Table Container -->
+<div class="bg-surface-container-lowest border border-border-slate rounded-lg shadow-sm flex flex-col overflow-hidden">
+<!-- Table Toolbar (Bulk Actions) -->
+<div class="p-4 border-b border-border-slate flex justify-between items-center bg-surface-bright">
+<div class="flex items-center gap-3">
+<input class="w-4 h-4 text-primary border-outline rounded focus:ring-primary cursor-pointer" type="checkbox"/>
+<span class="font-body-sm text-body-sm text-on-surface-variant">3 selected</span>
+</div>
+<div class="flex gap-2">
+<button class="px-3 py-1.5 border border-border-slate text-on-surface-variant rounded hover:bg-surface-container-low transition-colors font-label-caps text-label-caps flex items-center gap-1 disabled:opacity-50">
+<span class="material-symbols-outlined text-[16px]">sync</span> Reprocess
+                        </button>
+<button class="px-3 py-1.5 border border-error/30 text-error rounded hover:bg-error-container transition-colors font-label-caps text-label-caps flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">delete</span> Delete
+                        </button>
+</div>
+</div>
+<!-- Table Wrapper for scrolling -->
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead class="bg-[#F1F5F9] font-label-caps text-label-caps text-on-surface-variant sticky top-0 z-10">
+<tr>
+<th class="p-4 w-12 text-center border-b border-border-slate"></th>
+<th class="p-4 font-semibold border-b border-border-slate whitespace-nowrap cursor-pointer hover:text-on-surface">Filename <span class="material-symbols-outlined text-[14px] align-middle">arrow_downward</span></th>
+<th class="p-4 font-semibold border-b border-border-slate whitespace-nowrap">Date</th>
+<th class="p-4 font-semibold border-b border-border-slate whitespace-nowrap">Type</th>
+<th class="p-4 font-semibold border-b border-border-slate whitespace-nowrap">Format</th>
+<th class="p-4 font-semibold border-b border-border-slate whitespace-nowrap">Status</th>
+<th class="p-4 font-semibold border-b border-border-slate text-right whitespace-nowrap">Actions</th>
+</tr>
+</thead>
+<tbody class="font-body-sm text-body-sm text-on-surface divide-y divide-border-slate">
+{% for f in files %}
+<tr class="hover:bg-surface-container-low transition-colors group">
+<td class="p-4 text-center">
+<input class="w-4 h-4 text-primary border-outline rounded focus:ring-primary cursor-pointer" type="checkbox"/>
+</td>
+<td class="p-4 font-medium flex items-center gap-2">
+<span class="material-symbols-outlined text-outline text-[18px]">description</span>
+    {{ f }}
+</td>
+<td class="p-4 text-on-surface-variant whitespace-nowrap">Just now</td>
+<td class="p-4">Document</td>
+<td class="p-4"><span class="font-code-md text-code-md bg-surface-dim px-2 py-0.5 rounded text-outline">{{ f.split('.')[-1].upper() }}</span></td>
+<td class="p-4">
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-data-highlight border border-secondary text-secondary">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span> Ready
+</span>
+</td>
+<td class="p-4 text-right">
+<div class="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+<a href="/download/{{ f }}" class="p-1.5 text-on-surface-variant hover:text-primary rounded hover:bg-primary-fixed transition-colors" title="Download">
+<span class="material-symbols-outlined text-[18px]">download</span>
+</a>
+</div>
+</td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+<!-- Pagination -->
+<div class="p-4 border-t border-border-slate flex items-center justify-between bg-surface-container-lowest">
+<span class="font-body-sm text-body-sm text-on-surface-variant">Showing 1 to 4 of 24,592 entries</span>
+<div class="flex gap-1">
+<button class="w-8 h-8 flex items-center justify-center border border-border-slate rounded text-outline hover:bg-surface-container-low transition-colors disabled:opacity-50">
+<span class="material-symbols-outlined text-[18px]">chevron_left</span>
+</button>
+<button class="w-8 h-8 flex items-center justify-center border border-primary bg-primary text-on-primary rounded font-label-caps">1</button>
+<button class="w-8 h-8 flex items-center justify-center border border-border-slate rounded text-on-surface-variant hover:bg-surface-container-low transition-colors font-label-caps">2</button>
+<button class="w-8 h-8 flex items-center justify-center border border-border-slate rounded text-on-surface-variant hover:bg-surface-container-low transition-colors font-label-caps">3</button>
+<span class="w-8 h-8 flex items-center justify-center text-outline">...</span>
+<button class="w-8 h-8 flex items-center justify-center border border-border-slate rounded text-on-surface-variant hover:bg-surface-container-low transition-colors disabled:opacity-50">
+<span class="material-symbols-outlined text-[18px]">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+<div class="mt-8 text-center pb-8">
+<p class="font-body-sm text-body-sm text-outline">Need help understanding OCR confidence scores? <a class="text-primary hover:underline" href="#">Read the documentation</a>.</p>
+</div>
+</main>
+</div>
+</body></html>

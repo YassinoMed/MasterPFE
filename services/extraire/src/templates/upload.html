@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+
+<html class="h-full" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>PDF Extract Pro - Upload</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&amp;family=Geist:wght@600;700&amp;family=JetBrains+Mono:wght@400&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary-container": "#2563eb",
+                        "surface-tint": "#0053db",
+                        "outline": "#737686",
+                        "on-primary-fixed": "#00174b",
+                        "on-primary-container": "#eeefff",
+                        "background": "#f8f9ff",
+                        "on-surface": "#0b1c30",
+                        "surface-container-high": "#dce9ff",
+                        "primary-fixed": "#dbe1ff",
+                        "on-secondary-fixed": "#002113",
+                        "on-tertiary-fixed": "#07006c",
+                        "on-secondary-fixed-variant": "#005236",
+                        "border-slate": "#E2E8F0",
+                        "on-tertiary": "#ffffff",
+                        "on-primary-fixed-variant": "#003ea8",
+                        "on-background": "#0b1c30",
+                        "inverse-primary": "#b4c5ff",
+                        "on-secondary-container": "#00714d",
+                        "data-highlight": "#D1FAE5",
+                        "outline-variant": "#c3c6d7",
+                        "surface-dark": "#1E293B",
+                        "surface-container": "#e5eeff",
+                        "surface-container-highest": "#d3e4fe",
+                        "secondary-container": "#6cf8bb",
+                        "tertiary-fixed": "#e1e0ff",
+                        "inverse-on-surface": "#eaf1ff",
+                        "primary": "#004ac6",
+                        "tertiary-container": "#585be6",
+                        "on-primary": "#ffffff",
+                        "surface-variant": "#d3e4fe",
+                        "on-secondary": "#ffffff",
+                        "tertiary": "#3e3fcc",
+                        "error": "#ba1a1a",
+                        "error-container": "#ffdad6",
+                        "secondary-fixed": "#6ffbbe",
+                        "surface": "#f8f9ff",
+                        "on-tertiary-fixed-variant": "#2f2ebe",
+                        "surface-container-lowest": "#ffffff",
+                        "on-tertiary-container": "#f1eeff",
+                        "primary-fixed-dim": "#b4c5ff",
+                        "inverse-surface": "#213145",
+                        "on-error-container": "#93000a",
+                        "on-surface-variant": "#434655",
+                        "on-error": "#ffffff",
+                        "surface-dim": "#cbdbf5",
+                        "secondary": "#006c49",
+                        "background-dark": "#0F172A",
+                        "surface-bright": "#f8f9ff",
+                        "surface-container-low": "#eff4ff",
+                        "tertiary-fixed-dim": "#c0c1ff",
+                        "secondary-fixed-dim": "#4edea3"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "margin-desktop": "32px",
+                        "max-width": "1440px",
+                        "base": "4px",
+                        "margin-mobile": "16px",
+                        "gutter": "16px"
+                    },
+                    "fontFamily": {
+                        "label-caps": ["Inter"],
+                        "headline-lg": ["Geist"],
+                        "headline-lg-mobile": ["Geist"],
+                        "body-sm": ["Inter"],
+                        "headline-xl": ["Geist"],
+                        "body-md": ["Inter"],
+                        "code-md": ["JetBrains Mono"]
+                    },
+                    "fontSize": {
+                        "label-caps": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "headline-lg-mobile": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "body-sm": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "headline-xl": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "code-md": ["14px", { "lineHeight": "22px", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .drag-active {
+            border-color: #004ac6 !important;
+            background-color: #eff4ff !important;
+        }
+        /* Custom scrollbar for file list */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background-color: #c3c6d7;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body class="bg-background dark:bg-background-dark text-on-surface h-full flex antialiased">
+<!-- SideNavBar -->
+<nav class="fixed left-0 top-0 h-full w-[280px] bg-background dark:bg-background-dark border-r border-border-slate dark:border-outline-variant flex flex-col py-spacing-margin-desktop z-40 hidden md:flex">
+<!-- Brand / Header -->
+<div class="px-6 mb-8 flex items-center gap-3">
+<div class="w-10 h-10 rounded-lg bg-primary-container text-on-primary-container flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">document_scanner</span>
+</div>
+<div>
+<h1 class="font-headline-lg text-headline-lg font-bold text-primary dark:text-inverse-primary text-[20px] leading-tight tracking-tight">PDF Extract Pro</h1>
+<p class="font-label-caps text-label-caps text-on-surface-variant dark:text-outline mt-1">Enterprise Workspace</p>
+</div>
+</div>
+<!-- CTA -->
+<div class="px-6 mb-6">
+<button type="submit" class="w-full bg-primary hover:bg-on-primary-fixed-variant text-on-primary font-label-caps text-label-caps py-3 px-4 rounded-lg flex items-center justify-center gap-2 transition-colors duration-200 shadow-sm">
+<span class="material-symbols-outlined text-[18px]">add</span>
+                New Document
+            </button>
+</div>
+<!-- Main Navigation -->
+<div class="flex-1 px-3 space-y-1 overflow-y-auto">
+<!-- Dashboard (Inactive) -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-surface-variant dark:text-outline hover:bg-surface-container-low dark:hover:bg-surface-dark transition-colors duration-200 font-body-md text-body-md group" href="/dashboard">
+<span class="material-symbols-outlined text-[20px] group-hover:text-primary dark:group-hover:text-inverse-primary transition-colors">dashboard</span>
+<span class="group-hover:text-primary dark:group-hover:text-inverse-primary transition-colors">Dashboard</span>
+</a>
+<!-- Upload (Active) -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-surface-container-low dark:bg-surface-dark text-primary dark:text-inverse-primary font-bold border-r-4 border-primary dark:border-inverse-primary font-body-md text-body-md scale-[0.98] transition-all" href="/upload">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">upload_file</span>
+<span>Upload</span>
+</a>
+<!-- History (Inactive) -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-surface-variant dark:text-outline hover:bg-surface-container-low dark:hover:bg-surface-dark transition-colors duration-200 font-body-md text-body-md group" href="/history">
+<span class="material-symbols-outlined text-[20px] group-hover:text-primary dark:group-hover:text-inverse-primary transition-colors">history</span>
+<span class="group-hover:text-primary dark:group-hover:text-inverse-primary transition-colors">History</span>
+</a>
+<!-- Settings (Inactive) -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-surface-variant dark:text-outline hover:bg-surface-container-low dark:hover:bg-surface-dark transition-colors duration-200 font-body-md text-body-md group" href="/settings">
+<span class="material-symbols-outlined text-[20px] group-hover:text-primary dark:group-hover:text-inverse-primary transition-colors">settings</span>
+<span class="group-hover:text-primary dark:group-hover:text-inverse-primary transition-colors">Settings</span>
+</a>
+</div>
+<!-- Footer Navigation -->
+<div class="px-3 mt-auto pt-6 border-t border-border-slate dark:border-outline-variant space-y-1">
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-surface-variant dark:text-outline hover:bg-surface-container-low dark:hover:bg-surface-dark transition-colors duration-200 font-body-md text-body-md group" href="#">
+<span class="material-symbols-outlined text-[20px] group-hover:text-primary dark:group-hover:text-inverse-primary transition-colors">help</span>
+<span class="group-hover:text-primary dark:group-hover:text-inverse-primary transition-colors">Support</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-surface-variant dark:text-outline hover:bg-surface-container-low dark:hover:bg-surface-dark transition-colors duration-200 font-body-md text-body-md group" href="#">
+<span class="material-symbols-outlined text-[20px] group-hover:text-primary dark:group-hover:text-inverse-primary transition-colors">manage_accounts</span>
+<span class="group-hover:text-primary dark:group-hover:text-inverse-primary transition-colors">Account</span>
+</a>
+</div>
+</nav>
+<!-- Main Content Wrapper -->
+<div class="flex-1 flex flex-col min-h-screen md:ml-[280px]">
+<!-- TopNavBar -->
+<header class="flex justify-between items-center w-full h-16 px-spacing-margin-desktop sticky top-0 z-30 bg-surface-container-lowest dark:bg-surface-dark border-b border-border-slate dark:border-outline-variant">
+<!-- Left: Search (Hidden on this specific config but required by structure if on_left) -->
+<div class="flex-1 flex items-center">
+<div class="relative w-64 hidden sm:block">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[20px]">search</span>
+<input class="w-full pl-10 pr-4 py-2 bg-surface hover:bg-surface-container-low border-none rounded-lg font-body-sm text-body-sm focus:ring-2 focus:ring-primary-container transition-colors" placeholder="Search documents..." type="text"/>
+</div>
+<!-- Mobile Menu Button -->
+<button class="md:hidden p-2 text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined">menu</span>
+</button>
+</div>
+<!-- Right: Actions -->
+<div class="flex items-center gap-6">
+<!-- Navigation Links -->
+<div class="hidden sm:flex items-center gap-4">
+<span class="font-label-caps text-label-caps text-primary dark:text-inverse-primary font-bold bg-surface-container-low px-3 py-1.5 rounded-full border border-primary-fixed">Credits: 1,240</span>
+</div>
+<!-- Trailing Icons -->
+<div class="flex items-center gap-2">
+<button class="p-2 text-on-surface-variant dark:text-outline hover:text-primary dark:hover:text-inverse-primary transition-colors rounded-full hover:bg-surface-container-low">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="p-2 text-on-surface-variant dark:text-outline hover:text-primary dark:hover:text-inverse-primary transition-colors rounded-full hover:bg-surface-container-low">
+<span class="material-symbols-outlined">help_outline</span>
+</button>
+</div>
+<!-- Profile Avatar -->
+<div class="w-8 h-8 rounded-full bg-surface-variant overflow-hidden border border-border-slate cursor-pointer hover:opacity-80 transition-opacity">
+<img alt="User Profile Avatar" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD0Pf4Resz_P-zQFsg-uBEyGqnpInCMfFAVGxrigUPAGUTYLt_42TVXvSts4hX38KIR2kEk2lQntB_4BPtRM29bHupRCc7VdRkqnRaEtx9WPzElW71hgzjaQkRQLvUzhJzaGRfE7CVFsL0rC1JSXKpCFgU2D4cVrFUwEny-QLk0-Gh7rPQn1odrxlXO5MqCYIJgE5a_dSkoPc6p4b1SR7YE2CgsL_WsAGQYJ28YqmrxZccUCPbgZJcEx_pa3GN3RJ893L_ZYkgvzzH4"/>
+</div>
+</div>
+</header>
+<!-- Page Content -->
+<main class="flex-1 p-spacing-margin-mobile md:p-spacing-margin-desktop overflow-y-auto bg-background">
+<div class="max-w-[1200px] mx-auto">
+<!-- Page Header -->
+<div class="mb-8">
+<h2 class="font-headline-xl text-headline-xl text-on-surface mb-2">Upload Documents</h2>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-2xl">Drop your PDF files here for extraction. Configure advanced extraction parameters before processing to optimize accuracy.</p>
+</div>
+<form action="/upload" method="post" enctype="multipart/form-data" class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+<!-- Left Column: Upload Zone & Queue (8 cols) -->
+<div class="lg:col-span-8 flex flex-col gap-6">
+<!-- Drag & Drop Zone -->
+<div class="w-full h-[320px] rounded-xl border-2 border-dashed border-outline-variant bg-surface-container-lowest hover:border-primary hover:bg-surface-container-low transition-all duration-200 flex flex-col items-center justify-center p-8 cursor-pointer relative group" id="dropzone">
+<!-- Animated Background Element (Subtle) -->
+<div class="absolute inset-0 overflow-hidden rounded-xl opacity-[0.03] pointer-events-none">
+<div class="w-full h-full bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMiIgY3k9IjIiIHI9IjIiIGZpbGw9IiMwMDQxQzYiIGZpbGwtb3BhY2l0eT0iMSIvPjwvc3ZnPg==')] [background-size:24px_24px]"></div>
+</div>
+<div class="w-16 h-16 rounded-full bg-primary-fixed flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
+<span class="material-symbols-outlined text-[32px] text-primary" style="font-variation-settings: 'FILL' 1;">cloud_upload</span>
+</div>
+<h3 class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface mb-2 text-center">Drag &amp; Drop PDFs here</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant text-center mb-6">or click to browse files from your computer</p>
+<div class="flex gap-4 font-body-sm text-body-sm text-outline">
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">check_circle</span> Single or Batch</span>
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">check_circle</span> Max 50MB per file</span>
+</div>
+<input accept=".pdf" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" id="file-input" name="file" type="file" required/>
+</div>
+<!-- File Queue -->
+<div class="bg-surface-container-lowest border border-border-slate rounded-xl p-6 shadow-sm">
+<div class="flex justify-between items-center mb-4">
+<h3 class="font-label-caps text-label-caps text-on-surface">Upload Queue <span class="bg-surface-container px-2 py-0.5 rounded-full text-primary ml-2">2 Files</span></h3>
+<button class="font-label-caps text-label-caps text-primary hover:text-on-primary-fixed-variant transition-colors">Clear All</button>
+</div>
+<div class="space-y-3 max-h-[300px] overflow-y-auto custom-scrollbar pr-2">
+<!-- Pending Item -->
+<div class="flex items-center p-3 rounded-lg border border-border-slate bg-surface hover:border-outline-variant transition-colors">
+<div class="w-10 h-10 rounded bg-error-container text-on-error-container flex items-center justify-center shrink-0 mr-4">
+<span class="material-symbols-outlined">picture_as_pdf</span>
+</div>
+<div class="flex-1 min-w-0">
+<p class="font-body-sm text-body-sm font-semibold text-on-surface truncate">Q3_Financial_Report_Final_v2.pdf</p>
+<p class="font-body-sm text-body-sm text-on-surface-variant text-[12px]">4.2 MB • Ready to process</p>
+</div>
+<button class="p-2 text-outline hover:text-error transition-colors rounded-full hover:bg-error-container/50">
+<span class="material-symbols-outlined text-[20px]">delete</span>
+</button>
+</div>
+<!-- Processing Item -->
+<div class="flex items-center p-3 rounded-lg border border-primary-fixed bg-surface-container-low transition-colors relative overflow-hidden">
+<!-- Progress Bar Background -->
+<div class="absolute bottom-0 left-0 h-1 bg-primary-container w-[45%] rounded-r-full"></div>
+<div class="w-10 h-10 rounded bg-primary-fixed text-primary flex items-center justify-center shrink-0 mr-4">
+<span class="material-symbols-outlined animate-spin" style="animation-duration: 3s;">sync</span>
+</div>
+<div class="flex-1 min-w-0">
+<p class="font-body-sm text-body-sm font-semibold text-on-surface truncate">Vendor_Invoices_Batch_089.pdf</p>
+<div class="flex items-center gap-2">
+<p class="font-body-sm text-body-sm text-primary text-[12px] font-medium">Extracting... 45%</p>
+<span class="w-1 h-1 rounded-full bg-outline"></span>
+<p class="font-body-sm text-body-sm text-on-surface-variant text-[12px]">12.8 MB</p>
+</div>
+</div>
+<button class="p-2 text-outline hover:text-error transition-colors rounded-full hover:bg-surface-variant">
+<span class="material-symbols-outlined text-[20px]">close</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Right Column: Settings Panel (4 cols) -->
+<div class="lg:col-span-4">
+<div class="bg-surface-container-lowest border border-border-slate rounded-xl shadow-sm sticky top-24">
+<div class="p-5 border-b border-border-slate flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[20px]">tune</span>
+<h3 class="font-label-caps text-label-caps text-on-surface m-0">Extraction Settings</h3>
+</div>
+<div class="p-5 space-y-6">
+<!-- OCR Language -->
+<div>
+<label class="block font-label-caps text-label-caps text-on-surface mb-2">OCR Language</label>
+<div class="relative">
+<select class="w-full appearance-none bg-surface border border-border-slate text-on-surface font-body-sm text-body-sm rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-shadow">
+<option>Auto-detect (Recommended)</option>
+<option>English</option>
+<option>Spanish</option>
+<option>French</option>
+<option>German</option>
+</select>
+<span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-outline pointer-events-none">expand_more</span>
+</div>
+</div>
+<!-- ML Model Selection -->
+<div>
+<label class="block font-label-caps text-label-caps text-on-surface mb-2">Extraction Model</label>
+<div class="space-y-2">
+<label class="flex items-start gap-3 p-3 rounded-lg border border-primary bg-surface-container-low cursor-pointer">
+<input checked="" class="mt-1 text-primary focus:ring-primary border-outline" name="model" type="radio"/>
+<div>
+<span class="block font-body-sm text-body-sm font-semibold text-on-surface">Financial Fast (v2)</span>
+<span class="block font-body-sm text-body-sm text-on-surface-variant text-[12px] mt-0.5">Optimized for invoices and receipts. High speed.</span>
+</div>
+</label>
+<label class="flex items-start gap-3 p-3 rounded-lg border border-border-slate hover:border-outline-variant bg-surface cursor-pointer transition-colors">
+<input class="mt-1 text-primary focus:ring-primary border-outline" name="model" type="radio" value="deep"/>
+<div>
+<span class="block font-body-sm text-body-sm font-semibold text-on-surface">Legal Deep Extract</span>
+<span class="block font-body-sm text-body-sm text-on-surface-variant text-[12px] mt-0.5">Thorough parsing for contracts. Slower processing.</span>
+</div>
+</label>
+</div>
+</div>
+<!-- Toggles -->
+<div class="space-y-4 pt-2 border-t border-border-slate">
+<label class="flex items-center justify-between cursor-pointer group">
+<div>
+<span class="block font-body-sm text-body-sm font-medium text-on-surface">Preserve Layout Format</span>
+<span class="block font-body-sm text-body-sm text-on-surface-variant text-[12px]">Maintain spatial relationships in JSON</span>
+</div>
+<div class="relative inline-flex items-center h-6 rounded-full w-11 bg-primary transition-colors">
+<span class="inline-block w-4 h-4 transform translate-x-6 bg-white rounded-full transition-transform"></span>
+</div>
+</label>
+<label class="flex items-center justify-between cursor-pointer group">
+<div>
+<span class="block font-body-sm text-body-sm font-medium text-on-surface">Strict Validation</span>
+<span class="block font-body-sm text-body-sm text-on-surface-variant text-[12px]">Flag uncertain fields for manual review</span>
+</div>
+<div class="relative inline-flex items-center h-6 rounded-full w-11 bg-surface-container-highest transition-colors">
+<span class="inline-block w-4 h-4 transform translate-x-1 bg-outline rounded-full transition-transform"></span>
+</div>
+</label>
+</div>
+</div>
+<!-- Process Action -->
+<div class="p-5 bg-surface rounded-b-xl border-t border-border-slate">
+<button type="submit" class="w-full bg-primary hover:bg-on-primary-fixed-variant text-on-primary font-label-caps text-label-caps py-3 px-4 rounded-lg flex items-center justify-center gap-2 transition-colors duration-200 shadow-sm">
+<span class="material-symbols-outlined text-[18px]">play_arrow</span>
+                                    Start Extraction (1 pending)
+                                </button>
+</div>
+</div>
+</form>
+</div>
+</main>
+</div>
+<script>
+        // Simple drag and drop visual feedback
+        const dropzone = document.getElementById('dropzone');
+        const fileInput = document.getElementById('file-input');
+
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropzone.addEventListener(eventName, preventDefaults, false);
+        });
+
+        function preventDefaults (e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropzone.addEventListener(eventName, highlight, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropzone.addEventListener(eventName, unhighlight, false);
+        });
+
+        function highlight(e) {
+            dropzone.classList.add('drag-active');
+        }
+
+        function unhighlight(e) {
+            dropzone.classList.remove('drag-active');
+        }
+    </script>
+</body></html>

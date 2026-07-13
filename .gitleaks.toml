@@ -24,7 +24,9 @@ paths = [
   '''(^|/)vendor/''',
   '''(^|/)node_modules/''',
   '''(^|/)scripts/opensearch/''',
-  '''(^|/)istio-1.23.0/'''
+  '''(^|/)istio-1.23.0/''',
+  '''(^|/)infra/jenkins/secrets/.*''',
+  '''(^|/)evidence/.*'''
 ]
 regexes = [
   '''(?i)example[_-]?(token|secret|key|password)''',

@@ -1,0 +1,16 @@
+PyPDF2
+pdf2image
+pdfplumber
+PyYAML
+opencv-python
+Pillow
+pytesseract
+easyocr
+pandas
+openpyxl
+xlsxwriter
+numpy
+tqdm
+flask
+werkzeug
+fpdf2

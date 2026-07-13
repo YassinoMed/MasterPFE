@@ -1,0 +1,21 @@
+name: Run Tests
+on: [push, pull_request]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install system deps
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y tesseract-ocr tesseract-ocr-eng poppler-utils
+      - name: Install Python deps
+        run: |
+          pip install .
+          pip install pytest pytest-cov fpdf2
+      - name: Run tests
+        run: |
+          pytest tests/ --cov=src --cov-report=xml -v
