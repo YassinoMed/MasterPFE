@@ -10,9 +10,9 @@ RUN apt-get update && apt-get install -y \
 
 WORKDIR /app
 
-COPY requirements.txt .
+COPY services/extraire/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY . .
+COPY services/extraire .
 
 CMD ["python", "-m", "src.cli", "--input", "/data", "--output", "/output"]
