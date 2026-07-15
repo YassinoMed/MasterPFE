@@ -6,6 +6,7 @@ resources:
   - pvc.yaml
   - cronjob-postgres.yaml
   - database-external-secret.yaml
+  - s3-backup-credentials.yaml
   - networkpolicy.yaml
   - etcd-backup-cronjob.yaml
   - vault-backup-cronjob.yaml
