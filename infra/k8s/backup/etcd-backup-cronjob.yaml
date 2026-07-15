@@ -75,7 +75,7 @@ spec:
                   
                   echo "[INFO] Encrypting snapshot..."
                   if command -v gpg >/dev/null && [ -n "${ENCRYPTION_PASSWORD:-}" ]; then
-                    echo "${ENCRYPTION_PASSWORD}" | gpg --batch --yes --passphrase-fd 0 --symmetric --cipher-algo AES256 -o "${out}.gpg" "${out}"
+                    echo "${ENCRYPTION_PASSWORD}" | gpg --homedir /tmp/.gnupg --batch --yes --passphrase-fd 0 --symmetric --cipher-algo AES256 -o "${out}.gpg" "${out}"
                   else
                     echo "[WARN] gpg not found or passphrase empty. Mocking encryption."
                     cp "${out}" "${out}.gpg"
