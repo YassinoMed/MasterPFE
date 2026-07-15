@@ -20,9 +20,19 @@ spec:
         spec:
           serviceAccountName: argocd-server
           restartPolicy: OnFailure
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 999
+            runAsGroup: 999
+            fsGroup: 999
+            seccompProfile: { type: RuntimeDefault }
           containers:
             - name: argocd-backup
               image: argoproj/argocd:v2.12.3
+              securityContext:
+                allowPrivilegeEscalation: false
+                readOnlyRootFilesystem: true
+                capabilities: { drop: ["ALL"] }
               env:
                 - name: AWS_ACCESS_KEY_ID
                   valueFrom:

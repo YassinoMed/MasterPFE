@@ -18,12 +18,20 @@ spec:
           labels:
             app.kubernetes.io/name: vault-backup
         spec:
-          # Assuming vault service account is used or we provide vault token.
-          # Here we use vault token from a secret.
           restartPolicy: OnFailure
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 100
+            runAsGroup: 1000
+            fsGroup: 1000
+            seccompProfile: { type: RuntimeDefault }
           containers:
             - name: vault-backup
               image: hashicorp/vault:1.15.4
+              securityContext:
+                allowPrivilegeEscalation: false
+                readOnlyRootFilesystem: true
+                capabilities: { drop: ["ALL"] }
               env:
                 - name: VAULT_ADDR
                   value: "http://vault-active.vault.svc.cluster.local:8200"

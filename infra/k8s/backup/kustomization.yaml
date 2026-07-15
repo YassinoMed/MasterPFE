@@ -5,10 +5,12 @@ resources:
   - namespace.yaml
   - pvc.yaml
   - cronjob-postgres.yaml
+  - database-external-secret.yaml
   - networkpolicy.yaml
   - etcd-backup-cronjob.yaml
   - vault-backup-cronjob.yaml
   - argocd-backup-cronjob.yaml
+  - argocd-backup-rbac.yaml
 labels:
   - pairs:
       app.kubernetes.io/part-of: securerag-hub
