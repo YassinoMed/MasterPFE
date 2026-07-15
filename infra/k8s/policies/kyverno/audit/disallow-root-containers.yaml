@@ -11,7 +11,7 @@ metadata:
       Containers must run as non-root (runAsNonRoot: true). This policy audits 
       deployments that do not enforce non-root execution.
 spec:
-  validationFailureAction: Audit
+  validationFailureAction: Enforce
   background: true
   rules:
     - name: check-run-as-non-root

@@ -66,7 +66,8 @@ fi
 
 required_policies=(
   "securerag-audit-cleartext-env-values"
-  "securerag-require-pod-security"
+  "securerag-disallow-root-containers"
+  "securerag-disallow-host-network"
   "securerag-require-workload-controls"
   "securerag-restrict-image-references"
   "securerag-restrict-service-exposure"

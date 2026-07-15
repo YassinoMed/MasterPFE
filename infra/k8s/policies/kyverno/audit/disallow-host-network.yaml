@@ -11,7 +11,7 @@ metadata:
       Pods must not use the host network namespace. This policy audits 
       deployments that attempt to use hostNetwork: true.
 spec:
-  validationFailureAction: Audit
+  validationFailureAction: Enforce
   background: true
   rules:
     - name: check-host-network
