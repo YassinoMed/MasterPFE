@@ -7,14 +7,15 @@ metadata:
     app.kubernetes.io/name: argocd-backup
 ---
 apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRoleBinding
+kind: RoleBinding
 metadata:
   name: securerag-backup-argocd
+  namespace: argocd
   labels:
     app.kubernetes.io/name: argocd-backup
 roleRef:
   apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
+  kind: Role
   name: argocd-server
 subjects:
 - kind: ServiceAccount
