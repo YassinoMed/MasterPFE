@@ -63,11 +63,14 @@ spec:
                   set -euo pipefail
                   ts=$(date +%Y%m%d%H%M%S)
                   out="/tmp/etcd-snapshot-${ts}.db"
+                  
+                  echo "[INFO] Installing required packages (etcd-client, gnupg, aws-cli)..."
+                  apk add --no-cache gnupg aws-cli etcd-client > /dev/null || apk add --no-cache gnupg aws-cli etcd > /dev/null
+                  
                   echo "[INFO] Taking etcd snapshot..."
                   etcdctl snapshot save ${out}
                   
                   echo "[INFO] Encrypting snapshot..."
-                  apk add --no-cache gnupg aws-cli > /dev/null
                   echo "${ENCRYPTION_PASSWORD}" | gpg --batch --yes --passphrase-fd 0 --symmetric --cipher-algo AES256 -o "${out}.gpg" "${out}"
                   
                   echo "[INFO] Uploading to S3..."
