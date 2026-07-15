@@ -1,0 +1,20 @@
+---
+- name: Download Cilium CLI
+  get_url:
+    url: "https://github.com/cilium/cilium-cli/releases/download/v0.15.22/cilium-linux-amd64.tar.gz"
+    dest: /tmp/cilium-linux-amd64.tar.gz
+    mode: '0644'
+
+- name: Extract Cilium CLI
+  unarchive:
+    src: /tmp/cilium-linux-amd64.tar.gz
+    dest: /usr/local/bin
+    remote_src: yes
+    mode: '0755'
+
+- name: Install Cilium CNI with kube-proxy replacement
+  command: cilium install --version {{ cilium_version | default('1.15.5') }} --set kubeProxyReplacement=true
+  environment:
+    KUBECONFIG: /etc/kubernetes/admin.conf
+  failed_when: false
+  run_once: true

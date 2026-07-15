@@ -1,0 +1,82 @@
+---
+# Playbook Ansible - Déploiement des Addons Kubernetes (Cilium, Ingress, Cert-Manager, Storage)
+# Usage: ansible-playbook -i inventory.ini playbooks/kubernetes-addons.yml
+
+- name: Déploiement des Addons Kubernetes
+  hosts: control-plane[0]
+  become: true
+  tasks:
+    # ── Helm installation ───────────────────────────────────────────────
+    - name: Vérifier si Helm est installé
+      stat:
+        path: /usr/local/bin/helm
+      register: helm_stat
+
+    - name: Télécharger le script d'installation de Helm
+      get_url:
+        url: https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
+        dest: /tmp/get-helm-3
+        mode: '0700'
+      when: not helm_stat.stat.exists
+
+    - name: Exécuter le script d'installation de Helm
+      command: /tmp/get-helm-3
+      args:
+        creates: /usr/local/bin/helm
+      when: not helm_stat.stat.exists
+
+    # ── Helm repository setup ──────────────────────────────────────────
+    - name: Ajouter les dépôts Helm officiels
+      command: "helm repo add {{ item.name }} {{ item.url }}"
+      loop:
+        - { name: 'cilium', url: 'https://helm.cilium.io/' }
+        - { name: 'jetstack', url: 'https://charts.jetstack.io' }
+        - { name: 'ingress-nginx', url: 'https://kubernetes.github.io/ingress-nginx' }
+      changed_when: false
+
+    - name: Mettre à jour les dépôts Helm
+      command: helm repo update
+      changed_when: false
+
+    # ── NC-13 — CNI Cilium with WireGuard Encryption ────────────────────
+    - name: Déployer Cilium CNI avec routage eBPF et chiffrement Wireguard
+      command: >
+        helm upgrade --install cilium cilium/cilium --version {{ cilium_version }}
+        --namespace kube-system
+        --set encryption.enabled=true
+        --set encryption.type=wireguard
+        --set kubeProxyReplacement=strict
+        --set operator.replicas=1
+      changed_when: true
+
+    # ── Cert-Manager Deployment ─────────────────────────────────────────
+    - name: Déployer Jetstack Cert-Manager
+      command: >
+        helm upgrade --install cert-manager jetstack/cert-manager --version {{ cert_manager_version }}
+        --namespace cert-manager
+        --create-namespace
+        --set installCRDs=true
+      changed_when: true
+
+    # ── Ingress-Nginx Deployment ────────────────────────────────────────
+    - name: Déployer Ingress Nginx Controller (Configuration NodePort compatible)
+      command: >
+        helm upgrade --install ingress-nginx ingress-nginx/ingress-nginx --version {{ ingress_nginx_version }}
+        --namespace ingress-nginx
+        --create-namespace
+        --set controller.service.type=NodePort
+        --set controller.service.nodePorts.http=30080
+        --set controller.service.nodePorts.https=30443
+      changed_when: true
+
+    # ── StorageClass Provisioner ────────────────────────────────────────
+    - name: Installer Rancher Local Path Provisioner pour la persistance locale
+      command: kubectl apply -f https://raw.githubusercontent.com/rancher/local-path-provisioner/v0.0.26/deploy/local-path-storage.yaml
+      changed_when: true
+
+    - name: Définir Local Path comme StorageClass par défaut
+      command: >
+        kubectl patch storageclass local-path
+        -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'
+      failed_when: false
+      changed_when: true

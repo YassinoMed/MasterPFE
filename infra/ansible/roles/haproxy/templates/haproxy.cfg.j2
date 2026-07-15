@@ -1,0 +1,32 @@
+global
+    log /dev/log local0
+    log /dev/log local1 notice
+    chroot /var/lib/haproxy
+    user haproxy
+    group haproxy
+    daemon
+
+defaults
+    log     global
+    mode    tcp
+    option  tcplog
+    option  dontlognull
+    retries 3
+    timeout queue           1m
+    timeout connect         10s
+    timeout client          1m
+    timeout server          1m
+
+frontend kubernetes-apiserver
+    bind *:{{ k8s_vip_port | default(8443) }}
+    mode tcp
+    option tcplog
+    default_backend kubernetes-master-nodes
+
+backend kubernetes-master-nodes
+    mode tcp
+    balance roundrobin
+    option tcp-check
+    {% for host in groups['control-plane'] %}
+    server {{ host }} {{ hostvars[host]['ansible_host'] }}:{{ k8s_api_port | default(6443) }} check fall 3 rise 2
+    {% endfor %}

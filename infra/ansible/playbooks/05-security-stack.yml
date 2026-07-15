@@ -1,0 +1,10 @@
+---
+# 05-security-stack.yml - Deploys Cilium CNI, HashiCorp Vault, and Monitoring (Prometheus/Grafana)
+
+- name: Deploy Kubernetes Security, CNI, and Monitoring Stack
+  hosts: control-plane[0]
+  become: true
+  roles:
+    - cilium
+    - vault
+    - monitoring

@@ -1,0 +1,259 @@
+---
+# Playbook Ansible - Initialisation du Cluster Kubernetes HA avec Kubeadm, Keepalived et HAProxy
+# Usage: ansible-playbook -i inventory.ini playbooks/kubernetes-ha-setup.yml
+
+- name: Setup LB local (Keepalived & HAProxy) sur les Control Planes
+  hosts: control-plane
+  become: true
+  tasks:
+    - name: Installer HAProxy et Keepalived
+      apt:
+        name:
+          - haproxy
+          - keepalived
+        state: present
+        update_cache: true
+      when: ansible_os_family == "Debian"
+
+    - name: Configurer HAProxy pour équilibrer le trafic API Server
+      copy:
+        dest: /etc/haproxy/haproxy.cfg
+        content: |
+          global
+              log /dev/log local0
+              log /dev/log local1 notice
+              chroot /var/lib/haproxy
+              user haproxy
+              group haproxy
+              daemon
+
+          defaults
+              log     global
+              mode    tcp
+              option  tcplog
+              option  dontlognull
+              retries 3
+              timeout queue           1m
+              timeout connect         10s
+              timeout client          1m
+              timeout server          1m
+
+          frontend kubernetes-apiserver
+              bind *:8443
+              mode tcp
+              option tcplog
+              default_backend kubernetes-master-nodes
+
+          backend kubernetes-master-nodes
+              mode tcp
+              balance roundrobin
+              option tcp-check
+              {% for host in groups['control-plane'] %}
+              server {{ host }} {{ hostvars[host]['ansible_host'] }}:6443 check fall 3 rise 2
+              {% endfor %}
+        owner: root
+        group: root
+        mode: '0644'
+      notify: restart haproxy
+
+    - name: Configurer Keepalived pour la VIP API Server
+      copy:
+        dest: /etc/keepalived/keepalived.conf
+        content: |
+          vrrp_script check_apiserver {
+              script "/usr/bin/killall -0 haproxy"
+              interval 2
+              weight 2
+          }
+
+          vrrp_instance VI_1 {
+              state {{ 'MASTER' if inventory_hostname == groups['control-plane'][0] else 'BACKUP' }}
+              interface {{ k8s_vip_interface }}
+              virtual_router_id {{ keepalived_router_id }}
+              priority {{ 101 if inventory_hostname == groups['control-plane'][0] else 100 }}
+              advert_int 1
+              authentication {
+                  auth_type PASS
+                  auth_pass {{ keepalived_auth_pass }}
+              }
+              virtual_ipaddress {
+                  {{ k8s_vip }}
+              }
+              track_script {
+                  check_apiserver
+              }
+          }
+        owner: root
+        group: root
+        mode: '0644'
+      notify: restart keepalived
+
+  handlers:
+    - name: restart haproxy
+      service:
+        name: haproxy
+        state: restarted
+        enabled: true
+
+    - name: restart keepalived
+      service:
+        name: keepalived
+        state: restarted
+        enabled: true
+
+- name: Initialiser le premier nœud Control Plane (Master01)
+  hosts: control-plane[0]
+  become: true
+  tasks:
+    - name: Vérifier si le cluster est déjà initialisé
+      stat:
+        path: /etc/kubernetes/admin.conf
+      register: k8s_init
+
+    - name: Préparer le fichier de configuration de Kubeadm (v1beta4)
+      copy:
+        dest: /tmp/kubeadm-config.yaml
+        content: |
+          apiVersion: kubeadm.k8s.io/v1beta4
+          kind: InitConfiguration
+          localAPIEndpoint:
+            advertiseAddress: "{{ hostvars[inventory_hostname]['ansible_host'] }}"
+            bindPort: 6443
+          nodeRegistration:
+            criSocket: unix:///var/run/containerd/containerd.sock
+            imagePullPolicy: IfNotPresent
+          ---
+          apiVersion: kubeadm.k8s.io/v1beta4
+          kind: ClusterConfiguration
+          kubernetesVersion: "{{ kube_version }}"
+          controlPlaneEndpoint: "{{ k8s_vip }}:8443"
+          networking:
+            dnsDomain: cluster.local
+            podSubnet: "{{ pod_cidr }}"
+            serviceSubnet: "{{ service_cidr }}"
+          apiServer:
+            extraArgs:
+              - name: anonymous-auth
+                value: "false"
+              - name: profiling
+                value: "false"
+              - name: tls-cipher-suites
+                value: "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384"
+              - name: encryption-provider-config
+                value: "/etc/kubernetes/encryption-conf.yaml"
+              - name: audit-policy-file
+                value: "/etc/kubernetes/audit-policy.yaml"
+              - name: audit-log-path
+                value: "/var/log/kube-apiserver-audit.log"
+              - name: audit-log-maxage
+                value: "30"
+              - name: audit-log-maxbackup
+                value: "10"
+              - name: audit-log-maxsize
+                value: "100"
+            extraVolumes:
+              - name: audit-policy
+                hostPath: /etc/kubernetes/audit-policy.yaml
+                mountPath: /etc/kubernetes/audit-policy.yaml
+                readOnly: true
+                pathType: File
+              - name: audit-log-dir
+                hostPath: /var/log
+                mountPath: /var/log
+                readOnly: false
+                pathType: DirectoryOrCreate
+              - name: encryption-config
+                hostPath: /etc/kubernetes/encryption-conf.yaml
+                mountPath: /etc/kubernetes/encryption-conf.yaml
+                readOnly: true
+                pathType: File
+        owner: root
+        group: root
+        mode: '0600'
+      when: not k8s_init.stat.exists
+
+    - name: Initialiser le cluster avec Kubeadm
+      command: kubeadm init --config=/tmp/kubeadm-config.yaml --upload-certs
+      register: kubeadm_init_output
+      when: not k8s_init.stat.exists
+
+    - name: Configurer kubeconfig pour l'utilisateur root
+      file:
+        path: /root/.kube
+        state: directory
+        mode: '0700'
+
+    - name: Copier la configuration admin.conf
+      copy:
+        src: /etc/kubernetes/admin.conf
+        dest: /root/.kube/config
+        remote_src: true
+        mode: '0600'
+
+    - name: Générer le jeton de jointure des Workers
+      command: kubeadm token create --print-join-command
+      register: worker_join_cmd_raw
+      changed_when: false
+
+    - name: Définir la commande de jointure des Workers en tant que variable globale
+      set_fact:
+        worker_join_cmd: "{{ worker_join_cmd_raw.stdout }}"
+      delegate_to: localhost
+      delegate_facts: true
+
+    - name: Générer le jeton de jointure et le certificat de clé des Masters supplémentaires
+      shell: |
+        kubeadm init phase upload-certs --upload-certs | tail -n 1
+      register: master_cert_key_raw
+      changed_when: false
+
+    - name: Générer la commande de jointure pour les Masters
+      shell: |
+        echo "{{ worker_join_cmd_raw.stdout }} --control-plane --certificate-key {{ master_cert_key_raw.stdout }}"
+      register: master_join_cmd_raw
+      changed_when: false
+
+    - name: Définir la commande de jointure des Masters en tant que variable globale
+      set_fact:
+        master_join_cmd: "{{ master_join_cmd_raw.stdout }}"
+      delegate_to: localhost
+      delegate_facts: true
+
+- name: Associer les nœuds Control Plane restants au cluster
+  hosts: control-plane:!control-plane[0]
+  become: true
+  tasks:
+    - name: Vérifier si le nœud est déjà dans le cluster
+      stat:
+        path: /etc/kubernetes/admin.conf
+      register: secondary_k8s_init
+
+    - name: Rejoindre le cluster en tant que Master
+      command: "{{ hostvars['localhost']['master_join_cmd'] }}"
+      when: not secondary_k8s_init.stat.exists
+
+    - name: Configurer kubeconfig pour root sur les masters secondaires
+      file:
+        path: /root/.kube
+        state: directory
+        mode: '0700'
+
+    - name: Copier la configuration admin.conf sur les masters secondaires
+      copy:
+        src: /etc/kubernetes/admin.conf
+        dest: /root/.kube/config
+        remote_src: true
+        mode: '0600'
+
+- name: Associer les nœuds Workers au cluster
+  hosts: workers
+  become: true
+  tasks:
+    - name: Vérifier si le nœud Worker est déjà dans le cluster
+      stat:
+        path: /var/lib/kubelet/config.yaml
+      register: worker_k8s_init
+
+    - name: Rejoindre le cluster en tant que Worker
+      command: "{{ hostvars['localhost']['worker_join_cmd'] }}"
+      when: not worker_k8s_init.stat.exists

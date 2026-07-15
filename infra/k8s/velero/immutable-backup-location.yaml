@@ -1,0 +1,23 @@
+---
+# File: infra/k8s/velero/immutable-backup-location.yaml
+# Description: Configuration de l'emplacement de stockage immutable (WORM) de Velero.
+
+apiVersion: velero.io/v1
+kind: BackupStorageLocation
+metadata:
+  name: immutable
+  namespace: velero
+  labels:
+    app.kubernetes.io/part-of: securerag-hub
+spec:
+  provider: aws
+  objectStorage:
+    bucket: securerag-immutable-backups
+  config:
+    region: minio-default
+    s3ForcePathStyle: "true"
+    s3Url: "http://minio.velero.svc:9000"
+    publicUrl: "http://minio.velero.svc:9000"
+  credential:
+    name: vault-velero-credentials
+    key: cloud

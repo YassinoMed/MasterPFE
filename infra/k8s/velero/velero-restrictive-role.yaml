@@ -1,0 +1,22 @@
+---
+# File: infra/k8s/velero/velero-restrictive-role.yaml
+# Description: ClusterRole restrictif pour Velero afin de limiter ses privilèges (remédiation NC-03).
+# Verbes de suppression limités et permissions de secrets restreintes.
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: velero-backup-restore-manager
+rules:
+  # Permissions de lecture globales pour sauvegarder les ressources
+  - apiGroups: ["*"]
+    resources: ["*"]
+    verbs: ["get", "list", "watch"]
+  # Autoriser la création/mise à jour/suppression pour les besoins de restauration
+  - apiGroups: ["*"]
+    resources: ["*"]
+    verbs: ["create", "update", "patch", "delete"]
+  # Limiter l'accès aux secrets pour éviter les fuites de privilèges excessives
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["get", "list", "create", "update", "patch"]

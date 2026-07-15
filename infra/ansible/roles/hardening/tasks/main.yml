@@ -1,0 +1,36 @@
+---
+- name: Hardening SSH - Disable password authentication
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '^#?PasswordAuthentication'
+    line: 'PasswordAuthentication no'
+  notify: Restart SSH
+
+- name: Hardening SSH - Disable root login via password
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '^#?PermitRootLogin'
+    line: 'PermitRootLogin prohibit-password'
+  notify: Restart SSH
+
+- name: Set CIS Sysctl network hardening parameters
+  sysctl:
+    name: "{{ item.key }}"
+    value: "{{ item.value }}"
+    sysctl_file: /etc/sysctl.d/60-cis-hardening.conf
+    state: present
+    reload: true
+  with_dict:
+    # Disable IP source routing
+    net.ipv4.conf.all.accept_source_route: "0"
+    net.ipv4.conf.default.accept_source_route: "0"
+    # Disable ICMP redirect acceptance
+    net.ipv4.conf.all.accept_redirects: "0"
+    net.ipv4.conf.default.accept_redirects: "0"
+    # Log suspicious packets
+    net.ipv4.conf.all.log_martians: "1"
+    net.ipv4.conf.default.log_martians: "1"
+    # Ignore ICMP echo broadcasts
+    net.ipv4.icmp_echo_ignore_broadcasts: "1"
+    # Enable TCP SYN cookie protection
+    net.ipv4.tcp_syncookies: "1"

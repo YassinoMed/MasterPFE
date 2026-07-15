@@ -1,0 +1,21 @@
+---
+- name: Install HAProxy
+  apt:
+    name: haproxy
+    state: present
+    update_cache: true
+
+- name: Configure HAProxy for API Server Load Balancing
+  template:
+    src: haproxy.cfg.j2
+    dest: /etc/haproxy/haproxy.cfg
+    owner: root
+    group: root
+    mode: '0644'
+  notify: Restart HAProxy
+
+- name: Ensure HAProxy is started and enabled
+  service:
+    name: haproxy
+    state: started
+    enabled: true

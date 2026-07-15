@@ -1,0 +1,205 @@
+---
+# 04-kubernetes-ha.yml - Bootstrap HA Cluster and configures Keepalived / HAProxy / Kubeadm
+
+- name: Configure local load balancer (Keepalived & HAProxy)
+  hosts: control-plane
+  become: true
+  roles:
+    - haproxy
+    - keepalived
+
+- name: Create Kubernetes directories and write audit/encryption configurations
+  hosts: control-plane
+  become: true
+  tasks:
+    - name: Ensure /etc/kubernetes exists
+      file:
+        path: /etc/kubernetes
+        state: directory
+        mode: '0755'
+
+    - name: Create etcd encryption configuration
+      copy:
+        dest: /etc/kubernetes/encryption-conf.yaml
+        content: |
+          apiVersion: apiserver.config.k8s.io/v1
+          kind: EncryptionConfiguration
+          resources:
+            - resources:
+                - secrets
+              providers:
+                - aescbc:
+                    keys:
+                      - name: key1
+                        secret: "{{ etcd_encryption_key }}"
+                - identity: {}
+        owner: root
+        group: root
+        mode: '0600'
+
+    - name: Ensure API server audit policy file exists
+      copy:
+        dest: /etc/kubernetes/audit-policy.yaml
+        content: |
+          apiVersion: audit.k8s.io/v1
+          kind: Policy
+          rules:
+            - level: Metadata
+        owner: root
+        group: root
+        mode: '0600'
+
+- name: Initialize the first Control Plane (cp01)
+  hosts: control-plane[0]
+  become: true
+  tasks:
+    - name: Check if cluster is already initialized
+      stat:
+        path: /etc/kubernetes/admin.conf
+      register: k8s_init
+
+    - name: Prepare Kubeadm configuration file
+      copy:
+        dest: /tmp/kubeadm-config.yaml
+        content: |
+          apiVersion: kubeadm.k8s.io/v1beta4
+          kind: InitConfiguration
+          localAPIEndpoint:
+            advertiseAddress: "{{ hostvars[inventory_hostname]['ansible_host'] }}"
+            bindPort: 6443
+          nodeRegistration:
+            criSocket: unix:///var/run/containerd/containerd.sock
+            imagePullPolicy: IfNotPresent
+          ---
+          apiVersion: kubeadm.k8s.io/v1beta4
+          kind: ClusterConfiguration
+          kubernetesVersion: "{{ kube_version }}"
+          controlPlaneEndpoint: "{{ k8s_vip }}:{{ k8s_vip_port }}"
+          networking:
+            dnsDomain: cluster.local
+            podSubnet: "{{ pod_cidr }}"
+            serviceSubnet: "{{ service_cidr }}"
+          apiServer:
+            extraArgs:
+              - name: anonymous-auth
+                value: "false"
+              - name: profiling
+                value: "false"
+              - name: tls-cipher-suites
+                value: "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384"
+              - name: encryption-provider-config
+                value: "/etc/kubernetes/encryption-conf.yaml"
+              - name: audit-policy-file
+                value: "/etc/kubernetes/audit-policy.yaml"
+              - name: audit-log-path
+                value: "/var/log/kube-apiserver-audit.log"
+              - name: audit-log-maxage
+                value: "30"
+              - name: audit-log-maxbackup
+                value: "10"
+              - name: audit-log-maxsize
+                value: "100"
+            extraVolumes:
+              - name: audit-policy
+                hostPath: /etc/kubernetes/audit-policy.yaml
+                mountPath: /etc/kubernetes/audit-policy.yaml
+                readOnly: true
+                pathType: File
+              - name: audit-log-dir
+                hostPath: /var/log
+                mountPath: /var/log
+                readOnly: false
+                pathType: DirectoryOrCreate
+              - name: encryption-config
+                hostPath: /etc/kubernetes/encryption-conf.yaml
+                mountPath: /etc/kubernetes/encryption-conf.yaml
+                readOnly: true
+                pathType: File
+        owner: root
+        group: root
+        mode: '0600'
+      when: not k8s_init.stat.exists
+
+    - name: Initialize Kubernetes cluster
+      command: kubeadm init --config=/tmp/kubeadm-config.yaml --upload-certs
+      register: kubeadm_init_output
+      when: not k8s_init.stat.exists
+
+    - name: Create root .kube directory
+      file:
+        path: /root/.kube
+        state: directory
+        mode: '0700'
+
+    - name: Setup root kubeconfig
+      copy:
+        src: /etc/kubernetes/admin.conf
+        dest: /root/.kube/config
+        remote_src: true
+        mode: '0600'
+
+    - name: Generate Worker join command
+      command: kubeadm token create --print-join-command
+      register: worker_join_cmd_raw
+      changed_when: false
+
+    - name: Set Worker join command globally
+      set_fact:
+        worker_join_cmd: "{{ worker_join_cmd_raw.stdout }}"
+      delegate_to: localhost
+      delegate_facts: true
+
+    - name: Upload certificates and retrieve cert-key
+      shell: kubeadm init phase upload-certs --upload-certs | tail -n 1
+      register: master_cert_key_raw
+      changed_when: false
+
+    - name: Generate Control Plane join command
+      shell: echo "{{ worker_join_cmd_raw.stdout }} --control-plane --certificate-key {{ master_cert_key_raw.stdout }}"
+      register: master_join_cmd_raw
+      changed_when: false
+
+    - name: Set Control Plane join command globally
+      set_fact:
+        master_join_cmd: "{{ master_join_cmd_raw.stdout }}"
+      delegate_to: localhost
+      delegate_facts: true
+
+- name: Join secondary Control Planes (cp02, cp03)
+  hosts: control-plane:!control-plane[0]
+  become: true
+  tasks:
+    - name: Check if already in cluster
+      stat:
+        path: /etc/kubernetes/admin.conf
+      register: secondary_k8s_init
+
+    - name: Join as Control Plane
+      command: "{{ hostvars['localhost']['master_join_cmd'] }}"
+      when: not secondary_k8s_init.stat.exists
+
+    - name: Create root .kube directory
+      file:
+        path: /root/.kube
+        state: directory
+        mode: '0700'
+
+    - name: Setup root kubeconfig
+      copy:
+        src: /etc/kubernetes/admin.conf
+        dest: /root/.kube/config
+        remote_src: true
+        mode: '0600'
+
+- name: Join Workers (worker01, worker02, worker03)
+  hosts: workers
+  become: true
+  tasks:
+    - name: Check if already joined
+      stat:
+        path: /var/lib/kubelet/config.yaml
+      register: worker_k8s_init
+
+    - name: Join as Worker
+      command: "{{ hostvars['localhost']['worker_join_cmd'] }}"
+      when: not worker_k8s_init.stat.exists

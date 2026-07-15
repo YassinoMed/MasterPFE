@@ -1,0 +1,16 @@
+---
+# File: infra/k8s/velero/velero-rolebinding.yaml
+# Description: Liaison du ClusterRole restreint velero-backup-restore-manager au ServiceAccount de Velero.
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: securerag-velero-server
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: velero-backup-restore-manager
+subjects:
+  - kind: ServiceAccount
+    name: securerag-velero-server
+    namespace: velero

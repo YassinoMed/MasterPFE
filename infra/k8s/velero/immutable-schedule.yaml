@@ -1,0 +1,26 @@
+---
+# File: infra/k8s/velero/immutable-schedule.yaml
+# Description: Planification journalière pour la sauvegarde immutable WORM.
+
+apiVersion: velero.io/v1
+kind: Schedule
+metadata:
+  name: daily-immutable-backup
+  namespace: velero
+  labels:
+    app.kubernetes.io/part-of: securerag-hub
+spec:
+  schedule: "0 2 * * *"
+  template:
+    ttl: "720h"
+    includedNamespaces:
+      - securerag-hub
+      - vault
+      - velero
+      - argocd
+      - observability
+      - falco
+    storageLocation: immutable
+    volumeSnapshotLocations:
+      - immutable
+    defaultVolumesToRestic: true

@@ -1,0 +1,7 @@
+---
+- name: Apply OS Hardening & Prerequisites
+  hosts: all
+  become: true
+  roles:
+    - common
+    - hardening

@@ -1,0 +1,30 @@
+---
+# Variables globales pour le cluster Kubernetes HA - SecureRAG Hub
+
+# Versions logicielles
+kube_version: "1.33.1"
+cilium_version: "1.15.5"
+cert_manager_version: "v1.14.4"
+ingress_nginx_version: "4.10.0"
+
+# Configuration réseau du cluster
+pod_cidr: "10.244.0.0/16"
+service_cidr: "10.96.0.0/12"
+dns_service_ip: "10.96.0.10"
+
+# Haute Disponibilité (Keepalived / HAProxy)
+k8s_vip: "10.0.0.100"               # IP virtuelle (VIP) partagée par Keepalived
+k8s_vip_port: 8443                 # Port public d'équilibrage de charge
+k8s_api_port: 6443                 # Port réel de l'api-server kube
+k8s_vip_interface: "eth0"          # Interface réseau pour le binding de la VIP
+keepalived_router_id: 51
+keepalived_auth_pass: "SecureClusterVIPSecret"
+
+# Durcissement de sécurité (Audit etcd)
+# Clé de chiffrement AES-CBC-256 générée (32 octets encodés en base64)
+etcd_encryption_key: "8SnsND5mLW0yQ1V1eWs4SnBIU1ppQlpkeTVIWXdCRW5PcWRjYzc="
+etcd_backup_dir: "/var/lib/etcd-backups"
+
+# Configuration des nœuds
+ansible_user: root
+ansible_ssh_private_key_file: ~/.ssh/securerag-deploy-key

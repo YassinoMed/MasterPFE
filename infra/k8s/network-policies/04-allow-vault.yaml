@@ -1,0 +1,30 @@
+---
+# File: infra/k8s/network-policies/04-allow-vault.yaml
+# Description: Stratégie NetworkPolicy restreignant l'accès en entrée à HashiCorp Vault.
+# NC-02 Remediation: Autoriser uniquement les namespaces securerag-hub et external-secrets à se connecter sur le port 8200.
+
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-vault-access
+  namespace: vault
+  labels:
+    app.kubernetes.io/managed-by: devsecops-agent
+    app.kubernetes.io/part-of: securerag-hub
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: vault
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: securerag-hub
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: external-secrets
+      ports:
+        - protocol: TCP
+          port: 8200

@@ -1,0 +1,31 @@
+---
+- name: Download and install Helm
+  shell: |
+    curl -fsSL https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+  args:
+    creates: /usr/local/bin/helm
+
+- name: Add HashiCorp Helm repo
+  command: helm repo add hashicorp https://helm.releases.hashicorp.com
+  environment:
+    KUBECONFIG: /etc/kubernetes/admin.conf
+  failed_when: false
+  run_once: true
+
+- name: Update Helm repos
+  command: helm repo update
+  environment:
+    KUBECONFIG: /etc/kubernetes/admin.conf
+  run_once: true
+
+- name: Install HashiCorp Vault in the cluster
+  command: |
+    helm upgrade --install vault hashicorp/vault \
+      --namespace vault \
+      --create-namespace \
+      --set "server.ha.enabled=true" \
+      --set "server.ha.raft.enabled=true"
+  environment:
+    KUBECONFIG: /etc/kubernetes/admin.conf
+  failed_when: false
+  run_once: true

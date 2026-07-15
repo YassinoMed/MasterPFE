@@ -1,0 +1,23 @@
+vrrp_script check_apiserver {
+    script "/usr/bin/killall -0 haproxy"
+    interval 2
+    weight 2
+}
+
+vrrp_instance VI_1 {
+    state {{ 'MASTER' if inventory_hostname == groups['control-plane'][0] else 'BACKUP' }}
+    interface {{ k8s_vip_interface | default('eth0') }}
+    virtual_router_id {{ keepalived_router_id | default(51) }}
+    priority {{ 101 if inventory_hostname == groups['control-plane'][0] else 100 }}
+    advert_int 1
+    authentication {
+        auth_type PASS
+        auth_pass {{ keepalived_auth_pass | default('SecureVIPPass') }}
+    }
+    virtual_ipaddress {
+        {{ k8s_vip }}
+    }
+    track_script {
+        check_apiserver
+    }
+}

@@ -1,0 +1,21 @@
+---
+- name: Install Keepalived
+  apt:
+    name: keepalived
+    state: present
+    update_cache: true
+
+- name: Configure Keepalived VRRP Instance
+  template:
+    src: keepalived.conf.j2
+    dest: /etc/keepalived/keepalived.conf
+    owner: root
+    group: root
+    mode: '0644'
+  notify: Restart Keepalived
+
+- name: Ensure Keepalived is started and enabled
+  service:
+    name: keepalived
+    state: started
+    enabled: true

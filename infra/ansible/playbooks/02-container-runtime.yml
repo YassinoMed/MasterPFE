@@ -1,0 +1,6 @@
+---
+- name: Setup Container Runtime (containerd)
+  hosts: all
+  become: true
+  roles:
+    - containerd

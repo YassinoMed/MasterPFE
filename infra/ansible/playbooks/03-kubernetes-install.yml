@@ -1,0 +1,6 @@
+---
+- name: Install Kubernetes Components
+  hosts: all
+  become: true
+  roles:
+    - kubeadm
