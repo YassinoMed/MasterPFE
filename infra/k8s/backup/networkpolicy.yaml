@@ -13,9 +13,7 @@ metadata:
   name: allow-backup-egress
   namespace: securerag-backup
 spec:
-  podSelector:
-    matchLabels:
-      app.kubernetes.io/name: postgres-backup
+  podSelector: {}
   policyTypes: [Egress]
   egress:
     # DNS
@@ -24,8 +22,20 @@ spec:
       ports:
         - { protocol: UDP, port: 53 }
         - { protocol: TCP, port: 53 }
-    # PostgreSQL (in-cluster ou external DB endpoint via Egress)
+    # PostgreSQL
     - to:
         - ipBlock: { cidr: 0.0.0.0/0 }
       ports:
         - { protocol: TCP, port: 5432 }
+    # Vault
+    - to:
+        - ipBlock: { cidr: 0.0.0.0/0 }
+      ports:
+        - { protocol: TCP, port: 8200 }
+    # Kubernetes API Server & HTTPS (S3, apk repository, etc.)
+    - to:
+        - ipBlock: { cidr: 0.0.0.0/0 }
+      ports:
+        - { protocol: TCP, port: 443 }
+        - { protocol: TCP, port: 6443 }
+        - { protocol: TCP, port: 80 }
