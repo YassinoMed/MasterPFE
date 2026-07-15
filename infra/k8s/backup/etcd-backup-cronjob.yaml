@@ -28,7 +28,7 @@ spec:
           restartPolicy: OnFailure
           containers:
             - name: etcd-backup
-              image: registry.k8s.io/etcd:3.5.21-0
+              image: docker.io/alpine/k8s:1.28.2
               env:
                 - name: ETCDCTL_API
                   value: "3"
