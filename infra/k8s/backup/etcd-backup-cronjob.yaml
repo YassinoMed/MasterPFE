@@ -64,8 +64,14 @@ spec:
                   ts=$(date +%Y%m%d%H%M%S)
                   out="/tmp/etcd-snapshot-${ts}.db"
                   
-                  echo "[INFO] Installing required packages (etcd, gnupg, aws-cli)..."
-                  apk update > /dev/null && apk add --no-cache gnupg aws-cli etcd > /dev/null
+                  echo "[INFO] Installing required packages (gnupg, aws-cli, curl)..."
+                  apk update > /dev/null && apk add --no-cache gnupg aws-cli curl > /dev/null
+                  
+                  echo "[INFO] Downloading etcdctl..."
+                  curl -sSL https://github.com/etcd-io/etcd/releases/download/v3.5.10/etcd-v3.5.10-linux-amd64.tar.gz -o /tmp/etcd.tar.gz
+                  tar -xzf /tmp/etcd.tar.gz -C /tmp
+                  mv /tmp/etcd-v3.5.10-linux-amd64/etcdctl /usr/local/bin/
+                  rm -rf /tmp/etcd*
                   
                   echo "[INFO] Taking etcd snapshot..."
                   etcdctl snapshot save ${out}
