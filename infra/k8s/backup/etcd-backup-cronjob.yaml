@@ -64,8 +64,8 @@ spec:
                   ts=$(date +%Y%m%d%H%M%S)
                   out="/tmp/etcd-snapshot-${ts}.db"
                   
-                  echo "[INFO] Installing required packages (etcd-client, gnupg, aws-cli)..."
-                  apk add --no-cache gnupg aws-cli etcd-client > /dev/null || apk add --no-cache gnupg aws-cli etcd > /dev/null
+                  echo "[INFO] Installing required packages (etcd, gnupg, aws-cli)..."
+                  apk update > /dev/null && apk add --no-cache gnupg aws-cli etcd > /dev/null
                   
                   echo "[INFO] Taking etcd snapshot..."
                   etcdctl snapshot save ${out}
