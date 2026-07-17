@@ -49,6 +49,16 @@ spec:
       namespace: cert-manager
     - server: https://kubernetes.default.svc
       namespace: otel-system
+    - server: https://kubernetes.default.svc
+      namespace: securerag-dev
+    - server: https://kubernetes.default.svc
+      namespace: securerag-staging
+    - server: https://kubernetes.default.svc
+      namespace: securerag-recette
+    - server: https://kubernetes.default.svc
+      namespace: securerag-production
+    - server: https://kubernetes.default.svc
+      namespace: securerag-dr
   clusterResourceWhitelist:
     - group: ""
       kind: Namespace
