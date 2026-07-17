@@ -37,8 +37,6 @@ spec:
         - { protocol: UDP, port: 53 }
         - { protocol: TCP, port: 53 }
     # Egress HTTPS (kube-apiserver)
-    - to:
-        - ipBlock: { cidr: 0.0.0.0/0 }
-      ports:
+    - ports:
         - { protocol: TCP, port: 443 }
         - { protocol: TCP, port: 6443 }

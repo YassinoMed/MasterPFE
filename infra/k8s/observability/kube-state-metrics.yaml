@@ -138,7 +138,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: kube-state-metrics
-          image: registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.13.0
+          image: registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.14.0
           ports:
             - name: http-metrics
               containerPort: 8080
@@ -162,22 +162,22 @@ spec:
           resources:
             requests:
               cpu: 10m
-              memory: 64Mi
-            limits:
-              cpu: 100m
               memory: 256Mi
+            limits:
+              cpu: 200m
+              memory: 1Gi
           livenessProbe:
             httpGet:
               path: /healthz
               port: 8080
-            initialDelaySeconds: 5
+            initialDelaySeconds: 10
             periodSeconds: 10
             timeoutSeconds: 5
           readinessProbe:
             httpGet:
-              path: /
+              path: /healthz
               port: 8080
-            initialDelaySeconds: 5
+            initialDelaySeconds: 10
             periodSeconds: 10
             timeoutSeconds: 5
 ---
