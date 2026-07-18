@@ -7,8 +7,9 @@ jenkins:
     - kubernetes:
         name: "kubernetes"
         namespace: "securerag-hub"
-        # serverUrl: "https://securerag-dev-control-plane:6443"
+        serverUrl: "https://securerag-dev-control-plane:6443"
         skipTlsVerify: true
+        credentialsId: "k8s-token"
         jenkinsUrl: "http://jenkins.securerag-hub.svc:8080"
         jenkinsTunnel: "jenkins-agent.securerag-hub.svc:50000"
         containerCapStr: "10"

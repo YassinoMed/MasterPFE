@@ -45,6 +45,11 @@ credentials:
               id: "sonar-token"
               description: "SonarQube access token"
               secret: "${readFile:/run/jenkins-secrets/sonar-token}"
+          - string:
+              scope: GLOBAL
+              id: "k8s-token"
+              description: "Kubernetes Service Account Token for Jenkins Admin"
+              secret: "${readFile:/run/jenkins-secrets/k8s-token}"
 
 unclassified:
   globalLibraries:
