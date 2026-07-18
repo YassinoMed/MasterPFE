@@ -4,7 +4,7 @@
 
 set -euo pipefail
 
-NAMESPACES=("securerag-hub" "securerag-cicd")
+NAMESPACES=("securerag-cicd")
 CONTAINER_NAME="securerag-jenkins"
 
 log() {
