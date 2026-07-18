@@ -289,8 +289,10 @@ spec:
             catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
               timeout(time: 10, unit: 'MINUTES') {
                 unstash 'workspace'
-                try { unstash 'image-scan' } catch(e) { echo "No image-scan stash" }
-                try { unstash 'sbom-artifacts' } catch(e) { echo "No sbom-artifacts stash" }
+                script {
+                  try { unstash 'image-scan' } catch(e) { echo "No image-scan stash" }
+                  try { unstash 'sbom-artifacts' } catch(e) { echo "No sbom-artifacts stash" }
+                }
                 sh '''
                   set -euo pipefail
                   python3 scripts/ai/analyze-images.py \
