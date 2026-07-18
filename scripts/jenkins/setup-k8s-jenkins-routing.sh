@@ -4,7 +4,7 @@
 
 set -euo pipefail
 
-NAMESPACE="securerag-hub"
+NAMESPACES=("securerag-hub" "securerag-cicd")
 CONTAINER_NAME="securerag-jenkins"
 
 log() {
@@ -26,9 +26,10 @@ fi
 
 log "Jenkins container IP on the kind network is ${JENKINS_IP}"
 
-# 2. Create Service and Endpoints for Jenkins Web UI (port 8080)
-log "Creating Service and Endpoints for jenkins (port 8080) in namespace ${NAMESPACE}..."
-kubectl apply -f - <<EOF
+for NAMESPACE in "${NAMESPACES[@]}"; do
+  # 2. Create Service and Endpoints for Jenkins Web UI (port 8080)
+  log "Creating Service and Endpoints for jenkins (port 8080) in namespace ${NAMESPACE}..."
+  kubectl apply -f - <<EOF
 apiVersion: v1
 kind: Service
 metadata:
@@ -53,9 +54,9 @@ subsets:
     port: 8080
 EOF
 
-# 3. Create Service and Endpoints for Jenkins Agent JNPL (port 50000)
-log "Creating Service and Endpoints for jenkins-agent (port 50000) in namespace ${NAMESPACE}..."
-kubectl apply -f - <<EOF
+  # 3. Create Service and Endpoints for Jenkins Agent JNPL (port 50000)
+  log "Creating Service and Endpoints for jenkins-agent (port 50000) in namespace ${NAMESPACE}..."
+  kubectl apply -f - <<EOF
 apiVersion: v1
 kind: Service
 metadata:
@@ -79,5 +80,6 @@ subsets:
   - name: jnlp
     port: 50000
 EOF
+done
 
 log "Kubernetes routing configuration completed successfully."
