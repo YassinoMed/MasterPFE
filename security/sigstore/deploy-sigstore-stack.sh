@@ -77,8 +77,42 @@ cat <<EOF > "${REALM_FILE}"
             "access.token.claim": "true",
             "userinfo.token.claim": "true"
           }
+        },
+        {
+          "name": "email_verified",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-hardcoded-claim-mapper",
+          "consentRequired": false,
+          "config": {
+            "claim.name": "email_verified",
+            "claim.value": "true",
+            "jsonType.label": "boolean",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "userinfo.token.claim": "true"
+          }
+        },
+        {
+          "name": "audience_mapper",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-audience-mapper",
+          "consentRequired": false,
+          "config": {
+            "included.client.audience": "jenkins-cosign",
+            "id.token.claim": "true",
+            "access.token.claim": "true"
+          }
         }
       ]
+    }
+  ],
+  "users": [
+    {
+      "username": "service-account-jenkins-cosign",
+      "enabled": true,
+      "emailVerified": true,
+      "email": "jenkins-cosign@securerag.local",
+      "serviceAccountClientId": "jenkins-cosign"
     }
   ]
 }
@@ -114,7 +148,7 @@ helm upgrade --install fulcio sigstore/fulcio \
 # 8. Force NodePort Expositions (to bind to mapped host ports)
 info "Patching Kubernetes Services to expose ports..."
 kubectl patch svc keycloak -n "${NAMESPACE}" -p '{"spec": {"type": "NodePort", "ports": [{"port": 80, "targetPort": "http", "nodePort": 30080, "name": "http"}]}}' || warn "Failed to patch Keycloak NodePort"
-kubectl patch svc fulcio -n "${NAMESPACE}" -p '{"spec": {"type": "NodePort", "ports": [{"port": 80, "targetPort": 80, "nodePort": 30081, "name": "http"}]}}' || warn "Failed to patch Fulcio NodePort"
+kubectl patch svc fulcio -n "${NAMESPACE}" -p '{"spec": {"type": "NodePort", "ports": [{"port": 80, "targetPort": 5555, "nodePort": 30088, "name": "http"}]}}' || warn "Failed to patch Fulcio NodePort"
 kubectl patch svc rekor -n "${NAMESPACE}" -p '{"spec": {"type": "NodePort", "ports": [{"port": 80, "targetPort": 3000, "nodePort": 30082, "name": "http"}]}}' || warn "Failed to patch Rekor NodePort"
 
 # 9. Configure Nginx Proxy Router on 'kind' docker network
@@ -138,7 +172,7 @@ http {
         listen 80;
         server_name fulcio.sigstore-system;
         location / {
-            proxy_pass http://securerag-dev-control-plane:30081;
+            proxy_pass http://securerag-dev-control-plane:30088;
             proxy_set_header Host \$host;
             proxy_set_header X-Real-IP \$remote_addr;
             proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;

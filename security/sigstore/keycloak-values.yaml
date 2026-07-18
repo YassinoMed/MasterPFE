@@ -4,6 +4,10 @@
 
 production: false
 
+image:
+  repository: bitnamilegacy/keycloak
+  tag: 26.3.3-debian-12-r0
+
 auth:
   adminUser: admin
   adminPassword: adminpassword
@@ -12,9 +16,11 @@ http:
   relativePathway: /
 
 service:
-  type: ClusterIP
+  type: NodePort
   ports:
     http: 80
+  nodePorts:
+    http: 30080
 
 # Mount the realm import ConfigMap
 extraVolumes:
@@ -27,8 +33,9 @@ extraVolumeMounts:
     mountPath: /opt/bitnami/keycloak/data/import
     readOnly: true
 
-extraArgs:
-  - "--import-realm"
+extraEnvVars:
+  - name: KEYCLOAK_EXTRA_ARGS
+    value: "--import-realm"
 
 # PSS Restricted Compliance
 podSecurityContext:
@@ -48,3 +55,26 @@ containerSecurityContext:
     drop:
       - ALL
   readOnlyRootFilesystem: false
+
+# Override PostgreSQL subchart to use bitnamilegacy repo
+postgresql:
+  image:
+    repository: bitnamilegacy/postgresql
+    tag: 16.2.0-debian-11-r8
+
+# Increase probe delays to allow slow Quarkus build in Kind
+livenessProbe:
+  initialDelaySeconds: 1200
+  periodSeconds: 10
+readinessProbe:
+  initialDelaySeconds: 180
+  periodSeconds: 15
+
+# Allocating more resources to compile Quarkus quickly
+resources:
+  limits:
+    cpu: 1500m
+    memory: 1280Mi
+  requests:
+    cpu: 1000m
+    memory: 768Mi

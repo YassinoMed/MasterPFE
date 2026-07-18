@@ -156,7 +156,7 @@ spec:
               unstash 'workspace'
               sh '''
                 REGISTRY_HOST="${REGISTRY_HOST}" IMAGE_PREFIX="${IMAGE_PREFIX}" IMAGE_TAG="${SOURCE_IMAGE_TAG}" \
-                REPORT_DIR="${REPORT_DIR}" FAIL_FAST=true bash scripts/release/sign-images.sh
+                REPORT_DIR="${REPORT_DIR}" FAIL_FAST=true bash scripts/release/sign-images-keyless.sh
               '''
               stash name: 'sign-artifacts', includes: 'artifacts/release/*sign*'
             }
@@ -192,7 +192,7 @@ spec:
           unstash 'workspace'
           sh '''
             REGISTRY_HOST="${REGISTRY_HOST}" IMAGE_PREFIX="${IMAGE_PREFIX}" IMAGE_TAG="${SOURCE_IMAGE_TAG}" \
-            REPORT_DIR="${REPORT_DIR}" FAIL_FAST=true bash scripts/release/verify-signatures.sh
+            REPORT_DIR="${REPORT_DIR}" FAIL_FAST=true bash scripts/release/verify-signatures-keyless.sh
           '''
           stash name: 'verify-artifacts', includes: 'artifacts/release/*verify*'
         }

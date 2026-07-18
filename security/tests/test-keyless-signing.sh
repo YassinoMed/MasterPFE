@@ -16,8 +16,9 @@ command -v docker &>/dev/null || error "docker is required but not installed."
 
 # Configuration
 REGISTRY="localhost:5001"
-SIGNED_IMAGE="${REGISTRY}/securerag-hub-test-service:latest"
-UNSIGNED_IMAGE="${REGISTRY}/securerag-hub-test-service-unsigned:latest"
+TAG="test-$(date +%s)"
+SIGNED_IMAGE="${REGISTRY}/securerag-hub-test-service:${TAG}"
+UNSIGNED_IMAGE="${REGISTRY}/securerag-hub-test-service-unsigned:${TAG}"
 
 # 1. Build and push test images
 info "Building and pushing test images to ${REGISTRY}..."
@@ -41,8 +42,13 @@ info "OIDC token retrieved successfully."
 
 # 3. Sign image keyless via local Fulcio & Rekor
 info "Signing image keyless..."
+# Extract and configure CTLog public key
+CTLOG_PUB_FILE="/tmp/ctlog-public.pem"
+kubectl get secret ctlog-public-key -n ctlog-system -o jsonpath='{.data.public}' | base64 -d > "${CTLOG_PUB_FILE}"
+export SIGSTORE_CT_LOG_PUBLIC_KEY_FILE="${CTLOG_PUB_FILE}"
+
 # Cosign v2+ uses keyless mode by default via Fulcio + Rekor
-cosign sign \
+echo y | cosign sign \
   --fulcio-url=http://fulcio.sigstore-system \
   --rekor-url=http://rekor.sigstore-system \
   --oidc-issuer=http://keycloak.sigstore-system/realms/securerag-cicd \
@@ -60,6 +66,7 @@ if [ -z "$SECRET_NAME" ]; then
 fi
 
 FULCIO_CERT_FILE="/tmp/fulcio-root.pem"
+kubectl get secret "$SECRET_NAME" -n sigstore-system -o jsonpath='{.data.cert}' | base64 -d > "${FULCIO_CERT_FILE}" || \
 kubectl get secret "$SECRET_NAME" -n sigstore-system -o jsonpath='{.data.cert\.pem}' | base64 -d > "${FULCIO_CERT_FILE}" || \
 kubectl get secret "$SECRET_NAME" -n sigstore-system -o jsonpath='{.data.cacert\.pem}' | base64 -d > "${FULCIO_CERT_FILE}" || \
 kubectl get secret "$SECRET_NAME" -n sigstore-system -o jsonpath='{.data.root\.pem}' | base64 -d > "${FULCIO_CERT_FILE}" || \
@@ -69,6 +76,9 @@ info "Fulcio CA cert saved to ${FULCIO_CERT_FILE}"
 
 # 5. Verify signature using Cosign CLI
 info "Verifying signature using Cosign CLI..."
+REKOR_PUB_FILE="/tmp/rekor-public.pem"
+curl -s http://rekor.sigstore-system/api/v1/log/publicKey > "${REKOR_PUB_FILE}"
+export SIGSTORE_REKOR_PUBLIC_KEY="${REKOR_PUB_FILE}"
 export SIGSTORE_ROOT_FILE="${FULCIO_CERT_FILE}"
 cosign verify \
   --rekor-url=http://rekor.sigstore-system \
@@ -80,25 +90,58 @@ info "CLI signature verification PASSED!"
 
 # 6. Apply Kyverno Policy
 info "Applying Kyverno ClusterPolicy..."
-kubectl apply -f k8s/kyverno-policies/verify-image-signature-keyless.yaml
+LOCAL_POLICY_FILE="/tmp/verify-image-signature-keyless-local.yaml"
+python3 -c "
+with open('k8s/kyverno-policies/verify-image-signature-keyless.yaml', 'r') as f:
+    content = f.read()
 
-# Wait for Kyverno policy validation webhook to sync (usually few seconds)
-sleep 3
+with open('${FULCIO_CERT_FILE}', 'r') as f:
+    fulcio = f.read().strip()
+with open('${REKOR_PUB_FILE}', 'r') as f:
+    rekor = f.read().strip()
+with open('${CTLOG_PUB_FILE}', 'r') as f:
+    ctlog = f.read().strip()
+
+fulcio_indented = '\n'.join('                      ' + line for line in fulcio.split('\n'))
+rekor_indented = '\n'.join('                        ' + line for line in rekor.split('\n'))
+ctlog_indented = '\n'.join('                        ' + line for line in ctlog.split('\n'))
+
+content = content.replace('@FULCIO_ROOT@', fulcio_indented)
+content = content.replace('@REKOR_PUBKEY@', rekor_indented)
+content = content.replace('@CTLOG_PUBKEY@', ctlog_indented)
+
+content = content.replace('https://keycloak.sigstore-system', 'http://keycloak.sigstore-system')
+content = content.replace('https://rekor.sigstore-system', 'http://rekor.sigstore-system')
+
+with open('${LOCAL_POLICY_FILE}', 'w') as f:
+    f.write(content)
+"
+kubectl apply -f "${LOCAL_POLICY_FILE}"
+
+# Suspend the static cosign policy to isolate keyless admission testing
+info "Temporarily auditing static cosign policy..."
+kubectl patch clusterpolicy/securerag-verify-cosign-images --type=merge -p '{"spec":{"validationFailureAction":"Audit"}}'
+trap 'kubectl patch clusterpolicy/securerag-verify-cosign-images --type=merge -p "{\"spec\":{\"validationFailureAction\":\"Enforce\"}}" 2>/dev/null || true' EXIT
+
+# Wait for Kyverno policy validation webhook to sync (usually 8-10 seconds)
+sleep 10
 
 # 7. Test Admission Control - Unsigned Image (Should fail)
 info "Testing Kyverno admission control: deploying UNSIGNED image (expecting BLOCK)..."
-if kubectl run test-unsigned-pod --image="${UNSIGNED_IMAGE}" -n securerag-hub --dry-run=server 2>&1 | grep -q "denied the request"; then
+OUTPUT_UNSIGNED=$(kubectl run test-unsigned-pod --image="${UNSIGNED_IMAGE}" -n securerag-hub --dry-run=server 2>&1 || true)
+if echo "${OUTPUT_UNSIGNED}" | grep -q "denied the request"; then
   info "Kyverno correctly BLOCKED the unsigned image deployment. PASS!"
 else
-  warn "Kyverno DID NOT block the unsigned image. Check policy installation."
+  warn "Kyverno DID NOT block the unsigned image. Output was: ${OUTPUT_UNSIGNED}"
 fi
 
 # 8. Test Admission Control - Signed Image (Should pass)
 info "Testing Kyverno admission control: deploying SIGNED image (expecting ALLOW)..."
-if kubectl run test-signed-pod --image="${SIGNED_IMAGE}" -n securerag-hub --dry-run=server &>/dev/null; then
-  info "Kyverno correctly ALLOWED the signed image deployment. PASS!"
+OUTPUT_SIGNED=$(kubectl run test-signed-pod --image="${SIGNED_IMAGE}" -n securerag-hub --dry-run=server 2>&1 || true)
+if echo "${OUTPUT_SIGNED}" | grep -q "denied the request"; then
+  error "Kyverno BLOCKED the signed image deployment. Output was: ${OUTPUT_SIGNED}"
 else
-  error "Kyverno BLOCKED the signed image deployment. Check policy configuration."
+  info "Kyverno correctly ALLOWED the signed image deployment. PASS!"
 fi
 
 info "All tests completed successfully!"

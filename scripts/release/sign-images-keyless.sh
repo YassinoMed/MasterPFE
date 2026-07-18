@@ -1,42 +1,22 @@
 #!/usr/bin/env bash
 # sign-images-keyless.sh — Cosign Keyless Signing
 # SecureRAG Hub — Enterprise Supply Chain Security
-#
-# This script replaces the static key-based Cosign signing with
-# keyless mode using OIDC (GitHub Actions, Jenkins, or SPIFFE).
-#
-# Benefits:
-#   - No private key to store or rotate
-#   - Identity bound to workflow/job, not a static key
-#   - Automatic certificate issuance via Fulcio
-#   - Transparency via Rekor
-#
-# Prerequisites:
-#   - Cosign v2+ with Fulcio/Rekor (keyless mode is default)
-#   - OIDC token available (GitHub Actions: id-token: write)
-#   - Access to Fulcio (public sigstore.dev or private)
-#
-# Usage:
-#   bash scripts/release/sign-images-keyless.sh
-#
-# Environment:
-#   REGISTRY_HOST    (default: localhost:5001)
-#   IMAGE_PREFIX     (default: securerag-hub)
-#   IMAGE_TAG        (default: latest)
-#   COSIGN_ISSUER    (optional, validates OIDC issuer)
-#   COSIGN_IDENTITY  (optional, validates OIDC subject)
+
 set -euo pipefail
 
 REGISTRY_HOST="${REGISTRY_HOST:-localhost:5001}"
 IMAGE_PREFIX="${IMAGE_PREFIX:-securerag-hub}"
 IMAGE_TAG="${IMAGE_TAG:-latest}"
 REPORT_DIR="${REPORT_DIR:-artifacts/release}"
+LOCAL_SIGSTORE="${LOCAL_SIGSTORE:-true}"
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
 NC='\033[0m'
 
 info()  { printf "${GREEN}[INFO]${NC}  %s\n" "$*"; }
+warn()  { printf "${YELLOW}[WARN]${NC}  %s\n" "$*"; }
 error() { printf "${RED}[ERROR]${NC} %s\n" "$*" >&2; }
 
 mkdir -p "${REPORT_DIR}"
@@ -47,18 +27,51 @@ echo "  COSIGN KEYLESS SIGNING"
 echo "  No static keys — identity via OIDC"
 echo "═══════════════════════════════════════════════════════════════"
 
-# Cosign v2+ uses keyless mode by default via Fulcio + Rekor
-
 # Validate prerequisites
 if ! command -v cosign &>/dev/null; then
   error "cosign not installed"
   exit 1
 fi
+if ! command -v jq &>/dev/null; then
+  error "jq is required but not installed"
+  exit 1
+fi
 
 echo ""
 echo "Cosign version: $(cosign version 2>&1 | head -1)"
-echo "Keyless mode:   enabled (Fulcio + Rekor)"
 echo ""
+
+# Retrieve OIDC token if using local sigstore stack
+OIDC_TOKEN_ARG=""
+FULCIO_URL="https://fulcio.sigstore.dev"
+REKOR_URL="https://rekor.sigstore.dev"
+OIDC_ISSUER=""
+
+if [ "${LOCAL_SIGSTORE}" = "true" ]; then
+  info "Configuring for local Sigstore environment..."
+  
+  # Fetch Keycloak token
+  # Try both internal service name and external localhost mapping depending on where this script is running
+  TOKEN=""
+  if curl -s --connect-timeout 5 -f -X POST http://keycloak.sigstore-system/realms/securerag-cicd/protocol/openid-connect/token \
+    -d "client_id=jenkins-cosign&client_secret=jenkins-cosign-secret&grant_type=client_credentials" >/tmp/kc-token.json; then
+    TOKEN=$(jq -r .access_token /tmp/kc-token.json)
+  elif curl -s --connect-timeout 5 -f -X POST http://127.0.0.1:30080/realms/securerag-cicd/protocol/openid-connect/token \
+    -d "client_id=jenkins-cosign&client_secret=jenkins-cosign-secret&grant_type=client_credentials" >/tmp/kc-token.json; then
+    TOKEN=$(jq -r .access_token /tmp/kc-token.json)
+  fi
+
+  if [ -n "${TOKEN}" ] && [ "${TOKEN}" != "null" ]; then
+    info "Successfully retrieved OIDC token from local Keycloak."
+    export COSIGN_IDENTITY_TOKEN="${TOKEN}"
+    OIDC_TOKEN_ARG="--identity-token=${TOKEN}"
+    FULCIO_URL="http://fulcio.sigstore-system"
+    REKOR_URL="http://rekor.sigstore-system"
+    OIDC_ISSUER="http://keycloak.sigstore-system/realms/securerag-cicd"
+  else
+    warn "Failed to retrieve local Keycloak token. Falling back to public Sigstore."
+  fi
+fi
 
 # Core services to sign
 SERVICES=(
@@ -74,16 +87,26 @@ SIGN_FAIL=0
 
 for service in "${SERVICES[@]}"; do
   IMAGE="${REGISTRY_HOST}/${IMAGE_PREFIX}-${service}:${IMAGE_TAG}"
-  DIGEST_IMAGE="${REGISTRY_HOST}/${IMAGE_PREFIX}-${service}@${IMAGE_TAG}"
-
   info "Signing ${IMAGE}..."
 
-  # Try tag-based signing first, fall back to digest
-  if cosign sign "${IMAGE}" \
-    --yes \
-    --fulcio-url=https://fulcio.sigstore.dev \
-    --rekor-url=https://rekor.sigstore.dev \
-    -o json 2>/tmp/cosign-sign-${service}.log; then
+  # Build sign arguments
+  declare -a sign_args
+  sign_args=(sign --yes)
+  
+  if [ -n "${OIDC_TOKEN_ARG}" ]; then
+    sign_args+=("${OIDC_TOKEN_ARG}")
+  fi
+  
+  sign_args+=(
+    "--fulcio-url=${FULCIO_URL}"
+    "--rekor-url=${REKOR_URL}"
+  )
+  
+  if [ -n "${OIDC_ISSUER}" ]; then
+    sign_args+=("--oidc-issuer=${OIDC_ISSUER}")
+  fi
+
+  if cosign "${sign_args[@]}" "${IMAGE}" -o json 2>/tmp/cosign-sign-${service}.log; then
     info "✅ ${service} signed successfully"
     SIGN_SUCCESS=$((SIGN_SUCCESS + 1))
     echo "${IMAGE}" >> "${REPORT_DIR}/keyless-signed-images.txt"
@@ -105,8 +128,8 @@ done
   echo "| ❌ Failed | ${SIGN_FAIL} |"
   echo ""
   echo "Keyless mode: enabled"
-  echo "Fulcio: https://fulcio.sigstore.dev"
-  echo "Rekor:  https://rekor.sigstore.dev"
+  echo "Fulcio: ${FULCIO_URL}"
+  echo "Rekor:  ${REKOR_URL}"
 } > "${REPORT_DIR}/keyless-sign-summary.md"
 
 echo ""

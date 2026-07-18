@@ -1,0 +1,66 @@
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: verify-slsa-provenance
+  labels:
+    app.kubernetes.io/part-of: securerag-hub
+    app.kubernetes.io/managed-by: kyverno
+  annotations:
+    policies.kyverno.io/title: Verify SLSA Provenance
+    policies.kyverno.io/category: Supply Chain Security
+    policies.kyverno.io/severity: critical
+    policies.kyverno.io/subject: Pod
+    policies.kyverno.io/description: >-
+      All container images must have a valid SLSA provenance attestation.
+spec:
+  validationFailureAction: Enforce
+  background: false
+  webhookTimeoutSeconds: 30
+  failurePolicy: Fail
+  rules:
+    - name: verify-provenance
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+              namespaces:
+                - securerag-hub
+      verifyImages:
+        - imageReferences:
+            - "localhost:5001/securerag-hub-*"
+            - "harbor.securerag.local/securerag-hub/*"
+          mutateDigest: true
+          verifyDigest: true
+          required: true
+          attestors:
+            - count: 1
+              entries:
+                - keyless:
+                    issuer: https://keycloak.sigstore-system/realms/securerag-cicd
+                    subject: jenkins-cosign@securerag.local
+                    roots: |
+@FULCIO_ROOT@
+                    rekor:
+                      url: https://rekor.sigstore-system
+                      pubkey: |
+@REKOR_PUBKEY@
+          attestations:
+            - predicateType: https://slsa.dev/provenance/v1
+              attestors:
+                - count: 1
+                  entries:
+                    - keyless:
+                        issuer: https://keycloak.sigstore-system/realms/securerag-cicd
+                        subject: jenkins-cosign@securerag.local
+                        roots: |
+@FULCIO_ROOT_A1@
+                        rekor:
+                          url: https://rekor.sigstore-system
+                          pubkey: |
+@REKOR_PUBKEY_A1@
+              conditions:
+                - all:
+                    - key: "{{ runDetails.builder.id }}"
+                      operator: NotEquals
+                      value: ""
