@@ -6,7 +6,7 @@ jenkins:
   clouds:
     - kubernetes:
         name: "kubernetes"
-        namespace: "securerag-hub"
+        namespace: "securerag-cicd"
         serverUrl: "https://securerag-dev-control-plane:6443"
         skipTlsVerify: true
         credentialsId: "k8s-token"
