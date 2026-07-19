@@ -27,8 +27,8 @@ spec:
             - "registry.securerag.local/*"
             - "localhost:5001/securerag-hub-*"
           required: true
-          mutateDigest: false
-          verifyDigest: false
+          mutateDigest: true
+          verifyDigest: true
           attestors:
             - count: 1
               entries:

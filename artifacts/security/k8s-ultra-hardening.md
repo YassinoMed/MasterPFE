@@ -251,21 +251,24 @@
 | `dev` | NetworkPolicy selects conversation-service | TERMINÉ | `podSelector covers conversation-service` |
 | `dev` | NetworkPolicy selects audit-security-service | TERMINÉ | `podSelector covers audit-security-service` |
 | `kyverno-enforce-policies` | Kyverno policy securerag-audit-cleartext-env-values rendered | TERMINÉ | `ClusterPolicy present` |
-| `kyverno-enforce-policies` | Kyverno policy securerag-require-pod-security rendered | TERMINÉ | `ClusterPolicy present` |
+| `kyverno-enforce-policies` | Kyverno policy securerag-disallow-root-containers rendered | TERMINÉ | `ClusterPolicy present` |
+| `kyverno-enforce-policies` | Kyverno policy securerag-disallow-host-network rendered | TERMINÉ | `ClusterPolicy present` |
 | `kyverno-enforce-policies` | Kyverno policy securerag-require-workload-controls rendered | TERMINÉ | `ClusterPolicy present` |
 | `kyverno-enforce-policies` | Kyverno policy securerag-restrict-image-references rendered | TERMINÉ | `ClusterPolicy present` |
 | `kyverno-enforce-policies` | Kyverno policy securerag-restrict-service-exposure rendered | TERMINÉ | `ClusterPolicy present` |
 | `kyverno-enforce-policies` | Kyverno policy securerag-restrict-volume-types rendered | TERMINÉ | `ClusterPolicy present` |
 | `kyverno-enforce-policies` | Kyverno policy securerag-verify-cosign-images rendered | TERMINÉ | `ClusterPolicy present` |
 | `kyverno-enforce-policies` | securerag-audit-cleartext-env-values is Enforce | TERMINÉ | `validationFailureAction=Enforce` |
-| `kyverno-enforce-policies` | securerag-require-pod-security is Enforce | TERMINÉ | `validationFailureAction=Enforce` |
+| `kyverno-enforce-policies` | securerag-disallow-host-network is Enforce | TERMINÉ | `validationFailureAction=Enforce` |
+| `kyverno-enforce-policies` | securerag-disallow-root-containers is Enforce | TERMINÉ | `validationFailureAction=Enforce` |
 | `kyverno-enforce-policies` | securerag-require-workload-controls is Enforce | TERMINÉ | `validationFailureAction=Enforce` |
 | `kyverno-enforce-policies` | securerag-restrict-image-references is Enforce | TERMINÉ | `validationFailureAction=Enforce` |
 | `kyverno-enforce-policies` | securerag-restrict-service-exposure is Enforce | TERMINÉ | `validationFailureAction=Enforce` |
 | `kyverno-enforce-policies` | securerag-restrict-volume-types is Enforce | TERMINÉ | `validationFailureAction=Enforce` |
 | `kyverno-enforce-policies` | securerag-verify-cosign-images is Enforce | TERMINÉ | `validationFailureAction=Enforce` |
 | `kyverno-policies` | Kyverno policy securerag-audit-cleartext-env-values rendered | TERMINÉ | `ClusterPolicy present` |
-| `kyverno-policies` | Kyverno policy securerag-require-pod-security rendered | TERMINÉ | `ClusterPolicy present` |
+| `kyverno-policies` | Kyverno policy securerag-disallow-root-containers rendered | TERMINÉ | `ClusterPolicy present` |
+| `kyverno-policies` | Kyverno policy securerag-disallow-host-network rendered | TERMINÉ | `ClusterPolicy present` |
 | `kyverno-policies` | Kyverno policy securerag-require-workload-controls rendered | TERMINÉ | `ClusterPolicy present` |
 | `kyverno-policies` | Kyverno policy securerag-restrict-image-references rendered | TERMINÉ | `ClusterPolicy present` |
 | `kyverno-policies` | Kyverno policy securerag-restrict-service-exposure rendered | TERMINÉ | `ClusterPolicy present` |
@@ -298,7 +301,7 @@
 | `production` | portal-web/portal-web readinessProbe | TERMINÉ | `readinessProbe present` |
 | `production` | portal-web/portal-web livenessProbe | TERMINÉ | `livenessProbe present` |
 | `production` | portal-web/portal-web startupProbe | TERMINÉ | `startupProbe present` |
-| `production` | portal-web/portal-web image not latest | TERMINÉ | `localhost:5001/securerag-hub-portal-web:production` |
+| `production` | portal-web/portal-web image not latest | TERMINÉ | `localhost:5001/securerag-hub-portal-web@sha256:0000000000000000000000000000000000000000000000000000000000000000` |
 | `production` | Deployment auth-users rendered | TERMINÉ | `Deployment present` |
 | `production` | auth-users explicit non-default ServiceAccount | TERMINÉ | `sa-auth-users` |
 | `production` | auth-users token automount disabled | TERMINÉ | `automountServiceAccountToken=false` |
@@ -317,7 +320,7 @@
 | `production` | auth-users/auth-users readinessProbe | TERMINÉ | `readinessProbe present` |
 | `production` | auth-users/auth-users livenessProbe | TERMINÉ | `livenessProbe present` |
 | `production` | auth-users/auth-users startupProbe | TERMINÉ | `startupProbe present` |
-| `production` | auth-users/auth-users image not latest | TERMINÉ | `localhost:5001/securerag-hub-auth-users:production` |
+| `production` | auth-users/auth-users image not latest | TERMINÉ | `localhost:5001/securerag-hub-auth-users@sha256:0000000000000000000000000000000000000000000000000000000000000000` |
 | `production` | Deployment chatbot-manager rendered | TERMINÉ | `Deployment present` |
 | `production` | chatbot-manager explicit non-default ServiceAccount | TERMINÉ | `sa-chatbot-manager` |
 | `production` | chatbot-manager token automount disabled | TERMINÉ | `automountServiceAccountToken=false` |
@@ -336,7 +339,7 @@
 | `production` | chatbot-manager/chatbot-manager readinessProbe | TERMINÉ | `readinessProbe present` |
 | `production` | chatbot-manager/chatbot-manager livenessProbe | TERMINÉ | `livenessProbe present` |
 | `production` | chatbot-manager/chatbot-manager startupProbe | TERMINÉ | `startupProbe present` |
-| `production` | chatbot-manager/chatbot-manager image not latest | TERMINÉ | `localhost:5001/securerag-hub-chatbot-manager:production` |
+| `production` | chatbot-manager/chatbot-manager image not latest | TERMINÉ | `localhost:5001/securerag-hub-chatbot-manager@sha256:0000000000000000000000000000000000000000000000000000000000000000` |
 | `production` | Deployment conversation-service rendered | TERMINÉ | `Deployment present` |
 | `production` | conversation-service explicit non-default ServiceAccount | TERMINÉ | `sa-conversation-service` |
 | `production` | conversation-service token automount disabled | TERMINÉ | `automountServiceAccountToken=false` |
@@ -355,7 +358,7 @@
 | `production` | conversation-service/conversation-service readinessProbe | TERMINÉ | `readinessProbe present` |
 | `production` | conversation-service/conversation-service livenessProbe | TERMINÉ | `livenessProbe present` |
 | `production` | conversation-service/conversation-service startupProbe | TERMINÉ | `startupProbe present` |
-| `production` | conversation-service/conversation-service image not latest | TERMINÉ | `localhost:5001/securerag-hub-conversation-service:production` |
+| `production` | conversation-service/conversation-service image not latest | TERMINÉ | `localhost:5001/securerag-hub-conversation-service@sha256:0000000000000000000000000000000000000000000000000000000000000000` |
 | `production` | Deployment audit-security-service rendered | TERMINÉ | `Deployment present` |
 | `production` | audit-security-service explicit non-default ServiceAccount | TERMINÉ | `sa-audit-security-service` |
 | `production` | audit-security-service token automount disabled | TERMINÉ | `automountServiceAccountToken=false` |
@@ -374,7 +377,7 @@
 | `production` | audit-security-service/audit-security-service readinessProbe | TERMINÉ | `readinessProbe present` |
 | `production` | audit-security-service/audit-security-service livenessProbe | TERMINÉ | `livenessProbe present` |
 | `production` | audit-security-service/audit-security-service startupProbe | TERMINÉ | `startupProbe present` |
-| `production` | audit-security-service/audit-security-service image not latest | TERMINÉ | `localhost:5001/securerag-hub-audit-security-service:production` |
+| `production` | audit-security-service/audit-security-service image not latest | TERMINÉ | `localhost:5001/securerag-hub-audit-security-service@sha256:0000000000000000000000000000000000000000000000000000000000000000` |
 | `production` | Service audit-security-service exposure restricted | TERMINÉ | `type=ClusterIP` |
 | `production` | Service auth-users exposure restricted | TERMINÉ | `type=ClusterIP` |
 | `production` | Service chatbot-manager exposure restricted | TERMINÉ | `type=ClusterIP` |

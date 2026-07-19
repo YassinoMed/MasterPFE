@@ -1,6 +1,6 @@
 # Final Validation Summary - SecureRAG Hub
 
-- Generated at UTC: `2026-06-21T09:03:01Z`
+- Generated at UTC: `2026-07-18T13:31:04Z`
 - Status: `PARTIEL`
 
 ## 1. Official scenario
@@ -21,13 +21,13 @@
 | Coverage | unknown |
 | Semgrep findings | unknown |
 | Gitleaks leaks | unknown |
-| Trivy vulnerabilities | unknown |
+| Trivy vulnerabilities | 0 |
 
 ## 3. CD and runtime results
 
 | Check | Status |
 |---|---|
-| Jenkins / CD gates (job: `securerag-hub-ci`) | DÉPENDANT_DE_L_ENVIRONNEMENT |
+| Jenkins / CD gates (job: `securerag-hub-ci`) | PARTIEL |
 | Kubernetes runtime | PARTIEL |
 | Portal Web health | PARTIEL |
 | Digest-pinned runtime (registry: `localhost:5001`) | PARTIEL |
@@ -52,9 +52,9 @@
 | `artifacts/final/global-project-status.md` | TERMINÉ |
 | `artifacts/final/missing-phases-closure.md` | PARTIEL |
 | `artifacts/final/devsecops-readiness-report.md` | PARTIEL |
-| `artifacts/jenkins/github-webhook-validation.md` | PRÊT_NON_EXÉCUTÉ |
-| `artifacts/jenkins/ci-push-trigger-proof.md` | PRÊT_NON_EXÉCUTÉ |
-| Latest support pack | artifacts/support-pack/support-demo-20260411T144030Z.tar.gz |
+| `artifacts/jenkins/github-webhook-validation.md` | PARTIEL |
+| `artifacts/jenkins/ci-push-trigger-proof.md` | PARTIEL |
+| Latest support pack | artifacts/support-pack/20260718T133026Z.tar.gz |
 
 ## 5. Honest limits
 

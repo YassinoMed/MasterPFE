@@ -1,0 +1,4 @@
+make[1]: Entering directory '/root/MasterPFE'
+[WARN] HPA runtime report contains 10 gap(s): artifacts/validation/hpa-runtime-report.md
+make[1]: *** [Makefile:141: hpa-runtime-proof] Error 1
+make[1]: Leaving directory '/root/MasterPFE'

@@ -1,7 +1,7 @@
 # Security Posture Report — SecureRAG Hub
 
-- Generated at UTC: `2026-06-21T09:03:02Z`
-- Git commit: `6d02b639ba0810cfea23ee502f9321bbb8717209`
+- Generated at UTC: `2026-07-18T13:30:01Z`
+- Git commit: `d40fb6193d0ed5431c3cab7cf35860344f2cdf7f`
 - Kubernetes namespace: `securerag-hub`
 
 ## 1. Security controls status
@@ -10,13 +10,13 @@
 |---|---|---|
 | Semgrep SAST | `PRÊT_NON_EXÉCUTÉ` | `security/reports/semgrep.json`, findings=n/a |
 | Sonar CPD scope | `TERMINÉ` | `artifacts/security/sonar-cpd-scope.md` |
-| Sonar Quality Gate | `TERMINÉ` | `security/reports/sonar-analysis.md` |
+| Sonar Quality Gate | `FAIL` | `security/reports/sonar-analysis.md` |
 | Gitleaks secret scan | `PRÊT_NON_EXÉCUTÉ` | `security/reports/gitleaks.json`, findings=n/a |
-| Trivy filesystem scan | `DÉPENDANT_DE_L_ENVIRONNEMENT` | `security/reports/trivy-fs.json`, vulnerabilities=n/a |
+| Trivy filesystem scan | `TERMINÉ` | `security/reports/trivy-fs.json`, vulnerabilities=0 |
 | Trivy image scan | `DÉPENDANT_DE_L_ENVIRONNEMENT` | `artifacts/release/image-scan-summary.txt` |
 | SBOM Syft | `DÉPENDANT_DE_L_ENVIRONNEMENT` | `artifacts/release/sbom-summary.txt`, sbom_count=0, expected=5 |
 | SBOM Cosign attestation | `DÉPENDANT_DE_L_ENVIRONNEMENT` | `artifacts/release/attest-summary.txt` |
-| Cosign sign | `DÉPENDANT_DE_L_ENVIRONNEMENT` | `artifacts/release/sign-summary.txt` |
+| Cosign sign | `PARTIEL` | `artifacts/release/sign-summary.txt` |
 | Cosign verify | `DÉPENDANT_DE_L_ENVIRONNEMENT` | `artifacts/release/verify-summary.txt` |
 | Digest promotion | `DÉPENDANT_DE_L_ENVIRONNEMENT` | `artifacts/release/promotion-digests.txt` |
 | Release attestation | `DÉPENDANT_DE_L_ENVIRONNEMENT` | `artifacts/release/release-attestation.json` |
@@ -26,10 +26,10 @@
 | Kubernetes production HA static | `TERMINÉ` | `artifacts/security/production-ha-readiness.md` |
 | Production runtime evidence | `DÉPENDANT_DE_L_ENVIRONNEMENT` | `artifacts/validation/production-runtime-evidence.md` |
 | Runtime image rollout proof | `PARTIEL` | `artifacts/validation/runtime-image-rollout-proof.md` |
-| Jenkins webhook proof | `DÉPENDANT_DE_L_ENVIRONNEMENT` | `artifacts/jenkins/github-webhook-validation.md` |
-| Jenkins CI push proof | `DÉPENDANT_DE_L_ENVIRONNEMENT` | `artifacts/jenkins/ci-push-trigger-proof.md` |
+| Jenkins webhook proof | `PARTIEL` | `artifacts/jenkins/github-webhook-validation.md` |
+| Jenkins CI push proof | `TERMINÉ` | `artifacts/jenkins/ci-push-trigger-proof.md` |
 | Kyverno Enforce local registry blocker | `DÉPENDANT_DE_L_ENVIRONNEMENT` | `artifacts/validation/kyverno-local-registry-enforce-blocker.md` |
-| Production data resilience | `PRÊT_NON_EXÉCUTÉ` | `artifacts/security/production-data-resilience.md` |
+| Production data resilience | `FAIL` | `artifacts/security/production-data-resilience.md` |
 | Production Dockerfiles | `TERMINÉ` | `artifacts/security/production-dockerfiles.md` |
 | Image size evidence | `DÉPENDANT_DE_L_ENVIRONNEMENT` | `artifacts/security/image-size-evidence.md` |
 | Secrets management | `PRÊT_NON_EXÉCUTÉ` | `artifacts/security/secrets-management.md` |

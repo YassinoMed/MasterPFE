@@ -6,6 +6,10 @@ apiVersion: v1
 kind: Pod
 spec:
   serviceAccountName: jenkins
+  securityContext:
+    runAsNonRoot: true
+    seccompProfile:
+      type: RuntimeDefault
   containers:
   - name: tools
     image: mohamedyassinebouneb/securerag-hub-unified:latest
@@ -13,9 +17,10 @@ spec:
     command:
     - cat
     tty: true
-    env:
-    - name: DOCKER_HOST
-      value: tcp://localhost:2375
+    securityContext:
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop: [ALL]
     volumeMounts:
     - name: composer-cache
       mountPath: /home/jenkins/.composer/cache
@@ -31,13 +36,8 @@ spec:
       mountPath: /home/jenkins/.sonar
     - name: maven-cache
       mountPath: /home/jenkins/.m2
-  - name: dind
-    image: docker:27-dind
-    securityContext:
-      privileged: true
-    env:
-    - name: DOCKER_TLS_CERTDIR
-      value: ""
+  # DinD sidecar REMOVED — privileged containers violate SOC2 CC6.6
+  # Builds use Kaniko (rootless, no docker.sock required)
   volumes:
   - name: composer-cache
     hostPath:

@@ -1,0 +1,19 @@
+<!-- Kubernetes Audit Event Decoder for Wazuh SIEM -->
+<!-- Decodes Falcosidekick-forwarded Kubernetes audit events -->
+<decoder name="kubernetes-audit">
+  <prematch>^{"output":</prematch>
+  <regex>"rule":"(\S+)".*"priority":"(\S+)".*"source":"(\S+)"</regex>
+  <order>rule_name,priority,source</order>
+</decoder>
+
+<decoder name="falco-alert">
+  <prematch>^{"output":</prematch>
+  <regex>"output":"(.+?)".*"priority":"(\S+)".*"rule":"(\S+)"</regex>
+  <order>output_message,priority,rule_name</order>
+</decoder>
+
+<decoder name="falco-k8s-metadata">
+  <parent>falco-alert</parent>
+  <regex>pod=(\S+).*ns=(\S+)</regex>
+  <order>pod_name,namespace</order>
+</decoder>

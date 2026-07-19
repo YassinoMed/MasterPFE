@@ -1,5 +1,6 @@
-# ApplicationSet: AI Governance Layer
-# Deploys AI Security Orchestrator, Knowledge Graph, and related services
+# ApplicationSet: AI Security Service (v2)
+# Deploys the new 4-layer AI Security Pipeline
+# Replaces the legacy ai-governance-layer (orchestrator, risk, trust, etc.)
 apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
 metadata:
@@ -12,14 +13,10 @@ spec:
   generators:
     - list:
         elements:
-          - name: ai-security-orchestrator
-            namespace: securerag-hub
-            path: infra/k8s/base/ai-security-orchestrator
+          - name: ai-security-service
+            namespace: ai-security
+            path: ai-security-service/k8s
             wave: "20"
-          - name: ai-knowledge-graph
-            namespace: securerag-hub
-            path: infra/k8s/base/ai-knowledge-graph
-            wave: "21"
   template:
     metadata:
       name: 'ai-{{name}}'

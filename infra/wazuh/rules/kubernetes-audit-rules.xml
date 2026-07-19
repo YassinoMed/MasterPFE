@@ -1,0 +1,70 @@
+<!-- Kubernetes Audit Rules for Wazuh SIEM -->
+<!-- SOC2 Type II: Detect privilege escalation, unauthorized access, and security violations -->
+
+<group name="kubernetes,audit,soc2">
+
+  <!-- Falco: Shell execution in container -->
+  <rule id="100100" level="12">
+    <decoded_as>falco-alert</decoded_as>
+    <field name="rule_name">SecureRAG Shell in Container</field>
+    <description>CRITICAL: Shell execution detected in SecureRAG container. Possible intrusion.</description>
+    <group>attack,shell,container_escape</group>
+  </rule>
+
+  <!-- Falco: Privilege escalation attempt -->
+  <rule id="100101" level="14">
+    <decoded_as>falco-alert</decoded_as>
+    <field name="rule_name">SecureRAG Privilege Escalation Attempt</field>
+    <description>CRITICAL: Privilege escalation attempt in SecureRAG pod.</description>
+    <group>attack,privilege_escalation</group>
+  </rule>
+
+  <!-- Falco: Cryptomining detected -->
+  <rule id="100102" level="15">
+    <decoded_as>falco-alert</decoded_as>
+    <field name="rule_name">SecureRAG Cryptomining Detected</field>
+    <description>CRITICAL: Cryptomining activity detected in SecureRAG namespace.</description>
+    <group>attack,cryptomining,malware</group>
+  </rule>
+
+  <!-- Falco: C2 connection detected -->
+  <rule id="100103" level="15">
+    <decoded_as>falco-alert</decoded_as>
+    <field name="rule_name">SecureRAG Outbound Connection to C2</field>
+    <description>CRITICAL: Outbound connection to known C2 server from SecureRAG pod.</description>
+    <group>attack,c2,network</group>
+  </rule>
+
+  <!-- Falco: Log tampering -->
+  <rule id="100104" level="13">
+    <decoded_as>falco-alert</decoded_as>
+    <field name="rule_name">SecureRAG Log Tampering</field>
+    <description>HIGH: Log tampering detected in SecureRAG pod. SOC2 audit trail compromise.</description>
+    <group>attack,log_tampering,soc2_violation</group>
+  </rule>
+
+  <!-- K8s Audit: Privileged pod created -->
+  <rule id="100110" level="14">
+    <decoded_as>kubernetes-audit</decoded_as>
+    <field name="rule_name">K8s Privileged Pod Created</field>
+    <description>CRITICAL: Privileged pod creation detected via Kubernetes audit.</description>
+    <group>k8s_audit,privileged,policy_violation</group>
+  </rule>
+
+  <!-- K8s Audit: Secret accessed by unauthorized entity -->
+  <rule id="100111" level="10">
+    <decoded_as>kubernetes-audit</decoded_as>
+    <field name="rule_name">K8s Secret Accessed</field>
+    <description>WARNING: Kubernetes secret accessed by non-standard service account.</description>
+    <group>k8s_audit,secrets,soc2_monitoring</group>
+  </rule>
+
+  <!-- Generic high-priority Falco alert -->
+  <rule id="100120" level="12">
+    <decoded_as>falco-alert</decoded_as>
+    <field name="priority">Critical|Emergency</field>
+    <description>Falco critical/emergency alert: $(output_message)</description>
+    <group>falco,critical</group>
+  </rule>
+
+</group>

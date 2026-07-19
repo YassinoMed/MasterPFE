@@ -4,7 +4,7 @@
 |---|---|
 | Statut global | TERMINÉ |
 | Overlays contrôlés | infra/k8s/overlays/dev infra/k8s/overlays/demo |
-| Hôtes internes autorisés | auth-users chatbot-manager conversation-service audit-security-service portal-web |
+| Hôtes internes autorisés | auth-users chatbot-manager conversation-service audit-security-service portal-web otel-collector.otel-system.svc.cluster.local prometheus.securerag-monitoring.svc loki.securerag-monitoring.svc falco.falco.svc securerag-vault.vault.svc |
 
 ## Règle appliquée
 

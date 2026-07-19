@@ -1,7 +1,7 @@
 # Release Attestation — SecureRAG Hub
 
-- Generated at UTC: `2026-06-21T08:50:12Z`
-- Git commit: `6d02b639ba0810cfea23ee502f9321bbb8717209`
+- Generated at UTC: `2026-07-18T13:10:06Z`
+- Git commit: `d40fb6193d0ed5431c3cab7cf35860344f2cdf7f`
 - Expected services: `5`
 - Expected service names: `auth-users chatbot-manager conversation-service audit-security-service portal-web`
 - Status: `PARTIAL_READY_TO_PROVE`
@@ -12,7 +12,7 @@
 | Control | Status | Evidence |
 |---|---|---|
 | Trivy image scan | `MISSING` | `artifacts/release/image-scan-summary.txt` |
-| Cosign sign | `MISSING` | `artifacts/release/sign-summary.txt` |
+| Cosign sign | `PRESENT_UNPROVEN` | `artifacts/release/sign-summary.txt` |
 | Cosign verify | `MISSING` | `artifacts/release/verify-summary.txt` |
 | Digest promotion | `MISSING` | `artifacts/release/promotion-by-digest-summary.txt` |
 | Digest record | `MISSING` | `artifacts/release/promotion-digests.txt` |

@@ -1,20 +1,19 @@
+# syntax=docker/dockerfile:1
+# ── Stage 1: Composer Binary ─────────────────────────────────────
 FROM composer:2@sha256:dc292c5c0f95f526b051d4c341bf08e7e2b18504c74625e3203d7f123050e318 AS composer-bin
 
-FROM php:8.4-cli-bookworm@sha256:4714c394e9ea215809c4b68da9fda778044c723435279f7188a251134c64502a
+# ── Stage 2: Builder (compile extensions + install deps) ─────────
+FROM php:8.4-cli-bookworm@sha256:4714c394e9ea215809c4b68da9fda778044c723435279f7188a251134c64502a AS builder
 
 ENV COMPOSER_ALLOW_SUPERUSER=1
 
 RUN apt-get update \
-    && apt-get upgrade -y \
     && apt-get install -y --no-install-recommends curl unzip libicu-dev libsqlite3-dev libzip-dev libpq-dev \
     && docker-php-ext-install pdo_sqlite pdo_mysql pdo_pgsql intl \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
 COPY --from=composer-bin /usr/bin/composer /usr/bin/composer
-
-RUN groupadd --gid 10001 app \
-    && useradd --uid 10001 --gid 10001 --create-home --shell /usr/sbin/nologin app
 
 WORKDIR /var/www/html
 
@@ -34,6 +33,25 @@ COPY platform/portal-web/routes ./routes
 COPY platform/portal-web/.env.example ./
 
 RUN composer dump-autoload --optimize && php artisan package:discover --ansi
+
+# ── Stage 3: Runtime (Minimal — no apt, no curl, no shell tools) ─
+FROM php:8.4-cli-alpine@sha256:f074dc4cd01ef4cba6e3f65301a1c0dad4bde3b3aac923179f6ee6b414e50d1f AS runtime
+
+# Install ONLY runtime libraries (no compilers, no package managers)
+RUN apk add --no-cache icu-libs libpq sqlite-libs libzip \
+    && addgroup -g 10001 app \
+    && adduser -u 10001 -G app -H -s /sbin/nologin -D app \
+    # Remove apk cache and package manager to minimize attack surface
+    && rm -rf /var/cache/apk/* /usr/sbin/apk /usr/bin/apk 2>/dev/null || true
+
+# Copy compiled PHP extensions from builder
+COPY --from=builder /usr/local/lib/php/extensions /usr/local/lib/php/extensions
+COPY --from=builder /usr/local/etc/php/conf.d /usr/local/etc/php/conf.d
+
+# Copy application from builder
+COPY --from=builder /var/www/html /var/www/html
+
+WORKDIR /var/www/html
 
 ENV CREATE_DOTENV=false \
     SECURERAG_RUNTIME_ROOT=/tmp/securerag-runtime \

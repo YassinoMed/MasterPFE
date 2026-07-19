@@ -26,22 +26,24 @@ configMapGenerator:
 generatorOptions:
   disableNameSuffixHash: true
 
+# SLSA L3: Images pinned by digest — updated by CD pipeline (scripts/release/promote-by-digest.sh)
+# Never use mutable tags in production. Digests are immutable references.
 images:
   - name: ghcr.io/example/securerag-hub-portal-web
     newName: localhost:5001/securerag-hub-portal-web
-    newTag: production
+    digest: sha256:0000000000000000000000000000000000000000000000000000000000000000
   - name: ghcr.io/example/securerag-hub-auth-users
     newName: localhost:5001/securerag-hub-auth-users
-    newTag: production
+    digest: sha256:0000000000000000000000000000000000000000000000000000000000000000
   - name: ghcr.io/example/securerag-hub-chatbot-manager
     newName: localhost:5001/securerag-hub-chatbot-manager
-    newTag: production
+    digest: sha256:0000000000000000000000000000000000000000000000000000000000000000
   - name: ghcr.io/example/securerag-hub-conversation-service
     newName: localhost:5001/securerag-hub-conversation-service
-    newTag: production
+    digest: sha256:0000000000000000000000000000000000000000000000000000000000000000
   - name: ghcr.io/example/securerag-hub-audit-security-service
     newName: localhost:5001/securerag-hub-audit-security-service
-    newTag: production
+    digest: sha256:0000000000000000000000000000000000000000000000000000000000000000
 
 patches:
   - path: patches/portal-web-ha.yaml

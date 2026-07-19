@@ -1,0 +1,3 @@
+NAME                          STATUS   ROLES           AGE   VERSION   INTERNAL-IP   EXTERNAL-IP   OS-IMAGE                         KERNEL-VERSION      CONTAINER-RUNTIME
+securerag-dev-control-plane   Ready    control-plane   24d   v1.33.1   172.18.0.2    <none>        Debian GNU/Linux 12 (bookworm)   6.8.0-124-generic   containerd://2.1.1
+securerag-dev-worker          Ready    <none>          24d   v1.33.1   172.18.0.3    <none>        Debian GNU/Linux 12 (bookworm)   6.8.0-124-generic   containerd://2.1.1

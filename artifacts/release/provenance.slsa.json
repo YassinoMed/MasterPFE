@@ -5,15 +5,15 @@
       "buildType": "https://securerag.local/buildtypes/jenkins-cd-digest-release/v1",
       "externalParameters": {
         "branch": "main",
-        "commit": "6d02b639ba0810cfea23ee502f9321bbb8717209",
-        "repository": "https://github.com/YassinoMed/MasterPFE.git"
+        "commit": "d40fb6193d0ed5431c3cab7cf35860344f2cdf7f",
+        "repository": "https://github.com/YassinoMed/MasterPFE"
       },
       "resolvedDependencies": [
         {
           "digest": {
-            "gitCommit": "6d02b639ba0810cfea23ee502f9321bbb8717209"
+            "gitCommit": "d40fb6193d0ed5431c3cab7cf35860344f2cdf7f"
           },
-          "uri": "https://github.com/YassinoMed/MasterPFE.git"
+          "uri": "https://github.com/YassinoMed/MasterPFE"
         }
       ]
     },
@@ -24,7 +24,7 @@
       "byproducts": [
         {
           "digest": {
-            "sha256": "44490cb807923e2e1d81e1289dc6af3776830aaee2810d9865d1f4c0b44047f1"
+            "sha256": "14a8a90828ef02a2ada780befbf42ba2ca66b87fb2241c32e20de1468c69a54b"
           },
           "uri": "artifacts/release/release-attestation.json"
         },
@@ -36,9 +36,9 @@
         }
       ],
       "metadata": {
-        "finishedOn": "2026-06-21T08:50:12Z",
+        "finishedOn": "2026-07-18T13:10:12Z",
         "invocationId": "local",
-        "startedOn": "2026-06-21T08:50:12Z"
+        "startedOn": "2026-07-18T13:10:12Z"
       }
     },
     "securerag": {

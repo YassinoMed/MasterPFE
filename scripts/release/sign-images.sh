@@ -107,15 +107,25 @@ if is_true "${COSIGN_YES}"; then
   sign_args+=(--yes)
 fi
 
+# ── SLSA L3: Keyless-only signing enforced ──────────────────────
+# Static key-pair signing is deprecated and violates SLSA Level 3.
+# All signing MUST use OIDC-based keyless flow via Fulcio/Rekor.
 if [[ -n "${COSIGN_KEY:-}" ]]; then
-  if [[ ! -f "${COSIGN_KEY}" ]]; then
-    error "COSIGN_KEY points to a non-existent file: ${COSIGN_KEY}"
-    exit 2
-  fi
-
-  mode="key-pair"
-  sign_args+=(--key "${COSIGN_KEY}")
+  warn "COSIGN_KEY is set but IGNORED — keyless-only mode enforced (SLSA L3)."
+  warn "Remove COSIGN_KEY from your environment. Static key signing is deprecated."
+  unset COSIGN_KEY
 fi
+
+# Configure Sigstore endpoints
+FULCIO_URL="${FULCIO_URL:-http://fulcio.sigstore-system}"
+REKOR_URL="${REKOR_URL:-http://rekor.sigstore-system}"
+OIDC_ISSUER="${OIDC_ISSUER:-http://keycloak.sigstore-system/realms/securerag-cicd}"
+
+sign_args+=(
+  "--fulcio-url=${FULCIO_URL}"
+  "--rekor-url=${REKOR_URL}"
+  "--oidc-issuer=${OIDC_ISSUER}"
+)
 
 {
   printf '# SecureRAG Hub image signing summary\n'

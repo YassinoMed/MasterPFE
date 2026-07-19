@@ -1,0 +1,18 @@
+# ─────────────────────────────────────────────────────────────────
+# AI Security Service — PersistentVolumeClaim (Model Cache)
+# ─────────────────────────────────────────────────────────────────
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: ai-security-model-cache
+  namespace: ai-security
+  labels:
+    app: ai-security-service
+    app.kubernetes.io/part-of: securerag-hub
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+  storageClassName: standard

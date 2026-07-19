@@ -1,0 +1,187 @@
+{
+  "annotations": {
+    "list": []
+  },
+  "description": "AI Security Pipeline — Prompt Injection, Jailbreak Detection, Routing, Model Inference",
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "title": "🛡️ Pipeline Overview",
+      "type": "row",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 },
+      "collapsed": false
+    },
+    {
+      "title": "Total Requests (Allowed vs Blocked)",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 1 },
+      "targets": [
+        { "expr": "rate(allowed_requests_total[5m])", "legendFormat": "Allowed" },
+        { "expr": "rate(blocked_requests_total[5m])", "legendFormat": "Blocked ({{reason}})" }
+      ],
+      "fieldConfig": {
+        "defaults": { "color": { "mode": "palette-classic" }, "custom": { "fillOpacity": 20 } }
+      }
+    },
+    {
+      "title": "Block Rate (%)",
+      "type": "gauge",
+      "gridPos": { "h": 8, "w": 6, "x": 12, "y": 1 },
+      "targets": [
+        { "expr": "sum(rate(blocked_requests_total[5m])) / (sum(rate(allowed_requests_total[5m])) + sum(rate(blocked_requests_total[5m]))) * 100", "legendFormat": "Block Rate" }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "max": 100, "min": 0, "unit": "percent",
+          "thresholds": { "steps": [
+            { "color": "green", "value": 0 },
+            { "color": "yellow", "value": 5 },
+            { "color": "red", "value": 20 }
+          ]}
+        }
+      }
+    },
+    {
+      "title": "Pipeline Latency (p50/p95/p99)",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 6, "x": 18, "y": 1 },
+      "targets": [
+        { "expr": "histogram_quantile(0.50, rate(pipeline_duration_seconds_bucket[5m]))", "legendFormat": "p50" },
+        { "expr": "histogram_quantile(0.95, rate(pipeline_duration_seconds_bucket[5m]))", "legendFormat": "p95" },
+        { "expr": "histogram_quantile(0.99, rate(pipeline_duration_seconds_bucket[5m]))", "legendFormat": "p99" }
+      ],
+      "fieldConfig": { "defaults": { "unit": "s" } }
+    },
+    {
+      "title": "🔒 Layer 1 — Prompt Injection",
+      "type": "row",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 9 },
+      "collapsed": false
+    },
+    {
+      "title": "Prompt Injection Detections",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 10 },
+      "targets": [
+        { "expr": "rate(prompt_injection_total{classification=\"safe\"}[5m])", "legendFormat": "Safe" },
+        { "expr": "rate(prompt_injection_total{classification=\"suspicious\"}[5m])", "legendFormat": "Suspicious" },
+        { "expr": "rate(prompt_injection_total{classification=\"malicious\"}[5m])", "legendFormat": "Malicious" }
+      ]
+    },
+    {
+      "title": "Injection Blocks",
+      "type": "stat",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 10 },
+      "targets": [
+        { "expr": "sum(blocked_requests_total{reason=\"injection\"})", "legendFormat": "Total Injection Blocks" }
+      ],
+      "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "thresholds": { "steps": [{ "color": "green", "value": 0 }, { "color": "red", "value": 10 }]}}}
+    },
+    {
+      "title": "🚫 Layer 2 — Jailbreak Detection",
+      "type": "row",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 18 },
+      "collapsed": false
+    },
+    {
+      "title": "Jailbreak Detections",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 19 },
+      "targets": [
+        { "expr": "rate(jailbreak_detected_total{classification=\"allow\"}[5m])", "legendFormat": "Allow" },
+        { "expr": "rate(jailbreak_detected_total{classification=\"review\"}[5m])", "legendFormat": "Review" },
+        { "expr": "rate(jailbreak_detected_total{classification=\"deny\"}[5m])", "legendFormat": "Deny" }
+      ]
+    },
+    {
+      "title": "Jailbreak Blocks",
+      "type": "stat",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 19 },
+      "targets": [
+        { "expr": "sum(blocked_requests_total{reason=\"jailbreak\"})", "legendFormat": "Total Jailbreak Blocks" }
+      ],
+      "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "thresholds": { "steps": [{ "color": "green", "value": 0 }, { "color": "red", "value": 10 }]}}}
+    },
+    {
+      "title": "🧭 Layer 3 — Semantic Routing",
+      "type": "row",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 27 },
+      "collapsed": false
+    },
+    {
+      "title": "Routing Distribution",
+      "type": "piechart",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 28 },
+      "targets": [
+        { "expr": "sum by(category) (routing_decisions_total)", "legendFormat": "{{category}}" }
+      ]
+    },
+    {
+      "title": "Routing Latency",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 28 },
+      "targets": [
+        { "expr": "histogram_quantile(0.50, rate(routing_latency_seconds_bucket[5m]))", "legendFormat": "p50" },
+        { "expr": "histogram_quantile(0.95, rate(routing_latency_seconds_bucket[5m]))", "legendFormat": "p95" }
+      ],
+      "fieldConfig": { "defaults": { "unit": "s" } }
+    },
+    {
+      "title": "🤖 Layer 4 — Expert Models",
+      "type": "row",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 36 },
+      "collapsed": false
+    },
+    {
+      "title": "Model Inference Latency",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 37 },
+      "targets": [
+        { "expr": "histogram_quantile(0.95, rate(model_latency_seconds_bucket[5m]))", "legendFormat": "{{model_name}} p95" }
+      ],
+      "fieldConfig": { "defaults": { "unit": "s" } }
+    },
+    {
+      "title": "Tokens Processed",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 37 },
+      "targets": [
+        { "expr": "rate(tokens_processed_total[5m])", "legendFormat": "{{model_name}}" }
+      ],
+      "fieldConfig": { "defaults": { "unit": "short" } }
+    },
+    {
+      "title": "Model Errors",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 45 },
+      "targets": [
+        { "expr": "rate(model_errors_total[5m])", "legendFormat": "{{model_name}}" }
+      ],
+      "fieldConfig": { "defaults": { "color": { "fixedColor": "red", "mode": "fixed" } } }
+    },
+    {
+      "title": "Memory Usage",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 45 },
+      "targets": [
+        { "expr": "model_memory_usage_bytes / 1024 / 1024", "legendFormat": "{{model_name}} (MB)" },
+        { "expr": "model_vram_usage_bytes / 1024 / 1024", "legendFormat": "VRAM (MB)" }
+      ],
+      "fieldConfig": { "defaults": { "unit": "decmbytes" } }
+    }
+  ],
+  "schemaVersion": 39,
+  "tags": ["ai-security", "securerag", "pipeline"],
+  "templating": { "list": [] },
+  "time": { "from": "now-1h", "to": "now" },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "AI Security Pipeline",
+  "uid": "ai-security-pipeline-v2",
+  "version": 1
+}

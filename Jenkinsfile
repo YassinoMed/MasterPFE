@@ -24,7 +24,7 @@ pipeline {
     SBOM_DIR = 'artifacts/sbom'
     REPORT_DIR = 'artifacts/release'
     SECURITY_REPORT_DIR = 'security/reports'
-    COSIGN_KEY = '/run/jenkins-secrets/cosign.key'
+    // COSIGN_KEY removed — keyless-only signing enforced (SLSA L3)
     KUBECONFIG = '/var/jenkins_home/.kube/config'
     
     // Environment configurations for caches
@@ -270,15 +270,13 @@ pipeline {
       }
     }
 
-    stage('Signature avec Cosign') {
+    stage('Signature avec Cosign (Keyless)') {
       steps {
         sh '''
           set -euo pipefail
-          echo "[INFO] Signing images with Cosign..."
-          if [ -f "/run/jenkins-secrets/cosign.password" ]; then
-            export COSIGN_PASSWORD=$(cat /run/jenkins-secrets/cosign.password)
-          fi
-          export COSIGN_KEY="${COSIGN_KEY:-}"
+          echo "[INFO] Signing images with Cosign Keyless (SLSA L3)..."
+          # SLSA L3: No static keys — identity via OIDC + Fulcio + Rekor
+          unset COSIGN_KEY COSIGN_PASSWORD 2>/dev/null || true
           bash scripts/release/sign-images.sh
         '''
       }
@@ -288,11 +286,9 @@ pipeline {
       steps {
         sh '''
           set -euo pipefail
-          echo "[INFO] Generating SLSA Provenance and Attesting images..."
-          if [ -f "/run/jenkins-secrets/cosign.password" ]; then
-            export COSIGN_PASSWORD=$(cat /run/jenkins-secrets/cosign.password)
-          fi
-          export COSIGN_KEY="${COSIGN_KEY:-}"
+          echo "[INFO] Generating SLSA Provenance and Attesting images (Keyless)..."
+          # SLSA L3: No static keys — keyless attestation only
+          unset COSIGN_KEY COSIGN_PASSWORD 2>/dev/null || true
           bash scripts/release/generate-provenance.sh
         '''
       }
@@ -589,8 +585,8 @@ EOF
       steps {
         sh '''
           set -euo pipefail
-          echo "[INFO] Running k6 Performance Tests (smoke + load)..."
-          K6_TESTS=smoke,load SLO_STRICT=true \
+          echo "[INFO] Running k6 Performance Tests (smoke + load + stress)..."
+          K6_TESTS=smoke,load,stress SLO_STRICT=true \
             bash scripts/performance/k6-jenkins-stage.sh
         '''
       }
@@ -614,8 +610,8 @@ EOF
         sh '''
           set -euo pipefail
           echo "[INFO] Evaluating Performance Quality Gates..."
-          echo "[INFO]   p95 < 800ms | error < 1% | availability > 99%"
-          P95_THRESHOLD_MS=800 bash scripts/performance/performance-quality-gate.sh
+          echo "[INFO]   p95 < 500ms | error < 1% | availability > 99%"
+          P95_THRESHOLD_MS=500 bash scripts/performance/performance-quality-gate.sh
         '''
       }
       post {

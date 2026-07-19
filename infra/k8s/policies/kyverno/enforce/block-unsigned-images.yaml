@@ -42,7 +42,27 @@ spec:
             - count: 1
               entries:
                 - keyless:
-                    subject: "https://github.com/YassinoMed/MasterPFE/.github/workflows/*"
-                    issuer: "https://token.actions.githubusercontent.com"
+                    issuer: https://keycloak.sigstore-system/realms/securerag-cicd
+                    subject: jenkins-cosign@securerag.local
+                    roots: |
+                      -----BEGIN CERTIFICATE-----
+                      MIICNjCCAd2gAwIBAgIIblJOzj25x8kwCgYIKoZIzj0EAwIwfjEMMAoGA1UEBhMD
+                      VVNBMRMwEQYDVQQIEwpDYWxpZm9ybmlhMRYwFAYDVQQHEw1TYW4gRnJhbmNpc2Nv
+                      MRYwFAYDVQQJEw01NDggTWFya2V0IFN0MQ4wDAYDVQQREwU1NzI3NDEZMBcGA1UE
+                      ChMQTGludXggRm91bmRhdGlvbjAeFw0yNjA3MTcxNDE1NTJaFw0yNzA3MTcxNDE1
+                      NTJaMH4xDDAKBgNVBAYTA1VTQTETMBEGA1UECBMKQ2FsaWZvcm5pYTEWMBQGA1UE
+                      BxMNU2FuIEZyYW5jaXNjbzEWMBQGA1UECRMNNTQ4IE1hcmtldCBTdDEOMAwGA1UE
+                      ERMFNTcyNzQxGTAXBgNVBAoTEExpbnV4IEZvdW5kYXRpb24wWTATBgcqhkjOPQIB
+                      BggqhkjOPQMBBwNCAAR1h5Wi4CSRc9wM0I6t3pii9Cv/Sj0+Gkt2UvJbMLmyLRr3
+                      +oiBLZiJfnz0XD3AF/vn1f/OKC5zIKM7eW9oJxpio0UwQzAOBgNVHQ8BAf8EBAMC
+                      AQYwEgYDVR0TAQH/BAgwBgEB/wIBATAdBgNVHQ4EFgQUA7IVbqQ50y/dYqTj1bAX
+                      xF/f+ikwCgYIKoZIzj0EAwIDRwAwRAIgb8TyYrr0zvIxt+mXDzbOzzgrZxXOSBPb
+                      pR3FsxtUfPoCIC73eq5paV8dAcAV6xeQ/yOEmgapnrxhZ8mgFp8UjxAc
+                      -----END CERTIFICATE-----
                     rekor:
-                      url: https://rekor.sigstore.dev
+                      url: https://rekor.sigstore-system
+                      pubkey: |
+                        -----BEGIN PUBLIC KEY-----
+                        MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEdnxzwS3h9rBVtQjiXgjJN0ck7qmv
+                        +z/X2Y364+85XYMvYxEuxtqO6x3oRxWtv/MztLPaSVXXVvHB+B/Gxztg0w==
+                        -----END PUBLIC KEY-----

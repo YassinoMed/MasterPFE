@@ -1,0 +1,17 @@
+make[1]: Entering directory '/root/MasterPFE'
+[INFO] Rendering metrics-server addon from infra/k8s/addons/metrics-server
+[INFO] Server-side dry-run for metrics-server addon
+[INFO] Installing metrics-server from infra/k8s/addons/metrics-server
+serviceaccount/metrics-server serverside-applied
+clusterrole.rbac.authorization.k8s.io/system:aggregated-metrics-reader serverside-applied
+clusterrole.rbac.authorization.k8s.io/system:metrics-server serverside-applied
+rolebinding.rbac.authorization.k8s.io/metrics-server-auth-reader serverside-applied
+clusterrolebinding.rbac.authorization.k8s.io/metrics-server:system:auth-delegator serverside-applied
+clusterrolebinding.rbac.authorization.k8s.io/system:metrics-server serverside-applied
+service/metrics-server serverside-applied
+deployment.apps/metrics-server serverside-applied
+apiservice.apiregistration.k8s.io/v1beta1.metrics.k8s.io serverside-applied
+[INFO] Waiting for metrics-server deployment
+error: timed out waiting for the condition on deployments/metrics-server
+make[1]: *** [Makefile:290: metrics-install] Error 1
+make[1]: Leaving directory '/root/MasterPFE'

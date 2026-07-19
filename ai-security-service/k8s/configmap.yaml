@@ -1,0 +1,56 @@
+# ─────────────────────────────────────────────────────────────────
+# AI Security Service — ConfigMap
+# ─────────────────────────────────────────────────────────────────
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ai-security-config
+  namespace: ai-security
+  labels:
+    app: ai-security-service
+    app.kubernetes.io/part-of: securerag-hub
+data:
+  # ── Layer 1: Prompt Injection ──────────────────────────────
+  PI_MODEL_NAME: "protectai/deberta-v3-small-prompt-injection-v2"
+  PI_MAX_LENGTH: "512"
+  PI_SUSPICIOUS_THRESHOLD: "0.5"
+  PI_MALICIOUS_THRESHOLD: "0.8"
+
+  # ── Layer 2: Jailbreak Detection ───────────────────────────
+  JB_MODEL_NAME: "llm-semantic-router/mmbert32k-jailbreak-detector-merged"
+  JB_MAX_LENGTH: "512"
+  JB_REVIEW_THRESHOLD: "0.5"
+  JB_DENY_THRESHOLD: "0.8"
+
+  # ── Layer 3: Semantic Router ───────────────────────────────
+  ROUTER_DEFAULT_MODEL: "DevOpsAgent"
+  ROUTER_CONFIDENCE_THRESHOLD: "0.15"
+
+  # ── Layer 4a: CyberSecurity Agent ──────────────────────────
+  CYBER_CTX_SIZE: "2048"
+  CYBER_MAX_TOKENS: "512"
+  CYBER_THREADS: "4"
+  CYBER_GPU_LAYERS: "0"
+
+  # ── Layer 4b: DevOps Agent ─────────────────────────────────
+  DEVOPS_MODEL_NAME: "kavinduc/devops-mastermind"
+  DEVOPS_MAX_TOKENS: "256"
+
+  # ── Service Configuration ──────────────────────────────────
+  LOG_LEVEL: "INFO"
+  GUARDRAILS_ENABLED: "true"
+  RATE_LIMIT_PER_MINUTE: "60"
+  LOKI_ENABLED: "true"
+  PROMETHEUS_ENABLED: "true"
+---
+# ─────────────────────────────────────────────────────────────────
+# AI Security Service — ServiceAccount
+# ─────────────────────────────────────────────────────────────────
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: ai-security-sa
+  namespace: ai-security
+  labels:
+    app: ai-security-service
+    app.kubernetes.io/part-of: securerag-hub

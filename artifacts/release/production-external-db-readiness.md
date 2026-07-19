@@ -1,12 +1,12 @@
 # Production External DB Readiness - SecureRAG Hub
 
-- Generated at UTC: `2026-06-21T08:50:16Z`
+- Generated at UTC: `2026-07-18T13:10:14Z`
 - Overlay: `infra/k8s/overlays/production-external-db`
 
 | Control | Status | Evidence |
 |---|---:|---|
 | External DB overlay render | TERMINÉ | `infra/k8s/overlays/production-external-db` renders successfully |
-| SQLite removed from external DB overlay | TERMINÉ | `infra/k8s/overlays/production-external-db` renders without SQLite |
+| SQLite removed from external DB overlay | FAIL | `infra/k8s/overlays/production-external-db` still renders SQLite |
 | Kubernetes Secret references | TERMINÉ | workloads reference `securerag-database-secrets` |
 | Direct secret bootstrap | TERMINÉ | `scripts/secrets/create-production-db-secret.sh` executable |
 | SOPS bootstrap path | TERMINÉ | `scripts/secrets/apply-sops-production-db-secret.sh` executable |
@@ -17,8 +17,8 @@
 
 ## Global status
 
-Statut global: `PRÊT_NON_EXÉCUTÉ`
+Statut global: `FAIL`
 
 ## Interpretation
 
-The external database overlay and secret-delivery paths are repository-ready. Runtime proof still requires a real cluster secret delivery step.
+Blocking static gaps remain in the external database readiness path. Fix FAIL rows before calling it production-ready.

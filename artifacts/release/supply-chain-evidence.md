@@ -1,21 +1,34 @@
 # Supply Chain Evidence — SecureRAG Hub
 
-- Generated at UTC: `2026-04-17T05:16:40Z`
-- Git commit: `9b0878f0dd8923415026a96a33b9aad98f24cdc4`
+- Generated at UTC: `2026-07-18T13:10:04Z`
+- Git commit: `d40fb6193d0ed5431c3cab7cf35860344f2cdf7f`
 
 ## Evidence inventory
 
 | Evidence | Status |
 |---|---|
 | `image-scan-summary.txt` | missing |
-| `sign-summary.txt` | missing |
+| `image-scan-summary.md` | missing |
+| `image-scan-index.json` | missing |
+| `sign-summary.txt` | present: PASS=0 FAIL=0 SKIP=0 |
+| `sign-summary.md` | present |
+| `sign-index.json` | missing |
 | `verify-summary.txt` | missing |
+| `verify-summary.md` | missing |
+| `verify-index.json` | missing |
 | `promotion-by-digest-summary.txt` | missing |
+| `promotion-by-digest-summary.md` | missing |
 | `promotion-digests.txt` | missing |
+| `promotion-digests.json` | missing |
 | `sbom-summary.txt` | missing |
+| `sbom-summary.md` | missing |
 | `attest-summary.txt` | missing |
+| `no-rebuild-deploy-summary.md` | present |
 | `release-evidence.md` | present |
 | `release-attestation.json` | present |
+| `release-attestation.md` | present |
+| `provenance.slsa.json` | present |
+| `provenance.slsa.md` | present |
 | SBOM files | 0 |
 
 ## SBOM files

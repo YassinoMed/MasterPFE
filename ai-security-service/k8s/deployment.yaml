@@ -1,0 +1,132 @@
+# ─────────────────────────────────────────────────────────────────
+# AI Security Service — Kubernetes Deployment
+# ─────────────────────────────────────────────────────────────────
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ai-security-service
+  namespace: ai-security
+  labels:
+    app: ai-security-service
+    app.kubernetes.io/name: ai-security-service
+    app.kubernetes.io/part-of: securerag-hub
+    app.kubernetes.io/component: ai-security
+    app.kubernetes.io/managed-by: argocd
+spec:
+  replicas: 2
+  revisionHistoryLimit: 5
+  selector:
+    matchLabels:
+      app: ai-security-service
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: ai-security-service
+        app.kubernetes.io/name: ai-security-service
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8000"
+        prometheus.io/path: "/metrics"
+    spec:
+      serviceAccountName: ai-security-sa
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        fsGroup: 10001
+      # Init container to ensure model cache directory exists
+      initContainers:
+      - name: init-model-cache
+        image: busybox:1.36
+        command: ["sh", "-c", "mkdir -p /model-cache/huggingface/hub /model-cache/models && chown -R 10001:10001 /model-cache"]
+        volumeMounts:
+        - name: model-cache
+          mountPath: /model-cache
+        securityContext:
+          runAsUser: 0
+          allowPrivilegeEscalation: false
+      containers:
+      - name: ai-security-service
+        image: securerag/ai-security-service:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8000
+          name: http
+          protocol: TCP
+        resources:
+          requests:
+            cpu: 500m
+            memory: 2Gi
+          limits:
+            cpu: 4000m
+            memory: 8Gi
+        env:
+        - name: PYTHONUNBUFFERED
+          value: "1"
+        - name: ENVIRONMENT
+          value: "production"
+        - name: LOG_LEVEL
+          value: "INFO"
+        - name: MODEL_CACHE_DIR
+          value: "/app/model-cache"
+        - name: HF_HOME
+          value: "/app/model-cache/huggingface"
+        - name: CYBER_MODEL_PATH
+          value: "/app/model-cache/models/seneca-cybersecurity-llm-q4_k_m.gguf"
+        envFrom:
+        - configMapRef:
+            name: ai-security-config
+        - secretRef:
+            name: ai-security-secrets
+            optional: true
+        volumeMounts:
+        - name: model-cache
+          mountPath: /app/model-cache
+        - name: tmp
+          mountPath: /tmp
+        # Startup probe — allow 5 minutes for model loading
+        startupProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          failureThreshold: 30
+          timeoutSeconds: 5
+        # Liveness probe
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 15
+          periodSeconds: 15
+          timeoutSeconds: 5
+          failureThreshold: 3
+        # Readiness probe — checks model status
+        readinessProbe:
+          httpGet:
+            path: /readyz
+            port: 8000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: false
+          capabilities:
+            drop:
+            - ALL
+      volumes:
+      - name: model-cache
+        persistentVolumeClaim:
+          claimName: ai-security-model-cache
+      - name: tmp
+        emptyDir:
+          sizeLimit: 100Mi
+      terminationGracePeriodSeconds: 60

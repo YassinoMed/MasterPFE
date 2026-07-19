@@ -106,7 +106,7 @@ metadata:
       All workloads must include standard Kubernetes recommended labels
       for identification, versioning, and ownership tracking.
 spec:
-  validationFailureAction: Audit
+  validationFailureAction: Enforce
   background: true
   rules:
     - name: check-labels-deployments
@@ -154,7 +154,7 @@ metadata:
       All workloads must include ownership annotations for operational
       tracking and cost allocation.
 spec:
-  validationFailureAction: Audit
+  validationFailureAction: Enforce
   background: true
   rules:
     - name: check-annotations

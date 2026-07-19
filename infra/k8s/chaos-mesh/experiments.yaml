@@ -1,68 +1,142 @@
-# Chaos Mesh — Experiments (désactivés par défaut)
+# Chaos Mesh — Experiments (ENABLED)
 # Namespace: chaos-mesh
-# Feature flag: ENABLE_CHAOS_MESH=false
-# Ajoute des expériences supplémentaires SANS remplacer Litmus.
+# Comprehensive chaos engineering for resilience validation
 #
-# Activation:
-#   export ENABLE_CHAOS_MESH=true
-#   helm install chaos-mesh chaos-mesh/chaos-mesh --namespace=chaos-mesh --create-namespace --set chaosDaemon.runtime=crio
+# Installation:
+#   helm install chaos-mesh chaos-mesh/chaos-mesh --namespace=chaos-mesh --create-namespace
 #   kubectl apply -f infra/k8s/chaos-mesh/
-#
-# Rollback:
-#   kubectl delete -f infra/k8s/chaos-mesh/
-#   helm uninstall chaos-mesh -n chaos-mesh
 
+# ── Scenario 1: Random Pod Kill ──────────────────────────────────
 apiVersion: chaos-mesh.org/v1alpha1
 kind: PodChaos
 metadata:
-  name: securerag-pod-kill-canary
+  name: securerag-pod-kill
   namespace: securerag-hub
   annotations:
-    feature.securerag.dev/enable-chaos-mesh: "false"
+    feature.securerag.dev/enable-chaos-mesh: "true"
+    chaos.securerag.dev/category: "availability"
+    chaos.securerag.dev/mttr-target: "30s"
 spec:
   action: pod-kill
   mode: one
   selector:
     namespaces: [securerag-hub]
-    labelSelectors: { "istio-mtls": "canary" }
+    labelSelectors:
+      app.kubernetes.io/name: chatbot-manager
   scheduler:
     cron: "@every 1h"
   duration: "30s"
 
 ---
+# ── Scenario 2: Network Partition ────────────────────────────────
 apiVersion: chaos-mesh.org/v1alpha1
 kind: NetworkChaos
 metadata:
   name: securerag-network-partition
   namespace: securerag-hub
   annotations:
-    feature.securerag.dev/enable-chaos-mesh: "false"
+    feature.securerag.dev/enable-chaos-mesh: "true"
+    chaos.securerag.dev/category: "network"
 spec:
   action: partition
   mode: one
   selector:
     namespaces: [securerag-hub]
-    labelSelectors: { "app.kubernetes.io/name": "chatbot-manager" }
+    labelSelectors:
+      app.kubernetes.io/name: chatbot-manager
   direction: both
   scheduler:
     cron: "@every 2h"
   duration: "10s"
 
 ---
+# ── Scenario 3: Network Latency Injection ────────────────────────
+apiVersion: chaos-mesh.org/v1alpha1
+kind: NetworkChaos
+metadata:
+  name: securerag-network-latency
+  namespace: securerag-hub
+  annotations:
+    feature.securerag.dev/enable-chaos-mesh: "true"
+    chaos.securerag.dev/category: "network"
+spec:
+  action: delay
+  mode: one
+  selector:
+    namespaces: [securerag-hub]
+    labelSelectors:
+      app.kubernetes.io/name: portal-web
+  delay:
+    latency: "200ms"
+    jitter: "50ms"
+    correlation: "25"
+  scheduler:
+    cron: "@every 3h"
+  duration: "60s"
+
+---
+# ── Scenario 4: CPU Stress ───────────────────────────────────────
 apiVersion: chaos-mesh.org/v1alpha1
 kind: StressChaos
 metadata:
   name: securerag-cpu-stress
   namespace: securerag-hub
   annotations:
-    feature.securerag.dev/enable-chaos-mesh: "false"
+    feature.securerag.dev/enable-chaos-mesh: "true"
+    chaos.securerag.dev/category: "resource"
 spec:
   mode: one
   selector:
     namespaces: [securerag-hub]
-    labelSelectors: { "app.kubernetes.io/name": "portal-web" }
+    labelSelectors:
+      app.kubernetes.io/name: portal-web
   stressors:
     cpu:
       workers: 1
       load: 50
+  duration: "60s"
+
+---
+# ── Scenario 5: Database IO Chaos ────────────────────────────────
+apiVersion: chaos-mesh.org/v1alpha1
+kind: IOChaos
+metadata:
+  name: securerag-db-io-chaos
+  namespace: securerag-hub
+  annotations:
+    feature.securerag.dev/enable-chaos-mesh: "true"
+    chaos.securerag.dev/category: "database"
+spec:
+  action: latency
+  mode: one
+  selector:
+    namespaces: [securerag-hub]
+    labelSelectors:
+      app.kubernetes.io/name: postgres-auth
+  delay: "100ms"
+  path: "/var/lib/postgresql/data"
+  percent: 50
+  volumePath: "/var/lib/postgresql/data"
+  duration: "30s"
+
+---
+# ── Scenario 6: Memory Stress (Node Failure Simulation) ──────────
+apiVersion: chaos-mesh.org/v1alpha1
+kind: StressChaos
+metadata:
+  name: securerag-memory-stress
+  namespace: securerag-hub
+  annotations:
+    feature.securerag.dev/enable-chaos-mesh: "true"
+    chaos.securerag.dev/category: "resource"
+spec:
+  mode: one
+  selector:
+    namespaces: [securerag-hub]
+    labelSelectors:
+      app.kubernetes.io/name: auth-users
+  stressors:
+    memory:
+      workers: 1
+      size: "256MB"
   duration: "60s"

@@ -1,30 +1,118 @@
 # File: infra/helm/vault/values-production.yaml
-# Description: Configuration de production pour HashiCorp Vault.
-# Modified by: DevSecOps Agent — 2026-06-13
+# Description: Production-grade HashiCorp Vault HA configuration.
+# Modified by: DevSecOps Agent — 2026-07-18
+# SOC2 CC6.1/CC7.2: Encrypted storage, HA, audit logging
 
 server:
   affinity: ""
   ha:
-    enabled: false
-  standalone:
     enabled: true
-    config: |
-      ui = false
-      listener "tcp" {
-        tls_disable = 1
-        address = "[::]:8200"
-        cluster_address = "[::]:8201"
-      }
-      storage "raft" {
-        path = "/vault/data"
-      }
+    replicas: 3
+    raft:
+      enabled: true
+      setNodeId: true
+      config: |
+        ui = true
 
-  # Configuration de l'authentification Kubernetes
+        listener "tcp" {
+          tls_disable = 0
+          address = "[::]:8200"
+          cluster_address = "[::]:8201"
+          tls_cert_file = "/vault/tls/tls.crt"
+          tls_key_file  = "/vault/tls/tls.key"
+        }
+
+        storage "raft" {
+          path = "/vault/data"
+
+          retry_join {
+            leader_api_addr = "https://securerag-vault-0.securerag-vault-internal:8200"
+            leader_tls_servername = "securerag-vault"
+          }
+          retry_join {
+            leader_api_addr = "https://securerag-vault-1.securerag-vault-internal:8200"
+            leader_tls_servername = "securerag-vault"
+          }
+          retry_join {
+            leader_api_addr = "https://securerag-vault-2.securerag-vault-internal:8200"
+            leader_tls_servername = "securerag-vault"
+          }
+        }
+
+        # SOC2: Audit logging to file (shipped to Loki via sidecar)
+        audit {
+          type = "file"
+          path = "file"
+          options {
+            file_path = "/vault/audit/vault-audit.log"
+            log_raw   = false
+          }
+        }
+
+        service_registration "kubernetes" {}
+
+        # Telemetry for Prometheus
+        telemetry {
+          prometheus_retention_time = "30s"
+          disable_hostname = true
+        }
+
+  standalone:
+    enabled: false
+
+  # TLS volume mount
+  extraVolumes:
+    - type: secret
+      name: vault-tls
+    - type: emptyDir
+      name: vault-audit
+
+  extraVolumeMounts:
+    - mountPath: /vault/tls
+      name: vault-tls
+      readOnly: true
+    - mountPath: /vault/audit
+      name: vault-audit
+
+  dataStorage:
+    enabled: true
+    size: 10Gi
+    storageClass: null  # Use default StorageClass
+
+  auditStorage:
+    enabled: true
+    size: 5Gi
+    storageClass: null
+
+  # Kubernetes Auth configuration
   authDelegator:
     enabled: true
 
+  resources:
+    requests:
+      memory: 256Mi
+      cpu: 250m
+    limits:
+      memory: 512Mi
+      cpu: 500m
+
+  # Security context
+  securityContext:
+    container:
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop: [ALL]
+      readOnlyRootFilesystem: true
+
 ui:
-  enabled: false
+  enabled: true
 
 injector:
   enabled: true
+  resources:
+    requests:
+      memory: 64Mi
+      cpu: 50m
+    limits:
+      memory: 128Mi
+      cpu: 200m

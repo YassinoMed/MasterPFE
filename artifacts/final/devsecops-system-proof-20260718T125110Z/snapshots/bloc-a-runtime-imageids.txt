@@ -1,0 +1,6 @@
+audit-security-service-5dc8b86497-srmhp	localhost:5001/securerag-hub-audit-security-service:demo	localhost:5001/securerag-hub-audit-security-service@sha256:607c582cd366596ca2fe932f46ad20d2a2e2fc5035ceb21b2d3e7ceaddc4de40
+auth-users-557c884c45-skbzz	localhost:5001/securerag-hub-auth-users:demo	localhost:5001/securerag-hub-auth-users@sha256:bd41788e6601a3fae482f6fc40f6c11607be1a3a39f1ea091ebed7220134dedf
+chatbot-manager-5c868487d8-gh4sv	localhost:5001/securerag-hub-chatbot-manager:demo	localhost:5001/securerag-hub-chatbot-manager@sha256:a6a7cf00fdc32e9cc75b055ed11b528373c484bda23dcbbe72655bb43ee332ea
+conversation-service-7678f59b49-fqg8b	localhost:5001/securerag-hub-conversation-service:demo	localhost:5001/securerag-hub-conversation-service@sha256:ca1330835dbf0527e967f7b12a18d741ac956ab3e6763fb66b3b572b7d377c8a
+portal-web-84bd8bb87c-fm7sj	localhost:5001/securerag-hub-portal-web:demo	localhost:5001/securerag-hub-portal-web@sha256:d3c1a466bd97669e029ffd591e28e6ac2e63ab8d039f43a1a4a61e02a9e90e91
+postgres-auth-fbf55db78-kwlh4	docker.io/library/postgres:16-alpine	docker.io/library/postgres@sha256:e013e867e712fec275706a6c51c966f0bb0c93cfa8f51000f85a15f9865a28cb

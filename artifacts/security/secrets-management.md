@@ -1,6 +1,6 @@
 # Secrets Management Readiness - SecureRAG Hub
 
-- Generated at UTC: `2026-06-19T20:46:53Z`
+- Generated at UTC: `2026-07-18T12:20:12Z`
 
 | Control | Status | Evidence |
 |---|---:|---|

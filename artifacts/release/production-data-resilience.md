@@ -1,6 +1,6 @@
 # Production Data Resilience - SecureRAG Hub
 
-- Generated at UTC: `2026-06-21T08:50:16Z`
+- Generated at UTC: `2026-07-18T13:10:26Z`
 - Strict mode: `false`
 
 | Control | Status | Evidence |
@@ -11,7 +11,7 @@
 | `services-laravel/conversation-service` external DB PHP drivers | TERMINÉ | `pdo_mysql` and `pdo_pgsql` installed in Dockerfile |
 | `services-laravel/audit-security-service` external DB PHP drivers | TERMINÉ | `pdo_mysql` and `pdo_pgsql` installed in Dockerfile |
 | Production kind overlay DB mode | PRÊT_NON_EXÉCUTÉ | `infra/k8s/overlays/production` keeps SQLite for local/kind compatibility |
-| External DB overlay SQLite removal | TERMINÉ | `production-external-db` renders without SQLite |
+| External DB overlay SQLite removal | FAIL | `production-external-db` still renders SQLite |
 | External DB secret references | TERMINÉ | workloads reference `securerag-database-secrets` |
 | Data resilience runbook | TERMINÉ | `docs/runbooks/data-resilience.md` present |
 | Backup and restore scripts | TERMINÉ | `scripts/data/backup-postgres.sh` and `scripts/data/restore-postgres.sh` are executable |
@@ -20,11 +20,11 @@
 
 ## Global status
 
-Statut global: `PRÊT_NON_EXÉCUTÉ`
+Statut global: `FAIL`
 
 ## Interpretation
 
-Static production data resilience is ready. Runtime backup and restore still require an external PostgreSQL endpoint and credentials.
+Data resilience has blocking static gaps. Fix FAIL rows before presenting it as production-ready.
 
 ## Required production evidence
 

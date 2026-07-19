@@ -1,7 +1,7 @@
 # Production HA Readiness - SecureRAG Hub
 
 - Overlay: `infra/k8s/overlays/production`
-- Generated at UTC: `2026-06-21T05:10:15Z`
+- Generated at UTC: `2026-07-18T12:19:47Z`
 
 | Component | Control | Status | Evidence |
 |---|---|---:|---|

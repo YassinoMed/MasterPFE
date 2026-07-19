@@ -1,0 +1,25 @@
+# ─────────────────────────────────────────────────────────────────
+# AI Security Service — Kubernetes Service
+# ─────────────────────────────────────────────────────────────────
+apiVersion: v1
+kind: Service
+metadata:
+  name: ai-security-service
+  namespace: ai-security
+  labels:
+    app: ai-security-service
+    app.kubernetes.io/name: ai-security-service
+    app.kubernetes.io/part-of: securerag-hub
+spec:
+  type: ClusterIP
+  selector:
+    app: ai-security-service
+  ports:
+  - name: http
+    port: 80
+    targetPort: 8000
+    protocol: TCP
+  - name: metrics
+    port: 9090
+    targetPort: 8000
+    protocol: TCP

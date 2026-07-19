@@ -8,7 +8,6 @@ spec:
     matchLabels:
       app.kubernetes.io/name: api-gateway
   ingress:
-    # Allow external ingress (if using Nginx or other Ingress controller, we allow from everywhere or specific LB)
     - fromEntities:
         - cluster
         - world
@@ -18,7 +17,12 @@ spec:
               protocol: TCP
           rules:
             http:
-              - method: ".*"
+              - method: "GET"
+                path: "/api/.*"
+              - method: "POST"
+                path: "/api/.*"
+              - method: "GET"
+                path: "/health"
   egress:
     - toEndpoints:
         - matchLabels:
@@ -29,7 +33,16 @@ spec:
               protocol: TCP
           rules:
             http:
-              - method: ".*"
+              - method: "GET"
+                path: "/api/auth/.*"
+              - method: "POST"
+                path: "/api/login"
+              - method: "POST"
+                path: "/api/register"
+              - method: "POST"
+                path: "/api/logout"
+              - method: "GET"
+                path: "/health"
     - toEndpoints:
         - matchLabels:
             app.kubernetes.io/name: chatbot-manager
@@ -39,7 +52,12 @@ spec:
               protocol: TCP
           rules:
             http:
-              - method: ".*"
+              - method: "GET"
+                path: "/api/chatbots.*"
+              - method: "POST"
+                path: "/api/chatbots.*"
+              - method: "GET"
+                path: "/health"
     - toEndpoints:
         - matchLabels:
             app.kubernetes.io/name: llm-orchestrator
@@ -49,7 +67,23 @@ spec:
               protocol: TCP
           rules:
             http:
-              - method: ".*"
+              - method: "POST"
+                path: "/api/v1/.*"
+              - method: "GET"
+                path: "/health"
+    # Allow DNS resolution
+    - toEntities:
+        - kube-apiserver
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: kube-system
+            k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: UDP
+            - port: "53"
+              protocol: TCP
 ---
 apiVersion: "cilium.io/v2"
 kind: CiliumNetworkPolicy
@@ -70,24 +104,88 @@ spec:
               protocol: TCP
           rules:
             http:
-              - method: ".*"
+              - method: "GET"
+              - method: "POST"
+              - method: "PUT"
+              - method: "DELETE"
   egress:
     - toEndpoints:
-        - matchExpressions:
-            - key: app.kubernetes.io/name
-              operator: In
-              values:
-                - auth-users
-                - chatbot-manager
-                - conversation-service
-                - audit-security-service
+        - matchLabels:
+            app.kubernetes.io/name: auth-users
       toPorts:
         - ports:
             - port: "8000"
               protocol: TCP
           rules:
             http:
-              - method: ".*"
+              - method: "GET"
+                path: "/api/auth/.*"
+              - method: "POST"
+                path: "/api/login"
+              - method: "POST"
+                path: "/api/register"
+              - method: "POST"
+                path: "/api/logout"
+              - method: "GET"
+                path: "/api/users.*"
+              - method: "GET"
+                path: "/health"
+    - toEndpoints:
+        - matchLabels:
+            app.kubernetes.io/name: chatbot-manager
+      toPorts:
+        - ports:
+            - port: "8000"
+              protocol: TCP
+          rules:
+            http:
+              - method: "GET"
+                path: "/api/chatbots.*"
+              - method: "POST"
+                path: "/api/chatbots.*"
+              - method: "GET"
+                path: "/health"
+    - toEndpoints:
+        - matchLabels:
+            app.kubernetes.io/name: conversation-service
+      toPorts:
+        - ports:
+            - port: "8000"
+              protocol: TCP
+          rules:
+            http:
+              - method: "GET"
+                path: "/api/conversations.*"
+              - method: "POST"
+                path: "/api/conversations.*"
+              - method: "GET"
+                path: "/health"
+    - toEndpoints:
+        - matchLabels:
+            app.kubernetes.io/name: audit-security-service
+      toPorts:
+        - ports:
+            - port: "8000"
+              protocol: TCP
+          rules:
+            http:
+              - method: "GET"
+                path: "/api/audit.*"
+              - method: "POST"
+                path: "/api/audit/events"
+              - method: "GET"
+                path: "/health"
+    # Allow DNS
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: kube-system
+            k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: UDP
+            - port: "53"
+              protocol: TCP
 ---
 apiVersion: "cilium.io/v2"
 kind: CiliumNetworkPolicy
@@ -114,7 +212,18 @@ spec:
               protocol: TCP
           rules:
             http:
-              - method: ".*"
+              - method: "GET"
+                path: "/api/auth/.*"
+              - method: "POST"
+                path: "/api/login"
+              - method: "POST"
+                path: "/api/register"
+              - method: "POST"
+                path: "/api/logout"
+              - method: "GET"
+                path: "/api/users.*"
+              - method: "GET"
+                path: "/health"
   egress:
     - toEndpoints:
         - matchLabels:
@@ -122,6 +231,17 @@ spec:
       toPorts:
         - ports:
             - port: "5432"
+              protocol: TCP
+    # Allow DNS
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: kube-system
+            k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: UDP
+            - port: "53"
               protocol: TCP
 ---
 apiVersion: "cilium.io/v2"
@@ -148,7 +268,12 @@ spec:
               protocol: TCP
           rules:
             http:
-              - method: ".*"
+              - method: "GET"
+                path: "/api/chatbots.*"
+              - method: "POST"
+                path: "/api/chatbots.*"
+              - method: "GET"
+                path: "/health"
   egress:
     - toEndpoints:
         - matchLabels:
@@ -159,7 +284,21 @@ spec:
               protocol: TCP
           rules:
             http:
-              - method: ".*"
+              - method: "GET"
+                path: "/api/auth/verify"
+              - method: "GET"
+                path: "/health"
+    # Allow DNS
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: kube-system
+            k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: UDP
+            - port: "53"
+              protocol: TCP
 ---
 apiVersion: "cilium.io/v2"
 kind: CiliumNetworkPolicy
@@ -180,7 +319,10 @@ spec:
               protocol: TCP
           rules:
             http:
-              - method: ".*"
+              - method: "POST"
+                path: "/api/v1/.*"
+              - method: "GET"
+                path: "/health"
   egress:
     - toEndpoints:
         - matchLabels:
@@ -191,7 +333,10 @@ spec:
               protocol: TCP
           rules:
             http:
-              - method: ".*"
+              - method: "GET"
+                path: "/api/chatbots.*"
+              - method: "POST"
+                path: "/api/chatbots.*"
     - toEndpoints:
         - matchLabels:
             app.kubernetes.io/name: auth-users
@@ -201,7 +346,8 @@ spec:
               protocol: TCP
           rules:
             http:
-              - method: ".*"
+              - method: "GET"
+                path: "/api/auth/verify"
     - toEndpoints:
         - matchLabels:
             app.kubernetes.io/name: security-auditor
@@ -211,7 +357,21 @@ spec:
               protocol: TCP
           rules:
             http:
-              - method: ".*"
+              - method: "POST"
+                path: "/api/v1/security/.*"
+              - method: "GET"
+                path: "/health"
+    # Allow DNS
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: kube-system
+            k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: UDP
+            - port: "53"
+              protocol: TCP
 ---
 apiVersion: "cilium.io/v2"
 kind: CiliumNetworkPolicy
@@ -232,7 +392,10 @@ spec:
               protocol: TCP
           rules:
             http:
-              - method: ".*"
+              - method: "POST"
+                path: "/api/v1/security/.*"
+              - method: "GET"
+                path: "/health"
   egress:
     - toEndpoints:
         - matchLabels:
@@ -243,7 +406,10 @@ spec:
               protocol: TCP
           rules:
             http:
-              - method: ".*"
+              - method: "GET"
+                path: "/api/v1/knowledge/.*"
+              - method: "POST"
+                path: "/api/v1/knowledge/search"
     - toEndpoints:
         - matchLabels:
             app.kubernetes.io/name: ollama
@@ -253,7 +419,21 @@ spec:
               protocol: TCP
           rules:
             http:
-              - method: ".*"
+              - method: "POST"
+                path: "/api/generate"
+              - method: "POST"
+                path: "/api/chat"
+    # Allow DNS
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: kube-system
+            k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: UDP
+            - port: "53"
+              protocol: TCP
 ---
 apiVersion: "cilium.io/v2"
 kind: CiliumNetworkPolicy
@@ -274,7 +454,10 @@ spec:
               protocol: TCP
           rules:
             http:
-              - method: ".*"
+              - method: "GET"
+                path: "/api/v1/knowledge/.*"
+              - method: "POST"
+                path: "/api/v1/knowledge/search"
   egress:
     - toEndpoints:
         - matchLabels:
@@ -282,4 +465,15 @@ spec:
       toPorts:
         - ports:
             - port: "6333"
+              protocol: TCP
+    # Allow DNS
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: kube-system
+            k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: UDP
+            - port: "53"
               protocol: TCP

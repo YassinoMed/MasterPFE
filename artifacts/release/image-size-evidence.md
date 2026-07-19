@@ -1,6 +1,6 @@
 # Image Size Evidence - SecureRAG Hub
 
-- Generated at UTC: `2026-07-06T17:17:55Z`
+- Generated at UTC: `2026-07-18T13:10:46Z`
 - Registry: `localhost:5001`
 - Image tag: `dev`
 

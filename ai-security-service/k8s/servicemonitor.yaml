@@ -1,0 +1,25 @@
+# ─────────────────────────────────────────────────────────────────
+# AI Security Service — Prometheus ServiceMonitor
+# ─────────────────────────────────────────────────────────────────
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: ai-security-servicemonitor
+  namespace: ai-security
+  labels:
+    app: ai-security-service
+    app.kubernetes.io/part-of: securerag-hub
+    release: prometheus  # Match Prometheus Operator selector
+spec:
+  selector:
+    matchLabels:
+      app: ai-security-service
+  namespaceSelector:
+    matchNames:
+    - ai-security
+  endpoints:
+  - port: metrics
+    path: /metrics
+    interval: 15s
+    scrapeTimeout: 10s
+    honorLabels: true

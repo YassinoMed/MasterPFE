@@ -1,6 +1,6 @@
 # Kyverno Enforce Readiness - SecureRAG Hub
 
-- Generated at UTC: `2026-06-21T08:50:16Z`
+- Generated at UTC: `2026-07-18T13:21:17Z`
 - Status: `PRÊT_NON_EXÉCUTÉ`
 - Kyverno runtime report: `artifacts/release/kyverno-runtime-report.md`
 - Local registry blocker: `artifacts/release/kyverno-local-registry-enforce-blocker.md`

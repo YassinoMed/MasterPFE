@@ -1,6 +1,6 @@
 # SLSA-style Provenance Statement - SecureRAG Hub
 
-- Generated at UTC: `2026-06-21T08:50:12Z`
+- Generated at UTC: `2026-07-18T13:10:12Z`
 - Status: `PRÊT_NON_EXÉCUTÉ`
 - Release attestation: `PARTIAL_READY_TO_PROVE`
 - Subject count: `0`

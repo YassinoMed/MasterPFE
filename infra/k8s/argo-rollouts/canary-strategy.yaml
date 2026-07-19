@@ -1,16 +1,10 @@
 # Argo Rollouts — Canary Deployment (Progressive Delivery)
 # Namespace: securerag-hub
-# Feature flag: ENABLE_ARGO_ROLLOUTS=false
-# Migration canary : chatbot-manager → conversation-service
-# NE MODIFIE PAS les Deployments actuels.
+# ENABLED: Canary progressive delivery for chatbot-manager
 #
 # Installation:
 #   kubectl apply -n argo-rollouts -f https://github.com/argoproj/argo-rollouts/releases/latest/download/install.yaml
-#   ENABLE_ARGO_ROLLOUTS=true kubectl apply -f infra/k8s/argo-rollouts/
-#
-# Rollback:
-#   kubectl delete -f infra/k8s/argo-rollouts/
-#   kubectl argo rollouts undo chatbot-manager
+#   kubectl apply -f infra/k8s/argo-rollouts/
 
 apiVersion: argoproj.io/v1alpha1
 kind: Rollout
@@ -18,17 +12,17 @@ metadata:
   name: chatbot-manager-canary
   namespace: securerag-hub
   annotations:
-    feature.securerag.dev/enable-argo-rollouts: "false"
-    feature.securerag.dev/enable-canary-deployment: "false"
+    feature.securerag.dev/enable-argo-rollouts: "true"
+    feature.securerag.dev/enable-canary-deployment: "true"
 spec:
   replicas: 2
   strategy:
     canary:
       steps:
-        - setWeight: 10
+        - setWeight: 5
         - pause: { duration: 60s }
-        - setWeight: 30
-        - pause: { duration: 60s }
+        - setWeight: 25
+        - pause: { duration: 120s }
         - setWeight: 50
         - pause: { duration: 120s }
         - setWeight: 100
@@ -36,6 +30,10 @@ spec:
         templates:
           - templateName: securerag-canary-analysis
         startingStep: 1
+      # Automatic rollback on failure
+      abortScaleDownDelaySeconds: 30
+      canaryService: chatbot-manager-canary
+      stableService: chatbot-manager
   selector:
     matchLabels:
       app.kubernetes.io/name: chatbot-manager
@@ -59,7 +57,7 @@ spec:
             failureThreshold: 6
 
 ---
-# Canary Analysis — Prometheus-based
+# Canary Analysis — Prometheus-based with CPU/Memory metrics
 apiVersion: argoproj.io/v1alpha1
 kind: AnalysisTemplate
 metadata:
@@ -88,3 +86,106 @@ spec:
           address: http://prometheus.securerag-monitoring.svc:9090
           query: |
             histogram_quantile(0.95, sum(rate(http_server_request_duration_seconds_bucket{namespace="securerag-hub"}[1m])) by (le))
+    - name: cpu-usage
+      interval: 60s
+      count: 3
+      successCondition: result < 0.8
+      failureLimit: 2
+      provider:
+        prometheus:
+          address: http://prometheus.securerag-monitoring.svc:9090
+          query: |
+            avg(rate(container_cpu_usage_seconds_total{namespace="securerag-hub",container="chatbot-manager"}[5m]))
+            / avg(kube_pod_container_resource_limits{namespace="securerag-hub",container="chatbot-manager",resource="cpu"})
+    - name: memory-usage
+      interval: 60s
+      count: 3
+      successCondition: result < 0.85
+      failureLimit: 2
+      provider:
+        prometheus:
+          address: http://prometheus.securerag-monitoring.svc:9090
+          query: |
+            avg(container_memory_working_set_bytes{namespace="securerag-hub",container="chatbot-manager"})
+            / avg(kube_pod_container_resource_limits{namespace="securerag-hub",container="chatbot-manager",resource="memory"})
+
+---
+# Portal-web Rollout — highest traffic service
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: portal-web-canary
+  namespace: securerag-hub
+  annotations:
+    feature.securerag.dev/enable-argo-rollouts: "true"
+    feature.securerag.dev/enable-canary-deployment: "true"
+spec:
+  replicas: 2
+  strategy:
+    canary:
+      steps:
+        - setWeight: 5
+        - pause: { duration: 60s }
+        - setWeight: 25
+        - pause: { duration: 120s }
+        - setWeight: 50
+        - pause: { duration: 180s }
+        - setWeight: 100
+      analysis:
+        templates:
+          - templateName: securerag-portal-canary-analysis
+        startingStep: 1
+      abortScaleDownDelaySeconds: 30
+      canaryService: portal-web-canary
+      stableService: portal-web
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: portal-web
+      rollout: canary
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: portal-web
+        rollout: canary
+    spec:
+      containers:
+        - name: portal-web
+          image: localhost:5001/securerag-hub-portal-web:dev
+          ports:
+            - name: http
+              containerPort: 8000
+          readinessProbe:
+            httpGet: { path: /health, port: http }
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            failureThreshold: 6
+
+---
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata:
+  name: securerag-portal-canary-analysis
+  namespace: securerag-hub
+spec:
+  metrics:
+    - name: error-rate
+      interval: 30s
+      count: 5
+      successCondition: result < 0.03
+      failureLimit: 2
+      provider:
+        prometheus:
+          address: http://prometheus.securerag-monitoring.svc:9090
+          query: |
+            sum(rate(http_server_requests_total{namespace="securerag-hub",pod=~"portal-web.*",status=~"5.."}[1m]))
+            / sum(rate(http_server_requests_total{namespace="securerag-hub",pod=~"portal-web.*"}[1m]))
+    - name: p95-latency
+      interval: 30s
+      count: 5
+      successCondition: result < 0.5
+      failureLimit: 2
+      provider:
+        prometheus:
+          address: http://prometheus.securerag-monitoring.svc:9090
+          query: |
+            histogram_quantile(0.95, sum(rate(http_server_request_duration_seconds_bucket{namespace="securerag-hub",pod=~"portal-web.*"}[1m])) by (le))

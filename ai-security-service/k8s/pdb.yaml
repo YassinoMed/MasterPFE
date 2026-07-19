@@ -1,0 +1,16 @@
+# ─────────────────────────────────────────────────────────────────
+# AI Security Service — PodDisruptionBudget
+# ─────────────────────────────────────────────────────────────────
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: ai-security-pdb
+  namespace: ai-security
+  labels:
+    app: ai-security-service
+    app.kubernetes.io/part-of: securerag-hub
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: ai-security-service
