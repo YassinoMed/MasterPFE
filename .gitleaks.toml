@@ -26,7 +26,18 @@ paths = [
   '''(^|/)scripts/opensearch/''',
   '''(^|/)istio-1.23.0/''',
   '''(^|/)infra/jenkins/secrets/.*''',
-  '''(^|/)evidence/.*'''
+  '''(^|/)evidence/.*''',
+  '''(^|/)\.terraform/.*''',
+  '''(^|/)reports/.*''',
+  '''(^|/)artifacts/.*''',
+  '''(^|/)support-pack/.*''',
+  '''(^|/)\.kaniko-cache/.*''',
+  '''(^|/)\.venv/.*''',
+  '''(^|/)\.pytest_cache/.*''',
+  '''(^|/)\.scannerwork/.*''',
+  '''\.md$''',
+  '''(^|/)infra/ansible/group_vars/all\.yml$''',
+  '''(^|/)infra/k8s/argocd/application-harbor\.yaml$'''
 ]
 regexes = [
   '''(?i)example[_-]?(token|secret|key|password)''',
