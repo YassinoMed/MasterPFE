@@ -501,3 +501,10 @@ Pour assistance :
 
 Projet Master DSIR - SecureRAG Hub BY Yassino
 2026-2027
+
+---
+
+## 🔬 Validation Campaign (July 19, 2026)
+
+A complete validation campaign of the platform was successfully run on July 19, 2026, verifying the 15 DevSecOps, Kubernetes, and AI Security phases.
+See details in the final validation report artifact: `validation_report_final.md`.
