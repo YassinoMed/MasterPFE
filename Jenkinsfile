@@ -143,8 +143,13 @@ pipeline {
               # [SEC-04] Make Gitleaks fail the pipeline on secret detection
               # Assuming gitleaks is installed in the environment or we use docker if available
               if command -v gitleaks >/dev/null 2>&1; then
-                gitleaks dir . --config .gitleaks.toml --report-format json --report-path "${SECURITY_REPORT_DIR}/gitleaks.json" --exit-code 0 || true
-                gitleaks dir . --config .gitleaks.toml --report-format sarif --report-path "${SECURITY_REPORT_DIR}/gitleaks.sarif" --exit-code 1
+                if gitleaks dir --help >/dev/null 2>&1; then
+                  gitleaks dir . --config .gitleaks.toml --report-format json --report-path "${SECURITY_REPORT_DIR}/gitleaks.json" --exit-code 0 || true
+                  gitleaks dir . --config .gitleaks.toml --report-format sarif --report-path "${SECURITY_REPORT_DIR}/gitleaks.sarif" --exit-code 1
+                else
+                  gitleaks detect --no-git --config .gitleaks.toml --report-format json --report-path "${SECURITY_REPORT_DIR}/gitleaks.json" --exit-code 0 || true
+                  gitleaks detect --no-git --config .gitleaks.toml --report-format sarif --report-path "${SECURITY_REPORT_DIR}/gitleaks.sarif" --exit-code 1
+                fi
               elif command -v docker >/dev/null 2>&1 && docker info >/dev/null 2>&1; then
                 # DinD Path Translation
                 CONTAINER_ID=$(hostname)
