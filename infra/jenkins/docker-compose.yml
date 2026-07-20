@@ -28,7 +28,8 @@ services:
       - ./secrets:/run/jenkins-secrets:ro
       - ./secrets/kubeconfig:/var/jenkins_home/.kube/config:ro
       - ../../:/workspace
-      # [SEC-03] Removed docker.sock volume
+      - /var/run/docker.sock:/var/run/docker.sock
+      # [SEC-03] Removed docker.sock volume (Restored to enable Kaniko docker fallback in CI)
     working_dir: /workspace
     extra_hosts:
       - "host.docker.internal:host-gateway"
