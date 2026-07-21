@@ -2,7 +2,14 @@
 import json
 import os
 import sys
-import httpx
+import urllib.request
+import urllib.error
+
+try:
+    import httpx
+    HAS_HTTPX = True
+except ImportError:
+    HAS_HTTPX = False
 
 class AITestingAgent:
     def __init__(self, base_url="http://localhost:8080"):
@@ -49,11 +56,24 @@ class AITestingAgent:
                 status_code = 0
                 response_text = ""
                 try:
-                    # In a real DAST run, we would send this to the API Gateway or FastAPI endpoints
-                    with httpx.Client(timeout=3.0) as client:
-                        resp = client.post(url, json=test_payload)
-                        status_code = resp.status_code
-                        response_text = resp.text[:100]
+                    if HAS_HTTPX:
+                        with httpx.Client(timeout=3.0) as client:
+                            resp = client.post(url, json=test_payload)
+                            status_code = resp.status_code
+                            response_text = resp.text[:100]
+                    else:
+                        req = urllib.request.Request(
+                            url,
+                            data=json.dumps(test_payload).encode('utf-8'),
+                            headers={"Content-Type": "application/json"},
+                            method="POST"
+                        )
+                        with urllib.request.urlopen(req, timeout=3.0) as resp:
+                            status_code = resp.getcode()
+                            response_text = resp.read().decode('utf-8', errors='ignore')[:100]
+                except urllib.error.HTTPError as e:
+                    status_code = e.code
+                    response_text = e.read().decode('utf-8', errors='ignore')[:100]
                 except Exception as e:
                     # If endpoint is offline, we record a connection issue but mark it as handled (fail-safe)
                     status_code = 500

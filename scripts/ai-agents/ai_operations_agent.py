@@ -2,8 +2,15 @@
 import json
 import os
 import sys
-import httpx
 import time
+import urllib.request
+import urllib.error
+
+try:
+    import httpx
+    HAS_HTTPX = True
+except ImportError:
+    HAS_HTTPX = False
 
 class AIOperationsAgent:
     def __init__(self, backend_url="http://10.15.10.119:8082"):
@@ -21,40 +28,58 @@ class AIOperationsAgent:
             payload = {"source": source, "raw_log": log_message}
             
         try:
-            with httpx.Client(timeout=10.0) as client:
-                resp = client.post(url, json=payload)
-                if resp.status_code == 200:
-                    data = resp.json()
-                    if "8082" in self.backend_url:
-                        consensus = data.get("consensus", {})
-                        verdict = consensus.get("final_verdict", "ACCEPT")
-                        confidence = consensus.get("consensus_score", 0.0)
-                        justification = consensus.get("justification", "No justification provided.")
-                        
-                        risk = data.get("risk_assessment", {})
-                        severity = risk.get("severity", "LOW")
-                        
-                        journal = data.get("decision_journal", {})
-                        recommendations = journal.get("recommended_next_steps", [])
-                        rec_str = ", ".join(recommendations) if recommendations else "No specific action required."
-                        
-                        print(f"[AI Operations Agent] Verdict: {verdict}, Consensus Score: {confidence}% (Severity: {severity})")
-                        print(f"Justification: {justification}")
-                        print(f"Recommendations: {rec_str}")
-                        
-                        return {
-                            "classification": verdict,
-                            "confidence": confidence,
-                            "explanation": justification,
-                            "recommendation": rec_str
-                        }
-                    else:
-                        print(f"[AI Operations Agent] Verdict: {data.get('classification')}, Confidence: {data.get('confidence')}%")
-                        print(f"Explanation: {data.get('explanation')}")
-                        print(f"Remediation: {data.get('recommendation')}")
-                        return data
+            data = None
+            status_code = 0
+            if HAS_HTTPX:
+                with httpx.Client(timeout=10.0) as client:
+                    resp = client.post(url, json=payload)
+                    status_code = resp.status_code
+                    if resp.status_code == 200:
+                        data = resp.json()
+            else:
+                req = urllib.request.Request(
+                    url,
+                    data=json.dumps(payload).encode('utf-8'),
+                    headers={"Content-Type": "application/json"},
+                    method="POST"
+                )
+                with urllib.request.urlopen(req, timeout=10.0) as resp:
+                    status_code = resp.getcode()
+                    if status_code == 200:
+                        data = json.loads(resp.read().decode('utf-8'))
+
+            if data is not None:
+                if "8082" in self.backend_url:
+                    consensus = data.get("consensus", {})
+                    verdict = consensus.get("final_verdict", "ACCEPT")
+                    confidence = consensus.get("consensus_score", 0.0)
+                    justification = consensus.get("justification", "No justification provided.")
+                    
+                    risk = data.get("risk_assessment", {})
+                    severity = risk.get("severity", "LOW")
+                    
+                    journal = data.get("decision_journal", {})
+                    recommendations = journal.get("recommended_next_steps", [])
+                    rec_str = ", ".join(recommendations) if recommendations else "No specific action required."
+                    
+                    print(f"[AI Operations Agent] Verdict: {verdict}, Consensus Score: {confidence}% (Severity: {severity})")
+                    print(f"Justification: {justification}")
+                    print(f"Recommendations: {rec_str}")
+                    
+                    return {
+                        "classification": verdict,
+                        "confidence": confidence,
+                        "explanation": justification,
+                        "recommendation": rec_str
+                    }
                 else:
-                    print(f"[AI Operations Agent] Error: Backend returned status code {resp.status_code}")
+                    print(f"[AI Operations Agent] Verdict: {data.get('classification')}, Confidence: {data.get('confidence')}%")
+                    print(f"Explanation: {data.get('explanation')}")
+                    print(f"Remediation: {data.get('recommendation')}")
+                    return data
+            else:
+                print(f"[AI Operations Agent] Error: Backend returned status code {status_code}")
+                raise RuntimeError(f"Backend returned HTTP {status_code}")
         except Exception as e:
             print(f"[AI Operations Agent] Error communicating with backend: {e}")
             # Fallback mock decision if backend is offline to ensure zero disruption (fail-safe)

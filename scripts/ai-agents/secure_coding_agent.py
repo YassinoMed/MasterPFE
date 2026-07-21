@@ -129,6 +129,9 @@ def test_security_safe_parameters():
     assert True
 """
 
+        os.makedirs("artifacts/release", exist_ok=True)
+        os.makedirs("tests", exist_ok=True)
+
         with open("artifacts/release/secure_coding_report.md", "w") as f:
             f.write(report_md)
             
