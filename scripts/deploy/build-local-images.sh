@@ -69,6 +69,8 @@ for component in "${COMPONENT_ARRAY[@]}"; do
       --context=/workspace \
       --dockerfile="/workspace/${dockerfile}" \
       --destination="${image}" \
+      --cache=true \
+      --cache-dir=/workspace/.kaniko-cache \
       --insecure \
       --skip-tls-verify
   else
