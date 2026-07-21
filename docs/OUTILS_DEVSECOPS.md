@@ -1,5 +1,7 @@
 # Cartographie des Outils de la Chaîne DevSecOps - SecureRAG Hub
 
+*Dernière mise à jour : 21 Juillet 2026*
+
 Ce document recense l'ensemble des outils, technologies et agents intégrés dans la chaîne **DevSecOps** du projet **SecureRAG Hub**, classés par phase du cycle de vie logiciel (SDLC).
 
 ---
