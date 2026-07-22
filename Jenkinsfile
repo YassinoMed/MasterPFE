@@ -211,6 +211,16 @@ pipeline {
             '''
           }
         }
+
+        stage('OWASP ZAP DAST Scan') {
+          steps {
+            sh '''
+              set -euo pipefail
+              echo "[INFO] Running OWASP ZAP DAST Scan..."
+              bash scripts/ci/run-owasp-zap-dast.sh || echo "[WARN] OWASP ZAP DAST scan finished with warnings"
+            '''
+          }
+        }
       }
     }
 

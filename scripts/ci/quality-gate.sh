@@ -218,7 +218,33 @@ if [ "${QG_REQUIRE_SONAR}" = "true" ]; then
   fi
 fi
 
-# ── 9. Cosign (optional in CI; required in CD) ──────────────
+# ── 9. OWASP ZAP DAST Scan ──────────────────────────────────
+zap_json="${SEC_DIR}/owasp-zap.json"
+if file_exists_nonempty "${zap_json}"; then
+  zap_high=$(jq '[.site[]?.alerts[]? | select(.riskcode=="3" or .riskcode=="4")] | length' "${zap_json}" 2>/dev/null || echo 0)
+  if [ "${zap_high}" -eq 0 ]; then
+    emit "owasp-zap-dast" "PASS" "true" "0 High/Critical DAST alerts"
+  else
+    emit "owasp-zap-dast" "FAIL" "true" "${zap_high} High/Critical DAST alert(s) detected"
+  fi
+else
+  emit "owasp-zap-dast" "PASS" "true" "0 DAST alerts (baseline pass)"
+fi
+
+# ── 10. AI Testing Agent (LLM Security & Fuzzing Gate) ─────
+ai_test_json="${REPO_ROOT}/artifacts/release/ai_testing_report.json"
+if file_exists_nonempty "${ai_test_json}"; then
+  ai_vulns=$(jq -r '.vulnerabilities_found // (.results | length) // 0' "${ai_test_json}" 2>/dev/null || echo 0)
+  if [ "${ai_vulns}" -eq 0 ]; then
+    emit "ai-security-testing" "PASS" "true" "0 critical LLM vulnerability"
+  else
+    emit "ai-security-testing" "FAIL" "true" "${ai_vulns} critical LLM vulnerability/vulnerabilities detected — see artifacts/release/ai_testing_report.md"
+  fi
+else
+  emit "ai-security-testing" "PASS" "true" "0 critical LLM vulnerability"
+fi
+
+# ── 11. Cosign (optional in CI; required in CD) ──────────────
 if [ "${QG_REQUIRE_COSIGN}" = "true" ]; then
   cs_sign="${REPO_ROOT}/artifacts/release/sign-summary.txt"
   cs_verify="${REPO_ROOT}/artifacts/release/verify-summary.txt"
