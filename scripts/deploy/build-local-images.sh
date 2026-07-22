@@ -61,9 +61,10 @@ for component in "${COMPONENT_ARRAY[@]}"; do
   image="${REGISTRY_HOST}/${IMAGE_PREFIX}-${name}:${IMAGE_TAG}"
 
   if [ -f "${dockerfile}" ]; then
-    echo "Building ${image}..."
-    if ! DOCKER_BUILDKIT=1 docker build -t "${image}" -f "${dockerfile}" .; then
-      echo "[WARN] BuildKit build failed/unexpectedly closed gRPC. Retrying with legacy engine build..."
+    echo "[INFO] Building ${image} from ${dockerfile}..."
+    export BUILDKIT_PROGRESS=plain
+    if ! DOCKER_BUILDKIT=1 docker build --progress=plain -t "${image}" -f "${dockerfile}" .; then
+      echo "[WARN] BuildKit build failed or unexpectedly closed gRPC. Retrying with legacy engine build..."
       DOCKER_BUILDKIT=0 docker build -t "${image}" -f "${dockerfile}" .
     fi
   else

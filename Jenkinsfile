@@ -244,6 +244,7 @@ pipeline {
         sh '''
           set -euo pipefail
           echo "[INFO] Building all Docker images..."
+          export BUILDKIT_PROGRESS=plain
           bash scripts/deploy/build-local-images.sh
         '''
       }
