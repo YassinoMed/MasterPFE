@@ -61,21 +61,10 @@ for component in "${COMPONENT_ARRAY[@]}"; do
   image="${REGISTRY_HOST}/${IMAGE_PREFIX}-${name}:${IMAGE_TAG}"
 
   if [ -f "${dockerfile}" ]; then
-    echo "Building ${image} with BuildKit..."
-    export DOCKER_BUILDKIT=1
-    
-    if [[ "${USE_KANIKO:-false}" == "true" ]]; then
-      echo "[INFO] Building with Kaniko..."
-      docker run --rm --network host --cgroupns=host -v "${HOST_REPO_ROOT}:/workspace" \
-        gcr.io/kaniko-project/executor@sha256:4e7a52dd1f14872430652bb3b027405b8dfd17c4538751c620ac005741ef9698 \
-        --context=/workspace \
-        --dockerfile="/workspace/${dockerfile}" \
-        --destination="${image}" \
-        --cache=true \
-        --insecure \
-        --skip-tls-verify || docker build -t "${image}" -f "${dockerfile}" .
-    else
-      docker build -t "${image}" -f "${dockerfile}" .
+    echo "Building ${image}..."
+    if ! DOCKER_BUILDKIT=1 docker build -t "${image}" -f "${dockerfile}" .; then
+      echo "[WARN] BuildKit build failed/unexpectedly closed gRPC. Retrying with legacy engine build..."
+      DOCKER_BUILDKIT=0 docker build -t "${image}" -f "${dockerfile}" .
     fi
   else
     if [[ "${ALLOW_MISSING_COMPONENTS}" == "true" ]]; then
