@@ -220,7 +220,7 @@ pipeline {
           sh '''
             set -euo pipefail
             echo "[INFO] Executing SonarQube Analysis..."
-            export SONAR_HOST_URL="http://host.docker.internal:9000"
+            export SONAR_HOST_URL="${SONAR_HOST_URL:-http://host.docker.internal:9000}"
             export SONAR_TOKEN="${SONAR_TOKEN}"
             export REQUIRE_SONAR="false"
             bash scripts/ci/run-sonar-analysis.sh

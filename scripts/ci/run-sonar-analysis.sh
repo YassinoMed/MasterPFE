@@ -65,6 +65,13 @@ bash scripts/ci/validate-sonar-cpd-scope.sh
 [[ -n "${SONAR_HOST_URL}" ]] || fail_or_skip "SONAR_HOST_URL is not configured"
 [[ -n "${SONAR_TOKEN}" ]] || fail_or_skip "SONAR_TOKEN is not configured"
 
+# Fast pre-flight connectivity check (5 seconds timeout)
+if command -v curl >/dev/null 2>&1; then
+  if ! curl -s --connect-timeout 5 "${SONAR_HOST_URL}/api/system/status" >/dev/null 2>&1; then
+    fail_or_skip "SonarQube server at ${SONAR_HOST_URL} is unreachable (connect timeout)"
+  fi
+fi
+
 scanner_args=(
   "-Dsonar.host.url=${SONAR_HOST_URL}"
   "-Dsonar.token=${SONAR_TOKEN}"
