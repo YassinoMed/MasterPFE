@@ -227,12 +227,28 @@ graph LR
     class LITELLM,NEMO,GARAK,CHATBOT,LANGFUSE ai;
 ```
 
-### Composants de la Couche IA & Modèles
+### Composants & Modèles IA Spécialisés Intégrés
 
-1. **LiteLLM Gateway** : Proxy unifié qui orchestre l'accès aux LLMs (Ollama local ou providers). Il gère le basculement automatique (*failover*), la répartition de charge, le contrôle des quotas et le rate-limiting.
-2. **NeMo Guardrails (NVIDIA)** : Moteur de garde programmable qui filtre les entrées (*Input Rails*) pour intercepter les tentatives de prompt-injection et les sorties (*Output Rails*) pour empêcher la divulgation de données PII ou d'informations système confidentielles.
-3. **Garak (LLM Vulnerability Scanner)** : Outil de Red Teaming automatisé intégré **directement dans la CI** qui soumet dynamiquement des sondes (*probes*) de fuzzing pour tester la résistance du modèle contre le jailbreak et les attaques adverses.
-4. **Langfuse** : Solution d'observabilité LLM open-source assurant le tracing complet des requêtes RAG, le suivi précis de la consommation de tokens et le calcul du coût par utilisateur.
+1. **`AlicanKiraz0/Cybersecurity-BaronLLM_Offensive_Security_LLM_Q6_K_GGUF`** :  
+   - **Rôle** : Modèle d'Offensive Security & Red Teaming quantifié GGUF Q6_K.
+   - **Fonction** : Analyse les vulnérabilités de code et simule des vecteurs d'attaque complexes sur les conteneurs et l'API.
+
+2. **`Rapnss/DevOps-Ultra-125M`** :  
+   - **Rôle** : Modèle ultra-léger (125M paramètres) dédié au parsing haute vitesse.
+   - **Fonction** : Analyse en temps réel les flux de logs CI/CD Jenkins, Falco eBPF, et Tetragon à grande vitesse avec une empreinte mémoire minimale.
+
+3. **`andrebassi/devops-sensei-llama3.2-1b-merged`** :  
+   - **Rôle** : Modèle de raisonnement DevOps & IaC basé sur Llama 3.2 1B.
+   - **Fonction** : Réalise des audits de conformité avancés sur les manifestes Kubernetes K8s, Kustomize et les politiques Kyverno.
+
+4. **`nadtoka/llama-3.2-devops-notes-model`** :  
+   - **Rôle** : Modèle spécialisé en corrélation d'incidents et post-mortem.
+   - **Fonction** : Génère automatiquement des synthèses d'audit, des rapports post-mortem et des plans de remédiation en cas d'alerte de sécurité.
+
+5. **LiteLLM Gateway** : Proxy unifié qui orchestre l'accès aux LLMs (Ollama local ou providers). Il gère le basculement automatique (*failover*), la répartition de charge, le contrôle des quotas et le rate-limiting.
+6. **NeMo Guardrails (NVIDIA)** : Moteur de garde programmable qui filtre les entrées (*Input Rails*) pour intercepter les tentatives de prompt-injection et les sorties (*Output Rails*) pour empêcher la divulgation de données PII ou d'informations système confidentielles.
+7. **Garak (LLM Vulnerability Scanner)** : Outil de Red Teaming automatisé intégré **directement dans la CI** qui soumet dynamiquement des sondes (*probes*) de fuzzing pour tester la résistance du modèle contre le jailbreak et les attaques adverses.
+8. **Langfuse** : Solution d'observabilité LLM open-source assurant le tracing complet des requêtes RAG, le suivi précis de la consommation de tokens et le calcul du coût par utilisateur.
 
 ---
 
