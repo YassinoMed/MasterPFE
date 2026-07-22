@@ -45,20 +45,28 @@ class Settings:
     ROUTER_DEFAULT_MODEL: str = os.getenv("ROUTER_DEFAULT_MODEL", "DevOpsAgent")
     ROUTER_CONFIDENCE_THRESHOLD: float = float(os.getenv("ROUTER_CONFIDENCE_THRESHOLD", "0.15"))
 
-    # ── Layer 4a: CyberSecurity Agent (GGUF) ───────────────────
+    # ── Layer 4a: CyberSecurity Agent (BaronLLM GGUF) ─────────
     CYBER_MODEL_PATH: str = os.getenv(
         "CYBER_MODEL_PATH",
-        "/app/models/seneca-cybersecurity-llm-q4_k_m.gguf"
+        "AlicanKiraz0/Cybersecurity-BaronLLM_Offensive_Security_LLM_Q6_K_GGUF"
     )
     CYBER_CTX_SIZE: int = int(os.getenv("CYBER_CTX_SIZE", "2048"))
     CYBER_MAX_TOKENS: int = int(os.getenv("CYBER_MAX_TOKENS", "512"))
     CYBER_THREADS: int = int(os.getenv("CYBER_THREADS", "4"))
     CYBER_GPU_LAYERS: int = int(os.getenv("CYBER_GPU_LAYERS", "0"))
 
-    # ── Layer 4b: DevOps Agent (HuggingFace) ───────────────────
-    DEVOPS_MODEL_NAME: str = os.getenv(
-        "DEVOPS_MODEL_NAME",
-        "kavinduc/devops-mastermind"
+    # ── Layer 4b: DevOps & Pipeline Log Analysis LLM Stack ────
+    DEVOPS_SENSEI_MODEL: str = os.getenv(
+        "DEVOPS_SENSEI_MODEL",
+        "andrebassi/devops-sensei-llama3.2-1b-merged"
+    )
+    DEVOPS_ULTRA_MODEL: str = os.getenv(
+        "DEVOPS_ULTRA_MODEL",
+        "Rapnss/DevOps-Ultra-125M"
+    )
+    DEVOPS_NOTES_MODEL: str = os.getenv(
+        "DEVOPS_NOTES_MODEL",
+        "nadtoka/llama-3.2-devops-notes-model"
     )
     DEVOPS_MAX_TOKENS: int = int(os.getenv("DEVOPS_MAX_TOKENS", "256"))
 

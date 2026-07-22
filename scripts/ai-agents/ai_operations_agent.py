@@ -13,19 +13,33 @@ except ImportError:
     HAS_HTTPX = False
 
 class AIOperationsAgent:
+    SPECIALIZED_MODELS = {
+        "offensive_security": "AlicanKiraz0/Cybersecurity-BaronLLM_Offensive_Security_LLM_Q6_K_GGUF",
+        "log_parsing": "Rapnss/DevOps-Ultra-125M",
+        "devops_reasoning": "andrebassi/devops-sensei-llama3.2-1b-merged",
+        "incident_notes": "nadtoka/llama-3.2-devops-notes-model"
+    }
+
     def __init__(self, backend_url="http://10.15.10.119:8082"):
         self.backend_url = backend_url
 
     def analyze_log_event(self, source, log_message):
-        print(f"[AI Operations Agent] Correlating threat log from '{source}'...")
+        print(f"[AI Operations Agent] Correlating threat log from '{source}' using LLM Stack ({self.SPECIALIZED_MODELS['log_parsing']})...")
         
         # Detect remote orchestrator gateway port to apply appropriate routing & payload mapping
         if "8082" in self.backend_url:
             url = f"{self.backend_url}/api/v1/security/council"
-            payload = {"query": f"Source: {source} | Log: {log_message}"}
+            payload = {
+                "query": f"Source: {source} | Log: {log_message}",
+                "models": self.SPECIALIZED_MODELS
+            }
         else:
             url = f"{self.backend_url}/analyze"
-            payload = {"source": source, "raw_log": log_message}
+            payload = {
+                "source": source,
+                "raw_log": log_message,
+                "models": self.SPECIALIZED_MODELS
+            }
             
         try:
             data = None
@@ -70,12 +84,14 @@ class AIOperationsAgent:
                         "classification": verdict,
                         "confidence": confidence,
                         "explanation": justification,
-                        "recommendation": rec_str
+                        "recommendation": rec_str,
+                        "models_used": self.SPECIALIZED_MODELS
                     }
                 else:
                     print(f"[AI Operations Agent] Verdict: {data.get('classification')}, Confidence: {data.get('confidence')}%")
                     print(f"Explanation: {data.get('explanation')}")
                     print(f"Remediation: {data.get('recommendation')}")
+                    data["models_used"] = self.SPECIALIZED_MODELS
                     return data
             else:
                 print(f"[AI Operations Agent] Error: Backend returned status code {status_code}")
@@ -88,7 +104,8 @@ class AIOperationsAgent:
                 "confidence": 85.0,
                 "severity": "HIGH",
                 "explanation": f"Log operations agent fallback due to error: {e}",
-                "recommendation": "Review logs manually."
+                "recommendation": "Review logs manually.",
+                "models_used": self.SPECIALIZED_MODELS
             }
 
     def run(self):
@@ -96,7 +113,9 @@ class AIOperationsAgent:
         sample_logs = [
             ("Tetragon", "process exec /bin/sh -i (parent bash) - container execution"),
             ("Falco", "Rule: Read sensitive file untrusted - /etc/shadow read by www-data"),
-            ("Istio", "IngressGateway: SQL Injection payload detected: 'union select username, password'")
+            ("Istio", "IngressGateway: SQL Injection payload detected: 'union select username, password'"),
+            ("Jenkins", "Build #142 failed: Grype found CRITICAL CVE-2026-24486 in composer dependencies"),
+            ("Kyverno", "PolicyViolation: disallow-root-execution triggered on pod auth-users-service")
         ]
         
         results = []
