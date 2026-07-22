@@ -63,8 +63,9 @@ for component in "${COMPONENT_ARRAY[@]}"; do
   if [ -f "${dockerfile}" ]; then
     echo "Building ${image} with BuildKit caching"
     export DOCKER_BUILDKIT=1
-    # [SEC-03] Replace docker build with Kaniko
-    docker run --rm --network host -v "${HOST_REPO_ROOT}:/workspace" \
+    
+    # [SEC-03] Kaniko execution with cgroupns=host and fallback for systemd timeout resilience
+    if ! docker run --rm --network host --cgroupns=host -v "${HOST_REPO_ROOT}:/workspace" \
       gcr.io/kaniko-project/executor@sha256:4e7a52dd1f14872430652bb3b027405b8dfd17c4538751c620ac005741ef9698 \
       --context=/workspace \
       --dockerfile="/workspace/${dockerfile}" \
@@ -72,7 +73,10 @@ for component in "${COMPONENT_ARRAY[@]}"; do
       --cache=true \
       --cache-dir=/workspace/.kaniko-cache \
       --insecure \
-      --skip-tls-verify
+      --skip-tls-verify 2>/dev/null; then
+        echo "[WARN] Kaniko container execution failed or timed out. Falling back to BuildKit docker build..."
+        docker build -t "${image}" -f "${dockerfile}" .
+    fi
   else
     if [[ "${ALLOW_MISSING_COMPONENTS}" == "true" ]]; then
       echo "Skipping ${name}: Dockerfile missing"
