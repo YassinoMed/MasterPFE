@@ -1,42 +1,44 @@
-FROM python:3.11-slim-bookworm AS builder
+# syntax=docker/dockerfile:1
+# SecureRAG Hub — Security Auditor Service (Google Distroless Multi-stage)
+
+# ==============================================================================
+# STAGE 1: Builder (Compilation des dépendances Python via 'uv')
+# ==============================================================================
+FROM python:3.12-slim-bookworm AS builder
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
-    PIP_NO_CACHE_DIR=1 \
-    VENV_PATH=/opt/venv
+    UV_SYSTEM_PYTHON=0 \
+    UV_LINK_MODE=copy
 
-RUN python -m venv "${VENV_PATH}"
-ENV PATH="${VENV_PATH}/bin:${PATH}"
+WORKDIR /build
 
-RUN apt-get update && apt-get upgrade -y && apt-get clean && rm -rf /var/lib/apt/lists/*
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
 
-WORKDIR /app
+COPY requirements.txt ./
 
-COPY requirements.txt .
-RUN pip install --upgrade pip setuptools wheel && \
-    pip install -r requirements.txt
+RUN uv venv /app/.venv && \
+    uv pip install --no-cache -r requirements.txt
 
-FROM python:3.11-slim-bookworm AS runtime
+# ==============================================================================
+# STAGE 2: Runtime Minimal (Google Distroless - Zero Shell / Rootless)
+# ==============================================================================
+FROM gcr.io/distroless/python3-debian12:nonroot AS runtime
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
-    PIP_NO_CACHE_DIR=1 \
-    VENV_PATH=/opt/venv \
+    PATH="/app/.venv/bin:$PATH" \
+    PYTHONPATH="/app/src" \
     PORT=8080 \
     SERVICE_NAME=security-auditor
 
-ENV PATH="${VENV_PATH}/bin:${PATH}"
-
-RUN groupadd --gid 10001 app && \
-    useradd --uid 10001 --gid 10001 --create-home --shell /usr/sbin/nologin app
-
 WORKDIR /app
 
-COPY --from=builder "${VENV_PATH}" "${VENV_PATH}"
-COPY src ./src
+COPY --from=builder /app/.venv /app/.venv
+COPY --chown=nonroot:nonroot src /app/src
 
 EXPOSE 8080
 
-USER 10001:10001
+USER 65532:65532
 
-CMD ["python", "-m", "uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8080"]
+ENTRYPOINT ["/app/.venv/bin/python", "-m", "uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8080"]

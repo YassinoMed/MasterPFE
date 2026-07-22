@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1
-# SecureRAG Hub — LLM Orchestrator (Google Distroless Multi-stage)
+# SecureRAG Hub — RAG Service (Google Distroless Multi-stage)
 
 # ==============================================================================
 # STAGE 1: Builder (Compilation des dépendances Python via 'uv')
@@ -13,12 +13,10 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 WORKDIR /build
 
-# Importer l'exécutable ultra-rapide 'uv'
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
 
 COPY requirements.txt ./
 
-# Créer un environnement virtuel autonome dans /app/.venv
 RUN uv venv /app/.venv && \
     uv pip install --no-cache -r requirements.txt
 
@@ -30,19 +28,17 @@ FROM gcr.io/distroless/python3-debian12:nonroot AS runtime
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PATH="/app/.venv/bin:$PATH" \
-    PYTHONPATH="/app/src" \
-    PORT=8080 \
-    SERVICE_NAME=llm-orchestrator
+    PYTHONPATH="/app/app" \
+    PORT=8000 \
+    SERVICE_NAME=rag-service
 
 WORKDIR /app
 
-# Copier l'environnement virtuel compilé et le code source
 COPY --from=builder /app/.venv /app/.venv
-COPY --chown=nonroot:nonroot src /app/src
+COPY --chown=nonroot:nonroot app /app/app
 
-EXPOSE 8080
+EXPOSE 8000
 
-# UID nonroot = 65532 dans Distroless
 USER 65532:65532
 
-ENTRYPOINT ["/app/.venv/bin/python", "-m", "uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8080"]
+ENTRYPOINT ["/app/.venv/bin/python", "-m", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
