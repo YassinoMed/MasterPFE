@@ -33,16 +33,16 @@ Ce document recense l'ensemble des outils, technologies et agents intégrés dan
 
 ## 4. Sécurité du Code & Analyse Statique (SAST / SCA / Secrets)
 * **Semgrep** : Analyseur statique de sécurité du code (SAST) pour détecter les vulnérabilités applicatives (SQLi, XSS, RCE).
-* **Gitleaks** : Détecteur de secrets, clés API et identifiants codés en dur dans le code source et l'historique Git.
-* **OWASP Dependency-Check** : Analyse de la composition logicielle (SCA) pour les dépendances PHP (Composer) et Node.js (NPM).
+* **Gitleaks & TruffleHog v3** : Détection de secrets en amont et vérification active (*live verification*) des jetons d'API (OpenAI, AWS, GitHub).
+* **OWASP Dependency-Check & Renovate** : Analyse de la composition logicielle (SCA) et automatisation des mises à jour de sécurité des dépendances.
 * **SonarQube** : Plateforme d'analyse de la qualité du code, de la dette technique et des portes de qualité (Quality Gates).
 * **Checkov** : Analyseur de sécurité et de conformité IaC pour Terraform, Helm et manifests Kubernetes.
 
 ---
 
 ## 5. Sécurité des Conteneurs & de la Chaîne d'Approvisionnement (Supply Chain)
-* **Trivy** : Détecteur de vulnérabilités pour les images conteneurs, les systèmes de fichiers et les configurations IaC.
-* **Grype** : Analyseur de vulnérabilités CVE basé sur les fichiers SBOM.
+* **Trivy & Grype** : Détecteurs de vulnérabilités pour les images conteneurs, les systèmes de fichiers et les configurations IaC.
+* **EPSS & OpenVEX Filter (`epss_vulnerability_filter.py`)** : Filtrage et priorisation dynamique des vulnérabilités basés sur le score d'exploitabilité EPSS et attestations OpenVEX.
 * **Syft** : Générateur de nomenclature logicielle (SBOM - Software Bill of Materials) aux formats SPDX et CycloneDX.
 * **Cosign (Sigstore)** : Signature et vérification cryptographique des images conteneurs (signature keyless et clés K8s).
 * **SLSA Provenance** : Générateur d'attestations de provenance selon le standard SLSA (Supply-chain Levels for Software Artifacts).
@@ -59,16 +59,18 @@ Ce document recense l'ensemble des outils, technologies et agents intégrés dan
 
 ---
 
-## 7. Sécurité au Durée d'Exécution (Runtime) & Observabilité
-* **Falco** : Moteur de détection des menaces et anomalies en temps réel au niveau du noyau Linux (Runtime Security).
+## 7. Sécurité au Temps d'Exécution (Runtime) & Observabilité LLM
+* **Falco & Falco Talon** : Moteur de détection d'anomalies noyau et module de remédiation automatique au runtime (suppression de Pods compromis).
 * **Tetragon** : Outil de sécurité et d'observabilité runtime basé sur eBPF.
-* **Istio Service Mesh** : Maillage de services assurant le chiffrement mTLS, le routage et les politiques d'autorisation réseau (AuthorizationPolicies).
+* **Istio Service Mesh & Argo Rollouts** : Maillage de services (mTLS strict) et livraisons progressives Canary avec rollback automatique.
 * **Prometheus & Grafana** : Collecte des métriques de sécurité/performance et visualisation via des tableaux de bord.
-* **OpenTelemetry (OTel)** : Collecte distribuée des traces et de la télémétrie applicative.
+* **OpenTelemetry (OTel) & Langfuse** : Télémétrie distribuée et observabilité native LLM/RAG (tracing de contexte, latence et hallucinations).
 
 ---
 
-## 8. Layer IA Native & Agents de Sécurité Autonomes
+## 8. Layer IA Native & Security Guardrails
+* **LiteLLM Gateway + NeMo Guardrails** : Passerelle de sécurité IA pour l'anonymisation PII et le blocage des injections de prompt en temps réel.
+* **Garak (NVIDIA LLM Red Teaming)** : Fuzzer et scanner de vulnérabilités dynamiques ciblant les prompts et interfaces LLM en CI/CD.
 * **Secure Coding Agent (`secure_coding_agent.py`)** : Agent IA d'analyse sémantique du code par AST et détection de secrets.
 * **Deployment Intelligence Agent (`deployment_intelligence_agent.py`)** : Agent IA d'audit des configurations Kubernetes et calcul du score de risque.
 * **AI Testing Agent (`ai_testing_agent.py`)** : Agent IA de fuzzing dynamique (DAST) et d'injection de payloads.

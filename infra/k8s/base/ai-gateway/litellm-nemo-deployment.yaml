@@ -1,0 +1,94 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: litellm-nemo-config
+  namespace: securerag-hub
+data:
+  config.yaml: |
+    model_list:
+      - model_name: securerag-llm
+        litellm_params:
+          model: ollama/mistral:7b
+          api_base: http://ollama.securerag-hub.svc.cluster.local:11434
+    
+    router_settings:
+      routing_strategy: usage-based-routing-v2
+
+    guardrails:
+      - name: prompt_injection_filter
+        type: nemo_guardrails
+        enabled: true
+        config:
+          pii_masking: true
+          block_jailbreak: true
+          allowed_topics: ["rh", "it_support", "hr_policy", "technical_troubleshooting"]
+          sanitization:
+            anonymize_email: true
+            anonymize_phone: true
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ai-gateway-litellm
+  namespace: securerag-hub
+  labels:
+    app.kubernetes.io/name: ai-gateway-litellm
+    app.kubernetes.io/part-of: securerag-hub
+    app.kubernetes.io/component: ai-security-gateway
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: ai-gateway-litellm
+  template:
+    metadata:
+      labels:
+        app: ai-gateway-litellm
+        securerag.io/tier: gateway
+    spec:
+      containers:
+        - name: litellm-proxy
+          image: ghcr.io/berriai/litellm:main-v1.40.0
+          ports:
+            - containerPort: 4000
+              name: http
+          env:
+            - name: LITELLM_CONFIG_PATH
+              value: "/app/config.yaml"
+          volumeMounts:
+            - name: config-volume
+              mountPath: /app/config.yaml
+              subPath: config.yaml
+          resources:
+            limits:
+              cpu: "1"
+              memory: "1Gi"
+            requests:
+              cpu: "250m"
+              memory: "512Mi"
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            runAsUser: 10001
+            capabilities:
+              drop:
+                - ALL
+      volumes:
+        - name: config-volume
+          configMap:
+            name: litellm-nemo-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ai-gateway-litellm
+  namespace: securerag-hub
+spec:
+  type: ClusterIP
+  ports:
+    - port: 4000
+      targetPort: 4000
+      name: http
+  selector:
+    app: ai-gateway-litellm

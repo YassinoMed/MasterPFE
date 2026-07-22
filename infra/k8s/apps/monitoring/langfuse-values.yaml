@@ -1,0 +1,47 @@
+# SecureRAG Hub — Langfuse Helm Chart Override Values
+# Tracing distribué LLM/RAG, mesure de fidélité et suivi des coûts de requêtes.
+
+langfuse:
+  replicaCount: 2
+  
+  env:
+    NODE_ENV: "production"
+    LANGFUSE_ENABLE_EXPERIMENTAL_FEATURES: "true"
+    TELEMETRY_ENABLED: "false"
+    LANGFUSE_INIT_PROJECT_NAME: "SecureRAG-Hub-MultiChatbot"
+
+  resources:
+    limits:
+      cpu: "1"
+      memory: "1536Mi"
+    requests:
+      cpu: "250m"
+      memory: "512Mi"
+
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 1001
+
+postgresql:
+  enabled: false # Re-use existing cluster PostgreSQL (securerag-hub DB)
+  
+clickhouse:
+  enabled: true
+  persistence:
+    size: 20Gi
+
+redis:
+  enabled: true
+  architecture: standalone
+
+ingress:
+  enabled: true
+  className: nginx
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+  hosts:
+    - host: langfuse.securerag.local
+      paths:
+        - path: /
+          pathType: Prefix

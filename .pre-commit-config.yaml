@@ -20,6 +20,17 @@ repos:
       - id: gitleaks
         args: ['--config', '.gitleaks.toml']
 
+  # ── Secret detection & Live Verification (TruffleHog) ────────────────
+  # Détection proactive avec validation active des jetons d'API (OpenAI, AWS, GitHub)
+  - repo: https://github.com/trufflesecurity/trufflehog
+    rev: v3.88.0
+    hooks:
+      - id: trufflehog
+        name: TruffleHog Secret Verification
+        entry: trufflehog git file://. --since-commit HEAD --only-verified --fail
+        language: system
+        stages: [commit]
+
   # ── Linting Shell scripts ────────────────────────────────────────────
   # Détecte les erreurs bash courantes dans les scripts CI/CD et de
   # validation. Aligne les vérifications locales avec le `make lint`.

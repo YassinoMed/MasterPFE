@@ -1,0 +1,33 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: falco-talon-rules
+  namespace: falco
+  labels:
+    app.kubernetes.io/name: falco-talon
+    app.kubernetes.io/component: active-remediation
+data:
+  rules.yaml: |
+    - rule: Active Containment - Malicious Exec in Pod
+      match:
+        rule: Terminal shell in container or Shell Spawned in Container
+      action:
+        action: kubernetes:terminate
+        parameters:
+          grace_period: 0
+      notification:
+        slack:
+          channel: "#security-alerts"
+          message: "[CRITICAL] Terminated suspicious container triggering Falco alert: {{ .Target }}"
+
+    - rule: Network Isolation - Unauthorized Outbound Egress
+      match:
+        rule: Unexpected Outbound Connection
+      action:
+        action: kubernetes:network-isolate
+        parameters:
+          duration: 30m
+      notification:
+        slack:
+          channel: "#security-alerts"
+          message: "[WARNING] Network isolated pod {{ .Target }} due to unexpected egress"

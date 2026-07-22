@@ -1,0 +1,55 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: chatbot-manager-rollout
+  namespace: securerag-hub
+  labels:
+    app.kubernetes.io/name: chatbot-manager
+    app.kubernetes.io/part-of: securerag-hub
+spec:
+  replicas: 3
+  strategy:
+    canary:
+      canaryService: chatbot-manager-canary
+      stableService: chatbot-manager-stable
+      trafficRouting:
+        nginx:
+          stableIngress: chatbot-manager-ingress
+      steps:
+        - setWeight: 10
+        - pause: { duration: 5m }
+        - setWeight: 50
+        - pause: { duration: 10m }
+      analysis:
+        templates:
+          - templateName: success-rate-analysis
+        args:
+          - name: service-name
+            value: chatbot-manager-canary
+  selector:
+    matchLabels:
+      app: chatbot-manager
+  template:
+    metadata:
+      labels:
+        app: chatbot-manager
+    spec:
+      containers:
+        - name: chatbot-manager
+          image: localhost:5001/chatbot-manager:production
+          ports:
+            - containerPort: 8000
+              name: http
+          resources:
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+            requests:
+              cpu: "100m"
+              memory: "256Mi"
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 10
+            periodSeconds: 5
