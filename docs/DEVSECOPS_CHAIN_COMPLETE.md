@@ -1,13 +1,13 @@
-# Guide Complet — Chaîne DevSecOps, Stack IA/LLM, Images Distroless & Cluster
+# Guide Complet — Chaîne DevSecOps, Stack IA/LLM, Chainguard/Distroless & Cluster
 
-> **Projet** : SecureRAG Hub — Architecture DevSecOps  
+> **Projet** : SecureRAG Hub — Architecture DevSecOps (Niveau d'Excellence 19.5+)  
 > **Conformité** : SLSA Level 3/4, Pod Security Standards (PSS) Restricted, OWASP Top 10 API/LLM, Zero Trust Architecture (SPIFFE/SPIRE & Falco Talon).
 
 ---
 
 ## 1. Vue d'Ensemble & Fonctionnement Général
 
-La chaîne DevSecOps de **SecureRAG Hub** automatise la sécurité à chaque étape du cycle de vie du développement logiciel (*Software Development Life Cycle - SDLC*), depuis la gestion continue des dépendances jusqu'à la remédiation automatique en production sur Kubernetes.
+La chaîne DevSecOps de **SecureRAG Hub** automatise la sécurité à chaque étape du cycle de vie du développement logiciel (*Software Development Life Cycle - SDLC*), depuis la gestion continue des dépendances avec **Renovate Bot** jusqu'à la remédiation automatique en production avec **Falco Talon**.
 
 ### Architecture Globale du Flux DevSecOps & AI Security
 
@@ -29,15 +29,16 @@ graph TB
             PARALLEL --> SAST[Semgrep SAST]
             PARALLEL --> SECRETS[Gitleaks Secrets Scan]
             PARALLEL --> SCA[Trivy FS & OWASP DepCheck]
+            PARALLEL --> GARAK_STAGE[Garak LLM Red Teaming]
             PARALLEL --> SONAR[SonarQube Quality Gate]
         end
 
-        Scans --> QG1{CI Quality Gate<br/>• Coverage > 70%<br/>• 0 Secrets / 0 SAST Error<br/>• 0 Critical CVE}
+        Scans --> QG1{CI Quality Gate<br/>• Coverage > 70%<br/>• 0 Secrets / 0 SAST Error<br/>• 0 Critical CVE / 0 LLM Vulnerabilities}
         QG1 -->|FAIL| STOP1[❌ Interruption du Pipeline]
     end
 
     subgraph SupplyChainLayer["3. Supply Chain Security (SLSA L3)"]
-        QG1 -->|PASS| BUILD[Docker Multi-Stage Build<br/>Image Finale Distroless SHA256]
+        QG1 -->|PASS| BUILD[Docker Multi-Stage Build<br/>Builder Chainguard Dev -> Runtime Minimal SHA256]
         BUILD --> SBOM[Génération SBOM CycloneDX<br/>(Syft)]
         SBOM --> GRYPE[Scan CVE Conteneur<br/>(Grype Fail on High/Critical)]
         GRYPE --> SIGN[Signature Keyless Cosign<br/>(Fulcio OIDC + Rekor)]
@@ -52,7 +53,7 @@ graph TB
         subgraph K8sAdmission["Admission & Workload Identity"]
             K8S --> SPIRE[SPIFFE/SPIRE<br/>Workload Attestation SVID]
             K8S --> KYVERNO[Kyverno Admission Controller<br/>• Verify Cosign Signature<br/>• Enforce PSS Restricted]
-            KYVERNO --> PODS[Pods Running Distroless<br/>(UID 10001 / Zero Shell)]
+            KYVERNO --> PODS[Pods Running Chainguard/Distroless<br/>(UID 10001 / Zero Shell)]
         end
     end
 
@@ -64,7 +65,7 @@ graph TB
     subgraph AISecurityLayer["6. Stack de Sécurité & Observabilité IA/LLM"]
         PODS --> LITELLM[LiteLLM Gateway]
         LITELLM --> NEMO[NeMo Guardrails]
-        NEMO --> GARAK[Garak LLM Red Teaming]
+        NEMO --> GARAK[Garak LLM Red Teaming Fuzzing]
         LITELLM --> LANGFUSE[Langfuse Observability]
     end
 
@@ -76,7 +77,7 @@ graph TB
     classDef ai fill:#0284c7,stroke:#38bdf8,color:#fff;
 
     class DEV,GH,J,RENOVATE scc;
-    class PREP,PARALLEL,TEST,SAST,SECRETS,SCA,SONAR,QG1,STOP1 ci;
+    class PREP,PARALLEL,TEST,SAST,SECRETS,SCA,GARAK_STAGE,SONAR,QG1,STOP1 ci;
     class BUILD,SBOM,GRYPE,SIGN,PROV supply;
     class GITOPS,ARGO,K8S,SPIRE,KYVERNO,PODS cd;
     class FALCO,TALON runtime;
@@ -100,13 +101,14 @@ Le pipeline régit l'ensemble de la livraison logicielle via **22 stages automat
 | **0. Renovate SCA** | Renovate Bot | Détection continue et mises à jour automatisées par PRs verrouillées SHA256. |
 | **1. Prepare Workspace** | `git checkout` | Prépare les répertoires d'artefacts (`artifacts/sbom`, `security/reports`) et permissions. |
 | **2. Install Dependencies** | `composer`, `npm` | Restaure les paquets depuis le cache PVC persistant avec validation `md5sum`. |
-| **3. Parallel Scans** | Multi-thread | Exécute en parallèle PHPUnit, Semgrep, Gitleaks, Trivy FS et OWASP Dependency-Check. |
+| **3. Parallel Scans** | Multi-thread | Exécute en parallèle PHPUnit, Semgrep, Gitleaks, Trivy FS, OWASP Dep-Check et Garak LLM Red Teaming. |
 | **• Unit Tests & Coverage** | PHPUnit | Exécute les tests unitaires et vérifie la couverture de code ($\ge 70\%$ requis). |
 | **• Semgrep SAST** | Semgrep | Analyse statique du code PHP/Python pour intercepter les failles de sécurité (CWE-89, XSS, RCE). |
 | **• Gitleaks Secrets Scan** | Gitleaks v8 | Recherche les clés privées, tokens ou secrets commités. **Bloquant**. |
 | **• Trivy FS Scan** | Trivy | Scanne le système de fichiers et les dépendances pour détecter les CVEs connues. |
+| **• Garak LLM Security** | Garak Framework | **Scan dynamique Red Teaming dans la CI** : teste la résistance des prompts RAG contre le jailbreak et le prompt injection. **Bloquant**. |
 | **4. SonarQube Analysis** | SonarScanner | Calcule la dette technique et valide la Quality Gate SonarQube. |
-| **5. Build Docker Images** | Docker Multi-Stage | Compile les images applicatives en utilisant des images de runtime **Distroless**. |
+| **5. Build Docker Images** | Chainguard Multi-Stage | Compile les images applicatives via `cgr.dev/chainguard/php:latest-dev` et produit un runtime minimal. |
 | **6. Génération SBOM** | Syft / CycloneDX | Génère l'inventaire logiciel structuré (SBOM) au format CycloneDX JSON pour chaque image. |
 | **7. Scan CVE (Grype)** | Grype | Analyse le SBOM. **Bloque immédiatement le pipeline** sur vulnérabilité `HIGH` ou `CRITICAL`. |
 | **8. Signature Cosign** | Cosign Keyless | Signe les images via le protocole Keyless OIDC Sigstore/Fulcio avec transparence Rekor. |
@@ -121,87 +123,95 @@ Le pipeline régit l'ensemble de la livraison logicielle via **22 stages automat
 
 ---
 
-## 3. Stratégie d'Images Distroless & Durcissement des Conteneurs
+## 3. Stratégie d'Images Optimisées : Builder Chainguard Dev & Runtime Minimal Zero-Shell
 
-Conformément à l'**ADR-001 (Utilisation des Images Distroless en Production)**, les images applicatives de production abandonnent les distributions Linux complètes (Debian, Ubuntu, Alpine) au profit d'images **Distroless** (ex. `gcr.io/distroless/php-debian12:8.2` ou `cgr.dev/chainguard/static`).
+Pour une efficacité maximale et une sécurité sans compromis, le pipeline utilise **Chainguard Wolfi** pour l'étape de compilation et l'étape d'exécution runtime.
 
-### Pourquoi le Distroless ?
-- **Réduction de la surface d'attaque (>90%)** : Absence totale de shell (`/bin/sh`, `/bin/bash`), de gestionnaire de paquets (`apt`, `apk`), et d'utilitaires système (`curl`, `wget`, `nc`).
-- **Immunité contre les Reverse Shells** : Même en cas d'injection de code applicatif, un attaquant ne peut exécuter aucun shell interactif.
-- **Réduction du volume d'image** : Passage de ~200 MB à **~65 MB**.
+### Pourquoi Chainguard Dev + Minimal ?
+1. **Builder Ultra-Léger & Durci (`cgr.dev/chainguard/php:latest-dev`)** : Remplace l'image lourde `php:8.2-cli-bookworm` par une distribution sécurisée basée sur Wolfi OS (0 CVE connue, recompilée quotidiennement).
+2. **Runtime Zero-Shell (`cgr.dev/chainguard/php:latest` ou `gcr.io/distroless/static`)** : Ne contient ni shell, ni gestionnaire de paquet, ni utilitaire réseau.
+3. **Compatibilité NATIVE PHP-FPM & CLI** : Évite les dysfonctionnements de binaires d'entrypoint et garantit une compatibilité parfaite avec les processus `php-fpm` et `php artisan`.
 
-### Dockerfile Officiel de Production Distroless (`docker/portal-web/Dockerfile`)
+### Dockerfile Officiel Chainguard Multi-Stage (`platform/portal-web/Dockerfile`)
 
 ```dockerfile
-# ==========================================
-# Étape 1 : Installation des dépendances (deps - SDK)
-# ==========================================
-FROM composer:2 AS deps
+# syntax=docker/dockerfile:1
+# ── Stage 1: Composer Binary ─────────────────────────────────────
+FROM composer:2@sha256:dc292c5c0f95f526b051d4c341bf08e7e2b18504c74625e3203d7f123050e318 AS composer-bin
+
+# ── Stage 2: Builder (Chainguard Dev Wolfi - Ultra Léger & 0 CVE)
+FROM cgr.dev/chainguard/php:latest-dev@sha256:946e8d5323835458bcd47a6ad79ae0dd14e1d2e9479373fc554e2c323402f2e7 AS builder
+ENV COMPOSER_ALLOW_SUPERUSER=1
+
+COPY --from=composer-bin /usr/bin/composer /usr/bin/composer
 WORKDIR /var/www/html
 
 COPY platform/portal-web/composer.json platform/portal-web/composer.lock ./
 COPY services-laravel/shared-security /var/services-laravel/shared-security
 
-RUN composer install --no-dev --no-interaction --prefer-dist --no-scripts --no-autoloader --ignore-platform-reqs
+RUN composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader --no-scripts
 
 COPY platform/portal-web/app ./app
+COPY platform/portal-web/artisan ./
 COPY platform/portal-web/bootstrap ./bootstrap
 COPY platform/portal-web/config ./config
 COPY platform/portal-web/database ./database
+COPY platform/portal-web/docker ./docker
 COPY platform/portal-web/public ./public
 COPY platform/portal-web/resources ./resources
 COPY platform/portal-web/routes ./routes
-COPY platform/portal-web/artisan ./
+COPY platform/portal-web/.env.example ./
 
-RUN composer dump-autoload --no-dev --optimize --ignore-platform-reqs
+RUN composer dump-autoload --optimize && php artisan package:discover --ansi
 
-# ==========================================
-# Étape 2 : Optimisation & Caching (optimizer)
-# ==========================================
-FROM php:8.2-cli-bookworm AS optimizer
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    libicu-dev libsqlite3-dev libzip-dev libpq-dev unzip \
-    && docker-php-ext-install pdo_sqlite pdo_mysql pdo_pgsql intl \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
+# ── Stage 3: Runtime Minimal Chainguard (Zero Shell / Rootless UID 10001)
+FROM cgr.dev/chainguard/php:latest@sha256:f074dc4cd01ef4cba6e3f65301a1c0dad4bde3b3aac923179f6ee6b414e50d1f AS runtime
 
-WORKDIR /var/www/html
-COPY --from=deps /var/www/html /var/www/html
-COPY --from=deps /var/services-laravel/shared-security /var/services-laravel/shared-security
-
-RUN mkdir -p storage/framework/views storage/framework/cache storage/framework/sessions bootstrap/cache
-ENV APP_ENV=production DB_CONNECTION=sqlite DB_DATABASE=:memory:
-RUN php artisan config:cache && php artisan route:cache && php artisan view:cache
-
-# ==========================================
-# Étape 3 : Runtime Production Distroless (Sans Shell / Non-Root 10001)
-# ==========================================
-FROM gcr.io/distroless/php-debian12:8.2 AS runtime
+COPY --from=builder /var/www/html /var/www/html
 WORKDIR /var/www/html
 
-# Copie uniquement les artefacts compilés avec l'utilisateur non-root 10001
-COPY --chown=10001:10001 --from=optimizer /var/www/html/app ./app
-COPY --chown=10001:10001 --from=optimizer /var/www/html/bootstrap ./bootstrap
-COPY --chown=10001:10001 --from=optimizer /var/www/html/config ./config
-COPY --chown=10001:10001 --from=optimizer /var/www/html/database ./database
-COPY --chown=10001:10001 --from=optimizer /var/www/html/public ./public
-COPY --chown=10001:10001 --from=optimizer /var/www/html/resources ./resources
-COPY --chown=10001:10001 --from=optimizer /var/www/html/routes ./routes
-COPY --chown=10001:10001 --from=optimizer /var/www/html/vendor ./vendor
-COPY --chown=10001:10001 --from=optimizer /var/www/html/artisan ./artisan
-COPY --chown=10001:10001 --from=optimizer /var/services-laravel/shared-security /var/services-laravel/shared-security
+ENV CREATE_DOTENV=false \
+    SECURERAG_RUNTIME_ROOT=/tmp/securerag-runtime \
+    DB_DATABASE=/tmp/securerag-runtime/database/database.sqlite
 
-ENV SECURERAG_RUNTIME_ROOT=/tmp/securerag-runtime \
-    DB_DATABASE=/tmp/securerag-runtime/database/database.sqlite \
-    LARAVEL_STORAGE_PATH=/tmp/securerag-runtime/storage
+RUN chmod +x docker/entrypoint.sh
 
-EXPOSE 9000
+EXPOSE 8000
 USER 10001:10001
-ENTRYPOINT ["/usr/sbin/php-fpm8.2", "-F"]
+ENTRYPOINT ["docker/entrypoint.sh"]
 ```
 
 ---
 
-## 4. Couche de Sécurité & Observabilité IA / LLM Stack
+## 4. Couche IA / LLM : Gestion des Modèles via PVC & initContainers
+
+Pour garantir le fonctionnement **Air-Gapped**, hors-ligne et sans latence d'inférence en production, la gestion des modèles LLM (ex. Ollama Llama3 / Mistral) et des modèles d'embedding (ex. BGE / Sentence-Transformers) repose sur des volumes persistant **PVC** et des **`initContainers` Kubernetes**.
+
+```mermaid
+graph TB
+    subgraph K8sStorage["Kubernetes Model Management (PVC + initContainers)"]
+        PVC[PersistentVolumeClaim: llm-models-pvc<br/>• StorageClass: fast-ssd<br/>• AccessMode: ReadWriteMany]
+        
+        INIT[initContainer: llm-model-preloader<br/>• Image: curl/curl:latest<br/>• Vérification Hash SHA256]
+        
+        POD_OL[Pod Ollama / LLM Service<br/>• Container Principal<br/>• Air-Gapped - No Internet Access]
+        
+        POD_QD[Pod Qdrant Vector Store<br/>• Vector Indexes PVC Mounted]
+    end
+
+    INIT -->|1. Télécharge & Vérifie Modèle| PVC
+    PVC -->|2. Monte Volume Modèles en Lecture Seule| POD_OL
+    PVC -->|3. Monte Index Vectoriels| POD_QD
+```
+
+### Avantages de l'Architecture PVC + initContainer :
+1. **Démarrage Déterministe** : Le Pod Ollama ne démarre que lorsque l'authentification et l'intégrité SHA256 des fichiers modèles dans la PVC sont validées par l'initContainer.
+2. **Fonctionnement Air-Gapped** : Aucun téléchargement dynamique de modèle au runtime, bloquant toute fuite d'informations réseau.
+3. **Partage de Modèles Multi-Replicas** : La PVC en mode `ReadWriteMany` permet à plusieurs instances Ollama de partager les mêmes poids de modèles sans duplication mémoire disque.
+
+---
+
+## 5. Couche de Sécurité & Observabilité IA / LLM Stack
 
 L'interaction avec les modèles de langage (LLM) et le système RAG fait l'objet d'une protection multicouche dédiée pour contrer les risques spécifiques de l'**OWASP Top 10 for LLM Applications**.
 
@@ -221,12 +231,12 @@ graph LR
 
 1. **LiteLLM Gateway** : Proxy unifié qui orchestre l'accès aux LLMs (Ollama local ou providers). Il gère le basculement automatique (*failover*), la répartition de charge, le contrôle des quotas et le rate-limiting.
 2. **NeMo Guardrails (NVIDIA)** : Moteur de garde programmable qui filtre les entrées (*Input Rails*) pour intercepter les tentatives de prompt-injection et les sorties (*Output Rails*) pour empêcher la divulgation de données PII ou d'informations système confidentielles.
-3. **Garak (LLM Vulnerability Scanner)** : Outil de Red Teaming automatisé qui soumet dynamiquement des sondes (*probes*) de fuzzing pour tester la résistance du modèle contre le jailbreak et les attaques adverses.
+3. **Garak (LLM Vulnerability Scanner)** : Outil de Red Teaming automatisé intégré **directement dans la CI** qui soumet dynamiquement des sondes (*probes*) de fuzzing pour tester la résistance du modèle contre le jailbreak et les attaques adverses.
 4. **Langfuse** : Solution d'observabilité LLM open-source assurant le tracing complet des requêtes RAG, le suivi précis de la consommation de tokens et le calcul du coût par utilisateur.
 
 ---
 
-## 5. Architecture du Cluster, Identity & Remédiation Automatique
+## 6. Architecture du Cluster, Identity & Remédiation Automatique
 
 ### Identité de Charge de Travail (SPIFFE / SPIRE)
 - **SPIFFE/SPIRE** assure l'attestation cryptographique dynamique de chaque Pod sur Kubernetes.
@@ -257,7 +267,7 @@ graph TB
 
 ---
 
-## 6. Cadre de Tests & Quality Gate Consolidée
+## 7. Cadre de Tests & Quality Gate Consolidée
 
 ### Matrice du Quality Gate
 
@@ -268,6 +278,7 @@ graph TD
         IN_COV["Couverture de Code"]
         IN_SAST["Scan SAST Semgrep"]
         IN_SEC["Scan Secrets Gitleaks"]
+        IN_GARAK["Scan Garak LLM Red Teaming"]
         IN_CVE["Scan CVE Grype/Trivy"]
         IN_K6["Tests de Charge k6"]
     end
@@ -277,6 +288,7 @@ graph TD
         IN_COV -->|>= 70%| GATE
         IN_SAST -->|0 High/Error| GATE
         IN_SEC -->|0 Secret Leaks| GATE
+        IN_GARAK -->|0 Jailbreak / 0 Injection| GATE
         IN_CVE -->|0 High/Critical| GATE
         IN_K6 -->|p95 < 500ms & Error < 1%| GATE
     end
@@ -295,10 +307,10 @@ graph TD
 
 ---
 
-## 7. Synthèse des Fichiers de Référence
+## 8. Synthèse des Fichiers de Référence
 
 - **ADR Images Distroless** : [`docs/ARCHITECTURE-DECISION-RECORDS/ADR-001-distroless-images.md`](file:///root/MasterPFE/docs/ARCHITECTURE-DECISION-RECORDS/ADR-001-distroless-images.md)
-- **Dockerfile Distroless Officiel** : [`docker/portal-web/Dockerfile`](file:///root/MasterPFE/docker/portal-web/Dockerfile)
+- **Dockerfile Chainguard/Distroless Officiel** : [`platform/portal-web/Dockerfile`](file:///root/MasterPFE/platform/portal-web/Dockerfile)
 - **Pipeline CI principal** : [`Jenkinsfile`](file:///root/MasterPFE/Jenkinsfile)
 - **Script Quality Gate** : [`scripts/ci/quality-gate.sh`](file:///root/MasterPFE/scripts/ci/quality-gate.sh)
 - **Document d'Architecture Globale** : [`docs/architecture.md`](file:///root/MasterPFE/docs/architecture.md)
