@@ -24,6 +24,11 @@ set +e
 (
   cd "${REPO_ROOT}/services/extraire"
   
+  # Ensure system binaries (poppler-utils, tesseract) are available if apt-get exists
+  if command -v apt-get >/dev/null 2>&1; then
+    apt-get update -qq >/dev/null 2>&1 && apt-get install -y -qq poppler-utils tesseract-ocr >/dev/null 2>&1 || true
+  fi
+
   # Ensure dependencies and pytest are installed (use opencv-python-headless for CI server compatibility)
   python3 -m pip install --break-system-packages -q pytest pytest-cov fpdf fpdf2 opencv-python-headless 2>/dev/null || python3 -m pip install -q pytest pytest-cov fpdf fpdf2 opencv-python-headless 2>/dev/null || true
   if [ -f "requirements.txt" ]; then

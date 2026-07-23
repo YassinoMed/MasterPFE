@@ -1,7 +1,9 @@
 import pytest
+import shutil
 from src.preprocessing.pdf_to_image import convert_pdf_to_images
 
 
+@pytest.mark.skipif(not shutil.which("pdfinfo"), reason="poppler-utils (pdfinfo) not installed")
 def test_pdf_conversion(sample_pdf):
     images = convert_pdf_to_images(sample_pdf, dpi=150)
     assert len(images) > 0
