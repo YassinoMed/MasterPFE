@@ -64,9 +64,27 @@ if not files:
     print("FATAL: No coverage files to merge", file=sys.stderr)
     sys.exit(1)
 
-# Parse first file as base
-base_tree = ET.parse(files[0])
-base_root = base_tree.getroot()
+# Search for a base file containing a <project> element (Clover XML format)
+base_tree = None
+base_root = None
+base_project = None
+
+for f in files:
+    try:
+        t = ET.parse(f)
+        r = t.getroot()
+        p = r.find(".//project")
+        if p is not None:
+            base_tree = t
+            base_root = r
+            base_project = p
+            break
+    except Exception:
+        pass
+
+if base_root is None:
+    base_tree = ET.parse(files[0])
+    base_root = base_tree.getroot()
 
 # Collect all <package> elements from all files
 all_packages = []
@@ -81,34 +99,38 @@ all_metrics = {
 # Get timestamp from base
 generated = base_root.get("generated", str(int(datetime.now().timestamp())))
 
-# Find <project> element
-base_project = base_root.find(".//project")
-if base_project is None:
-    print("FATAL: No <project> element found in coverage files", file=sys.stderr)
-    sys.exit(1)
-
-# Find <metrics> in base project for structure
-base_metrics_el = base_project.find("metrics")
+# Find <metrics> in base project for structure if available
+base_metrics_el = base_project.find("metrics") if base_project is not None else None
 
 for f in files:
     try:
         tree = ET.parse(f)
         root = tree.getroot()
         project = root.find(".//project")
-        if project is None:
-            continue
+        if project is not None:
+            # Collect packages from Clover format
+            for pkg in project.findall("package"):
+                all_packages.append(pkg)
 
-        # Collect packages
-        for pkg in project.findall("package"):
-            all_packages.append(pkg)
-
-        # Aggregate metrics
-        metrics_el = project.find("metrics")
-        if metrics_el is not None:
-            for key in all_metrics:
-                val = metrics_el.get(key, "0")
+            # Aggregate metrics
+            metrics_el = project.find("metrics")
+            if metrics_el is not None:
+                for key in all_metrics:
+                    val = metrics_el.get(key, "0")
+                    try:
+                        all_metrics[key] += int(val)
+                    except (ValueError, TypeError):
+                        pass
+        else:
+            # Collect packages from Cobertura format (e.g., Python pytest-cov)
+            for pkg in root.findall(".//package"):
+                all_packages.append(pkg)
+            lines_valid = root.get("lines-valid")
+            lines_covered = root.get("lines-covered")
+            if lines_valid and lines_covered:
                 try:
-                    all_metrics[key] += int(val)
+                    all_metrics["statements"] += int(lines_valid)
+                    all_metrics["coveredstatements"] += int(lines_covered)
                 except (ValueError, TypeError):
                     pass
     except ET.ParseError as e:
