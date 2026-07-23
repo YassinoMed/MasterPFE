@@ -66,8 +66,7 @@ for app in "${apps[@]}"; do
     if [ "${coverage_driver_available}" = "true" ]; then
       php artisan test \
         --log-junit "${ARTIFACT_DIR}/junit-${report_name}.xml" \
-        --coverage-clover "${ARTIFACT_DIR}/coverage-${report_name}.xml" \
-        --coverage-html "${ARTIFACT_DIR}/coverage-html-${report_name}"
+        --coverage-clover "${ARTIFACT_DIR}/coverage-${report_name}.xml"
     else
       php artisan test --log-junit "${ARTIFACT_DIR}/junit-${report_name}.xml"
     fi

@@ -30,6 +30,7 @@ def call(Map params = [:]) {
       trivy ${scanType} \
         --config ${configFile} \
         --ignorefile .trivyignore \
+        --skip-dirs "node_modules,vendor,.venv,.kaniko-cache,istio-1.23.0,.coverage-artifacts,artifacts,security/reports" \
         --format json \
         --output ${outputFile} \
         ${target} || true
@@ -37,6 +38,7 @@ def call(Map params = [:]) {
       docker run --rm -v "\$PWD:/repo" aquasec/trivy:latest ${scanType} \
         --config /repo/${configFile} \
         --ignorefile /repo/.trivyignore \
+        --skip-dirs "node_modules,vendor,.venv,.kaniko-cache,istio-1.23.0,.coverage-artifacts,artifacts,security/reports" \
         --format json \
         --output /repo/${outputFile} \
         /repo/${target} || true
