@@ -37,7 +37,7 @@ def call(Map config = [:]) {
         docker:          files.any { it.endsWith("Dockerfile") || it.contains("docker-compose") || it.startsWith("docker/") },
         k8s:             files.any { it.startsWith("k8s/") || it.startsWith("infra/k8s/") || it.startsWith("infra/helm/") },
         aiAgents:        files.any { it.startsWith("scripts/ai-agents/") || it.startsWith("ai-security/") || it.startsWith("scripts/ai/") },
-        docsOnly:        files.length > 0 && files.every { it.endsWith(".md") || it.startsWith("docs/") }
+        docsOnly:        files.size() > 0 && files.every { it.endsWith(".md") || it.startsWith("docs/") }
     ]
 
     // If diff computation failed or empty, run everything safety-first
