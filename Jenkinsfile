@@ -202,7 +202,7 @@ pipeline {
             sh '''
               set -euo pipefail
               echo "[INFO] Scanning container images with Grype..."
-              for sbom in "${SBOM_DIR}"/*.cyclonedx.json; do
+              for sbom in "${SBOM_DIR}"/*.cdx.json "${SBOM_DIR}"/*.cyclonedx.json; do
                 if [ -f "$sbom" ] && command -v grype >/dev/null 2>&1; then
                   grype "sbom:$sbom" --fail-on high,critical -o json > "${sbom}.grype.json" || true
                 fi

@@ -170,7 +170,7 @@ spec:
                 REGISTRY_HOST="${REGISTRY_HOST}" IMAGE_PREFIX="${IMAGE_PREFIX}" IMAGE_TAG="${TARGET_IMAGE_TAG}" \
                 SBOM_DIR="${SBOM_DIR}" REPORT_DIR="${REPORT_DIR}" bash scripts/release/generate-sbom.sh
                 STRICT_SBOM_VALIDATION=true SBOM_DIR="${SBOM_DIR}" REPORT_DIR="${REPORT_DIR}" bash scripts/release/validate-sbom-cyclonedx.sh
-                for sbom in "${SBOM_DIR}"/*.cyclonedx.json; do
+                for sbom in "${SBOM_DIR}"/*.cdx.json "${SBOM_DIR}"/*.cyclonedx.json; do
                   [ -e "$sbom" ] && grype "sbom:$sbom" --fail-on high,critical -o json > "${sbom}.grype.json"
                 done
                 python3 scripts/release/generate-vex.py \
