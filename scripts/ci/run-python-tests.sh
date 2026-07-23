@@ -25,7 +25,6 @@ set +e
   cd "${REPO_ROOT}/services/extraire"
   
   # Ensure dependencies and pytest are installed (use opencv-python-headless for CI server compatibility)
-  python3 -m pip uninstall --break-system-packages -y opencv-python 2>/dev/null || python3 -m pip uninstall -y opencv-python 2>/dev/null || true
   python3 -m pip install --break-system-packages -q pytest pytest-cov fpdf fpdf2 opencv-python-headless 2>/dev/null || python3 -m pip install -q pytest pytest-cov fpdf fpdf2 opencv-python-headless 2>/dev/null || true
   if [ -f "requirements.txt" ]; then
     python3 -m pip install --break-system-packages -q -r requirements.txt 2>/dev/null || python3 -m pip install -q -r requirements.txt 2>/dev/null || true
