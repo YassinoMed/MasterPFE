@@ -22,7 +22,7 @@ def call(Map config = [:]) {
             else
                 echo '[WARN] Semgrep CLI not found; creating fallback schema compliance placeholders.'
                 echo '{"results": []}' > "${reportDir}/semgrep.json"
-                echo '{"$schema": "https://schemastore.azurewebsites.net/schemas/json/sarif-2.1.0-rtm.5.json", "version": "2.1.0", "runs": []}' > "${reportDir}/semgrep.sarif"
+                echo '{"\$schema": "https://schemastore.azurewebsites.net/schemas/json/sarif-2.1.0-rtm.5.json", "version": "2.1.0", "runs": []}' > "${reportDir}/semgrep.sarif"
             fi
         """
     } else if (tool == 'gitleaks') {
@@ -38,7 +38,7 @@ def call(Map config = [:]) {
                     docker run --rm -v "\$PWD:/repo" -w /repo ghcr.io/gitleaks/gitleaks:v8.30.1 detect --no-git --config .gitleaks.toml --report-format sarif --report-path "/repo/${reportDir}/gitleaks.sarif" --exit-code 1
                 else
                     echo '[WARN] Gitleaks unavailable. Generating empty sarif.'
-                    echo '{"$schema": "https://schemastore.azurewebsites.net/schemas/json/sarif-2.1.0-rtm.5.json", "version": "2.1.0", "runs": []}' > "${reportDir}/gitleaks.sarif"
+                    echo '{"\$schema": "https://schemastore.azurewebsites.net/schemas/json/sarif-2.1.0-rtm.5.json", "version": "2.1.0", "runs": []}' > "${reportDir}/gitleaks.sarif"
                     exit 0
                 fi
             """,

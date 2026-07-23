@@ -24,9 +24,9 @@ set +e
 (
   cd "${REPO_ROOT}/services/extraire"
   
-  # Ensure system binaries (poppler-utils, tesseract) are available if apt-get exists
+  # Ensure system binaries (poppler-utils, tesseract, libGL) are available if apt-get exists
   if command -v apt-get >/dev/null 2>&1; then
-    apt-get update -qq >/dev/null 2>&1 && apt-get install -y -qq poppler-utils tesseract-ocr >/dev/null 2>&1 || true
+    apt-get update -qq >/dev/null 2>&1 && apt-get install -y -qq poppler-utils tesseract-ocr libgl1 libglib2.0-0 >/dev/null 2>&1 || true
   fi
 
   # Ensure dependencies and pytest are installed (use opencv-python-headless for CI server compatibility)
@@ -34,6 +34,10 @@ set +e
   if [ -f "requirements.txt" ]; then
     python3 -m pip install --break-system-packages -q -r requirements.txt 2>/dev/null || python3 -m pip install -q -r requirements.txt 2>/dev/null || true
   fi
+
+  # Ensure opencv-python-headless is used instead of standard opencv-python to prevent libGL.so.1 runtime errors
+  python3 -m pip uninstall -y opencv-python 2>/dev/null || true
+  python3 -m pip install --break-system-packages -q opencv-python-headless 2>/dev/null || python3 -m pip install -q opencv-python-headless 2>/dev/null || true
 
   pytest --cov=src --cov-report=xml:"${ARTIFACT_DIR}/coverage-extraire.xml" --junitxml="${ARTIFACT_DIR}/junit-extraire.xml" tests/ || python3 -m unittest discover -s tests -p "test_*.py"
   exit_code=$?

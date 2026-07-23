@@ -76,7 +76,7 @@ def call(Map config = [:]) {
 
     // Publish HTML reports if available
     def htmlFiles = findFiles(glob: "${latestDir}/*.html") ?: []
-    if (htmlFiles.length > 0) {
+    if (htmlFiles.size() > 0) {
         publishHTML(target: [
             allowMissing: true,
             alwaysLinkToLastBuild: true,
