@@ -6,6 +6,7 @@ REGISTRY_HOST="${REGISTRY_HOST:-localhost:5001}"
 IMAGE_TAG="${IMAGE_TAG:-dev}"
 IMAGE_PREFIX="${IMAGE_PREFIX:-securerag-hub}"
 ALLOW_MISSING_COMPONENTS="${ALLOW_MISSING_COMPONENTS:-false}"
+ENABLE_PARALLEL_BUILDS="${ENABLE_PARALLEL_BUILDS:-true}"
 REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
 
 HOST_REPO_ROOT=""
@@ -47,7 +48,10 @@ else
   COMPONENT_ARRAY=("${DEFAULT_COMPONENTS[@]}")
 fi
 
-for component in "${COMPONENT_ARRAY[@]}"; do
+build_single_component() {
+  local component="$1"
+  local name context dockerfile image cache_image
+
   if [[ "${component}" == *=* ]]; then
     name="${component%%=*}"
     context="${component#*=}"
@@ -59,13 +63,21 @@ for component in "${COMPONENT_ARRAY[@]}"; do
 
   dockerfile="${context}/Dockerfile"
   image="${REGISTRY_HOST}/${IMAGE_PREFIX}-${name}:${IMAGE_TAG}"
+  cache_image="${REGISTRY_HOST}/${IMAGE_PREFIX}-${name}:build-cache"
 
   if [ -f "${dockerfile}" ]; then
-    echo "[INFO] Building ${image} from ${dockerfile}..."
+    echo "[INFO] Building ${image} from ${dockerfile} (Context: ${context})..."
     export BUILDKIT_PROGRESS=plain
-    if ! DOCKER_BUILDKIT=1 docker build --progress=plain -t "${image}" -f "${dockerfile}" .; then
-      echo "[WARN] BuildKit build failed or unexpectedly closed gRPC. Retrying with legacy engine build..."
-      DOCKER_BUILDKIT=0 docker build -t "${image}" -f "${dockerfile}" .
+    if ! DOCKER_BUILDKIT=1 docker build \
+        --progress=plain \
+        --build-arg BUILDKIT_INLINE_CACHE=1 \
+        --cache-from "${cache_image}" \
+        --cache-from "${image}" \
+        -t "${image}" \
+        -f "${dockerfile}" "${context}"; then
+      echo "[WARN] BuildKit build with cache failed for ${name}. Retrying with direct context build..."
+      DOCKER_BUILDKIT=1 docker build --progress=plain -t "${image}" -f "${dockerfile}" "${context}" || \
+      DOCKER_BUILDKIT=0 docker build -t "${image}" -f "${dockerfile}" "${context}"
     fi
   else
     if [[ "${ALLOW_MISSING_COMPONENTS}" == "true" ]]; then
@@ -75,4 +87,32 @@ for component in "${COMPONENT_ARRAY[@]}"; do
       exit 1
     fi
   fi
-done
+}
+
+export -f build_single_component
+export REGISTRY_HOST IMAGE_TAG IMAGE_PREFIX ALLOW_MISSING_COMPONENTS BUILDKIT_PROGRESS=plain
+
+if [[ "${ENABLE_PARALLEL_BUILDS}" == "true" && ${#COMPONENT_ARRAY[@]} -gt 1 ]]; then
+  echo "[INFO] Building ${#COMPONENT_ARRAY[@]} components in parallel with BuildKit layer caching..."
+  pids=()
+  for component in "${COMPONENT_ARRAY[@]}"; do
+    build_single_component "${component}" &
+    pids+=($!)
+  done
+
+  failed=0
+  for pid in "${pids[@]}"; do
+    wait "${pid}" || failed=$((failed + 1))
+  done
+
+  if [[ ${failed} -gt 0 ]]; then
+    echo "[ERROR] ${failed} image build(s) failed." >&2
+    exit 1
+  fi
+else
+  for component in "${COMPONENT_ARRAY[@]}"; do
+    build_single_component "${component}"
+  done
+fi
+
+echo "[INFO] All target Docker images successfully built."
