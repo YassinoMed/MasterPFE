@@ -31,11 +31,11 @@ def call(Map config = [:]) {
             script: """
                 set -euo pipefail
                 if command -v gitleaks >/dev/null 2>&1; then
-                    gitleaks detect --no-git --config .gitleaks.toml --exclude-path "(node_modules|vendor|venv|kaniko|istio|coverage|artifacts|reports)" --report-format json --report-path "${reportDir}/gitleaks.json" --exit-code 0 || true
-                    gitleaks detect --no-git --config .gitleaks.toml --exclude-path "(node_modules|vendor|venv|kaniko|istio|coverage|artifacts|reports)" --report-format sarif --report-path "${reportDir}/gitleaks.sarif" --exit-code 1
+                    gitleaks detect --no-git --config .gitleaks.toml --report-format json --report-path "${reportDir}/gitleaks.json" --exit-code 0 || true
+                    gitleaks detect --no-git --config .gitleaks.toml --report-format sarif --report-path "${reportDir}/gitleaks.sarif" --exit-code 1
                 elif command -v docker >/dev/null 2>&1 && docker info >/dev/null 2>&1; then
-                    docker run --rm -v "\$PWD:/repo" -w /repo ghcr.io/gitleaks/gitleaks:v8.30.1 detect --no-git --config .gitleaks.toml --exclude-path "(node_modules|vendor|venv|kaniko|istio|coverage|artifacts|reports)" --report-format json --report-path "/repo/${reportDir}/gitleaks.json" --exit-code 0 || true
-                    docker run --rm -v "\$PWD:/repo" -w /repo ghcr.io/gitleaks/gitleaks:v8.30.1 detect --no-git --config .gitleaks.toml --exclude-path "(node_modules|vendor|venv|kaniko|istio|coverage|artifacts|reports)" --report-format sarif --report-path "/repo/${reportDir}/gitleaks.sarif" --exit-code 1
+                    docker run --rm -v "\$PWD:/repo" -w /repo ghcr.io/gitleaks/gitleaks:v8.30.1 detect --no-git --config .gitleaks.toml --report-format json --report-path "/repo/${reportDir}/gitleaks.json" --exit-code 0 || true
+                    docker run --rm -v "\$PWD:/repo" -w /repo ghcr.io/gitleaks/gitleaks:v8.30.1 detect --no-git --config .gitleaks.toml --report-format sarif --report-path "/repo/${reportDir}/gitleaks.sarif" --exit-code 1
                 else
                     echo '[WARN] Gitleaks unavailable. Generating empty sarif.'
                     echo '{"\$schema": "https://schemastore.azurewebsites.net/schemas/json/sarif-2.1.0-rtm.5.json", "version": "2.1.0", "runs": []}' > "${reportDir}/gitleaks.sarif"
