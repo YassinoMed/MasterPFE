@@ -13,7 +13,7 @@ setup(
         "pdf2image",
         "pdfplumber",
         "PyYAML",
-        "opencv-python",
+        "opencv-python-headless",
         "Pillow",
         "pytesseract",
         "easyocr",

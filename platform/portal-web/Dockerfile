@@ -33,7 +33,7 @@ COPY platform/portal-web/resources ./resources
 COPY platform/portal-web/routes ./routes
 COPY platform/portal-web/.env.example ./
 
-RUN composer dump-autoload --optimize && php artisan package:discover --ansi
+RUN APP_ENV=production APP_KEY=base64:7n+2wA7QWsh1oFq0n0l9l7W5vX5D7e3W8q8e1r2t3y4= DB_CONNECTION=sqlite DB_DATABASE=:memory: composer dump-autoload --optimize && APP_ENV=production APP_KEY=base64:7n+2wA7QWsh1oFq0n0l9l7W5vX5D7e3W8q8e1r2t3y4= DB_CONNECTION=sqlite DB_DATABASE=:memory: php artisan package:discover --ansi
 
 # ── Stage 3: Runtime (Minimal — no apt, no curl, no shell tools) ─
 FROM php:8.4-cli-alpine@sha256:f074dc4cd01ef4cba6e3f65301a1c0dad4bde3b3aac923179f6ee6b414e50d1f AS runtime
