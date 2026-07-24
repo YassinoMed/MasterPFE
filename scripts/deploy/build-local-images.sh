@@ -87,14 +87,19 @@ export -f build_single_component
 export REGISTRY_HOST IMAGE_TAG IMAGE_PREFIX ALLOW_MISSING_COMPONENTS BUILDKIT_PROGRESS=plain
 
 if [[ "${ENABLE_PARALLEL_BUILDS}" == "true" && ${#COMPONENT_ARRAY[@]} -gt 1 ]]; then
-  echo "[INFO] Building ${#COMPONENT_ARRAY[@]} components in parallel with BuildKit layer caching..."
+  MAX_JOBS="${MAX_CONCURRENT_BUILDS:-2}"
+  echo "[INFO] Building ${#COMPONENT_ARRAY[@]} components with parallel concurrency of ${MAX_JOBS}..."
   pids=()
+  failed=0
   for component in "${COMPONENT_ARRAY[@]}"; do
     build_single_component "${component}" &
     pids+=($!)
+    if [[ ${#pids[@]} -ge ${MAX_JOBS} ]]; then
+      wait "${pids[0]}" || failed=$((failed + 1))
+      pids=("${pids[@]:1}")
+    fi
   done
 
-  failed=0
   for pid in "${pids[@]}"; do
     wait "${pid}" || failed=$((failed + 1))
   done

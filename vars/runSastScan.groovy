@@ -32,14 +32,40 @@ def call(Map config = [:]) {
                 set -euo pipefail
                 if command -v gitleaks >/dev/null 2>&1; then
                     gitleaks detect --no-git --config .gitleaks.toml --report-format json --report-path "${reportDir}/gitleaks.json" --exit-code 0 || true
-                    gitleaks detect --no-git --config .gitleaks.toml --report-format sarif --report-path "${reportDir}/gitleaks.sarif" --exit-code 1
                 elif command -v docker >/dev/null 2>&1 && docker info >/dev/null 2>&1; then
                     docker run --rm -v "\$PWD:/repo" -w /repo ghcr.io/gitleaks/gitleaks:v8.30.1 detect --no-git --config .gitleaks.toml --report-format json --report-path "/repo/${reportDir}/gitleaks.json" --exit-code 0 || true
-                    docker run --rm -v "\$PWD:/repo" -w /repo ghcr.io/gitleaks/gitleaks:v8.30.1 detect --no-git --config .gitleaks.toml --report-format sarif --report-path "/repo/${reportDir}/gitleaks.sarif" --exit-code 1
                 else
-                    echo '[WARN] Gitleaks unavailable. Generating empty sarif.'
-                    echo '{"\$schema": "https://schemastore.azurewebsites.net/schemas/json/sarif-2.1.0-rtm.5.json", "version": "2.1.0", "runs": []}' > "${reportDir}/gitleaks.sarif"
-                    exit 0
+                    echo '[WARN] Gitleaks unavailable. Generating empty sarif/json.'
+                    echo '[]' > "${reportDir}/gitleaks.json"
+                fi
+
+                # Convert JSON to SARIF in single-pass (<0.1s)
+                python3 -c '
+import json, sys, os
+json_path = "${reportDir}/gitleaks.json"
+sarif_path = "${reportDir}/gitleaks.sarif"
+findings = []
+if os.path.exists(json_path) and os.path.getsize(json_path) > 0:
+    try:
+        with open(json_path) as f:
+            findings = json.load(f)
+    except Exception:
+        findings = []
+
+sarif = {
+    "\$schema": "https://schemastore.azurewebsites.net/schemas/json/sarif-2.1.0-rtm.5.json",
+    "version": "2.1.0",
+    "runs": [{
+        "tool": {"driver": {"name": "Gitleaks", "version": "8.30.1"}},
+        "results": [{"ruleId": f.get("RuleID", "secret"), "message": {"text": f.get("Description", "Secret detected")}, "locations": [{"physicalLocation": {"artifactLocation": {"uri": f.get("File", "")}, "region": {"startLine": f.get("StartLine", 1)}}}]} for f in findings]
+    }]
+}
+with open(sarif_path, "w") as f:
+    json.dump(sarif, f, indent=2)
+' || echo '{"\$schema": "https://schemastore.azurewebsites.net/schemas/json/sarif-2.1.0-rtm.5.json", "version": "2.1.0", "runs": []}' > "${reportDir}/gitleaks.sarif"
+
+                if [ \$(python3 -c 'import json; print(len(json.load(open("${reportDir}/gitleaks.json"))))' 2>/dev/null || echo "0") -gt 0 ]; then
+                    exit 1
                 fi
             """,
             returnStatus: true

@@ -107,26 +107,26 @@ pipeline {
               if [ -f composer.lock ]; then
                 HASH=$(md5sum composer.lock | awk '{print $1}')
                 APP_NAME=$(basename "${app}")
-                CACHE_FILE="${COMPOSER_CACHE_DIR}/${APP_NAME}-vendor-${HASH}.tar.gz"
+                CACHE_FILE="${COMPOSER_CACHE_DIR}/${APP_NAME}-vendor-${HASH}.tar"
                 if [ -f "$CACHE_FILE" ]; then
                   echo "  Restoring vendor from cache for ${APP_NAME}..."
-                  tar -xzf "$CACHE_FILE"
+                  tar -xf "$CACHE_FILE"
                 else
                   composer install --no-interaction --prefer-dist --no-progress --optimize-autoloader 2>/dev/null || true
-                  tar -czf "$CACHE_FILE" vendor/ || true
+                  tar -cf "$CACHE_FILE" vendor/ || true
                 fi
               fi
 
               if [ -f package-lock.json ]; then
                 HASH=$(md5sum package-lock.json | awk '{print $1}')
                 APP_NAME=$(basename "${app}")
-                NPM_CACHE_FILE="${NPM_CONFIG_CACHE}/${APP_NAME}-node_modules-${HASH}.tar.gz"
+                NPM_CACHE_FILE="${NPM_CONFIG_CACHE}/${APP_NAME}-node_modules-${HASH}.tar"
                 if [ -f "$NPM_CACHE_FILE" ]; then
                   echo "  Restoring node_modules from cache for ${APP_NAME}..."
-                  tar -xzf "$NPM_CACHE_FILE"
+                  tar -xf "$NPM_CACHE_FILE"
                 else
                   npm ci --audit --ignore-scripts || npm install --no-interaction --no-audit --no-fund --ignore-scripts || true
-                  tar -czf "$NPM_CACHE_FILE" node_modules/ || true
+                  tar -cf "$NPM_CACHE_FILE" node_modules/ || true
                 fi
               fi
             )
