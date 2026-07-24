@@ -11,7 +11,7 @@ COPY --from=composer-bin /usr/bin/composer /usr/bin/composer
 WORKDIR /var/www/html
 COPY services-laravel/chatbot-manager-service/composer.json services-laravel/chatbot-manager-service/composer.lock ./
 COPY services-laravel/shared-security /var/www/shared-security
-RUN composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader --no-scripts
+RUN --mount=type=cache,target=/tmp/composer composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader --no-scripts
 COPY services-laravel/chatbot-manager-service/app ./app
 COPY services-laravel/chatbot-manager-service/artisan ./
 COPY services-laravel/chatbot-manager-service/bootstrap ./bootstrap

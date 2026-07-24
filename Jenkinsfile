@@ -59,6 +59,26 @@ pipeline {
             env.CHANGE_DOCKER  = changes.docker ? 'true' : 'false'
             env.CHANGE_K8S     = changes.k8s ? 'true' : 'false'
             env.CHANGE_AI      = changes.aiAgents ? 'true' : 'false'
+
+            def targets = []
+            if (changes.authUsers) targets.add('auth-users=services-laravel/auth-users-service')
+            if (changes.chatbotManager) targets.add('chatbot-manager=services-laravel/chatbot-manager-service')
+            if (changes.conversation) targets.add('conversation-service=services-laravel/conversation-service')
+            if (changes.auditSecurity) targets.add('audit-security-service=services-laravel/audit-security-service')
+            if (changes.portalWeb) targets.add('portal-web=platform/portal-web')
+            if (changes.extraire) targets.add('extraire=services/extraire')
+
+            if (changes.docker || targets.size() == 0) {
+              targets = [
+                'auth-users=services-laravel/auth-users-service',
+                'chatbot-manager=services-laravel/chatbot-manager-service',
+                'conversation-service=services-laravel/conversation-service',
+                'audit-security-service=services-laravel/audit-security-service',
+                'portal-web=platform/portal-web',
+                'extraire=services/extraire'
+              ]
+            }
+            env.BUILD_COMPONENTS = targets.join(',')
           } catch (Exception e) {
             echo "[WARN] Change detection failed, falling back to full build: ${e.getMessage()}"
             env.SKIPPABLE_DOCS = 'false'
@@ -66,6 +86,7 @@ pipeline {
             env.CHANGE_DOCKER  = 'true'
             env.CHANGE_K8S     = 'true'
             env.CHANGE_AI      = 'true'
+            env.BUILD_COMPONENTS = 'auth-users=services-laravel/auth-users-service,chatbot-manager=services-laravel/chatbot-manager-service,conversation-service=services-laravel/conversation-service,audit-security-service=services-laravel/audit-security-service,portal-web=platform/portal-web,extraire=services/extraire'
           }
         }
       }
@@ -179,7 +200,7 @@ pipeline {
           echo "[INFO] Building Docker images with BuildKit layer caching and parallel jobs..."
           export BUILDKIT_PROGRESS=plain
           export ENABLE_PARALLEL_BUILDS=true
-          bash scripts/deploy/build-local-images.sh
+          COMPONENTS="${BUILD_COMPONENTS:-}" bash scripts/deploy/build-local-images.sh
         '''
       }
     }

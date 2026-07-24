@@ -20,7 +20,7 @@ WORKDIR /var/www/html
 COPY platform/portal-web/composer.json platform/portal-web/composer.lock ./
 COPY services-laravel/shared-security /var/services-laravel/shared-security
 
-RUN composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader --no-scripts
+RUN --mount=type=cache,target=/tmp/composer composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader --no-scripts
 
 COPY platform/portal-web/app ./app
 COPY platform/portal-web/artisan ./

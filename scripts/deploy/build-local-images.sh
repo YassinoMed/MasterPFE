@@ -66,19 +66,13 @@ build_single_component() {
   cache_image="${REGISTRY_HOST}/${IMAGE_PREFIX}-${name}:build-cache"
 
   if [ -f "${dockerfile}" ]; then
-    echo "[INFO] Building ${image} from ${dockerfile} (Context: .)..."
+    echo "[INFO] Building ${image} from ${dockerfile}..."
     export BUILDKIT_PROGRESS=plain
-    if ! DOCKER_BUILDKIT=1 docker build \
+    DOCKER_BUILDKIT=1 docker build \
         --progress=plain \
         --build-arg BUILDKIT_INLINE_CACHE=1 \
-        --cache-from "${cache_image}" \
-        --cache-from "${image}" \
         -t "${image}" \
-        -f "${dockerfile}" "."; then
-      echo "[WARN] BuildKit build with cache failed for ${name}. Retrying with direct context build..."
-      DOCKER_BUILDKIT=1 docker build --progress=plain -t "${image}" -f "${dockerfile}" "." || \
-      DOCKER_BUILDKIT=0 docker build -t "${image}" -f "${dockerfile}" "."
-    fi
+        -f "${dockerfile}" "."
   else
     if [[ "${ALLOW_MISSING_COMPONENTS}" == "true" ]]; then
       echo "Skipping ${name}: Dockerfile missing"

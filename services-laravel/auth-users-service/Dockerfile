@@ -19,7 +19,7 @@ WORKDIR /var/www/html
 
 COPY services-laravel/auth-users-service/composer.json services-laravel/auth-users-service/composer.lock ./
 COPY services-laravel/shared-security /var/www/shared-security
-RUN composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader --no-scripts
+RUN --mount=type=cache,target=/tmp/composer composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader --no-scripts
 
 COPY services-laravel/auth-users-service/app ./app
 COPY services-laravel/auth-users-service/artisan ./
