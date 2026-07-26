@@ -80,7 +80,10 @@ provider "helm" {
 
 # ── AWS ──────────────────────────────────────────────────────────────────
 provider "aws" {
-  region = var.aws_region
+  region                      = var.aws_region
+  skip_credentials_validation = true
+  skip_requesting_account_id  = true
+  skip_metadata_api_check     = true
   default_tags {
     tags = {
       Environment = var.environment
@@ -93,6 +96,7 @@ provider "aws" {
 
 # ── Azure ────────────────────────────────────────────────────────────────
 provider "azurerm" {
+  skip_provider_registration = true
   features {
     key_vault {
       purge_soft_delete_on_destroy    = false
@@ -112,8 +116,9 @@ provider "azuread" {}
 
 # ── GCP ──────────────────────────────────────────────────────────────────
 provider "google" {
-  region  = var.gcp_region
-  project = var.gcp_project_id != "" ? var.gcp_project_id : null
+  region      = var.gcp_region
+  project     = var.gcp_project_id != "" ? var.gcp_project_id : "securerag-hub-mock"
+  user_project_override = false
 }
 
 provider "tls" {}
