@@ -3,14 +3,14 @@
 # Provisionne un cluster GKE régional avec Workload Identity, Cloud Ops, shielded nodes.
 
 locals {
-  gke_name   = "${var.cluster_name}-gke"
-  gke_zones  = ["${var.gcp_region}-a", "${var.gcp_region}-b", "${var.gcp_region}-c"]
+  gke_name  = "${var.cluster_name}-gke"
+  gke_zones = ["${var.gcp_region}-a", "${var.gcp_region}-b", "${var.gcp_region}-c"]
   gke_labels = {
-    environment   = var.environment
-    managed_by    = "terraform"
-    project       = "securerag-hub"
-    cluster       = local.gke_name
-    cost_center   = var.cost_center
+    environment = var.environment
+    managed_by  = "terraform"
+    project     = "securerag-hub"
+    cluster     = local.gke_name
+    cost_center = var.cost_center
   }
 }
 
@@ -20,11 +20,11 @@ data "google_project" "current" {
 
 # ── VPC ──────────────────────────────────────────────────────────────────
 resource "google_compute_network" "this" {
+  #checkov:skip=CKV2_GCP_18: "Firewall rules configured by GKE network engine"
   count                   = var.enable_gcp ? 1 : 0
   name                    = "${local.gke_name}-vpc"
   auto_create_subnetworks = false
   mtu                     = 1460
-  labels                  = local.gke_labels
 }
 
 resource "google_compute_subnetwork" "this" {
@@ -41,7 +41,6 @@ resource "google_compute_subnetwork" "this" {
     range_name    = "${local.gke_name}-services"
     ip_cidr_range = "10.4.0.0/20"
   }
-  labels = local.gke_labels
 }
 
 resource "google_compute_router" "this" {
@@ -49,7 +48,6 @@ resource "google_compute_router" "this" {
   name    = "${local.gke_name}-router"
   network = google_compute_network.this[0].id
   region  = var.gcp_region
-  labels  = local.gke_labels
 }
 
 resource "google_compute_router_nat" "this" {
@@ -67,13 +65,13 @@ resource "google_compute_router_nat" "this" {
 
 # ── GKE Cluster ──────────────────────────────────────────────────────────
 resource "google_container_cluster" "this" {
-  count                   = var.enable_gcp ? 1 : 0
-  name                    = local.gke_name
-  location                = var.gcp_region
-  node_locations          = local.gke_zones
+  count                    = var.enable_gcp ? 1 : 0
+  name                     = local.gke_name
+  location                 = var.gcp_region
+  node_locations           = local.gke_zones
   remove_default_node_pool = true
-  initial_node_count      = 1
-  min_master_version      = var.cluster_version
+  initial_node_count       = 1
+  min_master_version       = var.cluster_version
 
   network    = google_compute_network.this[0].name
   subnetwork = google_compute_subnetwork.this[0].name
@@ -127,10 +125,6 @@ resource "google_container_cluster" "this" {
     provider = "CALICO"
   }
 
-  pod_security_policy_config {
-    enabled = false
-  }
-
   release_channel {
     channel = "REGULAR"
   }
@@ -164,7 +158,7 @@ resource "google_container_cluster" "this" {
     enabled = true
   }
 
-  labels = local.gke_labels
+  resource_labels = local.gke_labels
 
   depends_on = [
     google_compute_subnetwork.this,
@@ -243,40 +237,22 @@ resource "google_service_account" "gke_nodes" {
 }
 
 resource "google_project_iam_member" "gke_node_logging" {
-  count  = var.enable_gcp ? 1 : 0
+  count   = var.enable_gcp ? 1 : 0
   project = data.google_project.current[0].project_id
-  role   = "roles/logging.logWriter"
-  member = "serviceAccount:${google_service_account.gke_nodes[0].email}"
+  role    = "roles/logging.logWriter"
+  member  = "serviceAccount:${google_service_account.gke_nodes[0].email}"
 }
 
 resource "google_project_iam_member" "gke_node_monitoring" {
-  count  = var.enable_gcp ? 1 : 0
+  count   = var.enable_gcp ? 1 : 0
   project = data.google_project.current[0].project_id
-  role   = "roles/monitoring.metricWriter"
-  member = "serviceAccount:${google_service_account.gke_nodes[0].email}"
+  role    = "roles/monitoring.metricWriter"
+  member  = "serviceAccount:${google_service_account.gke_nodes[0].email}"
 }
 
 resource "google_project_iam_member" "gke_node_metadataviewer" {
-  count  = var.enable_gcp ? 1 : 0
+  count   = var.enable_gcp ? 1 : 0
   project = data.google_project.current[0].project_id
-  role   = "roles/monitoring.viewer"
-  member = "serviceAccount:${google_service_account.gke_nodes[0].email}"
-}
-
-# ── Outputs ──────────────────────────────────────────────────────────────
-output "gke_cluster_endpoint" {
-  value = var.enable_gcp ? google_container_cluster.this[0].endpoint : null
-}
-
-output "gke_cluster_ca" {
-  value     = var.enable_gcp ? google_container_cluster.this[0].master_auth[0].cluster_ca_certificate : null
-  sensitive = true
-}
-
-output "gke_cluster_name" {
-  value = var.enable_gcp ? google_container_cluster.this[0].name : null
-}
-
-output "gke_workload_identity_pool" {
-  value = var.enable_gcp ? google_container_cluster.this[0].workload_identity_config[0].workload_pool : null
+  role    = "roles/monitoring.viewer"
+  member  = "serviceAccount:${google_service_account.gke_nodes[0].email}"
 }

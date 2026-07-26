@@ -30,7 +30,7 @@ info "Rendering metrics-server addon from ${METRICS_SERVER_ADDON_PATH}"
 kubectl kustomize "${METRICS_SERVER_ADDON_PATH}" >/dev/null
 
 info "Server-side dry-run for metrics-server addon"
-kubectl apply --server-side --dry-run=server -k "${METRICS_SERVER_ADDON_PATH}" >/dev/null
+kubectl apply --server-side --force-conflicts --dry-run=server -k "${METRICS_SERVER_ADDON_PATH}" >/dev/null
 
 info "Installing metrics-server from ${METRICS_SERVER_ADDON_PATH}"
 kubectl apply --server-side --force-conflicts -k "${METRICS_SERVER_ADDON_PATH}"

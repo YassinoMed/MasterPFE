@@ -1,6 +1,6 @@
 # Final Validation Summary - SecureRAG Hub
 
-- Generated at UTC: `2026-07-18T13:31:04Z`
+- Generated at UTC: `2026-07-24T22:32:00Z`
 - Status: `PARTIEL`
 
 ## 1. Official scenario
@@ -17,10 +17,10 @@
 | Gate | Result |
 |---|---|
 | Static checks | See Jenkins or shell output |
-| Tests | unknown |
-| Coverage | unknown |
+| Tests | 24 Laravel tests, failures=0, errors=0 |
+| Coverage | 44.97% |
 | Semgrep findings | unknown |
-| Gitleaks leaks | unknown |
+| Gitleaks leaks | 0 |
 | Trivy vulnerabilities | 0 |
 
 ## 3. CD and runtime results
@@ -30,7 +30,7 @@
 | Jenkins / CD gates (job: `securerag-hub-ci`) | PARTIEL |
 | Kubernetes runtime | PARTIEL |
 | Portal Web health | PARTIEL |
-| Digest-pinned runtime (registry: `localhost:5001`) | PARTIEL |
+| Digest-pinned runtime (registry: `securerag-registry:5000`) | DÉPENDANT_DE_L_ENVIRONNEMENT |
 
 ## 4. Evidence files
 

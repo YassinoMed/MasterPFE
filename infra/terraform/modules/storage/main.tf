@@ -4,6 +4,7 @@ resource "aws_ebs_volume" "etcd_backup" {
   size              = 20
   type              = "gp3"
   encrypted         = true
+  kms_key_id        = var.kms_key_arn
 
   tags = {
     Name        = "securerag-${var.environment}-etcd-backup-vol-${count.index + 1}"
@@ -16,6 +17,7 @@ resource "aws_ebs_volume" "postgres_data" {
   size              = 50
   type              = "gp3"
   encrypted         = true
+  kms_key_id        = var.kms_key_arn
 
   tags = {
     Name        = "securerag-${var.environment}-postgres-vol"
@@ -28,6 +30,7 @@ resource "aws_ebs_volume" "qdrant_data" {
   size              = 50
   type              = "gp3"
   encrypted         = true
+  kms_key_id        = var.kms_key_arn
 
   tags = {
     Name        = "securerag-${var.environment}-qdrant-vol"

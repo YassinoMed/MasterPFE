@@ -5,6 +5,7 @@ resource "aws_lb" "k8s_api" {
   subnets            = var.public_subnet_ids
 
   enable_cross_zone_load_balancing = true
+  enable_deletion_protection       = true
 
   tags = {
     Name        = "securerag-${var.environment}-api-nlb"

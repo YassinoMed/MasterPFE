@@ -193,7 +193,7 @@ metadata:
       Automatically generates a default-deny NetworkPolicy for every
       new namespace to enforce Zero Trust network segmentation.
 spec:
-  validationFailureAction: Audit
+  validationFailureAction: Enforce
   rules:
     - name: generate-default-deny
       match:

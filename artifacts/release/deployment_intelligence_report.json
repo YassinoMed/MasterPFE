@@ -1,0 +1,775 @@
+{
+  "deployment_risk_score": 100.0,
+  "findings": [
+    {
+      "file": "/root/MasterPFE/infra/k8s/backstage/deployment.yaml",
+      "resource": "Deployment/backstage/container/backstage",
+      "type": "Runs as Root",
+      "severity": "HIGH",
+      "description": "Container is allowed to run as root."
+    },
+    {
+      "file": "/root/MasterPFE/infra/k8s/backstage/deployment.yaml",
+      "resource": "Deployment/backstage/container/backstage",
+      "type": "Writable Root Filesystem",
+      "severity": "MEDIUM",
+      "description": "Root filesystem is writable. Risk of persistence on compromise."
+    },
+    {
+      "file": "/root/MasterPFE/infra/k8s/spiffe/deployment.yaml",
+      "resource": "Deployment/spire-server/container/spire-server",
+      "type": "Runs as Root",
+      "severity": "HIGH",
+      "description": "Container is allowed to run as root."
+    },
+    {
+      "file": "/root/MasterPFE/infra/k8s/spiffe/deployment.yaml",
+      "resource": "Deployment/spire-server/container/spire-server",
+      "type": "Writable Root Filesystem",
+      "severity": "MEDIUM",
+      "description": "Root filesystem is writable. Risk of persistence on compromise."
+    },
+    {
+      "file": "/root/MasterPFE/infra/k8s/spiffe/deployment.yaml",
+      "resource": "Deployment/spire-server/container/spire-controller-manager",
+      "type": "Runs as Root",
+      "severity": "HIGH",
+      "description": "Container is allowed to run as root."
+    },
+    {
+      "file": "/root/MasterPFE/infra/k8s/spiffe/deployment.yaml",
+      "resource": "Deployment/spire-server/container/spire-controller-manager",
+      "type": "Writable Root Filesystem",
+      "severity": "MEDIUM",
+      "description": "Root filesystem is writable. Risk of persistence on compromise."
+    },
+    {
+      "file": "/root/MasterPFE/infra/k8s/spiffe/deployment.yaml",
+      "resource": "DaemonSet/spire-agent",
+      "type": "hostPath Volume Mounted",
+      "severity": "CRITICAL",
+      "description": "Volume 'spire-agent-socket' mounts a host path. Risk of node compromise."
+    },
+    {
+      "file": "/root/MasterPFE/infra/k8s/spiffe/deployment.yaml",
+      "resource": "DaemonSet/spire-agent/container/spire-agent",
+      "type": "Runs as Root",
+      "severity": "HIGH",
+      "description": "Container is allowed to run as root."
+    },
+    {
+      "file": "/root/MasterPFE/infra/k8s/spiffe/deployment.yaml",
+      "resource": "DaemonSet/spire-agent/container/spire-agent",
+      "type": "Writable Root Filesystem",
+      "severity": "MEDIUM",
+      "description": "Root filesystem is writable. Risk of persistence on compromise."
+    },
+    {
+      "file": "/root/MasterPFE/infra/k8s/aiops/deployment.yaml",
+      "resource": "Deployment/ollama/container/ollama",
+      "type": "Runs as Root",
+      "severity": "HIGH",
+      "description": "Container is allowed to run as root."
+    },
+    {
+      "file": "/root/MasterPFE/infra/k8s/aiops/deployment.yaml",
+      "resource": "Deployment/ollama/container/ollama",
+      "type": "Writable Root Filesystem",
+      "severity": "MEDIUM",
+      "description": "Root filesystem is writable. Risk of persistence on compromise."
+    },
+    {
+      "file": "/root/MasterPFE/infra/k8s/aiops/deployment.yaml",
+      "resource": "Deployment/openwebui/container/openwebui",
+      "type": "Runs as Root",
+      "severity": "HIGH",
+      "description": "Container is allowed to run as root."
+    },
+    {
+      "file": "/root/MasterPFE/infra/k8s/aiops/deployment.yaml",
+      "resource": "Deployment/openwebui/container/openwebui",
+      "type": "Writable Root Filesystem",
+      "severity": "MEDIUM",
+      "description": "Root filesystem is writable. Risk of persistence on compromise."
+    },
+    {
+      "file": "/root/MasterPFE/infra/k8s/dependency-graph-engine/deployment.yaml",
+      "resource": "Deployment/dependency-graph-engine/container/engine",
+      "type": "Runs as Root",
+      "severity": "HIGH",
+      "description": "Container is allowed to run as root."
+    },
+    {
+      "file": "/root/MasterPFE/infra/k8s/dependency-graph-engine/deployment.yaml",
+      "resource": "Deployment/dependency-graph-engine/container/engine",
+      "type": "Writable Root Filesystem",
+      "severity": "MEDIUM",
+      "description": "Root filesystem is writable. Risk of persistence on compromise."
+    },
+    {
+      "file": "/root/MasterPFE/infra/k8s/wazuh/wazuh-agent-daemonset.yaml",
+      "resource": "DaemonSet/wazuh-agent",
+      "type": "hostPath Volume Mounted",
+      "severity": "CRITICAL",
+      "description": "Volume 'var-log' mounts a host path. Risk of node compromise."
+    },
+    {
+      "file": "/root/MasterPFE/infra/k8s/wazuh/wazuh-agent-daemonset.yaml",
+      "resource": "DaemonSet/wazuh-agent",
+      "type": "hostPath Volume Mounted",
+      "severity": "CRITICAL",
+      "description": "Volume 'var-lib-docker-containers' mounts a host path. Risk of node compromise."
+    },
+    {
+      "file": "/root/MasterPFE/infra/k8s/wazuh/wazuh-agent-daemonset.yaml",
+      "resource": "DaemonSet/wazuh-agent/container/wazuh-agent",
+      "type": "Runs as Root",
+      "severity": "HIGH",
+      "description": "Container is allowed to run as root."
+    },
+    {
+      "file": "/root/MasterPFE/infra/k8s/wazuh/wazuh-agent-daemonset.yaml",
+      "resource": "DaemonSet/wazuh-agent/container/wazuh-agent",
+      "type": "Privileged Container",
+      "severity": "CRITICAL",
+      "description": "Container runs in privileged mode. Total breakout risk."
+    },
+    {
+      "file": "/root/MasterPFE/infra/k8s/wazuh/wazuh-agent-daemonset.yaml",
+      "resource": "DaemonSet/wazuh-agent/container/wazuh-agent",
+      "type": "Writable Root Filesystem",
+      "severity": "MEDIUM",
+      "description": "Root filesystem is writable. Risk of persistence on compromise."
+    },
+    {
+      "file": "/root/MasterPFE/infra/k8s/security-forensics-engine/deployment.yaml",
+      "resource": "Deployment/security-forensics-engine/container/engine",
+      "type": "Runs as Root",
+      "severity": "HIGH",
+      "description": "Container is allowed to run as root."
+    },
+    {
+      "file": "/root/MasterPFE/infra/k8s/security-forensics-engine/deployment.yaml",
+      "resource": "Deployment/security-forensics-engine/container/engine",
+      "type": "Writable Root Filesystem",
+      "severity": "MEDIUM",
+      "description": "Root filesystem is writable. Risk of persistence on compromise."
+    },
+    {
+      "file": "/root/MasterPFE/infra/k8s/kong/deployment.yaml",
+      "resource": "Deployment/kong/container/kong",
+      "type": "Runs as Root",
+      "severity": "HIGH",
+      "description": "Container is allowed to run as root."
+    },
+    {
+      "file": "/root/MasterPFE/infra/k8s/kong/deployment.yaml",
+      "resource": "Deployment/kong/container/kong",
+      "type": "Writable Root Filesystem",
+      "severity": "MEDIUM",
+      "description": "Root filesystem is writable. Risk of persistence on compromise."
+    },
+    {
+      "file": "/root/MasterPFE/infra/k8s/crossplane/provisioning.yaml",
+      "resource": "Deployment/crossplane/container/crossplane",
+      "type": "Runs as Root",
+      "severity": "HIGH",
+      "description": "Container is allowed to run as root."
+    },
+    {
+      "file": "/root/MasterPFE/infra/k8s/crossplane/provisioning.yaml",
+      "resource": "Deployment/crossplane/container/crossplane",
+      "type": "Writable Root Filesystem",
+      "severity": "MEDIUM",
+      "description": "Root filesystem is writable. Risk of persistence on compromise."
+    },
+    {
+      "file": "/root/MasterPFE/infra/k8s/strategies/blue-green-canary.yaml",
+      "resource": "Deployment/portal-web-green/container/portal-web",
+      "type": "Runs as Root",
+      "severity": "HIGH",
+      "description": "Container is allowed to run as root."
+    },
+    {
+      "file": "/root/MasterPFE/infra/k8s/cilium/daemonset.yaml",
+      "resource": "DaemonSet/cilium",
+      "type": "hostPath Volume Mounted",
+      "severity": "CRITICAL",
+      "description": "Volume 'cilium-run' mounts a host path. Risk of node compromise."
+    },
+    {
+      "file": "/root/MasterPFE/infra/k8s/cilium/daemonset.yaml",
+      "resource": "DaemonSet/cilium",
+      "type": "hostPath Volume Mounted",
+      "severity": "CRITICAL",
+      "description": "Volume 'bpf' mounts a host path. Risk of node compromise."
+    },
+    {
+      "file": "/root/MasterPFE/infra/k8s/cilium/daemonset.yaml",
+      "resource": "DaemonSet/cilium/container/cilium-agent",
+      "type": "Runs as Root",
+      "severity": "HIGH",
+      "description": "Container is allowed to run as root."
+    },
+    {
+      "file": "/root/MasterPFE/infra/k8s/cilium/daemonset.yaml",
+      "resource": "DaemonSet/cilium/container/cilium-agent",
+      "type": "Privileged Container",
+      "severity": "CRITICAL",
+      "description": "Container runs in privileged mode. Total breakout risk."
+    },
+    {
+      "file": "/root/MasterPFE/infra/k8s/cilium/daemonset.yaml",
+      "resource": "DaemonSet/cilium/container/cilium-agent",
+      "type": "Writable Root Filesystem",
+      "severity": "MEDIUM",
+      "description": "Root filesystem is writable. Risk of persistence on compromise."
+    },
+    {
+      "file": "/root/MasterPFE/infra/k8s/cilium/daemonset.yaml",
+      "resource": "Deployment/hubble-relay/container/hubble-relay",
+      "type": "Runs as Root",
+      "severity": "HIGH",
+      "description": "Container is allowed to run as root."
+    },
+    {
+      "file": "/root/MasterPFE/infra/k8s/cilium/daemonset.yaml",
+      "resource": "Deployment/hubble-relay/container/hubble-relay",
+      "type": "Writable Root Filesystem",
+      "severity": "MEDIUM",
+      "description": "Root filesystem is writable. Risk of persistence on compromise."
+    },
+    {
+      "file": "/root/MasterPFE/infra/k8s/cilium/daemonset.yaml",
+      "resource": "Deployment/hubble-ui/container/hubble-ui",
+      "type": "Runs as Root",
+      "severity": "HIGH",
+      "description": "Container is allowed to run as root."
+    },
+    {
+      "file": "/root/MasterPFE/infra/k8s/cilium/daemonset.yaml",
+      "resource": "Deployment/hubble-ui/container/hubble-ui",
+      "type": "Writable Root Filesystem",
+      "severity": "MEDIUM",
+      "description": "Root filesystem is writable. Risk of persistence on compromise."
+    },
+    {
+      "file": "/root/MasterPFE/infra/k8s/observability/promtail.yaml",
+      "resource": "DaemonSet/promtail",
+      "type": "hostPath Volume Mounted",
+      "severity": "CRITICAL",
+      "description": "Volume 'run' mounts a host path. Risk of node compromise."
+    },
+    {
+      "file": "/root/MasterPFE/infra/k8s/observability/promtail.yaml",
+      "resource": "DaemonSet/promtail",
+      "type": "hostPath Volume Mounted",
+      "severity": "CRITICAL",
+      "description": "Volume 'varlog' mounts a host path. Risk of node compromise."
+    },
+    {
+      "file": "/root/MasterPFE/infra/k8s/observability/promtail.yaml",
+      "resource": "DaemonSet/promtail",
+      "type": "hostPath Volume Mounted",
+      "severity": "CRITICAL",
+      "description": "Volume 'varlibdockercontainers' mounts a host path. Risk of node compromise."
+    },
+    {
+      "file": "/root/MasterPFE/infra/k8s/observability/promtail.yaml",
+      "resource": "DaemonSet/promtail/container/promtail",
+      "type": "Runs as Root",
+      "severity": "HIGH",
+      "description": "Container is allowed to run as root."
+    },
+    {
+      "file": "/root/MasterPFE/infra/k8s/observability/loki-deployment.yaml",
+      "resource": "Deployment/loki/container/loki",
+      "type": "Runs as Root",
+      "severity": "HIGH",
+      "description": "Container is allowed to run as root."
+    },
+    {
+      "file": "/root/MasterPFE/infra/k8s/observability/grafana-deployment.yaml",
+      "resource": "Deployment/grafana/container/grafana",
+      "type": "Runs as Root",
+      "severity": "HIGH",
+      "description": "Container is allowed to run as root."
+    },
+    {
+      "file": "/root/MasterPFE/infra/k8s/observability/grafana-deployment.yaml",
+      "resource": "Deployment/grafana/container/grafana",
+      "type": "Writable Root Filesystem",
+      "severity": "MEDIUM",
+      "description": "Root filesystem is writable. Risk of persistence on compromise."
+    },
+    {
+      "file": "/root/MasterPFE/infra/k8s/observability/alertmanager.yaml",
+      "resource": "Deployment/alertmanager/container/alertmanager",
+      "type": "Runs as Root",
+      "severity": "HIGH",
+      "description": "Container is allowed to run as root."
+    },
+    {
+      "file": "/root/MasterPFE/infra/k8s/observability/tempo/tempo-deployment.yaml",
+      "resource": "Deployment/tempo/container/tempo",
+      "type": "Runs as Root",
+      "severity": "HIGH",
+      "description": "Container is allowed to run as root."
+    },
+    {
+      "file": "/root/MasterPFE/infra/k8s/observability/dora-exporter/deployment.yaml",
+      "resource": "Deployment/dora-exporter/container/exporter",
+      "type": "Runs as Root",
+      "severity": "HIGH",
+      "description": "Container is allowed to run as root."
+    },
+    {
+      "file": "/root/MasterPFE/infra/k8s/observability/dora-exporter/deployment.yaml",
+      "resource": "Deployment/dora-exporter/container/exporter",
+      "type": "Writable Root Filesystem",
+      "severity": "MEDIUM",
+      "description": "Root filesystem is writable. Risk of persistence on compromise."
+    },
+    {
+      "file": "/root/MasterPFE/infra/k8s/runtime-detection/falcosidekick.yaml",
+      "resource": "Deployment/falcosidekick/container/falcosidekick",
+      "type": "Runs as Root",
+      "severity": "HIGH",
+      "description": "Container is allowed to run as root."
+    },
+    {
+      "file": "/root/MasterPFE/infra/k8s/runtime-detection/daemonset.yaml",
+      "resource": "DaemonSet/falco",
+      "type": "hostPath Volume Mounted",
+      "severity": "CRITICAL",
+      "description": "Volume 'dev-fs' mounts a host path. Risk of node compromise."
+    },
+    {
+      "file": "/root/MasterPFE/infra/k8s/runtime-detection/daemonset.yaml",
+      "resource": "DaemonSet/falco",
+      "type": "hostPath Volume Mounted",
+      "severity": "CRITICAL",
+      "description": "Volume 'proc-fs' mounts a host path. Risk of node compromise."
+    },
+    {
+      "file": "/root/MasterPFE/infra/k8s/runtime-detection/daemonset.yaml",
+      "resource": "DaemonSet/falco",
+      "type": "hostPath Volume Mounted",
+      "severity": "CRITICAL",
+      "description": "Volume 'boot-fs' mounts a host path. Risk of node compromise."
+    },
+    {
+      "file": "/root/MasterPFE/infra/k8s/runtime-detection/daemonset.yaml",
+      "resource": "DaemonSet/falco",
+      "type": "hostPath Volume Mounted",
+      "severity": "CRITICAL",
+      "description": "Volume 'lib-modules' mounts a host path. Risk of node compromise."
+    },
+    {
+      "file": "/root/MasterPFE/infra/k8s/runtime-detection/daemonset.yaml",
+      "resource": "DaemonSet/falco",
+      "type": "hostPath Volume Mounted",
+      "severity": "CRITICAL",
+      "description": "Volume 'usr-fs' mounts a host path. Risk of node compromise."
+    },
+    {
+      "file": "/root/MasterPFE/infra/k8s/runtime-detection/daemonset.yaml",
+      "resource": "DaemonSet/falco",
+      "type": "hostPath Volume Mounted",
+      "severity": "CRITICAL",
+      "description": "Volume 'etc-fs' mounts a host path. Risk of node compromise."
+    },
+    {
+      "file": "/root/MasterPFE/infra/k8s/runtime-detection/daemonset.yaml",
+      "resource": "DaemonSet/falco",
+      "type": "hostPath Volume Mounted",
+      "severity": "CRITICAL",
+      "description": "Volume 'sys-fs' mounts a host path. Risk of node compromise."
+    },
+    {
+      "file": "/root/MasterPFE/infra/k8s/runtime-detection/daemonset.yaml",
+      "resource": "DaemonSet/falco",
+      "type": "hostPath Volume Mounted",
+      "severity": "CRITICAL",
+      "description": "Volume 'tracing-fs' mounts a host path. Risk of node compromise."
+    },
+    {
+      "file": "/root/MasterPFE/infra/k8s/runtime-detection/daemonset.yaml",
+      "resource": "DaemonSet/falco",
+      "type": "hostPath Volume Mounted",
+      "severity": "CRITICAL",
+      "description": "Volume 'containerd-socket' mounts a host path. Risk of node compromise."
+    },
+    {
+      "file": "/root/MasterPFE/infra/k8s/runtime-detection/daemonset.yaml",
+      "resource": "DaemonSet/falco/container/falco",
+      "type": "Runs as Root",
+      "severity": "HIGH",
+      "description": "Container is allowed to run as root."
+    },
+    {
+      "file": "/root/MasterPFE/infra/k8s/runtime-detection/daemonset.yaml",
+      "resource": "DaemonSet/falco/container/falco",
+      "type": "Privileged Container",
+      "severity": "CRITICAL",
+      "description": "Container runs in privileged mode. Total breakout risk."
+    },
+    {
+      "file": "/root/MasterPFE/infra/k8s/runtime-detection/daemonset.yaml",
+      "resource": "DaemonSet/falco/container/falco",
+      "type": "Writable Root Filesystem",
+      "severity": "MEDIUM",
+      "description": "Root filesystem is writable. Risk of persistence on compromise."
+    },
+    {
+      "file": "/root/MasterPFE/infra/k8s/tetragon/daemonset.yaml",
+      "resource": "DaemonSet/tetragon",
+      "type": "hostPath Volume Mounted",
+      "severity": "CRITICAL",
+      "description": "Volume 'bpf' mounts a host path. Risk of node compromise."
+    },
+    {
+      "file": "/root/MasterPFE/infra/k8s/tetragon/daemonset.yaml",
+      "resource": "DaemonSet/tetragon",
+      "type": "hostPath Volume Mounted",
+      "severity": "CRITICAL",
+      "description": "Volume 'cgroup' mounts a host path. Risk of node compromise."
+    },
+    {
+      "file": "/root/MasterPFE/infra/k8s/tetragon/daemonset.yaml",
+      "resource": "DaemonSet/tetragon",
+      "type": "hostPath Volume Mounted",
+      "severity": "CRITICAL",
+      "description": "Volume 'proc' mounts a host path. Risk of node compromise."
+    },
+    {
+      "file": "/root/MasterPFE/infra/k8s/tetragon/daemonset.yaml",
+      "resource": "DaemonSet/tetragon/container/tetragon",
+      "type": "Runs as Root",
+      "severity": "HIGH",
+      "description": "Container is allowed to run as root."
+    },
+    {
+      "file": "/root/MasterPFE/infra/k8s/tetragon/daemonset.yaml",
+      "resource": "DaemonSet/tetragon/container/tetragon",
+      "type": "Privileged Container",
+      "severity": "CRITICAL",
+      "description": "Container runs in privileged mode. Total breakout risk."
+    },
+    {
+      "file": "/root/MasterPFE/infra/k8s/tetragon/daemonset.yaml",
+      "resource": "DaemonSet/tetragon/container/tetragon",
+      "type": "Writable Root Filesystem",
+      "severity": "MEDIUM",
+      "description": "Root filesystem is writable. Risk of persistence on compromise."
+    },
+    {
+      "file": "/root/MasterPFE/infra/k8s/finops/opencost.yaml",
+      "resource": "Deployment/opencost/container/opencost",
+      "type": "Runs as Root",
+      "severity": "HIGH",
+      "description": "Container is allowed to run as root."
+    },
+    {
+      "file": "/root/MasterPFE/infra/k8s/finops/opencost.yaml",
+      "resource": "Deployment/opencost/container/opencost",
+      "type": "Writable Root Filesystem",
+      "severity": "MEDIUM",
+      "description": "Root filesystem is writable. Risk of persistence on compromise."
+    },
+    {
+      "file": "/root/MasterPFE/infra/k8s/data-platform/deployment.yaml",
+      "resource": "StatefulSet/clickhouse/container/clickhouse",
+      "type": "Runs as Root",
+      "severity": "HIGH",
+      "description": "Container is allowed to run as root."
+    },
+    {
+      "file": "/root/MasterPFE/infra/k8s/data-platform/deployment.yaml",
+      "resource": "StatefulSet/clickhouse/container/clickhouse",
+      "type": "Writable Root Filesystem",
+      "severity": "MEDIUM",
+      "description": "Root filesystem is writable. Risk of persistence on compromise."
+    },
+    {
+      "file": "/root/MasterPFE/infra/k8s/data-platform/deployment.yaml",
+      "resource": "Deployment/minio/container/minio",
+      "type": "Runs as Root",
+      "severity": "HIGH",
+      "description": "Container is allowed to run as root."
+    },
+    {
+      "file": "/root/MasterPFE/infra/k8s/data-platform/deployment.yaml",
+      "resource": "Deployment/minio/container/minio",
+      "type": "Writable Root Filesystem",
+      "severity": "MEDIUM",
+      "description": "Root filesystem is writable. Risk of persistence on compromise."
+    },
+    {
+      "file": "/root/MasterPFE/infra/k8s/falco-talon/deployment.yaml",
+      "resource": "Deployment/falco-talon/container/falco-talon",
+      "type": "Runs as Root",
+      "severity": "HIGH",
+      "description": "Container is allowed to run as root."
+    },
+    {
+      "file": "/root/MasterPFE/infra/k8s/overlays/demo/patches/ollama-mock.yaml",
+      "resource": "Deployment/ollama/container/ollama",
+      "type": "Runs as Root",
+      "severity": "HIGH",
+      "description": "Container is allowed to run as root."
+    },
+    {
+      "file": "/root/MasterPFE/infra/k8s/overlays/demo/patches/ollama-mock.yaml",
+      "resource": "Deployment/ollama/container/ollama",
+      "type": "Writable Root Filesystem",
+      "severity": "MEDIUM",
+      "description": "Root filesystem is writable. Risk of persistence on compromise."
+    },
+    {
+      "file": "/root/MasterPFE/infra/k8s/otel/deployment.yaml",
+      "resource": "Deployment/otel-collector/container/otel-collector",
+      "type": "Runs as Root",
+      "severity": "HIGH",
+      "description": "Container is allowed to run as root."
+    },
+    {
+      "file": "/root/MasterPFE/infra/k8s/otel/deployment.yaml",
+      "resource": "Deployment/otel-collector/container/otel-collector",
+      "type": "Writable Root Filesystem",
+      "severity": "MEDIUM",
+      "description": "Root filesystem is writable. Risk of persistence on compromise."
+    },
+    {
+      "file": "/root/MasterPFE/infra/k8s/otel/deployment.yaml",
+      "resource": "Deployment/tempo/container/tempo",
+      "type": "Runs as Root",
+      "severity": "HIGH",
+      "description": "Container is allowed to run as root."
+    },
+    {
+      "file": "/root/MasterPFE/infra/k8s/otel/deployment.yaml",
+      "resource": "Deployment/tempo/container/tempo",
+      "type": "Writable Root Filesystem",
+      "severity": "MEDIUM",
+      "description": "Root filesystem is writable. Risk of persistence on compromise."
+    },
+    {
+      "file": "/root/MasterPFE/infra/k8s/coraza/deployment.yaml",
+      "resource": "Deployment/coraza-waf/container/coraza-waf",
+      "type": "Runs as Root",
+      "severity": "HIGH",
+      "description": "Container is allowed to run as root."
+    },
+    {
+      "file": "/root/MasterPFE/infra/k8s/coraza/deployment.yaml",
+      "resource": "Deployment/coraza-waf/container/coraza-waf",
+      "type": "Writable Root Filesystem",
+      "severity": "MEDIUM",
+      "description": "Root filesystem is writable. Risk of persistence on compromise."
+    },
+    {
+      "file": "/root/MasterPFE/infra/k8s/ml-platform/deployment.yaml",
+      "resource": "Deployment/mlflow/container/mlflow",
+      "type": "Runs as Root",
+      "severity": "HIGH",
+      "description": "Container is allowed to run as root."
+    },
+    {
+      "file": "/root/MasterPFE/infra/k8s/ml-platform/deployment.yaml",
+      "resource": "Deployment/mlflow/container/mlflow",
+      "type": "Writable Root Filesystem",
+      "severity": "MEDIUM",
+      "description": "Root filesystem is writable. Risk of persistence on compromise."
+    },
+    {
+      "file": "/root/MasterPFE/infra/k8s/ml-platform/deployment.yaml",
+      "resource": "Deployment/feast/container/feast",
+      "type": "Runs as Root",
+      "severity": "HIGH",
+      "description": "Container is allowed to run as root."
+    },
+    {
+      "file": "/root/MasterPFE/infra/k8s/ml-platform/deployment.yaml",
+      "resource": "Deployment/feast/container/feast",
+      "type": "Writable Root Filesystem",
+      "severity": "MEDIUM",
+      "description": "Root filesystem is writable. Risk of persistence on compromise."
+    },
+    {
+      "file": "/root/MasterPFE/infra/k8s/base/otel-patch.yaml",
+      "resource": "Deployment/auth-users/container/auth-users",
+      "type": "Runs as Root",
+      "severity": "HIGH",
+      "description": "Container is allowed to run as root."
+    },
+    {
+      "file": "/root/MasterPFE/infra/k8s/base/otel-patch.yaml",
+      "resource": "Deployment/auth-users/container/auth-users",
+      "type": "Writable Root Filesystem",
+      "severity": "MEDIUM",
+      "description": "Root filesystem is writable. Risk of persistence on compromise."
+    },
+    {
+      "file": "/root/MasterPFE/infra/k8s/base/otel-patch.yaml",
+      "resource": "Deployment/chatbot-manager/container/chatbot-manager",
+      "type": "Runs as Root",
+      "severity": "HIGH",
+      "description": "Container is allowed to run as root."
+    },
+    {
+      "file": "/root/MasterPFE/infra/k8s/base/otel-patch.yaml",
+      "resource": "Deployment/chatbot-manager/container/chatbot-manager",
+      "type": "Writable Root Filesystem",
+      "severity": "MEDIUM",
+      "description": "Root filesystem is writable. Risk of persistence on compromise."
+    },
+    {
+      "file": "/root/MasterPFE/infra/k8s/base/otel-patch.yaml",
+      "resource": "Deployment/conversation-service/container/conversation-service",
+      "type": "Runs as Root",
+      "severity": "HIGH",
+      "description": "Container is allowed to run as root."
+    },
+    {
+      "file": "/root/MasterPFE/infra/k8s/base/otel-patch.yaml",
+      "resource": "Deployment/conversation-service/container/conversation-service",
+      "type": "Writable Root Filesystem",
+      "severity": "MEDIUM",
+      "description": "Root filesystem is writable. Risk of persistence on compromise."
+    },
+    {
+      "file": "/root/MasterPFE/infra/k8s/base/otel-patch.yaml",
+      "resource": "Deployment/audit-security-service/container/audit-security-service",
+      "type": "Runs as Root",
+      "severity": "HIGH",
+      "description": "Container is allowed to run as root."
+    },
+    {
+      "file": "/root/MasterPFE/infra/k8s/base/otel-patch.yaml",
+      "resource": "Deployment/audit-security-service/container/audit-security-service",
+      "type": "Writable Root Filesystem",
+      "severity": "MEDIUM",
+      "description": "Root filesystem is writable. Risk of persistence on compromise."
+    },
+    {
+      "file": "/root/MasterPFE/infra/k8s/base/llm-orchestrator/deployment.yaml",
+      "resource": "Deployment/llm-orchestrator/container/llm-orchestrator",
+      "type": "Runs as Root",
+      "severity": "HIGH",
+      "description": "Container is allowed to run as root."
+    },
+    {
+      "file": "/root/MasterPFE/infra/k8s/base/portal-web/deployment.yaml",
+      "resource": "Deployment/portal-web/container/portal-web",
+      "type": "Runs as Root",
+      "severity": "HIGH",
+      "description": "Container is allowed to run as root."
+    },
+    {
+      "file": "/root/MasterPFE/infra/k8s/base/qdrant/deployment.yaml",
+      "resource": "StatefulSet/qdrant/container/qdrant",
+      "type": "Runs as Root",
+      "severity": "HIGH",
+      "description": "Container is allowed to run as root."
+    },
+    {
+      "file": "/root/MasterPFE/infra/k8s/base/qdrant/deployment.yaml",
+      "resource": "StatefulSet/qdrant/container/qdrant",
+      "type": "Writable Root Filesystem",
+      "severity": "MEDIUM",
+      "description": "Root filesystem is writable. Risk of persistence on compromise."
+    },
+    {
+      "file": "/root/MasterPFE/infra/k8s/base/knowledge-hub/deployment.yaml",
+      "resource": "Deployment/knowledge-hub/container/knowledge-hub",
+      "type": "Runs as Root",
+      "severity": "HIGH",
+      "description": "Container is allowed to run as root."
+    },
+    {
+      "file": "/root/MasterPFE/infra/k8s/base/ai-knowledge-graph/deployment.yaml",
+      "resource": "Deployment/ai-knowledge-graph/container/knowledge-graph",
+      "type": "Runs as Root",
+      "severity": "HIGH",
+      "description": "Container is allowed to run as root."
+    },
+    {
+      "file": "/root/MasterPFE/infra/k8s/base/audit-security-service/deployment.yaml",
+      "resource": "Deployment/audit-security-service/container/audit-security-service",
+      "type": "Runs as Root",
+      "severity": "HIGH",
+      "description": "Container is allowed to run as root."
+    },
+    {
+      "file": "/root/MasterPFE/infra/k8s/base/ai-security-orchestrator/deployment.yaml",
+      "resource": "Deployment/ai-security-orchestrator/container/orchestrator",
+      "type": "Runs as Root",
+      "severity": "HIGH",
+      "description": "Container is allowed to run as root."
+    },
+    {
+      "file": "/root/MasterPFE/infra/k8s/base/conversation-service/deployment.yaml",
+      "resource": "Deployment/conversation-service/container/conversation-service",
+      "type": "Runs as Root",
+      "severity": "HIGH",
+      "description": "Container is allowed to run as root."
+    },
+    {
+      "file": "/root/MasterPFE/infra/k8s/base/ollama/deployment.yaml",
+      "resource": "Deployment/ollama/container/ollama",
+      "type": "Runs as Root",
+      "severity": "HIGH",
+      "description": "Container is allowed to run as root."
+    },
+    {
+      "file": "/root/MasterPFE/infra/k8s/base/ollama/deployment.yaml",
+      "resource": "Deployment/ollama/container/ollama",
+      "type": "Writable Root Filesystem",
+      "severity": "MEDIUM",
+      "description": "Root filesystem is writable. Risk of persistence on compromise."
+    },
+    {
+      "file": "/root/MasterPFE/infra/k8s/base/security-auditor/deployment.yaml",
+      "resource": "Deployment/security-auditor/container/security-auditor",
+      "type": "Runs as Root",
+      "severity": "HIGH",
+      "description": "Container is allowed to run as root."
+    },
+    {
+      "file": "/root/MasterPFE/infra/k8s/base/chatbot-manager/deployment.yaml",
+      "resource": "Deployment/chatbot-manager/container/chatbot-manager",
+      "type": "Runs as Root",
+      "severity": "HIGH",
+      "description": "Container is allowed to run as root."
+    },
+    {
+      "file": "/root/MasterPFE/infra/k8s/base/auth-users/deployment.yaml",
+      "resource": "Deployment/auth-users/container/auth-users",
+      "type": "Runs as Root",
+      "severity": "HIGH",
+      "description": "Container is allowed to run as root."
+    },
+    {
+      "file": "/root/MasterPFE/infra/k8s/base/api-gateway/deployment.yaml",
+      "resource": "Deployment/api-gateway/container/api-gateway",
+      "type": "Runs as Root",
+      "severity": "HIGH",
+      "description": "Container is allowed to run as root."
+    },
+    {
+      "file": "/root/MasterPFE/infra/k8s/opa-gatekeeper/deployment.yaml",
+      "resource": "Deployment/gatekeeper-controller-manager/container/manager",
+      "type": "Runs as Root",
+      "severity": "HIGH",
+      "description": "Container is allowed to run as root."
+    },
+    {
+      "file": "/root/MasterPFE/infra/k8s/opa-gatekeeper/deployment.yaml",
+      "resource": "Deployment/gatekeeper-controller-manager/container/manager",
+      "type": "Writable Root Filesystem",
+      "severity": "MEDIUM",
+      "description": "Root filesystem is writable. Risk of persistence on compromise."
+    }
+  ]
+}

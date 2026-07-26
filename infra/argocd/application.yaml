@@ -1,0 +1,26 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: securerag-hub
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: 'https://github.com/securerag/securerag-hub.git'
+    path: infra/k8s/overlays/demo
+    targetRevision: HEAD
+  destination:
+    server: 'https://kubernetes.default.svc'
+    namespace: securerag-hub
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    # Semi-automated configuration: 
+    # To enforce a manual validation step for rollbacks as described in the DevSecOps chapter,
+    # automated sync can be disabled in production, or webhook approvals can be configured.
+    # Here it is fully automated for the demo overlay, but we document the "semi-automated"
+    # rollback restriction for production deployments.
+    syncOptions:
+      - CreateNamespace=true
+      - Validate=true

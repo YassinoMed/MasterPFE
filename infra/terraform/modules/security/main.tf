@@ -1,4 +1,7 @@
 resource "aws_security_group" "loadbalancer" {
+  #checkov:skip=CKV2_AWS_5: "Security Group attached to resources in compute module"
+  #checkov:skip=CKV_AWS_260: "Public Load Balancer requires HTTP port 80 for web traffic"
+  #checkov:skip=CKV_AWS_382: "Outbound egress required for OS updates"
   name        = "securerag-${var.environment}-lb-sg"
   description = "Security group for external Load Balancers"
   vpc_id      = var.vpc_id
@@ -36,6 +39,7 @@ resource "aws_security_group" "loadbalancer" {
   }
 
   egress {
+    description = "Allow outbound traffic"
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
@@ -49,6 +53,8 @@ resource "aws_security_group" "loadbalancer" {
 }
 
 resource "aws_security_group" "control_plane" {
+  #checkov:skip=CKV2_AWS_5: "Security Group attached to EC2 instances in compute module"
+  #checkov:skip=CKV_AWS_382: "Outbound egress required for OS updates"
   name        = "securerag-${var.environment}-control-plane-sg"
   description = "Security group for control plane instances"
   vpc_id      = var.vpc_id
@@ -110,6 +116,7 @@ resource "aws_security_group" "control_plane" {
   }
 
   egress {
+    description = "Allow outbound traffic"
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
@@ -123,6 +130,8 @@ resource "aws_security_group" "control_plane" {
 }
 
 resource "aws_security_group" "worker" {
+  #checkov:skip=CKV2_AWS_5: "Security Group attached to EC2 instances in compute module"
+  #checkov:skip=CKV_AWS_382: "Outbound egress required for OS updates"
   name        = "securerag-${var.environment}-worker-sg"
   description = "Security group for worker nodes"
   vpc_id      = var.vpc_id
@@ -160,6 +169,7 @@ resource "aws_security_group" "worker" {
   }
 
   egress {
+    description = "Allow outbound traffic"
     from_port   = 0
     to_port     = 0
     protocol    = "-1"

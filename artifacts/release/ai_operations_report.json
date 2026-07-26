@@ -1,0 +1,87 @@
+[
+  {
+    "source": "Tetragon",
+    "log": "process exec /bin/sh -i (parent bash) - container execution",
+    "analysis": {
+      "classification": "SUSPICIOUS",
+      "confidence": 85.0,
+      "severity": "HIGH",
+      "explanation": "Log operations agent fallback due to error: [Errno 111] Connection refused",
+      "recommendation": "Review logs manually.",
+      "models_used": {
+        "offensive_security": "AlicanKiraz0/Cybersecurity-BaronLLM_Offensive_Security_LLM_Q6_K_GGUF",
+        "log_parsing": "Rapnss/DevOps-Ultra-125M",
+        "devops_reasoning": "andrebassi/devops-sensei-llama3.2-1b-merged",
+        "incident_notes": "nadtoka/llama-3.2-devops-notes-model"
+      }
+    }
+  },
+  {
+    "source": "Falco",
+    "log": "Rule: Read sensitive file untrusted - /etc/shadow read by www-data",
+    "analysis": {
+      "classification": "SUSPICIOUS",
+      "confidence": 85.0,
+      "severity": "HIGH",
+      "explanation": "Log operations agent fallback due to error: [Errno 111] Connection refused",
+      "recommendation": "Review logs manually.",
+      "models_used": {
+        "offensive_security": "AlicanKiraz0/Cybersecurity-BaronLLM_Offensive_Security_LLM_Q6_K_GGUF",
+        "log_parsing": "Rapnss/DevOps-Ultra-125M",
+        "devops_reasoning": "andrebassi/devops-sensei-llama3.2-1b-merged",
+        "incident_notes": "nadtoka/llama-3.2-devops-notes-model"
+      }
+    }
+  },
+  {
+    "source": "Istio",
+    "log": "IngressGateway: SQL Injection payload detected: 'union select username, password'",
+    "analysis": {
+      "classification": "SUSPICIOUS",
+      "confidence": 85.0,
+      "severity": "HIGH",
+      "explanation": "Log operations agent fallback due to error: [Errno 111] Connection refused",
+      "recommendation": "Review logs manually.",
+      "models_used": {
+        "offensive_security": "AlicanKiraz0/Cybersecurity-BaronLLM_Offensive_Security_LLM_Q6_K_GGUF",
+        "log_parsing": "Rapnss/DevOps-Ultra-125M",
+        "devops_reasoning": "andrebassi/devops-sensei-llama3.2-1b-merged",
+        "incident_notes": "nadtoka/llama-3.2-devops-notes-model"
+      }
+    }
+  },
+  {
+    "source": "Jenkins",
+    "log": "Build #142 failed: Grype found CRITICAL CVE-2026-24486 in composer dependencies",
+    "analysis": {
+      "classification": "SUSPICIOUS",
+      "confidence": 85.0,
+      "severity": "HIGH",
+      "explanation": "Log operations agent fallback due to error: [Errno 111] Connection refused",
+      "recommendation": "Review logs manually.",
+      "models_used": {
+        "offensive_security": "AlicanKiraz0/Cybersecurity-BaronLLM_Offensive_Security_LLM_Q6_K_GGUF",
+        "log_parsing": "Rapnss/DevOps-Ultra-125M",
+        "devops_reasoning": "andrebassi/devops-sensei-llama3.2-1b-merged",
+        "incident_notes": "nadtoka/llama-3.2-devops-notes-model"
+      }
+    }
+  },
+  {
+    "source": "Kyverno",
+    "log": "PolicyViolation: disallow-root-execution triggered on pod auth-users-service",
+    "analysis": {
+      "classification": "SUSPICIOUS",
+      "confidence": 85.0,
+      "severity": "HIGH",
+      "explanation": "Log operations agent fallback due to error: [Errno 111] Connection refused",
+      "recommendation": "Review logs manually.",
+      "models_used": {
+        "offensive_security": "AlicanKiraz0/Cybersecurity-BaronLLM_Offensive_Security_LLM_Q6_K_GGUF",
+        "log_parsing": "Rapnss/DevOps-Ultra-125M",
+        "devops_reasoning": "andrebassi/devops-sensei-llama3.2-1b-merged",
+        "incident_notes": "nadtoka/llama-3.2-devops-notes-model"
+      }
+    }
+  }
+]

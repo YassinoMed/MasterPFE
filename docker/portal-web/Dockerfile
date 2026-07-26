@@ -85,6 +85,7 @@ COPY --chown=10001:10001 --from=optimizer /var/www/html/artisan ./artisan
 
 # Copier le package partagé indispensable pour l'autoloader
 COPY --chown=10001:10001 --from=optimizer /var/services-laravel/shared-security /var/services-laravel/shared-security
+COPY --chown=10001:10001 --from=optimizer /var/services-laravel/shared-security /var/shared-security
 
 # Définir l'environnement de production PSS Restricted
 ENV CREATE_DOTENV=false \

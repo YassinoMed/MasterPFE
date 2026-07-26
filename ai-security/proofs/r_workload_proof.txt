@@ -1,0 +1,6 @@
+--- Scenario 1: Clean Workload ---
+R_workload = 2.12
+
+--- Scenario 2: Active Attack ---
+R_workload = 36.00
+

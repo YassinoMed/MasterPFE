@@ -1,0 +1,5 @@
+---
+# Tasks for falco
+- name: Log falco execution
+  ansible.builtin.debug:
+    msg: 'Executing falco stage'

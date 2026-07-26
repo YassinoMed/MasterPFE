@@ -75,6 +75,7 @@ spec:
         runAsNonRoot: true
         runAsUser: 1000
         capabilities: { drop: [ALL] }
+      resources: { requests: { cpu: 10m, memory: 16Mi }, limits: { cpu: 50m, memory: 64Mi } }
 YAML
 apply_expect_admit "compliant-pod" "${OK_POD}"
 

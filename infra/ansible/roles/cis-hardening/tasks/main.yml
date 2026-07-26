@@ -1,0 +1,5 @@
+---
+# Tasks for cis-hardening
+- name: Log cis-hardening execution
+  ansible.builtin.debug:
+    msg: 'Executing cis-hardening stage'

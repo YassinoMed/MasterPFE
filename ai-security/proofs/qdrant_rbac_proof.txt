@@ -1,0 +1,49 @@
+--- Standard User Query ---
+{
+  "collection_name": "secure_knowledge_base",
+  "vector": [
+    0.1,
+    0.2,
+    0.3
+  ],
+  "limit": 5,
+  "filter": {
+    "must": [
+      {
+        "key": "allowed_roles",
+        "match": {
+          "any": [
+            "ROLE_EMPLOYEE"
+          ]
+        }
+      }
+    ]
+  },
+  "with_payload": true
+}
+
+--- Executive User Query ---
+{
+  "collection_name": "secure_knowledge_base",
+  "vector": [
+    0.1,
+    0.2,
+    0.3
+  ],
+  "limit": 5,
+  "filter": {
+    "must": [
+      {
+        "key": "allowed_roles",
+        "match": {
+          "any": [
+            "ROLE_EMPLOYEE",
+            "ROLE_EXECUTIVE",
+            "ROLE_FINANCE"
+          ]
+        }
+      }
+    ]
+  },
+  "with_payload": true
+}

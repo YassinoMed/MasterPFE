@@ -45,6 +45,8 @@ RUN apk add --no-cache icu-libs libpq sqlite-libs libzip \
 COPY --from=builder /usr/local/lib/php/extensions /usr/local/lib/php/extensions
 COPY --from=builder /usr/local/etc/php/conf.d /usr/local/etc/php/conf.d
 COPY --from=builder /var/www/html /var/www/html
+COPY --from=builder /var/www/shared-security /var/www/shared-security
+COPY --from=builder /var/www/shared-security /var/shared-security
 
 WORKDIR /var/www/html
 

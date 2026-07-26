@@ -80,7 +80,7 @@ provider "helm" {
 
 # ── AWS ──────────────────────────────────────────────────────────────────
 provider "aws" {
-  region  = var.aws_region
+  region = var.aws_region
   default_tags {
     tags = {
       Environment = var.environment
@@ -113,7 +113,7 @@ provider "azuread" {}
 
 # ── GCP ──────────────────────────────────────────────────────────────────
 provider "google" {
-  region = var.gcp_region
+  region  = var.gcp_region
   project = var.gcp_project_id != "" ? var.gcp_project_id : null
 }
 

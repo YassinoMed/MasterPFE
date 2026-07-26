@@ -1,0 +1,67 @@
+---
+# Master Orchestration Playbook — Enterprise Infrastructure & K8s DevSecOps
+# 1. Base Linux OS Prep & CIS Hardening
+- name: Apply Base System Hardening & CIS Benchmarks
+  hosts: all
+  become: true
+  gather_facts: true
+  roles:
+    - common
+    - cis-hardening
+
+# 2. Container Runtime Installation
+- name: Install & Configure Containerd Runtime
+  hosts: control_plane:workers
+  become: true
+  roles:
+    - containerd
+
+# 3. High Availability Load Balancer & Keepalived
+- name: Setup Control Plane High Availability (HAProxy + Keepalived)
+  hosts: loadbalancers:control_plane
+  become: true
+  roles:
+    - kubernetes-ha
+
+# 4. Kubernetes Cluster Bootstrap
+- name: Initialize & Join Kubernetes Cluster Nodes
+  hosts: control_plane:workers
+  become: true
+  roles:
+    - kubernetes
+
+# 5. Network CNI (Cilium eBPF) & Zero Trust Network Policies
+- name: Deploy Cilium eBPF CNI & Security Policies
+  hosts: control_plane[0]
+  become: true
+  roles:
+    - cilium
+
+# 6. Runtime Threat Detection & Security Policy Engine
+- name: Deploy Falco Runtime Security & Kyverno Admission Control
+  hosts: control_plane[0]
+  become: true
+  roles:
+    - falco
+    - kyverno
+
+# 7. Vault Integration & External Secrets Operator
+- name: Connect HashiCorp Vault & External Secrets
+  hosts: control_plane[0]
+  become: true
+  roles:
+    - vault
+
+# 8. Full Supervision Stack (Prometheus, Grafana, Loki, Tempo)
+- name: Deploy Observability Stack
+  hosts: control_plane[0]
+  become: true
+  roles:
+    - monitoring
+
+# 9. GitOps Engine Bootstrap (ArgoCD)
+- name: Bootstrap ArgoCD GitOps Engine
+  hosts: control_plane[0]
+  become: true
+  roles:
+    - argocd

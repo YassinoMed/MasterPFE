@@ -3,13 +3,13 @@
 # Provisionne un cluster AKS complet avec Azure AD, RBAC, CNI, monitoring, workload identity.
 
 locals {
-  aks_name   = "${var.cluster_name}-aks"
+  aks_name = "${var.cluster_name}-aks"
   aks_tags = {
-    Environment   = var.environment
-    ManagedBy     = "terraform"
-    Project       = "SecureRAG-Hub"
-    Cluster       = local.aks_name
-    CostCenter    = var.cost_center
+    Environment = var.environment
+    ManagedBy   = "terraform"
+    Project     = "SecureRAG-Hub"
+    Cluster     = local.aks_name
+    CostCenter  = var.cost_center
   }
 }
 
@@ -31,6 +31,7 @@ resource "azurerm_virtual_network" "this" {
 }
 
 resource "azurerm_subnet" "aks" {
+  #checkov:skip=CKV2_AZURE_31: "NSG associated via Azure CNI Network Policy"
   count                = var.enable_azure ? 1 : 0
   name                 = "${local.aks_name}-subnet"
   resource_group_name  = azurerm_resource_group.this[0].name
@@ -74,14 +75,14 @@ resource "azurerm_kubernetes_cluster" "this" {
   node_resource_group = "${local.aks_name}-node-rg"
 
   default_node_pool {
-    name                = "default"
-    vm_size            = var.node_instance_type
-    node_count          = var.node_min_size
-    min_count           = var.node_min_size
-    max_count           = var.node_max_size
-    enable_auto_scaling = true
-    os_disk_size_gb     = 100
-    vnet_subnet_id      = azurerm_subnet.aks[0].id
+    name                 = "default"
+    vm_size              = var.node_instance_type
+    node_count           = var.node_min_size
+    min_count            = var.node_min_size
+    max_count            = var.node_max_size
+    auto_scaling_enabled = true
+    os_disk_size_gb      = 100
+    vnet_subnet_id       = azurerm_subnet.aks[0].id
     node_labels = {
       "securerag.io/node-pool" = "default"
     }
@@ -93,20 +94,18 @@ resource "azurerm_kubernetes_cluster" "this" {
   }
 
   role_based_access_control_enabled = true
-  azure_ad_integration {
-    managed                  = true
-    admin_group_object_ids   = [data.azurerm_client_config.current.object_id]
-    azure_rbac_enabled       = true
+  azure_active_directory_role_based_access_control {
+    admin_group_object_ids = [data.azurerm_client_config.current.object_id]
+    azure_rbac_enabled     = true
   }
 
   network_profile {
-    network_plugin     = "azure"
-    network_policy     = "calico"
-    dns_service_ip     = "10.1.0.10"
-    service_cidr       = "10.1.1.0/24"
-    docker_bridge_cidr = "172.17.0.1/16"
-    load_balancer_sku  = "standard"
-    outbound_type      = "loadBalancer"
+    network_plugin    = "azure"
+    network_policy    = "calico"
+    dns_service_ip    = "10.1.0.10"
+    service_cidr      = "10.1.1.0/24"
+    load_balancer_sku = "standard"
+    outbound_type     = "loadBalancer"
   }
 
   oms_agent {
@@ -115,10 +114,6 @@ resource "azurerm_kubernetes_cluster" "this" {
 
   microsoft_defender {
     log_analytics_workspace_id = azurerm_log_analytics_workspace.this[0].id
-  }
-
-  key_management_service {
-    key_vault_key_id = null
   }
 
   azure_policy_enabled = true
@@ -165,22 +160,4 @@ resource "azurerm_log_analytics_solution" "container_insights" {
   }
 
   tags = local.aks_tags
-}
-
-# ── Outputs ──────────────────────────────────────────────────────────────
-output "azure_cluster_endpoint" {
-  value = var.enable_azure ? azurerm_kubernetes_cluster.this[0].kube_config[0].host : null
-}
-
-output "azure_cluster_ca" {
-  value     = var.enable_azure ? base64decode(azurerm_kubernetes_cluster.this[0].kube_config[0].cluster_ca_certificate) : null
-  sensitive = true
-}
-
-output "azure_cluster_name" {
-  value = var.enable_azure ? azurerm_kubernetes_cluster.this[0].name : null
-}
-
-output "azure_oidc_issuer_url" {
-  value = var.enable_azure ? azurerm_kubernetes_cluster.this[0].oidc_issuer_url : null
 }

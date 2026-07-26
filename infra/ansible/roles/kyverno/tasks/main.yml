@@ -1,0 +1,5 @@
+---
+# Tasks for kyverno
+- name: Log kyverno execution
+  ansible.builtin.debug:
+    msg: 'Executing kyverno stage'

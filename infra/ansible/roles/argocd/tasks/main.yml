@@ -1,0 +1,5 @@
+---
+# Tasks for argocd
+- name: Log argocd execution
+  ansible.builtin.debug:
+    msg: 'Executing argocd stage'

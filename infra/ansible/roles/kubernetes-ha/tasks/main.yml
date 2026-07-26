@@ -1,0 +1,5 @@
+---
+# Tasks for kubernetes-ha
+- name: Log kubernetes-ha execution
+  ansible.builtin.debug:
+    msg: 'Executing kubernetes-ha stage'

@@ -15,9 +15,9 @@
 # ── Cluster kind ───────────────────────────────────────────────────────
 
 resource "kind_cluster" "secure_rag" {
-  name       = var.cluster_name
+  name           = var.cluster_name
   wait_for_ready = true
-  node_image = "kindest/node:v1.33.1"
+  node_image     = "kindest/node:v1.33.1"
 
   kind_config {
     kind        = "Cluster"
@@ -53,14 +53,14 @@ resource "kind_cluster" "secure_rag" {
     node {
       role = "worker"
       labels = {
-        "securerag.io/node-pool" = "app"
+        "securerag.io/node-pool"      = "app"
         "topology.kubernetes.io/zone" = "local-a"
       }
     }
     node {
       role = "worker"
       labels = {
-        "securerag.io/node-pool" = "app"
+        "securerag.io/node-pool"      = "app"
         "topology.kubernetes.io/zone" = "local-b"
       }
     }
@@ -74,8 +74,8 @@ resource "docker_image" "registry" {
 }
 
 resource "docker_container" "registry" {
-  name  = "kind-registry"
-  image = docker_image.registry.image_id
+  name    = "kind-registry"
+  image   = docker_image.registry.image_id
   restart = "always"
 
   ports {
