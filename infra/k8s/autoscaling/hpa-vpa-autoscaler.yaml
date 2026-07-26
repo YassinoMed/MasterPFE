@@ -1,0 +1,38 @@
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: securerag-portal-web-hpa
+  namespace: securerag-hub
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: portal-web
+  minReplicas: 2
+  maxReplicas: 10
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80
+---
+apiVersion: autoscaling.k8s.io/v1
+kind: VerticalPodAutoscaler
+metadata:
+  name: securerag-portal-web-vpa
+  namespace: securerag-hub
+spec:
+  targetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: portal-web
+  updatePolicy:
+    updateMode: "Off" # Recommendation Mode Only

@@ -1,0 +1,49 @@
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: enterprise-security-guardrails
+spec:
+  validationFailureAction: Enforce
+  background: true
+  rules:
+  - name: disallow-latest-tag
+    match:
+      any:
+      - resources:
+          kinds:
+          - Pod
+    validate:
+      message: "Using 'latest' image tag is prohibited in production enterprise workloads."
+      pattern:
+        spec:
+          containers:
+          - image: "!*:latest"
+
+  - name: require-security-context
+    match:
+      any:
+      - resources:
+          kinds:
+          - Pod
+    validate:
+      message: "Containers must define non-root securityContext."
+      pattern:
+        spec:
+          securityContext:
+            runAsNonRoot: true
+
+  - name: require-resource-limits
+    match:
+      any:
+      - resources:
+          kinds:
+          - Pod
+    validate:
+      message: "Containers must define CPU and Memory resource limits."
+      pattern:
+        spec:
+          containers:
+          - resources:
+              limits:
+                cpu: "?*"
+                memory: "?*"

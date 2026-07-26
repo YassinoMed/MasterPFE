@@ -1,0 +1,58 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: securerag-enterprise-alerts
+  namespace: securerag-monitoring
+  labels:
+    release: prometheus
+spec:
+  groups:
+  - name: kubernetes-control-plane-alerts
+    rules:
+    - alert: APIServerHighLatency
+      expr: histogram_quantile(0.99, sum(rate(apiserver_request_duration_seconds_bucket[5m])) by (le)) > 1
+      for: 5m
+      labels:
+        severity: critical
+      annotations:
+        summary: "API Server latency 99th percentile > 1s"
+
+    - alert: EtcdHighCommitDuration
+      expr: histogram_quantile(0.99, sum(rate(etcd_disk_backend_commit_duration_seconds_bucket[5m])) by (le)) > 0.5
+      for: 5m
+      labels:
+        severity: critical
+      annotations:
+        summary: "etcd disk commit latency > 500ms"
+
+    - alert: NodeHighCPUUtilization
+      expr: 100 - (avg by (instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 85
+      for: 10m
+      labels:
+        severity: warning
+      annotations:
+        summary: "Node CPU utilization exceeds 85%"
+
+    - alert: NodeHighMemoryUtilization
+      expr: (node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes) / node_memory_MemTotal_bytes * 100 > 90
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: "Node memory usage exceeds 90%"
+
+    - alert: PodCrashLooping
+      expr: rate(kube_pod_container_status_restarts_total[5m]) * 300 > 2
+      for: 5m
+      labels:
+        severity: critical
+      annotations:
+        summary: "Pod is crashlooping rapidly"
+
+    - alert: FalcoSecurityViolation
+      expr: rate(falco_events_total{priority="CRITICAL"}[5m]) > 0
+      for: 1m
+      labels:
+        severity: critical
+      annotations:
+        summary: "Falco detected critical security violation event"

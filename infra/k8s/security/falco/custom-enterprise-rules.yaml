@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: falco-custom-enterprise-rules
+  namespace: falco
+data:
+  custom_rules.yaml: |
+    - rule: Container Escape Detection
+      desc: Detect attempts to escape container namespace
+      condition: container and proc.name in (nsenter, unshare)
+      output: "Container escape attempt detected (user=%user.name command=%proc.cmdline container_id=%container.id image=%container.image.repository)"
+      priority: CRITICAL
+      tags: [container, security, escape]
+
+    - rule: Execution of Suspicious Binaries
+      desc: Detect execution of suspicious network scan binaries
+      condition: container and proc.name in (nmap, masscan, zmap, nc, netcat)
+      output: "Suspicious binary execution inside container (proc=%proc.name user=%user.name container=%container.name)"
+      priority: WARNING
+      tags: [network, reconnaissance]
+
+    - rule: Privilege Escalation Attempt
+      desc: Detect privilege escalation attempt via setuid or sudo
+      condition: container and proc.name in (sudo, su) and user.uid != 0
+      output: "Privilege escalation attempt in container (user=%user.name proc=%proc.cmdline)"
+      priority: HIGH
+      tags: [privilege, security]

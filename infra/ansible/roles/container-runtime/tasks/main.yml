@@ -1,0 +1,41 @@
+---
+# Role: container-runtime
+# Containerd Runtime Installation & Configuration
+
+- name: Load required kernel modules for containerd
+  modprobe:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - overlay
+    - br_netfilter
+
+- name: Ensure kernel modules load on boot
+  copy:
+    dest: /etc/modules-load.d/k8s.conf
+    content: |
+      overlay
+      br_netfilter
+
+- name: Install containerd package
+  apt:
+    name: containerd
+    state: present
+    update_cache: yes
+
+- name: Create containerd config directory
+  file:
+    path: /etc/containerd
+    state: directory
+    mode: '0755'
+
+- name: Generate default containerd configuration with SystemdCgroup enabled
+  shell: containerd config default | sed 's/SystemdCgroup = false/SystemdCgroup = true/g' > /etc/containerd/config.toml
+  args:
+    creates: /etc/containerd/config.toml
+
+- name: Enable and restart containerd
+  systemd:
+    name: containerd
+    enabled: yes
+    state: restarted

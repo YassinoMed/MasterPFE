@@ -1,0 +1,40 @@
+---
+# Role: security-agent
+# Falco Kernel Runtime Security Agent & CIS Benchmark Setup
+
+- name: Add Falco GPG key
+  apt_key:
+    url: https://falco.org/repo/falcosec.gpg
+    state: present
+
+- name: Add Falco APT repository
+  apt_repository:
+    repo: deb https://download.falco.org/packages/deb stable main
+    state: present
+
+- name: Install Falco and eBPF Probe drivers
+  apt:
+    name:
+      - falco
+      - linux-headers-generic
+    state: present
+    update_cache: yes
+
+- name: Enable and start Falco Security Agent
+  systemd:
+    name: falco
+    enabled: yes
+    state: started
+
+- name: Download kube-bench for CIS Kubernetes Benchmark audit
+  get_url:
+    url: https://github.com/aquasecurity/kube-bench/releases/download/v0.7.0/kube-bench_0.7.0_linux_amd64.tar.gz
+    dest: /tmp/kube-bench.tar.gz
+    mode: '0644'
+
+- name: Extract kube-bench
+  unarchive:
+    src: /tmp/kube-bench.tar.gz
+    dest: /usr/local/bin
+    remote_src: yes
+    creates: /usr/local/bin/kube-bench

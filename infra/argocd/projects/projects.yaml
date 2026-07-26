@@ -1,0 +1,18 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: securerag-enterprise
+  namespace: argocd
+spec:
+  description: Enterprise SecureRAG Hub Multi-Cluster Project
+  sourceRepos:
+  - 'https://github.com/YassinoMed/MasterPFE.git'
+  destinations:
+  - namespace: '*'
+    server: '*'
+  clusterResourceWhitelist:
+  - group: '*'
+    kind: '*'
+  namespaceResourceWhitelist:
+  - group: '*'
+    kind: '*'

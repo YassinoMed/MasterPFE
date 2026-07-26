@@ -1,0 +1,53 @@
+---
+# Role: monitoring-agent
+# Node Exporter & Promtail Agent Installation for Node Monitoring
+
+- name: Create node_exporter system group
+  group:
+    name: node_exporter
+    state: present
+
+- name: Create node_exporter system user
+  user:
+    name: node_exporter
+    group: node_exporter
+    shell: /sbin/nologin
+    system: yes
+
+- name: Install Node Exporter binary
+  get_url:
+    url: https://github.com/prometheus/node_exporter/releases/download/v1.7.0/node_exporter-1.7.0.linux-amd64.tar.gz
+    dest: /tmp/node_exporter.tar.gz
+    mode: '0644'
+
+- name: Extract Node Exporter
+  unarchive:
+    src: /tmp/node_exporter.tar.gz
+    dest: /usr/local/bin
+    remote_src: yes
+    extra_opts: [--strip-components=1]
+    creates: /usr/local/bin/node_exporter
+
+- name: Create Systemd service for Node Exporter
+  copy:
+    dest: /etc/systemd/system/node_exporter.service
+    content: |
+      [Unit]
+      Description=Node Exporter
+      Wants=network-online.target
+      After=network-online.target
+
+      [Service]
+      User=node_exporter
+      Group=node_exporter
+      Type=simple
+      ExecStart=/usr/local/bin/node_exporter
+
+      [Install]
+      WantedBy=multi-user.target
+
+- name: Start and enable Node Exporter
+  systemd:
+    name: node_exporter
+    enabled: yes
+    state: started

@@ -1,0 +1,50 @@
+# Dedicated Worker Pools Topology Definition
+
+# Pool 1: app-workers
+# Labels: node-role.kubernetes.io/app-worker=true, securerag.io/node-pool=app-workers
+# Taints: none
+
+# Pool 2: ai-workers
+# Labels: node-role.kubernetes.io/ai-worker=true, securerag.io/node-pool=ai-workers
+# Taint: gpu=true:NoSchedule
+
+# Pool 3: security-workers
+# Labels: node-role.kubernetes.io/security-worker=true, securerag.io/node-pool=security-workers
+# Taint: security=true:NoSchedule
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: node-pool-topology-config
+  namespace: kube-system
+data:
+  app-workers.json: |
+    {
+      "pool": "app-workers",
+      "labels": {
+        "node-role.kubernetes.io/app-worker": "true",
+        "securerag.io/node-pool": "app-workers"
+      }
+    }
+  ai-workers.json: |
+    {
+      "pool": "ai-workers",
+      "labels": {
+        "node-role.kubernetes.io/ai-worker": "true",
+        "securerag.io/node-pool": "ai-workers"
+      },
+      "taints": [
+        "gpu=true:NoSchedule"
+      ]
+    }
+  security-workers.json: |
+    {
+      "pool": "security-workers",
+      "labels": {
+        "node-role.kubernetes.io/security-worker": "true",
+        "securerag.io/node-pool": "security-workers"
+      },
+      "taints": [
+        "security=true:NoSchedule"
+      ]
+    }

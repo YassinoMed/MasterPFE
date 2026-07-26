@@ -1,0 +1,15 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: securerag-hub-podmonitor
+  namespace: securerag-monitoring
+  labels:
+    release: prometheus
+spec:
+  selector:
+    matchLabels:
+      prometheus.io/scrape: "true"
+  podMetricsEndpoints:
+  - port: http
+    path: /metrics
+    interval: 15s

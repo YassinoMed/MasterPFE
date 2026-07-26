@@ -128,3 +128,16 @@ variable "cost_center" {
   default     = "securerag-hub"
   description = "Centre de coût pour le tagging des ressources cloud"
 }
+
+variable "vpc_cidr" {
+  type        = string
+  default     = "10.0.0.0/16"
+  description = "CIDR block for VPC"
+}
+
+variable "instance_type" {
+  type        = string
+  default     = "t3.medium"
+  description = "Default compute instance type"
+}
+

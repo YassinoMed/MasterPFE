@@ -1,0 +1,26 @@
+apiVersion: serving.kserve.io/v1beta1
+kind: InferenceService
+metadata:
+  name: securerag-llm-embeddings
+  namespace: securerag-hub
+spec:
+  predictor:
+    model:
+      modelFormat:
+        name: pytorch
+      resources:
+        limits:
+          cpu: "4"
+          memory: 8Gi
+          nvidia.com/gpu: "1"
+        requests:
+          cpu: "2"
+          memory: 4Gi
+          nvidia.com/gpu: "1"
+    tolerations:
+    - key: gpu
+      operator: Equal
+      value: "true"
+      effect: NoSchedule
+    nodeSelector:
+      node-role.kubernetes.io/ai: "true"

@@ -1,0 +1,52 @@
+---
+# Role: os-hardening
+# OS Security Hardening & Kernel Tuning for Kubernetes Nodes
+
+- name: Update apt cache and install base security packages
+  apt:
+    name:
+      - curl
+      - gnupg2
+      - ca-certificates
+      - apt-transport-https
+      - software-properties-common
+      - chrony
+      - ufw
+      - fail2ban
+    state: present
+    update_cache: yes
+
+- name: Enable and configure Chrony NTP
+  systemd:
+    name: chrony
+    enabled: yes
+    state: started
+
+- name: Apply sysctl kernel tuning for Kubernetes network routing
+  sysctl:
+    name: "{{ item.name }}"
+    value: "{{ item.value }}"
+    state: present
+    reload: yes
+  loop:
+    - { name: 'net.bridge.bridge-nf-call-iptables', value: '1' }
+    - { name: 'net.bridge.bridge-nf-call-ip6tables', value: '1' }
+    - { name: 'net.ipv4.ip_forward', value: '1' }
+    - { name: 'vm.max_map_count', value: '262144' }
+    - { name: 'fs.file-max', value: '2097152' }
+
+- name: Secure SSH Configuration
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: "{{ item.regexp }}"
+    line: "{{ item.line }}"
+    state: present
+  loop:
+    - { regexp: '^#?PermitRootLogin', line: 'PermitRootLogin prohibit-password' }
+    - { regexp: '^#?PasswordAuthentication', line: 'PasswordAuthentication no' }
+    - { regexp: '^#?X11Forwarding', line: 'X11Forwarding no' }
+
+- name: Enable UFW Firewall
+  ufw:
+    state: enabled
+    policy: deny

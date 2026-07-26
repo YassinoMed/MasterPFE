@@ -1,0 +1,18 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: securerag-hub-servicemonitor
+  namespace: securerag-monitoring
+  labels:
+    release: prometheus
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/part-of: securerag-hub
+  namespaceSelector:
+    matchNames:
+    - securerag-hub
+  endpoints:
+  - port: http
+    interval: 15s
+    path: /metrics

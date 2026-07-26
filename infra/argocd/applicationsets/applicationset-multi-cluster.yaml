@@ -1,0 +1,46 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: securerag-hub-multi-environment
+  namespace: argocd
+spec:
+  generators:
+  - list:
+      elements:
+      - env: dev
+        cluster: securerag-dev
+        server: https://kubernetes.default.svc
+        branch: main
+      - env: staging
+        cluster: securerag-staging
+        server: https://staging-k8s.internal:6443
+        branch: release/staging
+      - env: production
+        cluster: securerag-prod
+        server: https://prod-k8s.internal:6443
+        branch: release/production
+  template:
+    metadata:
+      name: 'securerag-hub-{{env}}'
+    spec:
+      project: securerag-enterprise
+      source:
+        repoURL: 'https://github.com/YassinoMed/MasterPFE.git'
+        targetRevision: '{{branch}}'
+        path: 'infra/k8s/base'
+      destination:
+        server: '{{server}}'
+        namespace: securerag-hub
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+        - CreateNamespace=true
+        - ApplyOutOfSyncOnly=true
+        retry:
+          limit: 5
+          backoff:
+            duration: 5s
+            factor: 2
+            maxDuration: 3m

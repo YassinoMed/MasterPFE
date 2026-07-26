@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: vault-k8s-auth-config
+  namespace: vault
+data:
+  configure-auth.sh: |
+    #!/bin/sh
+    vault auth enable kubernetes
+    vault write auth/kubernetes/config \
+      kubernetes_host="https://kubernetes.default.svc:443" \
+      issuer="https://kubernetes.default.svc"
+
+    vault write auth/kubernetes/role/securerag-role \
+      bound_service_account_names=sa-portal-web \
+      bound_service_account_namespaces=securerag-hub \
+      policies=securerag-policy \
+      ttl=1h
