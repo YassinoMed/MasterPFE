@@ -378,6 +378,8 @@ pipeline {
           archiveArtifacts allowEmptyArchive: true, artifacts: 'reports/k6/**'
         }
       }
+    }
+
     stage('Ansible Configuration & Hardening') {
       when { expression { return env.SKIPPABLE_DOCS != 'true' } }
       steps {
