@@ -51,7 +51,9 @@ resource "azurerm_log_analytics_workspace" "this" {
 }
 
 # ── Azure AD Integration ─────────────────────────────────────────────────
-data "azurerm_client_config" "current" {}
+data "azurerm_client_config" "current" {
+  count = var.enable_azure ? 1 : 0
+}
 
 resource "azuread_application" "aks" {
   count        = var.enable_azure ? 1 : 0
@@ -95,7 +97,7 @@ resource "azurerm_kubernetes_cluster" "this" {
 
   role_based_access_control_enabled = true
   azure_active_directory_role_based_access_control {
-    admin_group_object_ids = [data.azurerm_client_config.current.object_id]
+    admin_group_object_ids = [data.azurerm_client_config.current[0].object_id]
     azure_rbac_enabled     = true
   }
 

@@ -62,15 +62,17 @@ provider "kubernetes" {
 }
 
 provider "kubectl" {
+  config_path = "~/.kube/config"
   host                   = try(kind_cluster.secure_rag.endpoint, "https://127.0.0.1:6443")
   client_certificate     = try(kind_cluster.secure_rag.client_certificate, "")
   client_key             = try(kind_cluster.secure_rag.client_key, "")
   cluster_ca_certificate = try(kind_cluster.secure_rag.cluster_ca_certificate, "")
-  load_config_file       = false
+  load_config_file       = true
 }
 
 provider "helm" {
   kubernetes {
+    config_path = "~/.kube/config"
     host                   = try(kind_cluster.secure_rag.endpoint, "https://127.0.0.1:6443")
     client_certificate     = try(kind_cluster.secure_rag.client_certificate, "")
     client_key             = try(kind_cluster.secure_rag.client_key, "")
@@ -80,7 +82,12 @@ provider "helm" {
 
 # ── AWS ──────────────────────────────────────────────────────────────────
 provider "aws" {
-  region = var.aws_region
+  region                      = var.aws_region
+  skip_credentials_validation = true
+  skip_requesting_account_id  = true
+  skip_metadata_api_check     = true
+  access_key                  = "mock"
+  secret_key                  = "mock"
   default_tags {
     tags = {
       Environment = var.environment
@@ -94,27 +101,19 @@ provider "aws" {
 # ── Azure ────────────────────────────────────────────────────────────────
 provider "azurerm" {
   resource_provider_registrations = "none"
-  features {
-    key_vault {
-      purge_soft_delete_on_destroy    = false
-      recover_soft_deleted_key_vaults = true
-    }
-    resource_group {
-      prevent_deletion_if_contains_resources = false
-    }
-    virtual_machine {
-      delete_os_disk_on_deletion     = true
-      skip_shutdown_and_force_delete = false
-    }
-  }
+  features {}
 }
 
-provider "azuread" {}
+provider "azuread" {
+  use_cli = false
+}
 
 # ── GCP ──────────────────────────────────────────────────────────────────
 provider "google" {
-  region  = var.gcp_region
-  project = var.gcp_project_id != "" ? var.gcp_project_id : null
+  region                = var.gcp_region
+  project               = var.gcp_project_id != "" ? var.gcp_project_id : "securerag-mock-project"
+  credentials           = "{\"type\": \"service_account\", \"project_id\": \"securerag-mock-project\"}"
+  user_project_override = false
 }
 
 provider "tls" {}

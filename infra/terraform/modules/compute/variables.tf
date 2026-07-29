@@ -27,7 +27,7 @@ variable "instance_type" {
 variable "ami_id" {
   description = "AMI ID for Ubuntu Server"
   type        = string
-  default     = "" # Will lookup Ubuntu 24.04 LTS if empty
+  default     = "ami-0123456789abcdef0" # Static fallback to avoid AWS DescribeImages API lookup during local plans
 }
 
 variable "ssh_public_key" {
