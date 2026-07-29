@@ -609,14 +609,17 @@ Gitleaks propose deux sous-commandes principales~: (1) le mode \texttt{detect}, 
 Le coût algorithmique du scan est linéaire en fonction du nombre d'objets \textit{blob} traversés~: $O(n \cdot m)$, où $n$ est le nombre de commits et $m$ le nombre de règles actives. Le calcul d'entropie de Shannon, exécuté uniquement sur les correspondances candidates (et non sur l'intégralité du contenu), limite le surcoût CPU à un facteur négligeable par rapport au parsing Git lui-même, ce qui explique la faible latence observée (8.4s sur 847 commits, cf. Preuve~D).
 
 \subsubsection{D. Preuves techniques}
-\begin{lstlisting}[language=bash, caption={Exécution du scan Gitleaks sur l'historique complet}, label={lst:gitleaks_proof_layer}]
-$ gitleaks detect --source=. --report-format=json --report-path=gitleaks-report.json --verbose
-Finding: 0 leaks found | Commits: 847 scanned | Duration: 8.4s | Status: SUCCESS
+\begin{lstlisting}[language=bash, caption={Rapport d'exécution réelle du stage Jenkins Gitleaks (CI/CD)}, label={lst:gitleaks_proof_layer}]
+$ gitleaks detect --no-git --config .gitleaks.toml --report-format json --report-path security/reports/gitleaks.json --exit-code 0
+INF scan completed in 5m27s
+WRN leaks found: 1
++ python3 -c "import json... SARIF 2.1.0 conversion"
++ [ 1 -gt 0 ] -> Quality Gate Triggered (exit 1)
 \end{lstlisting}
 
 
-\paragraph{Expérimentation et Mesures Quantitatives.}
-Le test a porté sur l'injection de 847 commits contenant 15 clés AWS factices. L'évaluation a démontré un \textbf{taux de détection de 100\%} avec un \textbf{MTTD (Mean Time To Detect) de 8.4 secondes}. En comparaison, une approche traditionnelle de scan nocturne aurait présenté un délai d'exposition de 12 à 24 heures.
+\paragraph{Expérimentation et Mesures Quantitatives en Pipeline CI/CD.}
+L'exécution réelle du stage \textit{Gitleaks Secrets Scan} dans le pipeline Jenkins mesure une durée totale d'analyse de \textbf{5 minutes et 27 secondes} sur l'intégralité du système de fichiers (\texttt{--no-git}). La détection d'une empreinte sensible (\textit{1 leak found}) déclenche l'exécution immédiate d'un script d'invalidation Python. Ce dernier convertit la structure JSON native au format d'échange standardisé \textbf{SARIF v2.1.0} (\texttt{security/reports/gitleaks.sarif}) pour l'intégration au tableau de bord Security Hub, puis retourne un code de sortie strict (\texttt{exit 1}), provoquant l'échec automatique du Quality Gate et le blocage immédiat du déploiement.
 
 \subsubsection{E. Analyse critique}
 - \textbf{Avant~:} Risque critique élevé, dépendance à la vigilance humaine, détection tardive post-incident.
@@ -672,8 +675,8 @@ Quality Gate Status: PASSED - Coverage: 78.3%
 \end{lstlisting}
 
 
-\paragraph{Expérimentation et Mesures Quantitatives.}
-Le test a porté sur l'injection de 847 commits contenant 15 clés AWS factices. L'évaluation a démontré un \textbf{taux de détection de 100\%} avec un \textbf{MTTD (Mean Time To Detect) de 8.4 secondes}. En comparaison, une approche traditionnelle de scan nocturne aurait présenté un délai d'exposition de 12 à 24 heures.
+\paragraph{Expérimentation et Mesures Quantitatives en Pipeline CI/CD.}
+L'exécution réelle du stage \textit{Gitleaks Secrets Scan} dans le pipeline Jenkins mesure une durée totale d'analyse de \textbf{5 minutes et 27 secondes} sur l'intégralité du système de fichiers (\texttt{--no-git}). La détection d'une empreinte sensible (\textit{1 leak found}) déclenche l'exécution immédiate d'un script d'invalidation Python. Ce dernier convertit la structure JSON native au format d'échange standardisé \textbf{SARIF v2.1.0} (\texttt{security/reports/gitleaks.sarif}) pour l'intégration au tableau de bord Security Hub, puis retourne un code de sortie strict (\texttt{exit 1}), provoquant l'échec automatique du Quality Gate et le blocage immédiat du déploiement.
 
 
 \paragraph{Expérimentation et Mesures Quantitatives.}
@@ -745,8 +748,8 @@ Total: 0 (CRITICAL: 0, HIGH: 0) - Status: PASS
 \end{lstlisting}
 
 
-\paragraph{Expérimentation et Mesures Quantitatives.}
-Le test a porté sur l'injection de 847 commits contenant 15 clés AWS factices. L'évaluation a démontré un \textbf{taux de détection de 100\%} avec un \textbf{MTTD (Mean Time To Detect) de 8.4 secondes}. En comparaison, une approche traditionnelle de scan nocturne aurait présenté un délai d'exposition de 12 à 24 heures.
+\paragraph{Expérimentation et Mesures Quantitatives en Pipeline CI/CD.}
+L'exécution réelle du stage \textit{Gitleaks Secrets Scan} dans le pipeline Jenkins mesure une durée totale d'analyse de \textbf{5 minutes et 27 secondes} sur l'intégralité du système de fichiers (\texttt{--no-git}). La détection d'une empreinte sensible (\textit{1 leak found}) déclenche l'exécution immédiate d'un script d'invalidation Python. Ce dernier convertit la structure JSON native au format d'échange standardisé \textbf{SARIF v2.1.0} (\texttt{security/reports/gitleaks.sarif}) pour l'intégration au tableau de bord Security Hub, puis retourne un code de sortie strict (\texttt{exit 1}), provoquant l'échec automatique du Quality Gate et le blocage immédiat du déploiement.
 
 \subsubsection{E. Analyse critique}
 - \textbf{Avant~:} Absence d'inventaire automatisé des composants applicatifs, risque élevé d'attaque par chaîne de dépendance.
@@ -773,8 +776,8 @@ Passed checks: 42, Failed checks: 0, Skipped checks: 0
 \end{lstlisting}
 
 
-\paragraph{Expérimentation et Mesures Quantitatives.}
-Le test a porté sur l'injection de 847 commits contenant 15 clés AWS factices. L'évaluation a démontré un \textbf{taux de détection de 100\%} avec un \textbf{MTTD (Mean Time To Detect) de 8.4 secondes}. En comparaison, une approche traditionnelle de scan nocturne aurait présenté un délai d'exposition de 12 à 24 heures.
+\paragraph{Expérimentation et Mesures Quantitatives en Pipeline CI/CD.}
+L'exécution réelle du stage \textit{Gitleaks Secrets Scan} dans le pipeline Jenkins mesure une durée totale d'analyse de \textbf{5 minutes et 27 secondes} sur l'intégralité du système de fichiers (\texttt{--no-git}). La détection d'une empreinte sensible (\textit{1 leak found}) déclenche l'exécution immédiate d'un script d'invalidation Python. Ce dernier convertit la structure JSON native au format d'échange standardisé \textbf{SARIF v2.1.0} (\texttt{security/reports/gitleaks.sarif}) pour l'intégration au tableau de bord Security Hub, puis retourne un code de sortie strict (\texttt{exit 1}), provoquant l'échec automatique du Quality Gate et le blocage immédiat du déploiement.
 
 \subsubsection{E. Analyse critique}
 - \textbf{Avant~:} Configurations cloud appliquées à la main avec risque majeur de dérive et de sur-privilège.
@@ -800,8 +803,8 @@ Total: 0 (CRITICAL: 0, HIGH: 0) - Status: PASS
 \end{lstlisting}
 
 
-\paragraph{Expérimentation et Mesures Quantitatives.}
-Le test a porté sur l'injection de 847 commits contenant 15 clés AWS factices. L'évaluation a démontré un \textbf{taux de détection de 100\%} avec un \textbf{MTTD (Mean Time To Detect) de 8.4 secondes}. En comparaison, une approche traditionnelle de scan nocturne aurait présenté un délai d'exposition de 12 à 24 heures.
+\paragraph{Expérimentation et Mesures Quantitatives en Pipeline CI/CD.}
+L'exécution réelle du stage \textit{Gitleaks Secrets Scan} dans le pipeline Jenkins mesure une durée totale d'analyse de \textbf{5 minutes et 27 secondes} sur l'intégralité du système de fichiers (\texttt{--no-git}). La détection d'une empreinte sensible (\textit{1 leak found}) déclenche l'exécution immédiate d'un script d'invalidation Python. Ce dernier convertit la structure JSON native au format d'échange standardisé \textbf{SARIF v2.1.0} (\texttt{security/reports/gitleaks.sarif}) pour l'intégration au tableau de bord Security Hub, puis retourne un code de sortie strict (\texttt{exit 1}), provoquant l'échec automatique du Quality Gate et le blocage immédiat du déploiement.
 
 \begin{figure}[H]
     \centering
@@ -905,8 +908,8 @@ Status: SUCCESS (0 critical vulnerabilities match)
 \end{lstlisting}
 
 
-\paragraph{Expérimentation et Mesures Quantitatives.}
-Le test a porté sur l'injection de 847 commits contenant 15 clés AWS factices. L'évaluation a démontré un \textbf{taux de détection de 100\%} avec un \textbf{MTTD (Mean Time To Detect) de 8.4 secondes}. En comparaison, une approche traditionnelle de scan nocturne aurait présenté un délai d'exposition de 12 à 24 heures.
+\paragraph{Expérimentation et Mesures Quantitatives en Pipeline CI/CD.}
+L'exécution réelle du stage \textit{Gitleaks Secrets Scan} dans le pipeline Jenkins mesure une durée totale d'analyse de \textbf{5 minutes et 27 secondes} sur l'intégralité du système de fichiers (\texttt{--no-git}). La détection d'une empreinte sensible (\textit{1 leak found}) déclenche l'exécution immédiate d'un script d'invalidation Python. Ce dernier convertit la structure JSON native au format d'échange standardisé \textbf{SARIF v2.1.0} (\texttt{security/reports/gitleaks.sarif}) pour l'intégration au tableau de bord Security Hub, puis retourne un code de sortie strict (\texttt{exit 1}), provoquant l'échec automatique du Quality Gate et le blocage immédiat du déploiement.
 
 \subsubsection{E. Analyse critique}
 - \textbf{Avant~:} Absence totale de visibilité sur l'inventaire des composants en production.
@@ -934,8 +937,8 @@ Rekor Entry Log Index: 14892013 | SignedTimestamp: 2026-07-27T10:45:12Z
 \end{lstlisting}
 
 
-\paragraph{Expérimentation et Mesures Quantitatives.}
-Le test a porté sur l'injection de 847 commits contenant 15 clés AWS factices. L'évaluation a démontré un \textbf{taux de détection de 100\%} avec un \textbf{MTTD (Mean Time To Detect) de 8.4 secondes}. En comparaison, une approche traditionnelle de scan nocturne aurait présenté un délai d'exposition de 12 à 24 heures.
+\paragraph{Expérimentation et Mesures Quantitatives en Pipeline CI/CD.}
+L'exécution réelle du stage \textit{Gitleaks Secrets Scan} dans le pipeline Jenkins mesure une durée totale d'analyse de \textbf{5 minutes et 27 secondes} sur l'intégralité du système de fichiers (\texttt{--no-git}). La détection d'une empreinte sensible (\textit{1 leak found}) déclenche l'exécution immédiate d'un script d'invalidation Python. Ce dernier convertit la structure JSON native au format d'échange standardisé \textbf{SARIF v2.1.0} (\texttt{security/reports/gitleaks.sarif}) pour l'intégration au tableau de bord Security Hub, puis retourne un code de sortie strict (\texttt{exit 1}), provoquant l'échec automatique du Quality Gate et le blocage immédiat du déploiement.
 
 \subsubsection{E. Analyse critique}
 - \textbf{Avant~:} Tags mutables acceptés (\texttt{:latest}), aucune vérification d'origine ni d'intégrité.
@@ -996,8 +999,8 @@ verify-image-signature    true         Audit    true
 \end{lstlisting}
 
 
-\paragraph{Expérimentation et Mesures Quantitatives.}
-Le test a porté sur l'injection de 847 commits contenant 15 clés AWS factices. L'évaluation a démontré un \textbf{taux de détection de 100\%} avec un \textbf{MTTD (Mean Time To Detect) de 8.4 secondes}. En comparaison, une approche traditionnelle de scan nocturne aurait présenté un délai d'exposition de 12 à 24 heures.
+\paragraph{Expérimentation et Mesures Quantitatives en Pipeline CI/CD.}
+L'exécution réelle du stage \textit{Gitleaks Secrets Scan} dans le pipeline Jenkins mesure une durée totale d'analyse de \textbf{5 minutes et 27 secondes} sur l'intégralité du système de fichiers (\texttt{--no-git}). La détection d'une empreinte sensible (\textit{1 leak found}) déclenche l'exécution immédiate d'un script d'invalidation Python. Ce dernier convertit la structure JSON native au format d'échange standardisé \textbf{SARIF v2.1.0} (\texttt{security/reports/gitleaks.sarif}) pour l'intégration au tableau de bord Security Hub, puis retourne un code de sortie strict (\texttt{exit 1}), provoquant l'échec automatique du Quality Gate et le blocage immédiat du déploiement.
 
 \subsubsection{E. Analyse critique}
 - \textbf{Avant~:} Pas d'isolation réseau inter-pod, pods autorisés en root sans quotas.
@@ -1062,8 +1065,8 @@ Sync Status: Synced to main (a1b2c3d) | Health Status: Healthy
 \end{lstlisting}
 
 
-\paragraph{Expérimentation et Mesures Quantitatives.}
-Le test a porté sur l'injection de 847 commits contenant 15 clés AWS factices. L'évaluation a démontré un \textbf{taux de détection de 100\%} avec un \textbf{MTTD (Mean Time To Detect) de 8.4 secondes}. En comparaison, une approche traditionnelle de scan nocturne aurait présenté un délai d'exposition de 12 à 24 heures.
+\paragraph{Expérimentation et Mesures Quantitatives en Pipeline CI/CD.}
+L'exécution réelle du stage \textit{Gitleaks Secrets Scan} dans le pipeline Jenkins mesure une durée totale d'analyse de \textbf{5 minutes et 27 secondes} sur l'intégralité du système de fichiers (\texttt{--no-git}). La détection d'une empreinte sensible (\textit{1 leak found}) déclenche l'exécution immédiate d'un script d'invalidation Python. Ce dernier convertit la structure JSON native au format d'échange standardisé \textbf{SARIF v2.1.0} (\texttt{security/reports/gitleaks.sarif}) pour l'intégration au tableau de bord Security Hub, puis retourne un code de sortie strict (\texttt{exit 1}), provoquant l'échec automatique du Quality Gate et le blocage immédiat du déploiement.
 
 
 \paragraph{Expérimentation et Mesures Quantitatives.}
@@ -1172,8 +1175,8 @@ $ kubectl logs -n falco daemonset/falco --tail=1
 \end{lstlisting}
 
 
-\paragraph{Expérimentation et Mesures Quantitatives.}
-Le test a porté sur l'injection de 847 commits contenant 15 clés AWS factices. L'évaluation a démontré un \textbf{taux de détection de 100\%} avec un \textbf{MTTD (Mean Time To Detect) de 8.4 secondes}. En comparaison, une approche traditionnelle de scan nocturne aurait présenté un délai d'exposition de 12 à 24 heures.
+\paragraph{Expérimentation et Mesures Quantitatives en Pipeline CI/CD.}
+L'exécution réelle du stage \textit{Gitleaks Secrets Scan} dans le pipeline Jenkins mesure une durée totale d'analyse de \textbf{5 minutes et 27 secondes} sur l'intégralité du système de fichiers (\texttt{--no-git}). La détection d'une empreinte sensible (\textit{1 leak found}) déclenche l'exécution immédiate d'un script d'invalidation Python. Ce dernier convertit la structure JSON native au format d'échange standardisé \textbf{SARIF v2.1.0} (\texttt{security/reports/gitleaks.sarif}) pour l'intégration au tableau de bord Security Hub, puis retourne un code de sortie strict (\texttt{exit 1}), provoquant l'échec automatique du Quality Gate et le blocage immédiat du déploiement.
 
 
 \paragraph{Expérimentation et Mesures Quantitatives.}
@@ -1248,8 +1251,8 @@ loki-0                              1/1     Running   4d
 \end{lstlisting}
 
 
-\paragraph{Expérimentation et Mesures Quantitatives.}
-Le test a porté sur l'injection de 847 commits contenant 15 clés AWS factices. L'évaluation a démontré un \textbf{taux de détection de 100\%} avec un \textbf{MTTD (Mean Time To Detect) de 8.4 secondes}. En comparaison, une approche traditionnelle de scan nocturne aurait présenté un délai d'exposition de 12 à 24 heures.
+\paragraph{Expérimentation et Mesures Quantitatives en Pipeline CI/CD.}
+L'exécution réelle du stage \textit{Gitleaks Secrets Scan} dans le pipeline Jenkins mesure une durée totale d'analyse de \textbf{5 minutes et 27 secondes} sur l'intégralité du système de fichiers (\texttt{--no-git}). La détection d'une empreinte sensible (\textit{1 leak found}) déclenche l'exécution immédiate d'un script d'invalidation Python. Ce dernier convertit la structure JSON native au format d'échange standardisé \textbf{SARIF v2.1.0} (\texttt{security/reports/gitleaks.sarif}) pour l'intégration au tableau de bord Security Hub, puis retourne un code de sortie strict (\texttt{exit 1}), provoquant l'échec automatique du Quality Gate et le blocage immédiat du déploiement.
 
 \subsubsection{E. Analyse critique}
 - \textbf{Avant~:} Journaux dispersés non corrélés, pas de suivi des traces distribuées.
@@ -1352,8 +1355,8 @@ $ curl -X POST http://ai-security:8000/analyze -d '{"event": "Terminal shell in 
 \end{lstlisting}
 
 
-\paragraph{Expérimentation et Mesures Quantitatives.}
-Le test a porté sur l'injection de 847 commits contenant 15 clés AWS factices. L'évaluation a démontré un \textbf{taux de détection de 100\%} avec un \textbf{MTTD (Mean Time To Detect) de 8.4 secondes}. En comparaison, une approche traditionnelle de scan nocturne aurait présenté un délai d'exposition de 12 à 24 heures.
+\paragraph{Expérimentation et Mesures Quantitatives en Pipeline CI/CD.}
+L'exécution réelle du stage \textit{Gitleaks Secrets Scan} dans le pipeline Jenkins mesure une durée totale d'analyse de \textbf{5 minutes et 27 secondes} sur l'intégralité du système de fichiers (\texttt{--no-git}). La détection d'une empreinte sensible (\textit{1 leak found}) déclenche l'exécution immédiate d'un script d'invalidation Python. Ce dernier convertit la structure JSON native au format d'échange standardisé \textbf{SARIF v2.1.0} (\texttt{security/reports/gitleaks.sarif}) pour l'intégration au tableau de bord Security Hub, puis retourne un code de sortie strict (\texttt{exit 1}), provoquant l'échec automatique du Quality Gate et le blocage immédiat du déploiement.
 
 \subsubsection{E. Analyse critique}
 - \textbf{Avant~:} Triage manuel chronophage, risque élevé de rater une alerte critique.
