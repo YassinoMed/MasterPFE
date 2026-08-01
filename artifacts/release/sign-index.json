@@ -1,0 +1,49 @@
+{
+  "signatures": [
+    {
+      "artifact": "artifacts/release/auth-users-sign.log",
+      "detail": "cosign sign failed",
+      "digest": "sha256:a8f80221d08bd483ae601fbc8e05e035a8cfbef0c37de998f3e42b6b6d65c2f6",
+      "image": "localhost:5001/securerag-hub-auth-users@sha256:a8f80221d08bd483ae601fbc8e05e035a8cfbef0c37de998f3e42b6b6d65c2f6",
+      "mode": "keyless",
+      "service": "auth-users",
+      "status": "FAIL"
+    },
+    {
+      "artifact": "artifacts/release/chatbot-manager-sign.log",
+      "detail": "cosign sign failed",
+      "digest": "sha256:f30a850332c528a3a20affed75db221204d0f83882ab56ceadee31726919ae0d",
+      "image": "localhost:5001/securerag-hub-chatbot-manager@sha256:f30a850332c528a3a20affed75db221204d0f83882ab56ceadee31726919ae0d",
+      "mode": "keyless",
+      "service": "chatbot-manager",
+      "status": "FAIL"
+    },
+    {
+      "artifact": "artifacts/release/conversation-service-sign.log",
+      "detail": "cosign sign failed",
+      "digest": "sha256:d45e19faa6976b61df5373695f57558cdd5c30b288ebc422e4bc693d262c684b",
+      "image": "localhost:5001/securerag-hub-conversation-service@sha256:d45e19faa6976b61df5373695f57558cdd5c30b288ebc422e4bc693d262c684b",
+      "mode": "keyless",
+      "service": "conversation-service",
+      "status": "FAIL"
+    },
+    {
+      "artifact": "artifacts/release/audit-security-service-sign.log",
+      "detail": "cosign sign failed",
+      "digest": "sha256:08888694701e861c2eb5efe2e4fc4b2434b11c851dfd919d7422deb0d6d1946b",
+      "image": "localhost:5001/securerag-hub-audit-security-service@sha256:08888694701e861c2eb5efe2e4fc4b2434b11c851dfd919d7422deb0d6d1946b",
+      "mode": "keyless",
+      "service": "audit-security-service",
+      "status": "FAIL"
+    },
+    {
+      "artifact": "artifacts/release/portal-web-sign.log",
+      "detail": "cosign sign failed",
+      "digest": "sha256:022d3706b499b665a51b268bb54d35cb2760a2bfeecf09f4ab5c459414d7a586",
+      "image": "localhost:5001/securerag-hub-portal-web@sha256:022d3706b499b665a51b268bb54d35cb2760a2bfeecf09f4ab5c459414d7a586",
+      "mode": "keyless",
+      "service": "portal-web",
+      "status": "FAIL"
+    }
+  ]
+}

@@ -1,6 +1,6 @@
 # Final Validation Summary - SecureRAG Hub
 
-- Generated at UTC: `2026-07-24T22:32:00Z`
+- Generated at UTC: `2026-07-31T18:19:34Z`
 - Status: `PARTIEL`
 
 ## 1. Official scenario
@@ -20,7 +20,7 @@
 | Tests | 24 Laravel tests, failures=0, errors=0 |
 | Coverage | 44.97% |
 | Semgrep findings | unknown |
-| Gitleaks leaks | 0 |
+| Gitleaks leaks | 1 |
 | Trivy vulnerabilities | 0 |
 
 ## 3. CD and runtime results

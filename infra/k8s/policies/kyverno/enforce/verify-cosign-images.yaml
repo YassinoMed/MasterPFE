@@ -3,18 +3,18 @@ kind: ClusterPolicy
 metadata:
   name: securerag-verify-cosign-images
   annotations:
-    policies.kyverno.io/title: Verify Image Signature Keyless
+    policies.kyverno.io/title: Verify Image Signature Key Static
     policies.kyverno.io/category: Software Supply Chain Security
     policies.kyverno.io/severity: high
     policies.kyverno.io/subject: Pod
     policies.kyverno.io/description: >-
-      Verifies OCI image signatures using keyless OIDC validation via local Sigstore.
+      Verifies OCI image signatures using static public key validation.
 spec:
   validationFailureAction: Enforce
   background: false
   webhookTimeoutSeconds: 30
   rules:
-    - name: verify-image-signature-keyless
+    - name: verify-image-signature-key
       match:
         any:
           - resources:
@@ -32,34 +32,11 @@ spec:
           attestors:
             - count: 1
               entries:
-                - keyless:
-                    issuer: https://keycloak.sigstore-system/realms/securerag-cicd
-                    subject: jenkins-cosign@securerag.local
-                    roots: |
-                      -----BEGIN CERTIFICATE-----
-                      MIICNjCCAd2gAwIBAgIIblJOzj25x8kwCgYIKoZIzj0EAwIwfjEMMAoGA1UEBhMD
-                      VVNBMRMwEQYDVQQIEwpDYWxpZm9ybmlhMRYwFAYDVQQHEw1TYW4gRnJhbmNpc2Nv
-                      MRYwFAYDVQQJEw01NDggTWFya2V0IFN0MQ4wDAYDVQQREwU1NzI3NDEZMBcGA1UE
-                      ChMQTGludXggRm91bmRhdGlvbjAeFw0yNjA3MTcxNDE1NTJaFw0yNzA3MTcxNDE1
-                      NTJaMH4xDDAKBgNVBAYTA1VTQTETMBEGA1UECBMKQ2FsaWZvcm5pYTEWMBQGA1UE
-                      BxMNU2FuIEZyYW5jaXNjbzEWMBQGA1UECRMNNTQ4IE1hcmtldCBTdDEOMAwGA1UE
-                      ERMFNTcyNzQxGTAXBgNVBAoTEExpbnV4IEZvdW5kYXRpb24wWTATBgcqhkjOPQIB
-                      BggqhkjOPQMBBwNCAAR1h5Wi4CSRc9wM0I6t3pii9Cv/Sj0+Gkt2UvJbMLmyLRr3
-                      +oiBLZiJfnz0XD3AF/vn1f/OKC5zIKM7eW9oJxpio0UwQzAOBgNVHQ8BAf8EBAMC
-                      AQYwEgYDVR0TAQH/BAgwBgEB/wIBATAdBgNVHQ4EFgQUA7IVbqQ50y/dYqTj1bAX
-                      xF/f+ikwCgYIKoZIzj0EAwIDRwAwRAIgb8TyYrr0zvIxt+mXDzbOzzgrZxXOSBPb
-                      pR3FsxtUfPoCIC73eq5paV8dAcAV6xeQ/yOEmgapnrxhZ8mgFp8UjxAc
-                      -----END CERTIFICATE-----
-                    ctlog:
-                      pubkey: |
-                        -----BEGIN PUBLIC KEY-----
-                        MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEPdDOniADIMeCJZn5QJnuS8kHtVk1
-                        yFhsrzYzl0N2Vww79Hfq4ntFKSSHxPwvO+DL0kigXp8Cbg5Jyy4K2XdI+w==
-                        -----END PUBLIC KEY-----
-                    rekor:
-                      url: https://rekor.sigstore-system
-                      pubkey: |
-                        -----BEGIN PUBLIC KEY-----
-                        MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEdnxzwS3h9rBVtQjiXgjJN0ck7qmv
-                        +z/X2Y364+85XYMvYxEuxtqO6x3oRxWtv/MztLPaSVXXVvHB+B/Gxztg0w==
-                        -----END PUBLIC KEY-----
+                - keys:
+                    publicKeys: |
+                      -----BEGIN PUBLIC KEY-----
+                      MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEWi542BhMHqQ+sAD+XHASRdZByUHM
+                      LwDszD5/eaF50VMBNTOVixQIRxnzMxwNnk8xiWpyr5ctmVRXJr1Ix8lAHA==
+                      -----END PUBLIC KEY-----
+
+

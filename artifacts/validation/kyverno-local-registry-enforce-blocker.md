@@ -1,6 +1,6 @@
 # Kyverno Cosign Enforce Local Registry Blocker
 
-- Generated at UTC: `2026-07-18T13:20:38Z`
+- Generated at UTC: `2026-07-31T18:26:38Z`
 - Namespace: `securerag-hub`
 - Registry reference used by workloads: `localhost:5001/postgres:16-alpine, localhost:5001/securerag-hub-audit-security-service:demo, localhost:5001/securerag-hub-auth-users:demo, localhost:5001/securerag-hub-chatbot-manager:demo, localhost:5001/securerag-hub-conversation-service:demo, localhost:5001/securerag-hub-portal-web:demo`
 - Affected policy: `securerag-verify-cosign-images`

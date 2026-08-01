@@ -42,8 +42,11 @@ data:
       }
       
       Notifier "k8sbundle" {
-        plugin_data {}
+        plugin_data {
+          namespace = "spire-system"
+        }
       }
+
     }
   controller-manager.conf: |
     apiVersion: spire.spiffe.io/v1alpha1

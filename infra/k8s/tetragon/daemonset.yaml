@@ -1,7 +1,5 @@
 # Tetragon — eBPF Runtime Security (complements Falco)
 # Namespace: kube-system (DaemonSet)
-# Feature flag: ENABLE_TETRAGON=false
-# CONSERVE Falco — ne supprime PAS.
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
@@ -9,7 +7,6 @@ metadata:
   namespace: kube-system
   labels:
     app.kubernetes.io/name: tetragon
-    feature.securerag.dev/enable-tetragon: "false"
 spec:
   selector:
     matchLabels: { app.kubernetes.io/name: tetragon }
@@ -22,7 +19,7 @@ spec:
         - operator: Exists
       containers:
         - name: tetragon
-          image: quay.io/cilium/tetragon:latest # TODO: Pin image digest
+          image: quay.io/cilium/tetragon:v1.2.0
           securityContext:
             privileged: true
           env:
@@ -40,24 +37,3 @@ spec:
         - { name: cgroup, hostPath: { path: /sys/fs/cgroup } }
         - { name: proc, hostPath: { path: /proc } }
 
----
-# Tetragon TracingPolicy — detect exec, network, file access
-apiVersion: cilium.io/v1alpha1
-kind: TracingPolicy
-metadata:
-  name: securerag-tetragon-policy
-  annotations:
-    feature.securerag.dev/enable-tetragon: "false"
-spec:
-  kprobes:
-    - call: "fd_install"
-      syscall: false
-      args:
-        - index: 0
-          type: "int"
-        - index: 1
-          type: "file"
-      selectors:
-        - matchBinaries:
-            - operator: "In"
-              values: ["/usr/local/bin/php", "/usr/sbin/nginx"]
