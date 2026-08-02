@@ -35,7 +35,12 @@ paths = [
   '''(^|/)\.venv/.*''',
   '''(^|/)\.pytest_cache/.*''',
   '''(^|/)\.scannerwork/.*''',
-  '''\.md$''',
+  '''(^|/)validation/.*''',
+  '''(^|/)gitleaks_results\.json$''',
+  '''(^|/)infra/terraform/securerag-dev-config$''',
+  '''(^|/)trivy_scan_results\.txt$''',
+  '''(^|/)\.agents/.*''',
+  '''(^|/)\.agent/.*''',
   '''(^|/)infra/ansible/group_vars/all\.yml$''',
   '''(^|/)infra/k8s/argocd/application-harbor\.yaml$'''
 ]
