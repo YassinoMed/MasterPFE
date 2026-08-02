@@ -1,0 +1,615 @@
+\relax 
+\providecommand\babel@aux[2]{}
+\@nameuse{bbl@beforestart}
+\providecommand\hyper@newdestlabel[2]{}
+\providecommand\HyField@AuxAddToFields[1]{}
+\providecommand\HyField@AuxAddToCoFields[2]{}
+\citation{burns_k8s_design_2016}
+\citation{myrbakken_devsecops_2017}
+\babel@aux{nil}{}
+\@writefile{toc}{\contentsline {chapter}{\numberline {1}Implémentation, Expérimentation et Validation d'une Chaîne DevSecOps Cloud Native et Intelligente}{1}{chapter.1}\protected@file@percent }
+\@writefile{lof}{\addvspace {10\p@ }}
+\@writefile{lot}{\addvspace {10\p@ }}
+\newlabel{ch:sprint_devsecops}{{1}{1}{Implémentation, Expérimentation et Validation d'une Chaîne DevSecOps Cloud Native et Intelligente}{chapter.1}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {1.1}Cadre Méthodologique et Approche de Recherche}{1}{section.1.1}\protected@file@percent }
+\newlabel{sec:cadre_methodologique}{{1.1}{1}{Cadre Méthodologique et Approche de Recherche}{section.1.1}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.1.1}Problématique Scientifique et Contexte Cybersécurité}{1}{subsection.1.1.1}\protected@file@percent }
+\citation{cncf_security_whitepaper}
+\citation{dora_metrics_2018}
+\citation{myrbakken_devsecops_2017}
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.1.2}Questions de Recherche et Hypothèses}{2}{subsection.1.1.2}\protected@file@percent }
+\citation{mitre_attack_containers}
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.1.3}Approche Méthodologique et Protocole Expérimental Global}{3}{subsection.1.1.3}\protected@file@percent }
+\newlabel{subsec:protocole_experimental}{{1.1.3}{3}{Approche Méthodologique et Protocole Expérimental Global}{subsection.1.1.3}{}}
+\citation{nist_ssdf_800_218}
+\citation{nist_sp_800_190}
+\citation{slsa_spec_v1}
+\citation{soc2_trust_services_criteria}
+\citation{iso_27001_2022}
+\citation{owasp_dsomm}
+\citation{owasp_k8s_top10}
+\citation{mitre_attack_containers}
+\citation{dora_metrics_2018}
+\citation{gregg_ebpf_2020}
+\citation{fontana_ebpf_security}
+\citation{yao_rag_security}
+\citation{lewis_rag_2020}
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.1.4}Cadres Normatifs et Référentiels d'Ingénierie}{6}{subsection.1.1.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {1.2}Architecture Globale DevSecOps \& Choix Technologiques}{7}{section.1.2}\protected@file@percent }
+\newlabel{sec:architecture_globale_devsecops}{{1.2}{7}{Architecture Globale DevSecOps \& Choix Technologiques}{section.1.2}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {1.1}{\ignorespaces Architecture globale de la chaîne DevSecOps SecureRAG Hub et attestation de provenance des artefacts.}}{7}{figure.1.1}\protected@file@percent }
+\newlabel{fig:arch_globale_devsecops}{{1.1}{7}{Architecture globale de la chaîne DevSecOps SecureRAG Hub et attestation de provenance des artefacts}{figure.1.1}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.2.1}Modélisation de l'Architecture Multi-Zones}{7}{subsection.1.2.1}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {1.2}{\ignorespaces Architecture globale DevSecOps de bout en bout — du développeur à la sécurité IA.}}{7}{figure.1.2}\protected@file@percent }
+\newlabel{fig:pipeline_global_devsecops}{{1.2}{7}{Architecture globale DevSecOps de bout en bout — du développeur à la sécurité IA}{figure.1.2}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.2.2}Flux Réseau, Sécurité et Données}{8}{subsection.1.2.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.2.3}Articulation et Enchaînement Séquentiel de la Chaîne DevSecOps}{8}{subsection.1.2.3}\protected@file@percent }
+\newlabel{subsec:articulation_chaine_devsecops}{{1.2.3}{8}{Articulation et Enchaînement Séquentiel de la Chaîne DevSecOps}{subsection.1.2.3}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.2.4}Matrice d'Arbitrage Technologique}{10}{subsection.1.2.4}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {1.1}{\ignorespaces Matrice d'arbitrage technologique et justifications d'ingénierie.}}{11}{table.1.1}\protected@file@percent }
+\newlabel{tab:choix_technologiques}{{1.1}{11}{Matrice d'arbitrage technologique et justifications d'ingénierie}{table.1.1}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {1.3}Volet 1 : Développement \& SCM (\textit  {Dev})}{11}{section.1.3}\protected@file@percent }
+\newlabel{sec:volet_dev}{{1.3}{11}{Volet 1 : Développement \& SCM (\textit {Dev})}{section.1.3}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.3.1}Architecture des Microservices et Dépôt Source}{11}{subsection.1.3.1}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {1.3}{\ignorespaces Validation de la suite de hooks de pre-commit.}}{12}{figure.1.3}\protected@file@percent }
+\newlabel{fig:precommit_framework}{{1.3}{12}{Validation de la suite de hooks de pre-commit}{figure.1.3}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {1.4}{\ignorespaces Validation réussie des conventions de commit via le hook Commitlint (spécification Conventional Commits).}}{13}{figure.1.4}\protected@file@percent }
+\newlabel{fig:commitlint_hook}{{1.4}{13}{Validation réussie des conventions de commit via le hook Commitlint (spécification Conventional Commits)}{figure.1.4}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {1.5}{\ignorespaces Audit \texttt  {npm audit} des dépendances React : 0 vulnérabilité détectée sur 231 paquets.}}{13}{figure.1.5}\protected@file@percent }
+\newlabel{fig:npm_audit}{{1.5}{13}{Audit \texttt {npm audit} des dépendances React : 0 vulnérabilité détectée sur 231 paquets}{figure.1.5}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.3.2}Détection des Secrets Pre-Commit (Gitleaks)}{13}{subsection.1.3.2}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {1.6}{\ignorespaces Révocation dynamique instantanée des baux de secrets sous HashiCorp Vault.}}{14}{figure.1.6}\protected@file@percent }
+\newlabel{fig:vault_lease_revoke}{{1.6}{14}{Révocation dynamique instantanée des baux de secrets sous HashiCorp Vault}{figure.1.6}{}}
+\@writefile{toc}{\contentsline {subsubsection}{Règles SAST Personnalisées (Semgrep)}{15}{section*.1}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {1.7}{\ignorespaces Rapport de couverture de tests unitaires PHPUnit.}}{15}{figure.1.7}\protected@file@percent }
+\newlabel{fig:phpunit_coverage}{{1.7}{15}{Rapport de couverture de tests unitaires PHPUnit}{figure.1.7}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.3.3}Dockerfile Multi-Stage Sécurisé Non-Root}{15}{subsection.1.3.3}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {1.8}{\ignorespaces Audit des dépendances applicatives Composer.}}{16}{figure.1.8}\protected@file@percent }
+\newlabel{fig:composer_audit}{{1.8}{16}{Audit des dépendances applicatives Composer}{figure.1.8}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.3.4}Hooks Git Avancés et Environnement Local}{16}{subsection.1.3.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {1.4}Volet 2 : Réalisation \& Infrastructure (\textit  {Build \& IaC})}{17}{section.1.4}\protected@file@percent }
+\newlabel{sec:volet_iac}{{1.4}{17}{Volet 2 : Réalisation \& Infrastructure (\textit {Build \& IaC})}{section.1.4}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.4.1}Infrastructure as Code Modulaire avec Terraform}{17}{subsection.1.4.1}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {1.9}{\ignorespaces Résultat du plan d'exécution Terraform (\texttt  {terraform plan}) : ressources à créer, à modifier et à détruire, validées avant tout \texttt  {apply}.}}{17}{figure.1.9}\protected@file@percent }
+\newlabel{fig:terraform_validate_plan}{{1.9}{17}{Résultat du plan d'exécution Terraform (\texttt {terraform plan}) : ressources à créer, à modifier et à détruire, validées avant tout \texttt {apply}}{figure.1.9}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {1.10}{\ignorespaces Inventaire des ressources suivies dans le fichier d'état Terraform (\texttt  {terraform state list}), reflet fidèle de l'infrastructure réellement provisionnée.}}{18}{figure.1.10}\protected@file@percent }
+\newlabel{fig:terraform_state_list}{{1.10}{18}{Inventaire des ressources suivies dans le fichier d'état Terraform (\texttt {terraform state list}), reflet fidèle de l'infrastructure réellement provisionnée}{figure.1.10}{}}
+\newlabel{lst:eks_tf_checkov_skip}{{1.1}{18}{Extrait réel du module Terraform EKS avec annotations Checkov (\texttt {infra/terraform/eks.tf})}{lstlisting.1.1}{}}
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {1.1}Extrait réel du module Terraform EKS avec annotations Checkov (\texttt  {infra/terraform/eks.tf})}{18}{lstlisting.1.1}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {1.11}{\ignorespaces Rapport d'analyse de conformité IaC avec Checkov.}}{19}{figure.1.11}\protected@file@percent }
+\newlabel{fig:checkov_iac_report}{{1.11}{19}{Rapport d'analyse de conformité IaC avec Checkov}{figure.1.11}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.4.2}Durcissement des Nœuds Workers (Ansible \& CIS Benchmark)}{20}{subsection.1.4.2}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {1.12}{\ignorespaces État des nœuds du cluster Kubernetes \texttt  {kind} (\texttt  {kubectl get nodes -o wide}) : rôles control-plane/worker, version du kubelet et adresses internes.}}{20}{figure.1.12}\protected@file@percent }
+\newlabel{fig:k8s_cluster_nodes}{{1.12}{20}{État des nœuds du cluster Kubernetes \texttt {kind} (\texttt {kubectl get nodes -o wide}) : rôles control-plane/worker, version du kubelet et adresses internes}{figure.1.12}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {1.13}{\ignorespaces Répartition des pods par namespace (\texttt  {kubectl get pods -A}), confirmant l'isolation des charges applicatives, de sécurité et d'observabilité.}}{20}{figure.1.13}\protected@file@percent }
+\newlabel{fig:k8s_namespaces_pods}{{1.13}{20}{Répartition des pods par namespace (\texttt {kubectl get pods -A}), confirmant l'isolation des charges applicatives, de sécurité et d'observabilité}{figure.1.13}{}}
+\newlabel{lst:ansible_site_yml}{{1.2}{21}{Extrait réel du playbook d'orchestration principal (\texttt {infra/ansible/site.yml})}{lstlisting.1.2}{}}
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {1.2}Extrait réel du playbook d'orchestration principal (\texttt  {infra/ansible/site.yml})}{21}{lstlisting.1.2}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {1.14}{\ignorespaces Statut de délivrance des certificats TLS par Cert-Manager.}}{21}{figure.1.14}\protected@file@percent }
+\newlabel{fig:cert_manager_status}{{1.14}{21}{Statut de délivrance des certificats TLS par Cert-Manager}{figure.1.14}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.4.3}Sécurisation des Accès Distants}{22}{subsection.1.4.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {1.5}Volet 3 : Implémentation DevSecOps \& Contribution IA Originale}{22}{section.1.5}\protected@file@percent }
+\newlabel{sec:volet_impl}{{1.5}{22}{Volet 3 : Implémentation DevSecOps \& Contribution IA Originale}{section.1.5}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.5.1}Automatisation CI/CD avec Jenkins Configuration as Code}{23}{subsection.1.5.1}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {1.15}{\ignorespaces Vue d'ensemble d'une exécution complète du pipeline CI/CD Jenkins : les six étapes du tableau~\ref {tab:pipeline_stages} s'enchaînent jusqu'à la validation finale du quality gate.}}{23}{figure.1.15}\protected@file@percent }
+\newlabel{fig:jenkins_pipeline_overview}{{1.15}{23}{Vue d'ensemble d'une exécution complète du pipeline CI/CD Jenkins : les six étapes du tableau~\ref {tab:pipeline_stages} s'enchaînent jusqu'à la validation finale du quality gate}{figure.1.15}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {1.16}{\ignorespaces Journaux détaillés des stages de sécurité (Gitleaks, Semgrep, Trivy, Cosign) au sein d'une même exécution de pipeline.}}{23}{figure.1.16}\protected@file@percent }
+\newlabel{fig:jenkins_stage_logs}{{1.16}{23}{Journaux détaillés des stages de sécurité (Gitleaks, Semgrep, Trivy, Cosign) au sein d'une même exécution de pipeline}{figure.1.16}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {1.2}{\ignorespaces Séquence des six étapes du pipeline CI/CD Jenkins.}}{24}{table.1.2}\protected@file@percent }
+\newlabel{tab:pipeline_stages}{{1.2}{24}{Séquence des six étapes du pipeline CI/CD Jenkins}{table.1.2}{}}
+\newlabel{lst:jenkinsfile_stages_reels}{{1.3}{24}{Extraits réels du \texttt {Jenkinsfile} — scans parallèles, SBOM, signature Cosign}{lstlisting.1.3}{}}
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {1.3}Extraits réels du \texttt  {Jenkinsfile} — scans parallèles, SBOM, signature Cosign}{24}{lstlisting.1.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.5.2}Contrôle d'Admission Kyverno sur Kubernetes}{25}{subsection.1.5.2}\protected@file@percent }
+\newlabel{lst:kyverno_policy_reelle}{{1.4}{25}{Extrait réel de la ClusterPolicy Kyverno de vérification de signature keyless}{lstlisting.1.4}{}}
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {1.4}Extrait réel de la ClusterPolicy Kyverno de vérification de signature keyless}{25}{lstlisting.1.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.5.3}Détection Runtime eBPF avec Falco}{26}{subsection.1.5.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.5.4}Contribution Originale : le Moteur AI Security Brain}{26}{subsection.1.5.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.5.5}Score de Risque Unifié et Overhead eBPF}{27}{subsection.1.5.5}\protected@file@percent }
+\newlabel{eq:r_workload_weights_justification}{{1.1}{27}{Score de Risque Unifié et Overhead eBPF}{equation.1.5.1}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {1.6}Analyse Systématique des Couches DevSecOps}{27}{section.1.6}\protected@file@percent }
+\newlabel{sec:analyse_systematique_couches}{{1.6}{27}{Analyse Systématique des Couches DevSecOps}{section.1.6}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.6.1}Couche 1 : Gestion et Détection des Secrets (Vault, ESO \& Gitleaks)}{27}{subsection.1.6.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{A. Risque de sécurité}{27}{section*.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{B. Attaque simulée}{28}{section*.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{C. Défense implémentée}{28}{section*.4}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {1.17}{\ignorespaces Flux de détection (Gitleaks) et de gestion dynamique des secrets (Vault).}}{28}{figure.1.17}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {1.18}{\ignorespaces Sortie du scan Gitleaks sur le dépôt applicatif : aucune fuite d'identifiant détectée sur l'ensemble de l'historique de commits.}}{28}{figure.1.18}\protected@file@percent }
+\newlabel{fig:gitleaks_secret_scan}{{1.18}{28}{Sortie du scan Gitleaks sur le dépôt applicatif : aucune fuite d'identifiant détectée sur l'ensemble de l'historique de commits}{figure.1.18}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {1.19}{\ignorespaces Capture d'exécution réelle du scan Gitleaks SAST : détection et interception d'une clé RSA privée dans le dépôt.}}{29}{figure.1.19}\protected@file@percent }
+\newlabel{fig:gitleaks_sast_scan_teste}{{1.19}{29}{Capture d'exécution réelle du scan Gitleaks SAST : détection et interception d'une clé RSA privée dans le dépôt}{figure.1.19}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {1.20}{\ignorespaces Synchronisation d'un secret depuis Vault vers un objet Kubernetes natif via External Secrets Operator (capture historique).}}{29}{figure.1.20}\protected@file@percent }
+\newlabel{fig:vault_eso_sync}{{1.20}{29}{Synchronisation d'un secret depuis Vault vers un objet Kubernetes natif via External Secrets Operator (capture historique)}{figure.1.20}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {1.21}{\ignorespaces État des objets \texttt  {SecretStore} et \texttt  {ExternalSecret} après ingestion Zero-Trust — synchronisation réussie sans exposition en clair (capture historique).}}{30}{figure.1.21}\protected@file@percent }
+\newlabel{fig:vault_eso_secrets_sync}{{1.21}{30}{État des objets \texttt {SecretStore} et \texttt {ExternalSecret} après ingestion Zero-Trust — synchronisation réussie sans exposition en clair (capture historique)}{figure.1.21}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {1.22}{\ignorespaces Statut \textit  {unsealed} du coffre HashiCorp Vault et chiffrement KMS des identifiants de base de données stockés sous le chemin \texttt  {secret/data/securerag/db} (capture historique).}}{30}{figure.1.22}\protected@file@percent }
+\newlabel{fig:vault_kms_status}{{1.22}{30}{Statut \textit {unsealed} du coffre HashiCorp Vault et chiffrement KMS des identifiants de base de données stockés sous le chemin \texttt {secret/data/securerag/db} (capture historique)}{figure.1.22}{}}
+\newlabel{lst:eso_invalidproviderconfig}{{1.5}{31}{Sortie réelle — état du ClusterSecretStore ESO/Vault au 30 juillet 2026}{lstlisting.1.5}{}}
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {1.5}Sortie réelle — état du ClusterSecretStore ESO/Vault au 30 juillet 2026}{31}{lstlisting.1.5}\protected@file@percent }
+\newlabel{lst:vault_k8s_auth_reel}{{1.6}{31}{Extrait réel de la configuration d'authentification Kubernetes de Vault (\texttt {infra/k8s/security/vault/k8s-auth-config.yaml})}{lstlisting.1.6}{}}
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {1.6}Extrait réel de la configuration d'authentification Kubernetes de Vault (\texttt  {infra/k8s/security/vault/k8s-auth-config.yaml})}{31}{lstlisting.1.6}\protected@file@percent }
+\newlabel{lst:eso_cluster_secret_store_reel}{{1.7}{32}{Extrait réel du ClusterSecretStore ESO relié à Vault (\texttt {infra/k8s/secrets/eso-cluster-secret-store.yaml})}{lstlisting.1.7}{}}
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {1.7}Extrait réel du ClusterSecretStore ESO relié à Vault (\texttt  {infra/k8s/secrets/eso-cluster-secret-store.yaml})}{32}{lstlisting.1.7}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Architecture interne du moteur de détection.}{32}{section*.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Intégration au flux Git.}{32}{section*.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Complexité et performance.}{33}{section*.7}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{D. Preuve technique}{33}{section*.8}\protected@file@percent }
+\newlabel{lst:gitleaks_proof_layer}{{1.8}{33}{Exécution du scan Gitleaks sur l'historique complet}{lstlisting.1.8}{}}
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {1.8}Exécution du scan Gitleaks sur l'historique complet}{33}{lstlisting.1.8}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{E. Analyse critique}{33}{section*.9}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{Gitleaks — Analyse Expérimentale Approfondie}{33}{section*.10}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Présentation.}{33}{section*.11}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Objectif sécurité.}{33}{section*.12}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Fonctionnement.}{34}{section*.13}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Intégration dans SecureRAG Hub.}{34}{section*.14}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Validation expérimentale.}{34}{section*.15}\protected@file@percent }
+\newlabel{lst:gitleaks_real_exec}{{1.9}{34}{Capture réelle de l'exécution Gitleaks sur le dépôt SecureRAG Hub}{lstlisting.1.9}{}}
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {1.9}Capture réelle de l'exécution Gitleaks sur le dépôt SecureRAG Hub}{34}{lstlisting.1.9}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {1.23}{\ignorespaces Capture réelle de l'interception et de la détection de fuite de secret par Gitleaks sur l'historique Git (Commit 0b6cb49).}}{35}{figure.1.23}\protected@file@percent }
+\newlabel{fig:gitleaks_execution_real}{{1.23}{35}{Capture réelle de l'interception et de la détection de fuite de secret par Gitleaks sur l'historique Git (Commit 0b6cb49)}{figure.1.23}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {1.3}{\ignorespaces Synthèse des métriques expérimentales de détection Gitleaks.}}{35}{table.1.3}\protected@file@percent }
+\newlabel{tab:gitleaks_experimental_summary}{{1.3}{35}{Synthèse des métriques expérimentales de détection Gitleaks}{table.1.3}{}}
+\@writefile{toc}{\contentsline {paragraph}{Analyse.}{35}{section*.16}\protected@file@percent }
+\citation{meli_secret_leaks_2019}
+\citation{bader_sast_comparison_2019}
+\@writefile{toc}{\contentsline {paragraph}{Limites.}{36}{section*.17}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Conclusion.}{36}{section*.18}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Analyse académique complémentaire — Gitleaks.}{36}{section*.19}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.6.2}Couche 2 : Static Application Security Testing — SAST (Semgrep \& SonarQube)}{37}{subsection.1.6.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{A. Risque de sécurité}{37}{section*.20}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{B. Attaque simulée}{37}{section*.21}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{C. Défense implémentée}{37}{section*.22}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {1.24}{\ignorespaces Processus d'analyse statique SAST et Quality Gate.}}{37}{figure.1.24}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{D. Preuve technique}{37}{section*.23}\protected@file@percent }
+\newlabel{lst:sast_proof_layer}{{1.10}{37}{Rapport de scan Semgrep et Quality Gate SonarQube}{lstlisting.1.10}{}}
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {1.10}Rapport de scan Semgrep et Quality Gate SonarQube}{37}{lstlisting.1.10}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {1.25}{\ignorespaces Résultat de l'analyse AST Semgrep sur le code PHP/Laravel : détail des \textit  {findings} par règle et par sévérité.}}{38}{figure.1.25}\protected@file@percent }
+\newlabel{fig:semgrep_sast_analysis}{{1.25}{38}{Résultat de l'analyse AST Semgrep sur le code PHP/Laravel : détail des \textit {findings} par règle et par sévérité}{figure.1.25}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {1.26}{\ignorespaces Tableau de bord SonarQube : couverture de code, dette technique et statut de la Quality Gate (78,3~\% de couverture, seuil franchi).}}{38}{figure.1.26}\protected@file@percent }
+\newlabel{fig:sonarqube_dashboard}{{1.26}{38}{Tableau de bord SonarQube : couverture de code, dette technique et statut de la Quality Gate (78,3~\% de couverture, seuil franchi)}{figure.1.26}{}}
+\@writefile{toc}{\contentsline {subsubsection}{E. Analyse critique}{38}{section*.24}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.6.3}Couche 3 : Software Composition Analysis — SCA (Trivy FS, Composer Audit \& OWASP Dependency-Check)}{39}{subsection.1.6.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{A. Risque de sécurité}{39}{section*.25}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{C. Défense implémentée}{39}{section*.26}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {1.27}{\ignorespaces Analyse composite SCA (Trivy et OWASP).}}{39}{figure.1.27}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{D. Preuve technique}{39}{section*.27}\protected@file@percent }
+\newlabel{lst:sca_proof_layer}{{1.11}{39}{Sortie du scan SCA Trivy FS}{lstlisting.1.11}{}}
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {1.11}Sortie du scan SCA Trivy FS}{39}{lstlisting.1.11}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {1.28}{\ignorespaces Capture d'exécution réelle du scan SCA Trivy FS sur le composant \texttt  {platform/portal-web} (\texttt  {composer.lock} conforme, 0 vulnérabilité).}}{39}{figure.1.28}\protected@file@percent }
+\newlabel{fig:trivy_sca_scan_teste}{{1.28}{39}{Capture d'exécution réelle du scan SCA Trivy FS sur le composant \texttt {platform/portal-web} (\texttt {composer.lock} conforme, 0 vulnérabilité)}{figure.1.28}{}}
+\@writefile{toc}{\contentsline {subsubsection}{E. Analyse critique}{40}{section*.28}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{Trivy — Analyse Expérimentale Approfondie}{40}{section*.29}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Présentation.}{40}{section*.30}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Objectif sécurité.}{40}{section*.31}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Fonctionnement.}{40}{section*.32}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Intégration dans SecureRAG Hub.}{40}{section*.33}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Validation expérimentale.}{40}{section*.34}\protected@file@percent }
+\newlabel{lst:trivy_real_exec}{{1.12}{40}{Sortie réelle du scan filesystem Trivy sur composer.lock}{lstlisting.1.12}{}}
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {1.12}Sortie réelle du scan filesystem Trivy sur composer.lock}{40}{lstlisting.1.12}\protected@file@percent }
+\citation{zahan_sca_study_2022}
+\@writefile{lof}{\contentsline {figure}{\numberline {1.29}{\ignorespaces Capture réelle de l'analyse du système de fichiers par Trivy sur composer.lock (0 vulnérabilité, état Clean).}}{41}{figure.1.29}\protected@file@percent }
+\newlabel{fig:trivy_composer_real}{{1.29}{41}{Capture réelle de l'analyse du système de fichiers par Trivy sur composer.lock (0 vulnérabilité, état Clean)}{figure.1.29}{}}
+\@writefile{toc}{\contentsline {paragraph}{Analyse.}{41}{section*.35}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Limites.}{41}{section*.36}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Conclusion.}{41}{section*.37}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Analyse académique complémentaire — Trivy.}{41}{section*.38}\protected@file@percent }
+\citation{morris_iac_2020}
+\citation{sultan_container_security_2019}
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.6.4}Couche 4 : Infrastructure as Code Security (Terraform, Checkov \& tfsec)}{42}{subsection.1.6.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{A. Risque de sécurité}{42}{section*.39}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{C. Défense implémentée}{42}{section*.40}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{D. Preuve technique}{42}{section*.41}\protected@file@percent }
+\newlabel{lst:checkov_proof_layer}{{1.13}{42}{Validation Checkov sur les modules Terraform}{lstlisting.1.13}{}}
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {1.13}Validation Checkov sur les modules Terraform}{42}{lstlisting.1.13}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{E. Analyse critique}{42}{section*.42}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.6.5}Couche 5 : Container Security \& Build (Docker Multi-Stage \& Trivy Image)}{43}{subsection.1.6.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{A. Risque de sécurité}{43}{section*.43}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{C. Défense implémentée}{43}{section*.44}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{D. Preuve technique}{43}{section*.45}\protected@file@percent }
+\newlabel{lst:trivy_img_proof_layer}{{1.14}{43}{Scan d'image conteneur Trivy}{lstlisting.1.14}{}}
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {1.14}Scan d'image conteneur Trivy}{43}{lstlisting.1.14}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {1.30}{\ignorespaces Rapport Trivy sur l'image de production \texttt  {securerag/api:v1.2.0} : détail des couches analysées et absence de CVE critique ou haute.}}{43}{figure.1.30}\protected@file@percent }
+\newlabel{fig:trivy_image_scan}{{1.30}{43}{Rapport Trivy sur l'image de production \texttt {securerag/api:v1.2.0} : détail des couches analysées et absence de CVE critique ou haute}{figure.1.30}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {1.31}{\ignorespaces Statut opérationnel du registre d'images privé Harbor, hébergeant les artefacts signés de \textit  {SecureRAG Hub} (capture historique).}}{44}{figure.1.31}\protected@file@percent }
+\newlabel{fig:harbor_registry_status}{{1.31}{44}{Statut opérationnel du registre d'images privé Harbor, hébergeant les artefacts signés de \textit {SecureRAG Hub} (capture historique)}{figure.1.31}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {1.32}{\ignorespaces Pods d'infrastructure du registre Harbor et persistance des volumes associés (capture historique).}}{44}{figure.1.32}\protected@file@percent }
+\newlabel{fig:harbor_infrastructure_pods}{{1.32}{44}{Pods d'infrastructure du registre Harbor et persistance des volumes associés (capture historique)}{figure.1.32}{}}
+\@writefile{toc}{\contentsline {subsubsection}{E. Analyse critique}{45}{section*.46}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {1.33}{\ignorespaces Inspection du manifeste OCI et des digests SHA-256 avec Crane.}}{45}{figure.1.33}\protected@file@percent }
+\newlabel{fig:crane_manifest}{{1.33}{45}{Inspection du manifeste OCI et des digests SHA-256 avec Crane}{figure.1.33}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {1.34}{\ignorespaces Analyse de vulnérabilités des paquets d'OS Alpine avec Grype.}}{45}{figure.1.34}\protected@file@percent }
+\newlabel{fig:grype_vulnerability_diff}{{1.34}{45}{Analyse de vulnérabilités des paquets d'OS Alpine avec Grype}{figure.1.34}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.6.6}Couche 6 : Software Supply Chain Security (Syft, CycloneDX \& Grype)}{46}{subsection.1.6.6}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {1.35}{\ignorespaces Génération de la nomenclature logicielle (SBOM) au format CycloneDX par Syft, et confrontation aux bases de vulnérabilités par Grype.}}{46}{figure.1.35}\protected@file@percent }
+\newlabel{fig:syft_grype_sbom}{{1.35}{46}{Génération de la nomenclature logicielle (SBOM) au format CycloneDX par Syft, et confrontation aux bases de vulnérabilités par Grype}{figure.1.35}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {1.36}{\ignorespaces Vérification de la signature Cosign d'une image OCI contre la clé publique ECDSA enregistrée dans Sigstore.}}{46}{figure.1.36}\protected@file@percent }
+\newlabel{fig:cosign_image_verification}{{1.36}{46}{Vérification de la signature Cosign d'une image OCI contre la clé publique ECDSA enregistrée dans Sigstore}{figure.1.36}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {1.37}{\ignorespaces Pods d'infrastructure d'identité Keycloak (OIDC) supportant les services de confiance Sigstore utilisés par Cosign (capture historique).}}{47}{figure.1.37}\protected@file@percent }
+\newlabel{fig:sigstore_keycloak_pods}{{1.37}{47}{Pods d'infrastructure d'identité Keycloak (OIDC) supportant les services de confiance Sigstore utilisés par Cosign (capture historique)}{figure.1.37}{}}
+\@writefile{toc}{\contentsline {subsubsection}{A. Risque de sécurité}{47}{section*.47}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{C. Défense implémentée}{47}{section*.48}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{D. Preuve technique}{47}{section*.49}\protected@file@percent }
+\newlabel{lst:grype_proof_layer}{{1.15}{47}{Génération SBOM et analyse Grype}{lstlisting.1.15}{}}
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {1.15}Génération SBOM et analyse Grype}{47}{lstlisting.1.15}\protected@file@percent }
+\citation{torres_arias_intoto_2019}
+\@writefile{toc}{\contentsline {subsubsection}{E. Analyse critique}{48}{section*.50}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.6.7}Couche 7 : Intégrité et Provenance Cryptographique des Artefacts (Cosign Sigstore)}{48}{subsection.1.6.7}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{A. Risque de sécurité}{48}{section*.51}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{C. Défense implémentée}{48}{section*.52}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{D. Preuve technique}{48}{section*.53}\protected@file@percent }
+\newlabel{lst:cosign_proof_layer}{{1.16}{48}{Vérification cryptographique Cosign et enregistrement Rekor}{lstlisting.1.16}{}}
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {1.16}Vérification cryptographique Cosign et enregistrement Rekor}{48}{lstlisting.1.16}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{E. Analyse critique}{48}{section*.54}\protected@file@percent }
+\citation{shamim_k8s_admission_2020}
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.6.8}Couche 8 : Kubernetes Platform Security (Kyverno, Pod Security Admission, LimitRange \& PDB)}{49}{subsection.1.6.8}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {1.38}{\ignorespaces Rejet d'un déploiement non conforme par Kyverno en mode Enforce (capture historique — voir précision temporelle en section~\ref {sec:volet_impl}).}}{49}{figure.1.38}\protected@file@percent }
+\newlabel{fig:kyverno_policy_reports}{{1.38}{49}{Rejet d'un déploiement non conforme par Kyverno en mode Enforce (capture historique — voir précision temporelle en section~\ref {sec:volet_impl})}{figure.1.38}{}}
+\@writefile{toc}{\contentsline {subsubsection}{A. Risque de sécurité}{49}{section*.55}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{C. Défense implémentée}{49}{section*.56}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {1.39}{\ignorespaces Filtrage d'admission Kubernetes (PSA et Kyverno).}}{49}{figure.1.39}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{D. Preuve technique}{50}{section*.57}\protected@file@percent }
+\newlabel{lst:kyverno_proof_layer}{{1.17}{50}{Vérification des ClusterPolicies Kyverno}{lstlisting.1.17}{}}
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {1.17}Vérification des ClusterPolicies Kyverno}{50}{lstlisting.1.17}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{E. Analyse critique}{50}{section*.58}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.6.9}Couche 9 : Déploiements Avancés \& GitOps Security (ArgoCD, Helm \& Argo Rollouts)}{50}{subsection.1.6.9}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {1.40}{\ignorespaces Application \texttt  {securerag-portal} synchronisée via ArgoCD : état \textit  {Synced} et \textit  {Healthy} en régime nominal (capture historique).}}{50}{figure.1.40}\protected@file@percent }
+\newlabel{fig:argocd_applications}{{1.40}{50}{Application \texttt {securerag-portal} synchronisée via ArgoCD : état \textit {Synced} et \textit {Healthy} en régime nominal (capture historique)}{figure.1.40}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {1.41}{\ignorespaces Détection d'une dérive de configuration (\textit  {drift}) et réconciliation automatique par ArgoCD vers l'état déclaré dans Git (capture historique).}}{51}{figure.1.41}\protected@file@percent }
+\newlabel{fig:argocd_sync_drift}{{1.41}{51}{Détection d'une dérive de configuration (\textit {drift}) et réconciliation automatique par ArgoCD vers l'état déclaré dans Git (capture historique)}{figure.1.41}{}}
+\@writefile{toc}{\contentsline {subsubsection}{A. Risque de sécurité}{51}{section*.59}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{C. Défense implémentée}{51}{section*.60}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {1.42}{\ignorespaces Processus de réconciliation GitOps (ArgoCD) et détection de dérive.}}{51}{figure.1.42}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{D. Preuve technique}{51}{section*.61}\protected@file@percent }
+\newlabel{lst:argocd_proof_layer}{{1.18}{52}{Statut de synchronisation ArgoCD}{lstlisting.1.18}{}}
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {1.18}Statut de synchronisation ArgoCD}{52}{lstlisting.1.18}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{E. Analyse critique}{52}{section*.62}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {1.43}{\ignorespaces Observation des flux réseau L3/L4/L7 eBPF en temps réel avec Hubble (capture historique).}}{52}{figure.1.43}\protected@file@percent }
+\newlabel{fig:hubble_ebpf_observe}{{1.43}{52}{Observation des flux réseau L3/L4/L7 eBPF en temps réel avec Hubble (capture historique)}{figure.1.43}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {1.44}{\ignorespaces Interception et audit des appels système au niveau noyau avec Tetragon eBPF (capture historique — voir précision en section~\ref {subsec:tetragon_complet_v2}).}}{53}{figure.1.44}\protected@file@percent }
+\newlabel{fig:tetragon_kernel_probe}{{1.44}{53}{Interception et audit des appels système au niveau noyau avec Tetragon eBPF (capture historique — voir précision en section~\ref {subsec:tetragon_complet_v2})}{figure.1.44}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {1.45}{\ignorespaces Cartographie temps réel et filtrage des flux réseau L3/L4/L7 avec Hubble eBPF (capture historique).}}{53}{figure.1.45}\protected@file@percent }
+\newlabel{fig:hubble_ui_map}{{1.45}{53}{Cartographie temps réel et filtrage des flux réseau L3/L4/L7 avec Hubble eBPF (capture historique)}{figure.1.45}{}}
+\citation{vieira_ebpf_survey_2020}
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.6.10}Couche 10 : Runtime Security \& Networking eBPF (Falco, Tetragon, Cilium \& Falcosidekick)}{54}{subsection.1.6.10}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {1.46}{\ignorespaces Alerte Falco déclenchée par l'ouverture d'un shell interactif dans un conteneur du namespace \texttt  {securerag} (règle \textit  {Terminal Shell Spawned}).}}{54}{figure.1.46}\protected@file@percent }
+\newlabel{fig:falco_intrusion_alerts}{{1.46}{54}{Alerte Falco déclenchée par l'ouverture d'un shell interactif dans un conteneur du namespace \texttt {securerag} (règle \textit {Terminal Shell Spawned})}{figure.1.46}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {1.47}{\ignorespaces Capture d'exécution réelle de la supervision Falco eBPF sur le cluster \texttt  {kind} : statut des pods et log d'alerte critique en temps réel.}}{54}{figure.1.47}\protected@file@percent }
+\newlabel{fig:falco_runtime_scan_teste}{{1.47}{54}{Capture d'exécution réelle de la supervision Falco eBPF sur le cluster \texttt {kind} : statut des pods et log d'alerte critique en temps réel}{figure.1.47}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {1.48}{\ignorespaces Supervision du plan de données eBPF de Cilium et des règles \texttt  {CiliumNetworkPolicy} actives sur le cluster (capture historique).}}{55}{figure.1.48}\protected@file@percent }
+\newlabel{fig:cilium_ebpf_status}{{1.48}{55}{Supervision du plan de données eBPF de Cilium et des règles \texttt {CiliumNetworkPolicy} actives sur le cluster (capture historique)}{figure.1.48}{}}
+\@writefile{toc}{\contentsline {subsubsection}{A. Risque de sécurité}{55}{section*.63}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{C. Défense implémentée}{55}{section*.64}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {1.49}{\ignorespaces Architecture de détection comportementale eBPF via Falco.}}{55}{figure.1.49}\protected@file@percent }
+\newlabel{lst:falco_values_reel}{{1.19}{55}{Extrait réel des overrides Helm Falco/Falcosidekick (\texttt {infra/k8s/falco/values-override.yaml})}{lstlisting.1.19}{}}
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {1.19}Extrait réel des overrides Helm Falco/Falcosidekick (\texttt  {infra/k8s/falco/values-override.yaml})}{55}{lstlisting.1.19}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{D. Preuve technique}{56}{section*.65}\protected@file@percent }
+\newlabel{lst:falco_proof_layer}{{1.20}{56}{Alerte Falco lors de l'ouverture d'un shell conteneur}{lstlisting.1.20}{}}
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {1.20}Alerte Falco lors de l'ouverture d'un shell conteneur}{56}{lstlisting.1.20}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{E. Analyse critique}{56}{section*.66}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{Falco Runtime — Analyse Expérimentale Approfondie}{56}{section*.67}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Présentation.}{56}{section*.68}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Objectif sécurité.}{56}{section*.69}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Fonctionnement.}{57}{section*.70}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Intégration dans SecureRAG Hub.}{57}{section*.71}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Validation expérimentale.}{57}{section*.72}\protected@file@percent }
+\newlabel{lst:falco_pods_real_exec}{{1.21}{57}{Capture réelle du statut des pods du namespace falco}{lstlisting.1.21}{}}
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {1.21}Capture réelle du statut des pods du namespace falco}{57}{lstlisting.1.21}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {1.50}{\ignorespaces Capture réelle de la surveillance distribuée eBPF par Falco et Falcosidekick sur les nœuds du cluster Kubernetes.}}{57}{figure.1.50}\protected@file@percent }
+\newlabel{fig:falco_runtime_real}{{1.50}{57}{Capture réelle de la surveillance distribuée eBPF par Falco et Falcosidekick sur les nœuds du cluster Kubernetes}{figure.1.50}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {1.4}{\ignorespaces Topologie distribuée de la sécurité runtime Falco.}}{58}{table.1.4}\protected@file@percent }
+\newlabel{tab:falco_nodes_summary}{{1.4}{58}{Topologie distribuée de la sécurité runtime Falco}{table.1.4}{}}
+\@writefile{toc}{\contentsline {paragraph}{Analyse.}{58}{section*.73}\protected@file@percent }
+\citation{falco_cncf_graduation_2024}
+\@writefile{toc}{\contentsline {paragraph}{Limites.}{59}{section*.74}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Conclusion.}{59}{section*.75}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Analyse académique complémentaire — Falco.}{59}{section*.76}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {1.51}{\ignorespaces Requêtage et corrélation des logs centralisés via Loki LogCLI (capture historique).}}{60}{figure.1.51}\protected@file@percent }
+\newlabel{fig:loki_logcli_query}{{1.51}{60}{Requêtage et corrélation des logs centralisés via Loki LogCLI (capture historique)}{figure.1.51}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.6.11}Couche 11 : Security Observability \& Telemetry (Prometheus, Loki, Tempo \& Grafana)}{60}{subsection.1.6.11}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {1.52}{\ignorespaces Vue d'ensemble de l'observabilité (métriques, logs et traces) (capture historique).}}{60}{figure.1.52}\protected@file@percent }
+\newlabel{fig:grafana_devsecops_dashboard}{{1.52}{60}{Vue d'ensemble de l'observabilité (métriques, logs et traces) (capture historique)}{figure.1.52}{}}
+\@writefile{toc}{\contentsline {subsubsection}{A. Risque de sécurité}{61}{section*.77}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{C. Défense implémentée}{61}{section*.78}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {1.53}{\ignorespaces Pipeline d'observabilité unifiée et d'ingestion RAG.}}{61}{figure.1.53}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{E. Analyse critique}{61}{section*.79}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {1.54}{\ignorespaces Statut de la base vectorielle d'événements de sécurité Qdrant (capture historique — voir précision en section~\ref {subsec:qdrant_ollama_v2}).}}{62}{figure.1.54}\protected@file@percent }
+\newlabel{fig:qdrant_vector_db}{{1.54}{62}{Statut de la base vectorielle d'événements de sécurité Qdrant (capture historique — voir précision en section~\ref {subsec:qdrant_ollama_v2})}{figure.1.54}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {1.55}{\ignorespaces Inférence et analyse d'incidents par le LLM souverain Ollama (capture historique).}}{62}{figure.1.55}\protected@file@percent }
+\newlabel{fig:ollama_llm_inference}{{1.55}{62}{Inférence et analyse d'incidents par le LLM souverain Ollama (capture historique)}{figure.1.55}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {1.56}{\ignorespaces API d'évaluation du score de risque unifié R\_workload.}}{63}{figure.1.56}\protected@file@percent }
+\newlabel{fig:risk_score_api}{{1.56}{63}{API d'évaluation du score de risque unifié R\_workload}{figure.1.56}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {1.57}{\ignorespaces Benchmarking de latence bout-en-bout du moteur RAG Security Brain.}}{63}{figure.1.57}\protected@file@percent }
+\newlabel{fig:rag_benchmark_latency}{{1.57}{63}{Benchmarking de latence bout-en-bout du moteur RAG Security Brain}{figure.1.57}{}}
+\citation{greshake_prompt_injection_2023}
+\@writefile{lof}{\contentsline {figure}{\numberline {1.58}{\ignorespaces API de corrélation multi-sources d'incidents du moteur IA.}}{64}{figure.1.58}\protected@file@percent }
+\newlabel{fig:correlated_incidents_api}{{1.58}{64}{API de corrélation multi-sources d'incidents du moteur IA}{figure.1.58}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.6.12}Couche 12 : AI Security Layer (RAG Engine, Qdrant \& Ollama)}{64}{subsection.1.6.12}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {1.59}{\ignorespaces Chaîne d'analyse RAG et architecture vectorielle Qdrant appliquées aux événements de sécurité.}}{64}{figure.1.59}\protected@file@percent }
+\newlabel{fig:ai_security_rag}{{1.59}{64}{Chaîne d'analyse RAG et architecture vectorielle Qdrant appliquées aux événements de sécurité}{figure.1.59}{}}
+\@writefile{toc}{\contentsline {subsubsection}{A. Risque de sécurité}{64}{section*.80}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{B. Attaque simulée}{65}{section*.81}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{C. Défense implémentée}{65}{section*.82}\protected@file@percent }
+\newlabel{eq:risk_score_ai_full}{{1.2}{65}{C. Défense implémentée}{equation.1.6.2}{}}
+\@writefile{toc}{\contentsline {subsubsection}{D. Preuve technique}{65}{section*.83}\protected@file@percent }
+\newlabel{lst:ai_proof_layer}{{1.22}{65}{Réponse JSON de l'API RAG Security Assistant}{lstlisting.1.22}{}}
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {1.22}Réponse JSON de l'API RAG Security Assistant}{65}{lstlisting.1.22}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{E. Analyse critique}{65}{section*.84}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.6.13}Intégration Outil : Dynamic Application Security Testing (OWASP ZAP)}{65}{subsection.1.6.13}\protected@file@percent }
+\newlabel{lst:zap_proof}{{1.23}{66}{Exécution du scan ZAP Baseline dans le pipeline CI}{lstlisting.1.23}{}}
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {1.23}Exécution du scan ZAP Baseline dans le pipeline CI}{66}{lstlisting.1.23}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.6.14}Intégration Outil : Linting des Images Conteneurs (Hadolint)}{66}{subsection.1.6.14}\protected@file@percent }
+\newlabel{lst:hadolint_proof}{{1.24}{66}{Vérification du Dockerfile par Hadolint}{lstlisting.1.24}{}}
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {1.24}Vérification du Dockerfile par Hadolint}{66}{lstlisting.1.24}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.6.15}Intégration Outil : Analyse Statique de l'IaC (Terrascan)}{66}{subsection.1.6.15}\protected@file@percent }
+\newlabel{lst:terrascan_proof}{{1.25}{66}{Rapport de scan Terrascan}{lstlisting.1.25}{}}
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {1.25}Rapport de scan Terrascan}{66}{lstlisting.1.25}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.6.16}Intégration Outils : Audit de Posture Kubernetes (kube-bench \& kube-score)}{67}{subsection.1.6.16}\protected@file@percent }
+\newlabel{lst:kube_bench_proof}{{1.26}{67}{Exécution de kube-bench sur un nœud master}{lstlisting.1.26}{}}
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {1.26}Exécution de kube-bench sur un nœud master}{67}{lstlisting.1.26}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.6.17}Intégration Outils : Policy Enforcement \& Posture Management (OPA Gatekeeper \& Kubescape)}{67}{subsection.1.6.17}\protected@file@percent }
+\newlabel{lst:gatekeeper_proof}{{1.27}{67}{Blocage d'un pod privilégié par OPA Gatekeeper}{lstlisting.1.27}{}}
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {1.27}Blocage d'un pod privilégié par OPA Gatekeeper}{67}{lstlisting.1.27}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.6.18}Intégration Outil : Gestion de Configuration K8s (Kustomize)}{67}{subsection.1.6.18}\protected@file@percent }
+\newlabel{lst:kustomize_proof}{{1.28}{67}{Génération des manifestes de production avec Kustomize}{lstlisting.1.28}{}}
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {1.28}Génération des manifestes de production avec Kustomize}{67}{lstlisting.1.28}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.6.19}Intégration Outils : Résilience et Autoscaling (KEDA \& LitmusChaos)}{68}{subsection.1.6.19}\protected@file@percent }
+\newlabel{lst:litmus_proof}{{1.29}{68}{Rapport d'expérience Chaos Engineering Litmus}{lstlisting.1.29}{}}
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {1.29}Rapport d'expérience Chaos Engineering Litmus}{68}{lstlisting.1.29}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {1.7}Volet 4 : Tests, Expérimentations \& Validation (\textit  {Tests \& QA})}{68}{section.1.7}\protected@file@percent }
+\newlabel{sec:volet_tests}{{1.7}{68}{Volet 4 : Tests, Expérimentations \& Validation (\textit {Tests \& QA})}{section.1.7}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.7.1}Métriques d'Évaluation de la Détection}{68}{subsection.1.7.1}\protected@file@percent }
+\newlabel{eq:dr_formula}{{1.3}{68}{Métriques d'Évaluation de la Détection}{equation.1.7.3}{}}
+\newlabel{eq:fpr_formula}{{1.4}{68}{Métriques d'Évaluation de la Détection}{equation.1.7.4}{}}
+\newlabel{eq:f1_formula}{{1.5}{68}{Métriques d'Évaluation de la Détection}{equation.1.7.5}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.7.2}Campagnes de Tests de Charge (k6) et Protocoles de Reproductibilité}{69}{subsection.1.7.2}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {1.60}{\ignorespaces Consommation CPU et mémoire des nœuds du cluster (\texttt  {kubectl top}) relevée pendant l'une des campagnes de charge k6.}}{69}{figure.1.60}\protected@file@percent }
+\newlabel{fig:k6_loadtest_kubectl_top}{{1.60}{69}{Consommation CPU et mémoire des nœuds du cluster (\texttt {kubectl top}) relevée pendant l'une des campagnes de charge k6}{figure.1.60}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {1.61}{\ignorespaces CronJobs de sauvegarde automatisée de l'état \texttt  {etcd} du cluster et des volumes persistants, orchestrés par Velero.}}{69}{figure.1.61}\protected@file@percent }
+\newlabel{fig:backup_cronjobs_velero}{{1.61}{69}{CronJobs de sauvegarde automatisée de l'état \texttt {etcd} du cluster et des volumes persistants, orchestrés par Velero}{figure.1.61}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {1.5}{\ignorespaces Protocole d'expérimentation et résultats reproductibles des campagnes k6 (moyenne $N=3$ répétitions).}}{70}{table.1.5}\protected@file@percent }
+\newlabel{tab:k6_reproducibility_table}{{1.5}{70}{Protocole d'expérimentation et résultats reproductibles des campagnes k6 (moyenne $N=3$ répétitions)}{table.1.5}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.7.3}Résultats et Analyse des Campagnes Expérimentales}{70}{subsection.1.7.3}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {1.6}{\ignorespaces Résultats expérimentaux détaillés des tests de charge k6 de 10 à 5000 utilisateurs virtuels.}}{70}{table.1.6}\protected@file@percent }
+\newlabel{tab:k6_results_exp_full_section}{{1.6}{70}{Résultats expérimentaux détaillés des tests de charge k6 de 10 à 5000 utilisateurs virtuels}{table.1.6}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {1.62}{\ignorespaces Courbe expérimentale de la latence P95 sous montée en charge k6.}}{71}{figure.1.62}\protected@file@percent }
+\newlabel{fig:k6_chart_full_section}{{1.62}{71}{Courbe expérimentale de la latence P95 sous montée en charge k6}{figure.1.62}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {1.8}Comparaison Académique Avant / Après \& Matrice de Traçabilité}{71}{section.1.8}\protected@file@percent }
+\newlabel{sec:comparaison_avant_apres}{{1.8}{71}{Comparaison Académique Avant / Après \& Matrice de Traçabilité}{section.1.8}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.8.1}Matrice de Traçabilité Expérimentale (Risque $\rightarrow $ Attaque $\rightarrow $ Défense $\rightarrow $ Preuve $\rightarrow $ Verdict)}{72}{subsection.1.8.1}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {1.7}{\ignorespaces Matrice de traçabilité expérimentale exhaustive : de la menace au verdict scientifique.}}{72}{table.1.7}\protected@file@percent }
+\newlabel{tab:matrice_tracabilite_experimentale_full}{{1.7}{72}{Matrice de traçabilité expérimentale exhaustive : de la menace au verdict scientifique}{table.1.7}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.8.2}Matrice de Justification et Traçabilité des Métriques Quantitatives}{72}{subsection.1.8.2}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {1.8}{\ignorespaces Matrice de justification et de traçabilité des métriques quantitatives.}}{73}{table.1.8}\protected@file@percent }
+\newlabel{tab:justification_metriques_full}{{1.8}{73}{Matrice de justification et de traçabilité des métriques quantitatives}{table.1.8}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.8.3}Tableau Comparatif Académique Avant / Après}{73}{subsection.1.8.3}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {1.9}{\ignorespaces Tableau comparatif académique avant et après l'implémentation DevSecOps, intégrant les mesures empiriques réelles.}}{74}{table.1.9}\protected@file@percent }
+\newlabel{tab:comparaison_avant_apres_full_sec}{{1.9}{74}{Tableau comparatif académique avant et après l'implémentation DevSecOps, intégrant les mesures empiriques réelles}{table.1.9}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {1.9}Évaluation de Maturité DevSecOps \& Audit SOC2}{74}{section.1.9}\protected@file@percent }
+\newlabel{sec:modele_maturite}{{1.9}{74}{Évaluation de Maturité DevSecOps \& Audit SOC2}{section.1.9}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.9.1}Modèle de Maturité DevSecOps (DSMM)}{74}{subsection.1.9.1}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {1.63}{\ignorespaces Score de maturité DevSecOps comparatif par domaine fonctionnel (DSMM) — score de conception, à distinguer de la disponibilité opérationnelle instantanée détaillée en section~\ref {sec:limites_operationnelles_empiriques}.}}{74}{figure.1.63}\protected@file@percent }
+\newlabel{fig:dsmm_chart_full_sec}{{1.63}{74}{Score de maturité DevSecOps comparatif par domaine fonctionnel (DSMM) — score de conception, à distinguer de la disponibilité opérationnelle instantanée détaillée en section~\ref {sec:limites_operationnelles_empiriques}}{figure.1.63}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.9.2}Checklist d'Audit SOC2 Type II Readiness}{75}{subsection.1.9.2}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {1.10}{\ignorespaces Checklist d'audit SOC2 Type II Readiness et preuves associées.}}{75}{table.1.10}\protected@file@percent }
+\newlabel{tab:soc2_checklist_full_sec}{{1.10}{75}{Checklist d'audit SOC2 Type II Readiness et preuves associées}{table.1.10}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {1.64}{\ignorespaces Sauvegarde et restauration d'urgence du cluster via Velero CLI.}}{75}{figure.1.64}\protected@file@percent }
+\newlabel{fig:velero_disaster_recovery}{{1.64}{75}{Sauvegarde et restauration d'urgence du cluster via Velero CLI}{figure.1.64}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {1.10}Journal de Preuves Techniques (\textit  {Evidence Collection})}{76}{section.1.10}\protected@file@percent }
+\newlabel{sec:evidence_collection}{{1.10}{76}{Journal de Preuves Techniques (\textit {Evidence Collection})}{section.1.10}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {1.65}{\ignorespaces Score de risque unifié et traçabilité certifiée générés par le moteur AI Security Brain.}}{76}{figure.1.65}\protected@file@percent }
+\newlabel{fig:pipeline_evidence_json}{{1.65}{76}{Score de risque unifié et traçabilité certifiée générés par le moteur AI Security Brain}{figure.1.65}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {1.11}{\ignorespaces Journal de preuves techniques du Sprint DevSecOps — \textit  {Evidence Collection Table} (mis à jour avec les preuves d'exécution du 30 juillet 2026).}}{77}{table.1.11}\protected@file@percent }
+\newlabel{tab:evidence_collection}{{1.11}{77}{Journal de preuves techniques du Sprint DevSecOps — \textit {Evidence Collection Table} (mis à jour avec les preuves d'exécution du 30 juillet 2026)}{table.1.11}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.10.1}Fiche de Preuve Détaillée — Certificat de Traçabilité}{78}{subsection.1.10.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.10.2}Fiche de Preuve Détaillée — Scan d'Image Trivy}{78}{subsection.1.10.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.10.3}Fiche de Preuve Détaillée — Synchronisation ESO / Vault}{78}{subsection.1.10.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {1.11}Compléments Techniques Approfondis}{79}{section.1.11}\protected@file@percent }
+\newlabel{sec:complements_techniques}{{1.11}{79}{Compléments Techniques Approfondis}{section.1.11}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.11.1}Git Hooks Avancés (au-delà de Gitleaks)}{79}{subsection.1.11.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.11.2}Terraform Modules, State \& Providers}{79}{subsection.1.11.2}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {1.12}{\ignorespaces Providers Terraform déclarés et statuts d'instanciation.}}{80}{table.1.12}\protected@file@percent }
+\newlabel{tab:terraform_providers}{{1.12}{80}{Providers Terraform déclarés et statuts d'instanciation}{table.1.12}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.11.3}tfsec — Analyse Statique Terraform}{80}{subsection.1.11.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.11.4}Durcissement SSH des Nœuds Hôtes}{80}{subsection.1.11.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.11.5}Docker Compose (Environnement de Développement Local)}{80}{subsection.1.11.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.11.6}Kubernetes Managé Cloud (EKS / AKS / GKE)}{80}{subsection.1.11.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.11.7}Sécurité Kubernetes Avancée (PSA, ResourceQuota, LimitRange, PDB)}{81}{subsection.1.11.7}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.11.8}Helm \& Argo Rollouts}{81}{subsection.1.11.8}\protected@file@percent }
+\newlabel{lst:helm_dryrun_proof}{{1.30}{81}{Validation locale du chart Helm (dry-run)}{lstlisting.1.30}{}}
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {1.30}Validation locale du chart Helm (dry-run)}{81}{lstlisting.1.30}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.11.9}Cilium (CNI eBPF) \& Falcosidekick}{82}{subsection.1.11.9}\protected@file@percent }
+\newlabel{subsec:cilium_v2}{{1.11.9}{82}{Cilium (CNI eBPF) \& Falcosidekick}{subsection.1.11.9}{}}
+\newlabel{lst:cilium_default_deny_reel}{{1.31}{82}{Extrait réel de la politique réseau Zero-Trust Cilium (\texttt {infra/k8s/policies/cilium/default-deny-networkpolicy.yaml})}{lstlisting.1.31}{}}
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {1.31}Extrait réel de la politique réseau Zero-Trust Cilium (\texttt  {infra/k8s/policies/cilium/default-deny-networkpolicy.yaml})}{82}{lstlisting.1.31}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.11.10}OWASP Dependency-Check}{82}{subsection.1.11.10}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.11.11}Jenkins Configuration as Code (CASC) Détaillé}{83}{subsection.1.11.11}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.11.12}HashiCorp Vault \& External Secrets Operator}{83}{subsection.1.11.12}\protected@file@percent }
+\newlabel{subsec:vault_eso_v2}{{1.11.12}{83}{HashiCorp Vault \& External Secrets Operator}{subsection.1.11.12}{}}
+\newlabel{lst:vault_ha_values_reel}{{1.32}{83}{Extrait réel de la configuration Helm haute disponibilité de Vault (\texttt {infra/helm/vault/values-production.yaml})}{lstlisting.1.32}{}}
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {1.32}Extrait réel de la configuration Helm haute disponibilité de Vault (\texttt  {infra/helm/vault/values-production.yaml})}{83}{lstlisting.1.32}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.11.13}Grafana Tempo — Tracing Distribué}{84}{subsection.1.11.13}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.11.14}Loki — Agrégation et Requêtage des Journaux Applicatifs}{84}{subsection.1.11.14}\protected@file@percent }
+\newlabel{subsec:loki_v2}{{1.11.14}{84}{Loki — Agrégation et Requêtage des Journaux Applicatifs}{subsection.1.11.14}{}}
+\@writefile{toc}{\contentsline {subsubsection}{Présentation}{84}{section*.85}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{Fonctionnement}{84}{section*.86}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{Architecture}{85}{section*.87}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {1.66}{\ignorespaces Architecture du composant Loki dans la pile d'observabilité SecureRAG Hub : collecte par DaemonSet, indexation par labels et requêtage différé LogQL.}}{85}{figure.1.66}\protected@file@percent }
+\newlabel{fig:loki_architecture}{{1.66}{85}{Architecture du composant Loki dans la pile d'observabilité SecureRAG Hub : collecte par DaemonSet, indexation par labels et requêtage différé LogQL}{figure.1.66}{}}
+\@writefile{toc}{\contentsline {subsubsection}{Intégration dans la chaîne DevSecOps}{85}{section*.88}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{Sécurité apportée}{85}{section*.89}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{Cas d'utilisation dans SecureRAG Hub}{86}{section*.90}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Validation expérimentale.}{86}{section*.91}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.11.15}SPIFFE \& SPIRE — Identité de Workload Cryptographique}{87}{subsection.1.11.15}\protected@file@percent }
+\newlabel{subsec:spiffe_spire_v2}{{1.11.15}{87}{SPIFFE \& SPIRE — Identité de Workload Cryptographique}{subsection.1.11.15}{}}
+\@writefile{toc}{\contentsline {subsubsection}{Présentation}{87}{section*.92}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{Architecture prévue}{87}{section*.93}\protected@file@percent }
+\newlabel{lst:spire_server_reel}{{1.33}{87}{Extrait réel du StatefulSet SPIRE Server (\texttt {infra/k8s/spire/spire-server.yaml})}{lstlisting.1.33}{}}
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {1.33}Extrait réel du StatefulSet SPIRE Server (\texttt  {infra/k8s/spire/spire-server.yaml})}{87}{lstlisting.1.33}\protected@file@percent }
+\newlabel{lst:spire_istio_reel}{{1.34}{87}{Extrait réel de l'intégration SPIRE/Istio SDS (\texttt {infra/k8s/istio/spire-integration.yaml})}{lstlisting.1.34}{}}
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {1.34}Extrait réel de l'intégration SPIRE/Istio SDS (\texttt  {infra/k8s/istio/spire-integration.yaml})}{87}{lstlisting.1.34}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{État d'exécution}{88}{section*.94}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{Analyse critique}{88}{section*.95}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.11.16}Istio — Service Mesh et mTLS Strict}{88}{subsection.1.11.16}\protected@file@percent }
+\newlabel{subsec:istio_v2}{{1.11.16}{88}{Istio — Service Mesh et mTLS Strict}{subsection.1.11.16}{}}
+\@writefile{toc}{\contentsline {subsubsection}{Présentation}{88}{section*.96}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{Configuration versionnée}{88}{section*.97}\protected@file@percent }
+\newlabel{lst:istio_peerauth_reel}{{1.35}{88}{Extrait réel de la PeerAuthentication Istio en mode STRICT (\texttt {infra/k8s/istio/peerauthentication-strict.yaml})}{lstlisting.1.35}{}}
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {1.35}Extrait réel de la PeerAuthentication Istio en mode STRICT (\texttt  {infra/k8s/istio/peerauthentication-strict.yaml})}{88}{lstlisting.1.35}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{État d'exécution}{89}{section*.98}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{Analyse critique}{89}{section*.99}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.11.17}Tetragon — Détection et Application Comportementale eBPF au Niveau Noyau}{89}{subsection.1.11.17}\protected@file@percent }
+\newlabel{subsec:tetragon_complet_v2}{{1.11.17}{89}{Tetragon — Détection et Application Comportementale eBPF au Niveau Noyau}{subsection.1.11.17}{}}
+\@writefile{toc}{\contentsline {subsubsection}{Présentation}{89}{section*.100}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{Configuration versionnée}{89}{section*.101}\protected@file@percent }
+\newlabel{lst:tetragon_daemonset_reel}{{1.36}{89}{Extrait réel du DaemonSet Tetragon (\texttt {infra/k8s/tetragon/daemonset.yaml})}{lstlisting.1.36}{}}
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {1.36}Extrait réel du DaemonSet Tetragon (\texttt  {infra/k8s/tetragon/daemonset.yaml})}{89}{lstlisting.1.36}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{État d'exécution}{90}{section*.102}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{Analyse critique}{90}{section*.103}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.11.18}Sigstore — Infrastructure d'Identité Fédérée (Fulcio, Rekor, Keycloak)}{91}{subsection.1.11.18}\protected@file@percent }
+\newlabel{subsec:sigstore_infra_v2}{{1.11.18}{91}{Sigstore — Infrastructure d'Identité Fédérée (Fulcio, Rekor, Keycloak)}{subsection.1.11.18}{}}
+\@writefile{toc}{\contentsline {subsubsection}{Présentation}{91}{section*.104}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{État d'exécution}{91}{section*.105}\protected@file@percent }
+\newlabel{lst:helm_sigstore_reel}{{1.37}{91}{Sortie réelle — helm list -A, namespace sigstore-system}{lstlisting.1.37}{}}
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {1.37}Sortie réelle — helm list -A, namespace sigstore-system}{91}{lstlisting.1.37}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{Analyse critique}{91}{section*.106}\protected@file@percent }
+\newlabel{lst:slsa_report_reel}{{1.38}{92}{Extrait réel du script de génération de rapport SLSA (\texttt {scripts/supply-chain/slsa-report.sh})}{lstlisting.1.38}{}}
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {1.38}Extrait réel du script de génération de rapport SLSA (\texttt  {scripts/supply-chain/slsa-report.sh})}{92}{lstlisting.1.38}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.11.19}OpenTelemetry Collector}{92}{subsection.1.11.19}\protected@file@percent }
+\newlabel{subsec:otel_v2}{{1.11.19}{92}{OpenTelemetry Collector}{subsection.1.11.19}{}}
+\@writefile{toc}{\contentsline {subsubsection}{Présentation}{92}{section*.107}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{Configuration versionnée}{92}{section*.108}\protected@file@percent }
+\newlabel{lst:otel_deployment_reel}{{1.39}{92}{Extrait réel du déploiement du Collector OpenTelemetry (\texttt {infra/k8s/otel/deployment.yaml})}{lstlisting.1.39}{}}
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {1.39}Extrait réel du déploiement du Collector OpenTelemetry (\texttt  {infra/k8s/otel/deployment.yaml})}{92}{lstlisting.1.39}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{État d'exécution}{93}{section*.109}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{Complément : Receivers, Processors, Exporters (OpenTelemetry)}{93}{section*.110}\protected@file@percent }
+\newlabel{subsec:otel_pipeline_v2_ref}{{1.11.19}{93}{Complément — Pipeline Interne OpenTelemetry Collector}{section*.110}{}}
+\newlabel{lst:otel_pipeline_illustratif}{{1.40}{93}{Exemple illustratif de pipeline Receivers/Processors/Exporters du Collector OpenTelemetry (syntaxe de référence, non issu du dépôt du projet)}{lstlisting.1.40}{}}
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {1.40}Exemple illustratif de pipeline Receivers/Processors/Exporters du Collector OpenTelemetry (syntaxe de référence, non issu du dépôt du projet)}{93}{lstlisting.1.40}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Validation expérimentale.}{94}{section*.112}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{Analyse critique}{94}{section*.113}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.11.20}Qdrant \& Ollama — Statut Observé sur le Cluster \texttt  {kind}}{94}{subsection.1.11.20}\protected@file@percent }
+\newlabel{subsec:qdrant_ollama_v2}{{1.11.20}{94}{Qdrant \& Ollama — Statut Observé sur le Cluster \texttt {kind}}{subsection.1.11.20}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.11.21}PyTorch, MLflow \& KServe}{95}{subsection.1.11.21}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {1.13}{\ignorespaces Synthèse des statuts des compléments techniques et justifications, mise à jour avec les preuves d'exécution collectées le 30 juillet 2026.}}{95}{table.1.13}\protected@file@percent }
+\newlabel{tab:complements_synthese_statuts}{{1.13}{95}{Synthèse des statuts des compléments techniques et justifications, mise à jour avec les preuves d'exécution collectées le 30 juillet 2026}{table.1.13}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.11.22}Redis — Cache Applicatif, Sessions et Files de Messages}{96}{subsection.1.11.22}\protected@file@percent }
+\newlabel{subsec:redis_v2}{{1.11.22}{96}{Redis — Cache Applicatif, Sessions et Files de Messages}{subsection.1.11.22}{}}
+\@writefile{toc}{\contentsline {subsubsection}{Présentation}{96}{section*.114}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{Fonctionnement}{96}{section*.115}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{Architecture}{96}{section*.116}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {1.67}{\ignorespaces Architecture Redis — cache applicatif, gestion des sessions et files de messages dans SecureRAG Hub.}}{97}{figure.1.67}\protected@file@percent }
+\newlabel{fig:redis_architecture}{{1.67}{97}{Architecture Redis — cache applicatif, gestion des sessions et files de messages dans SecureRAG Hub}{figure.1.67}{}}
+\@writefile{toc}{\contentsline {subsubsection}{Intégration dans la chaîne DevSecOps}{97}{section*.117}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{Sécurité apportée}{97}{section*.118}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{Cas d'utilisation dans SecureRAG Hub}{97}{section*.119}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Validation expérimentale.}{98}{section*.120}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.11.23}PostgreSQL — Persistance Transactionnelle des Microservices}{98}{subsection.1.11.23}\protected@file@percent }
+\newlabel{subsec:postgresql_v2}{{1.11.23}{98}{PostgreSQL — Persistance Transactionnelle des Microservices}{subsection.1.11.23}{}}
+\@writefile{toc}{\contentsline {subsubsection}{Présentation}{98}{section*.121}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{Fonctionnement}{98}{section*.122}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{Architecture}{98}{section*.123}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {1.68}{\ignorespaces Architecture de la base de données PostgreSQL dans SecureRAG Hub — instance primaire, répliques et opérateur Kubernetes.}}{99}{figure.1.68}\protected@file@percent }
+\newlabel{fig:postgresql_architecture}{{1.68}{99}{Architecture de la base de données PostgreSQL dans SecureRAG Hub — instance primaire, répliques et opérateur Kubernetes}{figure.1.68}{}}
+\@writefile{toc}{\contentsline {subsubsection}{Intégration dans la chaîne DevSecOps}{99}{section*.124}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{Sécurité apportée}{99}{section*.125}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{Cas d'utilisation dans SecureRAG Hub}{100}{section*.126}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Validation expérimentale.}{100}{section*.127}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.11.24}AlertManager — Gestion des Alertes et Règles de Seuil}{100}{subsection.1.11.24}\protected@file@percent }
+\newlabel{subsec:alertmanager_v2}{{1.11.24}{100}{AlertManager — Gestion des Alertes et Règles de Seuil}{subsection.1.11.24}{}}
+\@writefile{toc}{\contentsline {subsubsection}{Présentation}{100}{section*.128}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{Fonctionnement}{101}{section*.129}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{Architecture}{101}{section*.130}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {1.69}{\ignorespaces Architecture du composant AlertManager dans la pile d'observabilité SecureRAG Hub : routage, groupement et inhibition des alertes.}}{101}{figure.1.69}\protected@file@percent }
+\newlabel{fig:alertmanager_architecture}{{1.69}{101}{Architecture du composant AlertManager dans la pile d'observabilité SecureRAG Hub : routage, groupement et inhibition des alertes}{figure.1.69}{}}
+\@writefile{toc}{\contentsline {subsubsection}{Intégration dans la chaîne DevSecOps}{101}{section*.131}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{Sécurité apportée}{102}{section*.132}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{Cas d'utilisation dans SecureRAG Hub}{102}{section*.133}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{Complément : routage, regroupement, inhibition et silences (AlertManager)}{102}{section*.134}\protected@file@percent }
+\newlabel{subsec:alertmanager_v2_ref}{{1.11.24}{102}{Complément — Mécaniques Internes d'AlertManager}{section*.134}{}}
+\newlabel{par:alertmanager_mecaniques_v2}{{1.11.24}{102}{Complément — Mécaniques Internes d'AlertManager}{section*.134}{}}
+\@writefile{toc}{\contentsline {paragraph}{Validation expérimentale.}{103}{section*.135}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Validation expérimentale.}{103}{section*.136}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.11.25}Prometheus Rules et Objectifs de Niveau de Service (SLO)}{103}{subsection.1.11.25}\protected@file@percent }
+\newlabel{subsec:prometheus_rules_slo_v2}{{1.11.25}{103}{Prometheus Rules et Objectifs de Niveau de Service (SLO)}{subsection.1.11.25}{}}
+\@writefile{toc}{\contentsline {subsubsection}{Présentation}{103}{section*.137}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{Fonctionnement}{104}{section*.138}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{Architecture}{104}{section*.139}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {1.70}{\ignorespaces Architecture des \texttt  {PrometheusRule} et du mécanisme de budget d'erreur SLO dans la pile d'observabilité.}}{104}{figure.1.70}\protected@file@percent }
+\newlabel{fig:prometheus_rules_architecture}{{1.70}{104}{Architecture des \texttt {PrometheusRule} et du mécanisme de budget d'erreur SLO dans la pile d'observabilité}{figure.1.70}{}}
+\@writefile{toc}{\contentsline {subsubsection}{Intégration dans la chaîne DevSecOps}{105}{section*.140}\protected@file@percent }
+\newlabel{lst:prometheus_rule_illustratif}{{1.41}{105}{Exemple illustratif de \texttt {PrometheusRule} pour un SLO de disponibilité (syntaxe de référence, non issu du dépôt du projet)}{lstlisting.1.41}{}}
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {1.41}Exemple illustratif de \texttt  {PrometheusRule} pour un SLO de disponibilité (syntaxe de référence, non issu du dépôt du projet)}{105}{lstlisting.1.41}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{Sécurité apportée}{105}{section*.142}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Validation expérimentale.}{106}{section*.143}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.11.26}Grafana — Tableaux de Bord de Sécurité et d'Observabilité}{106}{subsection.1.11.26}\protected@file@percent }
+\newlabel{subsec:grafana_dashboards_v2}{{1.11.26}{106}{Grafana — Tableaux de Bord de Sécurité et d'Observabilité}{subsection.1.11.26}{}}
+\@writefile{toc}{\contentsline {subsubsection}{Présentation}{106}{section*.144}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{Fonctionnement}{106}{section*.145}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{Architecture}{107}{section*.146}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {1.71}{\ignorespaces Architecture et organisation des tableaux de bord Grafana dans SecureRAG Hub (Pipeline, Runtime Security, Capacité Cluster).}}{107}{figure.1.71}\protected@file@percent }
+\newlabel{fig:grafana_dashboards_architecture}{{1.71}{107}{Architecture et organisation des tableaux de bord Grafana dans SecureRAG Hub (Pipeline, Runtime Security, Capacité Cluster)}{figure.1.71}{}}
+\@writefile{toc}{\contentsline {subsubsection}{Intégration dans la chaîne DevSecOps}{107}{section*.147}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{Sécurité apportée}{107}{section*.148}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{Cas d'utilisation dans SecureRAG Hub}{108}{section*.149}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Validation expérimentale.}{108}{section*.150}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {1.12}Limites Opérationnelles Empiriques : Contention de Ressources et Dégradation en Cascade}{108}{section.1.12}\protected@file@percent }
+\newlabel{sec:limites_operationnelles_empiriques}{{1.12}{108}{Limites Opérationnelles Empiriques : Contention de Ressources et Dégradation en Cascade}{section.1.12}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.12.1}Protocole de Vérification}{109}{subsection.1.12.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.12.2}Observation Principale : Dégradation Progressive et Généralisée}{109}{subsection.1.12.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.12.3}Cause Racine : Sur-engagement CPU et Pression Mémoire}{109}{subsection.1.12.3}\protected@file@percent }
+\newlabel{lst:node_resource_overcommit}{{1.42}{109}{Allocation des ressources du nœud worker (\texttt {kubectl describe node})}{lstlisting.1.42}{}}
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {1.42}Allocation des ressources du nœud worker (\texttt  {kubectl describe node})}{109}{lstlisting.1.42}\protected@file@percent }
+\newlabel{lst:node_free_mem}{{1.43}{109}{État mémoire et swap du nœud (\texttt {free -h})}{lstlisting.1.43}{}}
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {1.43}État mémoire et swap du nœud (\texttt  {free -h})}{109}{lstlisting.1.43}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.12.4}Mécanisme Causal de la Cascade}{110}{subsection.1.12.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.12.5}Tableau de Synthèse : État Expérimental Consolidé par Composant au 2 Août 2026}{112}{subsection.1.12.5}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {1.14}{\ignorespaces Tableau de synthèse consolidé : état expérimental validé des 27 composants de la chaîne au 2 août 2026. Les statuts reflètent strictement les résultats réels observés par commandes \texttt  {kubectl} et outils CLI horodatés.}}{112}{table.1.14}\protected@file@percent }
+\newlabel{tab:etat_execution_consolide}{{1.14}{112}{Tableau de synthèse consolidé : état expérimental validé des 27 composants de la chaîne au 2 août 2026. Les statuts reflètent strictement les résultats réels observés par commandes \texttt {kubectl} et outils CLI horodatés}{table.1.14}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.12.6}Portée Scientifique du Constat}{113}{subsection.1.12.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.12.7}Recommandations Correctives}{113}{subsection.1.12.7}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.12.8}Profil de Configuration Viable et Recommandations Ajustées (Environnement 8 CPU / 24 GB RAM)}{114}{subsection.1.12.8}\protected@file@percent }
+\newlabel{subsec:recommandations_ajustees_machine}{{1.12.8}{114}{Profil de Configuration Viable et Recommandations Ajustées (Environnement 8 CPU / 24 GB RAM)}{subsection.1.12.8}{}}
+\@writefile{toc}{\contentsline {subsubsection}{1. Composants Prioritaires à Maintenir}{114}{section*.151}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{2. Composants Désactivés ou Reportés}{114}{section*.152}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{3. Mesures Techniques d'Ingénierie}{115}{section*.153}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {1.13}Perspectives d'Évolution de la Chaîne DevSecOps}{115}{section.1.13}\protected@file@percent }
+\newlabel{sec:perspectives_evolution_outils}{{1.13}{115}{Perspectives d'Évolution de la Chaîne DevSecOps}{section.1.13}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.13.1}Nuclei — Scan de Vulnérabilités Piloté par Templates}{116}{subsection.1.13.1}\protected@file@percent }
+\newlabel{subsec:nuclei_perspective}{{1.13.1}{116}{Nuclei — Scan de Vulnérabilités Piloté par Templates}{subsection.1.13.1}{}}
+\@writefile{toc}{\contentsline {subsubsection}{Objectif}{116}{section*.154}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{Intérêt scientifique}{116}{section*.155}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{Où il s'intégrerait}{116}{section*.156}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{Architecture envisagée}{116}{section*.157}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{Bénéfices attendus}{116}{section*.158}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{Pourquoi il n'est pas encore déployé}{116}{section*.159}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Validation expérimentale (Nuclei).}{117}{section*.160}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.13.2}OWASP Dependency-Track — Gestion Continue de l'Inventaire des Composants}{117}{subsection.1.13.2}\protected@file@percent }
+\newlabel{subsec:dependency_track_perspective}{{1.13.2}{117}{OWASP Dependency-Track — Gestion Continue de l'Inventaire des Composants}{subsection.1.13.2}{}}
+\@writefile{toc}{\contentsline {subsubsection}{Objectif}{117}{section*.161}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{Intérêt scientifique}{117}{section*.162}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{Où il s'intégrerait}{117}{section*.163}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{Architecture envisagée}{117}{section*.164}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{Bénéfices attendus}{118}{section*.165}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{Pourquoi il n'est pas encore déployé}{118}{section*.166}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Validation expérimentale (Dependency-Track).}{118}{section*.167}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.13.3}OpenCTI — Plateforme de Threat Intelligence}{118}{subsection.1.13.3}\protected@file@percent }
+\newlabel{subsec:opencti_perspective}{{1.13.3}{118}{OpenCTI — Plateforme de Threat Intelligence}{subsection.1.13.3}{}}
+\@writefile{toc}{\contentsline {subsubsection}{Objectif}{118}{section*.168}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{Intérêt scientifique}{118}{section*.169}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{Où il s'intégrerait}{118}{section*.170}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{Architecture envisagée}{119}{section*.171}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{Bénéfices attendus}{119}{section*.172}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{Pourquoi il n'est pas encore déployé}{119}{section*.173}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Validation expérimentale (OpenCTI).}{119}{section*.174}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.13.4}Synthèse}{119}{subsection.1.13.4}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {1.15}{\ignorespaces Synthèse des trois extensions envisagées et de leurs conditions préalables de déploiement.}}{119}{table.1.15}\protected@file@percent }
+\newlabel{tab:perspectives_outils_synthese}{{1.15}{119}{Synthèse des trois extensions envisagées et de leurs conditions préalables de déploiement}{table.1.15}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {1.14}Conclusion du Chapitre et Perspectives de Recherche}{120}{section.1.14}\protected@file@percent }
+\newlabel{sec:conclusion_sprint}{{1.14}{120}{Conclusion du Chapitre et Perspectives de Recherche}{section.1.14}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.14.1}Synthèse Scientifique et Validation des Hypothèses}{120}{subsection.1.14.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.14.2}Limites de l'Étude}{120}{subsection.1.14.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.14.3}Menaces à la Validité Expérimentale}{121}{subsection.1.14.3}\protected@file@percent }
+\newlabel{subsec:menaces_validite_exp}{{1.14.3}{121}{Menaces à la Validité Expérimentale}{subsection.1.14.3}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.14.4}Perspectives de Recherche}{122}{subsection.1.14.4}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {1.72}{\ignorespaces Feuille de route des travaux de recherche et d'amélioration, incluant la résolution de la contention de ressources comme préalable.}}{123}{figure.1.72}\protected@file@percent }
+\newlabel{fig:perspectives_amelioration_full_sec}{{1.72}{123}{Feuille de route des travaux de recherche et d'amélioration, incluant la résolution de la contention de ressources comme préalable}{figure.1.72}{}}
+\gdef \@abspage@last{123}

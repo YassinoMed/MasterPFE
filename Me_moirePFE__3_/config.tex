@@ -17,9 +17,14 @@
 \usepackage{booktabs} 
 \usepackage{array}
 \usepackage{float}
+\usepackage{amsmath}
+\usepackage{amssymb}
 \usepackage{tikz} 
+\usetikzlibrary{positioning, arrows.meta, shapes, shapes.geometric, shapes.multipart, calc, shadows}
 \usepackage{pgfplots}
 \pgfplotsset{compat=1.18}
+
+
 \usepackage{listings}
 \usepackage{xcolor}
 
@@ -49,6 +54,33 @@
     rulecolor=\color{lightgray}
 }
 \lstset{style=mystyle}
+
+\lstdefinelanguage{yaml}{
+  keywords={true, false, null, y, n},
+  keywordstyle=\color{blue}\bfseries,
+  basicstyle=\ttfamily\footnotesize,
+  sensitive=false,
+  comment=[l]{\#},
+  commentstyle=\color{codegreen},
+  stringstyle=\color{codepurple},
+  morestring=[b]',
+  morestring=[b]"
+}
+
+\lstdefinelanguage{json}{
+  basicstyle=\normalfont\ttfamily\footnotesize,
+  showstringspaces=false,
+  breaklines=true,
+  stringstyle=\color{codepurple},
+  keywordstyle=\color{blue}\bfseries
+}
+
+\lstdefinelanguage{text}{
+  basicstyle=\ttfamily\footnotesize,
+  breaklines=true
+}
+
+
 
 \usepackage[backend=biber, style=ieee]{biblatex}
 \addbibresource{references.bib} 

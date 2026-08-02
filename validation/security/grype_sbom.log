@@ -1,0 +1,686 @@
+[0000]  WARN go binary packages were found but none carry function symbols; go vulnerability matching falls back to module granularity and may report false positives. if scanning an SBOM, regenerate it with symbol capture enabled for more precise results.
+NAME                                                   INSTALLED             FIXED IN                               TYPE           VULNERABILITY        SEVERITY  EPSS          RISK   
+github.com/docker/docker                               v26.1.4+incompatible  26.1.5                                 go-module      GHSA-v23v-6jw2-98fq  Critical  16.5% (96th)  15.4   
+github.com/docker/docker                               v25.0.6+incompatible  29.3.1                                 go-module      GHSA-x744-4wpc-v9h2  High      10.1% (95th)  8.3    
+github.com/docker/docker                               v26.1.4+incompatible  29.3.1                                 go-module      GHSA-x744-4wpc-v9h2  High      10.1% (95th)  8.3    
+github.com/docker/docker                               v28.5.2+incompatible  29.3.1                                 go-module      GHSA-x744-4wpc-v9h2  High      10.1% (95th)  8.3    
+golang.org/x/crypto                                    v0.24.0               0.31.0                                 go-module      GHSA-v778-237x-gjrc  Critical  3.2% (86th)   2.9    
+urllib3                                                2.2.2                 2.6.3                                  python         GHSA-38jv-5279-wg99  High      2.7% (84th)   2.1    
+python-multipart                                       0.0.9                 0.0.22                                 python         GHSA-wp53-j4wj-2cfg  High      2.2% (80th)   1.8    
+torch                                                  2.4.1                 2.6.0                                  python         GHSA-53q9-r3pm-6pq6  Critical  1.9% (78th)   1.8    
+stdlib                                                 go1.22.5              *1.24.12, 1.25.6                       go-module      GO-2026-4341         High      1.9% (78th)   1.5    
+stdlib                                                 go1.22.6              *1.24.12, 1.25.6                       go-module      GO-2026-4341         High      1.9% (78th)   1.5    
+stdlib                                                 go1.23.10             *1.24.12, 1.25.6                       go-module      GO-2026-4341         High      1.9% (78th)   1.5    
+stdlib                                                 go1.23.12             *1.24.12, 1.25.6                       go-module      GO-2026-4341         High      1.9% (78th)   1.5    
+stdlib                                                 go1.24.1              *1.24.12, 1.25.6                       go-module      GO-2026-4341         High      1.9% (78th)   1.5    
+stdlib                                                 go1.24.6              *1.24.12, 1.25.6                       go-module      GO-2026-4341         High      1.9% (78th)   1.5    
+google.golang.org/grpc                                 v1.63.2               1.79.3                                 go-module      GHSA-p77j-4mvh-x3m3  Critical  1.6% (72nd)   1.4    
+google.golang.org/grpc                                 v1.65.0               1.79.3                                 go-module      GHSA-p77j-4mvh-x3m3  Critical  1.6% (72nd)   1.4    
+google.golang.org/grpc                                 v1.72.0               1.79.3                                 go-module      GHSA-p77j-4mvh-x3m3  Critical  1.6% (72nd)   1.4    
+google.golang.org/grpc                                 v1.72.1               1.79.3                                 go-module      GHSA-p77j-4mvh-x3m3  Critical  1.6% (72nd)   1.4    
+google.golang.org/grpc                                 v1.74.2               1.79.3                                 go-module      GHSA-p77j-4mvh-x3m3  Critical  1.6% (72nd)   1.4    
+google.golang.org/grpc                                 v1.75.1               1.79.3                                 go-module      GHSA-p77j-4mvh-x3m3  Critical  1.6% (72nd)   1.4    
+stdlib                                                 go1.22.5              *1.22.7, 1.23.1                        go-module      GO-2024-3106         High      1.1% (63rd)   0.8    
+stdlib                                                 go1.22.6              *1.22.7, 1.23.1                        go-module      GO-2024-3106         High      1.1% (63rd)   0.8    
+stdlib                                                 go1.22.5              *1.22.7, 1.23.1                        go-module      GO-2024-3107         High      1.0% (60th)   0.8    
+stdlib                                                 go1.22.6              *1.22.7, 1.23.1                        go-module      GO-2024-3107         High      1.0% (60th)   0.8    
+stdlib                                                 go1.22.5              *1.24.13, 1.25.7, 1.26.0-rc.3          go-module      GO-2026-4337         Critical  0.8% (51st)   0.7    
+stdlib                                                 go1.22.6              *1.24.13, 1.25.7, 1.26.0-rc.3          go-module      GO-2026-4337         Critical  0.8% (51st)   0.7    
+stdlib                                                 go1.23.10             *1.24.13, 1.25.7, 1.26.0-rc.3          go-module      GO-2026-4337         Critical  0.8% (51st)   0.7    
+stdlib                                                 go1.23.12             *1.24.13, 1.25.7, 1.26.0-rc.3          go-module      GO-2026-4337         Critical  0.8% (51st)   0.7    
+stdlib                                                 go1.24.1              *1.24.13, 1.25.7, 1.26.0-rc.3          go-module      GO-2026-4337         Critical  0.8% (51st)   0.7    
+stdlib                                                 go1.24.6              *1.24.13, 1.25.7, 1.26.0-rc.3          go-module      GO-2026-4337         Critical  0.8% (51st)   0.7    
+stdlib                                                 go1.22.5              *1.23.8, 1.24.2                        go-module      GO-2025-3563         Critical  0.8% (52nd)   0.7    
+stdlib                                                 go1.22.6              *1.23.8, 1.24.2                        go-module      GO-2025-3563         Critical  0.8% (52nd)   0.7    
+stdlib                                                 go1.24.1              1.23.8, *1.24.2                        go-module      GO-2025-3563         Critical  0.8% (52nd)   0.7    
+golang.org/x/crypto                                    v0.24.0               0.35.0                                 go-module      GHSA-hcg3-q754-cr77  High      0.9% (56th)   0.7    
+golang.org/x/crypto                                    v0.31.0               0.35.0                                 go-module      GHSA-hcg3-q754-cr77  High      0.9% (56th)   0.7    
+werkzeug                                               3.0.3                 3.0.6                                  python         GHSA-q34m-jh98-gwm2  Medium    1.1% (62nd)   0.7    
+golang.org/x/oauth2                                    v0.17.0               0.27.0                                 go-module      GHSA-6v2p-p543-phr9  High      0.8% (54th)   0.6    
+golang.org/x/oauth2                                    v0.21.0               0.27.0                                 go-module      GHSA-6v2p-p543-phr9  High      0.8% (54th)   0.6    
+golang.org/x/oauth2                                    v0.26.0               0.27.0                                 go-module      GHSA-6v2p-p543-phr9  High      0.8% (54th)   0.6    
+stdlib                                                 go1.22.5              *1.25.10, 1.26.3                       go-module      GO-2026-4981         High      0.8% (53rd)   0.6    
+stdlib                                                 go1.22.6              *1.25.10, 1.26.3                       go-module      GO-2026-4981         High      0.8% (53rd)   0.6    
+stdlib                                                 go1.23.10             *1.25.10, 1.26.3                       go-module      GO-2026-4981         High      0.8% (53rd)   0.6    
+stdlib                                                 go1.23.12             *1.25.10, 1.26.3                       go-module      GO-2026-4981         High      0.8% (53rd)   0.6    
+stdlib                                                 go1.24.1              *1.25.10, 1.26.3                       go-module      GO-2026-4981         High      0.8% (53rd)   0.6    
+stdlib                                                 go1.24.6              *1.25.10, 1.26.3                       go-module      GO-2026-4981         High      0.8% (53rd)   0.6    
+stdlib                                                 go1.25.8              *1.25.10, 1.26.3                       go-module      GO-2026-4981         High      0.8% (53rd)   0.6    
+github.com/prometheus/prometheus                       v0.52.1               0.305.2                                go-module      GHSA-8rm2-7qqf-34qm  High      0.8% (53rd)   0.6    
+stdlib                                                 go1.22.5              *1.25.10, 1.26.3                       go-module      GO-2026-4977         High      0.8% (52nd)   0.6    
+stdlib                                                 go1.22.6              *1.25.10, 1.26.3                       go-module      GO-2026-4977         High      0.8% (52nd)   0.6    
+stdlib                                                 go1.23.10             *1.25.10, 1.26.3                       go-module      GO-2026-4977         High      0.8% (52nd)   0.6    
+stdlib                                                 go1.23.12             *1.25.10, 1.26.3                       go-module      GO-2026-4977         High      0.8% (52nd)   0.6    
+stdlib                                                 go1.24.1              *1.25.10, 1.26.3                       go-module      GO-2026-4977         High      0.8% (52nd)   0.6    
+stdlib                                                 go1.24.6              *1.25.10, 1.26.3                       go-module      GO-2026-4977         High      0.8% (52nd)   0.6    
+stdlib                                                 go1.25.8              *1.25.10, 1.26.3                       go-module      GO-2026-4977         High      0.8% (52nd)   0.6    
+stdlib                                                 go1.22.5              *1.25.10, 1.26.3                       go-module      GO-2026-4986         High      0.8% (52nd)   0.6    
+stdlib                                                 go1.22.6              *1.25.10, 1.26.3                       go-module      GO-2026-4986         High      0.8% (52nd)   0.6    
+stdlib                                                 go1.23.10             *1.25.10, 1.26.3                       go-module      GO-2026-4986         High      0.8% (52nd)   0.6    
+stdlib                                                 go1.23.12             *1.25.10, 1.26.3                       go-module      GO-2026-4986         High      0.8% (52nd)   0.6    
+stdlib                                                 go1.24.1              *1.25.10, 1.26.3                       go-module      GO-2026-4986         High      0.8% (52nd)   0.6    
+stdlib                                                 go1.24.6              *1.25.10, 1.26.3                       go-module      GO-2026-4986         High      0.8% (52nd)   0.6    
+stdlib                                                 go1.25.8              *1.25.10, 1.26.3                       go-module      GO-2026-4986         High      0.8% (52nd)   0.6    
+golang.org/x/net                                       v0.25.0               0.53.0                                 go-module      GO-2026-4918         High      0.8% (52nd)   0.6    
+golang.org/x/net                                       v0.26.0               0.53.0                                 go-module      GO-2026-4918         High      0.8% (52nd)   0.6    
+golang.org/x/net                                       v0.39.0               0.53.0                                 go-module      GO-2026-4918         High      0.8% (52nd)   0.6    
+golang.org/x/net                                       v0.41.0               0.53.0                                 go-module      GO-2026-4918         High      0.8% (52nd)   0.6    
+golang.org/x/net                                       v0.42.0               0.53.0                                 go-module      GO-2026-4918         High      0.8% (52nd)   0.6    
+golang.org/x/net                                       v0.44.0               0.53.0                                 go-module      GO-2026-4918         High      0.8% (52nd)   0.6    
+golang.org/x/net                                       v0.48.0               0.53.0                                 go-module      GO-2026-4918         High      0.8% (52nd)   0.6    
+stdlib                                                 go1.22.5              *1.25.10, 1.26.3                       go-module      GO-2026-4918         High      0.8% (52nd)   0.6    
+stdlib                                                 go1.22.6              *1.25.10, 1.26.3                       go-module      GO-2026-4918         High      0.8% (52nd)   0.6    
+stdlib                                                 go1.23.10             *1.25.10, 1.26.3                       go-module      GO-2026-4918         High      0.8% (52nd)   0.6    
+stdlib                                                 go1.23.12             *1.25.10, 1.26.3                       go-module      GO-2026-4918         High      0.8% (52nd)   0.6    
+stdlib                                                 go1.24.1              *1.25.10, 1.26.3                       go-module      GO-2026-4918         High      0.8% (52nd)   0.6    
+stdlib                                                 go1.24.6              *1.25.10, 1.26.3                       go-module      GO-2026-4918         High      0.8% (52nd)   0.6    
+stdlib                                                 go1.25.8              *1.25.10, 1.26.3                       go-module      GO-2026-4918         High      0.8% (52nd)   0.6    
+golang.org/x/crypto                                    v0.24.0               0.52.0                                 go-module      GHSA-vgwf-h737-ff37  Critical  0.6% (46th)   0.6    
+golang.org/x/crypto                                    v0.31.0               0.52.0                                 go-module      GHSA-vgwf-h737-ff37  Critical  0.6% (46th)   0.6    
+golang.org/x/crypto                                    v0.39.0               0.52.0                                 go-module      GHSA-vgwf-h737-ff37  Critical  0.6% (46th)   0.6    
+golang.org/x/crypto                                    v0.40.0               0.52.0                                 go-module      GHSA-vgwf-h737-ff37  Critical  0.6% (46th)   0.6    
+golang.org/x/crypto                                    v0.42.0               0.52.0                                 go-module      GHSA-vgwf-h737-ff37  Critical  0.6% (46th)   0.6    
+golang.org/x/crypto                                    v0.47.0               0.52.0                                 go-module      GHSA-vgwf-h737-ff37  Critical  0.6% (46th)   0.6    
+golang.org/x/crypto                                    v0.51.0               0.52.0                                 go-module      GHSA-vgwf-h737-ff37  Critical  0.6% (46th)   0.6    
+stdlib                                                 go1.22.5              *1.25.8, 1.26.1                        go-module      GO-2026-4601         High      0.7% (50th)   0.5    
+stdlib                                                 go1.22.6              *1.25.8, 1.26.1                        go-module      GO-2026-4601         High      0.7% (50th)   0.5    
+stdlib                                                 go1.23.10             *1.25.8, 1.26.1                        go-module      GO-2026-4601         High      0.7% (50th)   0.5    
+stdlib                                                 go1.23.12             *1.25.8, 1.26.1                        go-module      GO-2026-4601         High      0.7% (50th)   0.5    
+stdlib                                                 go1.24.1              *1.25.8, 1.26.1                        go-module      GO-2026-4601         High      0.7% (50th)   0.5    
+stdlib                                                 go1.24.6              *1.25.8, 1.26.1                        go-module      GO-2026-4601         High      0.7% (50th)   0.5    
+golang.org/x/crypto                                    v0.24.0               0.52.0                                 go-module      GHSA-f5wc-c3c7-36mc  Critical  0.6% (45th)   0.5    
+golang.org/x/crypto                                    v0.31.0               0.52.0                                 go-module      GHSA-f5wc-c3c7-36mc  Critical  0.6% (45th)   0.5    
+golang.org/x/crypto                                    v0.39.0               0.52.0                                 go-module      GHSA-f5wc-c3c7-36mc  Critical  0.6% (45th)   0.5    
+golang.org/x/crypto                                    v0.40.0               0.52.0                                 go-module      GHSA-f5wc-c3c7-36mc  Critical  0.6% (45th)   0.5    
+golang.org/x/crypto                                    v0.42.0               0.52.0                                 go-module      GHSA-f5wc-c3c7-36mc  Critical  0.6% (45th)   0.5    
+golang.org/x/crypto                                    v0.47.0               0.52.0                                 go-module      GHSA-f5wc-c3c7-36mc  Critical  0.6% (45th)   0.5    
+golang.org/x/crypto                                    v0.51.0               0.52.0                                 go-module      GHSA-f5wc-c3c7-36mc  Critical  0.6% (45th)   0.5    
+python-multipart                                       0.0.9                 0.0.27                                 python         GHSA-pp6c-gr5w-3c5g  High      0.7% (50th)   0.5    
+github.com/moby/spdystream                             v0.2.0                0.5.1                                  go-module      GHSA-pc3f-x583-g7j2  High      0.7% (47th)   0.5    
+github.com/moby/spdystream                             v0.4.0                0.5.1                                  go-module      GHSA-pc3f-x583-g7j2  High      0.7% (47th)   0.5    
+urllib3                                                2.2.2                 2.6.0                                  python         GHSA-2xpw-w6gg-jr37  High      0.6% (47th)   0.5    
+urllib3                                                2.2.2                 2.6.0                                  python         GHSA-gm62-xv2j-4w53  High      0.6% (47th)   0.5    
+github.com/sirupsen/logrus                             v1.8.1                1.8.3                                  go-module      GHSA-4f99-4q7p-p3gh  High      0.6% (47th)   0.5    
+golang.org/x/net                                       v0.25.0               0.55.0                                 go-module      GO-2026-5026         High      0.7% (47th)   0.5    
+golang.org/x/net                                       v0.26.0               0.55.0                                 go-module      GO-2026-5026         High      0.7% (47th)   0.5    
+golang.org/x/net                                       v0.39.0               0.55.0                                 go-module      GO-2026-5026         High      0.7% (47th)   0.5    
+golang.org/x/net                                       v0.41.0               0.55.0                                 go-module      GO-2026-5026         High      0.7% (47th)   0.5    
+golang.org/x/net                                       v0.42.0               0.55.0                                 go-module      GO-2026-5026         High      0.7% (47th)   0.5    
+golang.org/x/net                                       v0.44.0               0.55.0                                 go-module      GO-2026-5026         High      0.7% (47th)   0.5    
+golang.org/x/net                                       v0.48.0               0.55.0                                 go-module      GO-2026-5026         High      0.7% (47th)   0.5    
+golang.org/x/net                                       v0.54.0               0.55.0                                 go-module      GO-2026-5026         High      0.7% (47th)   0.5    
+golang.org/x/crypto                                    v0.24.0               0.52.0                                 go-module      GHSA-5cgq-3rg8-m6cv  Critical  0.6% (43rd)   0.5    
+golang.org/x/crypto                                    v0.31.0               0.52.0                                 go-module      GHSA-5cgq-3rg8-m6cv  Critical  0.6% (43rd)   0.5    
+golang.org/x/crypto                                    v0.39.0               0.52.0                                 go-module      GHSA-5cgq-3rg8-m6cv  Critical  0.6% (43rd)   0.5    
+golang.org/x/crypto                                    v0.40.0               0.52.0                                 go-module      GHSA-5cgq-3rg8-m6cv  Critical  0.6% (43rd)   0.5    
+golang.org/x/crypto                                    v0.42.0               0.52.0                                 go-module      GHSA-5cgq-3rg8-m6cv  Critical  0.6% (43rd)   0.5    
+golang.org/x/crypto                                    v0.47.0               0.52.0                                 go-module      GHSA-5cgq-3rg8-m6cv  Critical  0.6% (43rd)   0.5    
+golang.org/x/crypto                                    v0.51.0               0.52.0                                 go-module      GHSA-5cgq-3rg8-m6cv  Critical  0.6% (43rd)   0.5    
+python-multipart                                       0.0.9                 0.0.18                                 python         GHSA-59g5-xgcq-4qw3  High      0.6% (47th)   0.5    
+github.com/go-jose/go-jose/v3                          v3.0.3                3.0.5                                  go-module      GHSA-78h2-9frx-2jm8  High      0.7% (47th)   0.5    
+github.com/go-jose/go-jose/v4                          v4.0.5                4.1.4                                  go-module      GHSA-78h2-9frx-2jm8  High      0.7% (47th)   0.5    
+golang.org/x/crypto                                    v0.24.0               0.52.0                                 go-module      GHSA-x527-x647-q7gg  Critical  0.5% (40th)   0.5    
+golang.org/x/crypto                                    v0.31.0               0.52.0                                 go-module      GHSA-x527-x647-q7gg  Critical  0.5% (40th)   0.5    
+golang.org/x/crypto                                    v0.39.0               0.52.0                                 go-module      GHSA-x527-x647-q7gg  Critical  0.5% (40th)   0.5    
+golang.org/x/crypto                                    v0.40.0               0.52.0                                 go-module      GHSA-x527-x647-q7gg  Critical  0.5% (40th)   0.5    
+golang.org/x/crypto                                    v0.42.0               0.52.0                                 go-module      GHSA-x527-x647-q7gg  Critical  0.5% (40th)   0.5    
+golang.org/x/crypto                                    v0.47.0               0.52.0                                 go-module      GHSA-x527-x647-q7gg  Critical  0.5% (40th)   0.5    
+golang.org/x/crypto                                    v0.51.0               0.52.0                                 go-module      GHSA-x527-x647-q7gg  Critical  0.5% (40th)   0.5    
+golang.org/x/crypto                                    v0.24.0               0.52.0                                 go-module      GHSA-rm3j-f69w-wqmq  Critical  0.5% (41st)   0.5    
+golang.org/x/crypto                                    v0.31.0               0.52.0                                 go-module      GHSA-rm3j-f69w-wqmq  Critical  0.5% (41st)   0.5    
+golang.org/x/crypto                                    v0.39.0               0.52.0                                 go-module      GHSA-rm3j-f69w-wqmq  Critical  0.5% (41st)   0.5    
+golang.org/x/crypto                                    v0.40.0               0.52.0                                 go-module      GHSA-rm3j-f69w-wqmq  Critical  0.5% (41st)   0.5    
+golang.org/x/crypto                                    v0.42.0               0.52.0                                 go-module      GHSA-rm3j-f69w-wqmq  Critical  0.5% (41st)   0.5    
+golang.org/x/crypto                                    v0.47.0               0.52.0                                 go-module      GHSA-rm3j-f69w-wqmq  Critical  0.5% (41st)   0.5    
+golang.org/x/crypto                                    v0.51.0               0.52.0                                 go-module      GHSA-rm3j-f69w-wqmq  Critical  0.5% (41st)   0.5    
+golang.org/x/crypto                                    v0.24.0               0.43.0                                 go-module      GO-2025-4116         High      0.6% (46th)   0.5    
+golang.org/x/crypto                                    v0.31.0               0.43.0                                 go-module      GO-2025-4116         High      0.6% (46th)   0.5    
+golang.org/x/crypto                                    v0.39.0               0.43.0                                 go-module      GO-2025-4116         High      0.6% (46th)   0.5    
+golang.org/x/crypto                                    v0.40.0               0.43.0                                 go-module      GO-2025-4116         High      0.6% (46th)   0.5    
+golang.org/x/crypto                                    v0.42.0               0.43.0                                 go-module      GO-2025-4116         High      0.6% (46th)   0.5    
+stdlib                                                 go1.22.5              *1.25.9, 1.26.2                        go-module      GO-2026-4870         High      0.6% (46th)   0.5    
+stdlib                                                 go1.22.6              *1.25.9, 1.26.2                        go-module      GO-2026-4870         High      0.6% (46th)   0.5    
+stdlib                                                 go1.23.10             *1.25.9, 1.26.2                        go-module      GO-2026-4870         High      0.6% (46th)   0.5    
+stdlib                                                 go1.23.12             *1.25.9, 1.26.2                        go-module      GO-2026-4870         High      0.6% (46th)   0.5    
+stdlib                                                 go1.24.1              *1.25.9, 1.26.2                        go-module      GO-2026-4870         High      0.6% (46th)   0.5    
+stdlib                                                 go1.24.6              *1.25.9, 1.26.2                        go-module      GO-2026-4870         High      0.6% (46th)   0.5    
+stdlib                                                 go1.25.8              *1.25.9, 1.26.2                        go-module      GO-2026-4870         High      0.6% (46th)   0.5    
+stdlib                                                 go1.22.5              *1.24.8, 1.25.2                        go-module      GO-2025-4009         High      0.6% (46th)   0.5    
+stdlib                                                 go1.22.6              *1.24.8, 1.25.2                        go-module      GO-2025-4009         High      0.6% (46th)   0.5    
+stdlib                                                 go1.23.10             *1.24.8, 1.25.2                        go-module      GO-2025-4009         High      0.6% (46th)   0.5    
+stdlib                                                 go1.23.12             *1.24.8, 1.25.2                        go-module      GO-2025-4009         High      0.6% (46th)   0.5    
+stdlib                                                 go1.24.1              *1.24.8, 1.25.2                        go-module      GO-2025-4009         High      0.6% (46th)   0.5    
+stdlib                                                 go1.24.6              *1.24.8, 1.25.2                        go-module      GO-2025-4009         High      0.6% (46th)   0.5    
+stdlib                                                 go1.22.5              *1.25.9, 1.26.2                        go-module      GO-2026-4947         High      0.6% (46th)   0.5    
+stdlib                                                 go1.22.6              *1.25.9, 1.26.2                        go-module      GO-2026-4947         High      0.6% (46th)   0.5    
+stdlib                                                 go1.23.10             *1.25.9, 1.26.2                        go-module      GO-2026-4947         High      0.6% (46th)   0.5    
+stdlib                                                 go1.23.12             *1.25.9, 1.26.2                        go-module      GO-2026-4947         High      0.6% (46th)   0.5    
+stdlib                                                 go1.24.1              *1.25.9, 1.26.2                        go-module      GO-2026-4947         High      0.6% (46th)   0.5    
+stdlib                                                 go1.24.6              *1.25.9, 1.26.2                        go-module      GO-2026-4947         High      0.6% (46th)   0.5    
+stdlib                                                 go1.25.8              *1.25.9, 1.26.2                        go-module      GO-2026-4947         High      0.6% (46th)   0.5    
+stdlib                                                 go1.22.5              *1.24.8, 1.25.2                        go-module      GO-2025-4006         High      0.6% (45th)   0.5    
+stdlib                                                 go1.22.6              *1.24.8, 1.25.2                        go-module      GO-2025-4006         High      0.6% (45th)   0.5    
+stdlib                                                 go1.23.10             *1.24.8, 1.25.2                        go-module      GO-2025-4006         High      0.6% (45th)   0.5    
+stdlib                                                 go1.23.12             *1.24.8, 1.25.2                        go-module      GO-2025-4006         High      0.6% (45th)   0.5    
+stdlib                                                 go1.24.1              *1.24.8, 1.25.2                        go-module      GO-2025-4006         High      0.6% (45th)   0.5    
+stdlib                                                 go1.24.6              *1.24.8, 1.25.2                        go-module      GO-2025-4006         High      0.6% (45th)   0.5    
+langchain-text-splitters                               0.3.0                 0.3.9                                  python         GHSA-m42m-m8cr-8m58  High      0.6% (45th)   0.5    
+golang.org/x/net                                       v0.25.0               0.33.0                                 go-module      GO-2024-3333         Medium    0.9% (55th)   0.5    
+golang.org/x/net                                       v0.26.0               0.33.0                                 go-module      GO-2024-3333         Medium    0.9% (55th)   0.5    
+stdlib                                                 go1.22.5              *1.25.11, 1.26.4                       go-module      GO-2026-5037         High      0.6% (44th)   0.4    
+stdlib                                                 go1.22.6              *1.25.11, 1.26.4                       go-module      GO-2026-5037         High      0.6% (44th)   0.4    
+stdlib                                                 go1.23.10             *1.25.11, 1.26.4                       go-module      GO-2026-5037         High      0.6% (44th)   0.4    
+stdlib                                                 go1.23.12             *1.25.11, 1.26.4                       go-module      GO-2026-5037         High      0.6% (44th)   0.4    
+stdlib                                                 go1.24.1              *1.25.11, 1.26.4                       go-module      GO-2026-5037         High      0.6% (44th)   0.4    
+stdlib                                                 go1.24.6              *1.25.11, 1.26.4                       go-module      GO-2026-5037         High      0.6% (44th)   0.4    
+stdlib                                                 go1.25.8              *1.25.11, 1.26.4                       go-module      GO-2026-5037         High      0.6% (44th)   0.4    
+stdlib                                                 go1.26.3              1.25.11, *1.26.4                       go-module      GO-2026-5037         High      0.6% (44th)   0.4    
+stdlib                                                 go1.22.5              *1.25.10, 1.26.3                       go-module      GO-2026-4971         High      0.6% (44th)   0.4    
+stdlib                                                 go1.22.6              *1.25.10, 1.26.3                       go-module      GO-2026-4971         High      0.6% (44th)   0.4    
+stdlib                                                 go1.23.10             *1.25.10, 1.26.3                       go-module      GO-2026-4971         High      0.6% (44th)   0.4    
+stdlib                                                 go1.23.12             *1.25.10, 1.26.3                       go-module      GO-2026-4971         High      0.6% (44th)   0.4    
+stdlib                                                 go1.24.1              *1.25.10, 1.26.3                       go-module      GO-2026-4971         High      0.6% (44th)   0.4    
+stdlib                                                 go1.24.6              *1.25.10, 1.26.3                       go-module      GO-2026-4971         High      0.6% (44th)   0.4    
+stdlib                                                 go1.25.8              *1.25.10, 1.26.3                       go-module      GO-2026-4971         High      0.6% (44th)   0.4    
+requests                                               2.32.0                2.32.4                                 python         GHSA-9hjg-9r4m-mvj7  Medium    0.8% (54th)   0.4    
+requests                                               2.32.2                2.32.4                                 python         GHSA-9hjg-9r4m-mvj7  Medium    0.8% (54th)   0.4    
+werkzeug                                               3.0.3                 3.0.6                                  python         GHSA-f9vj-2wh5-fj8j  Medium    0.8% (52nd)   0.4    
+go.opentelemetry.io/otel                               v1.36.0               1.41.0                                 go-module      GHSA-mh2q-q3fh-2475  High      0.6% (44th)   0.4    
+go.opentelemetry.io/otel                               v1.37.0               1.41.0                                 go-module      GHSA-mh2q-q3fh-2475  High      0.6% (44th)   0.4    
+stdlib                                                 go1.22.5              *1.25.11, 1.26.4                       go-module      GO-2026-5038         High      0.6% (43rd)   0.4    
+stdlib                                                 go1.22.6              *1.25.11, 1.26.4                       go-module      GO-2026-5038         High      0.6% (43rd)   0.4    
+stdlib                                                 go1.23.10             *1.25.11, 1.26.4                       go-module      GO-2026-5038         High      0.6% (43rd)   0.4    
+stdlib                                                 go1.23.12             *1.25.11, 1.26.4                       go-module      GO-2026-5038         High      0.6% (43rd)   0.4    
+stdlib                                                 go1.24.1              *1.25.11, 1.26.4                       go-module      GO-2026-5038         High      0.6% (43rd)   0.4    
+stdlib                                                 go1.24.6              *1.25.11, 1.26.4                       go-module      GO-2026-5038         High      0.6% (43rd)   0.4    
+stdlib                                                 go1.25.8              *1.25.11, 1.26.4                       go-module      GO-2026-5038         High      0.6% (43rd)   0.4    
+stdlib                                                 go1.26.3              1.25.11, *1.26.4                       go-module      GO-2026-5038         High      0.6% (43rd)   0.4    
+python-jose                                            3.3.0                 3.4.0                                  python         GHSA-cjwg-qfpm-7377  Medium    0.8% (52nd)   0.4    
+github.com/moby/buildkit                               v0.22.0               0.28.1                                 go-module      GHSA-4c29-8rgm-jvjj  High      0.5% (40th)   0.4    
+stdlib                                                 go1.22.5              *1.22.7, 1.23.1                        go-module      GO-2024-3105         Medium    0.8% (54th)   0.4    
+stdlib                                                 go1.22.6              *1.22.7, 1.23.1                        go-module      GO-2024-3105         Medium    0.8% (54th)   0.4    
+golang.org/x/crypto                                    v0.24.0               0.52.0                                 go-module      GHSA-89gr-r52h-f8rx  Critical  0.4% (34th)   0.4    
+golang.org/x/crypto                                    v0.31.0               0.52.0                                 go-module      GHSA-89gr-r52h-f8rx  Critical  0.4% (34th)   0.4    
+golang.org/x/crypto                                    v0.39.0               0.52.0                                 go-module      GHSA-89gr-r52h-f8rx  Critical  0.4% (34th)   0.4    
+golang.org/x/crypto                                    v0.40.0               0.52.0                                 go-module      GHSA-89gr-r52h-f8rx  Critical  0.4% (34th)   0.4    
+golang.org/x/crypto                                    v0.42.0               0.52.0                                 go-module      GHSA-89gr-r52h-f8rx  Critical  0.4% (34th)   0.4    
+golang.org/x/crypto                                    v0.47.0               0.52.0                                 go-module      GHSA-89gr-r52h-f8rx  Critical  0.4% (34th)   0.4    
+golang.org/x/crypto                                    v0.51.0               0.52.0                                 go-module      GHSA-89gr-r52h-f8rx  Critical  0.4% (34th)   0.4    
+golang.org/x/crypto                                    v0.24.0               0.52.0                                 go-module      GHSA-jppx-rxg9-jmrx  Critical  0.4% (33rd)   0.4    
+golang.org/x/crypto                                    v0.31.0               0.52.0                                 go-module      GHSA-jppx-rxg9-jmrx  Critical  0.4% (33rd)   0.4    
+golang.org/x/crypto                                    v0.39.0               0.52.0                                 go-module      GHSA-jppx-rxg9-jmrx  Critical  0.4% (33rd)   0.4    
+golang.org/x/crypto                                    v0.40.0               0.52.0                                 go-module      GHSA-jppx-rxg9-jmrx  Critical  0.4% (33rd)   0.4    
+golang.org/x/crypto                                    v0.42.0               0.52.0                                 go-module      GHSA-jppx-rxg9-jmrx  Critical  0.4% (33rd)   0.4    
+golang.org/x/crypto                                    v0.47.0               0.52.0                                 go-module      GHSA-jppx-rxg9-jmrx  Critical  0.4% (33rd)   0.4    
+golang.org/x/crypto                                    v0.51.0               0.52.0                                 go-module      GHSA-jppx-rxg9-jmrx  Critical  0.4% (33rd)   0.4    
+github.com/getkin/kin-openapi                          v0.111.0              0.131.0                                go-module      GHSA-wq9g-9vfc-cfq9  High      0.5% (39th)   0.4    
+stdlib                                                 go1.22.5              *1.24.12, 1.25.6                       go-module      GO-2026-4342         Medium    0.6% (47th)   0.4    
+stdlib                                                 go1.22.6              *1.24.12, 1.25.6                       go-module      GO-2026-4342         Medium    0.6% (47th)   0.4    
+stdlib                                                 go1.23.10             *1.24.12, 1.25.6                       go-module      GO-2026-4342         Medium    0.6% (47th)   0.4    
+stdlib                                                 go1.23.12             *1.24.12, 1.25.6                       go-module      GO-2026-4342         Medium    0.6% (47th)   0.4    
+stdlib                                                 go1.24.1              *1.24.12, 1.25.6                       go-module      GO-2026-4342         Medium    0.6% (47th)   0.4    
+stdlib                                                 go1.24.6              *1.24.12, 1.25.6                       go-module      GO-2026-4342         Medium    0.6% (47th)   0.4    
+stdlib                                                 go1.22.5              *1.22.11, 1.23.5, 1.24.0-rc.2          go-module      GO-2025-3420         Medium    0.7% (47th)   0.4    
+stdlib                                                 go1.22.6              *1.22.11, 1.23.5, 1.24.0-rc.2          go-module      GO-2025-3420         Medium    0.7% (47th)   0.4    
+github.com/moby/buildkit                               v0.22.0               0.28.1                                 go-module      GHSA-4vrq-3vrq-g6gg  High      0.5% (37th)   0.4    
+golang.org/x/crypto                                    v0.24.0               0.52.0                                 go-module      GHSA-q4h4-gmj2-qvw2  High      0.5% (38th)   0.4    
+golang.org/x/crypto                                    v0.31.0               0.52.0                                 go-module      GHSA-q4h4-gmj2-qvw2  High      0.5% (38th)   0.4    
+golang.org/x/crypto                                    v0.39.0               0.52.0                                 go-module      GHSA-q4h4-gmj2-qvw2  High      0.5% (38th)   0.4    
+golang.org/x/crypto                                    v0.40.0               0.52.0                                 go-module      GHSA-q4h4-gmj2-qvw2  High      0.5% (38th)   0.4    
+golang.org/x/crypto                                    v0.42.0               0.52.0                                 go-module      GHSA-q4h4-gmj2-qvw2  High      0.5% (38th)   0.4    
+golang.org/x/crypto                                    v0.47.0               0.52.0                                 go-module      GHSA-q4h4-gmj2-qvw2  High      0.5% (38th)   0.4    
+golang.org/x/crypto                                    v0.51.0               0.52.0                                 go-module      GHSA-q4h4-gmj2-qvw2  High      0.5% (38th)   0.4    
+golang.org/x/crypto                                    v0.24.0               0.52.0                                 go-module      GHSA-w879-237q-wc7r  High      0.5% (38th)   0.4    
+golang.org/x/crypto                                    v0.31.0               0.52.0                                 go-module      GHSA-w879-237q-wc7r  High      0.5% (38th)   0.4    
+golang.org/x/crypto                                    v0.39.0               0.52.0                                 go-module      GHSA-w879-237q-wc7r  High      0.5% (38th)   0.4    
+golang.org/x/crypto                                    v0.40.0               0.52.0                                 go-module      GHSA-w879-237q-wc7r  High      0.5% (38th)   0.4    
+golang.org/x/crypto                                    v0.42.0               0.52.0                                 go-module      GHSA-w879-237q-wc7r  High      0.5% (38th)   0.4    
+golang.org/x/crypto                                    v0.47.0               0.52.0                                 go-module      GHSA-w879-237q-wc7r  High      0.5% (38th)   0.4    
+golang.org/x/crypto                                    v0.51.0               0.52.0                                 go-module      GHSA-w879-237q-wc7r  High      0.5% (38th)   0.4    
+stdlib                                                 go1.22.5              *1.24.11, 1.25.5                       go-module      GO-2025-4155         High      0.5% (37th)   0.3    
+stdlib                                                 go1.22.6              *1.24.11, 1.25.5                       go-module      GO-2025-4155         High      0.5% (37th)   0.3    
+stdlib                                                 go1.23.10             *1.24.11, 1.25.5                       go-module      GO-2025-4155         High      0.5% (37th)   0.3    
+stdlib                                                 go1.23.12             *1.24.11, 1.25.5                       go-module      GO-2025-4155         High      0.5% (37th)   0.3    
+stdlib                                                 go1.24.1              *1.24.11, 1.25.5                       go-module      GO-2025-4155         High      0.5% (37th)   0.3    
+stdlib                                                 go1.24.6              *1.24.11, 1.25.5                       go-module      GO-2025-4155         High      0.5% (37th)   0.3    
+github.com/docker/cli                                  v25.0.1+incompatible  29.2.0                                 go-module      GHSA-p436-gjf2-799p  High      0.5% (38th)   0.3    
+github.com/docker/cli                                  v26.1.4+incompatible  29.2.0                                 go-module      GHSA-p436-gjf2-799p  High      0.5% (38th)   0.3    
+github.com/docker/cli                                  v28.5.2+incompatible  29.2.0                                 go-module      GHSA-p436-gjf2-799p  High      0.5% (38th)   0.3    
+stdlib                                                 go1.22.5              *1.23.10, 1.24.4                       go-module      GO-2025-3751         Medium    0.6% (44th)   0.3    
+stdlib                                                 go1.22.6              *1.23.10, 1.24.4                       go-module      GO-2025-3751         Medium    0.6% (44th)   0.3    
+stdlib                                                 go1.24.1              1.23.10, *1.24.4                       go-module      GO-2025-3751         Medium    0.6% (44th)   0.3    
+golang.org/x/text                                      v0.16.0               0.39.0                                 go-module      GO-2026-5970         High      0.4% (36th)   0.3    
+golang.org/x/text                                      v0.21.0               0.39.0                                 go-module      GO-2026-5970         High      0.4% (36th)   0.3    
+golang.org/x/text                                      v0.25.0               0.39.0                                 go-module      GO-2026-5970         High      0.4% (36th)   0.3    
+golang.org/x/text                                      v0.26.0               0.39.0                                 go-module      GO-2026-5970         High      0.4% (36th)   0.3    
+golang.org/x/text                                      v0.27.0               0.39.0                                 go-module      GO-2026-5970         High      0.4% (36th)   0.3    
+golang.org/x/text                                      v0.30.0               0.39.0                                 go-module      GO-2026-5970         High      0.4% (36th)   0.3    
+golang.org/x/text                                      v0.33.0               0.39.0                                 go-module      GO-2026-5970         High      0.4% (36th)   0.3    
+golang.org/x/text                                      v0.37.0               0.39.0                                 go-module      GO-2026-5970         High      0.4% (36th)   0.3    
+github.com/containerd/containerd                       v1.7.12                                                      go-module      GO-2026-5064         Critical  0.3% (27th)   0.3    
+werkzeug                                               3.0.3                 3.1.6                                  python         GHSA-29vq-49wr-vm6x  Medium    0.6% (43rd)   0.3    
+github.com/containerd/containerd                       v1.7.12                                                      go-module      GO-2026-5338         Critical  0.3% (25th)   0.3    
+jinja2                                                 3.1.4                 3.1.5                                  python         GHSA-q2x7-8rv6-6q7h  Medium    0.5% (41st)   0.3    
+pypdf                                                  4.3.1                 6.14.2                                 python         GHSA-g867-7843-wf8q  High      0.4% (29th)   0.3    
+golang.org/x/crypto                                    v0.24.0               0.45.0                                 go-module      GHSA-j5w8-q4qc-rx2x  Medium    0.6% (43rd)   0.3    
+golang.org/x/crypto                                    v0.31.0               0.45.0                                 go-module      GHSA-j5w8-q4qc-rx2x  Medium    0.6% (43rd)   0.3    
+golang.org/x/crypto                                    v0.39.0               0.45.0                                 go-module      GHSA-j5w8-q4qc-rx2x  Medium    0.6% (43rd)   0.3    
+golang.org/x/crypto                                    v0.40.0               0.45.0                                 go-module      GHSA-j5w8-q4qc-rx2x  Medium    0.6% (43rd)   0.3    
+golang.org/x/crypto                                    v0.42.0               0.45.0                                 go-module      GHSA-j5w8-q4qc-rx2x  Medium    0.6% (43rd)   0.3    
+helm.sh/helm/v3                                        v3.15.1               3.17.4                                 go-module      GHSA-557j-xg8c-q2mm  High      0.4% (29th)   0.3    
+helm.sh/helm/v3                                        v3.15.3               3.17.4                                 go-module      GHSA-557j-xg8c-q2mm  High      0.4% (29th)   0.3    
+werkzeug                                               3.0.3                 3.1.4                                  python         GHSA-hgf8-39gv-g3f2  Medium    0.5% (41st)   0.3    
+anthropics/claude-code-action                          v1                    1.0.74                                 github-action  GHSA-8q5r-mmjf-575q  Medium    0.6% (43rd)   0.3    
+python-multipart                                       0.0.9                 0.0.30                                 python         GHSA-5rvq-cxj2-64vf  High      0.4% (30th)   0.3    
+stdlib                                                 go1.22.5              *1.24.9, 1.25.3                        go-module      GO-2025-4007         High      0.4% (30th)   0.3    
+stdlib                                                 go1.22.6              *1.24.9, 1.25.3                        go-module      GO-2025-4007         High      0.4% (30th)   0.3    
+stdlib                                                 go1.23.10             *1.24.9, 1.25.3                        go-module      GO-2025-4007         High      0.4% (30th)   0.3    
+stdlib                                                 go1.23.12             *1.24.9, 1.25.3                        go-module      GO-2025-4007         High      0.4% (30th)   0.3    
+stdlib                                                 go1.24.1              *1.24.9, 1.25.3                        go-module      GO-2025-4007         High      0.4% (30th)   0.3    
+stdlib                                                 go1.24.6              *1.24.9, 1.25.3                        go-module      GO-2025-4007         High      0.4% (30th)   0.3    
+stdlib                                                 go1.22.5              *1.23.12, 1.24.6                       go-module      GO-2025-3956         Medium    0.5% (39th)   0.3    
+stdlib                                                 go1.22.6              *1.23.12, 1.24.6                       go-module      GO-2025-3956         Medium    0.5% (39th)   0.3    
+stdlib                                                 go1.23.10             *1.23.12, 1.24.6                       go-module      GO-2025-3956         Medium    0.5% (39th)   0.3    
+stdlib                                                 go1.24.1              1.23.12, *1.24.6                       go-module      GO-2025-3956         Medium    0.5% (39th)   0.3    
+pypdf                                                  4.3.1                 6.14.1                                 python         GHSA-5xf7-4p34-54qr  High      0.3% (26th)   0.3    
+stdlib                                                 go1.22.5              *1.24.8, 1.25.2                        go-module      GO-2025-4012         Medium    0.5% (41st)   0.3    
+stdlib                                                 go1.22.6              *1.24.8, 1.25.2                        go-module      GO-2025-4012         Medium    0.5% (41st)   0.3    
+stdlib                                                 go1.23.10             *1.24.8, 1.25.2                        go-module      GO-2025-4012         Medium    0.5% (41st)   0.3    
+stdlib                                                 go1.23.12             *1.24.8, 1.25.2                        go-module      GO-2025-4012         Medium    0.5% (41st)   0.3    
+stdlib                                                 go1.24.1              *1.24.8, 1.25.2                        go-module      GO-2025-4012         Medium    0.5% (41st)   0.3    
+stdlib                                                 go1.24.6              *1.24.8, 1.25.2                        go-module      GO-2025-4012         Medium    0.5% (41st)   0.3    
+stdlib                                                 go1.22.5              *1.24.8, 1.25.2                        go-module      GO-2025-4013         High      0.4% (28th)   0.3    
+stdlib                                                 go1.22.6              *1.24.8, 1.25.2                        go-module      GO-2025-4013         High      0.4% (28th)   0.3    
+stdlib                                                 go1.23.10             *1.24.8, 1.25.2                        go-module      GO-2025-4013         High      0.4% (28th)   0.3    
+stdlib                                                 go1.23.12             *1.24.8, 1.25.2                        go-module      GO-2025-4013         High      0.4% (28th)   0.3    
+stdlib                                                 go1.24.1              *1.24.8, 1.25.2                        go-module      GO-2025-4013         High      0.4% (28th)   0.3    
+stdlib                                                 go1.24.6              *1.24.8, 1.25.2                        go-module      GO-2025-4013         High      0.4% (28th)   0.3    
+stdlib                                                 go1.22.5              *1.24.8, 1.25.2                        go-module      GO-2025-4011         Medium    0.5% (41st)   0.3    
+stdlib                                                 go1.22.5              *1.24.8, 1.25.2                        go-module      GO-2025-4015         Medium    0.5% (41st)   0.3    
+stdlib                                                 go1.22.6              *1.24.8, 1.25.2                        go-module      GO-2025-4011         Medium    0.5% (41st)   0.3    
+stdlib                                                 go1.22.6              *1.24.8, 1.25.2                        go-module      GO-2025-4015         Medium    0.5% (41st)   0.3    
+stdlib                                                 go1.23.10             *1.24.8, 1.25.2                        go-module      GO-2025-4011         Medium    0.5% (41st)   0.3    
+stdlib                                                 go1.23.10             *1.24.8, 1.25.2                        go-module      GO-2025-4015         Medium    0.5% (41st)   0.3    
+stdlib                                                 go1.23.12             *1.24.8, 1.25.2                        go-module      GO-2025-4011         Medium    0.5% (41st)   0.3    
+stdlib                                                 go1.23.12             *1.24.8, 1.25.2                        go-module      GO-2025-4015         Medium    0.5% (41st)   0.3    
+stdlib                                                 go1.24.1              *1.24.8, 1.25.2                        go-module      GO-2025-4011         Medium    0.5% (41st)   0.3    
+stdlib                                                 go1.24.1              *1.24.8, 1.25.2                        go-module      GO-2025-4015         Medium    0.5% (41st)   0.3    
+stdlib                                                 go1.24.6              *1.24.8, 1.25.2                        go-module      GO-2025-4011         Medium    0.5% (41st)   0.3    
+stdlib                                                 go1.24.6              *1.24.8, 1.25.2                        go-module      GO-2025-4015         Medium    0.5% (41st)   0.3    
+golang.org/x/crypto                                    v0.24.0               0.45.0                                 go-module      GHSA-f6x5-jh6r-wrfv  Medium    0.5% (41st)   0.3    
+golang.org/x/crypto                                    v0.31.0               0.45.0                                 go-module      GHSA-f6x5-jh6r-wrfv  Medium    0.5% (41st)   0.3    
+golang.org/x/crypto                                    v0.39.0               0.45.0                                 go-module      GHSA-f6x5-jh6r-wrfv  Medium    0.5% (41st)   0.3    
+golang.org/x/crypto                                    v0.40.0               0.45.0                                 go-module      GHSA-f6x5-jh6r-wrfv  Medium    0.5% (41st)   0.3    
+golang.org/x/crypto                                    v0.42.0               0.45.0                                 go-module      GHSA-f6x5-jh6r-wrfv  Medium    0.5% (41st)   0.3    
+stdlib                                                 go1.22.5              *1.25.9, 1.26.2                        go-module      GO-2026-4946         High      0.4% (28th)   0.3    
+stdlib                                                 go1.22.6              *1.25.9, 1.26.2                        go-module      GO-2026-4946         High      0.4% (28th)   0.3    
+stdlib                                                 go1.23.10             *1.25.9, 1.26.2                        go-module      GO-2026-4946         High      0.4% (28th)   0.3    
+stdlib                                                 go1.23.12             *1.25.9, 1.26.2                        go-module      GO-2026-4946         High      0.4% (28th)   0.3    
+stdlib                                                 go1.24.1              *1.25.9, 1.26.2                        go-module      GO-2026-4946         High      0.4% (28th)   0.3    
+stdlib                                                 go1.24.6              *1.25.9, 1.26.2                        go-module      GO-2026-4946         High      0.4% (28th)   0.3    
+stdlib                                                 go1.25.8              *1.25.9, 1.26.2                        go-module      GO-2026-4946         High      0.4% (28th)   0.3    
+python-jose                                            3.3.0                 3.4.0                                  python         GHSA-6c5p-j8vq-pqhj  Critical  0.3% (22nd)   0.3    
+golang.org/x/net                                       v0.25.0               0.38.0                                 go-module      GHSA-vvgc-356p-c3xw  Medium    0.5% (40th)   0.3    
+golang.org/x/net                                       v0.26.0               0.38.0                                 go-module      GHSA-vvgc-356p-c3xw  Medium    0.5% (40th)   0.3    
+github.com/prometheus/prometheus                       v0.52.1               0.311.3                                go-module      GHSA-wg65-39gg-5wfj  High      0.4% (27th)   0.3    
+helm.sh/helm/v3                                        v3.15.1               3.17.3                                 go-module      GHSA-5xqw-8hwv-wg92  Medium    0.5% (37th)   0.3    
+helm.sh/helm/v3                                        v3.15.3               3.17.3                                 go-module      GHSA-5xqw-8hwv-wg92  Medium    0.5% (37th)   0.3    
+golang.org/x/crypto                                    v0.24.0               0.52.0                                 go-module      GHSA-78mq-xcr3-xm33  Medium    0.5% (40th)   0.3    
+golang.org/x/crypto                                    v0.31.0               0.52.0                                 go-module      GHSA-78mq-xcr3-xm33  Medium    0.5% (40th)   0.3    
+golang.org/x/crypto                                    v0.39.0               0.52.0                                 go-module      GHSA-78mq-xcr3-xm33  Medium    0.5% (40th)   0.3    
+golang.org/x/crypto                                    v0.40.0               0.52.0                                 go-module      GHSA-78mq-xcr3-xm33  Medium    0.5% (40th)   0.3    
+golang.org/x/crypto                                    v0.42.0               0.52.0                                 go-module      GHSA-78mq-xcr3-xm33  Medium    0.5% (40th)   0.3    
+golang.org/x/crypto                                    v0.47.0               0.52.0                                 go-module      GHSA-78mq-xcr3-xm33  Medium    0.5% (40th)   0.3    
+golang.org/x/crypto                                    v0.51.0               0.52.0                                 go-module      GHSA-78mq-xcr3-xm33  Medium    0.5% (40th)   0.3    
+stdlib                                                 go1.22.5              *1.22.11, 1.23.5, 1.24.0-rc.2          go-module      GO-2025-3373         Medium    0.5% (38th)   0.3    
+stdlib                                                 go1.22.6              *1.22.11, 1.23.5, 1.24.0-rc.2          go-module      GO-2025-3373         Medium    0.5% (38th)   0.3    
+golang.org/x/net                                       v0.25.0               0.45.0                                 go-module      GO-2026-4440         Medium    0.5% (40th)   0.3    
+golang.org/x/net                                       v0.26.0               0.45.0                                 go-module      GO-2026-4440         Medium    0.5% (40th)   0.3    
+golang.org/x/net                                       v0.39.0               0.45.0                                 go-module      GO-2026-4440         Medium    0.5% (40th)   0.3    
+golang.org/x/net                                       v0.41.0               0.45.0                                 go-module      GO-2026-4440         Medium    0.5% (40th)   0.3    
+golang.org/x/net                                       v0.42.0               0.45.0                                 go-module      GO-2026-4440         Medium    0.5% (40th)   0.3    
+golang.org/x/net                                       v0.44.0               0.45.0                                 go-module      GO-2026-4440         Medium    0.5% (40th)   0.3    
+jinja2                                                 3.1.4                 3.1.6                                  python         GHSA-cpwx-vrp4-4pq7  Medium    0.5% (39th)   0.3    
+stdlib                                                 go1.22.5              *1.23.12, 1.24.6                       go-module      GO-2025-3849         High      0.4% (28th)   0.3    
+stdlib                                                 go1.22.6              *1.23.12, 1.24.6                       go-module      GO-2025-3849         High      0.4% (28th)   0.3    
+stdlib                                                 go1.23.10             *1.23.12, 1.24.6                       go-module      GO-2025-3849         High      0.4% (28th)   0.3    
+stdlib                                                 go1.24.1              1.23.12, *1.24.6                       go-module      GO-2025-3849         High      0.4% (28th)   0.3    
+golang.org/x/net                                       v0.25.0               0.56.0                                 go-module      GO-2026-5942         High      0.3% (26th)   0.3    
+golang.org/x/net                                       v0.26.0               0.56.0                                 go-module      GO-2026-5942         High      0.3% (26th)   0.3    
+golang.org/x/net                                       v0.39.0               0.56.0                                 go-module      GO-2026-5942         High      0.3% (26th)   0.3    
+golang.org/x/net                                       v0.41.0               0.56.0                                 go-module      GO-2026-5942         High      0.3% (26th)   0.3    
+golang.org/x/net                                       v0.42.0               0.56.0                                 go-module      GO-2026-5942         High      0.3% (26th)   0.3    
+golang.org/x/net                                       v0.44.0               0.56.0                                 go-module      GO-2026-5942         High      0.3% (26th)   0.3    
+golang.org/x/net                                       v0.48.0               0.56.0                                 go-module      GO-2026-5942         High      0.3% (26th)   0.3    
+golang.org/x/net                                       v0.54.0               0.56.0                                 go-module      GO-2026-5942         High      0.3% (26th)   0.3    
+golang.org/x/net                                       v0.55.0               0.56.0                                 go-module      GO-2026-5942         High      0.3% (26th)   0.3    
+pypdf                                                  4.3.1                 6.0.0                                  python         GHSA-7hfw-26vp-jp8m  Medium    0.4% (35th)   0.3    
+pypdf                                                  4.3.1                 6.7.4                                  python         GHSA-f2v5-7jq9-h8cg  Medium    0.4% (34th)   0.3    
+golang.org/x/net                                       v0.25.0               0.45.0                                 go-module      GO-2026-4441         Medium    0.5% (39th)   0.2    
+golang.org/x/net                                       v0.26.0               0.45.0                                 go-module      GO-2026-4441         Medium    0.5% (39th)   0.2    
+golang.org/x/net                                       v0.39.0               0.45.0                                 go-module      GO-2026-4441         Medium    0.5% (39th)   0.2    
+golang.org/x/net                                       v0.41.0               0.45.0                                 go-module      GO-2026-4441         Medium    0.5% (39th)   0.2    
+golang.org/x/net                                       v0.42.0               0.45.0                                 go-module      GO-2026-4441         Medium    0.5% (39th)   0.2    
+golang.org/x/net                                       v0.44.0               0.45.0                                 go-module      GO-2026-4441         Medium    0.5% (39th)   0.2    
+helm.sh/helm/v3                                        v3.15.1               3.17.3                                 go-module      GHSA-4hfp-h4cw-hj8p  Medium    0.4% (35th)   0.2    
+helm.sh/helm/v3                                        v3.15.3               3.17.3                                 go-module      GHSA-4hfp-h4cw-hj8p  Medium    0.4% (35th)   0.2    
+stdlib                                                 go1.24.1              1.24.4                                 go-module      GO-2025-3749         High      0.3% (25th)   0.2    
+pypdf                                                  4.3.1                 6.1.3                                  python         GHSA-jfx9-29x2-rv3j  Medium    0.4% (33rd)   0.2    
+pypdf                                                  4.3.1                 6.1.3                                  python         GHSA-vr63-x8vc-m265  Medium    0.4% (33rd)   0.2    
+pypdf                                                  4.3.1                 6.7.5                                  python         GHSA-9m86-7pmv-2852  Medium    0.4% (32nd)   0.2    
+urllib3                                                2.2.2                 2.7.0                                  python         GHSA-qccp-gfcp-xxvc  High      0.3% (25th)   0.2    
+pypdf                                                  4.3.1                 6.10.0                                 python         GHSA-3crg-w4f6-42mx  Medium    0.4% (34th)   0.2    
+github.com/go-jose/go-jose/v3                          v3.0.3                3.0.4                                  go-module      GHSA-c6gw-w398-hv78  Medium    0.4% (31st)   0.2    
+werkzeug                                               3.0.3                 3.1.5                                  python         GHSA-87hc-h4r5-73f7  Medium    0.4% (34th)   0.2    
+github.com/docker/docker                               v25.0.6+incompatible                                         go-module      GHSA-pxq6-2prw-chj9  Medium    0.4% (31st)   0.2    
+github.com/docker/docker                               v26.1.4+incompatible                                         go-module      GHSA-pxq6-2prw-chj9  Medium    0.4% (31st)   0.2    
+github.com/docker/docker                               v28.5.2+incompatible                                         go-module      GHSA-pxq6-2prw-chj9  Medium    0.4% (31st)   0.2    
+idna                                                   3.7                   3.15                                   python         GHSA-65pc-fj4g-8rjx  Medium    0.4% (33rd)   0.2    
+stdlib                                                 go1.22.5              *1.24.8, 1.25.2                        go-module      GO-2025-4008         Medium    0.4% (35th)   0.2    
+stdlib                                                 go1.22.6              *1.24.8, 1.25.2                        go-module      GO-2025-4008         Medium    0.4% (35th)   0.2    
+stdlib                                                 go1.23.10             *1.24.8, 1.25.2                        go-module      GO-2025-4008         Medium    0.4% (35th)   0.2    
+stdlib                                                 go1.23.12             *1.24.8, 1.25.2                        go-module      GO-2025-4008         Medium    0.4% (35th)   0.2    
+stdlib                                                 go1.24.1              *1.24.8, 1.25.2                        go-module      GO-2025-4008         Medium    0.4% (35th)   0.2    
+stdlib                                                 go1.24.6              *1.24.8, 1.25.2                        go-module      GO-2025-4008         Medium    0.4% (35th)   0.2    
+stdlib                                                 go1.22.5              *1.24.8, 1.25.2                        go-module      GO-2025-4010         Medium    0.4% (35th)   0.2    
+stdlib                                                 go1.22.6              *1.24.8, 1.25.2                        go-module      GO-2025-4010         Medium    0.4% (35th)   0.2    
+stdlib                                                 go1.23.10             *1.24.8, 1.25.2                        go-module      GO-2025-4010         Medium    0.4% (35th)   0.2    
+stdlib                                                 go1.23.12             *1.24.8, 1.25.2                        go-module      GO-2025-4010         Medium    0.4% (35th)   0.2    
+stdlib                                                 go1.24.1              *1.24.8, 1.25.2                        go-module      GO-2025-4010         Medium    0.4% (35th)   0.2    
+stdlib                                                 go1.24.6              *1.24.8, 1.25.2                        go-module      GO-2025-4010         Medium    0.4% (35th)   0.2    
+pypdf                                                  4.3.1                 6.9.2                                  python         GHSA-87mj-5ggw-8qc3  Medium    0.5% (37th)   0.2    
+golang.org/x/crypto                                    v0.24.0               0.52.0                                 go-module      GHSA-9m57-25v3-79x9  Medium    0.4% (33rd)   0.2    
+golang.org/x/crypto                                    v0.31.0               0.52.0                                 go-module      GHSA-9m57-25v3-79x9  Medium    0.4% (33rd)   0.2    
+golang.org/x/crypto                                    v0.39.0               0.52.0                                 go-module      GHSA-9m57-25v3-79x9  Medium    0.4% (33rd)   0.2    
+golang.org/x/crypto                                    v0.40.0               0.52.0                                 go-module      GHSA-9m57-25v3-79x9  Medium    0.4% (33rd)   0.2    
+golang.org/x/crypto                                    v0.42.0               0.52.0                                 go-module      GHSA-9m57-25v3-79x9  Medium    0.4% (33rd)   0.2    
+golang.org/x/crypto                                    v0.47.0               0.52.0                                 go-module      GHSA-9m57-25v3-79x9  Medium    0.4% (33rd)   0.2    
+golang.org/x/crypto                                    v0.51.0               0.52.0                                 go-module      GHSA-9m57-25v3-79x9  Medium    0.4% (33rd)   0.2    
+golang.org/x/crypto                                    v0.24.0               0.52.0                                 go-module      GHSA-45gg-vh54-h5m9  Medium    0.4% (29th)   0.2    
+golang.org/x/crypto                                    v0.31.0               0.52.0                                 go-module      GHSA-45gg-vh54-h5m9  Medium    0.4% (29th)   0.2    
+golang.org/x/crypto                                    v0.39.0               0.52.0                                 go-module      GHSA-45gg-vh54-h5m9  Medium    0.4% (29th)   0.2    
+golang.org/x/crypto                                    v0.40.0               0.52.0                                 go-module      GHSA-45gg-vh54-h5m9  Medium    0.4% (29th)   0.2    
+golang.org/x/crypto                                    v0.42.0               0.52.0                                 go-module      GHSA-45gg-vh54-h5m9  Medium    0.4% (29th)   0.2    
+golang.org/x/crypto                                    v0.47.0               0.52.0                                 go-module      GHSA-45gg-vh54-h5m9  Medium    0.4% (29th)   0.2    
+golang.org/x/crypto                                    v0.51.0               0.52.0                                 go-module      GHSA-45gg-vh54-h5m9  Medium    0.4% (29th)   0.2    
+stdlib                                                 go1.22.5              *1.25.10, 1.26.3                       go-module      GO-2026-4980         Medium    0.4% (29th)   0.2    
+stdlib                                                 go1.22.6              *1.25.10, 1.26.3                       go-module      GO-2026-4980         Medium    0.4% (29th)   0.2    
+stdlib                                                 go1.23.10             *1.25.10, 1.26.3                       go-module      GO-2026-4980         Medium    0.4% (29th)   0.2    
+stdlib                                                 go1.23.12             *1.25.10, 1.26.3                       go-module      GO-2026-4980         Medium    0.4% (29th)   0.2    
+stdlib                                                 go1.24.1              *1.25.10, 1.26.3                       go-module      GO-2026-4980         Medium    0.4% (29th)   0.2    
+stdlib                                                 go1.24.6              *1.25.10, 1.26.3                       go-module      GO-2026-4980         Medium    0.4% (29th)   0.2    
+stdlib                                                 go1.25.8              *1.25.10, 1.26.3                       go-module      GO-2026-4980         Medium    0.4% (29th)   0.2    
+pypdf                                                  4.3.1                 6.4.0                                  python         GHSA-m449-cwjh-6pw7  Medium    0.4% (28th)   0.2    
+urllib3                                                2.2.2                 2.5.0                                  python         GHSA-pq67-6m6q-mj2v  Medium    0.4% (32nd)   0.2    
+pypdf                                                  4.3.1                 6.14.0                                 python         GHSA-55h5-xmcq-c37v  Medium    0.3% (26th)   0.2    
+pypdf                                                  4.3.1                 6.7.3                                  python         GHSA-x7hp-r3qg-r3cj  Medium    0.3% (27th)   0.2    
+stdlib                                                 go1.22.5              *1.25.10, 1.26.3                       go-module      GO-2026-4976         Medium    0.4% (31st)   0.2    
+stdlib                                                 go1.22.6              *1.25.10, 1.26.3                       go-module      GO-2026-4976         Medium    0.4% (31st)   0.2    
+stdlib                                                 go1.23.10             *1.25.10, 1.26.3                       go-module      GO-2026-4976         Medium    0.4% (31st)   0.2    
+stdlib                                                 go1.23.12             *1.25.10, 1.26.3                       go-module      GO-2026-4976         Medium    0.4% (31st)   0.2    
+stdlib                                                 go1.24.1              *1.25.10, 1.26.3                       go-module      GO-2026-4976         Medium    0.4% (31st)   0.2    
+stdlib                                                 go1.24.6              *1.25.10, 1.26.3                       go-module      GO-2026-4976         Medium    0.4% (31st)   0.2    
+stdlib                                                 go1.25.8              *1.25.10, 1.26.3                       go-module      GO-2026-4976         Medium    0.4% (31st)   0.2    
+pypdf                                                  4.3.1                 6.6.2                                  python         GHSA-2q4j-m29v-hq73  Medium    0.4% (31st)   0.2    
+helm.sh/helm/v3                                        v3.15.1               3.18.5                                 go-module      GHSA-9h84-qmv7-982p  Medium    0.3% (25th)   0.2    
+helm.sh/helm/v3                                        v3.15.3               3.18.5                                 go-module      GHSA-9h84-qmv7-982p  Medium    0.3% (25th)   0.2    
+stdlib                                                 go1.22.5              *1.24.8, 1.25.2                        go-module      GO-2025-4014         Medium    0.4% (34th)   0.2    
+stdlib                                                 go1.22.6              *1.24.8, 1.25.2                        go-module      GO-2025-4014         Medium    0.4% (34th)   0.2    
+stdlib                                                 go1.23.10             *1.24.8, 1.25.2                        go-module      GO-2025-4014         Medium    0.4% (34th)   0.2    
+stdlib                                                 go1.23.12             *1.24.8, 1.25.2                        go-module      GO-2025-4014         Medium    0.4% (34th)   0.2    
+stdlib                                                 go1.24.1              *1.24.8, 1.25.2                        go-module      GO-2025-4014         Medium    0.4% (34th)   0.2    
+stdlib                                                 go1.24.6              *1.24.8, 1.25.2                        go-module      GO-2025-4014         Medium    0.4% (34th)   0.2    
+stdlib                                                 go1.22.5              *1.25.11, 1.26.4                       go-module      GO-2026-5039         Medium    0.4% (29th)   0.2    
+stdlib                                                 go1.22.6              *1.25.11, 1.26.4                       go-module      GO-2026-5039         Medium    0.4% (29th)   0.2    
+stdlib                                                 go1.23.10             *1.25.11, 1.26.4                       go-module      GO-2026-5039         Medium    0.4% (29th)   0.2    
+stdlib                                                 go1.23.12             *1.25.11, 1.26.4                       go-module      GO-2026-5039         Medium    0.4% (29th)   0.2    
+stdlib                                                 go1.24.1              *1.25.11, 1.26.4                       go-module      GO-2026-5039         Medium    0.4% (29th)   0.2    
+stdlib                                                 go1.24.6              *1.25.11, 1.26.4                       go-module      GO-2026-5039         Medium    0.4% (29th)   0.2    
+stdlib                                                 go1.25.8              *1.25.11, 1.26.4                       go-module      GO-2026-5039         Medium    0.4% (29th)   0.2    
+stdlib                                                 go1.26.3              1.25.11, *1.26.4                       go-module      GO-2026-5039         Medium    0.4% (29th)   0.2    
+helm.sh/helm/v3                                        v3.15.1               3.18.5                                 go-module      GHSA-f9f8-9pmf-xv68  Medium    0.3% (25th)   0.2    
+helm.sh/helm/v3                                        v3.15.3               3.18.5                                 go-module      GHSA-f9f8-9pmf-xv68  Medium    0.3% (25th)   0.2    
+golang.org/x/net                                       v0.25.0               0.55.0                                 go-module      GHSA-5cv4-jp36-h3mw  Medium    0.3% (25th)   0.2    
+golang.org/x/net                                       v0.26.0               0.55.0                                 go-module      GHSA-5cv4-jp36-h3mw  Medium    0.3% (25th)   0.2    
+golang.org/x/net                                       v0.39.0               0.55.0                                 go-module      GHSA-5cv4-jp36-h3mw  Medium    0.3% (25th)   0.2    
+golang.org/x/net                                       v0.41.0               0.55.0                                 go-module      GHSA-5cv4-jp36-h3mw  Medium    0.3% (25th)   0.2    
+golang.org/x/net                                       v0.42.0               0.55.0                                 go-module      GHSA-5cv4-jp36-h3mw  Medium    0.3% (25th)   0.2    
+golang.org/x/net                                       v0.44.0               0.55.0                                 go-module      GHSA-5cv4-jp36-h3mw  Medium    0.3% (25th)   0.2    
+golang.org/x/net                                       v0.48.0               0.55.0                                 go-module      GHSA-5cv4-jp36-h3mw  Medium    0.3% (25th)   0.2    
+golang.org/x/net                                       v0.54.0               0.55.0                                 go-module      GHSA-5cv4-jp36-h3mw  Medium    0.3% (25th)   0.2    
+jinja2                                                 3.1.4                 3.1.5                                  python         GHSA-gmj6-6f8f-6699  Medium    0.3% (23rd)   0.2    
+stdlib                                                 go1.22.5              *1.25.8, 1.26.1                        go-module      GO-2026-4603         Medium    0.3% (25th)   0.2    
+stdlib                                                 go1.22.6              *1.25.8, 1.26.1                        go-module      GO-2026-4603         Medium    0.3% (25th)   0.2    
+stdlib                                                 go1.23.10             *1.25.8, 1.26.1                        go-module      GO-2026-4603         Medium    0.3% (25th)   0.2    
+stdlib                                                 go1.23.12             *1.25.8, 1.26.1                        go-module      GO-2026-4603         Medium    0.3% (25th)   0.2    
+stdlib                                                 go1.24.1              *1.25.8, 1.26.1                        go-module      GO-2026-4603         Medium    0.3% (25th)   0.2    
+stdlib                                                 go1.24.6              *1.25.8, 1.26.1                        go-module      GO-2026-4603         Medium    0.3% (25th)   0.2    
+golang.org/x/net                                       v0.25.0               0.36.0                                 go-module      GHSA-qxp5-gwg8-xv66  Medium    0.4% (31st)   0.2    
+golang.org/x/net                                       v0.26.0               0.36.0                                 go-module      GHSA-qxp5-gwg8-xv66  Medium    0.4% (31st)   0.2    
+stdlib                                                 go1.22.5              *1.23.7, 1.24.1                        go-module      GO-2025-3503         Medium    0.4% (31st)   0.2    
+stdlib                                                 go1.22.6              *1.23.7, 1.24.1                        go-module      GO-2025-3503         Medium    0.4% (31st)   0.2    
+python-multipart                                       0.0.9                 0.0.26                                 python         GHSA-mj87-hwqh-73pj  Medium    0.4% (27th)   0.2    
+pypdf                                                  4.3.1                 6.14.0                                 python         GHSA-5qjq-93h5-hrgp  Medium    0.3% (22nd)   0.2    
+stdlib                                                 go1.22.5              *1.25.12, 1.26.5, 1.27.0-rc.2          go-module      GO-2026-4970         High      0.2% (14th)   0.2    
+stdlib                                                 go1.22.6              *1.25.12, 1.26.5, 1.27.0-rc.2          go-module      GO-2026-4970         High      0.2% (14th)   0.2    
+stdlib                                                 go1.23.10             *1.25.12, 1.26.5, 1.27.0-rc.2          go-module      GO-2026-4970         High      0.2% (14th)   0.2    
+stdlib                                                 go1.23.12             *1.25.12, 1.26.5, 1.27.0-rc.2          go-module      GO-2026-4970         High      0.2% (14th)   0.2    
+stdlib                                                 go1.24.1              *1.25.12, 1.26.5, 1.27.0-rc.2          go-module      GO-2026-4970         High      0.2% (14th)   0.2    
+stdlib                                                 go1.24.6              *1.25.12, 1.26.5, 1.27.0-rc.2          go-module      GO-2026-4970         High      0.2% (14th)   0.2    
+stdlib                                                 go1.25.8              *1.25.12, 1.26.5, 1.27.0-rc.2          go-module      GO-2026-4970         High      0.2% (14th)   0.2    
+stdlib                                                 go1.26.3              1.25.12, *1.26.5, 1.27.0-rc.2          go-module      GO-2026-4970         High      0.2% (14th)   0.2    
+stdlib                                                 go1.26.4              1.25.12, *1.26.5, 1.27.0-rc.2          go-module      GO-2026-4970         High      0.2% (14th)   0.2    
+pypdf                                                  4.3.1                 6.9.1                                  python         GHSA-qpxp-75px-xjcp  Medium    0.3% (27th)   0.2    
+stdlib                                                 go1.22.5              *1.25.10, 1.26.3                       go-module      GO-2026-4982         Medium    0.3% (23rd)   0.2    
+stdlib                                                 go1.22.6              *1.25.10, 1.26.3                       go-module      GO-2026-4982         Medium    0.3% (23rd)   0.2    
+stdlib                                                 go1.23.10             *1.25.10, 1.26.3                       go-module      GO-2026-4982         Medium    0.3% (23rd)   0.2    
+stdlib                                                 go1.23.12             *1.25.10, 1.26.3                       go-module      GO-2026-4982         Medium    0.3% (23rd)   0.2    
+stdlib                                                 go1.24.1              *1.25.10, 1.26.3                       go-module      GO-2026-4982         Medium    0.3% (23rd)   0.2    
+stdlib                                                 go1.24.6              *1.25.10, 1.26.3                       go-module      GO-2026-4982         Medium    0.3% (23rd)   0.2    
+stdlib                                                 go1.25.8              *1.25.10, 1.26.3                       go-module      GO-2026-4982         Medium    0.3% (23rd)   0.2    
+stdlib                                                 go1.22.5              *1.25.9, 1.26.2                        go-module      GO-2026-4864         Medium    0.3% (21st)   0.2    
+stdlib                                                 go1.22.6              *1.25.9, 1.26.2                        go-module      GO-2026-4864         Medium    0.3% (21st)   0.2    
+stdlib                                                 go1.23.10             *1.25.9, 1.26.2                        go-module      GO-2026-4864         Medium    0.3% (21st)   0.2    
+stdlib                                                 go1.23.12             *1.25.9, 1.26.2                        go-module      GO-2026-4864         Medium    0.3% (21st)   0.2    
+stdlib                                                 go1.24.1              *1.25.9, 1.26.2                        go-module      GO-2026-4864         Medium    0.3% (21st)   0.2    
+stdlib                                                 go1.24.6              *1.25.9, 1.26.2                        go-module      GO-2026-4864         Medium    0.3% (21st)   0.2    
+stdlib                                                 go1.25.8              *1.25.9, 1.26.2                        go-module      GO-2026-4864         Medium    0.3% (21st)   0.2    
+github.com/containerd/containerd/v2                    v2.0.5                2.0.9                                  go-module      GHSA-fqw6-gf59-qr4w  High      0.2% (12th)   0.2    
+stdlib                                                 go1.22.5              *1.24.11, 1.25.5                       go-module      GO-2025-4175         Medium    0.3% (21st)   0.2    
+stdlib                                                 go1.22.6              *1.24.11, 1.25.5                       go-module      GO-2025-4175         Medium    0.3% (21st)   0.2    
+stdlib                                                 go1.23.10             *1.24.11, 1.25.5                       go-module      GO-2025-4175         Medium    0.3% (21st)   0.2    
+stdlib                                                 go1.23.12             *1.24.11, 1.25.5                       go-module      GO-2025-4175         Medium    0.3% (21st)   0.2    
+stdlib                                                 go1.24.1              *1.24.11, 1.25.5                       go-module      GO-2025-4175         Medium    0.3% (21st)   0.2    
+stdlib                                                 go1.24.6              *1.24.11, 1.25.5                       go-module      GO-2025-4175         Medium    0.3% (21st)   0.2    
+urllib3                                                2.2.2                 2.5.0                                  python         GHSA-48p4-8xcf-vxj5  Medium    0.3% (24th)   0.2    
+go.opentelemetry.io/otel/sdk                           v1.27.0               1.43.0                                 go-module      GHSA-hfvc-g4fc-pqhx  High      0.2% (12th)   0.2    
+go.opentelemetry.io/otel/sdk                           v1.36.0               1.43.0                                 go-module      GHSA-hfvc-g4fc-pqhx  High      0.2% (12th)   0.2    
+go.opentelemetry.io/otel/sdk                           v1.37.0               1.43.0                                 go-module      GHSA-hfvc-g4fc-pqhx  High      0.2% (12th)   0.2    
+stdlib                                                 go1.22.5              *1.25.9, 1.26.2                        go-module      GO-2026-4865         Medium    0.3% (21st)   0.2    
+stdlib                                                 go1.22.6              *1.25.9, 1.26.2                        go-module      GO-2026-4865         Medium    0.3% (21st)   0.2    
+stdlib                                                 go1.23.10             *1.25.9, 1.26.2                        go-module      GO-2026-4865         Medium    0.3% (21st)   0.2    
+stdlib                                                 go1.23.12             *1.25.9, 1.26.2                        go-module      GO-2026-4865         Medium    0.3% (21st)   0.2    
+stdlib                                                 go1.24.1              *1.25.9, 1.26.2                        go-module      GO-2026-4865         Medium    0.3% (21st)   0.2    
+stdlib                                                 go1.24.6              *1.25.9, 1.26.2                        go-module      GO-2026-4865         Medium    0.3% (21st)   0.2    
+stdlib                                                 go1.25.8              *1.25.9, 1.26.2                        go-module      GO-2026-4865         Medium    0.3% (21st)   0.2    
+golang.org/x/crypto                                    v0.24.0               0.52.0                                 go-module      GHSA-qpw4-5x99-6vjp  Medium    0.3% (20th)   0.2    
+golang.org/x/crypto                                    v0.31.0               0.52.0                                 go-module      GHSA-qpw4-5x99-6vjp  Medium    0.3% (20th)   0.2    
+golang.org/x/crypto                                    v0.39.0               0.52.0                                 go-module      GHSA-qpw4-5x99-6vjp  Medium    0.3% (20th)   0.2    
+golang.org/x/crypto                                    v0.40.0               0.52.0                                 go-module      GHSA-qpw4-5x99-6vjp  Medium    0.3% (20th)   0.2    
+golang.org/x/crypto                                    v0.42.0               0.52.0                                 go-module      GHSA-qpw4-5x99-6vjp  Medium    0.3% (20th)   0.2    
+golang.org/x/crypto                                    v0.47.0               0.52.0                                 go-module      GHSA-qpw4-5x99-6vjp  Medium    0.3% (20th)   0.2    
+golang.org/x/crypto                                    v0.51.0               0.52.0                                 go-module      GHSA-qpw4-5x99-6vjp  Medium    0.3% (20th)   0.2    
+github.com/containerd/containerd                       v1.7.12               1.7.33                                 go-module      GHSA-jpcc-p29g-p8mq  Medium    0.3% (18th)   0.2    
+github.com/containerd/containerd/v2                    v2.0.5                2.0.10                                 go-module      GHSA-jpcc-p29g-p8mq  Medium    0.3% (18th)   0.2    
+stdlib                                                 go1.22.5              *1.25.9, 1.26.2                        go-module      GO-2026-4869         Medium    0.3% (21st)   0.2    
+stdlib                                                 go1.22.6              *1.25.9, 1.26.2                        go-module      GO-2026-4869         Medium    0.3% (21st)   0.2    
+stdlib                                                 go1.23.10             *1.25.9, 1.26.2                        go-module      GO-2026-4869         Medium    0.3% (21st)   0.2    
+stdlib                                                 go1.23.12             *1.25.9, 1.26.2                        go-module      GO-2026-4869         Medium    0.3% (21st)   0.2    
+stdlib                                                 go1.24.1              *1.25.9, 1.26.2                        go-module      GO-2026-4869         Medium    0.3% (21st)   0.2    
+stdlib                                                 go1.24.6              *1.25.9, 1.26.2                        go-module      GO-2026-4869         Medium    0.3% (21st)   0.2    
+stdlib                                                 go1.25.8              *1.25.9, 1.26.2                        go-module      GO-2026-4869         Medium    0.3% (21st)   0.2    
+langchain-text-splitters                               0.3.0                 1.1.2                                  python         GHSA-fv5p-p927-qmxr  Medium    0.3% (17th)   0.1    
+pypdf                                                  4.3.1                 6.10.1                                 python         GHSA-jj6c-8h6c-hppx  Medium    0.3% (21st)   0.1    
+github.com/containerd/containerd                       v1.7.12               1.7.33                                 go-module      GHSA-xhf5-7wjv-pqxp  High      0.2% (7th)    0.1    
+github.com/containerd/containerd/v2                    v2.0.5                2.0.10                                 go-module      GHSA-xhf5-7wjv-pqxp  High      0.2% (7th)    0.1    
+stdlib                                                 go1.22.5              *1.24.12, 1.25.6                       go-module      GO-2026-4340         Medium    0.3% (19th)   0.1    
+stdlib                                                 go1.22.6              *1.24.12, 1.25.6                       go-module      GO-2026-4340         Medium    0.3% (19th)   0.1    
+stdlib                                                 go1.23.10             *1.24.12, 1.25.6                       go-module      GO-2026-4340         Medium    0.3% (19th)   0.1    
+stdlib                                                 go1.23.12             *1.24.12, 1.25.6                       go-module      GO-2026-4340         Medium    0.3% (19th)   0.1    
+stdlib                                                 go1.24.1              *1.24.12, 1.25.6                       go-module      GO-2026-4340         Medium    0.3% (19th)   0.1    
+stdlib                                                 go1.24.6              *1.24.12, 1.25.6                       go-module      GO-2026-4340         Medium    0.3% (19th)   0.1    
+torch                                                  2.4.1                 2.8.0                                  python         GHSA-887c-mr87-cxwp  Medium    0.3% (23rd)   0.1    
+github.com/prometheus/prometheus                       v0.52.1               0.311.2-0.20260410083055-07c6232d159b  go-module      GHSA-vffh-x6r8-xx99  Medium    0.3% (17th)   0.1    
+github.com/containerd/containerd                       v1.7.12               1.7.27                                 go-module      GHSA-265r-hfxg-fhmg  Medium    0.3% (20th)   0.1    
+torch                                                  2.4.1                                                        python         GHSA-c678-jfcj-6jmf  Low       0.4% (33rd)   0.1    
+pypdf                                                  4.3.1                 6.10.2                                 python         GHSA-7gw9-cf7v-778f  Medium    0.2% (13th)   0.1    
+pypdf                                                  4.3.1                 6.10.2                                 python         GHSA-x284-j5p8-9c5p  Medium    0.2% (13th)   0.1    
+stdlib                                                 go1.22.5              *1.25.12, 1.26.5, 1.27.0-rc.2          go-module      GO-2026-5856         Medium    0.3% (16th)   0.1    
+stdlib                                                 go1.22.6              *1.25.12, 1.26.5, 1.27.0-rc.2          go-module      GO-2026-5856         Medium    0.3% (16th)   0.1    
+stdlib                                                 go1.23.10             *1.25.12, 1.26.5, 1.27.0-rc.2          go-module      GO-2026-5856         Medium    0.3% (16th)   0.1    
+stdlib                                                 go1.23.12             *1.25.12, 1.26.5, 1.27.0-rc.2          go-module      GO-2026-5856         Medium    0.3% (16th)   0.1    
+stdlib                                                 go1.24.1              *1.25.12, 1.26.5, 1.27.0-rc.2          go-module      GO-2026-5856         Medium    0.3% (16th)   0.1    
+stdlib                                                 go1.24.6              *1.25.12, 1.26.5, 1.27.0-rc.2          go-module      GO-2026-5856         Medium    0.3% (16th)   0.1    
+stdlib                                                 go1.25.8              *1.25.12, 1.26.5, 1.27.0-rc.2          go-module      GO-2026-5856         Medium    0.3% (16th)   0.1    
+stdlib                                                 go1.26.3              1.25.12, *1.26.5, 1.27.0-rc.2          go-module      GO-2026-5856         Medium    0.3% (16th)   0.1    
+stdlib                                                 go1.26.4              1.25.12, *1.26.5, 1.27.0-rc.2          go-module      GO-2026-5856         Medium    0.3% (16th)   0.1    
+golang.org/x/net                                       v0.25.0               0.55.0                                 go-module      GO-2026-5025         Medium    0.2% (14th)   0.1    
+golang.org/x/net                                       v0.26.0               0.55.0                                 go-module      GO-2026-5025         Medium    0.2% (14th)   0.1    
+golang.org/x/net                                       v0.39.0               0.55.0                                 go-module      GO-2026-5025         Medium    0.2% (14th)   0.1    
+golang.org/x/net                                       v0.41.0               0.55.0                                 go-module      GO-2026-5025         Medium    0.2% (14th)   0.1    
+golang.org/x/net                                       v0.42.0               0.55.0                                 go-module      GO-2026-5025         Medium    0.2% (14th)   0.1    
+golang.org/x/net                                       v0.44.0               0.55.0                                 go-module      GO-2026-5025         Medium    0.2% (14th)   0.1    
+golang.org/x/net                                       v0.48.0               0.55.0                                 go-module      GO-2026-5025         Medium    0.2% (14th)   0.1    
+golang.org/x/net                                       v0.54.0               0.55.0                                 go-module      GO-2026-5025         Medium    0.2% (14th)   0.1    
+stdlib                                                 go1.22.5              *1.23.10, 1.24.4                       go-module      GO-2025-3750         Medium    0.2% (16th)   0.1    
+stdlib                                                 go1.22.6              *1.23.10, 1.24.4                       go-module      GO-2025-3750         Medium    0.2% (16th)   0.1    
+stdlib                                                 go1.24.1              1.23.10, *1.24.4                       go-module      GO-2025-3750         Medium    0.2% (16th)   0.1    
+stdlib                                                 go1.22.5              *1.22.12, 1.23.6, 1.24.0-rc.3          go-module      GO-2025-3447         Medium    0.3% (20th)   0.1    
+stdlib                                                 go1.22.6              *1.22.12, 1.23.6, 1.24.0-rc.3          go-module      GO-2025-3447         Medium    0.3% (20th)   0.1    
+pypdf                                                  4.3.1                 6.10.2                                 python         GHSA-4pxv-j86v-mhcw  Medium    0.2% (11th)   0.1    
+golang.org/x/net                                       v0.25.0               0.55.0                                 go-module      GO-2026-5027         Medium    0.2% (13th)   0.1    
+golang.org/x/net                                       v0.25.0               0.55.0                                 go-module      GO-2026-5030         Medium    0.2% (13th)   0.1    
+golang.org/x/net                                       v0.26.0               0.55.0                                 go-module      GO-2026-5027         Medium    0.2% (13th)   0.1    
+golang.org/x/net                                       v0.26.0               0.55.0                                 go-module      GO-2026-5030         Medium    0.2% (13th)   0.1    
+golang.org/x/net                                       v0.39.0               0.55.0                                 go-module      GO-2026-5027         Medium    0.2% (13th)   0.1    
+golang.org/x/net                                       v0.39.0               0.55.0                                 go-module      GO-2026-5030         Medium    0.2% (13th)   0.1    
+golang.org/x/net                                       v0.41.0               0.55.0                                 go-module      GO-2026-5027         Medium    0.2% (13th)   0.1    
+golang.org/x/net                                       v0.41.0               0.55.0                                 go-module      GO-2026-5030         Medium    0.2% (13th)   0.1    
+golang.org/x/net                                       v0.42.0               0.55.0                                 go-module      GO-2026-5027         Medium    0.2% (13th)   0.1    
+golang.org/x/net                                       v0.42.0               0.55.0                                 go-module      GO-2026-5030         Medium    0.2% (13th)   0.1    
+golang.org/x/net                                       v0.44.0               0.55.0                                 go-module      GO-2026-5027         Medium    0.2% (13th)   0.1    
+golang.org/x/net                                       v0.44.0               0.55.0                                 go-module      GO-2026-5030         Medium    0.2% (13th)   0.1    
+golang.org/x/net                                       v0.48.0               0.55.0                                 go-module      GO-2026-5027         Medium    0.2% (13th)   0.1    
+golang.org/x/net                                       v0.48.0               0.55.0                                 go-module      GO-2026-5030         Medium    0.2% (13th)   0.1    
+golang.org/x/net                                       v0.54.0               0.55.0                                 go-module      GO-2026-5027         Medium    0.2% (13th)   0.1    
+golang.org/x/net                                       v0.54.0               0.55.0                                 go-module      GO-2026-5030         Medium    0.2% (13th)   0.1    
+golang.org/x/net                                       v0.25.0               0.55.0                                 go-module      GO-2026-5029         Medium    0.2% (13th)   0.1    
+golang.org/x/net                                       v0.26.0               0.55.0                                 go-module      GO-2026-5029         Medium    0.2% (13th)   0.1    
+golang.org/x/net                                       v0.39.0               0.55.0                                 go-module      GO-2026-5029         Medium    0.2% (13th)   0.1    
+golang.org/x/net                                       v0.41.0               0.55.0                                 go-module      GO-2026-5029         Medium    0.2% (13th)   0.1    
+golang.org/x/net                                       v0.42.0               0.55.0                                 go-module      GO-2026-5029         Medium    0.2% (13th)   0.1    
+golang.org/x/net                                       v0.44.0               0.55.0                                 go-module      GO-2026-5029         Medium    0.2% (13th)   0.1    
+golang.org/x/net                                       v0.48.0               0.55.0                                 go-module      GO-2026-5029         Medium    0.2% (13th)   0.1    
+golang.org/x/net                                       v0.54.0               0.55.0                                 go-module      GO-2026-5029         Medium    0.2% (13th)   0.1    
+github.com/containerd/containerd                       v1.7.12               1.7.29                                 go-module      GHSA-pwhc-rpq9-4c8w  High      0.2% (5th)    0.1    
+github.com/containerd/containerd/v2                    v2.0.5                2.0.7                                  go-module      GHSA-pwhc-rpq9-4c8w  High      0.2% (5th)    0.1    
+github.com/cloudflare/circl                            v1.6.1                1.6.3                                  go-module      GHSA-q9hv-hpm4-hj6x  Low       0.4% (32nd)   0.1    
+go.opentelemetry.io/otel/sdk                           v1.27.0               1.40.0                                 go-module      GHSA-9h8m-3fm2-qjrq  High      0.2% (5th)    0.1    
+go.opentelemetry.io/otel/sdk                           v1.36.0               1.40.0                                 go-module      GHSA-9h8m-3fm2-qjrq  High      0.2% (5th)    0.1    
+go.opentelemetry.io/otel/sdk                           v1.37.0               1.40.0                                 go-module      GHSA-9h8m-3fm2-qjrq  High      0.2% (5th)    0.1    
+github.com/docker/docker                               v25.0.6+incompatible                                         go-module      GHSA-x86f-5xw2-fm2r  High      0.2% (5th)    0.1    
+github.com/docker/docker                               v26.1.4+incompatible                                         go-module      GHSA-x86f-5xw2-fm2r  High      0.2% (5th)    0.1    
+github.com/docker/docker                               v28.5.2+incompatible                                         go-module      GHSA-x86f-5xw2-fm2r  High      0.2% (5th)    0.1    
+pypdf                                                  4.3.1                 6.6.0                                  python         GHSA-4f6g-68pf-7vhv  Low       0.4% (31st)   0.1    
+pypdf                                                  4.3.1                 6.6.0                                  python         GHSA-4xc4-762w-m6cg  Low       0.4% (31st)   0.1    
+github.com/containerd/containerd                       v1.7.12                                                      go-module      GO-2026-5622         Medium    0.2% (8th)    0.1    
+pypdf                                                  4.3.1                 6.8.0                                  python         GHSA-hqmh-ppp3-xvm7  Medium    0.2% (6th)    0.1    
+pypdf                                                  4.3.1                 6.7.1                                  python         GHSA-996q-pr4m-cvgq  Medium    0.2% (6th)    < 0.1  
+pypdf                                                  4.3.1                 6.7.1                                  python         GHSA-9mvc-8737-8j8h  Medium    0.2% (6th)    < 0.1  
+pypdf                                                  4.3.1                 6.7.1                                  python         GHSA-wgvp-vg3v-2xq3  Medium    0.2% (6th)    < 0.1  
+helm.sh/helm/v3                                        v3.15.1               3.20.2                                 go-module      GHSA-hr2v-4r36-88hr  Medium    0.2% (9th)    < 0.1  
+helm.sh/helm/v3                                        v3.15.3               3.20.2                                 go-module      GHSA-hr2v-4r36-88hr  Medium    0.2% (9th)    < 0.1  
+github.com/prometheus/prometheus                       v0.52.1               0.311.3                                go-module      GHSA-fw8g-cg8f-9j28  Medium    0.2% (8th)    < 0.1  
+github.com/containerd/containerd                       v1.7.12               1.7.29                                 go-module      GHSA-m6hq-p25p-ffr2  Medium    0.2% (5th)    < 0.1  
+github.com/containerd/containerd/v2                    v2.0.5                2.0.7                                  go-module      GHSA-m6hq-p25p-ffr2  Medium    0.2% (5th)    < 0.1  
+torch                                                  2.4.1                                                        python         GHSA-f4hp-rmr7-r7v8  Medium    0.2% (8th)    < 0.1  
+torch                                                  2.4.1                 2.9.1                                  python         GHSA-vgrw-7cvw-pwgx  Medium    0.2% (8th)    < 0.1  
+flask                                                  3.0.2                 3.1.3                                  python         GHSA-68rp-wp8r-4726  Low       0.3% (27th)   < 0.1  
+flask                                                  3.0.3                 3.1.3                                  python         GHSA-68rp-wp8r-4726  Low       0.3% (27th)   < 0.1  
+guzzlehttp/psr7                                        2.12.1                2.12.3                                 php-composer   GHSA-c2w2-prh8-qm98  Medium    0.2% (8th)    < 0.1  
+requests                                               2.32.0                2.33.0                                 python         GHSA-gc5v-m9x4-r6x2  Medium    0.2% (8th)    < 0.1  
+requests                                               2.32.2                2.33.0                                 python         GHSA-gc5v-m9x4-r6x2  Medium    0.2% (8th)    < 0.1  
+pytest                                                 8.3.3                 9.0.3                                  python         GHSA-6w46-j5rx-g56g  Medium    0.1% (3rd)    < 0.1  
+stdlib                                                 go1.22.5              *1.23.9, 1.24.3                        go-module      GO-2026-4403         Low       0.2% (14th)   < 0.1  
+stdlib                                                 go1.22.6              *1.23.9, 1.24.3                        go-module      GO-2026-4403         Low       0.2% (14th)   < 0.1  
+stdlib                                                 go1.24.1              1.23.9, *1.24.3                        go-module      GO-2026-4403         Low       0.2% (14th)   < 0.1  
+github.com/docker/docker                               v25.0.6+incompatible                                         go-module      GHSA-rg2x-37c3-w2rh  High      0.1% (1st)    < 0.1  
+github.com/docker/docker                               v26.1.4+incompatible                                         go-module      GHSA-rg2x-37c3-w2rh  High      0.1% (1st)    < 0.1  
+github.com/docker/docker                               v28.5.2+incompatible                                         go-module      GHSA-rg2x-37c3-w2rh  High      0.1% (1st)    < 0.1  
+pypdf                                                  4.3.1                 6.12.1                                 python         GHSA-wjqc-6w8f-h24c  Medium    0.1% (2nd)    < 0.1  
+python-multipart                                       0.0.9                 0.0.31                                 python         GHSA-v9pg-7xvm-68hf  Low       0.2% (12th)   < 0.1  
+pypdf                                                  4.3.1                 6.7.2                                  python         GHSA-2rw7-x74f-jg35  Low       0.3% (27th)   < 0.1  
+pypdf                                                  4.3.1                 6.13.0                                 python         GHSA-52x6-gq3r-vpf4  Medium    0.1% (2nd)    < 0.1  
+pypdf                                                  4.3.1                 6.12.2                                 python         GHSA-j543-4vmf-qm7v  Medium    0.1% (2nd)    < 0.1  
+pypdf                                                  4.3.1                 6.13.0                                 python         GHSA-m2v9-299j-rv96  Medium    0.1% (2nd)    < 0.1  
+torch                                                  2.4.1                 2.7.1-rc1                              python         GHSA-3749-ghw9-m3mg  Low       0.2% (14th)   < 0.1  
+pypdf                                                  4.3.1                 6.13.1                                 python         GHSA-g9xf-7f8q-9mcj  Medium    0.1% (1st)    < 0.1  
+torch                                                  2.4.1                                                        python         GHSA-x3gm-94wq-g975  Low       0.2% (15th)   < 0.1  
+pypdf                                                  4.3.1                 6.12.0                                 python         GHSA-cj93-chg6-vgv8  Medium    0.1% (2nd)    < 0.1  
+torch                                                  2.4.1                 2.13.0                                 python         GHSA-rrmf-rvhw-rf47  Low       0.2% (8th)    < 0.1  
+torch                                                  2.4.1                 2.10.0                                 python         GHSA-qfhq-4f3w-5fph  Low       0.2% (8th)    < 0.1  
+github.com/docker/docker                               v25.0.6+incompatible                                         go-module      GHSA-vp62-88p7-qqf5  Medium    0.1% (1st)    < 0.1  
+github.com/docker/docker                               v26.1.4+incompatible                                         go-module      GHSA-vp62-88p7-qqf5  Medium    0.1% (1st)    < 0.1  
+github.com/docker/docker                               v28.5.2+incompatible                                         go-module      GHSA-vp62-88p7-qqf5  Medium    0.1% (1st)    < 0.1  
+python-multipart                                       0.0.9                 0.0.30                                 python         GHSA-vffw-93wf-4j4q  Low       0.2% (7th)    < 0.1  
+pypdf                                                  4.3.1                 6.12.2                                 python         GHSA-5hgr-hg42-57jg  Medium    0.1% (1st)    < 0.1  
+python-multipart                                       0.0.9                 0.0.30                                 python         GHSA-6jv3-5f52-599m  Low       0.2% (7th)    < 0.1  
+guzzlehttp/guzzle                                      7.12.1                7.12.3                                 php-composer   GHSA-g446-98w2-8p5w  Medium    0.1% (1st)    < 0.1  
+pypdf                                                  4.3.1                 6.12.0                                 python         GHSA-248m-82v9-q6g6  Medium    0.1% (2nd)    < 0.1  
+stdlib                                                 go1.22.5              *1.25.8, 1.26.1                        go-module      GO-2026-4602         Low       0.2% (10th)   < 0.1  
+stdlib                                                 go1.22.6              *1.25.8, 1.26.1                        go-module      GO-2026-4602         Low       0.2% (10th)   < 0.1  
+stdlib                                                 go1.23.10             *1.25.8, 1.26.1                        go-module      GO-2026-4602         Low       0.2% (10th)   < 0.1  
+stdlib                                                 go1.23.12             *1.25.8, 1.26.1                        go-module      GO-2026-4602         Low       0.2% (10th)   < 0.1  
+stdlib                                                 go1.24.1              *1.25.8, 1.26.1                        go-module      GO-2026-4602         Low       0.2% (10th)   < 0.1  
+stdlib                                                 go1.24.6              *1.25.8, 1.26.1                        go-module      GO-2026-4602         Low       0.2% (10th)   < 0.1  
+oras.land/oras-go                                      v1.2.5                                                       go-module      GHSA-xf85-363p-868w  Low       0.2% (11th)   < 0.1  
+github.com/docker/docker                               v25.0.6+incompatible  25.0.13                                go-module      GHSA-4vq8-7jfc-9cvp  Low       0.2% (4th)    < 0.1  
+github.com/docker/docker                               v26.1.4+incompatible  28.0.0                                 go-module      GHSA-4vq8-7jfc-9cvp  Low       0.2% (4th)    < 0.1  
+golang.org/x/sys                                       v0.21.0               0.44.0                                 go-module      GO-2026-5024         Low       0.1% (1st)    < 0.1  
+golang.org/x/sys                                       v0.28.0               0.44.0                                 go-module      GO-2026-5024         Low       0.1% (1st)    < 0.1  
+golang.org/x/sys                                       v0.33.0               0.44.0                                 go-module      GO-2026-5024         Low       0.1% (1st)    < 0.1  
+golang.org/x/sys                                       v0.34.0               0.44.0                                 go-module      GO-2026-5024         Low       0.1% (1st)    < 0.1  
+golang.org/x/sys                                       v0.36.0               0.44.0                                 go-module      GO-2026-5024         Low       0.1% (1st)    < 0.1  
+golang.org/x/sys                                       v0.40.0               0.44.0                                 go-module      GO-2026-5024         Low       0.1% (1st)    < 0.1  
+github.com/getkin/kin-openapi                          v0.111.0              0.144.0                                go-module      GHSA-r277-6w6q-xmqw  Critical  N/A           N/A    
+google.golang.org/grpc                                 v1.63.2               1.82.1                                 go-module      GHSA-hrxh-6v49-42gf  High      N/A           N/A    
+google.golang.org/grpc                                 v1.65.0               1.82.1                                 go-module      GHSA-hrxh-6v49-42gf  High      N/A           N/A    
+google.golang.org/grpc                                 v1.72.0               1.82.1                                 go-module      GHSA-hrxh-6v49-42gf  High      N/A           N/A    
+google.golang.org/grpc                                 v1.72.1               1.82.1                                 go-module      GHSA-hrxh-6v49-42gf  High      N/A           N/A    
+google.golang.org/grpc                                 v1.74.2               1.82.1                                 go-module      GHSA-hrxh-6v49-42gf  High      N/A           N/A    
+google.golang.org/grpc                                 v1.75.1               1.82.1                                 go-module      GHSA-hrxh-6v49-42gf  High      N/A           N/A    
+google.golang.org/grpc                                 v1.79.3               1.82.1                                 go-module      GHSA-hrxh-6v49-42gf  High      N/A           N/A    
+github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream  v1.6.10               1.7.8                                  go-module      GHSA-xmrv-pmrh-hhx2  Medium    N/A           N/A    
+github.com/aws/aws-sdk-go-v2/service/cloudwatchlogs    v1.50.1               1.65.0                                 go-module      GHSA-xmrv-pmrh-hhx2  Medium    N/A           N/A    
+github.com/aws/aws-sdk-go-v2/service/kinesis           v1.35.1               1.43.5                                 go-module      GHSA-xmrv-pmrh-hhx2  Medium    N/A           N/A    
+github.com/aws/aws-sdk-go-v2/service/lambda            v1.71.3               1.88.5                                 go-module      GHSA-xmrv-pmrh-hhx2  Medium    N/A           N/A    
+github.com/aws/aws-sdk-go-v2/service/s3                v1.80.1               1.97.3                                 go-module      GHSA-xmrv-pmrh-hhx2  Medium    N/A           N/A    
+github.com/getkin/kin-openapi                          v0.111.0              0.144.0                                go-module      GHSA-jpcw-4wr7-c3vq  Medium    N/A           N/A    
+github.com/in-toto/in-toto-golang                      v0.5.0                0.11.0                                 go-module      GHSA-pmwq-pjrm-6p5r  Medium    N/A           N/A    
+guzzlehttp/guzzle                                      7.12.1                7.14.2                                 php-composer   GHSA-94pj-82f3-465w  Medium    N/A           N/A    
+guzzlehttp/guzzle                                      7.12.1                7.15.1                                 php-composer   GHSA-f283-ghqc-fg79  Medium    N/A           N/A    
+guzzlehttp/guzzle                                      7.12.1                7.15.1                                 php-composer   GHSA-h95v-h523-3mw8  Medium    N/A           N/A    
+guzzlehttp/guzzle                                      7.12.1                7.15.1                                 php-composer   GHSA-wm3w-8rrp-j577  Medium    N/A           N/A    
+pypdf                                                  4.3.1                 6.13.3                                 python         GHSA-jm82-fx9c-mx94  Medium    N/A           N/A    
+github.com/klauspost/compress                          v1.16.0               1.18.7                                 go-module      GO-2026-5841         Unknown   N/A           N/A    
+github.com/klauspost/compress                          v1.17.8               1.18.7                                 go-module      GO-2026-5841         Unknown   N/A           N/A    
+github.com/klauspost/compress                          v1.18.0               1.18.7                                 go-module      GO-2026-5841         Unknown   N/A           N/A    
+golang.org/x/crypto                                    v0.24.0                                                      go-module      GO-2026-5932         Unknown   N/A           N/A    
+golang.org/x/crypto                                    v0.31.0                                                      go-module      GO-2026-5932         Unknown   N/A           N/A    
+golang.org/x/crypto                                    v0.39.0                                                      go-module      GO-2026-5932         Unknown   N/A           N/A    
+golang.org/x/crypto                                    v0.40.0                                                      go-module      GO-2026-5932         Unknown   N/A           N/A    
+golang.org/x/crypto                                    v0.42.0                                                      go-module      GO-2026-5932         Unknown   N/A           N/A    
+golang.org/x/crypto                                    v0.47.0                                                      go-module      GO-2026-5932         Unknown   N/A           N/A    
+golang.org/x/crypto                                    v0.51.0                                                      go-module      GO-2026-5932         Unknown   N/A           N/A    
+golang.org/x/crypto                                    v0.52.0                                                      go-module      GO-2026-5932         Unknown   N/A           N/A    
+golang.org/x/crypto                                    v0.54.0                                                      go-module      GO-2026-5932         Unknown   N/A           N/A

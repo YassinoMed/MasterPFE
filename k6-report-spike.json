@@ -1,0 +1,174 @@
+{
+  "meta": {
+    "test_name": "spike",
+    "timestamp": "2026-07-30T04:57:47.825Z",
+    "k6_version": "unknown",
+    "scenario": "default",
+    "base_url": "not-set",
+    "namespace": "securerag-hub"
+  },
+  "summary": {
+    "total_requests": 38965,
+    "total_failed": 4539,
+    "failure_rate": 0.11648915693571153,
+    "avg_latency_ms": 2419.2160715261502,
+    "min_latency_ms": 0,
+    "med_latency_ms": 1024.173649,
+    "p90_latency_ms": 8200.8654122,
+    "p95_latency_ms": 11801.64795339997,
+    "p99_latency_ms": -1,
+    "max_latency_ms": 30001.631647
+  },
+  "thresholds": {},
+  "per_service": {
+      "http_req_failed": {
+        "type": "rate",
+        "rate": 0.11648915693571153,
+        "passes": 4539,
+        "fails": 34426
+      },
+      "http_req_blocked": {
+        "type": "trend",
+        "avg": 0.3147622445784683,
+        "min": 0,
+        "med": 0.199684,
+        "p90": 0.6244124,
+        "p95": 0.866864799999999,
+        "p99": -1,
+        "max": 13.52503
+      },
+      "http_req_duration{expected_response:true}": {
+        "type": "trend",
+        "avg": 2436.0654756865674,
+        "min": 6.925752,
+        "med": 1028.2985985,
+        "p90": 8139.9251835,
+        "p95": 10909.32916175,
+        "p99": -1,
+        "max": 29604.659602
+      },
+      "group_duration": {
+        "type": "trend",
+        "avg": 12233.354177208757,
+        "min": 3044.315682,
+        "med": 10802.8661965,
+        "p90": 20018.0583606,
+        "p95": 21896.540535999997,
+        "p99": -1,
+        "max": 34841.497504
+      },
+      "http_req_receiving": {
+        "type": "trend",
+        "avg": 686.6376459948435,
+        "min": 0,
+        "med": 1000.956903,
+        "p90": 1004.2286978,
+        "p95": 1007.5987052,
+        "p99": -1,
+        "max": 1531.908177
+      },
+      "http_reqs": {
+        "type": "counter",
+        "count": 38965,
+        "rate": 298.025298331076
+      },
+      "http_req_waiting": {
+        "type": "trend",
+        "avg": 1732.5185602213026,
+        "min": 0,
+        "med": 32.474564,
+        "p90": 7232.6579014,
+        "p95": 11029.87177299998,
+        "p99": -1,
+        "max": 30001.585931
+      },
+      "http_req_connecting": {
+        "type": "trend",
+        "avg": 0.25141234672141505,
+        "min": 0,
+        "med": 0.142761,
+        "p90": 0.5286401999999998,
+        "p95": 0.7382941999999991,
+        "p99": -1,
+        "max": 13.500039
+      },
+      "iterations": {
+        "type": "counter",
+        "count": 3896,
+        "rate": 29.798705563913053
+      },
+      "data_sent": {
+        "type": "counter",
+        "count": 15810915,
+        "rate": 120930.39034421364
+      },
+      "http_req_sending": {
+        "type": "trend",
+        "avg": 0.059865310021815006,
+        "min": 0,
+        "med": 0.038545,
+        "p90": 0.07654099999999998,
+        "p95": 0.11896419999999992,
+        "p99": -1,
+        "max": 12.150172
+      },
+      "checks": {
+        "type": "rate",
+        "rate": 0.8402464065708419,
+        "passes": 65472,
+        "fails": 12448
+      },
+      "http_req_duration": {
+        "type": "trend",
+        "avg": 2419.2160715261502,
+        "min": 0,
+        "med": 1024.173649,
+        "p90": 8200.8654122,
+        "p95": 11801.64795339997,
+        "p99": -1,
+        "max": 30001.631647
+      },
+      "data_received": {
+        "type": "counter",
+        "count": 72382215,
+        "rate": 553618.1501152081
+      },
+      "spike_errors": {
+        "type": "rate",
+        "rate": 0.29589322381930183,
+        "passes": 11528,
+        "fails": 27432
+      },
+      "iteration_duration": {
+        "type": "trend",
+        "avg": 24967.35244263374,
+        "min": 6853.512973,
+        "med": 22548.5993915,
+        "p90": 38397.70423,
+        "p95": 41398.3366635,
+        "p99": -1,
+        "max": 52569.88461
+      },
+      "http_req_tls_handshaking": {
+        "type": "trend",
+        "avg": 0,
+        "min": 0,
+        "med": 0,
+        "p90": 0,
+        "p95": 0,
+        "p99": -1,
+        "max": 0
+      },
+      "spike_duration": {
+        "type": "trend",
+        "avg": 2419.4223894932097,
+        "min": 0,
+        "med": 1024.1878594999998,
+        "p90": 8200.942382399999,
+        "p95": 11803.177669599992,
+        "p99": -1,
+        "max": 30001.631647
+      }
+    },
+  "slo_passed": true
+}

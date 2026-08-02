@@ -1,0 +1,77 @@
+--- 3. GITLEAKS SCAN ---
+
+    ○
+    │╲
+    │ ○
+    ○ ░
+    ░    gitleaks
+
+Finding:     -----BEGIN RSA PRIVATE KEY-----
+MIIEogIBAAKCAQEAvfBnWkECSsrEdrkAtrUnuKveFAc5sbRycBDisUM3E9eB0i9H
+ioFqYOZaeUlWIjar5nnf6rI2nl+d7z2UX0IugC0pw3pZkKBOfTIaPJT1o3ha3hkj
+W7RzDq6QHTLG5EbZTznM2OYlylNJokYYsobB4O3aUYE1ItOprmA3y+AxDYoVac0I
+Pt8y48cqtF87a5OFVxTbXsKIW9OMY9t+ztpDjjLTfg0UnWcDHQcAj9FsXvdk5j8I
+fV5uDGjO2Hw4df+IrHmFo13KBuB5eyv0dhwK2tQ/2KAimhvDVCiSRKtPQYaBTwf0
+DTQRoyN/8CgxiyrWS4WdYHZivC23cvItqB8lZQIDAQABAoIBAAIMbTjvzuQFSCrV
+ok3WKgMCYNygxVJcKrMjDibbnY+fuT04mFIZ746dqBJ7JCwt9cWrFoCpV7shNzVa
+LyxQgkA3UdDTaX2Mqma28HSAe3O+ERDTKZVMHsTk72tOiGRJj/9xlVAuOfBy3IOd
+CO19VEBQ9b6qS5XqvX+YIbyXrZUX8uXqsxkRZO+6AfRcdz24f41LbIpF1Rqd+n5D
+l9ij7UCSLGcbQZtrjjK74Q4i8fgDyNuBPEM/Neqi4r4Pz77J6vehHp+ZiOppJJYU
+a+TVOLkliUS0ZabrfPgfmQR0eq2iShdnqpJNDDgyb61VRp7K3JfFAoGhjRjjPCpP
+fPx1KSMCgYEAzqCnZnVvQR7uzfOIY9o5xMhguPcFe56U2nsgRRvccBAyCo8v4G6a
+0dUhl/wUjY5sYLXnBrey0P2KonlNroV19J5XzlehzELrjUYJz3SQ2f3wIiyLNFvE
+ZF49ywjZQtAk7+G7Ebn/mcbx0bSVxolqhl0ydLpD4f2LVhqaYx88bssCgYEA61Lr
+rZTdI8QkHOBROK9TIlw/sYPp8bb/ZPqgvxPV9wwBCS3D5QsQa5uICvK/yj7Lh8vd
+rLoXHxNJHs8ixw0XKGkguA+8h2nAxSHf742LWgSTj9ozGo5U/x+5eI+5+c9g0ox5
+nycYwQ1k2o/6BJszZ+hutIUY8m47I+ECguc9ho8CgYAmkZRNqrP2mtiGduPJh61q
+zuBHBkzusz4jvgHbBIVUIaHFmM6d/OdHLZpUrUgE2EXgk3OpLFbjbcAX7b6TSfQn
+kfrf2DmqT/954k3ofGChYCYXqurc/hgdh/3OzTsInqOWZzMs7uQIBzuSIjwmz/Wj
+WPgXE8GiCFqe2t5gjC8SmwKBgGmruaMfxtHJwQGqhS50JFu4mu1mtAXTzAmXNdm3
+2YvvOwPZJi9S8ZOwqr1n1lHGMvUOycNHaRyON3Z7Qz2pFi4STxv4DQutpF+hX4Kd
+x+arSWv+apZRNb++ijWmLLgNtIe3huG917LRBenTX0z0OHg/en7biaFLeIkbAFqx
+5gHnAoGALxgqle5SfXY7RhoEUyOhnqJkuCQEUQHGFc7bZcmIvaGu23AD3+SqA2kO
+kd3tPEYkkEWWESwZtTcjXsOQ4C3SS1pw/LSF0yz6u3mwZ6gCnsqh2v+DjN8Z5Arf
+559aJIwrTnllhAdV8RAvUEi0viVZNsd0Tz1pDGgNJTuZ2vXKI44=
+-----END RSA PRIVATE KEY-----
+Secret:      -----BEGIN RSA PRIVATE KEY-----
+MIIEogIBAAKCAQEAvfBnWkECSsrEdrkAtrUnuKveFAc5sbRycBDisUM3E9eB0i9H
+ioFqYOZaeUlWIjar5nnf6rI2nl+d7z2UX0IugC0pw3pZkKBOfTIaPJT1o3ha3hkj
+W7RzDq6QHTLG5EbZTznM2OYlylNJokYYsobB4O3aUYE1ItOprmA3y+AxDYoVac0I
+Pt8y48cqtF87a5OFVxTbXsKIW9OMY9t+ztpDjjLTfg0UnWcDHQcAj9FsXvdk5j8I
+fV5uDGjO2Hw4df+IrHmFo13KBuB5eyv0dhwK2tQ/2KAimhvDVCiSRKtPQYaBTwf0
+DTQRoyN/8CgxiyrWS4WdYHZivC23cvItqB8lZQIDAQABAoIBAAIMbTjvzuQFSCrV
+ok3WKgMCYNygxVJcKrMjDibbnY+fuT04mFIZ746dqBJ7JCwt9cWrFoCpV7shNzVa
+LyxQgkA3UdDTaX2Mqma28HSAe3O+ERDTKZVMHsTk72tOiGRJj/9xlVAuOfBy3IOd
+CO19VEBQ9b6qS5XqvX+YIbyXrZUX8uXqsxkRZO+6AfRcdz24f41LbIpF1Rqd+n5D
+l9ij7UCSLGcbQZtrjjK74Q4i8fgDyNuBPEM/Neqi4r4Pz77J6vehHp+ZiOppJJYU
+a+TVOLkliUS0ZabrfPgfmQR0eq2iShdnqpJNDDgyb61VRp7K3JfFAoGhjRjjPCpP
+fPx1KSMCgYEAzqCnZnVvQR7uzfOIY9o5xMhguPcFe56U2nsgRRvccBAyCo8v4G6a
+0dUhl/wUjY5sYLXnBrey0P2KonlNroV19J5XzlehzELrjUYJz3SQ2f3wIiyLNFvE
+ZF49ywjZQtAk7+G7Ebn/mcbx0bSVxolqhl0ydLpD4f2LVhqaYx88bssCgYEA61Lr
+rZTdI8QkHOBROK9TIlw/sYPp8bb/ZPqgvxPV9wwBCS3D5QsQa5uICvK/yj7Lh8vd
+rLoXHxNJHs8ixw0XKGkguA+8h2nAxSHf742LWgSTj9ozGo5U/x+5eI+5+c9g0ox5
+nycYwQ1k2o/6BJszZ+hutIUY8m47I+ECguc9ho8CgYAmkZRNqrP2mtiGduPJh61q
+zuBHBkzusz4jvgHbBIVUIaHFmM6d/OdHLZpUrUgE2EXgk3OpLFbjbcAX7b6TSfQn
+kfrf2DmqT/954k3ofGChYCYXqurc/hgdh/3OzTsInqOWZzMs7uQIBzuSIjwmz/Wj
+WPgXE8GiCFqe2t5gjC8SmwKBgGmruaMfxtHJwQGqhS50JFu4mu1mtAXTzAmXNdm3
+2YvvOwPZJi9S8ZOwqr1n1lHGMvUOycNHaRyON3Z7Qz2pFi4STxv4DQutpF+hX4Kd
+x+arSWv+apZRNb++ijWmLLgNtIe3huG917LRBenTX0z0OHg/en7biaFLeIkbAFqx
+5gHnAoGALxgqle5SfXY7RhoEUyOhnqJkuCQEUQHGFc7bZcmIvaGu23AD3+SqA2kO
+kd3tPEYkkEWWESwZtTcjXsOQ4C3SS1pw/LSF0yz6u3mwZ6gCnsqh2v+DjN8Z5Arf
+559aJIwrTnllhAdV8RAvUEi0viVZNsd0Tz1pDGgNJTuZ2vXKI44=
+-----END RSA PRIVATE KEY-----
+RuleID:      private-key
+Entropy:     6.034492
+Tags:        [decoded:base64 decode-depth:1]
+File:        infra/terraform/securerag-dev-config
+Line:        19
+Commit:      0b6cb49f6ad5210f46bb556e7316783a8a730092
+Author:      Jenkins GitOps Bot
+Email:       jenkins@securerag.local
+Date:        2026-07-29T17:27:35Z
+Fingerprint: 0b6cb49f6ad5210f46bb556e7316783a8a730092:infra/terraform/securerag-dev-config:private-key:19
+Link:        https://github.com/YassinoMed/MasterPFE/blob/0b6cb49f6ad5210f46bb556e7316783a8a730092/infra/terraform/securerag-dev-config#L19
+
+[90m10:13AM[0m [32mINF[0m [1m502 commits scanned.[0m
+[90m10:13AM[0m [32mINF[0m [1mscanned ~39422169 bytes (39.42 MB) in 2.67s[0m
+[90m10:13AM[0m [33mWRN[0m [1mleaks found: 1[0m

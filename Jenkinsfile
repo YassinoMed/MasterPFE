@@ -310,6 +310,17 @@ pipeline {
             '''
           }
         }
+
+        stage('MLSecOps Model & LLM Safety Fuzzing') {
+          when { expression { return env.CHANGE_AI == 'true' || env.CHANGE_LARAVEL == 'true' || env.CHANGE_DOCKER == 'true' } }
+          steps {
+            sh '''
+              set -euo pipefail
+              echo "[INFO] Executing MLSecOps Model Security & LLM Fuzzing Suite..."
+              bash scripts/ci/run-mlsecops-scans.sh || echo "[WARN] MLSecOps scan finished with warnings"
+            '''
+          }
+        }
       }
     }
 

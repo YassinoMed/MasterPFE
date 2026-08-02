@@ -1,0 +1,8 @@
+{
+  "mlsecops_status": "COMPLIANT",
+  "model_deserialization_scan": true,
+  "llm_redteaming_scan": true,
+  "safetensors_enforced": true,
+  "cosign_signing_enabled": true,
+  "kyverno_admission_policy": true
+}

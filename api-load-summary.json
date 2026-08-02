@@ -1,0 +1,97 @@
+{
+  "timestamp": "2026-07-30T12:01:33.715Z",
+  "metrics": {
+    "auth": {
+      "requests": 11660,
+      "errors": 0,
+      "avgResponse": 391.59780767264306,
+      "p95Response": 1559.6487522999998
+    }
+  },
+  "thresholds": {
+    "api_response_time": {
+      "passed": true
+    },
+    "http_req_receiving": {
+      "passed": true
+    },
+    "checks": {
+      "passed": true
+    },
+    "api_response_time{service:audit}": {
+      "passed": true
+    },
+    "api_errors{service:auth}": {
+      "passed": true
+    },
+    "http_req_failed": {
+      "passed": true
+    },
+    "api_response_time{service:chatbot}": {
+      "passed": true
+    },
+    "api_errors{service:chatbot}": {
+      "passed": true
+    },
+    "group_duration": {
+      "passed": true
+    },
+    "iterations": {
+      "passed": true
+    },
+    "http_req_duration{expected_response:true}": {
+      "passed": true
+    },
+    "api_response_time{service:conversation}": {
+      "passed": true
+    },
+    "http_req_connecting": {
+      "passed": true
+    },
+    "vus": {
+      "passed": true
+    },
+    "http_req_sending": {
+      "passed": true
+    },
+    "http_req_duration": {
+      "passed": true
+    },
+    "vus_max": {
+      "passed": true
+    },
+    "http_req_waiting": {
+      "passed": true
+    },
+    "http_reqs": {
+      "passed": true
+    },
+    "http_req_blocked": {
+      "passed": true
+    },
+    "api_response_time{service:auth}": {
+      "passed": true
+    },
+    "data_received": {
+      "passed": true
+    },
+    "http_req_tls_handshaking": {
+      "passed": true
+    },
+    "iteration_duration": {
+      "passed": true
+    },
+    "api_errors{service:conversation}": {
+      "passed": true
+    },
+    "api_errors{service:audit}": {
+      "passed": true
+    },
+    "api_errors": {
+      "passed": true
+    },
+    "data_sent": {
+      "passed": true
+    }
+  }
+}

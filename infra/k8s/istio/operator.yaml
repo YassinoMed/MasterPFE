@@ -1,0 +1,18 @@
+# IstioOperator — Securerag Hub Istio Control Plane Installation Profile (Minimal)
+apiVersion: install.istio.io/v1alpha1
+kind: IstioOperator
+metadata:
+  namespace: istio-system
+  name: securerag-istio
+spec:
+  profile: minimal
+  meshConfig:
+    accessLogFile: /dev/stdout
+    enableAutoMtls: true
+  components:
+    ingressGateways:
+      - name: istio-ingressgateway
+        enabled: true
+    egressGateways:
+      - name: istio-egressgateway
+        enabled: false

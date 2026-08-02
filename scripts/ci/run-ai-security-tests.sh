@@ -32,12 +32,17 @@ python3 "${REPO_ROOT}/scripts/ai-agents/ai_testing_agent.py" || echo "[WARN] AI 
 
 # 4. AI Operations & Runtime Agent
 echo ""
-echo "[4/4] Running AI Operations & Runtime Validation Agent..."
+echo "[4/5] Running AI Operations & Runtime Validation Agent..."
 python3 "${REPO_ROOT}/scripts/ai-agents/ai_operations_agent.py" "http://localhost:8082" || echo "[WARN] AI operations agent reported warnings"
+
+# 5. MLSecOps Model & LLM Fuzzing Suite
+echo ""
+echo "[5/5] Running MLSecOps Security Suite (ModelScan, Garak, ML Supply Chain)..."
+bash "${REPO_ROOT}/scripts/ci/run-mlsecops-scans.sh" || echo "[WARN] MLSecOps scan reported warnings"
 
 echo ""
 echo "=========================================================="
-echo "   [SUCCESS] Validation IA terminée avec succès           "
+echo "   [SUCCESS] Validation IA & MLSecOps terminée          "
 echo "=========================================================="
 echo "Rapports générés dans: ${REPORT_DIR}/"
-ls -la "${REPORT_DIR}"/ai_* 2>/dev/null || true
+ls -la "${REPORT_DIR}"/ai_* "${REPORT_DIR}"/mlsecops_* 2>/dev/null || true

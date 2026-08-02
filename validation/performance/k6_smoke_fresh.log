@@ -1,0 +1,133 @@
+
+         /\      Grafana   /‾‾/  
+    /\  /  \     |\  __   /  /   
+   /  \/    \    | |/ /  /   ‾‾\ 
+  /          \   |   (  |  (‾)  |
+ / __________ \  |_|\_\  \_____/ 
+
+     execution: local
+        script: -
+        output: -
+
+     scenarios: (100.00%) 1 scenario, 5 max VUs, 1m0s max duration (incl. graceful stop):
+              * default: 5 looping VUs for 30s (gracefulStop: 30s)
+
+
+running (0m01.0s), 5/5 VUs, 0 complete and 0 interrupted iterations
+default   [   3% ] 5 VUs  01.0s/30s
+
+running (0m02.0s), 5/5 VUs, 5 complete and 0 interrupted iterations
+default   [   7% ] 5 VUs  02.0s/30s
+
+running (0m03.0s), 5/5 VUs, 9 complete and 0 interrupted iterations
+default   [  10% ] 5 VUs  03.0s/30s
+
+running (0m04.0s), 5/5 VUs, 15 complete and 0 interrupted iterations
+default   [  13% ] 5 VUs  04.0s/30s
+
+running (0m05.0s), 5/5 VUs, 21 complete and 0 interrupted iterations
+default   [  17% ] 5 VUs  05.0s/30s
+
+running (0m06.0s), 5/5 VUs, 26 complete and 0 interrupted iterations
+default   [  20% ] 5 VUs  06.0s/30s
+
+running (0m07.0s), 5/5 VUs, 29 complete and 0 interrupted iterations
+default   [  23% ] 5 VUs  07.0s/30s
+
+running (0m08.0s), 5/5 VUs, 31 complete and 0 interrupted iterations
+default   [  27% ] 5 VUs  08.0s/30s
+
+running (0m09.0s), 5/5 VUs, 36 complete and 0 interrupted iterations
+default   [  30% ] 5 VUs  09.0s/30s
+
+running (0m10.0s), 5/5 VUs, 40 complete and 0 interrupted iterations
+default   [  33% ] 5 VUs  10.0s/30s
+
+running (0m11.0s), 5/5 VUs, 47 complete and 0 interrupted iterations
+default   [  37% ] 5 VUs  11.0s/30s
+
+running (0m12.0s), 5/5 VUs, 54 complete and 0 interrupted iterations
+default   [  40% ] 5 VUs  12.0s/30s
+
+running (0m13.0s), 5/5 VUs, 60 complete and 0 interrupted iterations
+default   [  43% ] 5 VUs  13.0s/30s
+
+running (0m14.0s), 5/5 VUs, 66 complete and 0 interrupted iterations
+default   [  47% ] 5 VUs  14.0s/30s
+
+running (0m15.0s), 5/5 VUs, 74 complete and 0 interrupted iterations
+default   [  50% ] 5 VUs  15.0s/30s
+
+running (0m16.0s), 5/5 VUs, 79 complete and 0 interrupted iterations
+default   [  53% ] 5 VUs  16.0s/30s
+
+running (0m17.0s), 5/5 VUs, 87 complete and 0 interrupted iterations
+default   [  57% ] 5 VUs  17.0s/30s
+
+running (0m18.0s), 5/5 VUs, 95 complete and 0 interrupted iterations
+default   [  60% ] 5 VUs  18.0s/30s
+
+running (0m19.0s), 5/5 VUs, 102 complete and 0 interrupted iterations
+default   [  63% ] 5 VUs  19.0s/30s
+
+running (0m20.0s), 5/5 VUs, 109 complete and 0 interrupted iterations
+default   [  67% ] 5 VUs  20.0s/30s
+
+running (0m21.0s), 5/5 VUs, 116 complete and 0 interrupted iterations
+default   [  70% ] 5 VUs  21.0s/30s
+
+running (0m22.0s), 5/5 VUs, 124 complete and 0 interrupted iterations
+default   [  73% ] 5 VUs  22.0s/30s
+
+running (0m23.0s), 5/5 VUs, 131 complete and 0 interrupted iterations
+default   [  77% ] 5 VUs  23.0s/30s
+
+running (0m24.0s), 5/5 VUs, 136 complete and 0 interrupted iterations
+default   [  80% ] 5 VUs  24.0s/30s
+
+running (0m25.0s), 5/5 VUs, 138 complete and 0 interrupted iterations
+default   [  83% ] 5 VUs  25.0s/30s
+
+running (0m26.0s), 5/5 VUs, 143 complete and 0 interrupted iterations
+default   [  87% ] 5 VUs  26.0s/30s
+
+running (0m27.0s), 5/5 VUs, 149 complete and 0 interrupted iterations
+default   [  90% ] 5 VUs  27.0s/30s
+
+running (0m28.0s), 5/5 VUs, 155 complete and 0 interrupted iterations
+default   [  93% ] 5 VUs  28.0s/30s
+
+running (0m29.0s), 5/5 VUs, 163 complete and 0 interrupted iterations
+default   [  97% ] 5 VUs  29.0s/30s
+
+running (0m30.0s), 5/5 VUs, 170 complete and 0 interrupted iterations
+default   [ 100% ] 5 VUs  30.0s/30s
+
+     ✗ health 200
+      ↳  33% — ✓ 58 / ✗ 117
+     ✓ home reachable
+
+     checks.........................: 66.57% 233 out of 350
+     data_received..................: 978 kB 32 kB/s
+     data_sent......................: 30 kB  972 B/s
+     errors.........................: 66.85% 117 out of 175
+     http_req_blocked...............: avg=13.68µs    min=2.54µs   med=5.52µs    max=625.69µs    p(90)=7.72µs     p(95)=9.2µs     
+     http_req_connecting............: avg=5.47µs     min=0s       med=0s        max=570.96µs    p(90)=0s         p(95)=0s        
+   ✗ http_req_duration..............: avg=182.87ms   min=6.57ms   med=89.62ms   max=2.01s       p(90)=502.11ms   p(95)=775.28ms  
+       { expected_response:true }...: avg=137.31ms   min=6.57ms   med=10.35ms   max=1.62s       p(90)=90.48ms    p(95)=1.33s     
+   ✗ http_req_failed................: 83.14% 291 out of 350
+     http_req_receiving.............: avg=5.7ms      min=24.24µs  med=87.51µs   max=421.19ms    p(90)=714.08µs   p(95)=1.03ms    
+     http_req_sending...............: avg=22.49µs    min=7.53µs   med=20.22µs   max=306.97µs    p(90)=29.11µs    p(95)=37.91µs   
+     http_req_tls_handshaking.......: avg=0s         min=0s       med=0s        max=0s          p(90)=0s         p(95)=0s        
+     http_req_waiting...............: avg=177.14ms   min=6.31ms   med=89.52ms   max=1.71s       p(90)=499.2ms    p(95)=621.45ms  
+     http_reqs......................: 350    11.440412/s
+     iteration_duration.............: avg=866.74ms   min=582.62ms med=705.24ms  max=3.24s       p(90)=1.07s      p(95)=1.55s     
+     iterations.....................: 175    5.720206/s
+     response_time..................: avg=182.872469 min=6.570914 med=89.625074 max=2019.341146 p(90)=502.111275 p(95)=775.284867
+     vus............................: 5      min=5          max=5
+     vus_max........................: 5      min=5          max=5
+
+
+running (0m30.6s), 0/5 VUs, 175 complete and 0 interrupted iterations
+default ✓ [ 100% ] 5 VUs  30s
+time="2026-08-02T10:42:33+02:00" level=error msg="thresholds on metrics 'http_req_duration, http_req_failed' have been crossed"

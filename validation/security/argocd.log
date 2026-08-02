@@ -1,0 +1,4 @@
+=== ARGO CD APPS ===
+NAME                              READY   STATUS    RESTARTS       AGE     IP             NODE                   NOMINATED NODE   READINESS GATES
+argocd-application-controller-0   1/1     Running   8 (3d5h ago)   3d11h   10.244.0.127   securerag-dev-worker   <none>           <none>
+time="2026-08-02T10:18:04+02:00" level=fatal msg="Failed to establish connection to 127.0.0.1:8080: dial tcp 127.0.0.1:8080: connect: connection refused"

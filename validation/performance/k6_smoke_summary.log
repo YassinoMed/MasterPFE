@@ -1,0 +1,17 @@
+              * default: 10 looping VUs for 30s (gracefulStop: 30s)
+     data_received..............: 0 B     0 B/s
+     data_sent..................: 0 B     0 B/s
+   ✓ errors.....................: 0.00%   0 out of 0
+     http_req_blocked...........: avg=0s min=0s med=0s max=0s p(90)=0s p(95)=0s
+     http_req_connecting........: avg=0s min=0s med=0s max=0s p(90)=0s p(95)=0s
+   ✓ http_req_duration..........: avg=0s min=0s med=0s max=0s p(90)=0s p(95)=0s
+   ✗ http_req_failed............: 100.00% 1 out of 1
+     http_req_receiving.........: avg=0s min=0s med=0s max=0s p(90)=0s p(95)=0s
+     http_req_sending...........: avg=0s min=0s med=0s max=0s p(90)=0s p(95)=0s
+     http_req_tls_handshaking...: avg=0s min=0s med=0s max=0s p(90)=0s p(95)=0s
+     http_req_waiting...........: avg=0s min=0s med=0s max=0s p(90)=0s p(95)=0s
+     http_reqs..................: 1       1086.797046/s
+     ✓ { test_type:load }.......: avg=0  min=0  med=0  max=0  p(90)=0  p(95)=0 
+     ✓ { test_type:smoke }......: avg=0  min=0  med=0  max=0  p(90)=0  p(95)=0 
+     ✓ { test_type:stress }.....: avg=0  min=0  med=0  max=0  p(90)=0  p(95)=0 
+default   [   0% ]

@@ -1,0 +1,148 @@
+{
+  "meta": {
+    "test_name": "stress",
+    "timestamp": "2026-07-30T02:40:33.599Z",
+    "k6_version": "unknown",
+    "scenario": "default",
+    "base_url": "not-set",
+    "namespace": "securerag-hub"
+  },
+  "summary": {
+    "total_requests": 5,
+    "total_failed": 5,
+    "failure_rate": 1,
+    "avg_latency_ms": 0,
+    "min_latency_ms": 0,
+    "med_latency_ms": 0,
+    "p90_latency_ms": 0,
+    "p95_latency_ms": 0,
+    "p99_latency_ms": -1,
+    "max_latency_ms": 0
+  },
+  "thresholds": {},
+  "per_service": {
+      "data_sent": {
+        "type": "counter",
+        "count": 0,
+        "rate": 0
+      },
+      "iterations": {
+        "type": "counter",
+        "count": 95051,
+        "rate": 226.25492408184576
+      },
+      "stress_errors": {
+        "type": "rate",
+        "rate": 0,
+        "passes": 0,
+        "fails": 0
+      },
+      "http_req_failed": {
+        "type": "rate",
+        "rate": 1,
+        "passes": 5,
+        "fails": 0
+      },
+      "http_req_blocked": {
+        "type": "trend",
+        "avg": 0,
+        "min": 0,
+        "med": 0,
+        "p90": 0,
+        "p95": 0,
+        "p99": -1,
+        "max": 0
+      },
+      "iteration_duration": {
+        "type": "trend",
+        "avg": 0.9547959989269013,
+        "min": 0.008776,
+        "med": 0.025973,
+        "p90": 0.061622,
+        "p95": 0.0906125,
+        "p99": -1,
+        "max": 694.666967
+      },
+      "stress_duration": {
+        "type": "trend",
+        "avg": 0,
+        "min": 0,
+        "med": 0,
+        "p90": 0,
+        "p95": 0,
+        "p99": -1,
+        "max": 0
+      },
+      "data_received": {
+        "type": "counter",
+        "count": 0,
+        "rate": 0
+      },
+      "http_req_receiving": {
+        "type": "trend",
+        "avg": 0,
+        "min": 0,
+        "med": 0,
+        "p90": 0,
+        "p95": 0,
+        "p99": -1,
+        "max": 0
+      },
+      "http_req_tls_handshaking": {
+        "type": "trend",
+        "avg": 0,
+        "min": 0,
+        "med": 0,
+        "p90": 0,
+        "p95": 0,
+        "p99": -1,
+        "max": 0
+      },
+      "http_req_duration": {
+        "type": "trend",
+        "avg": 0,
+        "min": 0,
+        "med": 0,
+        "p90": 0,
+        "p95": 0,
+        "p99": -1,
+        "max": 0
+      },
+      "http_req_connecting": {
+        "type": "trend",
+        "avg": 0,
+        "min": 0,
+        "med": 0,
+        "p90": 0,
+        "p95": 0,
+        "p99": -1,
+        "max": 0
+      },
+      "http_req_sending": {
+        "type": "trend",
+        "avg": 0,
+        "min": 0,
+        "med": 0,
+        "p90": 0,
+        "p95": 0,
+        "p99": -1,
+        "max": 0
+      },
+      "http_req_waiting": {
+        "type": "trend",
+        "avg": 0,
+        "min": 0,
+        "med": 0,
+        "p90": 0,
+        "p95": 0,
+        "p99": -1,
+        "max": 0
+      },
+      "http_reqs": {
+        "type": "counter",
+        "count": 5,
+        "rate": 0.011901764530717498
+      }
+    },
+  "slo_passed": true
+}

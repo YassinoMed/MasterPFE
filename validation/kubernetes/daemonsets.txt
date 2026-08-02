@@ -1,0 +1,8 @@
+NAMESPACE              NAME           DESIRED   CURRENT   READY   UP-TO-DATE   AVAILABLE   NODE SELECTOR                      AGE
+falco                  falco          2         2         2       2            2           securerag.dev/falco-enabled=true   38d
+kube-system            cilium         2         2         2       2            2           kubernetes.io/os=linux             16d
+kube-system            cilium-envoy   2         2         2       2            2           kubernetes.io/os=linux             16d
+kube-system            kube-proxy     2         2         2       2            2           kubernetes.io/os=linux             39d
+kube-system            tetragon       2         2         2       2            2           <none>                             31h
+securerag-monitoring   promtail       2         2         2       2            2           <none>                             22d
+velero                 node-agent     2         2         2       2            2           <none>                             27d

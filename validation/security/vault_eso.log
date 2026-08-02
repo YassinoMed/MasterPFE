@@ -1,0 +1,17 @@
+=== VAULT & EXTERNAL SECRETS ===
+NAME      READY   STATUS    RESTARTS   AGE   IP            NODE                          NOMINATED NODE   READINESS GATES
+vault-0   1/1     Running   0          20h   10.244.1.83   securerag-dev-control-plane   <none>           <none>
+NAME                                                   AGE   STATUS   CAPABILITIES   READY
+clustersecretstore.external-secrets.io/vault-backend   20h   Valid    ReadWrite      True
+
+NAMESPACE              NAME                                                                 STORE           REFRESH INTERVAL   STATUS         READY
+argocd                 externalsecret.external-secrets.io/argocd-notifications-secret-eso   vault-backend   1h                 SecretSynced   True
+securerag-backup       externalsecret.external-secrets.io/securerag-database-secrets        vault-backend   1h                 SecretSynced   True
+securerag-hub          externalsecret.external-secrets.io/db-credentials-es                 vault-backend   1h                 SecretSynced   True
+securerag-hub          externalsecret.external-secrets.io/securerag-common-secrets          vault-backend   1h                 SecretSynced   True
+securerag-monitoring   externalsecret.external-secrets.io/alertmanager-secrets              vault-backend   1h                 SecretSynced   True
+securerag-monitoring   externalsecret.external-secrets.io/grafana-admin-secret              vault-backend   1h                 SecretSynced   True
+velero                 externalsecret.external-secrets.io/vault-velero-credentials          vault-backend   1h                 SecretSynced   True
+No resources found
+NAME            AGE   STATUS   CAPABILITIES   READY
+vault-backend   20h   Valid    ReadWrite      True

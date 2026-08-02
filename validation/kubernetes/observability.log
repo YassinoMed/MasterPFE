@@ -1,0 +1,12 @@
+=== OBSERVABILITY PODS & SERVICES ===
+NAME                                  READY   STATUS    RESTARTS       AGE     IP             NODE                          NOMINATED NODE   READINESS GATES
+alertmanager-5fcd66fdd6-bfbqv         1/1     Running   3 (3d5h ago)   3d11h   10.244.0.186   securerag-dev-worker          <none>           <none>
+alertmanager-5fcd66fdd6-vx9vn         1/1     Running   3 (3d5h ago)   3d11h   10.244.0.22    securerag-dev-worker          <none>           <none>
+grafana-7f4569df6b-844wr              1/1     Running   0              2d15h   10.244.0.86    securerag-dev-worker          <none>           <none>
+kube-state-metrics-696cbf7768-wlzkc   1/1     Running   3 (3d5h ago)   3d11h   10.244.0.161   securerag-dev-worker          <none>           <none>
+loki-78c4b5cc8d-6vwtl                 1/1     Running   3 (3d5h ago)   3d11h   10.244.0.66    securerag-dev-worker          <none>           <none>
+prometheus-6fcc5bfc5c-7w6pt           1/1     Running   0              2d19h   10.244.0.67    securerag-dev-worker          <none>           <none>
+promtail-vskzn                        1/1     Running   7 (3d5h ago)   3d11h   10.244.1.66    securerag-dev-control-plane   <none>           <none>
+promtail-xjjb9                        1/1     Running   3 (3d5h ago)   3d11h   10.244.0.125   securerag-dev-worker          <none>           <none>
+tempo-84d44fd9f9-9p8jw                1/1     Running   4 (3d5h ago)   3d11h   10.244.0.18    securerag-dev-worker          <none>           <none>
+No resources found in otel-system namespace.

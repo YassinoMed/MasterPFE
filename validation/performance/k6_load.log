@@ -1,0 +1,228 @@
+
+         /\      Grafana   /‾‾/  
+    /\  /  \     |\  __   /  /   
+   /  \/    \    | |/ /  /   ‾‾\ 
+  /          \   |   (  |  (‾)  |
+ / __________ \  |_|\_\  \_____/ 
+
+     execution: local
+        script: tests/load/k6-load-test.js
+        output: -
+
+     scenarios: (100.00%) 1 scenario, 50 max VUs, 1m15s max duration (incl. graceful stop):
+              * default: 50 looping VUs for 45s (gracefulStop: 30s)
+
+
+running (0m01.0s), 50/50 VUs, 0 complete and 0 interrupted iterations
+default   [   2% ] 50 VUs  01.0s/45s
+
+running (0m02.0s), 50/50 VUs, 0 complete and 0 interrupted iterations
+default   [   4% ] 50 VUs  02.0s/45s
+
+running (0m03.0s), 50/50 VUs, 0 complete and 0 interrupted iterations
+default   [   7% ] 50 VUs  03.0s/45s
+
+running (0m04.0s), 50/50 VUs, 0 complete and 0 interrupted iterations
+default   [   9% ] 50 VUs  04.0s/45s
+
+running (0m05.0s), 50/50 VUs, 11 complete and 0 interrupted iterations
+default   [  11% ] 50 VUs  05.0s/45s
+
+running (0m06.0s), 50/50 VUs, 37 complete and 0 interrupted iterations
+default   [  13% ] 50 VUs  06.0s/45s
+
+running (0m07.0s), 50/50 VUs, 50 complete and 0 interrupted iterations
+default   [  16% ] 50 VUs  07.0s/45s
+
+running (0m08.0s), 50/50 VUs, 50 complete and 0 interrupted iterations
+default   [  18% ] 50 VUs  08.0s/45s
+
+running (0m09.0s), 50/50 VUs, 50 complete and 0 interrupted iterations
+default   [  20% ] 50 VUs  09.0s/45s
+
+running (0m10.0s), 50/50 VUs, 53 complete and 0 interrupted iterations
+default   [  22% ] 50 VUs  10.0s/45s
+
+running (0m11.0s), 50/50 VUs, 72 complete and 0 interrupted iterations
+default   [  24% ] 50 VUs  11.0s/45s
+
+running (0m12.0s), 50/50 VUs, 93 complete and 0 interrupted iterations
+default   [  27% ] 50 VUs  12.0s/45s
+
+running (0m13.0s), 50/50 VUs, 100 complete and 0 interrupted iterations
+default   [  29% ] 50 VUs  13.0s/45s
+
+running (0m14.0s), 50/50 VUs, 100 complete and 0 interrupted iterations
+default   [  31% ] 50 VUs  14.0s/45s
+
+running (0m15.0s), 50/50 VUs, 102 complete and 0 interrupted iterations
+default   [  33% ] 50 VUs  15.0s/45s
+
+running (0m16.0s), 50/50 VUs, 114 complete and 0 interrupted iterations
+default   [  36% ] 50 VUs  16.0s/45s
+
+running (0m17.0s), 50/50 VUs, 132 complete and 0 interrupted iterations
+default   [  38% ] 50 VUs  17.0s/45s
+
+running (0m18.0s), 50/50 VUs, 150 complete and 0 interrupted iterations
+default   [  40% ] 50 VUs  18.0s/45s
+
+running (0m19.0s), 50/50 VUs, 150 complete and 0 interrupted iterations
+default   [  42% ] 50 VUs  19.0s/45s
+
+running (0m20.0s), 50/50 VUs, 152 complete and 0 interrupted iterations
+default   [  44% ] 50 VUs  20.0s/45s
+
+running (0m21.0s), 50/50 VUs, 161 complete and 0 interrupted iterations
+default   [  47% ] 50 VUs  21.0s/45s
+
+running (0m22.0s), 50/50 VUs, 172 complete and 0 interrupted iterations
+default   [  49% ] 50 VUs  22.0s/45s
+
+running (0m23.0s), 50/50 VUs, 192 complete and 0 interrupted iterations
+default   [  51% ] 50 VUs  23.0s/45s
+
+running (0m24.0s), 50/50 VUs, 200 complete and 0 interrupted iterations
+default   [  53% ] 50 VUs  24.0s/45s
+
+running (0m25.0s), 50/50 VUs, 201 complete and 0 interrupted iterations
+default   [  56% ] 50 VUs  25.0s/45s
+
+running (0m26.0s), 50/50 VUs, 209 complete and 0 interrupted iterations
+default   [  58% ] 50 VUs  26.0s/45s
+
+running (0m27.0s), 50/50 VUs, 222 complete and 0 interrupted iterations
+default   [  60% ] 50 VUs  27.0s/45s
+
+running (0m28.0s), 50/50 VUs, 235 complete and 0 interrupted iterations
+default   [  62% ] 50 VUs  28.0s/45s
+
+running (0m29.0s), 50/50 VUs, 249 complete and 0 interrupted iterations
+default   [  64% ] 50 VUs  29.0s/45s
+
+running (0m30.0s), 50/50 VUs, 251 complete and 0 interrupted iterations
+default   [  67% ] 50 VUs  30.0s/45s
+
+running (0m31.0s), 50/50 VUs, 259 complete and 0 interrupted iterations
+default   [  69% ] 50 VUs  31.0s/45s
+
+running (0m32.0s), 50/50 VUs, 268 complete and 0 interrupted iterations
+default   [  71% ] 50 VUs  32.0s/45s
+
+running (0m33.0s), 50/50 VUs, 282 complete and 0 interrupted iterations
+default   [  73% ] 50 VUs  33.0s/45s
+
+running (0m34.0s), 50/50 VUs, 298 complete and 0 interrupted iterations
+default   [  76% ] 50 VUs  34.0s/45s
+
+running (0m35.0s), 50/50 VUs, 301 complete and 0 interrupted iterations
+default   [  78% ] 50 VUs  35.0s/45s
+
+running (0m36.0s), 50/50 VUs, 309 complete and 0 interrupted iterations
+default   [  80% ] 50 VUs  36.0s/45s
+
+running (0m37.0s), 50/50 VUs, 317 complete and 0 interrupted iterations
+default   [  82% ] 50 VUs  37.0s/45s
+
+running (0m38.0s), 50/50 VUs, 330 complete and 0 interrupted iterations
+default   [  84% ] 50 VUs  38.0s/45s
+
+running (0m39.0s), 50/50 VUs, 345 complete and 0 interrupted iterations
+default   [  87% ] 50 VUs  39.0s/45s
+
+running (0m40.0s), 50/50 VUs, 351 complete and 0 interrupted iterations
+default   [  89% ] 50 VUs  40.0s/45s
+
+running (0m41.0s), 50/50 VUs, 359 complete and 0 interrupted iterations
+default   [  91% ] 50 VUs  41.0s/45s
+
+running (0m42.0s), 50/50 VUs, 364 complete and 0 interrupted iterations
+default   [  93% ] 50 VUs  42.0s/45s
+
+running (0m43.0s), 50/50 VUs, 376 complete and 0 interrupted iterations
+default   [  96% ] 50 VUs  43.0s/45s
+
+running (0m44.0s), 50/50 VUs, 390 complete and 0 interrupted iterations
+default   [  98% ] 50 VUs  44.0s/45s
+
+running (0m45.0s), 50/50 VUs, 401 complete and 0 interrupted iterations
+default   [ 100% ] 50 VUs  45.0s/45s
+
+running (0m46.0s), 42/50 VUs, 409 complete and 0 interrupted iterations
+default ↓ [ 100% ] 50 VUs  45s
+
+running (0m47.0s), 37/50 VUs, 414 complete and 0 interrupted iterations
+default ↓ [ 100% ] 50 VUs  45s
+
+running (0m48.0s), 26/50 VUs, 425 complete and 0 interrupted iterations
+default ↓ [ 100% ] 50 VUs  45s
+
+running (0m49.0s), 11/50 VUs, 440 complete and 0 interrupted iterations
+default ↓ [ 100% ] 50 VUs  45s
+time="2026-08-02T10:18:35+02:00" level=error msg="TypeError: Object has no member 'includes'\n\tat evaluateThreshold (file:///root/MasterPFE/tests/load/k6-load-test.js:211:25(4))\n\tat file:///root/MasterPFE/tests/load/k6-load-test.js:199:74(27)\n\tat forEach (native)\n\tat handleSummary (file:///root/MasterPFE/tests/load/k6-load-test.js:196:45(81))\n" hint="script exception"
+
+     █ Portal Web - Health Check
+
+       ✓ health check status 200
+       ✗ health check response time < 200ms
+        ↳  67% — ✓ 305 / ✗ 146
+
+     █ Portal Web - Home Page
+
+       ✓ home page status 200
+       ✓ home page response time < 500ms
+       ✓ home page contains content
+
+     █ Auth Service - Login Page
+
+       ✗ login page status 200
+        ↳  0% — ✓ 0 / ✗ 451
+       ✓ login page response time < 500ms
+
+     █ Chatbot Manager - List Chatbots
+
+       ✗ chatbots list status 200
+        ↳  0% — ✓ 0 / ✗ 451
+       ✓ chatbots list response time < 500ms
+
+     █ Conversation Service - Health
+
+       ✗ conversations health status 200
+        ↳  0% — ✓ 0 / ✗ 451
+       ✓ conversations health response time < 500ms
+
+     █ Audit Service - Health
+
+       ✗ audit health status 200
+        ↳  0% — ✓ 0 / ✗ 451
+       ✓ audit health response time < 500ms
+
+     checks.........................: 66.74% 3913 out of 5863
+     data_received..................: 7.3 MB 148 kB/s
+     data_sent......................: 1.7 MB 35 kB/s
+   ✗ errors.........................: 72.06% 1950 out of 2706
+     group_duration.................: avg=131.61ms   min=5.22ms   med=93.97ms   max=1.22s       p(90)=303.81ms   p(95)=460.62ms  
+     http_req_blocked...............: avg=18.55µs    min=1.63µs   med=4.78µs    max=1.95ms      p(90)=7.38µs     p(95)=9.29µs    
+     http_req_connecting............: avg=11.23µs    min=0s       med=0s        max=1.92ms      p(90)=0s         p(95)=0s        
+   ✓ http_req_duration..............: avg=131.34ms   min=5.11ms   med=93.78ms   max=1.22s       p(90)=303.65ms   p(95)=460.12ms  
+       { expected_response:true }...: avg=203.18ms   min=5.11ms   med=172.27ms  max=993.74ms    p(90)=436.13ms   p(95)=595.91ms  
+   ✗ http_req_failed................: 66.64% 1804 out of 2707
+     http_req_receiving.............: avg=4.51ms     min=17.29µs  med=126.37µs  max=196ms       p(90)=1.02ms     p(95)=41.63ms   
+     http_req_sending...............: avg=29.93µs    min=5.3µs    med=16.9µs    max=1.98ms      p(90)=29.86µs    p(95)=43.97µs   
+     http_req_tls_handshaking.......: avg=0s         min=0s       med=0s        max=0s          p(90)=0s         p(95)=0s        
+     http_req_waiting...............: avg=126.79ms   min=4.86ms   med=93.02ms   max=1.22s       p(90)=301.47ms   p(95)=406.35ms  
+     http_reqs......................: 2707   54.661842/s
+     iteration_duration.............: avg=5.29s      min=4.63s    med=5.2s      max=6.67s       p(90)=5.77s      p(95)=6s        
+     iterations.....................: 451    9.106942/s
+     requests_total.................: 2706   54.641649/s
+     response_time..................: avg=131.385992 min=5.113435 med=93.788738 max=1226.016975 p(90)=303.672223 p(95)=460.445787
+     ✓ { test_type:load }...........: avg=0          min=0        med=0         max=0           p(90)=0          p(95)=0         
+     ✓ { test_type:smoke }..........: avg=0          min=0        med=0         max=0           p(90)=0          p(95)=0         
+     ✓ { test_type:stress }.........: avg=0          min=0        med=0         max=0           p(90)=0          p(95)=0         
+     vus............................: 11     min=11           max=50
+     vus_max........................: 50     min=50           max=50
+
+
+running (0m49.5s), 00/50 VUs, 451 complete and 0 interrupted iterations
+default ✓ [ 100% ] 50 VUs  45s
+time="2026-08-02T10:18:35+02:00" level=error msg="thresholds on metrics 'errors, http_req_failed' have been crossed"

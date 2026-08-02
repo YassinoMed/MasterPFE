@@ -1,168 +1,113 @@
-\documentclass[12pt, a4paper]{report}
-
-\input{config}
+\documentclass[12pt,a4paper]{report}
+\usepackage{config}
 
 \begin{document}
 
-\iffalse
-\begin{titlepage}
-    \begin{center}
-        
-        \includegraphics[height=3cm]{logo_universite.png} \hfill \includegraphics[height=3cm]{logo_iset.png}
-        
-        \vspace*{0.5cm}
-        {\large \textbf{République Tunisienne}} \\
-        {\large Ministère de l'Enseignement Supérieur et de la Recherche Scientifique} \\
-        \vspace{0.3cm}
-        {\Large \textbf{Institut Supérieur des Études Technologiques de Sfax}} \\
-        \vspace{1.5cm}
-
-        {\large \textbf{MÉMOIRE DE FIN D'ÉTUDES}} \\
-        \vspace{0.5cm}
-        {\large Pour l'obtention du diplôme de} \\
-        {\Large \textbf{Mastère Professionnel DSIR}} \\
-        {\large (Développement des Systèmes Informatiques et Réseaux)} \\
-        \vspace{1.5cm}
-
-        \rule{\linewidth}{0.5mm} \\ [0.4cm]
-        {\huge \textbf{Conception et Développement d'un Agent IA Intelligent / Autonome}} \\ [0.4cm]
-        \rule{\linewidth}{0.5mm} \\
-        \vspace{1.5cm}
-
-        \textit{Élaboré par :} \\
-        {\Large \textbf{[Ton Nom et Ton Prénom]}} \\
-        \vspace{1.2cm}
-
-        \textit{Soutenu le [Date de la soutenance ex: 15 Juillet 2026] devant le jury composé de :} \\
-        \vspace{0.4cm}
-        \begin{tabular}{>{\bfseries}l l l}
-            M. [Nom et Prénom] & Président du jury & (ISET Sfax) \\
-            M. [Nom et Prénom] & Rapporteur & (Institution) \\
-            M. [Nom de l'Encadrant] & Encadrant ISET & (ISET Sfax) \\
-            M. [Nom du Co-encadrant] & Co-encadrant Entreprise & (Nom Entreprise) \\
-        \end{tabular}
-
-        \vfill 
-        {\large Année Universitaire : 2025 - 2026}
-    \end{center}
-\end{titlepage}
-
-\pagenumbering{roman}
-
-\pdfbookmark[0]{Dédicace}{dedicace} 
-\chapter*{Dédicace}
-\addcontentsline{toc}{chapter}{Dédicace} 
-\begin{flushright}
-    \textit{À mes chers parents,\\
-    Pour leur amour, leur soutien inconditionnel et leurs sacrifices.\\
-    \vspace{0.5cm}
-    À mes frères et sœurs,\\
-    À tous mes amis et collègues de la promotion DSIR.\\
-    \vspace{0.5cm}
-    À tous ceux qui m'ont aidé de près ou de loin à la réalisation de ce travail.\\}
-\end{flushright}
-\vspace{1cm}
-
-\chapter*{Remerciements}
-\addcontentsline{toc}{chapter}{Remerciements}
-Je tiens tout d'abord à exprimer ma profonde gratitude à mon encadrant académique, \textbf{Monsieur [Nom de l'encadrant]}, pour son encadrement, sa disponibilité, et ses précieux conseils tout au long de ce projet de fin d'études.
-
-Mes remerciements s'adressent également à \textbf{Monsieur/Madame [Nom du co-encadrant, si applicable]} pour le soutien technique et l'accueil chaleureux au sein de l'entreprise \textbf{[Nom de l'entreprise]}.
-
-Je remercie chaleureusement les membres du jury d'avoir accepté d'évaluer ce travail.
-Enfin, je remercie tout le corps professoral de l'ISET Sfax, et particulièrement l'équipe du Mastère DSIR, pour la qualité de l'enseignement prodigué.
-
-\chapter*{Résumé}
-\addcontentsline{toc}{chapter}{Résumé}
-Dans le cadre de l'évolution fulgurante de l'intelligence artificielle générative et de l'automatisation avancée, ce mémoire présente la conception et le développement d'un agent IA intelligent et autonome. L'objectif principal de ce projet est de ...
-
-\noindent \textbf{Mots-clés :} Agent IA, LLM, LangChain, ReAct, Autonomie, DSIR.
-
-\chapter*{Abstract}
-\addcontentsline{toc}{chapter}{Abstract}
-In the context of the rapid evolution of generative artificial intelligence and advanced automation, this thesis presents the design and development of an intelligent and autonomous AI agent. The main objective of this project is to ...
-
-\noindent \textbf{Keywords:} AI Agent, LLM, LangChain, ReAct, Autonomy, DSIR.
-
+% ================== Pages liminaires ==================
+\bigskip
+%\input{glossaire}
+% ================== Tables ==================
 \tableofcontents
-
-\clearpage
 \listoffigures
-\addcontentsline{toc}{chapter}{Liste des figures}
-
-\clearpage
 \listoftables
-\addcontentsline{toc}{chapter}{Liste des tableaux}
+\newpage
+%\input{intro}
+%\input{chapitre1_etd_ART}
+%\input{chapitre_2}
+%\input{chapitre_securite}
+\input{chapitre_devsecops}
 
-\clearpage
-\chapter*{Liste des abréviations et acronymes}
-\addcontentsline{toc}{chapter}{Liste des abréviations}
-\begin{acronym}[LangGraph] 
-    \acro{API}{Application Programming Interface}
-    \acro{DSIR}{Développement des Systèmes Informatiques et Réseaux}
-    \acro{IA}{Intelligence Artificielle}
-    \acro{LLM}{Large Language Model}
-    \acro{NLP}{Natural Language Processing}
-    \acro{UML}{Unified Modeling Language}
-\end{acronym}
-\fi
+\begin{thebibliography}{99}
 
+\bibitem{mitre_attack}
+MITRE Corporation, ``MITRE ATT\&CK: Adversarial Tactics, Techniques \& Common Knowledge,'' \textit{https://attack.mitre.org}, 2024.
 
-\clearpage
-\pagenumbering{arabic}
+\bibitem{mitre_attack_containers}
+MITRE Corporation, ``MITRE ATT\&CK Matrix for Containers,'' \textit{https://attack.mitre.org/matrices/enterprise/containers/}, 2024.
 
-\input{intro}
- \input{chapitre_1}
-% \input{chapitre_2}
-% \input{chapitre_3}
-% \input{chapitre_4}
-% \input{chapitre_5}
-% \input{chapitre_6}
-% \input{chapitre_7}
-% \input{chapitre_8}
-% \input{chapitre_9}
-% \input{chapitre_10}
+\bibitem{owasp}
+OWASP Foundation, ``OWASP Top 10 Security Risks,'' \textit{https://owasp.org/www-project-top-ten}, 2023.
 
-\iffalse
-\clearpage
-\fancyhead[L]{Conclusion Générale et Perspectives}
-\chapter*{Conclusion Générale et Perspectives}
-\addcontentsline{toc}{chapter}{Conclusion Générale et Perspectives}
+\bibitem{owasp_k8s_top10}
+OWASP Foundation, ``OWASP Kubernetes Top 10 Security Risks,'' \textit{https://owasp.org/www-project-kubernetes-top-ten/}, 2024.
 
-Ce projet de Mastère professionnel a permis d'explorer de manière approfondie l'univers fascinant des agents d'intelligence artificielle autonomes. De la conceptualisation théorique jusqu'au déploiement de l'architecture, nous avons réussi à :
-\begin{itemize}
-    \item Intégrer avec succès [Technologies] pour concevoir un flux logique.
-    \item Réduire l'intervention humaine sur le processus [Processus].
-\end{itemize}
+\bibitem{nist_ssdf_800_218}
+M. Souppaya, K. Scarfone, and D. Dodson, ``Secure Software Development Framework (SSDF) Version 1.1: Recommendations for Mitigating the Risk of Software Vulnerabilities,'' \textit{NIST Special Publication 800-218}, National Institute of Standards and Technology, 2022.
 
-Toutefois, certaines contraintes sont apparues, comme la forte latence liée aux appels des API LLM externes, ou le coût des tokens.
+\bibitem{nist_sp_800_190}
+M. Souppaya, J. Morello, and K. Scarfone, ``Application Container Security Guide,'' \textit{NIST Special Publication 800-190}, National Institute of Standards and Technology, 2017.
 
-\vspace{0.5cm}
-\textbf{Perspectives d'avenir :}
-\begin{itemize}
-    \item Utilisation de modèles LLM Open Source hostés localement (comme LLaMA 3 ou Mistral) pour réduire les coûts et garantir la confidentialité des données.
-    \item Ajout d'une capacité multimodale (analyse d'images ou d'audio par l'agent).
-\end{itemize}
+\bibitem{slsa_spec_v1}
+SLSA Community, ``Supply-chain Levels for Software Artifacts (SLSA) Specification v1.0,'' \textit{https://slsa.dev/spec/v1.0/}, 2023.
 
-\clearpage
-\fancyhead[L]{Bibliographie}
-\printbibliography[heading=bibintoc, title={Bibliographie et Nétographie}]
+\bibitem{cncf_security_whitepaper}
+CNCF Security Technical Advisory Group, ``Cloud Native Security Whitepaper (v2),'' \textit{Cloud Native Computing Foundation}, 2022.
 
-\appendix
-\fancyhead[L]{\leftmark} 
-\chapter{Complément de code source}
-\label{annexe:code}
+\bibitem{dora_metrics_2018}
+N. Forsgren, J. Humble, and G. Kim, \textit{Accelerate: The Science of Lean Software and DevOps}, IT Revolution Press, 2018.
 
-\chapter{Manuel d'installation ou Documentations supplémentaires}
-\label{annexe:manuel}
+\bibitem{gregg_ebpf_2020}
+B. Gregg, \textit{Systems Performance: Enterprise and the Cloud}, 2nd ed., Addison-Wesley Professional, 2020.
 
-\clearpage
-\thispagestyle{empty}
-\vspace*{\fill}
-\begin{center}
-    \textbf{Institut Supérieur des Études Technologiques de Sfax} \\
-    Route Mahdia Km 2.5 El-Boustène Sfax 3099, Tunisie
-\end{center}
-\fi
+\bibitem{chaos_engineering_2016}
+A. Basiri et al., ``Chaos Engineering,'' \textit{IEEE Software}, vol. 33, no. 3, pp. 35--41, 2016.
+
+\bibitem{lewis2020rag}
+P. Lewis et al., ``Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks,'' in \textit{Advances in Neural Information Processing Systems}, 2020.
+
+\bibitem{bert2019}
+J. Devlin et al., ``BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding,'' in \textit{Proc. NAACL-HLT}, 2019.
+
+\bibitem{du2023multiagent}
+Y. Du et al., ``Improving Factuality and Reasoning in Language Models through Multiagent Debate,'' in \textit{Proc. ICML}, 2023.
+
+\bibitem{wu2023autogen}
+Q. Wu et al., ``AutoGen: Enabling Next-Gen LLM Applications via Multi-Agent Conversation,'' \textit{arXiv:2308.08155}, 2023.
+
+\bibitem{guo2017calibration}
+C. Guo et al., ``On Calibration of Modern Neural Networks,'' in \textit{Proc. ICML}, 2017.
+
+\bibitem{shinn2023reflexion}
+N. Shinn et al., ``Reflexion: Language Agents with Verbal Reinforcement Learning,'' in \textit{Advances in Neural Information Processing Systems}, 2023.
+
+\bibitem{condorcet1785}
+M. de Condorcet, \textit{Essai sur l'application de l'analyse à la probabilité des décisions rendues à la pluralité des voix}. Paris : Imprimerie Royale, 1785.
+
+\bibitem{nist_ir}
+NIST, \textit{Special Publication 800-61 Rev. 2 --- Computer Security Incident Handling Guide}. Gaithersburg : NIST, 2012.
+
+\bibitem{sigma2023}
+F. Roth et al., ``Sigma: Generic Signatures for SIEM Systems,'' \textit{GitHub Repository}, 2023.
+
+\bibitem{crewai2024}
+J. Moura, ``CrewAI: Framework for Orchestrating Role-Playing, Autonomous AI Agents,'' \textit{GitHub Repository}, 2024.
+
+\bibitem{bayer2022cysecbert}
+M. Bayer et al., ``CySecBERT: A Domain-Adapted Language Model for the Cybersecurity Domain,'' \textit{ACM Trans. Privacy Secur.}, vol. 26, no. 2, 2023.
+
+\bibitem{yan2024corrective}
+S.-Q. Yan et al., ``Corrective Retrieval Augmented Generation,'' \textit{arXiv:2401.15884}, 2024.
+
+\bibitem{asai2024selfrag}
+A. Asai et al., ``Self-RAG: Learning to Retrieve, Generate, and Critique through Self-Reflection,'' in \textit{Proc. ICLR}, 2024.
+
+\bibitem{yao2023react}
+S. Yao et al., ``ReAct: Synergizing Reasoning and Acting in Language Models,'' in \textit{Proc. ICLR}, 2023.
+
+\bibitem{langgraph2024}
+LangChain, ``LangGraph: Build Stateful, Multi-Actor Applications with LLMs,'' \textit{Technical Documentation}, 2024.
+
+\bibitem{nitzan1982}
+S. Nitzan and J. Paroush, ``Optimal Decision Rules in Uncertain Dichotomous Choice Situations,'' \textit{International Economic Review}, vol. 23, no. 2, pp. 289--297, 1982.
+
+\bibitem{sharafaldin2018}
+I. Sharafaldin, A. H. Lashkari, and A. A. Ghorbani, ``Toward Generating a New Intrusion Detection Dataset,'' in \textit{Proc. ICISSP}, 2018.
+
+\bibitem{naeini2015}
+M. P. Naeini, G. F. Cooper, and M. Hauskrecht, ``Obtaining Well Calibrated Probabilities Using Bayesian Binning,'' in \textit{Proc. AAAI}, 2015.
+
+\end{thebibliography}
+
+%\input{annexe}
 
 \end{document}

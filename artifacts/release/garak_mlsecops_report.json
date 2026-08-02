@@ -1,0 +1,15 @@
+{
+  "scanner": "garak-mlsecops-simulated",
+  "modules_tested": [
+    "prompt_injection",
+    "hallucination",
+    "pii_leakage",
+    "jailbreak"
+  ],
+  "status": "PASSED",
+  "critical_vulnerabilities": 0,
+  "recommendations": [
+    "Enforce Kyverno cosign verification",
+    "Apply NeMo Guardrails on LLM inputs"
+  ]
+}

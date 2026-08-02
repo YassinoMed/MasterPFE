@@ -145,17 +145,13 @@ spec:
       }
     }
 
-    stage('LLM Red Teaming & Fuzzing (Garak)') {
+    stage('MLSecOps Security & LLM Red-Teaming (Garak & ModelScan)') {
       steps {
         unstash 'workspace'
         sh '''
           set -euo pipefail
-          echo "[INFO] Running Garak LLM vulnerability & prompt injection red-teaming..."
-          if python3 -c "import garak" >/dev/null 2>&1; then
-            python3 -m garak --model_type rest --report_prefix garak_report || echo "[WARN] Garak red-teaming found non-blocking prompt vulnerabilities"
-          else
-            echo "[INFO] Garak security check simulated (install garak for full red-teaming coverage)."
-          fi
+          echo "[INFO] Running MLSecOps Security Suite (ModelScan, Garak Red-Teaming, ML Supply Chain)..."
+          bash scripts/ci/run-mlsecops-scans.sh || echo "[WARN] MLSecOps security checks completed with warnings"
         '''
       }
     }

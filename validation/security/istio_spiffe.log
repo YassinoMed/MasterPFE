@@ -1,0 +1,17 @@
+--- 11. ISTIO & SPIFFE AUDIT ---
+istio-system           istio-ingressgateway-759f9464b4-hh5ps                             1/1     Running     0                3d6h
+istio-system           istiod-55cc5cb676-7ftkq                                           1/1     Running     0                3d6h
+authorizationpolicies.security.istio.io                 2026-07-29T23:54:41Z
+destinationrules.networking.istio.io                    2026-07-30T00:19:49Z
+envoyfilters.networking.istio.io                        2026-07-30T00:20:18Z
+gateways.networking.istio.io                            2026-07-30T00:20:31Z
+peerauthentications.security.istio.io                   2026-07-30T00:20:37Z
+proxyconfigs.networking.istio.io                        2026-07-30T00:20:42Z
+requestauthentications.security.istio.io                2026-07-30T00:20:44Z
+serviceentries.networking.istio.io                      2026-07-30T00:20:51Z
+sidecars.networking.istio.io                            2026-07-30T00:20:55Z
+telemetries.telemetry.istio.io                          2026-07-30T00:21:23Z
+virtualservices.networking.istio.io                     2026-07-30T00:22:04Z
+wasmplugins.extensions.istio.io                         2026-07-30T00:22:10Z
+workloadentries.networking.istio.io                     2026-07-30T00:22:16Z
+workloadgroups.networking.istio.io                      2026-07-30T00:22:19Z

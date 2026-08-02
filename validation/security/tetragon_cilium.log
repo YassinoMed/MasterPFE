@@ -1,0 +1,13 @@
+--- 10. TETRAGON & CILIUM AUDIT ---
+ciliumcidrgroups.cilium.io                              2026-07-16T17:07:57Z
+ciliumclusterwidenetworkpolicies.cilium.io              2026-07-16T17:07:57Z
+ciliumendpoints.cilium.io                               2026-07-16T17:07:58Z
+ciliumexternalworkloads.cilium.io                       2026-07-16T17:07:57Z
+ciliumidentities.cilium.io                              2026-07-16T17:07:57Z
+ciliuml2announcementpolicies.cilium.io                  2026-07-16T17:07:57Z
+ciliumloadbalancerippools.cilium.io                     2026-07-16T17:07:57Z
+ciliumnetworkpolicies.cilium.io                         2026-07-16T17:07:58Z
+ciliumnodeconfigs.cilium.io                             2026-07-16T17:07:57Z
+ciliumnodes.cilium.io                                   2026-07-16T17:07:57Z
+ciliumpodippools.cilium.io                              2026-07-16T17:07:57Z
+error: the server doesn't have a resource type "tracingpolicies"
