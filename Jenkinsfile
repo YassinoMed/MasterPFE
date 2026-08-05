@@ -144,9 +144,9 @@ pipeline {
             sh '''
               set -euo pipefail
               echo "[INFO] Running unit tests in parallel..."
-              bash scripts/ci/run-tests.sh || echo "[WARN] Unit tests finished with warnings"
-              bash scripts/ci/run-python-tests.sh || echo "[WARN] Python tests finished with warnings"
-              bash scripts/ci/collect-coverage.sh || echo "[WARN] Coverage collection completed with warnings"
+              bash scripts/ci/run-tests.sh
+              bash scripts/ci/run-python-tests.sh
+              bash scripts/ci/collect-coverage.sh
             '''
           }
         }
@@ -181,12 +181,16 @@ pipeline {
               set -euo pipefail
               echo "[INFO] Running Terraform IaC Validation & Checkov Security Scan..."
               if command -v terraform >/dev/null 2>&1; then
-                (cd infra/terraform && terraform init -backend=false && terraform validate) || echo "[WARN] Terraform validate finished with warnings"
+                (cd infra/terraform && terraform init -backend=false && terraform validate)
+              else
+                echo "[ERROR] terraform not installed"
+                exit 1
               fi
               if command -v checkov >/dev/null 2>&1; then
-                checkov -d infra/terraform --output cli --output junitxml --output-file-path console,${SECURITY_REPORT_DIR}/checkov-terraform-report.xml || echo "[WARN] Checkov Terraform scan finished with warnings"
+                checkov -d infra/terraform --output cli --output junitxml --output-file-path console,${SECURITY_REPORT_DIR}/checkov-terraform-report.xml
               else
-                echo "[WARN] Checkov not installed, skipping Checkov Terraform scan"
+                echo "[ERROR] Checkov not installed"
+                exit 1
               fi
             '''
           }
@@ -200,8 +204,8 @@ pipeline {
                 echo "[INFO] Executing SonarQube SAST Analysis..."
                 export SONAR_HOST_URL="${SONAR_HOST_URL:-http://host.docker.internal:9000}"
                 export SONAR_TOKEN="${SONAR_TOKEN}"
-                export REQUIRE_SONAR="false"
-                bash scripts/ci/run-sonar-analysis.sh || echo "[WARN] Sonar analysis completed with warnings"
+                export REQUIRE_SONAR="true"
+                bash scripts/ci/run-sonar-analysis.sh
               '''
             }
           }
@@ -242,7 +246,7 @@ pipeline {
               echo "[INFO] Scanning container images with Grype..."
               for sbom in "${SBOM_DIR}"/*.cdx.json "${SBOM_DIR}"/*.cyclonedx.json; do
                 if [ -f "$sbom" ] && command -v grype >/dev/null 2>&1; then
-                  grype "sbom:$sbom" --fail-on high,critical -o json > "${sbom}.grype.json" || true
+                  grype "sbom:$sbom" --fail-on high,critical -o json > "${sbom}.grype.json"
                 fi
               done
             '''
@@ -256,10 +260,10 @@ pipeline {
       steps {
         sh '''
           set -euo pipefail
-          echo "[INFO] Signing & attesting images (SLSA L3 Keyless)..."
+          echo "[INFO] Signing & attesting images (SLSA)..."
           unset COSIGN_KEY COSIGN_PASSWORD 2>/dev/null || true
-          bash scripts/release/sign-images.sh || echo "[WARN] Cosign signing skipped in local mode"
-          bash scripts/release/generate-provenance.sh || echo "[WARN] Provenance generation skipped in local mode"
+          bash scripts/release/sign-images.sh
+          bash scripts/release/generate-provenance.sh
         '''
       }
     }

@@ -13,10 +13,9 @@ spec:
     command:
     - cat
     tty: true
-    env:
-    - name: DOCKER_HOST
-      value: tcp://localhost:2375
     volumeMounts:
+    - name: workspace
+      mountPath: /home/jenkins/agent
     - name: composer-cache
       mountPath: /home/jenkins/.composer/cache
     - name: npm-cache
@@ -31,14 +30,25 @@ spec:
       mountPath: /home/jenkins/.sonar
     - name: maven-cache
       mountPath: /home/jenkins/.m2
-  - name: dind
-    image: docker:27-dind
-    securityContext:
-      privileged: true
-    env:
-    - name: DOCKER_TLS_CERTDIR
-      value: ""
+
+  # Kaniko executor (rootless, no privileged)
+  - name: kaniko
+    image: gcr.io/kaniko-project/executor:v1.23.2-debug
+    imagePullPolicy: IfNotPresent
+    command:
+    - /busybox/cat
+    tty: true
+    volumeMounts:
+    - name: workspace
+      mountPath: /workspace
+    - name: docker-config
+      mountPath: /kaniko/.docker
+
   volumes:
+  - name: workspace
+    emptyDir: {}
+  - name: docker-config
+    emptyDir: {}
   - name: composer-cache
     hostPath:
       path: /var/cache/jenkins/composer-cache-pvc
@@ -76,11 +86,10 @@ spec:
 
   environment {
     REGISTRY_HOST = 'localhost:5001'
-    IMAGE_PREFIX = 'ai-security'
-    IMAGE_TAG = 'production'
-    NAMESPACE = 'ai-security'
+    IMAGE_PREFIX  = 'ai-security'
+    IMAGE_TAG     = 'production'
+    NAMESPACE     = 'ai-security'
 
-    // Cache configurations
     COMPOSER_HOME       = '/home/jenkins/.composer'
     COMPOSER_CACHE_DIR  = '/home/jenkins/.composer/cache'
     npm_config_cache    = '/home/jenkins/.npm'
@@ -110,9 +119,10 @@ spec:
           set -euo pipefail
           echo "[INFO] Linting Python files..."
           if command -v flake8 >/dev/null 2>&1; then
-            flake8 ai-security/ --exclude=frontend,node_modules,.venv || echo "[WARN] Flake8 warnings found"
+            flake8 ai-security/ --exclude=frontend,node_modules,.venv
           else
-            echo "[WARN] flake8 not installed; skipping Python lint"
+            echo "[ERROR] flake8 not installed"
+            exit 1
           fi
         '''
       }
@@ -125,7 +135,7 @@ spec:
           set -euo pipefail
           echo "[INFO] Running Python tests..."
           export PYTHONPATH="$PYTHONPATH:$(pwd)/ai-security/backend"
-          pytest ai-security/backend/tests/ -v || echo "[WARN] Unit tests bypassed"
+          pytest ai-security/backend/tests/ -v --tb=short
         '''
       }
     }
@@ -137,83 +147,94 @@ spec:
           set -euo pipefail
           echo "[INFO] Running TruffleHog active secret scanner..."
           if command -v trufflehog >/dev/null 2>&1; then
-            trufflehog git file://. --since-commit HEAD --only-verified --fail || echo "[WARN] TruffleHog detected unverified or potential secrets"
+            trufflehog git file://. --since-commit HEAD --only-verified --fail
           else
-            echo "[INFO] TruffleHog fallback check completed."
+            echo "[ERROR] TruffleHog not installed"
+            exit 1
           fi
         '''
       }
     }
 
-    stage('MLSecOps Security & LLM Red-Teaming (Garak & ModelScan)') {
+    stage('MLSecOps Security & LLM Red-Teaming') {
       steps {
         unstash 'workspace'
         sh '''
           set -euo pipefail
-          echo "[INFO] Running MLSecOps Security Suite (ModelScan, Garak Red-Teaming, ML Supply Chain)..."
-          bash scripts/ci/run-mlsecops-scans.sh || echo "[WARN] MLSecOps security checks completed with warnings"
+          echo "[INFO] Running MLSecOps Security Suite..."
+          # Note: run-mlsecops-scans.sh sera corrigé en Phase 2 (Garak/ModelScan réels)
+          bash scripts/ci/run-mlsecops-scans.sh
         '''
       }
     }
 
-    stage('Build & Security Scan') {
+    stage('Build Images with Kaniko (rootless)') {
+      steps {
+        unstash 'workspace'
+        container('kaniko') {
+          sh '''
+            set -euo pipefail
+            echo "[INFO] Building AI images with Kaniko (rootless)..."
+
+            /kaniko/executor \
+              --context=/workspace/ai-security \
+              --dockerfile=/workspace/ai-security/Dockerfile \
+              --destination=${REGISTRY_HOST}/${IMAGE_PREFIX}-inference:${IMAGE_TAG} \
+              --cache=true \
+              --cache-ttl=24h
+
+            /kaniko/executor \
+              --context=/workspace/ai-security/backend \
+              --dockerfile=/workspace/ai-security/backend/Dockerfile \
+              --destination=${REGISTRY_HOST}/${IMAGE_PREFIX}-backend:${IMAGE_TAG} \
+              --cache=true \
+              --cache-ttl=24h
+
+            /kaniko/executor \
+              --context=/workspace/ai-security \
+              --dockerfile=/workspace/ai-security/Dockerfile.collector \
+              --destination=${REGISTRY_HOST}/${IMAGE_PREFIX}-log-collector:${IMAGE_TAG} \
+              --cache=true \
+              --cache-ttl=24h
+
+            /kaniko/executor \
+              --context=/workspace/ai-security/frontend \
+              --dockerfile=/workspace/ai-security/frontend/Dockerfile \
+              --destination=${REGISTRY_HOST}/${IMAGE_PREFIX}-frontend:${IMAGE_TAG} \
+              --cache=true \
+              --cache-ttl=24h
+          '''
+        }
+      }
+    }
+
+    stage('Trivy Image Scan (blocking)') {
       steps {
         unstash 'workspace'
         sh '''
           set -euo pipefail
-          
-          KANIKO_IMG="gcr.io/kaniko-project/executor@sha256:4e7a52dd1f14872430652bb3b027405b8dfd17c4538751c620ac005741ef9698"
-
-          # 1. Build Inference Service
-          echo "[INFO] Building AI Inference image with Kaniko..."
-          docker run --rm -v "$PWD:/workspace" ${KANIKO_IMG} \
-            --context=/workspace/ai-security \
-            --dockerfile=/workspace/ai-security/Dockerfile \
-            --destination=${REGISTRY_HOST}/${IMAGE_PREFIX}-inference:${IMAGE_TAG}
-          
-          # 2. Build Backend Service
-          echo "[INFO] Building Backend API image with Kaniko..."
-          docker run --rm -v "$PWD:/workspace" ${KANIKO_IMG} \
-            --context=/workspace/ai-security/backend \
-            --dockerfile=/workspace/ai-security/backend/Dockerfile \
-            --destination=${REGISTRY_HOST}/${IMAGE_PREFIX}-backend:${IMAGE_TAG}
-          
-          # 3. Build Log Collector Daemon
-          echo "[INFO] Building Log Collector image with Kaniko..."
-          docker run --rm -v "$PWD:/workspace" ${KANIKO_IMG} \
-            --context=/workspace/ai-security \
-            --dockerfile=/workspace/ai-security/Dockerfile.collector \
-            --destination=${REGISTRY_HOST}/${IMAGE_PREFIX}-log-collector:${IMAGE_TAG}
-          
-          # 4. Build Frontend Service
-          echo "[INFO] Building Frontend UI image with Kaniko..."
-          docker run --rm -v "$PWD:/workspace" ${KANIKO_IMG} \
-            --context=/workspace/ai-security/frontend \
-            --dockerfile=/workspace/ai-security/frontend/Dockerfile \
-            --destination=${REGISTRY_HOST}/${IMAGE_PREFIX}-frontend:${IMAGE_TAG}
-          
-          # 5. Security Scanning with Trivy (Fail on CRITICAL)
-          echo "[INFO] Running Trivy container vulnerability scan..."
-          trivy image --severity CRITICAL --exit-code 1 ${REGISTRY_HOST}/${IMAGE_PREFIX}-backend:${IMAGE_TAG} || true
-          trivy image --severity CRITICAL --exit-code 1 ${REGISTRY_HOST}/${IMAGE_PREFIX}-inference:${IMAGE_TAG} || true
+          echo "[INFO] Running Trivy container vulnerability scan (CRITICAL = fail)..."
+          trivy image --severity CRITICAL --exit-code 1 ${REGISTRY_HOST}/${IMAGE_PREFIX}-backend:${IMAGE_TAG}
+          trivy image --severity CRITICAL --exit-code 1 ${REGISTRY_HOST}/${IMAGE_PREFIX}-inference:${IMAGE_TAG}
+          trivy image --severity CRITICAL --exit-code 1 ${REGISTRY_HOST}/${IMAGE_PREFIX}-log-collector:${IMAGE_TAG}
+          trivy image --severity CRITICAL --exit-code 1 ${REGISTRY_HOST}/${IMAGE_PREFIX}-frontend:${IMAGE_TAG}
         '''
       }
     }
 
-    stage('Push & Sign') {
+    stage('Cosign Sign (blocking)') {
       steps {
         sh '''
           set -euo pipefail
-          
-          # 1. Push to local registry
-          echo "[INFO] Images already pushed by Kaniko during build stage."
-          
-          # 2. Image signature via Cosign keyless or cluster key
-          COSIGN_PUB_KEY="k8s://securerag-hub/cosign-public-key"
-          if command -v cosign >/dev/null 2>&1; then
-            echo "[INFO] Signing images with Cosign..."
-            cosign sign --key k8s://securerag-hub/cosign-private-key --yes ${REGISTRY_HOST}/${IMAGE_PREFIX}-backend:${IMAGE_TAG} || echo "[WARN] Skipping actual Cosign signing in dev environment"
+          echo "[INFO] Signing images with Cosign..."
+          if ! command -v cosign >/dev/null 2>&1; then
+            echo "[ERROR] cosign not installed"
+            exit 1
           fi
+          cosign sign --key k8s://securerag-hub/cosign-private-key --yes \
+            ${REGISTRY_HOST}/${IMAGE_PREFIX}-backend:${IMAGE_TAG}
+          cosign sign --key k8s://securerag-hub/cosign-private-key --yes \
+            ${REGISTRY_HOST}/${IMAGE_PREFIX}-inference:${IMAGE_TAG}
         '''
       }
     }
@@ -226,13 +247,12 @@ spec:
           echo "[INFO] Applying Kubernetes manifests..."
           kubectl apply -f ai-security/k8s/namespace.yaml
           kubectl apply -f ai-security/k8s/
-          
-          # Wait for database and services to be fully roll-out
+
           echo "[INFO] Waiting for deployments rollout..."
-          kubectl rollout status deployment/ai-security-inference -n ${NAMESPACE} --timeout=120s || true
-          kubectl rollout status deployment/ai-security-backend -n ${NAMESPACE} --timeout=120s || true
-          kubectl rollout status deployment/ai-security-frontend -n ${NAMESPACE} --timeout=120s || true
-          
+          kubectl rollout status deployment/ai-security-inference -n ${NAMESPACE} --timeout=180s
+          kubectl rollout status deployment/ai-security-backend -n ${NAMESPACE} --timeout=180s
+          kubectl rollout status deployment/ai-security-frontend -n ${NAMESPACE} --timeout=180s
+
           echo "[INFO] AI Security Layer deployed successfully."
         '''
       }
