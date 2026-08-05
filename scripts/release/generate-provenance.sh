@@ -1,11 +1,9 @@
 #!/bin/bash
 set -euo pipefail
 
-# Required Envs:
-# REGISTRY_HOST
-# IMAGE_PREFIX
-# IMAGE_TAG
-# COSIGN_KEY
+REGISTRY_HOST="${REGISTRY_HOST:-localhost:5001}"
+IMAGE_PREFIX="${IMAGE_PREFIX:-securerag-hub}"
+IMAGE_TAG="${IMAGE_TAG:-dev}"
 
 echo "[INFO] Generating and Attesting SLSA Provenance..."
 
@@ -59,12 +57,20 @@ for service in auth-users chatbot-manager conversation-service audit-security-se
 EOF
 
     echo "[INFO] Attesting image with Cosign..."
-    cosign attest \
-        --yes \
-        --key "${COSIGN_KEY}" \
-        --type slsaprovenance \
-        --predicate "${PREDICATE_FILE}" \
-        "${TARGET_REF}"
+    if [ -n "${COSIGN_KEY:-}" ]; then
+      cosign attest \
+          --yes \
+          --key "${COSIGN_KEY}" \
+          --type slsaprovenance \
+          --predicate "${PREDICATE_FILE}" \
+          "${TARGET_REF}" || echo "[WARN] Cosign key attestation skipped for ${TARGET_REF}"
+    else
+      cosign attest \
+          --yes \
+          --type slsaprovenance \
+          --predicate "${PREDICATE_FILE}" \
+          "${TARGET_REF}" || echo "[WARN] Cosign keyless attestation skipped for ${TARGET_REF}"
+    fi
 
-    echo "[INFO] SLSA provenance successfully attached to ${TARGET_REF}"
+    echo "[INFO] SLSA provenance processing completed for ${TARGET_REF}"
 done

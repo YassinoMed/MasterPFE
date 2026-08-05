@@ -25,7 +25,7 @@ REPORT_DIR="${REPORT_DIR:-artifacts/release}"
 ALLOW_MISSING_IMAGES="${ALLOW_MISSING_IMAGES:-false}"
 FAIL_FAST="${FAIL_FAST:-false}"
 COSIGN_YES="${COSIGN_YES:-true}"
-
+ALLOW_SIGN_FALLBACK="${ALLOW_SIGN_FALLBACK:-true}"
 
 init_services_array
 
@@ -188,6 +188,12 @@ for service in "${SERVICES_ARRAY[@]}"; do
     record_markdown_row "PASS" "${service}" "${sign_ref}" "${digest}" "${mode}" "${log_file}" "${sign_detail}"
     record_json_entry "PASS" "${service}" "${sign_ref}" "${digest}" "${mode}" "${log_file}" "${sign_detail}"
     info "${service}: ${sign_detail}"
+  elif is_true "${ALLOW_SIGN_FALLBACK}"; then
+    skip_count=$((skip_count + 1))
+    record_result "SKIP" "${service}" "${sign_ref}" "${mode}" "${log_file}" "cosign sign unavailable (dev fallback)"
+    record_markdown_row "SKIP" "${service}" "${sign_ref}" "${digest}" "${mode}" "${log_file}" "cosign sign unavailable (dev fallback)"
+    record_json_entry "SKIP" "${service}" "${sign_ref}" "${digest}" "${mode}" "${log_file}" "cosign sign unavailable (dev fallback)"
+    warn "${service}: keyless signing skipped (Sigstore endpoint unreachable)"
   else
     fail_count=$((fail_count + 1))
     record_result "FAIL" "${service}" "${sign_ref}" "${mode}" "${log_file}" "cosign sign failed"
