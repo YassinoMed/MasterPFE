@@ -19,7 +19,6 @@ class ChatbotCatalogServiceTest extends TestCase
     {
         parent::setUp();
 
-        // Ensure seed data exists
         BusinessDomain::create(['name' => 'Finance', 'slug' => 'finance']);
         BusinessDomain::create(['name' => 'HR', 'slug' => 'hr']);
         SensitivityLevel::create(['name' => 'Public', 'slug' => 'public', 'rank' => 1]);
@@ -31,7 +30,6 @@ class ChatbotCatalogServiceTest extends TestCase
     public function test_domains_returns_query_builder(): void
     {
         $result = $this->service->domains()->get();
-
         $this->assertGreaterThanOrEqual(2, $result->count());
     }
 
@@ -41,7 +39,6 @@ class ChatbotCatalogServiceTest extends TestCase
             'name' => 'Legal',
             'slug' => 'legal',
         ]);
-
         $this->assertInstanceOf(BusinessDomain::class, $domain);
         $this->assertEquals('legal', $domain->slug);
         $this->assertEquals('active', $domain->status);
@@ -54,7 +51,6 @@ class ChatbotCatalogServiceTest extends TestCase
             'slug' => 'archived',
             'status' => 'inactive',
         ]);
-
         $this->assertEquals('inactive', $domain->status);
     }
 
@@ -62,14 +58,12 @@ class ChatbotCatalogServiceTest extends TestCase
     {
         $domain = BusinessDomain::where('slug', 'finance')->first();
         $updated = $this->service->updateDomain($domain, ['name' => 'Finance Updated']);
-
         $this->assertEquals('Finance Updated', $updated->name);
     }
 
     public function test_sensitivity_levels_ordered_by_rank(): void
     {
         $result = $this->service->sensitivityLevels()->get();
-
         $this->assertEquals('Public', $result->first()->name);
     }
 
@@ -80,8 +74,14 @@ class ChatbotCatalogServiceTest extends TestCase
             'slug' => 'top-secret',
             'rank' => 5,
         ]);
-
         $this->assertEquals('top-secret', $level->slug);
+    }
+
+    public function test_update_sensitivity_level(): void
+    {
+        $level = SensitivityLevel::where('slug', 'public')->first();
+        $updated = $this->service->updateSensitivityLevel($level, ['name' => 'Public Info']);
+        $this->assertEquals('Public Info', $updated->name);
     }
 
     public function test_chatbots_filters_by_status(): void
@@ -100,8 +100,29 @@ class ChatbotCatalogServiceTest extends TestCase
         ]);
 
         $result = $this->service->chatbots(['status' => 'published']);
-
         $this->assertEquals(1, $result->total());
+    }
+
+    public function test_chatbots_filters_by_domain_and_search(): void
+    {
+        Chatbot::create([
+            'name' => 'Finance Advisor', 'slug' => 'fin-bot-' . uniqid(),
+            'business_domain_id' => BusinessDomain::where('slug', 'finance')->first()->id,
+            'sensitivity_level_id' => SensitivityLevel::where('slug', 'public')->first()->id,
+            'status' => 'active',
+        ]);
+        Chatbot::create([
+            'name' => 'HR Recruiter', 'slug' => 'hr-rec-' . uniqid(),
+            'business_domain_id' => BusinessDomain::where('slug', 'hr')->first()->id,
+            'sensitivity_level_id' => SensitivityLevel::where('slug', 'internal')->first()->id,
+            'status' => 'active',
+        ]);
+
+        $byDomain = $this->service->chatbots(['domain' => 'hr']);
+        $this->assertEquals(1, $byDomain->total());
+
+        $bySearch = $this->service->chatbots(['search' => 'Advisor']);
+        $this->assertEquals(1, $bySearch->total());
     }
 
     public function test_create_chatbot(): void
@@ -116,5 +137,25 @@ class ChatbotCatalogServiceTest extends TestCase
         $this->assertInstanceOf(Chatbot::class, $chatbot);
         $this->assertEquals('draft', $chatbot->status);
         $this->assertTrue($chatbot->relationLoaded('businessDomain'));
+    }
+
+    public function test_update_chatbot_with_slug_relations(): void
+    {
+        $chatbot = $this->service->createChatbot([
+            'name' => 'Initial Bot',
+            'slug' => 'init-bot-' . uniqid(),
+            'business_domain_slug' => 'hr',
+            'sensitivity_level_slug' => 'internal',
+        ]);
+
+        $updated = $this->service->updateChatbot($chatbot, [
+            'name' => 'Renamed Bot',
+            'business_domain_slug' => 'finance',
+            'sensitivity_level_slug' => 'public',
+        ]);
+
+        $this->assertEquals('Renamed Bot', $updated->name);
+        $this->assertEquals('finance', $updated->businessDomain->slug);
+        $this->assertEquals('public', $updated->sensitivityLevel->slug);
     }
 }

@@ -14,7 +14,7 @@ REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 ARTIFACT_DIR="${REPO_ROOT}/.coverage-artifacts"
 COVERAGE_XML="${ARTIFACT_DIR}/coverage.xml"
 SUMMARY_FILE="${ARTIFACT_DIR}/coverage-summary.txt"
-MIN_COVERAGE="${COVERAGE_MIN:-80}"
+MIN_COVERAGE="${COVERAGE_MIN:-95}"
 
 mkdir -p "${ARTIFACT_DIR}"
 
