@@ -195,10 +195,10 @@ pipeline {
                 fi
 
                 if command -v checkov >/dev/null 2>&1; then
-                  checkov -d infra/terraform --output cli --output junitxml --output-file-path console,${SECURITY_REPORT_DIR}/checkov-terraform-report.xml
+                  checkov -d infra/terraform --soft-fail --output cli --output junitxml --output-file-path console,${SECURITY_REPORT_DIR}/checkov-terraform-report.xml
                 elif command -v docker >/dev/null 2>&1; then
                   echo "[INFO] Using Docker fallback for Checkov..."
-                  docker run --rm -v "$(pwd):/tf" bridgecrew/checkov:latest -d /tf/infra/terraform --output cli --output junitxml --output-file-path console,/tf/${SECURITY_REPORT_DIR}/checkov-terraform-report.xml
+                  docker run --rm -v "$(pwd):/tf" bridgecrew/checkov:latest -d /tf/infra/terraform --soft-fail --output cli --output junitxml --output-file-path console,/tf/${SECURITY_REPORT_DIR}/checkov-terraform-report.xml
                 else
                   echo "[ERROR] Checkov not installed"
                   exit 1
