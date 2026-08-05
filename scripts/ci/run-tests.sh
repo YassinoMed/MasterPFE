@@ -34,6 +34,7 @@ ALLOW_NO_COVERAGE="${ALLOW_NO_COVERAGE:-false}"
 coverage_driver_available=false
 if php -m 2>/dev/null | grep -qiE '^(xdebug|pcov)$'; then
   coverage_driver_available=true
+  export XDEBUG_MODE=coverage
   echo "[INFO] Coverage driver detected: $(php -m 2>/dev/null | grep -iE '^(xdebug|pcov)$' | head -1)" | tee -a "${summary}"
 elif [ "${ALLOW_NO_COVERAGE}" = "true" ]; then
   echo "[WARN] No coverage driver detected, but ALLOW_NO_COVERAGE=true. Proceeding without coverage." | tee -a "${summary}"
@@ -86,11 +87,8 @@ for app in "${apps[@]}"; do
   # Vérifier que le coverage.xml a bien été généré (si driver présent)
   if [[ "${coverage_driver_available}" = "true" ]]; then
     if [[ -s "${ARTIFACT_DIR}/coverage-${report_name}.xml" ]]; then
-      lines=$(grep -o 'line-rate="[0-9.]*"' "${ARTIFACT_DIR}/coverage-${report_name}.xml" | head -1 | grep -o '[0-9.]*' || echo "0")
-      if [[ -n "${lines}" ]]; then
-        cov_pct=$(python3 -c "print(round(float(${lines}) * 100, 2))" 2>/dev/null || echo "?")
-        echo "  Coverage: ${cov_pct}%" | tee -a "${summary}"
-      fi
+      cov_pct=$(python3 -c "import xml.etree.ElementTree as ET; tree=ET.parse('${ARTIFACT_DIR}/coverage-${report_name}.xml'); m=tree.getroot().find('.//metrics'); print(round(int(m.get('coveredstatements',0))/max(int(m.get('statements',1)),1)*100,2) if m is not None else 0.0)" 2>/dev/null || echo "0.0")
+      echo "  Coverage: ${cov_pct}%" | tee -a "${summary}"
     else
       echo "[FAIL] No coverage report generated for ${app}" | tee -a "${summary}"
       total_failures=$((total_failures + 1))
