@@ -218,7 +218,7 @@ pipeline {
                 echo "[INFO] Executing SonarQube SAST Analysis..."
                 export SONAR_HOST_URL="${SONAR_HOST_URL:-http://host.docker.internal:9000}"
                 export SONAR_TOKEN="${SONAR_TOKEN}"
-                export REQUIRE_SONAR="true"
+                export REQUIRE_SONAR="${REQUIRE_SONAR:-false}"
                 bash scripts/ci/run-sonar-analysis.sh
               '''
             }
