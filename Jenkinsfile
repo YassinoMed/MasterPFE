@@ -179,18 +179,32 @@ pipeline {
           steps {
             sh '''
               set -euo pipefail
+              export PATH="$PATH:/usr/local/bin:/usr/bin:/root/.local/bin:~/.local/bin"
               echo "[INFO] Running Terraform IaC Validation & Checkov Security Scan..."
-              if command -v terraform >/dev/null 2>&1; then
-                (cd infra/terraform && terraform init -backend=false && terraform validate)
+              
+              if [ -d "infra/terraform" ]; then
+                if command -v terraform >/dev/null 2>&1; then
+                  (cd infra/terraform && terraform init -backend=false && terraform validate)
+                elif command -v docker >/dev/null 2>&1; then
+                  echo "[INFO] Using Docker fallback for Terraform..."
+                  docker run --rm -v "$(pwd)/infra/terraform:/workspace" -w /workspace hashicorp/terraform:latest init -backend=false
+                  docker run --rm -v "$(pwd)/infra/terraform:/workspace" -w /workspace hashicorp/terraform:latest validate
+                else
+                  echo "[ERROR] terraform not installed"
+                  exit 1
+                fi
+
+                if command -v checkov >/dev/null 2>&1; then
+                  checkov -d infra/terraform --output cli --output junitxml --output-file-path console,${SECURITY_REPORT_DIR}/checkov-terraform-report.xml
+                elif command -v docker >/dev/null 2>&1; then
+                  echo "[INFO] Using Docker fallback for Checkov..."
+                  docker run --rm -v "$(pwd):/tf" bridgecrew/checkov:latest -d /tf/infra/terraform --output cli --output junitxml --output-file-path console,/tf/${SECURITY_REPORT_DIR}/checkov-terraform-report.xml
+                else
+                  echo "[ERROR] Checkov not installed"
+                  exit 1
+                fi
               else
-                echo "[ERROR] terraform not installed"
-                exit 1
-              fi
-              if command -v checkov >/dev/null 2>&1; then
-                checkov -d infra/terraform --output cli --output junitxml --output-file-path console,${SECURITY_REPORT_DIR}/checkov-terraform-report.xml
-              else
-                echo "[ERROR] Checkov not installed"
-                exit 1
+                echo "[WARN] No infra/terraform directory found, skipping Terraform scan."
               fi
             '''
           }
