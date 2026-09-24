@@ -1,0 +1,93 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: secai
+  namespace: securerag-hub
+  labels: {app.kubernetes.io/part-of: securerag-hub}
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 0
+      maxUnavailable: 1
+  selector:
+    matchLabels: {app.kubernetes.io/name: secai}
+  template:
+    metadata:
+      labels: {app.kubernetes.io/name: secai}
+    spec:
+      serviceAccountName: secai-sa
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        fsGroup: 10001
+        seccompProfile:
+          type: RuntimeDefault
+      volumes:
+        - name: model-cache
+          emptyDir: {}
+        - name: tmp
+          emptyDir: {medium: Memory}
+      containers:
+        - name: secai
+          image: localhost:5001/secai@sha256:bd4086e36b61008172e203df6794395be8fdd4ed0318e2cf9d91d31d229f2b6a
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+            readOnlyRootFilesystem: true
+          ports:
+            - containerPort: 8001
+              name: http
+          env:
+            - name: SECAI_MODEL_ID
+              valueFrom:
+                configMapKeyRef: {name: secai-config, key: model_id}
+            - name: SECAI_DEVICE
+              valueFrom:
+                configMapKeyRef: {name: secai-config, key: device}
+            - name: SECAI_MAX_LENGTH
+              valueFrom:
+                configMapKeyRef: {name: secai-config, key: max_length}
+            - name: SECAI_CONFIDENCE_THRESHOLD
+              valueFrom:
+                configMapKeyRef: {name: secai-config, key: confidence_threshold}
+            - name: SECAI_MODE
+              valueFrom:
+                configMapKeyRef: {name: secai-config, key: mode}
+            - name: SECAI_ENABLE_EXTERNAL_LLM
+              valueFrom:
+                configMapKeyRef: {name: secai-config, key: enable_external_llm}
+            - name: SECAI_AUTO_REMEDIATION
+              valueFrom:
+                configMapKeyRef: {name: secai-config, key: auto_remediation}
+          resources:
+            requests: {cpu: 500m, memory: 1Gi}
+            limits: {cpu: "1", memory: "2Gi"}
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+            - name: model-cache
+              mountPath: /app/model-cache
+          startupProbe:
+            httpGet: {path: /ready, port: 8001}
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 24
+          livenessProbe:
+            httpGet: {path: /health, port: 8001}
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 5
+          readinessProbe:
+            httpGet: {path: /ready, port: 8001}
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3

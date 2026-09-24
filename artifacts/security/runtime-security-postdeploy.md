@@ -1,8 +1,8 @@
 # Runtime Security Post-Deployment Report - SecureRAG Hub
 
-- Generated at UTC: `2026-07-05T11:59:18Z`
+- Generated at UTC: `2026-09-23T04:45:45Z`
 - Namespace: `securerag-hub`
-- Status: `PARTIEL`
+- Status: `TERMINÉ`
 
 ## Global controls
 
@@ -17,60 +17,48 @@
 
 | Workload | Status | Ready / Desired | imageID coverage | Runtime hardening coverage | ServiceAccount | NetPol | HPA | PDB |
 |---|---:|---:|---:|---:|---|---|---|---|
-| `auth-users` | PARTIEL | 3 / 3 | 3 / 3 | 3 / 3 | `sa-auth-users` | `True` | `False` | `True` |
-| `chatbot-manager` | PARTIEL | 1 / 1 | 1 / 1 | 1 / 1 | `sa-chatbot-manager` | `True` | `False` | `True` |
-| `conversation-service` | PARTIEL | 1 / 1 | 1 / 1 | 1 / 1 | `sa-conversation-service` | `True` | `False` | `True` |
-| `audit-security-service` | PARTIEL | 1 / 1 | 1 / 1 | 1 / 1 | `sa-audit-security-service` | `True` | `False` | `True` |
-| `portal-web` | TERMINÉ | 3 / 3 | 3 / 3 | 3 / 3 | `sa-portal-web` | `True` | `True` | `True` |
+| `auth-users` | TERMINÉ | 1 / 1 | 1 / 1 | 1 / 1 | `sa-auth-users` | `True` | `True` | `True` |
+| `chatbot-manager` | TERMINÉ | 1 / 1 | 1 / 1 | 1 / 1 | `sa-chatbot-manager` | `True` | `True` | `True` |
+| `conversation-service` | TERMINÉ | 1 / 1 | 1 / 1 | 1 / 1 | `sa-conversation-service` | `True` | `True` | `True` |
+| `audit-security-service` | TERMINÉ | 1 / 1 | 1 / 1 | 1 / 1 | `sa-audit-security-service` | `True` | `True` | `True` |
+| `portal-web` | TERMINÉ | 1 / 1 | 1 / 1 | 1 / 1 | `sa-portal-web` | `True` | `True` | `True` |
 
 ## Workload details
 
 ### auth-users
 
-- Gap: HPA missing
-- Pod `auth-users-8678978685-bfl4l` ready=`True` created=`2026-06-25T10:30:42Z` imageIDs=`1`
+- No deployment-level hardening gap detected.
+- Pod `auth-users-776cc8bfdb-95sj7` ready=`True` created=`2026-09-22T12:09:21Z` imageIDs=`1`
   - Runtime hardening checks matched the active Pod spec.
-  - imageID: `localhost:5001/securerag-hub-auth-users@sha256:7b24d8aa5f36d0db05d10fb2a46286711cc4a2304f47dde84ba796362aef5522`
-- Pod `auth-users-8678978685-l7968` ready=`True` created=`2026-06-25T10:30:54Z` imageIDs=`1`
-  - Runtime hardening checks matched the active Pod spec.
-  - imageID: `localhost:5001/securerag-hub-auth-users@sha256:7b24d8aa5f36d0db05d10fb2a46286711cc4a2304f47dde84ba796362aef5522`
-- Pod `auth-users-8678978685-zrn25` ready=`True` created=`2026-06-25T10:31:25Z` imageIDs=`1`
-  - Runtime hardening checks matched the active Pod spec.
-  - imageID: `localhost:5001/securerag-hub-auth-users@sha256:7b24d8aa5f36d0db05d10fb2a46286711cc4a2304f47dde84ba796362aef5522`
+  - imageID: `localhost:5001/securerag-hub-auth-users@sha256:0d7795be3c8c678f3616779b1365d5ae160efce38b6a2e03c8b6fba3bf74ec93`
 
 ### chatbot-manager
 
-- Gap: HPA missing
-- Pod `chatbot-manager-79b79d59c4-lvgtp` ready=`True` created=`2026-06-25T10:30:42Z` imageIDs=`1`
+- No deployment-level hardening gap detected.
+- Pod `chatbot-manager-77b78ffb97-dl96v` ready=`True` created=`2026-09-22T12:09:21Z` imageIDs=`1`
   - Runtime hardening checks matched the active Pod spec.
-  - imageID: `localhost:5001/securerag-hub-chatbot-manager@sha256:086ed526afb4439f6d4c5590326be3a757574ccda5e894ce1b652054bde84513`
+  - imageID: `localhost:5001/securerag-hub-chatbot-manager@sha256:7d52f77d49fe1b3f458cb4c06ac9f3568c2f48c3a4f27dff56a39d59a11195eb`
 
 ### conversation-service
 
-- Gap: HPA missing
-- Pod `conversation-service-6bc4c7dbc6-pq7xf` ready=`True` created=`2026-06-25T10:30:43Z` imageIDs=`1`
+- No deployment-level hardening gap detected.
+- Pod `conversation-service-86bbd9598b-gr9wd` ready=`True` created=`2026-09-22T12:09:22Z` imageIDs=`1`
   - Runtime hardening checks matched the active Pod spec.
-  - imageID: `localhost:5001/securerag-hub-conversation-service@sha256:35f53f4cd274b54021812ed48b95991af875c7e8e0aa66c53bb06df65fe4e03f`
+  - imageID: `localhost:5001/securerag-hub-conversation-service@sha256:68e3d1f29ed008be81171d5a9f7711da5b030ad2e26846828905def992fe5b6c`
 
 ### audit-security-service
 
-- Gap: HPA missing
-- Pod `audit-security-service-667b7997b4-j5m7r` ready=`True` created=`2026-06-25T10:30:43Z` imageIDs=`1`
+- No deployment-level hardening gap detected.
+- Pod `audit-security-service-5fd6685f64-n7fjh` ready=`True` created=`2026-09-22T12:09:22Z` imageIDs=`1`
   - Runtime hardening checks matched the active Pod spec.
-  - imageID: `localhost:5001/securerag-hub-audit-security-service@sha256:6cf5cd864a1eb4b9179869b55519c1ba7b86d03f355b28506d3b7de97325d9bb`
+  - imageID: `localhost:5001/securerag-hub-audit-security-service@sha256:f681d9c8f698b01be192a2471cc5230652ccc0f2ce8fcbe86433e468ede0a58b`
 
 ### portal-web
 
 - No deployment-level hardening gap detected.
-- Pod `portal-web-859c78db95-8xxmr` ready=`True` created=`2026-06-25T10:31:26Z` imageIDs=`1`
+- Pod `portal-web-68978bbc68-v4wfb` ready=`True` created=`2026-09-23T03:20:08Z` imageIDs=`1`
   - Runtime hardening checks matched the active Pod spec.
-  - imageID: `localhost:5001/securerag-hub-portal-web@sha256:fa1fc37b44b4cedc7e32c38940f1971f5e9af7c7b6d425d66d3214cd4bc18f80`
-- Pod `portal-web-859c78db95-v9vwx` ready=`True` created=`2026-06-25T10:30:59Z` imageIDs=`1`
-  - Runtime hardening checks matched the active Pod spec.
-  - imageID: `localhost:5001/securerag-hub-portal-web@sha256:fa1fc37b44b4cedc7e32c38940f1971f5e9af7c7b6d425d66d3214cd4bc18f80`
-- Pod `portal-web-859c78db95-z68jt` ready=`True` created=`2026-06-25T10:30:42Z` imageIDs=`1`
-  - Runtime hardening checks matched the active Pod spec.
-  - imageID: `localhost:5001/securerag-hub-portal-web@sha256:fa1fc37b44b4cedc7e32c38940f1971f5e9af7c7b6d425d66d3214cd4bc18f80`
+  - imageID: `localhost:5001/securerag-hub-portal-web@sha256:88492602d12bf81f4a6c8f611fb82f75de067e147a4fc0639989b33c7d2a905b`
 
 ## Honest reading
 
@@ -81,575 +69,561 @@
 ## Deployments
 
 ```text
-NAME                     READY   UP-TO-DATE   AVAILABLE   AGE   CONTAINERS               IMAGES                                                     SELECTOR
-audit-security-service   1/1     1            1           11d   audit-security-service   localhost:5001/securerag-hub-audit-security-service:demo   app.kubernetes.io/name=audit-security-service,app.kubernetes.io/part-of=securerag-hub
-auth-users               3/3     3            3           11d   auth-users               localhost:5001/securerag-hub-auth-users:demo               app.kubernetes.io/name=auth-users,app.kubernetes.io/part-of=securerag-hub
-chatbot-manager          1/1     1            1           11d   chatbot-manager          localhost:5001/securerag-hub-chatbot-manager:demo          app.kubernetes.io/name=chatbot-manager,app.kubernetes.io/part-of=securerag-hub
-conversation-service     1/1     1            1           11d   conversation-service     localhost:5001/securerag-hub-conversation-service:demo     app.kubernetes.io/name=conversation-service,app.kubernetes.io/part-of=securerag-hub
-portal-web               3/3     3            3           11d   portal-web               localhost:5001/securerag-hub-portal-web:demo               app.kubernetes.io/name=portal-web,app.kubernetes.io/part-of=securerag-hub
-postgres-auth            1/1     1            1           11d   postgres-auth            localhost:5001/postgres:16-alpine                          app.kubernetes.io/name=postgres-auth,app.kubernetes.io/part-of=securerag-hub
+NAME                     READY   UP-TO-DATE   AVAILABLE   AGE   CONTAINERS               IMAGES                                                                                                                        SELECTOR
+audit-security-service   1/1     1            1           44h   audit-security-service   localhost:5001/securerag-hub-audit-security-service@sha256:f681d9c8f698b01be192a2471cc5230652ccc0f2ce8fcbe86433e468ede0a58b   app.kubernetes.io/name=audit-security-service,app.kubernetes.io/part-of=securerag-hub
+auth-users               1/1     1            1           44h   auth-users               localhost:5001/securerag-hub-auth-users@sha256:0d7795be3c8c678f3616779b1365d5ae160efce38b6a2e03c8b6fba3bf74ec93               app.kubernetes.io/name=auth-users,app.kubernetes.io/part-of=securerag-hub
+chatbot-manager          1/1     1            1           44h   chatbot-manager          localhost:5001/securerag-hub-chatbot-manager@sha256:7d52f77d49fe1b3f458cb4c06ac9f3568c2f48c3a4f27dff56a39d59a11195eb          app.kubernetes.io/name=chatbot-manager,app.kubernetes.io/part-of=securerag-hub
+conversation-service     1/1     1            1           44h   conversation-service     localhost:5001/securerag-hub-conversation-service@sha256:68e3d1f29ed008be81171d5a9f7711da5b030ad2e26846828905def992fe5b6c     app.kubernetes.io/name=conversation-service,app.kubernetes.io/part-of=securerag-hub
+portal-web               1/1     1            1           44h   portal-web               localhost:5001/securerag-hub-portal-web:dev                                                                                   app.kubernetes.io/name=portal-web,app.kubernetes.io/part-of=securerag-hub
+postgres-auth            1/1     1            1           44h   postgres-auth            localhost:5001/postgres:16-alpine                                                                                             app.kubernetes.io/name=postgres-auth,app.kubernetes.io/part-of=securerag-hub
 ```
 
 ## Pods
 
 ```text
-NAME                                      READY   STATUS    RESTARTS   AGE   IP             NODE                   NOMINATED NODE   READINESS GATES
-audit-security-service-667b7997b4-j5m7r   1/1     Running   0          10d   10.244.1.226   securerag-dev-worker   <none>           <none>
-auth-users-8678978685-bfl4l               1/1     Running   0          10d   10.244.1.223   securerag-dev-worker   <none>           <none>
-auth-users-8678978685-l7968               1/1     Running   0          10d   10.244.1.227   securerag-dev-worker   <none>           <none>
-auth-users-8678978685-zrn25               1/1     Running   0          10d   10.244.1.229   securerag-dev-worker   <none>           <none>
-chatbot-manager-79b79d59c4-lvgtp          1/1     Running   0          10d   10.244.1.224   securerag-dev-worker   <none>           <none>
-conversation-service-6bc4c7dbc6-pq7xf     1/1     Running   0          10d   10.244.1.225   securerag-dev-worker   <none>           <none>
-portal-web-859c78db95-8xxmr               1/1     Running   0          10d   10.244.1.230   securerag-dev-worker   <none>           <none>
-portal-web-859c78db95-v9vwx               1/1     Running   0          10d   10.244.1.228   securerag-dev-worker   <none>           <none>
-portal-web-859c78db95-z68jt               1/1     Running   0          10d   10.244.1.222   securerag-dev-worker   <none>           <none>
-postgres-auth-fbf55db78-kwlh4             1/1     Running   0          10d   10.244.1.212   securerag-dev-worker   <none>           <none>
+NAME                                      READY   STATUS    RESTARTS     AGE   IP             NODE                   NOMINATED NODE   READINESS GATES
+audit-security-service-5fd6685f64-n7fjh   1/1     Running   0            16h   10.244.1.104   securerag-dev-worker   <none>           <none>
+auth-users-776cc8bfdb-95sj7               1/1     Running   1 (8h ago)   16h   10.244.1.101   securerag-dev-worker   <none>           <none>
+chatbot-manager-77b78ffb97-dl96v          1/1     Running   0            16h   10.244.1.102   securerag-dev-worker   <none>           <none>
+conversation-service-86bbd9598b-gr9wd     1/1     Running   0            16h   10.244.1.103   securerag-dev-worker   <none>           <none>
+portal-web-68978bbc68-v4wfb               1/1     Running   0            85m   10.244.1.152   securerag-dev-worker   <none>           <none>
+postgres-auth-58f89fd9bf-b55hk            1/1     Running   0            16h   10.244.1.94    securerag-dev-worker   <none>           <none>
 ```
 
 ## Deployment images and imageIDs
 
 ```text
-audit-security-service-667b7997b4-j5m7r	localhost:5001/securerag-hub-audit-security-service:demo	localhost:5001/securerag-hub-audit-security-service@sha256:6cf5cd864a1eb4b9179869b55519c1ba7b86d03f355b28506d3b7de97325d9bb
-auth-users-8678978685-bfl4l	localhost:5001/securerag-hub-auth-users:demo	localhost:5001/securerag-hub-auth-users@sha256:7b24d8aa5f36d0db05d10fb2a46286711cc4a2304f47dde84ba796362aef5522
-auth-users-8678978685-l7968	localhost:5001/securerag-hub-auth-users:demo	localhost:5001/securerag-hub-auth-users@sha256:7b24d8aa5f36d0db05d10fb2a46286711cc4a2304f47dde84ba796362aef5522
-auth-users-8678978685-zrn25	localhost:5001/securerag-hub-auth-users:demo	localhost:5001/securerag-hub-auth-users@sha256:7b24d8aa5f36d0db05d10fb2a46286711cc4a2304f47dde84ba796362aef5522
-chatbot-manager-79b79d59c4-lvgtp	localhost:5001/securerag-hub-chatbot-manager:demo	localhost:5001/securerag-hub-chatbot-manager@sha256:086ed526afb4439f6d4c5590326be3a757574ccda5e894ce1b652054bde84513
-conversation-service-6bc4c7dbc6-pq7xf	localhost:5001/securerag-hub-conversation-service:demo	localhost:5001/securerag-hub-conversation-service@sha256:35f53f4cd274b54021812ed48b95991af875c7e8e0aa66c53bb06df65fe4e03f
-portal-web-859c78db95-8xxmr	localhost:5001/securerag-hub-portal-web:demo	localhost:5001/securerag-hub-portal-web@sha256:fa1fc37b44b4cedc7e32c38940f1971f5e9af7c7b6d425d66d3214cd4bc18f80
-portal-web-859c78db95-v9vwx	localhost:5001/securerag-hub-portal-web:demo	localhost:5001/securerag-hub-portal-web@sha256:fa1fc37b44b4cedc7e32c38940f1971f5e9af7c7b6d425d66d3214cd4bc18f80
-portal-web-859c78db95-z68jt	localhost:5001/securerag-hub-portal-web:demo	localhost:5001/securerag-hub-portal-web@sha256:fa1fc37b44b4cedc7e32c38940f1971f5e9af7c7b6d425d66d3214cd4bc18f80
-postgres-auth-fbf55db78-kwlh4	docker.io/library/postgres:16-alpine	docker.io/library/postgres@sha256:e013e867e712fec275706a6c51c966f0bb0c93cfa8f51000f85a15f9865a28cb
+audit-security-service-5fd6685f64-n7fjh	localhost:5001/securerag-hub-audit-security-service:dev	localhost:5001/securerag-hub-audit-security-service@sha256:f681d9c8f698b01be192a2471cc5230652ccc0f2ce8fcbe86433e468ede0a58b
+auth-users-776cc8bfdb-95sj7	localhost:5001/securerag-hub-auth-users:dev	localhost:5001/securerag-hub-auth-users@sha256:0d7795be3c8c678f3616779b1365d5ae160efce38b6a2e03c8b6fba3bf74ec93
+chatbot-manager-77b78ffb97-dl96v	localhost:5001/securerag-hub-chatbot-manager:dev	localhost:5001/securerag-hub-chatbot-manager@sha256:7d52f77d49fe1b3f458cb4c06ac9f3568c2f48c3a4f27dff56a39d59a11195eb
+conversation-service-86bbd9598b-gr9wd	localhost:5001/securerag-hub-conversation-service:dev	localhost:5001/securerag-hub-conversation-service@sha256:68e3d1f29ed008be81171d5a9f7711da5b030ad2e26846828905def992fe5b6c
+portal-web-68978bbc68-v4wfb	localhost:5001/securerag-hub-portal-web:dev	localhost:5001/securerag-hub-portal-web@sha256:88492602d12bf81f4a6c8f611fb82f75de067e147a4fc0639989b33c7d2a905b
+postgres-auth-58f89fd9bf-b55hk	localhost:5001/postgres:16-alpine	localhost:5001/postgres@sha256:1a66d744c1b459e13b05a8fca341da84cb63383e99ce262210efee5a319d4551
 ```
 
 ## ServiceAccounts
 
 ```text
 NAME                        SECRETS   AGE
-default                     0         11d
-sa-audit-security-service   0         11d
-sa-auth-users               0         11d
-sa-chatbot-manager          0         11d
-sa-conversation-service     0         11d
-sa-portal-web               0         11d
-sa-postgres-auth            0         11d
-sa-validation               0         11d
+default                     0         44h
+sa-audit-security-service   0         44h
+sa-auth-users               0         44h
+sa-chatbot-manager          0         44h
+sa-conversation-service     0         44h
+sa-portal-web               0         44h
+sa-postgres-auth            0         44h
+sa-validation               0         44h
 ```
 
 ## Roles and RoleBindings
 
 ```text
 NAME                                                        CREATED AT
-role.rbac.authorization.k8s.io/securerag-runtime-readonly   2026-06-24T11:03:14Z
+role.rbac.authorization.k8s.io/securerag-runtime-readonly   2026-09-21T07:55:08Z
 
 NAME                                                                                      ROLE                              AGE   USERS   GROUPS   SERVICEACCOUNTS
-rolebinding.rbac.authorization.k8s.io/securerag-runtime-readonly-audit-security-service   Role/securerag-runtime-readonly   11d                    securerag-hub/sa-audit-security-service
+rolebinding.rbac.authorization.k8s.io/securerag-runtime-readonly-audit-security-service   Role/securerag-runtime-readonly   44h                    securerag-hub/sa-audit-security-service
 ```
 
 ## NetworkPolicies
 
 ```text
 NAME                             POD-SELECTOR                                                                                                    AGE
-allow-dns-egress                 <none>                                                                                                          11d
-allow-validation-egress          app.kubernetes.io/part-of=securerag-hub,job-role=validation                                                     11d
-allow-validation-ingress         app.kubernetes.io/name in (audit-security-service,auth-users,chatbot-manager,conversation-service,portal-web)   11d
-audit-security-service-network   app.kubernetes.io/name=audit-security-service,app.kubernetes.io/part-of=securerag-hub                           11d
-auth-users-policy                app.kubernetes.io/name=auth-users,app.kubernetes.io/part-of=securerag-hub                                       11d
-chatbot-manager-policy           app.kubernetes.io/name=chatbot-manager,app.kubernetes.io/part-of=securerag-hub                                  11d
-conversation-service-network     app.kubernetes.io/name=conversation-service,app.kubernetes.io/part-of=securerag-hub                             11d
-default-deny-all                 <none>                                                                                                          11d
-portal-web-policy                app.kubernetes.io/name=portal-web,app.kubernetes.io/part-of=securerag-hub                                       11d
-postgres-auth-policy             app.kubernetes.io/name=postgres-auth,app.kubernetes.io/part-of=securerag-hub                                    11d
+allow-dns-egress                 <none>                                                                                                          44h
+allow-validation-egress          app.kubernetes.io/part-of=securerag-hub,job-role=validation                                                     44h
+allow-validation-ingress         app.kubernetes.io/name in (audit-security-service,auth-users,chatbot-manager,conversation-service,portal-web)   44h
+audit-security-service-network   app.kubernetes.io/name=audit-security-service,app.kubernetes.io/part-of=securerag-hub                           44h
+auth-users-policy                app.kubernetes.io/name=auth-users,app.kubernetes.io/part-of=securerag-hub                                       44h
+chatbot-manager-policy           app.kubernetes.io/name=chatbot-manager,app.kubernetes.io/part-of=securerag-hub                                  44h
+conversation-service-network     app.kubernetes.io/name=conversation-service,app.kubernetes.io/part-of=securerag-hub                             44h
+default-deny-all                 <none>                                                                                                          44h
+portal-web-policy                app.kubernetes.io/name=portal-web,app.kubernetes.io/part-of=securerag-hub                                       44h
+postgres-auth-policy             app.kubernetes.io/part-of=securerag-hub,cnpg.io/cluster=postgres-auth                                           44h
 ```
 
 ## PodDisruptionBudgets
 
 ```text
 NAME                         MIN AVAILABLE   MAX UNAVAILABLE   ALLOWED DISRUPTIONS   AGE
-audit-security-service-pdb   1               N/A               0                     11d
-auth-users-pdb               1               N/A               2                     11d
-chatbot-manager-pdb          1               N/A               0                     11d
-conversation-service-pdb     1               N/A               0                     11d
-portal-web-pdb               1               N/A               2                     11d
+audit-security-service-pdb   1               N/A               0                     44h
+auth-users-pdb               1               N/A               0                     44h
+chatbot-manager-pdb          1               N/A               0                     44h
+conversation-service-pdb     1               N/A               0                     44h
+portal-web-pdb               1               N/A               0                     44h
 ```
 
 ## HPA
 
 ```text
-NAME         REFERENCE               TARGETS              MINPODS   MAXPODS   REPLICAS   AGE
-portal-web   Deployment/portal-web   cpu: <unknown>/70%   1         3         3          11d
+NAME                     REFERENCE                           TARGETS       MINPODS   MAXPODS   REPLICAS   AGE
+audit-security-service   Deployment/audit-security-service   cpu: 0%/70%   1         3         1          11h
+auth-users               Deployment/auth-users               cpu: 1%/70%   1         3         1          11h
+chatbot-manager          Deployment/chatbot-manager          cpu: 1%/70%   1         3         1          11h
+conversation-service     Deployment/conversation-service     cpu: 1%/70%   1         3         1          11h
+portal-web               Deployment/portal-web               cpu: 4%/70%   1         3         1          44h
 ```
 
 ## Recent events
 
 ```text
-LAST SEEN   TYPE      REASON                    OBJECT                                      MESSAGE
-5m56s       Warning   PolicyViolation           service/postgres-auth                       policy securerag-restrict-service-exposure/allow-nodeport-only-for-portal-web fail: Only portal-web may use NodePort in the local demo overlay; LoadBalancer is forbidden.
-108s        Normal    Pulled                    pod/curl-smoke-1783252650                   Container image "curlimages/curl:8.11.1" already present on machine
-108s        Normal    Scheduled                 pod/curl-smoke-1783252650                   Successfully assigned securerag-hub/curl-smoke-1783252650 to securerag-dev-worker
-107s        Normal    Created                   pod/curl-smoke-1783252650                   Created container: curl-smoke-1783252650
-107s        Normal    Started                   pod/curl-smoke-1783252650                   Started container curl-smoke-1783252650
-104s        Normal    Scheduled                 pod/curl-sec-smoke-1783252655               Successfully assigned securerag-hub/curl-sec-smoke-1783252655 to securerag-dev-worker
-103s        Normal    Started                   pod/curl-sec-smoke-1783252655               Started container curl-sec-smoke-1783252655
-103s        Normal    Created                   pod/curl-sec-smoke-1783252655               Created container: curl-sec-smoke-1783252655
-103s        Normal    Pulled                    pod/curl-sec-smoke-1783252655               Container image "curlimages/curl:8.11.1" already present on machine
-100s        Normal    Scheduled                 pod/e2e-functional-check-1783252659         Successfully assigned securerag-hub/e2e-functional-check-1783252659 to securerag-dev-worker
-99s         Normal    Created                   pod/e2e-functional-check-1783252659         Created container: e2e-functional-check-1783252659
-99s         Normal    Pulled                    pod/e2e-functional-check-1783252659         Container image "curlimages/curl:8.11.1" already present on machine
-98s         Normal    Started                   pod/e2e-functional-check-1783252659         Started container e2e-functional-check-1783252659
-96s         Normal    Scheduled                 pod/auditor-availability-check-1783252663   Successfully assigned securerag-hub/auditor-availability-check-1783252663 to securerag-dev-worker
-96s         Normal    Pulled                    pod/auditor-availability-check-1783252663   Container image "curlimages/curl:8.11.1" already present on machine
-95s         Normal    Created                   pod/auditor-availability-check-1783252663   Created container: auditor-availability-check-1783252663
-95s         Normal    Started                   pod/auditor-availability-check-1783252663   Started container auditor-availability-check-1783252663
-93s         Normal    Scheduled                 pod/auditor-endpoint-check-1783252663       Successfully assigned securerag-hub/auditor-endpoint-check-1783252663 to securerag-dev-worker
-92s         Normal    Pulled                    pod/auditor-endpoint-check-1783252663       Container image "curlimages/curl:8.11.1" already present on machine
-92s         Normal    Started                   pod/auditor-endpoint-check-1783252663       Started container auditor-endpoint-check-1783252663
-92s         Normal    Created                   pod/auditor-endpoint-check-1783252663       Created container: auditor-endpoint-check-1783252663
-35s         Warning   FailedGetResourceMetric   horizontalpodautoscaler/portal-web          failed to get cpu utilization: unable to get metrics for resource cpu: unable to fetch metrics from resource metrics API: the server could not find the requested resource (get pods.metrics.k8s.io)
-26s         Normal    Scheduled                 pod/curl-smoke-1783252733                   Successfully assigned securerag-hub/curl-smoke-1783252733 to securerag-dev-worker
-25s         Normal    Created                   pod/curl-smoke-1783252733                   Created container: curl-smoke-1783252733
-25s         Normal    Pulled                    pod/curl-smoke-1783252733                   Container image "curlimages/curl:8.11.1" already present on machine
-24s         Normal    Started                   pod/curl-smoke-1783252733                   Started container curl-smoke-1783252733
-22s         Normal    Scheduled                 pod/curl-sec-smoke-1783252737               Successfully assigned securerag-hub/curl-sec-smoke-1783252737 to securerag-dev-worker
-21s         Normal    Created                   pod/curl-sec-smoke-1783252737               Created container: curl-sec-smoke-1783252737
-21s         Normal    Pulled                    pod/curl-sec-smoke-1783252737               Container image "curlimages/curl:8.11.1" already present on machine
-20s         Normal    Started                   pod/curl-sec-smoke-1783252737               Started container curl-sec-smoke-1783252737
-18s         Normal    Scheduled                 pod/e2e-functional-check-1783252741         Successfully assigned securerag-hub/e2e-functional-check-1783252741 to securerag-dev-worker
-17s         Normal    Created                   pod/e2e-functional-check-1783252741         Created container: e2e-functional-check-1783252741
-17s         Normal    Pulled                    pod/e2e-functional-check-1783252741         Container image "curlimages/curl:8.11.1" already present on machine
-16s         Normal    Started                   pod/e2e-functional-check-1783252741         Started container e2e-functional-check-1783252741
-14s         Normal    Scheduled                 pod/auditor-availability-check-1783252745   Successfully assigned securerag-hub/auditor-availability-check-1783252745 to securerag-dev-worker
-13s         Normal    Pulled                    pod/auditor-availability-check-1783252745   Container image "curlimages/curl:8.11.1" already present on machine
-13s         Normal    Created                   pod/auditor-availability-check-1783252745   Created container: auditor-availability-check-1783252745
-12s         Normal    Started                   pod/auditor-availability-check-1783252745   Started container auditor-availability-check-1783252745
-11s         Normal    Scheduled                 pod/auditor-endpoint-check-1783252745       Successfully assigned securerag-hub/auditor-endpoint-check-1783252745 to securerag-dev-worker
-10s         Normal    Pulled                    pod/auditor-endpoint-check-1783252745       Container image "curlimages/curl:8.11.1" already present on machine
-10s         Normal    Created                   pod/auditor-endpoint-check-1783252745       Created container: auditor-endpoint-check-1783252745
-9s          Normal    Started                   pod/auditor-endpoint-check-1783252745       Started container auditor-endpoint-check-1783252745
+LAST SEEN   TYPE      REASON            OBJECT                                      MESSAGE
+49m         Warning   PolicyViolation   service/postgres-auth                       policy securerag-restrict-service-exposure/allow-nodeport-only-for-portal-web fail: Only portal-web may use NodePort in the local demo overlay; LoadBalancer is forbidden.
+49m         Warning   PolicyViolation   service/postgres-auth                       policy securerag-restrict-service-exposure/allow-nodeport-only-for-portal-web fail: Only portal-web may use NodePort in the local demo overlay; LoadBalancer is forbidden.
+33m         Normal    Scheduled         pod/curl-sec-smoke-1790136720               Successfully assigned securerag-hub/curl-sec-smoke-1790136720 to securerag-dev-worker
+33m         Normal    Created           pod/curl-sec-smoke-1790136720               Created container: curl-sec-smoke-1790136720
+33m         Normal    Pulled            pod/curl-sec-smoke-1790136720               Container image "curlimages/curl:8.11.1" already present on machine
+33m         Normal    Started           pod/curl-sec-smoke-1790136720               Started container curl-sec-smoke-1790136720
+33m         Normal    Pulled            pod/auditor-availability-check-1790136724   Container image "curlimages/curl:8.11.1" already present on machine
+33m         Normal    Created           pod/auditor-availability-check-1790136724   Created container: auditor-availability-check-1790136724
+33m         Normal    Scheduled         pod/auditor-availability-check-1790136724   Successfully assigned securerag-hub/auditor-availability-check-1790136724 to securerag-dev-worker
+33m         Normal    Started           pod/auditor-availability-check-1790136724   Started container auditor-availability-check-1790136724
+33m         Normal    Scheduled         pod/auditor-endpoint-check-1790136724       Successfully assigned securerag-hub/auditor-endpoint-check-1790136724 to securerag-dev-worker
+33m         Normal    Created           pod/auditor-endpoint-check-1790136724       Created container: auditor-endpoint-check-1790136724
+33m         Normal    Pulled            pod/auditor-endpoint-check-1790136724       Container image "curlimages/curl:8.11.1" already present on machine
+33m         Normal    Started           pod/auditor-endpoint-check-1790136724       Started container auditor-endpoint-check-1790136724
+33m         Normal    Scheduled         pod/curl-smoke-1790136733                   Successfully assigned securerag-hub/curl-smoke-1790136733 to securerag-dev-worker
+33m         Normal    Created           pod/curl-smoke-1790136733                   Created container: curl-smoke-1790136733
+33m         Normal    Pulled            pod/curl-smoke-1790136733                   Container image "curlimages/curl:8.11.1" already present on machine
+33m         Normal    Started           pod/curl-smoke-1790136733                   Started container curl-smoke-1790136733
+33m         Normal    Scheduled         pod/e2e-functional-check-1790136738         Successfully assigned securerag-hub/e2e-functional-check-1790136738 to securerag-dev-worker
+33m         Normal    Started           pod/e2e-functional-check-1790136738         Started container e2e-functional-check-1790136738
+33m         Normal    Created           pod/e2e-functional-check-1790136738         Created container: e2e-functional-check-1790136738
+33m         Normal    Pulled            pod/e2e-functional-check-1790136738         Container image "curlimages/curl:8.11.1" already present on machine
+12s         Normal    Scheduled         pod/curl-sec-smoke-1790138733               Successfully assigned securerag-hub/curl-sec-smoke-1790138733 to securerag-dev-worker
+12s         Normal    Created           pod/curl-sec-smoke-1790138733               Created container: curl-sec-smoke-1790138733
+12s         Normal    Pulled            pod/curl-sec-smoke-1790138733               Container image "curlimages/curl:8.11.1" already present on machine
+11s         Normal    Started           pod/curl-sec-smoke-1790138733               Started container curl-sec-smoke-1790138733
+9s          Normal    Scheduled         pod/auditor-availability-check-1790138737   Successfully assigned securerag-hub/auditor-availability-check-1790138737 to securerag-dev-worker
+8s          Normal    Created           pod/auditor-availability-check-1790138737   Created container: auditor-availability-check-1790138737
+8s          Normal    Started           pod/auditor-availability-check-1790138737   Started container auditor-availability-check-1790138737
+8s          Normal    Pulled            pod/auditor-availability-check-1790138737   Container image "curlimages/curl:8.11.1" already present on machine
+5s          Normal    Scheduled         pod/auditor-endpoint-check-1790138737       Successfully assigned securerag-hub/auditor-endpoint-check-1790138737 to securerag-dev-worker
+4s          Normal    Pulled            pod/auditor-endpoint-check-1790138737       Container image "curlimages/curl:8.11.1" already present on machine
+4s          Normal    Started           pod/auditor-endpoint-check-1790138737       Started container auditor-endpoint-check-1790138737
+4s          Normal    Created           pod/auditor-endpoint-check-1790138737       Created container: auditor-endpoint-check-1790138737
 ```
 
 ## Logs deployment/auth-users
 
 ```text
-Found 3 pods, using pod/auth-users-8678978685-bfl4l
-  2026-07-05 11:50:34 /health ...................................... ~ 0.09ms
-  2026-07-05 11:50:43 /health ...................................... ~ 0.08ms
-  2026-07-05 11:50:44 /health ...................................... ~ 0.10ms
-  2026-07-05 11:50:54 /health ...................................... ~ 0.08ms
-  2026-07-05 11:51:03 /health ...................................... ~ 0.10ms
-  2026-07-05 11:51:04 /health ...................................... ~ 0.10ms
-  2026-07-05 11:51:14 /health ...................................... ~ 0.09ms
-  2026-07-05 11:51:23 /health ...................................... ~ 0.11ms
-  2026-07-05 11:51:24 /health ...................................... ~ 0.08ms
-  2026-07-05 11:51:34 /health ...................................... ~ 0.15ms
-  2026-07-05 11:51:43 /health ...................................... ~ 0.08ms
-  2026-07-05 11:51:44 /health ...................................... ~ 0.09ms
-  2026-07-05 11:51:54 /health ...................................... ~ 0.10ms
-  2026-07-05 11:52:03 /health ...................................... ~ 0.10ms
-  2026-07-05 11:52:04 /health ...................................... ~ 0.08ms
-  2026-07-05 11:52:14 /health ...................................... ~ 0.07ms
-  2026-07-05 11:52:23 /health ...................................... ~ 0.09ms
-  2026-07-05 11:52:24 /health ...................................... ~ 0.10ms
-  2026-07-05 11:52:34 /health ...................................... ~ 0.10ms
-  2026-07-05 11:52:43 /health ...................................... ~ 0.09ms
-  2026-07-05 11:52:44 /health ...................................... ~ 0.11ms
-  2026-07-05 11:52:54 /health ...................................... ~ 0.10ms
-  2026-07-05 11:53:03 /health ...................................... ~ 0.09ms
-  2026-07-05 11:53:04 /health ...................................... ~ 0.10ms
-  2026-07-05 11:53:14 /health ...................................... ~ 0.12ms
-  2026-07-05 11:53:23 /health ...................................... ~ 0.25ms
-  2026-07-05 11:53:24 /health ...................................... ~ 0.13ms
-  2026-07-05 11:53:34 /health ...................................... ~ 0.07ms
-  2026-07-05 11:53:43 /health ...................................... ~ 0.08ms
-  2026-07-05 11:53:44 /health ...................................... ~ 0.11ms
-  2026-07-05 11:53:54 /health ...................................... ~ 0.08ms
-  2026-07-05 11:54:03 /health ...................................... ~ 0.11ms
-  2026-07-05 11:54:04 /health ...................................... ~ 0.08ms
-  2026-07-05 11:54:14 /health ...................................... ~ 0.10ms
-  2026-07-05 11:54:23 /health ...................................... ~ 0.10ms
-  2026-07-05 11:54:24 /health ...................................... ~ 0.16ms
-  2026-07-05 11:54:34 /health ...................................... ~ 0.11ms
-  2026-07-05 11:54:43 /health ...................................... ~ 0.08ms
-  2026-07-05 11:54:44 /health ...................................... ~ 0.09ms
-  2026-07-05 11:54:54 /health ...................................... ~ 0.08ms
-  2026-07-05 11:55:03 /health ...................................... ~ 0.11ms
-  2026-07-05 11:55:04 /health ...................................... ~ 0.07ms
-  2026-07-05 11:55:14 /health ...................................... ~ 0.09ms
-  2026-07-05 11:55:23 /health ...................................... ~ 0.10ms
-  2026-07-05 11:55:24 /health ...................................... ~ 0.08ms
-  2026-07-05 11:55:34 /health ...................................... ~ 0.09ms
-  2026-07-05 11:55:43 /health ...................................... ~ 0.11ms
-  2026-07-05 11:55:44 /health ...................................... ~ 0.14ms
-  2026-07-05 11:55:54 /health ...................................... ~ 0.13ms
-  2026-07-05 11:56:03 /health ...................................... ~ 0.08ms
-  2026-07-05 11:56:04 /health ...................................... ~ 0.08ms
-  2026-07-05 11:56:14 /health ...................................... ~ 0.11ms
-  2026-07-05 11:56:23 /health ...................................... ~ 0.09ms
-  2026-07-05 11:56:24 /health ...................................... ~ 0.10ms
-  2026-07-05 11:56:34 /health ...................................... ~ 0.08ms
-  2026-07-05 11:56:43 /health ...................................... ~ 0.10ms
-  2026-07-05 11:56:44 /health ...................................... ~ 0.09ms
-  2026-07-05 11:56:54 /health ...................................... ~ 0.08ms
-  2026-07-05 11:57:03 /health ...................................... ~ 0.40ms
-  2026-07-05 11:57:04 /health ...................................... ~ 0.08ms
-  2026-07-05 11:57:14 /health ...................................... ~ 0.13ms
-  2026-07-05 11:57:23 /health ...................................... ~ 0.07ms
-  2026-07-05 11:57:24 /health ...................................... ~ 0.10ms
-  2026-07-05 11:57:34 /health ...................................... ~ 0.10ms
-  2026-07-05 11:57:43 /health ...................................... ~ 0.07ms
-  2026-07-05 11:57:44 /health ...................................... ~ 0.08ms
-  2026-07-05 11:57:54 /health ...................................... ~ 0.14ms
-  2026-07-05 11:58:03 /health ...................................... ~ 0.08ms
-  2026-07-05 11:58:04 /health ...................................... ~ 0.08ms
-  2026-07-05 11:58:14 /health ...................................... ~ 0.11ms
-  2026-07-05 11:58:23 /health ...................................... ~ 0.13ms
-  2026-07-05 11:58:24 /health ...................................... ~ 0.08ms
-  2026-07-05 11:58:34 /health ...................................... ~ 0.10ms
-  2026-07-05 11:58:43 /health ...................................... ~ 0.08ms
-  2026-07-05 11:58:44 /health ...................................... ~ 0.09ms
-  2026-07-05 11:58:54 /health ...................................... ~ 0.14ms
-  2026-07-05 11:58:55 /health ...................................... ~ 0.13ms
-  2026-07-05 11:59:03 /health ...................................... ~ 0.08ms
-  2026-07-05 11:59:04 /health ...................................... ~ 0.12ms
-  2026-07-05 11:59:14 /health ...................................... ~ 0.11ms
+  2026-09-23 04:36:57 /health ...................................... ~ 0.06ms
+  2026-09-23 04:37:01 /health ...................................... ~ 0.07ms
+  2026-09-23 04:37:07 /health ...................................... ~ 0.07ms
+  2026-09-23 04:37:17 /health ...................................... ~ 0.07ms
+  2026-09-23 04:37:21 /health ...................................... ~ 0.07ms
+  2026-09-23 04:37:27 /health ...................................... ~ 0.06ms
+  2026-09-23 04:37:37 /health ...................................... ~ 0.07ms
+  2026-09-23 04:37:41 /health ...................................... ~ 0.07ms
+  2026-09-23 04:37:47 /health ...................................... ~ 0.07ms
+  2026-09-23 04:37:57 /health ...................................... ~ 0.06ms
+  2026-09-23 04:38:01 /health ...................................... ~ 0.07ms
+  2026-09-23 04:38:07 /health ...................................... ~ 0.07ms
+  2026-09-23 04:38:17 /health ...................................... ~ 0.07ms
+  2026-09-23 04:38:21 /health ...................................... ~ 0.07ms
+  2026-09-23 04:38:27 /health ...................................... ~ 0.07ms
+  2026-09-23 04:38:37 /health ...................................... ~ 0.06ms
+  2026-09-23 04:38:41 /health ...................................... ~ 0.07ms
+  2026-09-23 04:38:47 /health ...................................... ~ 0.06ms
+  2026-09-23 04:38:57 /health ...................................... ~ 0.07ms
+  2026-09-23 04:39:01 /health ...................................... ~ 0.07ms
+  2026-09-23 04:39:07 /health ...................................... ~ 0.07ms
+  2026-09-23 04:39:17 /health ...................................... ~ 0.07ms
+  2026-09-23 04:39:21 /health ...................................... ~ 0.08ms
+  2026-09-23 04:39:27 /health ...................................... ~ 0.06ms
+  2026-09-23 04:39:37 /health ...................................... ~ 0.06ms
+  2026-09-23 04:39:41 /health ...................................... ~ 0.07ms
+  2026-09-23 04:39:47 /health ...................................... ~ 0.06ms
+  2026-09-23 04:39:57 /health ...................................... ~ 0.06ms
+  2026-09-23 04:40:01 /health ...................................... ~ 0.07ms
+  2026-09-23 04:40:07 /health .................................... ~ 500.22ms
+  2026-09-23 04:40:17 /health .................................... ~ 500.22ms
+  2026-09-23 04:40:21 /health ...................................... ~ 0.07ms
+  2026-09-23 04:40:27 /health .................................... ~ 500.21ms
+  2026-09-23 04:40:37 /health ...................................... ~ 0.07ms
+  2026-09-23 04:40:41 /health ...................................... ~ 0.07ms
+  2026-09-23 04:40:47 /health ...................................... ~ 0.07ms
+  2026-09-23 04:40:57 /health ...................................... ~ 0.06ms
+  2026-09-23 04:41:01 /health ...................................... ~ 0.08ms
+  2026-09-23 04:41:07 /health ...................................... ~ 0.07ms
+  2026-09-23 04:41:17 /health ...................................... ~ 0.06ms
+  2026-09-23 04:41:21 /health ...................................... ~ 0.08ms
+  2026-09-23 04:41:27 /health ...................................... ~ 0.06ms
+  2026-09-23 04:41:37 /health ...................................... ~ 0.08ms
+  2026-09-23 04:41:41 /health ...................................... ~ 0.07ms
+  2026-09-23 04:41:47 /health ...................................... ~ 0.07ms
+  2026-09-23 04:41:57 /health ...................................... ~ 0.06ms
+  2026-09-23 04:42:01 /health ...................................... ~ 0.07ms
+  2026-09-23 04:42:07 /health ...................................... ~ 0.09ms
+  2026-09-23 04:42:17 /health ...................................... ~ 0.07ms
+  2026-09-23 04:42:21 /health ...................................... ~ 0.08ms
+  2026-09-23 04:42:27 /health ...................................... ~ 0.07ms
+  2026-09-23 04:42:37 /health ...................................... ~ 0.06ms
+  2026-09-23 04:42:41 /health ...................................... ~ 0.07ms
+  2026-09-23 04:42:47 /health ...................................... ~ 0.06ms
+  2026-09-23 04:42:57 /health ...................................... ~ 0.06ms
+  2026-09-23 04:43:01 /health ...................................... ~ 0.07ms
+  2026-09-23 04:43:07 /health ...................................... ~ 0.07ms
+  2026-09-23 04:43:17 /health ...................................... ~ 0.06ms
+  2026-09-23 04:43:21 /health ...................................... ~ 0.07ms
+  2026-09-23 04:43:27 /health ...................................... ~ 0.06ms
+  2026-09-23 04:43:37 /health ...................................... ~ 0.07ms
+  2026-09-23 04:43:41 /health ...................................... ~ 0.06ms
+  2026-09-23 04:43:47 /health ...................................... ~ 0.06ms
+  2026-09-23 04:43:57 /health ...................................... ~ 0.07ms
+  2026-09-23 04:44:01 /health ...................................... ~ 0.06ms
+  2026-09-23 04:44:07 /health ...................................... ~ 0.06ms
+  2026-09-23 04:44:17 /health ...................................... ~ 0.06ms
+  2026-09-23 04:44:21 /health ...................................... ~ 0.06ms
+  2026-09-23 04:44:27 /health ...................................... ~ 0.06ms
+  2026-09-23 04:44:37 /health ...................................... ~ 0.06ms
+  2026-09-23 04:44:41 /health ...................................... ~ 0.07ms
+  2026-09-23 04:44:47 /health ...................................... ~ 0.06ms
+  2026-09-23 04:44:57 /health ...................................... ~ 0.07ms
+  2026-09-23 04:45:01 /health ...................................... ~ 0.06ms
+  2026-09-23 04:45:07 /health ...................................... ~ 0.06ms
+  2026-09-23 04:45:17 /health ...................................... ~ 0.07ms
+  2026-09-23 04:45:21 /health .................................... ~ 500.22ms
+  2026-09-23 04:45:27 /health ...................................... ~ 0.07ms
+  2026-09-23 04:45:37 /health ...................................... ~ 0.06ms
+  2026-09-23 04:45:41 /health ...................................... ~ 0.06ms
 ```
 
 ## Logs deployment/chatbot-manager
 
 ```text
-  2026-07-05 11:50:54 /health ...................................... ~ 0.13ms
-  2026-07-05 11:51:03 /health ...................................... ~ 0.08ms
-  2026-07-05 11:51:04 /health ...................................... ~ 0.10ms
-  2026-07-05 11:51:14 /health ...................................... ~ 0.08ms
-  2026-07-05 11:51:23 /health ...................................... ~ 0.10ms
-  2026-07-05 11:51:24 /health ...................................... ~ 0.09ms
-  2026-07-05 11:51:34 /health ...................................... ~ 0.10ms
-  2026-07-05 11:51:43 /health ...................................... ~ 0.10ms
-  2026-07-05 11:51:44 /health ...................................... ~ 0.12ms
-  2026-07-05 11:51:54 /health ...................................... ~ 0.11ms
-  2026-07-05 11:52:03 /health ...................................... ~ 0.09ms
-  2026-07-05 11:52:04 /health ...................................... ~ 0.13ms
-  2026-07-05 11:52:14 /health ...................................... ~ 0.10ms
-  2026-07-05 11:52:23 /health ...................................... ~ 0.08ms
-  2026-07-05 11:52:24 /health ...................................... ~ 0.09ms
-  2026-07-05 11:52:34 /health ...................................... ~ 0.08ms
-  2026-07-05 11:52:43 /health ...................................... ~ 0.09ms
-  2026-07-05 11:52:44 /health ...................................... ~ 0.12ms
-  2026-07-05 11:52:54 /health ...................................... ~ 0.08ms
-  2026-07-05 11:53:03 /health ...................................... ~ 0.12ms
-  2026-07-05 11:53:04 /health ...................................... ~ 0.09ms
-  2026-07-05 11:53:14 /health ...................................... ~ 0.08ms
-  2026-07-05 11:53:23 /health ...................................... ~ 0.14ms
-  2026-07-05 11:53:24 /health ...................................... ~ 0.20ms
-  2026-07-05 11:53:34 /health ...................................... ~ 0.10ms
-  2026-07-05 11:53:43 /health ...................................... ~ 0.09ms
-  2026-07-05 11:53:44 /health ...................................... ~ 0.10ms
-  2026-07-05 11:53:54 /health ...................................... ~ 0.08ms
-  2026-07-05 11:54:03 /health ...................................... ~ 0.10ms
-  2026-07-05 11:54:04 /health ...................................... ~ 0.07ms
-  2026-07-05 11:54:14 /health ...................................... ~ 0.10ms
-  2026-07-05 11:54:23 /health ...................................... ~ 0.10ms
-  2026-07-05 11:54:24 /health ...................................... ~ 0.08ms
-  2026-07-05 11:54:34 /health ...................................... ~ 0.10ms
-  2026-07-05 11:54:43 /health ...................................... ~ 0.07ms
-  2026-07-05 11:54:44 /health ...................................... ~ 0.07ms
-  2026-07-05 11:54:54 /health ...................................... ~ 0.16ms
-  2026-07-05 11:55:03 /health ...................................... ~ 0.10ms
-  2026-07-05 11:55:04 /health ...................................... ~ 0.10ms
-  2026-07-05 11:55:14 /health ...................................... ~ 0.12ms
-  2026-07-05 11:55:23 /health ...................................... ~ 0.08ms
-  2026-07-05 11:55:24 /health ...................................... ~ 0.11ms
-  2026-07-05 11:55:34 /health ...................................... ~ 0.15ms
-  2026-07-05 11:55:43 /health ...................................... ~ 0.10ms
-  2026-07-05 11:55:44 /health ...................................... ~ 0.11ms
-  2026-07-05 11:55:54 /health ...................................... ~ 0.08ms
-  2026-07-05 11:56:03 /health ...................................... ~ 0.09ms
-  2026-07-05 11:56:04 /health ...................................... ~ 0.08ms
-  2026-07-05 11:56:14 /health ...................................... ~ 0.09ms
-  2026-07-05 11:56:23 /health ...................................... ~ 0.08ms
-  2026-07-05 11:56:24 /health ...................................... ~ 0.09ms
-  2026-07-05 11:56:34 /health ...................................... ~ 0.07ms
-  2026-07-05 11:56:43 /health ...................................... ~ 0.10ms
-  2026-07-05 11:56:44 /health ...................................... ~ 0.10ms
-  2026-07-05 11:56:54 /health ...................................... ~ 0.08ms
-  2026-07-05 11:57:03 /health ...................................... ~ 0.10ms
-  2026-07-05 11:57:04 /health ...................................... ~ 0.07ms
-  2026-07-05 11:57:14 /health ...................................... ~ 0.08ms
-  2026-07-05 11:57:23 /health ...................................... ~ 0.07ms
-  2026-07-05 11:57:24 /health ...................................... ~ 0.10ms
-  2026-07-05 11:57:32 /health ...................................... ~ 0.07ms
-  2026-07-05 11:57:34 /health ...................................... ~ 0.12ms
-  2026-07-05 11:57:41 /health ...................................... ~ 0.08ms
-  2026-07-05 11:57:43 /health ...................................... ~ 0.11ms
-  2026-07-05 11:57:44 /health ...................................... ~ 0.09ms
-  2026-07-05 11:57:54 /health ...................................... ~ 0.09ms
-  2026-07-05 11:58:03 /health ...................................... ~ 0.08ms
-  2026-07-05 11:58:04 /health ...................................... ~ 0.08ms
-  2026-07-05 11:58:14 /health ...................................... ~ 0.11ms
-  2026-07-05 11:58:23 /health ...................................... ~ 0.09ms
-  2026-07-05 11:58:24 /health ...................................... ~ 0.10ms
-  2026-07-05 11:58:34 /health ...................................... ~ 0.10ms
-  2026-07-05 11:58:43 /health ...................................... ~ 0.08ms
-  2026-07-05 11:58:44 /health ...................................... ~ 0.07ms
-  2026-07-05 11:58:54 /health ...................................... ~ 0.07ms
-  2026-07-05 11:58:55 /health ...................................... ~ 0.10ms
-  2026-07-05 11:59:03 /health ...................................... ~ 0.07ms
-  2026-07-05 11:59:03 /health ...................................... ~ 0.08ms
-  2026-07-05 11:59:04 /health ...................................... ~ 0.08ms
-  2026-07-05 11:59:14 /health ...................................... ~ 0.13ms
+  2026-09-23 04:36:57 /health ...................................... ~ 0.06ms
+  2026-09-23 04:37:02 /health ...................................... ~ 0.06ms
+  2026-09-23 04:37:07 /health ...................................... ~ 0.06ms
+  2026-09-23 04:37:17 /health ...................................... ~ 0.07ms
+  2026-09-23 04:37:22 /health ...................................... ~ 0.07ms
+  2026-09-23 04:37:27 /health ...................................... ~ 0.06ms
+  2026-09-23 04:37:37 /health ...................................... ~ 0.07ms
+  2026-09-23 04:37:42 /health ...................................... ~ 0.07ms
+  2026-09-23 04:37:47 /health ...................................... ~ 0.07ms
+  2026-09-23 04:37:57 /health ...................................... ~ 0.06ms
+  2026-09-23 04:38:02 /health ...................................... ~ 0.07ms
+  2026-09-23 04:38:07 /health ...................................... ~ 0.09ms
+  2026-09-23 04:38:17 /health ...................................... ~ 0.07ms
+  2026-09-23 04:38:22 /health ...................................... ~ 0.07ms
+  2026-09-23 04:38:27 /health ...................................... ~ 0.07ms
+  2026-09-23 04:38:37 /health ...................................... ~ 0.06ms
+  2026-09-23 04:38:42 /health ...................................... ~ 0.07ms
+  2026-09-23 04:38:47 /health ...................................... ~ 0.07ms
+  2026-09-23 04:38:57 /health ...................................... ~ 0.06ms
+  2026-09-23 04:39:02 /health ...................................... ~ 0.07ms
+  2026-09-23 04:39:07 /health ...................................... ~ 0.07ms
+  2026-09-23 04:39:17 /health ...................................... ~ 0.07ms
+  2026-09-23 04:39:22 /health ...................................... ~ 0.06ms
+  2026-09-23 04:39:27 /health ...................................... ~ 0.07ms
+  2026-09-23 04:39:37 /health ...................................... ~ 0.07ms
+  2026-09-23 04:39:42 /health ...................................... ~ 0.07ms
+  2026-09-23 04:39:47 /health ...................................... ~ 0.07ms
+  2026-09-23 04:39:57 /health ...................................... ~ 0.06ms
+  2026-09-23 04:40:02 /health ...................................... ~ 0.06ms
+  2026-09-23 04:40:07 /health ...................................... ~ 0.07ms
+  2026-09-23 04:40:17 /health ...................................... ~ 0.06ms
+  2026-09-23 04:40:22 /health ...................................... ~ 0.07ms
+  2026-09-23 04:40:27 /health ...................................... ~ 0.07ms
+  2026-09-23 04:40:37 /health ...................................... ~ 0.08ms
+  2026-09-23 04:40:42 /health ...................................... ~ 0.07ms
+  2026-09-23 04:40:47 /health ...................................... ~ 0.06ms
+  2026-09-23 04:40:57 /health ...................................... ~ 0.08ms
+  2026-09-23 04:41:02 /health ...................................... ~ 0.07ms
+  2026-09-23 04:41:07 /health ...................................... ~ 0.07ms
+  2026-09-23 04:41:17 /health ...................................... ~ 0.08ms
+  2026-09-23 04:41:22 /health ...................................... ~ 0.06ms
+  2026-09-23 04:41:27 /health ...................................... ~ 0.06ms
+  2026-09-23 04:41:37 /health ...................................... ~ 0.06ms
+  2026-09-23 04:41:42 /health ...................................... ~ 0.06ms
+  2026-09-23 04:41:47 /health ...................................... ~ 0.07ms
+  2026-09-23 04:41:57 /health ...................................... ~ 0.09ms
+  2026-09-23 04:42:02 /health ...................................... ~ 0.07ms
+  2026-09-23 04:42:07 /health ...................................... ~ 0.09ms
+  2026-09-23 04:42:17 /health ...................................... ~ 0.07ms
+  2026-09-23 04:42:22 /health ...................................... ~ 0.07ms
+  2026-09-23 04:42:27 /health ...................................... ~ 0.06ms
+  2026-09-23 04:42:37 /health ...................................... ~ 0.06ms
+  2026-09-23 04:42:42 /health ...................................... ~ 0.07ms
+  2026-09-23 04:42:47 /health ...................................... ~ 0.07ms
+  2026-09-23 04:42:57 /health ...................................... ~ 0.06ms
+  2026-09-23 04:43:02 /health ...................................... ~ 0.06ms
+  2026-09-23 04:43:07 /health ...................................... ~ 0.06ms
+  2026-09-23 04:43:17 /health ...................................... ~ 0.06ms
+  2026-09-23 04:43:22 /health ...................................... ~ 0.07ms
+  2026-09-23 04:43:27 /health ...................................... ~ 0.06ms
+  2026-09-23 04:43:37 /health ...................................... ~ 0.07ms
+  2026-09-23 04:43:42 /health ...................................... ~ 0.07ms
+  2026-09-23 04:43:47 /health ...................................... ~ 0.07ms
+  2026-09-23 04:43:57 /health ...................................... ~ 0.09ms
+  2026-09-23 04:44:02 /health ...................................... ~ 0.07ms
+  2026-09-23 04:44:07 /health ...................................... ~ 0.07ms
+  2026-09-23 04:44:17 /health ...................................... ~ 0.07ms
+  2026-09-23 04:44:22 /health ...................................... ~ 0.06ms
+  2026-09-23 04:44:27 /health ...................................... ~ 0.06ms
+  2026-09-23 04:44:37 /health ...................................... ~ 0.06ms
+  2026-09-23 04:44:42 /health ...................................... ~ 0.06ms
+  2026-09-23 04:44:47 /health ...................................... ~ 0.06ms
+  2026-09-23 04:44:57 /health ...................................... ~ 0.06ms
+  2026-09-23 04:45:02 /health ...................................... ~ 0.07ms
+  2026-09-23 04:45:07 /health ...................................... ~ 0.07ms
+  2026-09-23 04:45:17 /health ...................................... ~ 0.09ms
+  2026-09-23 04:45:22 /health ...................................... ~ 0.07ms
+  2026-09-23 04:45:27 /health ...................................... ~ 0.07ms
+  2026-09-23 04:45:37 /health ...................................... ~ 0.07ms
+  2026-09-23 04:45:42 /health ...................................... ~ 0.07ms
 ```
 
 ## Logs deployment/conversation-service
 
 ```text
-  2026-07-05 11:50:54 /health ...................................... ~ 0.14ms
-  2026-07-05 11:51:03 /health ...................................... ~ 0.08ms
-  2026-07-05 11:51:04 /health ...................................... ~ 0.10ms
-  2026-07-05 11:51:14 /health ...................................... ~ 0.09ms
-  2026-07-05 11:51:23 /health ...................................... ~ 0.11ms
-  2026-07-05 11:51:24 /health ...................................... ~ 0.08ms
-  2026-07-05 11:51:34 /health ...................................... ~ 0.09ms
-  2026-07-05 11:51:43 /health ...................................... ~ 0.09ms
-  2026-07-05 11:51:44 /health ...................................... ~ 0.10ms
-  2026-07-05 11:51:54 /health ...................................... ~ 0.08ms
-  2026-07-05 11:52:03 /health ...................................... ~ 0.08ms
-  2026-07-05 11:52:04 /health ...................................... ~ 0.10ms
-  2026-07-05 11:52:14 /health ...................................... ~ 0.09ms
-  2026-07-05 11:52:23 /health ...................................... ~ 0.10ms
-  2026-07-05 11:52:24 /health ...................................... ~ 0.08ms
-  2026-07-05 11:52:34 /health ...................................... ~ 0.13ms
-  2026-07-05 11:52:43 /health ...................................... ~ 0.09ms
-  2026-07-05 11:52:44 /health ...................................... ~ 0.12ms
-  2026-07-05 11:52:54 /health ...................................... ~ 0.10ms
-  2026-07-05 11:53:03 /health ...................................... ~ 0.10ms
-  2026-07-05 11:53:04 /health ...................................... ~ 0.08ms
-  2026-07-05 11:53:14 /health ...................................... ~ 0.09ms
-  2026-07-05 11:53:23 /health ...................................... ~ 0.11ms
-  2026-07-05 11:53:24 /health ...................................... ~ 0.10ms
-  2026-07-05 11:53:34 /health ...................................... ~ 0.12ms
-  2026-07-05 11:53:43 /health ...................................... ~ 0.09ms
-  2026-07-05 11:53:44 /health ...................................... ~ 0.08ms
-  2026-07-05 11:53:54 /health ...................................... ~ 0.08ms
-  2026-07-05 11:54:03 /health ...................................... ~ 0.08ms
-  2026-07-05 11:54:04 /health ...................................... ~ 0.08ms
-  2026-07-05 11:54:14 /health ...................................... ~ 0.10ms
-  2026-07-05 11:54:23 /health ...................................... ~ 0.12ms
-  2026-07-05 11:54:24 /health ...................................... ~ 0.09ms
-  2026-07-05 11:54:34 /health ...................................... ~ 0.09ms
-  2026-07-05 11:54:43 /health ...................................... ~ 0.10ms
-  2026-07-05 11:54:44 /health ...................................... ~ 0.09ms
-  2026-07-05 11:54:54 /health ...................................... ~ 0.16ms
-  2026-07-05 11:55:03 /health ...................................... ~ 0.12ms
-  2026-07-05 11:55:04 /health ...................................... ~ 0.11ms
-  2026-07-05 11:55:14 /health ...................................... ~ 0.21ms
-  2026-07-05 11:55:23 /health ...................................... ~ 0.10ms
-  2026-07-05 11:55:24 /health ...................................... ~ 0.09ms
-  2026-07-05 11:55:34 /health ...................................... ~ 0.08ms
-  2026-07-05 11:55:43 /health ...................................... ~ 0.08ms
-  2026-07-05 11:55:44 /health ...................................... ~ 0.08ms
-  2026-07-05 11:55:54 /health ...................................... ~ 0.10ms
-  2026-07-05 11:56:03 /health ...................................... ~ 0.10ms
-  2026-07-05 11:56:04 /health ...................................... ~ 0.08ms
-  2026-07-05 11:56:14 /health ...................................... ~ 0.08ms
-  2026-07-05 11:56:23 /health ...................................... ~ 0.11ms
-  2026-07-05 11:56:24 /health ...................................... ~ 0.85ms
-  2026-07-05 11:56:34 /health ...................................... ~ 0.09ms
-  2026-07-05 11:56:43 /health ...................................... ~ 0.11ms
-  2026-07-05 11:56:44 /health ...................................... ~ 0.20ms
-  2026-07-05 11:56:54 /health ...................................... ~ 0.09ms
-  2026-07-05 11:57:03 /health ...................................... ~ 0.08ms
-  2026-07-05 11:57:04 /health ...................................... ~ 0.07ms
-  2026-07-05 11:57:14 /health ...................................... ~ 0.08ms
-  2026-07-05 11:57:23 /health ...................................... ~ 0.07ms
-  2026-07-05 11:57:24 /health ...................................... ~ 0.07ms
-  2026-07-05 11:57:33 /health ...................................... ~ 0.09ms
-  2026-07-05 11:57:34 /health ...................................... ~ 0.08ms
-  2026-07-05 11:57:41 /health ...................................... ~ 0.08ms
-  2026-07-05 11:57:43 /health ...................................... ~ 0.08ms
-  2026-07-05 11:57:44 /health ...................................... ~ 0.07ms
-  2026-07-05 11:57:54 /health ...................................... ~ 0.09ms
-  2026-07-05 11:58:03 /health ...................................... ~ 0.10ms
-  2026-07-05 11:58:04 /health ...................................... ~ 0.08ms
-  2026-07-05 11:58:14 /health ...................................... ~ 0.09ms
-  2026-07-05 11:58:23 /health ...................................... ~ 0.07ms
-  2026-07-05 11:58:24 /health .................................... ~ 500.33ms
-  2026-07-05 11:58:34 /health .................................... ~ 500.39ms
-  2026-07-05 11:58:43 /health ...................................... ~ 0.07ms
-  2026-07-05 11:58:44 /health ...................................... ~ 0.02ms
-  2026-07-05 11:58:54 /health ...................................... ~ 0.07ms
-  2026-07-05 11:58:55 /health ...................................... ~ 0.08ms
-  2026-07-05 11:59:03 /health ...................................... ~ 0.11ms
-  2026-07-05 11:59:03 /health ...................................... ~ 0.67ms
-  2026-07-05 11:59:04 /health ...................................... ~ 0.12ms
-  2026-07-05 11:59:14 /health ...................................... ~ 0.08ms
+  2026-09-23 04:36:58 /health ...................................... ~ 0.09ms
+  2026-09-23 04:37:02 /health ...................................... ~ 0.07ms
+  2026-09-23 04:37:08 /health ...................................... ~ 0.07ms
+  2026-09-23 04:37:18 /health ...................................... ~ 0.07ms
+  2026-09-23 04:37:22 /health ...................................... ~ 0.07ms
+  2026-09-23 04:37:28 /health ...................................... ~ 0.06ms
+  2026-09-23 04:37:38 /health ...................................... ~ 0.07ms
+  2026-09-23 04:37:42 /health ...................................... ~ 0.06ms
+  2026-09-23 04:37:48 /health ...................................... ~ 0.07ms
+  2026-09-23 04:37:58 /health ...................................... ~ 0.07ms
+  2026-09-23 04:38:02 /health ...................................... ~ 0.07ms
+  2026-09-23 04:38:08 /health ...................................... ~ 0.07ms
+  2026-09-23 04:38:18 /health ...................................... ~ 0.07ms
+  2026-09-23 04:38:22 /health ...................................... ~ 0.07ms
+  2026-09-23 04:38:28 /health ...................................... ~ 0.07ms
+  2026-09-23 04:38:38 /health ...................................... ~ 0.07ms
+  2026-09-23 04:38:42 /health ...................................... ~ 0.06ms
+  2026-09-23 04:38:48 /health ...................................... ~ 0.07ms
+  2026-09-23 04:38:58 /health ...................................... ~ 0.07ms
+  2026-09-23 04:39:02 /health ...................................... ~ 0.07ms
+  2026-09-23 04:39:08 /health ...................................... ~ 0.07ms
+  2026-09-23 04:39:18 /health ...................................... ~ 0.07ms
+  2026-09-23 04:39:22 /health ...................................... ~ 0.06ms
+  2026-09-23 04:39:28 /health ...................................... ~ 0.07ms
+  2026-09-23 04:39:38 /health ...................................... ~ 0.07ms
+  2026-09-23 04:39:42 /health ...................................... ~ 0.06ms
+  2026-09-23 04:39:48 /health ...................................... ~ 0.07ms
+  2026-09-23 04:39:58 /health ...................................... ~ 0.07ms
+  2026-09-23 04:40:02 /health ...................................... ~ 0.06ms
+  2026-09-23 04:40:08 /health ...................................... ~ 0.07ms
+  2026-09-23 04:40:18 /health ...................................... ~ 0.07ms
+  2026-09-23 04:40:22 /health ...................................... ~ 0.06ms
+  2026-09-23 04:40:28 /health ...................................... ~ 0.07ms
+  2026-09-23 04:40:38 /health ...................................... ~ 0.07ms
+  2026-09-23 04:40:42 /health ...................................... ~ 0.06ms
+  2026-09-23 04:40:48 /health ...................................... ~ 0.10ms
+  2026-09-23 04:40:58 /health ...................................... ~ 0.07ms
+  2026-09-23 04:41:02 /health ...................................... ~ 0.07ms
+  2026-09-23 04:41:08 /health ...................................... ~ 0.06ms
+  2026-09-23 04:41:18 /health ...................................... ~ 0.07ms
+  2026-09-23 04:41:22 /health ...................................... ~ 0.07ms
+  2026-09-23 04:41:28 /health ...................................... ~ 0.07ms
+  2026-09-23 04:41:38 /health ...................................... ~ 0.07ms
+  2026-09-23 04:41:42 /health ...................................... ~ 0.07ms
+  2026-09-23 04:41:48 /health ...................................... ~ 0.07ms
+  2026-09-23 04:41:58 /health ...................................... ~ 0.10ms
+  2026-09-23 04:42:02 /health ...................................... ~ 0.07ms
+  2026-09-23 04:42:08 /health ...................................... ~ 0.07ms
+  2026-09-23 04:42:18 /health ...................................... ~ 0.09ms
+  2026-09-23 04:42:22 /health ...................................... ~ 0.06ms
+  2026-09-23 04:42:28 /health ...................................... ~ 0.06ms
+  2026-09-23 04:42:38 /health ...................................... ~ 0.06ms
+  2026-09-23 04:42:42 /health ...................................... ~ 0.06ms
+  2026-09-23 04:42:48 /health ...................................... ~ 0.07ms
+  2026-09-23 04:42:58 /health ...................................... ~ 0.06ms
+  2026-09-23 04:43:02 /health ...................................... ~ 0.06ms
+  2026-09-23 04:43:08 /health ...................................... ~ 0.06ms
+  2026-09-23 04:43:18 /health ...................................... ~ 0.07ms
+  2026-09-23 04:43:22 /health ...................................... ~ 0.06ms
+  2026-09-23 04:43:28 /health ...................................... ~ 0.07ms
+  2026-09-23 04:43:38 /health ...................................... ~ 0.07ms
+  2026-09-23 04:43:42 /health ...................................... ~ 0.06ms
+  2026-09-23 04:43:48 /health ...................................... ~ 0.07ms
+  2026-09-23 04:43:58 /health ...................................... ~ 0.07ms
+  2026-09-23 04:44:02 /health ...................................... ~ 0.06ms
+  2026-09-23 04:44:08 /health ...................................... ~ 0.07ms
+  2026-09-23 04:44:18 /health ...................................... ~ 0.07ms
+  2026-09-23 04:44:22 /health ...................................... ~ 0.06ms
+  2026-09-23 04:44:28 /health ...................................... ~ 0.07ms
+  2026-09-23 04:44:38 /health ...................................... ~ 0.06ms
+  2026-09-23 04:44:42 /health ...................................... ~ 0.06ms
+  2026-09-23 04:44:48 /health ...................................... ~ 0.07ms
+  2026-09-23 04:44:58 /health ...................................... ~ 0.07ms
+  2026-09-23 04:45:02 /health ...................................... ~ 0.06ms
+  2026-09-23 04:45:08 /health ...................................... ~ 0.07ms
+  2026-09-23 04:45:18 /health ...................................... ~ 0.07ms
+  2026-09-23 04:45:22 /health ...................................... ~ 0.07ms
+  2026-09-23 04:45:28 /health ...................................... ~ 0.07ms
+  2026-09-23 04:45:38 /health ...................................... ~ 0.07ms
+  2026-09-23 04:45:42 /health ...................................... ~ 0.07ms
 ```
 
 ## Logs deployment/audit-security-service
 
 ```text
-  2026-07-05 11:51:23 /health ...................................... ~ 0.11ms
-  2026-07-05 11:51:24 /health ...................................... ~ 0.09ms
-  2026-07-05 11:51:34 /health ...................................... ~ 0.12ms
-  2026-07-05 11:51:43 /health ...................................... ~ 0.13ms
-  2026-07-05 11:51:44 /health ...................................... ~ 0.08ms
-  2026-07-05 11:51:54 /health ...................................... ~ 0.09ms
-  2026-07-05 11:52:03 /health ...................................... ~ 0.08ms
-  2026-07-05 11:52:04 /health ...................................... ~ 0.20ms
-  2026-07-05 11:52:14 /health ...................................... ~ 0.09ms
-  2026-07-05 11:52:23 /health ...................................... ~ 0.08ms
-  2026-07-05 11:52:24 /health ...................................... ~ 0.09ms
-  2026-07-05 11:52:34 /health ...................................... ~ 0.08ms
-  2026-07-05 11:52:43 /health ...................................... ~ 0.10ms
-  2026-07-05 11:52:44 /health ...................................... ~ 0.08ms
-  2026-07-05 11:52:54 /health ...................................... ~ 0.07ms
-  2026-07-05 11:53:03 /health ...................................... ~ 0.12ms
-  2026-07-05 11:53:04 /health ...................................... ~ 0.09ms
-  2026-07-05 11:53:14 /health ...................................... ~ 0.11ms
-  2026-07-05 11:53:23 /health ...................................... ~ 0.08ms
-  2026-07-05 11:53:24 /health ...................................... ~ 0.13ms
-  2026-07-05 11:53:34 /health ...................................... ~ 0.15ms
-  2026-07-05 11:53:43 /health ...................................... ~ 0.14ms
-  2026-07-05 11:53:44 /health ...................................... ~ 0.10ms
-  2026-07-05 11:53:54 /health ...................................... ~ 0.08ms
-  2026-07-05 11:54:03 /health ...................................... ~ 0.19ms
-  2026-07-05 11:54:04 /health ...................................... ~ 0.10ms
-  2026-07-05 11:54:14 /health ...................................... ~ 0.11ms
-  2026-07-05 11:54:23 /health ...................................... ~ 0.09ms
-  2026-07-05 11:54:24 /health ...................................... ~ 0.07ms
-  2026-07-05 11:54:34 /health ...................................... ~ 0.09ms
-  2026-07-05 11:54:43 /health ...................................... ~ 0.08ms
-  2026-07-05 11:54:44 /health ...................................... ~ 0.08ms
-  2026-07-05 11:54:54 /health ...................................... ~ 0.10ms
-  2026-07-05 11:55:03 /health ...................................... ~ 0.08ms
-  2026-07-05 11:55:04 /health ...................................... ~ 0.08ms
-  2026-07-05 11:55:14 /health ...................................... ~ 0.09ms
-  2026-07-05 11:55:23 /health ...................................... ~ 0.08ms
-  2026-07-05 11:55:24 /health ...................................... ~ 0.10ms
-  2026-07-05 11:55:34 /health ...................................... ~ 0.12ms
-  2026-07-05 11:55:43 /health ...................................... ~ 0.09ms
-  2026-07-05 11:55:44 /health ...................................... ~ 0.12ms
-  2026-07-05 11:55:54 /health ...................................... ~ 0.14ms
-  2026-07-05 11:56:03 /health ...................................... ~ 0.08ms
-  2026-07-05 11:56:04 /health ...................................... ~ 0.13ms
-  2026-07-05 11:56:14 /health ...................................... ~ 0.13ms
-  2026-07-05 11:56:23 /health ...................................... ~ 0.09ms
-  2026-07-05 11:56:24 /health ...................................... ~ 0.09ms
-  2026-07-05 11:56:34 /health ...................................... ~ 0.09ms
-  2026-07-05 11:56:43 /health ...................................... ~ 0.09ms
-  2026-07-05 11:56:44 /health ...................................... ~ 0.08ms
-  2026-07-05 11:56:54 /health ...................................... ~ 0.17ms
-  2026-07-05 11:57:03 /health ...................................... ~ 0.10ms
-  2026-07-05 11:57:04 /health ...................................... ~ 0.13ms
-  2026-07-05 11:57:14 /health ...................................... ~ 0.07ms
-  2026-07-05 11:57:23 /health ...................................... ~ 0.14ms
-  2026-07-05 11:57:24 /health ...................................... ~ 0.07ms
-  2026-07-05 11:57:33 /health ...................................... ~ 0.11ms
-  2026-07-05 11:57:34 /health ...................................... ~ 0.08ms
-  2026-07-05 11:57:41 /health ...................................... ~ 0.07ms
-  2026-07-05 11:57:43 /health ...................................... ~ 0.08ms
-  2026-07-05 11:57:44 /health ...................................... ~ 0.11ms
-  2026-07-05 11:57:44 /health ...................................... ~ 0.10ms
-  2026-07-05 11:57:47 /api/v1/audit-logs ........................... ~ 0.20ms
-  2026-07-05 11:57:54 /health ...................................... ~ 0.07ms
-  2026-07-05 11:58:03 /health ...................................... ~ 0.16ms
-  2026-07-05 11:58:04 /health ...................................... ~ 0.07ms
-  2026-07-05 11:58:14 /health ...................................... ~ 0.09ms
-  2026-07-05 11:58:23 /health ...................................... ~ 0.11ms
-  2026-07-05 11:58:24 /health ...................................... ~ 0.16ms
-  2026-07-05 11:58:34 /health ...................................... ~ 0.14ms
-  2026-07-05 11:58:43 /health ...................................... ~ 0.09ms
-  2026-07-05 11:58:44 /health ...................................... ~ 0.07ms
-  2026-07-05 11:58:54 /health ...................................... ~ 0.08ms
-  2026-07-05 11:58:55 /health ...................................... ~ 0.10ms
-  2026-07-05 11:59:03 /health ...................................... ~ 0.08ms
-  2026-07-05 11:59:03 /health ...................................... ~ 0.03ms
-  2026-07-05 11:59:04 /health ...................................... ~ 0.08ms
-  2026-07-05 11:59:07 /health ...................................... ~ 0.10ms
-  2026-07-05 11:59:10 /api/v1/audit-logs ........................... ~ 0.08ms
-  2026-07-05 11:59:14 /health ...................................... ~ 0.10ms
+  2026-09-23 04:37:08 /health ...................................... ~ 0.07ms
+  2026-09-23 04:37:18 /health ...................................... ~ 0.07ms
+  2026-09-23 04:37:22 /health ...................................... ~ 0.07ms
+  2026-09-23 04:37:28 /health ...................................... ~ 0.07ms
+  2026-09-23 04:37:38 /health ...................................... ~ 0.06ms
+  2026-09-23 04:37:42 /health ...................................... ~ 0.07ms
+  2026-09-23 04:37:48 /health ...................................... ~ 0.07ms
+  2026-09-23 04:37:58 /health ...................................... ~ 0.07ms
+  2026-09-23 04:38:02 /health ...................................... ~ 0.08ms
+  2026-09-23 04:38:08 /health ...................................... ~ 0.07ms
+  2026-09-23 04:38:18 /health ...................................... ~ 0.07ms
+  2026-09-23 04:38:22 /health ...................................... ~ 0.06ms
+  2026-09-23 04:38:28 /health ...................................... ~ 0.06ms
+  2026-09-23 04:38:38 /health ...................................... ~ 0.06ms
+  2026-09-23 04:38:42 /health ...................................... ~ 0.06ms
+  2026-09-23 04:38:48 /health ...................................... ~ 0.07ms
+  2026-09-23 04:38:58 /health ...................................... ~ 0.07ms
+  2026-09-23 04:39:02 /health ...................................... ~ 0.09ms
+  2026-09-23 04:39:08 /health ...................................... ~ 0.07ms
+  2026-09-23 04:39:18 /health ...................................... ~ 0.07ms
+  2026-09-23 04:39:22 /health ...................................... ~ 0.06ms
+  2026-09-23 04:39:28 /health ...................................... ~ 0.07ms
+  2026-09-23 04:39:38 /health ...................................... ~ 0.07ms
+  2026-09-23 04:39:42 /health ...................................... ~ 0.07ms
+  2026-09-23 04:39:48 /health ...................................... ~ 0.09ms
+  2026-09-23 04:39:58 /health ...................................... ~ 0.07ms
+  2026-09-23 04:40:02 /health ...................................... ~ 0.07ms
+  2026-09-23 04:40:08 /health ...................................... ~ 0.06ms
+  2026-09-23 04:40:18 /health ...................................... ~ 0.07ms
+  2026-09-23 04:40:22 /health ...................................... ~ 0.07ms
+  2026-09-23 04:40:28 /health ...................................... ~ 0.06ms
+  2026-09-23 04:40:38 /health ...................................... ~ 0.06ms
+  2026-09-23 04:40:42 /health ...................................... ~ 0.06ms
+  2026-09-23 04:40:48 /health ...................................... ~ 0.07ms
+  2026-09-23 04:40:58 /health ...................................... ~ 0.07ms
+  2026-09-23 04:41:02 /health ...................................... ~ 0.07ms
+  2026-09-23 04:41:08 /health ...................................... ~ 0.06ms
+  2026-09-23 04:41:18 /health ...................................... ~ 0.07ms
+  2026-09-23 04:41:22 /health ...................................... ~ 0.06ms
+  2026-09-23 04:41:28 /health ...................................... ~ 0.08ms
+  2026-09-23 04:41:38 /health ...................................... ~ 0.07ms
+  2026-09-23 04:41:42 /health ...................................... ~ 0.06ms
+  2026-09-23 04:41:48 /health ...................................... ~ 0.08ms
+  2026-09-23 04:41:58 /health ...................................... ~ 0.09ms
+  2026-09-23 04:42:02 /health ...................................... ~ 0.07ms
+  2026-09-23 04:42:08 /health ...................................... ~ 0.09ms
+  2026-09-23 04:42:18 /health ...................................... ~ 0.09ms
+  2026-09-23 04:42:22 /health ...................................... ~ 0.07ms
+  2026-09-23 04:42:28 /health ...................................... ~ 0.07ms
+  2026-09-23 04:42:38 /health ...................................... ~ 0.07ms
+  2026-09-23 04:42:42 /health ...................................... ~ 0.06ms
+  2026-09-23 04:42:48 /health ...................................... ~ 0.07ms
+  2026-09-23 04:42:58 /health ...................................... ~ 0.07ms
+  2026-09-23 04:43:02 /health ...................................... ~ 0.07ms
+  2026-09-23 04:43:08 /health ...................................... ~ 0.07ms
+  2026-09-23 04:43:18 /health ...................................... ~ 0.09ms
+  2026-09-23 04:43:22 /health ...................................... ~ 0.07ms
+  2026-09-23 04:43:28 /health ...................................... ~ 0.07ms
+  2026-09-23 04:43:38 /health ...................................... ~ 0.07ms
+  2026-09-23 04:43:42 /health ...................................... ~ 0.06ms
+  2026-09-23 04:43:48 /health ...................................... ~ 0.07ms
+  2026-09-23 04:43:58 /health ...................................... ~ 0.07ms
+  2026-09-23 04:44:02 /health ...................................... ~ 0.07ms
+  2026-09-23 04:44:08 /health ...................................... ~ 0.07ms
+  2026-09-23 04:44:18 /health ...................................... ~ 0.07ms
+  2026-09-23 04:44:22 /health ...................................... ~ 0.06ms
+  2026-09-23 04:44:28 /health ...................................... ~ 0.07ms
+  2026-09-23 04:44:38 /health ...................................... ~ 0.07ms
+  2026-09-23 04:44:42 /health ...................................... ~ 0.07ms
+  2026-09-23 04:44:48 /health ...................................... ~ 0.07ms
+  2026-09-23 04:44:58 /health ...................................... ~ 0.08ms
+  2026-09-23 04:45:02 /health ...................................... ~ 0.07ms
+  2026-09-23 04:45:08 /health ...................................... ~ 0.07ms
+  2026-09-23 04:45:18 /health ...................................... ~ 0.07ms
+  2026-09-23 04:45:22 /health ...................................... ~ 0.07ms
+  2026-09-23 04:45:28 /health ...................................... ~ 0.09ms
+  2026-09-23 04:45:38 /health ...................................... ~ 0.07ms
+  2026-09-23 04:45:39 /health ...................................... ~ 0.07ms
+  2026-09-23 04:45:42 /health ...................................... ~ 0.07ms
+  2026-09-23 04:45:43 /api/v1/audit-logs ........................... ~ 0.07ms
 ```
 
 ## Logs deployment/portal-web
 
 ```text
-Found 3 pods, using pod/portal-web-859c78db95-z68jt
-  2026-07-05 11:51:29 /health ...................................... ~ 0.09ms
-  2026-07-05 11:51:39 /health ...................................... ~ 0.10ms
-  2026-07-05 11:51:43 /health ...................................... ~ 0.08ms
-  2026-07-05 11:51:49 /health ...................................... ~ 0.10ms
-  2026-07-05 11:51:59 /health ...................................... ~ 0.08ms
-  2026-07-05 11:52:03 /health ...................................... ~ 0.11ms
-  2026-07-05 11:52:09 /health ...................................... ~ 0.11ms
-  2026-07-05 11:52:19 /health ...................................... ~ 0.08ms
-  2026-07-05 11:52:23 /health .................................... ~ 500.44ms
-  2026-07-05 11:52:29 /health ...................................... ~ 0.09ms
-  2026-07-05 11:52:39 /health ...................................... ~ 0.09ms
-  2026-07-05 11:52:43 /health .................................... ~ 500.31ms
-  2026-07-05 11:52:49 /health ...................................... ~ 0.07ms
-  2026-07-05 11:52:59 /health ...................................... ~ 0.12ms
-  2026-07-05 11:53:03 /health ...................................... ~ 0.11ms
-  2026-07-05 11:53:09 /health ...................................... ~ 0.08ms
-  2026-07-05 11:53:19 /health ...................................... ~ 0.08ms
-  2026-07-05 11:53:23 /health ...................................... ~ 0.10ms
-  2026-07-05 11:53:29 /health ...................................... ~ 0.11ms
-  2026-07-05 11:53:39 /health ...................................... ~ 0.08ms
-  2026-07-05 11:53:43 /health ...................................... ~ 0.09ms
-  2026-07-05 11:53:49 /health ...................................... ~ 0.10ms
-  2026-07-05 11:53:59 /health ...................................... ~ 0.09ms
-  2026-07-05 11:54:03 /health ...................................... ~ 0.08ms
-  2026-07-05 11:54:09 /health ...................................... ~ 0.10ms
-  2026-07-05 11:54:19 /health ...................................... ~ 0.12ms
-  2026-07-05 11:54:23 /health ...................................... ~ 0.12ms
-  2026-07-05 11:54:29 /health ...................................... ~ 0.08ms
-  2026-07-05 11:54:39 /health ...................................... ~ 0.09ms
-  2026-07-05 11:54:43 /health ...................................... ~ 0.10ms
-  2026-07-05 11:54:49 /health ...................................... ~ 0.09ms
-  2026-07-05 11:54:59 /health ...................................... ~ 0.10ms
-  2026-07-05 11:55:03 /health ...................................... ~ 0.11ms
-  2026-07-05 11:55:09 /health ...................................... ~ 0.08ms
-  2026-07-05 11:55:19 /health ...................................... ~ 0.09ms
-  2026-07-05 11:55:23 /health ...................................... ~ 0.16ms
-  2026-07-05 11:55:29 /health ...................................... ~ 0.10ms
-  2026-07-05 11:55:39 /health ...................................... ~ 0.08ms
-  2026-07-05 11:55:43 /health ...................................... ~ 0.09ms
-  2026-07-05 11:55:49 /health ...................................... ~ 0.09ms
-  2026-07-05 11:55:59 /health ...................................... ~ 0.14ms
-  2026-07-05 11:56:03 /health ...................................... ~ 0.09ms
-  2026-07-05 11:56:09 /health ...................................... ~ 0.10ms
-  2026-07-05 11:56:19 /health ...................................... ~ 0.10ms
-  2026-07-05 11:56:23 /health ...................................... ~ 0.12ms
-  2026-07-05 11:56:29 /health ...................................... ~ 0.10ms
-  2026-07-05 11:56:39 /health ...................................... ~ 0.11ms
-  2026-07-05 11:56:43 /health ...................................... ~ 0.10ms
-  2026-07-05 11:56:49 /health ...................................... ~ 0.08ms
-  2026-07-05 11:56:59 /health ...................................... ~ 0.08ms
-  2026-07-05 11:57:03 /health ...................................... ~ 0.10ms
-  2026-07-05 11:57:09 /health ...................................... ~ 0.09ms
-  2026-07-05 11:57:19 /health ...................................... ~ 0.10ms
-  2026-07-05 11:57:23 /health ...................................... ~ 0.09ms
-  2026-07-05 11:57:29 /health ...................................... ~ 0.09ms
-  2026-07-05 11:57:32 / ............................................ ~ 0.09ms
-  2026-07-05 11:57:36 /.env ........................................ ~ 0.08ms
-  2026-07-05 11:57:36 /admin ....................................... ~ 0.04ms
-  2026-07-05 11:57:39 /health .................................... ~ 500.37ms
-  2026-07-05 11:57:41 /health ...................................... ~ 0.11ms
-  2026-07-05 11:57:43 /health ...................................... ~ 0.09ms
-  2026-07-05 11:57:49 /health .................................... ~ 500.29ms
-  2026-07-05 11:57:59 /health ...................................... ~ 0.07ms
-  2026-07-05 11:58:03 /health ...................................... ~ 0.08ms
-  2026-07-05 11:58:09 /health ...................................... ~ 0.10ms
-  2026-07-05 11:58:19 /health ...................................... ~ 0.08ms
-  2026-07-05 11:58:23 /health ...................................... ~ 0.11ms
-  2026-07-05 11:58:29 /health ...................................... ~ 0.08ms
-  2026-07-05 11:58:39 /health ...................................... ~ 0.09ms
-  2026-07-05 11:58:43 /health ...................................... ~ 0.09ms
-  2026-07-05 11:58:49 /health ...................................... ~ 0.10ms
-  2026-07-05 11:58:55 /health ...................................... ~ 0.08ms
-  2026-07-05 11:58:55 / ............................................ ~ 0.11ms
-  2026-07-05 11:58:59 /health ...................................... ~ 0.09ms
-  2026-07-05 11:58:59 /storage/ .................................... ~ 0.17ms
-  2026-07-05 11:59:03 /health ...................................... ~ 0.11ms
-  2026-07-05 11:59:03 /health ...................................... ~ 0.08ms
-  2026-07-05 11:59:05 /health ...................................... ~ 0.15ms
-  2026-07-05 11:59:09 /health ...................................... ~ 0.09ms
-  2026-07-05 11:59:19 /health ...................................... ~ 0.09ms
+  2026-09-23 04:37:29 /health ...................................... ~ 0.07ms
+  2026-09-23 04:37:39 /health ...................................... ~ 0.07ms
+  2026-09-23 04:37:48 /health ...................................... ~ 0.07ms
+  2026-09-23 04:37:49 /health ...................................... ~ 0.07ms
+  2026-09-23 04:37:59 /health ...................................... ~ 0.07ms
+  2026-09-23 04:38:08 /health ...................................... ~ 0.07ms
+  2026-09-23 04:38:09 /health ...................................... ~ 0.07ms
+  2026-09-23 04:38:19 /health ...................................... ~ 0.07ms
+  2026-09-23 04:38:28 /health ...................................... ~ 0.07ms
+  2026-09-23 04:38:29 /health ...................................... ~ 0.07ms
+  2026-09-23 04:38:39 /health ...................................... ~ 0.08ms
+  2026-09-23 04:38:48 /health ...................................... ~ 0.07ms
+  2026-09-23 04:38:49 /health ...................................... ~ 0.07ms
+  2026-09-23 04:38:59 /health ...................................... ~ 0.07ms
+  2026-09-23 04:39:08 /health ...................................... ~ 0.07ms
+  2026-09-23 04:39:09 /health ...................................... ~ 0.07ms
+  2026-09-23 04:39:19 /health ...................................... ~ 0.07ms
+  2026-09-23 04:39:28 /health .................................... ~ 500.23ms
+  2026-09-23 04:39:29 /health ...................................... ~ 0.07ms
+  2026-09-23 04:39:39 /health ...................................... ~ 0.07ms
+  2026-09-23 04:39:48 /health .................................... ~ 500.23ms
+  2026-09-23 04:39:49 /health ...................................... ~ 0.07ms
+  2026-09-23 04:39:59 /health ...................................... ~ 0.07ms
+  2026-09-23 04:40:08 /health ...................................... ~ 0.06ms
+  2026-09-23 04:40:09 /health ...................................... ~ 0.07ms
+  2026-09-23 04:40:19 /health ...................................... ~ 0.07ms
+  2026-09-23 04:40:28 /health ...................................... ~ 0.06ms
+  2026-09-23 04:40:29 /health ...................................... ~ 0.07ms
+  2026-09-23 04:40:39 /health ...................................... ~ 0.07ms
+  2026-09-23 04:40:48 /health ...................................... ~ 0.06ms
+  2026-09-23 04:40:49 /health ...................................... ~ 0.07ms
+  2026-09-23 04:40:59 /health ...................................... ~ 0.07ms
+  2026-09-23 04:41:08 /health ...................................... ~ 0.06ms
+  2026-09-23 04:41:09 /health ...................................... ~ 0.07ms
+  2026-09-23 04:41:19 /health ...................................... ~ 0.10ms
+  2026-09-23 04:41:28 /health ...................................... ~ 0.06ms
+  2026-09-23 04:41:29 /health ...................................... ~ 0.08ms
+  2026-09-23 04:41:39 /health ...................................... ~ 0.07ms
+  2026-09-23 04:41:48 /health ...................................... ~ 0.06ms
+  2026-09-23 04:41:49 /health ...................................... ~ 0.09ms
+  2026-09-23 04:41:59 /health ...................................... ~ 0.09ms
+  2026-09-23 04:42:08 /health ...................................... ~ 0.06ms
+  2026-09-23 04:42:09 /health ...................................... ~ 0.07ms
+  2026-09-23 04:42:19 /health ...................................... ~ 0.09ms
+  2026-09-23 04:42:28 /health ...................................... ~ 0.06ms
+  2026-09-23 04:42:29 /health ...................................... ~ 0.07ms
+  2026-09-23 04:42:39 /health ...................................... ~ 0.07ms
+  2026-09-23 04:42:48 /health ...................................... ~ 0.06ms
+  2026-09-23 04:42:49 /health ...................................... ~ 0.07ms
+  2026-09-23 04:42:59 /health .................................... ~ 500.25ms
+  2026-09-23 04:43:08 /health ...................................... ~ 0.07ms
+  2026-09-23 04:43:09 /health .................................... ~ 500.22ms
+  2026-09-23 04:43:19 /health .................................... ~ 500.23ms
+  2026-09-23 04:43:28 /health ...................................... ~ 0.07ms
+  2026-09-23 04:43:29 /health ...................................... ~ 0.10ms
+  2026-09-23 04:43:39 /health ...................................... ~ 0.06ms
+  2026-09-23 04:43:48 /health ...................................... ~ 0.06ms
+  2026-09-23 04:43:49 /health ...................................... ~ 0.06ms
+  2026-09-23 04:43:59 /health ...................................... ~ 0.06ms
+  2026-09-23 04:44:08 /health ...................................... ~ 0.07ms
+  2026-09-23 04:44:09 /health ...................................... ~ 0.06ms
+  2026-09-23 04:44:19 /health ...................................... ~ 0.06ms
+  2026-09-23 04:44:28 /health ...................................... ~ 0.08ms
+  2026-09-23 04:44:29 /health ...................................... ~ 0.06ms
+  2026-09-23 04:44:39 /health ...................................... ~ 0.07ms
+  2026-09-23 04:44:48 /health ...................................... ~ 0.06ms
+  2026-09-23 04:44:49 /health ...................................... ~ 0.06ms
+  2026-09-23 04:44:59 /health ...................................... ~ 0.07ms
+  2026-09-23 04:45:08 /health ...................................... ~ 0.07ms
+  2026-09-23 04:45:09 /health ...................................... ~ 0.07ms
+  2026-09-23 04:45:19 /health ...................................... ~ 0.09ms
+  2026-09-23 04:45:28 /health ...................................... ~ 0.07ms
+  2026-09-23 04:45:29 /health ...................................... ~ 0.07ms
+  2026-09-23 04:45:35 /.env ........................................ ~ 0.07ms
+  2026-09-23 04:45:35 /storage/ .................................... ~ 0.02ms
+  2026-09-23 04:45:35 /admin ....................................... ~ 0.02ms
+  2026-09-23 04:45:35 /api/secrets ................................. ~ 0.02ms
+  2026-09-23 04:45:35 /dashboard ................................... ~ 0.02ms
+  2026-09-23 04:45:35 / ............................................ ~ 0.02ms
+  2026-09-23 04:45:39 /health ...................................... ~ 0.07ms
 ```

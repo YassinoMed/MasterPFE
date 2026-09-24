@@ -5,6 +5,8 @@ namespace: securerag-hub
 
 resources:
   - ../../base
+  - portal-admin-secret.yaml
+  - hpa-services.yaml
 
 configMapGenerator:
   - name: securerag-common-config
@@ -50,6 +52,14 @@ patches:
       - op: replace
         path: /spec/template/spec/containers/0/imagePullPolicy
         value: Always
+      - op: add
+        path: /spec/template/spec/containers/0/env/-
+        value:
+          name: PORTAL_ADMIN_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: portal-admin-token
+              key: token
   - target:
       kind: Deployment
       name: auth-users

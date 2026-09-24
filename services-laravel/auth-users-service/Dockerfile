@@ -3,15 +3,12 @@
 FROM composer:2@sha256:dc292c5c0f95f526b051d4c341bf08e7e2b18504c74625e3203d7f123050e318 AS composer-bin
 
 # ── Stage 2: Builder (compile extensions + install deps) ─────────
-FROM php:8.4-cli-bookworm@sha256:4714c394e9ea215809c4b68da9fda778044c723435279f7188a251134c64502a AS builder
+FROM php:8.4-cli-alpine@sha256:1f044d6de9f2338df85f32719dfd2938e284f848a91b5ccee6a3d375ca81caa5 AS builder
 
 ENV COMPOSER_ALLOW_SUPERUSER=1
 
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends curl unzip libicu-dev libsqlite3-dev libzip-dev libpq-dev \
-    && docker-php-ext-install pdo_sqlite pdo_mysql pdo_pgsql intl \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+RUN apk add --no-cache icu-dev sqlite-dev libzip-dev postgresql-dev unzip \
+    && docker-php-ext-install pdo_sqlite pdo_mysql pdo_pgsql intl
 
 COPY --from=composer-bin /usr/bin/composer /usr/bin/composer
 
@@ -35,7 +32,7 @@ COPY services-laravel/auth-users-service/.env.example ./
 RUN APP_ENV=production APP_KEY=base64:7n+2wA7QWsh1oFq0n0l9l7W5vX5D7e3W8q8e1r2t3y4= DB_CONNECTION=sqlite DB_DATABASE=:memory: composer dump-autoload --optimize && APP_ENV=production APP_KEY=base64:7n+2wA7QWsh1oFq0n0l9l7W5vX5D7e3W8q8e1r2t3y4= DB_CONNECTION=sqlite DB_DATABASE=:memory: php artisan package:discover --ansi
 
 # ── Stage 3: Runtime (Minimal — no apt, no curl, no shell tools) ─
-FROM php:8.4-cli-alpine@sha256:f074dc4cd01ef4cba6e3f65301a1c0dad4bde3b3aac923179f6ee6b414e50d1f AS runtime
+FROM php:8.4-cli-alpine@sha256:1f044d6de9f2338df85f32719dfd2938e284f848a91b5ccee6a3d375ca81caa5 AS runtime
 
 RUN apk add --no-cache icu-libs libpq sqlite-libs libzip \
     && addgroup -g 10001 app \

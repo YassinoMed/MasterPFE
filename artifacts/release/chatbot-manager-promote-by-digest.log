@@ -1,0 +1,5 @@
+#1 [internal] pushing localhost:5001/securerag-hub-chatbot-manager
+#1 0.000 copying sha256:8016dded9438ec4c61b90fb7ec81c9bb1946a4e5c8ee148c9949f4f293605769 from localhost:5001/securerag-hub-chatbot-manager@sha256:7d52f77d49fe1b3f458cb4c06ac9f3568c2f48c3a4f27dff56a39d59a11195eb to localhost:5001/securerag-hub-chatbot-manager
+#1 0.000 copying sha256:591e45984ddf3548e95e20125b124bbaff89a997f4835b420537697ac34accd5 from localhost:5001/securerag-hub-chatbot-manager@sha256:7d52f77d49fe1b3f458cb4c06ac9f3568c2f48c3a4f27dff56a39d59a11195eb to localhost:5001/securerag-hub-chatbot-manager
+#1 0.018 pushing sha256:7d52f77d49fe1b3f458cb4c06ac9f3568c2f48c3a4f27dff56a39d59a11195eb to localhost:5001/securerag-hub-chatbot-manager:release-local
+#1 DONE 0.0s

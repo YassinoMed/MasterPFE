@@ -631,6 +631,14 @@ pre-commit-install: ## Install pre-commit hooks (Gitleaks, shellcheck, yaml-chec
 	  echo "[OK] pre-commit hooks installed"; \
 	fi
 
+benchmark-k6: ## Run the k6 benchmark suite (smoke+load+stress) and print a summary
+	@bash scripts/performance/run-k6-tests.sh smoke load stress 2>&1 | tail -n 60
+	@echo "[INFO] Reports in reports/k6/ — latest run:"
+	@ls reports/k6/ | tail -n 3
+
+benchmark-report: ## Print a consolidated k6 summary table
+	@bash scripts/performance/benchmark-summary.sh
+
 # ----------------------------------------------------------------------------
 # Recette (staging) deployment targets — deploy to 63.250.59.72 via SSH
 # Requires: SSH key pair in infra/jenkins/secrets/recette-deploy-key

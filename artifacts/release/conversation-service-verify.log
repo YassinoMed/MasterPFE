@@ -1,0 +1,8 @@
+
+Verification for localhost:5001/securerag-hub-conversation-service@sha256:e33d4fe73a6ce95e37a087457ecc77f0b671c86cd4036b907ec83d11c709c608 --
+The following checks were performed on each of these signatures:
+  - The cosign claims were validated
+  - Existence of the claims in the transparency log was verified offline
+  - The signatures were verified against the specified public key
+
+[{"critical":{"identity":{"docker-reference":"localhost:5001/securerag-hub-conversation-service@sha256:e33d4fe73a6ce95e37a087457ecc77f0b671c86cd4036b907ec83d11c709c608"},"image":{"docker-manifest-digest":"sha256:e33d4fe73a6ce95e37a087457ecc77f0b671c86cd4036b907ec83d11c709c608"},"type":"https://sigstore.dev/cosign/sign/v1"},"optional":{}}]

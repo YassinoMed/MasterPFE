@@ -1,17 +1,17 @@
 # Kyverno admission tests — SecureRAG Hub
 
-- Generated UTC: `2026-07-25T20:39:54Z`
+- Generated UTC: `2026-09-24T03:59:35Z`
 - Status: `PARTIEL`
-- Pass: `5`  Fail: `1`
+- Pass: `1`  Fail: `5`
 
 ## PASS
 
-- REJECT/hostpath-volume
-- REJECT/privileged-container
-- REJECT/missing-resources
-- REJECT/loadbalancer-service
-- REJECT/cleartext-secret
+- ADMIT/compliant-pod
 
 ## FAIL
 
-- ADMIT/compliant-pod — expected admit, was rejected
+- REJECT/hostpath-volume — expected reject, was admitted
+- REJECT/privileged-container — expected reject, was admitted
+- REJECT/missing-resources — expected reject, was admitted
+- REJECT/loadbalancer-service — expected reject, was admitted
+- REJECT/cleartext-secret — expected reject, was admitted

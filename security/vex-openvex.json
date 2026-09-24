@@ -1,0 +1,10 @@
+{
+  "@context": ["https://openvex.dev/ns", "https://www.w3.org/ns/activitystreams"],
+  "@id": "urn:vex:securerag-hub:portfolio",
+  "@type": "OpenVEX",
+  "author": "SecureRAG Hub CI/CD",
+  "role": "Document Creator",
+  "timestamp": "2026-09-24T10:35:00Z",
+  "version": "1",
+  "statements": []
+}

@@ -1,0 +1,137 @@
+[
+  {
+    "id": "sg-pos-001",
+    "label": "positive",
+    "severity": "CRITICAL",
+    "source": "semgrep",
+    "rule_id": "php.cmdi.exec",
+    "path": "app/Http/Controllers/PwnController.php",
+    "content": "public function exec(Request $r) { $input = $r->get('cmd'); system($input); return view('pwned', ['output' => shell_exec($input)]); }"
+  },
+  {
+    "id": "sg-pos-002",
+    "label": "positive",
+    "severity": "HIGH",
+    "source": "semgrep",
+    "rule_id": "php.sqli.blind",
+    "path": "app/Http/Controllers/AuthController.php",
+    "content": "$user = DB::select(\"SELECT * FROM users WHERE email='{$r->email}'\");"
+  },
+  {
+    "id": "sg-pos-003",
+    "label": "positive",
+    "severity": "CRITICAL",
+    "source": "semgrep",
+    "rule_id": "php.hardcoded-password",
+    "path": "config/database.php",
+    "content": "'username' => 'admin', 'password' => 'production_secret_123'"
+  },
+  {
+    "id": "sg-pos-004",
+    "label": "positive",
+    "severity": "HIGH",
+    "source": "trivy",
+    "rule_id": "CVE-2025-CVE-PHP_EXEC",
+    "path": "vendor/laravel/framework/Illuminate/Foundation/Bootstrap/LoadConfiguration.php",
+    "content": "Eval executed with unsanitized system environment."
+  },
+  {
+    "id": "sg-pos-005",
+    "label": "positive",
+    "severity": "HIGH",
+    "source": "falco",
+    "rule_id": "falco.security.spawn-shell",
+    "path": "/bin/sh",
+    "content": "Shell spawned in pod by web process — try /bin/sh -c"
+  },
+  {
+    "id": "sg-pos-006",
+    "label": "positive",
+    "severity": "CRITICAL",
+    "source": "semgrep",
+    "rule_id": "php.xxe.doc",
+    "path": "app/Http/Controllers/XmlParserController.php",
+    "content": "$doc = SimpleXML::load_string($xml); echo $doc->asXML();"
+  },
+  {
+    "id": "sg-pos-007",
+    "label": "positive",
+    "severity": "HIGH",
+    "source": "kyverno",
+    "rule_id": "kyverno.disallow-privileged",
+    "path": "k8s/deployment.yaml",
+    "content": "spread containers run as privileged: true (allowed by policy)"
+  },
+  {
+    "id": "sg-pos-008",
+    "label": "positive",
+    "severity": "HIGH",
+    "source": "semgrep",
+    "rule_id": "php.jwt-weak-secret",
+    "path": "config/jwt.php",
+    "content": "'secret' => '123456'"
+  },
+  {
+    "id": "sg-neg-009",
+    "label": "negative",
+    "severity": "INFO",
+    "source": "semgrep",
+    "rule_id": "php.assess.prep.stmt",
+    "path": "app/Http/Controllers/pet/UserController.php",
+    "content": "DB::table('users')->where('id', $id)->first(); // prepared is safe"
+  },
+  {
+    "id": "sg-neg-010",
+    "label": "negative",
+    "severity": "INFO",
+    "source": "semgrep",
+    "rule_id": "php.no-hardcode",
+    "path": "config/app.php",
+    "content": "'name' => env('APP_NAME', 'SecureRAG Hub')"
+  },
+  {
+    "id": "sg-bord-011",
+    "label": "borderline",
+    "severity": "MEDIUM",
+    "source": "trivy",
+    "rule_id": "CVE-2023-22222",
+    "path": "vendor/monolog/monolog",
+    "content": "logging statement denied rate limit variable -- vulnerability theory: probably outdated, not an exploit"
+  },
+  {
+    "id": "sg-neg-012",
+    "label": "negative",
+    "severity": "INFO",
+    "source": "falco",
+    "rule_id": "falco.pod-status-check",
+    "path": "/health",
+    "content": "Liveness probe hit on unprivileged container — normal behavior"
+  },
+  {
+    "id": "sg-neg-013",
+    "label": "negative",
+    "severity": "INFO",
+    "source": "kyverno",
+    "rule_id": "kyverno.require-non-root",
+    "path": "k8s/rbac.yaml",
+    "content": "ServiceAccount default to root (restricted psa)"
+  },
+  {
+    "id": "sg-pos-014",
+    "label": "positive",
+    "severity": "HIGH",
+    "source": "semgrep",
+    "rule_id": "php.file-inclusion",
+    "path": "app/Http/Controllers/DocController.php",
+    "content": "readfile($_GET['file']); // path traversal attempt"
+  },
+  {
+    "id": "sg-bord-015",
+    "label": "borderline",
+    "severity": "LOW",
+    "source": "semgrep",
+    "rule_id": "php.error.info.disclosure",
+    "path": "app/Exceptions/Handler.php",
+    "content": "Response::json(['error' => $e->getMessage()], 500); // might leak stacktrace in debug mode"
+  }
+]

@@ -54,13 +54,6 @@ if [[ -n "${SERVICES:-}" ]]; then
   services=(${SERVICES//,/ })
 fi
 
-  case "${REGISTRY_HOST}" in
-    localhost:*|127.0.0.1:*|0.0.0.0:*)
-      ;;
-    *)
-      ;;
-  esac
-fi
 
 mkdir -p "${REPORT_DIR}" "${SBOM_DIR}"
 

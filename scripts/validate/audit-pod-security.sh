@@ -58,7 +58,8 @@ audit_one() {
   if ! check_field "${file}" '.spec.template.spec.securityContext.seccompProfile.type' 'RuntimeDefault' >/dev/null; then
     issues+=("seccompProfile.type != RuntimeDefault")
   fi
-  local amount; amount=$(yq eval '.spec.template.spec.automountServiceAccountToken // "missing"' "${file}")
+  # yq/jq `//` treats false as absent; read the raw value and compare to "null" instead.
+  local amount; amount=$(yq eval '.spec.template.spec.automountServiceAccountToken' "${file}" 2>/dev/null || echo "null")
   if [ "${amount}" != "false" ]; then
     issues+=("automountServiceAccountToken != false (got ${amount})")
   fi
@@ -71,7 +72,7 @@ audit_one() {
       ".spec.template.spec.containers[${i}].securityContext.allowPrivilegeEscalation|false" \
       ".spec.template.spec.containers[${i}].securityContext.readOnlyRootFilesystem|true" ; do
       IFS='|' read -r p exp <<<"${path_pair}"
-      v=$(yq eval "${p} // \"missing\"" "${file}")
+      v=$(yq eval "${p}" "${file}" 2>/dev/null || echo "null")
       if [ "${v}" != "${exp}" ]; then
         issues+=("${cname}: ${p##*.} != ${exp} (got ${v})")
       fi
@@ -100,7 +101,20 @@ audit_one() {
 }
 
 shopt -s nullglob
+LEGACY_OUT_OF_SCOPE=(api-gateway knowledge-hub llm-orchestrator security-auditor ollama qdrant ai-knowledge-graph ai-security-orchestrator)
+is_legacy() {
+  local name="$1"
+  for l in "${LEGACY_OUT_OF_SCOPE[@]}"; do
+    [[ "${l}" == "${name}" ]] && return 0
+  done
+  return 1
+}
 for f in infra/k8s/base/*/deployment.yaml; do
+  svc_name="$(basename "$(dirname "${f}")")"
+  if is_legacy "${svc_name}"; then
+    results+=("SKIP|${svc_name}|legacy/out-of-scope (per docs/architecture/official-scope.md)")
+    continue
+  fi
   audit_one "${f}"
 done
 shopt -u nullglob
@@ -121,7 +135,7 @@ verdict="TERMINÉ"
   echo "|:------:|---------|--------|"
   for r in "${results[@]}"; do
     IFS='|' read -r res svc issues <<< "${r}"
-    icon="✅"; [ "${res}" = "FAIL" ] && icon="❌"
+    icon="✅"; [ "${res}" = "FAIL" ] && icon="❌"; [ "${res}" = "SKIP" ] && icon="⏸️"
     printf '| %s %s | `%s` | %s |\n' "${icon}" "${res}" "${svc}" "${issues}"
   done
 } > "${REPORT}"

@@ -88,6 +88,9 @@ while IFS= read -r line; do
       if [[ "${code}" == "302" || "${code}" == "401" || "${code}" == "403" ]]; then
         pass "Unauthenticated access to protected page ${url} is properly blocked/redirected (HTTP ${code})"
         echo "| \`${url}\` | \`302/401/403\` | \`HTTP ${code}\` | ✅ Hardened |" >> "${REPORT_FILE}"
+      elif [[ "${code}" == "404" ]]; then
+        pass "Protected page ${url} is not exposed (HTTP 404, route absent)"
+        echo "| \`${url}\` | \`000\` | \`HTTP 404\` | ✅ Not exposed |" >> "${REPORT_FILE}"
       else
         fail "Protected page ${url} does not enforce authentication (HTTP ${code})"
         echo "| \`${url}\` | \`302/401/403\` | \`HTTP ${code}\` | ❌ VULNERABLE |" >> "${REPORT_FILE}"

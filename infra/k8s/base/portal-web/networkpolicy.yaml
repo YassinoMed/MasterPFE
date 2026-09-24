@@ -10,7 +10,13 @@ spec:
     - Ingress
     - Egress
   ingress:
-    - ports:
+    - from:
+        # Portail public (NodePort 30081) : trafic entrant autorisé depuis tout
+        # le cluster et les IP externes via kube-proxy (rôle frontend assumé).
+        - podSelector: {}
+        - ipBlock:
+            cidr: 0.0.0.0/0
+      ports:
         - protocol: TCP
           port: 8000
   egress:

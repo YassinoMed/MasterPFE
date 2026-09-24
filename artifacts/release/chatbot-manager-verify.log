@@ -1,0 +1,8 @@
+
+Verification for localhost:5001/securerag-hub-chatbot-manager@sha256:cddbcf4922fd6dca941751130728436d7c70a1250354134a07277bee45831ca6 --
+The following checks were performed on each of these signatures:
+  - The cosign claims were validated
+  - Existence of the claims in the transparency log was verified offline
+  - The signatures were verified against the specified public key
+
+[{"critical":{"identity":{"docker-reference":"localhost:5001/securerag-hub-chatbot-manager@sha256:cddbcf4922fd6dca941751130728436d7c70a1250354134a07277bee45831ca6"},"image":{"docker-manifest-digest":"sha256:cddbcf4922fd6dca941751130728436d7c70a1250354134a07277bee45831ca6"},"type":"https://sigstore.dev/cosign/sign/v1"},"optional":{}}]

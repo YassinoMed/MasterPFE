@@ -1,0 +1,19 @@
+{
+  "timestamp": "2026-09-24T05:55:00Z",
+  "tool": "trivy + patch",
+  "image": "multiple",
+  "previous": {
+    "total_high": 13,
+    "status": "REVIEW"
+  },
+  "current": {
+    "portal-web": {"critical": 0, "high": 0},
+    "auth-users": {"critical": 0, "high": 0},
+    "chatbot-manager": {"critical": 0, "high": 0},
+    "conversation-service": {"critical": 0, "high": 0},
+    "audit-security-service": {"critical": 0, "high": 0}
+  },
+  "verdict": "PASS",
+  "requires_human_review": true,
+  "notes": "Patch c-ares/openssl/guzzle/commonmark appliqué, digests régénérés."
+}

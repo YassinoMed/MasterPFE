@@ -101,31 +101,45 @@ mkdir -p "${REPORT_DIR}"
 
 mode="keyless"
 declare -a sign_args
-sign_args=(sign)
+# Optional local key-pair signing for dev/offline environments.
+# Activated only when COSIGN_KEY or COSIGN_PRIVATE_KEY points to a real key file.
+LOCAL_SIGN_KEY="${COSIGN_KEY:-${COSIGN_PRIVATE_KEY:-}}"
+if [[ -n "${LOCAL_SIGN_KEY}" && -f "${LOCAL_SIGN_KEY}" ]]; then
+  mode="key-pair"
+  sign_args+=(sign --key "${LOCAL_SIGN_KEY}")
+  warn "Using local key-pair signing (dev mode, not SLSA L3-compliant)"
+else
+  sign_args=(sign)
+fi
 
 if is_true "${COSIGN_YES}"; then
+  # --yes only needed for keyless/fulcio flows; harmless for key-pair
   sign_args+=(--yes)
 fi
 
 # ── SLSA L3: Keyless-only signing enforced ──────────────────────
 # Static key-pair signing is deprecated and violates SLSA Level 3.
 # All signing MUST use OIDC-based keyless flow via Fulcio/Rekor.
-if [[ -n "${COSIGN_KEY:-}" ]]; then
+# Exception: dev / offline environments may opt into key-pair mode by passing
+# a readable key via COSIGN_KEY or COSIGN_PRIVATE_KEY.
+if [[ "${mode}" != "key-pair" && -n "${COSIGN_KEY:-}" ]]; then
   warn "COSIGN_KEY is set but IGNORED — keyless-only mode enforced (SLSA L3)."
   warn "Remove COSIGN_KEY from your environment. Static key signing is deprecated."
   unset COSIGN_KEY
 fi
 
-# Configure Sigstore endpoints
+# Configure Sigstore endpoints (keyless mode only)
 FULCIO_URL="${FULCIO_URL:-http://fulcio.sigstore-system}"
 REKOR_URL="${REKOR_URL:-http://rekor.sigstore-system}"
 OIDC_ISSUER="${OIDC_ISSUER:-http://keycloak.sigstore-system/realms/securerag-cicd}"
 
-sign_args+=(
-  "--fulcio-url=${FULCIO_URL}"
-  "--rekor-url=${REKOR_URL}"
-  "--oidc-issuer=${OIDC_ISSUER}"
-)
+if [[ "${mode}" == "keyless" ]]; then
+  sign_args+=(
+    "--fulcio-url=${FULCIO_URL}"
+    "--rekor-url=${REKOR_URL}"
+    "--oidc-issuer=${OIDC_ISSUER}"
+  )
+fi
 
 {
   printf '# SecureRAG Hub image signing summary\n'

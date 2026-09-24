@@ -41,13 +41,12 @@ is_true() {
 require_command bash
 require_command kubectl
 
-  case "${REGISTRY_HOST}" in
-    localhost:*|127.0.0.1:*|0.0.0.0:*)
-      ;;
-    *)
-      ;;
-  esac
-fi
+case "${REGISTRY_HOST}" in
+  localhost:*|127.0.0.1:*|0.0.0.0:*)
+    ;;
+  *)
+    ;;
+esac
 
 mkdir -p "${REPORT_DIR}"
 

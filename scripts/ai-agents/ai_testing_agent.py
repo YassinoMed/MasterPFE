@@ -75,16 +75,23 @@ class AITestingAgent:
                     status_code = e.code
                     response_text = e.read().decode('utf-8', errors='ignore')[:100]
                 except Exception as e:
-                    # If endpoint is offline, we record a connection issue but mark it as handled (fail-safe)
-                    status_code = 500
+                    # Endpoint unreachable => test inconclusive, NOT a vulnerability.
+                    status_code = 0
                     response_text = f"Connection failed: {e}"
-                    
+
+                if status_code == 0:
+                    verdict = "INCONCLUSIVE"
+                elif status_code in [400, 401, 403, 404, 422] or "NORMAL" in response_text:
+                    verdict = "SAFE"
+                else:
+                    verdict = "VULNERABLE"
+
                 self.test_results.append({
                     "attack_type": attack_type,
                     "payload": payload,
                     "endpoint": path,
                     "response_status": status_code,
-                    "verdict": "SAFE" if status_code in [400, 401, 403, 404, 422] or "NORMAL" in response_text else "VULNERABLE"
+                    "verdict": verdict
                 })
 
     def run(self):
@@ -100,8 +107,13 @@ class AITestingAgent:
 """
         vulnerable_count = 0
         for res in self.test_results:
-            verdict_color = "🟢 SAFE" if res["verdict"] == "SAFE" else "🔴 VULNERABLE"
-            if res["verdict"] != "SAFE":
+            if res["verdict"] == "INCONCLUSIVE":
+                verdict_color = "⚪ INCONCLUSIVE (endpoint unavailable)"
+            elif res["verdict"] == "SAFE":
+                verdict_color = "🟢 SAFE"
+            else:
+                verdict_color = "🔴 VULNERABLE"
+            if res["verdict"] == "VULNERABLE":
                 vulnerable_count += 1
             report_md += f"""* **Type d'attaque** : `{res['attack_type']}`
   * Payload : `{res['payload']}`

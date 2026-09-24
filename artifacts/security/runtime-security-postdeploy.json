@@ -1,10 +1,5 @@
 {
-  "failures": [
-    "auth-users: HPA missing",
-    "chatbot-manager: HPA missing",
-    "conversation-service: HPA missing",
-    "audit-security-service: HPA missing"
-  ],
+  "failures": [],
   "globalControls": {
     "auditRoleBinding": true,
     "defaultDenyNetworkPolicy": true,
@@ -14,67 +9,45 @@
   "namespace": "securerag-hub",
   "services": [
     {
-      "desired": 3,
-      "failures": [
-        "HPA missing"
-      ],
-      "hpaPresent": false,
-      "imageIDCoverage": 3,
-      "livePods": 3,
-      "networkPolicySelected": true,
-      "pdbPresent": true,
-      "pods": [
-        {
-          "created": "2026-06-25T10:30:42Z",
-          "imageIDs": [
-            "localhost:5001/securerag-hub-auth-users@sha256:7b24d8aa5f36d0db05d10fb2a46286711cc4a2304f47dde84ba796362aef5522"
-          ],
-          "name": "auth-users-8678978685-bfl4l",
-          "ready": true,
-          "runtimeFailures": []
-        },
-        {
-          "created": "2026-06-25T10:30:54Z",
-          "imageIDs": [
-            "localhost:5001/securerag-hub-auth-users@sha256:7b24d8aa5f36d0db05d10fb2a46286711cc4a2304f47dde84ba796362aef5522"
-          ],
-          "name": "auth-users-8678978685-l7968",
-          "ready": true,
-          "runtimeFailures": []
-        },
-        {
-          "created": "2026-06-25T10:31:25Z",
-          "imageIDs": [
-            "localhost:5001/securerag-hub-auth-users@sha256:7b24d8aa5f36d0db05d10fb2a46286711cc4a2304f47dde84ba796362aef5522"
-          ],
-          "name": "auth-users-8678978685-zrn25",
-          "ready": true,
-          "runtimeFailures": []
-        }
-      ],
-      "readyPods": 3,
-      "runtimeCoverage": 3,
-      "service": "auth-users",
-      "serviceAccount": "sa-auth-users",
-      "status": "PARTIEL"
-    },
-    {
       "desired": 1,
-      "failures": [
-        "HPA missing"
-      ],
-      "hpaPresent": false,
+      "failures": [],
+      "hpaPresent": true,
       "imageIDCoverage": 1,
       "livePods": 1,
       "networkPolicySelected": true,
       "pdbPresent": true,
       "pods": [
         {
-          "created": "2026-06-25T10:30:42Z",
+          "created": "2026-09-22T12:09:21Z",
           "imageIDs": [
-            "localhost:5001/securerag-hub-chatbot-manager@sha256:086ed526afb4439f6d4c5590326be3a757574ccda5e894ce1b652054bde84513"
+            "localhost:5001/securerag-hub-auth-users@sha256:0d7795be3c8c678f3616779b1365d5ae160efce38b6a2e03c8b6fba3bf74ec93"
           ],
-          "name": "chatbot-manager-79b79d59c4-lvgtp",
+          "name": "auth-users-776cc8bfdb-95sj7",
+          "ready": true,
+          "runtimeFailures": []
+        }
+      ],
+      "readyPods": 1,
+      "runtimeCoverage": 1,
+      "service": "auth-users",
+      "serviceAccount": "sa-auth-users",
+      "status": "TERMIN\u00c9"
+    },
+    {
+      "desired": 1,
+      "failures": [],
+      "hpaPresent": true,
+      "imageIDCoverage": 1,
+      "livePods": 1,
+      "networkPolicySelected": true,
+      "pdbPresent": true,
+      "pods": [
+        {
+          "created": "2026-09-22T12:09:21Z",
+          "imageIDs": [
+            "localhost:5001/securerag-hub-chatbot-manager@sha256:7d52f77d49fe1b3f458cb4c06ac9f3568c2f48c3a4f27dff56a39d59a11195eb"
+          ],
+          "name": "chatbot-manager-77b78ffb97-dl96v",
           "ready": true,
           "runtimeFailures": []
         }
@@ -83,25 +56,23 @@
       "runtimeCoverage": 1,
       "service": "chatbot-manager",
       "serviceAccount": "sa-chatbot-manager",
-      "status": "PARTIEL"
+      "status": "TERMIN\u00c9"
     },
     {
       "desired": 1,
-      "failures": [
-        "HPA missing"
-      ],
-      "hpaPresent": false,
+      "failures": [],
+      "hpaPresent": true,
       "imageIDCoverage": 1,
       "livePods": 1,
       "networkPolicySelected": true,
       "pdbPresent": true,
       "pods": [
         {
-          "created": "2026-06-25T10:30:43Z",
+          "created": "2026-09-22T12:09:22Z",
           "imageIDs": [
-            "localhost:5001/securerag-hub-conversation-service@sha256:35f53f4cd274b54021812ed48b95991af875c7e8e0aa66c53bb06df65fe4e03f"
+            "localhost:5001/securerag-hub-conversation-service@sha256:68e3d1f29ed008be81171d5a9f7711da5b030ad2e26846828905def992fe5b6c"
           ],
-          "name": "conversation-service-6bc4c7dbc6-pq7xf",
+          "name": "conversation-service-86bbd9598b-gr9wd",
           "ready": true,
           "runtimeFailures": []
         }
@@ -110,25 +81,23 @@
       "runtimeCoverage": 1,
       "service": "conversation-service",
       "serviceAccount": "sa-conversation-service",
-      "status": "PARTIEL"
+      "status": "TERMIN\u00c9"
     },
     {
       "desired": 1,
-      "failures": [
-        "HPA missing"
-      ],
-      "hpaPresent": false,
+      "failures": [],
+      "hpaPresent": true,
       "imageIDCoverage": 1,
       "livePods": 1,
       "networkPolicySelected": true,
       "pdbPresent": true,
       "pods": [
         {
-          "created": "2026-06-25T10:30:43Z",
+          "created": "2026-09-22T12:09:22Z",
           "imageIDs": [
-            "localhost:5001/securerag-hub-audit-security-service@sha256:6cf5cd864a1eb4b9179869b55519c1ba7b86d03f355b28506d3b7de97325d9bb"
+            "localhost:5001/securerag-hub-audit-security-service@sha256:f681d9c8f698b01be192a2471cc5230652ccc0f2ce8fcbe86433e468ede0a58b"
           ],
-          "name": "audit-security-service-667b7997b4-j5m7r",
+          "name": "audit-security-service-5fd6685f64-n7fjh",
           "ready": true,
           "runtimeFailures": []
         }
@@ -137,51 +106,33 @@
       "runtimeCoverage": 1,
       "service": "audit-security-service",
       "serviceAccount": "sa-audit-security-service",
-      "status": "PARTIEL"
+      "status": "TERMIN\u00c9"
     },
     {
-      "desired": 3,
+      "desired": 1,
       "failures": [],
       "hpaPresent": true,
-      "imageIDCoverage": 3,
-      "livePods": 3,
+      "imageIDCoverage": 1,
+      "livePods": 1,
       "networkPolicySelected": true,
       "pdbPresent": true,
       "pods": [
         {
-          "created": "2026-06-25T10:31:26Z",
+          "created": "2026-09-23T03:20:08Z",
           "imageIDs": [
-            "localhost:5001/securerag-hub-portal-web@sha256:fa1fc37b44b4cedc7e32c38940f1971f5e9af7c7b6d425d66d3214cd4bc18f80"
+            "localhost:5001/securerag-hub-portal-web@sha256:88492602d12bf81f4a6c8f611fb82f75de067e147a4fc0639989b33c7d2a905b"
           ],
-          "name": "portal-web-859c78db95-8xxmr",
-          "ready": true,
-          "runtimeFailures": []
-        },
-        {
-          "created": "2026-06-25T10:30:59Z",
-          "imageIDs": [
-            "localhost:5001/securerag-hub-portal-web@sha256:fa1fc37b44b4cedc7e32c38940f1971f5e9af7c7b6d425d66d3214cd4bc18f80"
-          ],
-          "name": "portal-web-859c78db95-v9vwx",
-          "ready": true,
-          "runtimeFailures": []
-        },
-        {
-          "created": "2026-06-25T10:30:42Z",
-          "imageIDs": [
-            "localhost:5001/securerag-hub-portal-web@sha256:fa1fc37b44b4cedc7e32c38940f1971f5e9af7c7b6d425d66d3214cd4bc18f80"
-          ],
-          "name": "portal-web-859c78db95-z68jt",
+          "name": "portal-web-68978bbc68-v4wfb",
           "ready": true,
           "runtimeFailures": []
         }
       ],
-      "readyPods": 3,
-      "runtimeCoverage": 3,
+      "readyPods": 1,
+      "runtimeCoverage": 1,
       "service": "portal-web",
       "serviceAccount": "sa-portal-web",
       "status": "TERMIN\u00c9"
     }
   ],
-  "status": "PARTIEL"
+  "status": "TERMIN\u00c9"
 }

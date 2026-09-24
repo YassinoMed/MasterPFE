@@ -1,0 +1,5 @@
+#1 [internal] pushing localhost:5001/securerag-hub-portal-web
+#1 0.000 copying sha256:c6888b6c09ac2127dac432eab7f66f2e64a6cbad48a0bee575bf06a8a3eae510 from localhost:5001/securerag-hub-portal-web@sha256:88492602d12bf81f4a6c8f611fb82f75de067e147a4fc0639989b33c7d2a905b to localhost:5001/securerag-hub-portal-web
+#1 0.000 copying sha256:dab62ec717b9d0a68f2c59a86ca9f8e794efbfd4f57ded7e91a13f842045eb12 from localhost:5001/securerag-hub-portal-web@sha256:88492602d12bf81f4a6c8f611fb82f75de067e147a4fc0639989b33c7d2a905b to localhost:5001/securerag-hub-portal-web
+#1 0.019 pushing sha256:88492602d12bf81f4a6c8f611fb82f75de067e147a4fc0639989b33c7d2a905b to localhost:5001/securerag-hub-portal-web:release-local
+#1 DONE 0.0s

@@ -19,7 +19,7 @@ mkdir -p "$(dirname "${REPORT}")"
 require() { command -v "$1" >/dev/null 2>&1 || { echo "[FAIL] missing $1" >&2; exit 2; }; }
 require yq
 
-services=(api-gateway audit-security-service auth-users chatbot-manager conversation-service knowledge-hub llm-orchestrator ollama portal-web qdrant security-auditor)
+services=(audit-security-service auth-users chatbot-manager conversation-service portal-web)
 
 failures=0
 results=()

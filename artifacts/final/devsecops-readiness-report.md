@@ -2,7 +2,7 @@
 
 ## 1. Contexte
 
-- Généré le : `2026-06-15T19:14:05Z`
+- Généré le : `2026-09-23T14:40:04Z`
 - Scénario officiel : `demo`
 - Autorité CI/CD officielle : Jenkins
 - Namespace Kubernetes : `securerag-hub`
@@ -13,29 +13,29 @@
 | Composant | État | Preuve observée |
 |---|---:|---|
 | Jenkins | OK | `http://localhost:8085/login` |
-| Portal Web | OK | `http://localhost:8081/health` |
+| Portal Web | PARTIEL | `http://localhost:8081/health` |
 | Namespace Kubernetes | OK | `kubectl get ns securerag-hub` |
 | Pods applicatifs | OK | `kubectl get pods -n securerag-hub` |
 | HPA | OK | `kubectl get hpa -n securerag-hub` |
-| Metrics API | PARTIEL | `kubectl get apiservice v1beta1.metrics.k8s.io` |
+| Metrics API | OK | `kubectl get apiservice v1beta1.metrics.k8s.io` |
 | Kyverno CRD | OK | `kubectl get crd clusterpolicies.kyverno.io` |
 
 ## 3. Preuves DevSecOps
 
 | Domaine | État | Artefact principal |
 |---|---:|---|
-| Jenkins webhook / CI push | PARTIEL | `artifacts/jenkins/github-webhook-validation.md` |
+| Jenkins webhook / CI push | OK | `artifacts/jenkins/github-webhook-validation.md` |
 | Jenkins commit consommé après push | PARTIEL | `artifacts/jenkins/ci-push-trigger-proof.md` |
-| Supply chain execute | PARTIEL | `artifacts/release/supply-chain-execute-summary.md` |
-| Signature Cosign | MANQUANT | `artifacts/release/sign-summary.txt` |
-| Vérification Cosign | MANQUANT | `artifacts/release/verify-summary.txt` |
-| Promotion par digest | MANQUANT | `artifacts/release/promotion-digests.txt` |
-| SBOM Syft | MANQUANT | `artifacts/sbom/sbom-index.txt` |
+| Supply chain execute | OK | `artifacts/release/supply-chain-execute-summary.md` |
+| Signature Cosign | OK | `artifacts/release/sign-summary.txt` |
+| Vérification Cosign | OK | `artifacts/release/verify-summary.txt` |
+| Promotion par digest | OK | `artifacts/release/promotion-digests.txt` |
+| SBOM Syft | OK | `artifacts/sbom/sbom-index.txt` |
 | Evidence release | OK | `artifacts/release/release-evidence.md` |
 | Evidence supply chain | OK | `artifacts/release/supply-chain-evidence.md` |
 | Addons sécurité cluster | PARTIEL | `artifacts/validation/cluster-security-addons.md` |
 | Résumé final | OK | `artifacts/final/final-validation-summary.md` |
-| Support pack | OK | `artifacts/support-pack/support-demo-20260411T144030Z.tar.gz` |
+| Support pack | OK | `artifacts/support-pack/support-demo-20260411T085511Z.tar.gz` |
 
 ## 4. Lecture soutenance
 

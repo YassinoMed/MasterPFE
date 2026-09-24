@@ -1,0 +1,16 @@
+apiVersion: kyverno.io/v2
+kind: PolicyException
+metadata:
+  name: secai-exception
+  namespace: securerag-hub
+  labels: {app.kubernetes.io/part-of: securerag-hub}
+spec:
+  exceptions:
+    - policyName: securerag-restrict-service-exposure
+      ruleNames: ["allow-nodeport-only-for-portal-web"]
+  match:
+    any:
+      - resources:
+          kinds: ["Service"]
+          names: ["secai"]
+          namespaces: ["securerag-hub"]

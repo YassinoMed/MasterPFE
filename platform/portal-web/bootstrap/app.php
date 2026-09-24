@@ -15,6 +15,9 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->append(SecurityHeaders::class);
         $middleware->append(\SecureRag\LaravelSecurity\Http\Middleware\PrometheusMetricsMiddleware::class);
+        $middleware->alias([
+            'portal.admin' => \App\Http\Middleware\RequireAdminToken::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

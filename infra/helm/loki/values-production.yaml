@@ -1,0 +1,33 @@
+loki:
+  enabled: true
+
+promtail:
+  enabled: true
+
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 300m
+      memory: 256Mi
+
+  extraArgs:
+    - -config.expand-env=true
+
+  config:
+    clients:
+      - url: http://loki:3100/loki/api/v1/push
+
+    positions:
+      filename: /run/promtail/positions.yaml
+
+    snippets:
+      scrapeConfigs: |
+        - job_name: test
+          static_configs:
+            - targets:
+                - localhost
+              labels:
+                job: test
+                __path__: /tmp/promtail-test/*.log

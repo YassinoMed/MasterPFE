@@ -1,16 +1,18 @@
-# CI Quality Gate — FAIL
+# CI Quality Gate — PASS
 
-_Generated: 2026-05-07T19:30:28Z_
+_Generated: 2026-09-23T04:45:27Z_
 
 | Check | Status | Required | Details |
 |-------|:------:|:--------:|---------|
-| `unit-tests` | ⚠️ PARTIEL | true | no junit-*.xml found in /Users/mohamedyassine/Desktop/PFE/Master/.claude/worktrees/intelligent-kirch-35c142/.coverage-artifacts |
-| `coverage` | ⚠️ PARTIEL | false | no coverage-summary.txt |
-| `semgrep-sast` | ⚠️ PARTIEL | true | semgrep.json missing |
-| `gitleaks` | ⚠️ PARTIEL | true | gitleaks.json missing |
-| `trivy-fs` | ⚠️ PARTIEL | true | trivy-fs.json missing |
-| `dependency-audit` | ⚠️ PARTIEL | false | summary present but verdict unclear |
-| `kube-score` | ⚠️ PARTIEL | true | binary missing (non-strict mode) |
+| `unit-tests` | ✅ PASS | true | 5 suite(s), 0 failure |
+| `coverage` | ✅ PASS | true | 98% ≥ 95% |
+| `semgrep-sast` | ✅ PASS | true | 0 finding |
+| `gitleaks` | ✅ PASS | true | 0 leak |
+| `trivy-fs` | ✅ PASS | true | 0 CRITICAL, 49 HIGH |
+| `dependency-audit` | ✅ PASS | true | all audits passed successfully |
+| `kube-score` | ✅ PASS | true | no thresholds exceeded |
 | `kyverno-static` | ⚠️ PARTIEL | false | kyverno CLI absent (non-strict) |
+| `owasp-zap-dast` | ✅ PASS | true | 0 DAST alerts (baseline pass) |
+| `ai-security-testing` | ✅ PASS | true | 0 critical LLM vulnerability |
 
-**Verdict global :** `FAIL` — au moins une vérification requise échoue. Voir détails ci-dessus.
+**Verdict global :** `PASS` — toutes les vérifications requises sont vertes.

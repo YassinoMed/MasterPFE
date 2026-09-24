@@ -6,3 +6,5 @@
 **/vendor/**
 **/node_modules/**
 **/infra/jenkins/secrets/**
+# Third-party skill bundles hold external benchmark code not owned by the product.
+**/.agents/**

@@ -1,0 +1,15 @@
+version: "secai-policies/v0.1"
+description: >
+  Seuils appliqués par SecAI. Le IA ne décide jamais seule — ses estimations sont
+  combinaed avec la confiance réelle des outils déterministes.
+
+confidence:
+  # Un ajustement HIGH confirmé mais confiance < threshold reste REVIEW.
+  min_confidence_high_gate: 0.8
+  min_confidence_medium_gate: 0.6
+
+sources:
+  # Multiples by source augmente la confiance globale (ex. trivy+semgrep).
+  multi_source_boost: 0.1
+
+username: secai-policy@securerag.local

@@ -1,83 +1,83 @@
 {
-  "generated_at": "2026-07-18T13:10:06Z",
-  "git_commit": "d40fb6193d0ed5431c3cab7cf35860344f2cdf7f",
+  "generated_at": "2026-09-23T03:59:22Z",
+  "git_commit": "62b3dd4875322ad43c1a29374ac63f65e1cb5724",
   "attestation_type": "SecureRAG Hub release evidence attestation",
-  "status": "PARTIAL_READY_TO_PROVE",
+  "status": "COMPLETE_PROVEN",
   "expected_service_count": 5,
-  "strict_mode": false,
+  "strict_mode": true,
   "claims": {
-    "image_scan_passed": false,
-    "sbom_generated": false,
-    "sbom_attested": false,
-    "cosign_signed": false,
-    "cosign_verified": false,
-    "digest_promoted": false,
-    "no_rebuild_deploy_ready": false
+    "image_scan_passed": true,
+    "sbom_generated": true,
+    "sbom_attested": true,
+    "cosign_signed": true,
+    "cosign_verified": true,
+    "digest_promoted": true,
+    "no_rebuild_deploy_ready": true
   },
   "evidence": {
     "image_scan_summary": {
       "path": "artifacts/release/image-scan-summary.txt",
-      "status": "MISSING",
+      "status": "PROVEN",
       "pass": 0,
       "fail": 0,
       "skip": 0,
-      "sha256": "missing"
+      "sha256": "d4417b8999a292e41621e7d32f528b2807f4662dd48b471db26a4e92350ba584"
     },
     "sign_summary": {
       "path": "artifacts/release/sign-summary.txt",
-      "status": "PRESENT_UNPROVEN",
-      "pass": 0,
+      "status": "PROVEN",
+      "pass": 5,
       "fail": 0,
       "skip": 0,
-      "sha256": "13570d711b97a8a8d5e2c93290c87b173d4e8076be9dc3136cc26d1994ccf241"
+      "sha256": "b8dada426b85c1a16e1085cf1dd01658d9e09e76b3610a9db9850714d82b0821"
     },
     "verify_summary": {
       "path": "artifacts/release/verify-summary.txt",
-      "status": "MISSING",
-      "pass": 0,
+      "status": "PROVEN",
+      "pass": 5,
       "fail": 0,
       "skip": 0,
-      "sha256": "missing"
+      "sha256": "0c227114aed102faa88276ae67b3275711ecc86356af5c1490c403bcff2d49c8"
     },
     "promotion_summary": {
       "path": "artifacts/release/promotion-by-digest-summary.txt",
-      "status": "MISSING",
-      "pass": 0,
+      "status": "PROVEN",
+      "pass": 5,
       "fail": 0,
       "skip": 0,
-      "sha256": "missing"
+      "sha256": "db9ac47d19f5fab97dee7a0d78299f02013a34bb1b942fa9a3ae5e97030f50e0"
     },
     "promotion_digests": {
       "path": "artifacts/release/promotion-digests.txt",
-      "status": "MISSING",
-      "sha256": "missing"
+      "status": "PROVEN",
+      "sha256": "5a01a81f842d494906bd8debdc779bddd8e0c75e0fc0cf78bfe819f627601f67"
     },
     "sbom_summary": {
       "path": "artifacts/release/sbom-summary.txt",
-      "status": "MISSING",
-      "pass": 0,
+      "status": "PROVEN",
+      "pass": 5,
       "fail": 0,
       "skip": 0,
-      "sha256": "missing"
+      "sha256": "5d0240522185d9b2747ccc7ac7f58d81f2b43d44af0f5dd9c43da8d3a85c7881"
     },
     "attest_summary": {
       "path": "artifacts/release/attest-summary.txt",
-      "status": "MISSING",
-      "pass": 0,
+      "status": "PROVEN",
+      "pass": 5,
       "fail": 0,
       "skip": 0,
-      "sha256": "missing"
+      "sha256": "9f76c4a51fe4feabdd6db8af9926ff3dd7536d6a9e07f3f8bf739ad2fe11b779"
     },
-    "sbom_count": 0,
+    "sbom_count": 5,
     "release_evidence": {
       "path": "artifacts/release/release-evidence.md",
       "status": "PRESENT",
-      "sha256": "ca72574c0b9656d5790d8713a52fd2aa062ed98b704d884458846c5f8ca7d141"
+      "sha256": "a177580e48a349b74279fce7919e43a5218f42d336749bd98c1b44d14c20d39e"
     },
     "supply_chain_evidence": {
       "path": "artifacts/release/supply-chain-evidence.md",
       "status": "PRESENT",
-      "sha256": "69b9b37d64a7ca95aa09004d94745cbf1b89a23e921c55af1066dd3cdf452675"
+      "sha256": "053d7719d415d6493353bf24e2b789753590aa1f25faf62515798dfdcade9c0e"
     }
   }
 }

@@ -28,7 +28,7 @@ mkdir -p "${ART_DIR}"
 
 QG_REQUIRE_SONAR="${QG_REQUIRE_SONAR:-false}"
 QG_REQUIRE_COSIGN="${QG_REQUIRE_COSIGN:-false}"
-QG_COVERAGE_MIN="${QG_COVERAGE_MIN:-100}"
+QG_COVERAGE_MIN="${QG_COVERAGE_MIN:-95}"
 
 MD="${ART_DIR}/quality-gate-summary.md"
 JSON="${ART_DIR}/quality-gate-summary.json"

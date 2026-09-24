@@ -73,6 +73,8 @@ for app in "${apps[@]}"; do
 
   if grep -Fq 'rm -rf /var/lib/apt/lists/*' "${dockerfile}"; then
     row "${app}" "APT cache cleanup" "TERMINÉ" "apt lists removed"
+  elif grep -Eq 'apk (add|--no-cache)' "${dockerfile}"; then
+    row "${app}" "APT cache cleanup" "TERMINÉ" "apk-based build (alpine), no apt cache"
   else
     row "${app}" "APT cache cleanup" "FAIL" "apt lists cleanup missing"
   fi

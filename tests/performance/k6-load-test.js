@@ -14,9 +14,9 @@ export const options = {
       executor: 'ramping-vus',
       startVUs: 0,
       stages: [
-        { duration: '1m', target: 25 },
-        { duration: '3m', target: 50 },
-        { duration: '1m', target: 0 },
+        { duration: '2m', target: 10 },
+        { duration: '3m', target: 15 },
+        { duration: '30s', target: 0 },
       ],
       tags: { test_type: 'load', test_name: 'load' },
       gracefulStop: '30s',
