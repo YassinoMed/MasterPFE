@@ -22,10 +22,16 @@ spec:
                 - Pod
               namespaces:
                 - securerag-hub
+                - securerag-dev
+                - securerag-test
+                - securerag-staging
+                - securerag-preprod
+                - securerag-prod
       verifyImages:
         - imageReferences:
             - "registry.securerag.local/*"
             - "localhost:5001/securerag-hub-*"
+            - "kind-registry.registry.svc.cluster.local:5001/securerag-hub-*"
           required: true
           mutateDigest: true
           verifyDigest: true
@@ -33,10 +39,11 @@ spec:
             - count: 1
               entries:
                 - keys:
+                    # Rotation 2026-09-25 : l'ancienne clé privée (security/keys/cosign.key)
+                    # était indéchiffrable (mot de passe inconnu). Nouvelle paire générée,
+                    # images signées, clé privée stockée dans Vault (secret/securerag/pipeline).
                     publicKeys: |
                       -----BEGIN PUBLIC KEY-----
-                      MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEWi542BhMHqQ+sAD+XHASRdZByUHM
-                      LwDszD5/eaF50VMBNTOVixQIRxnzMxwNnk8xiWpyr5ctmVRXJr1Ix8lAHA==
+                      MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEnbWQ/uK/K9dbV2c79kPbRrj31kcQ
+                      nPRQKxX2P86qL9nPfcSJnngSMlz7SSqW7IuV5/hTgdMxmaVHrm5d4zhvtg==
                       -----END PUBLIC KEY-----
-
-
