@@ -35,13 +35,17 @@ spec:
           required: true
           mutateDigest: true
           verifyDigest: true
+          # Registry local Kind en HTTP clair (maillage via Service registry/kind-registry).
+          imageRegistryCredentials:
+            allowInsecureRegistry: true
           attestors:
             - count: 1
               entries:
                 - keys:
-                    # Rotation 2026-09-25 : l'ancienne clé privée (security/keys/cosign.key)
-                    # était indéchiffrable (mot de passe inconnu). Nouvelle paire générée,
-                    # images signées, clé privée stockée dans Vault (secret/securerag/pipeline).
+                    # Signatures hors-ligne (pas de rekor sur un cluster Kind isolé) :
+                    # on demande à Kyverno de ne pas interroger le transparency log.
+                    rekor:
+                      ignoreTlog: true
                     publicKeys: |
                       -----BEGIN PUBLIC KEY-----
                       MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEnbWQ/uK/K9dbV2c79kPbRrj31kcQ
