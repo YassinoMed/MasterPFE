@@ -1,0 +1,30 @@
+# Autorise les workloads SecureRAG à exporter leurs traces/métriques
+# vers l'OpenTelemetry Collector (namespace otel-system).
+# Flux minimal : TCP 4318 (OTLP/HTTP) et 4317 (OTLP/gRPC).
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-otel-egress
+spec:
+  podSelector:
+    matchExpressions:
+      - key: app.kubernetes.io/name
+        operator: In
+        values:
+          - portal-web
+          - auth-users
+          - chatbot-manager
+          - conversation-service
+          - audit-security-service
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: otel-system
+      ports:
+        - protocol: TCP
+          port: 4318
+        - protocol: TCP
+          port: 4317
