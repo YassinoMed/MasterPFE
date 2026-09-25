@@ -3,14 +3,18 @@ kind: Kustomization
 
 namespace: securerag-hub
 
+# NOTE 2026-09-25 (remédiation multi-environnements) :
+# namespace.yaml / resourcequota.yaml / limitrange.yaml ont été RETIRÉS de la base
+# (ils étaient câblés sur securerag-hub). Chaque overlay porte désormais son propre
+# namespace/quota/limitrange via infra/k8s/environments/<env>/ ou une référence
+# explicite (overlays historiques hub : demo, dr, recette).
 resources:
-  - namespace.yaml
-  - resourcequota.yaml
-  - limitrange.yaml
   - networkpolicy-default-deny.yaml
   - networkpolicy-allow-dns.yaml
   - networkpolicy-validation-ingress.yaml
   - networkpolicy-validation-egress.yaml
+  - networkpolicy-allow-monitoring.yaml
+  - networkpolicy-allow-otel-egress.yaml
   - rbac-runtime-readonly.yaml
   - validation/serviceaccount.yaml
   - common-configmap.yaml
