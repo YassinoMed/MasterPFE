@@ -17,6 +17,15 @@ data:
     log_level: info
     priority: notice
     buffered_outputs: false
+    # Falco >= 0.42 : l'enrichissement container passe par le plugin dédié
+    # (libcontainer.so est embarqué dans l'image officielle). Requis par les
+    # règles SecureRAG qui utilisent les champs %container.* / %k8s.*.
+    plugins:
+      - name: container
+        library_path: /usr/share/falco/plugins/libcontainer.so
+        init_config: ""
+    load_plugins:
+      - container
     syscall_event_drops:
       threshold: 0.1
       actions: [log, alert]

@@ -58,6 +58,14 @@ spec:
     - server: https://kubernetes.default.svc
       namespace: securerag-production
     - server: https://kubernetes.default.svc
+      namespace: securerag-prod
+    - server: https://kubernetes.default.svc
+      namespace: securerag-test
+    - server: https://kubernetes.default.svc
+      namespace: securerag-preprod
+    - server: https://kubernetes.default.svc
+      namespace: securerag-hub-dr
+    - server: https://kubernetes.default.svc
       namespace: securerag-dr
   clusterResourceWhitelist:
     - group: ""
