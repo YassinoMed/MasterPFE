@@ -16,8 +16,13 @@ spec:
     helm:
       values: "server:\n  tolerations:\n  - key: node-role.kubernetes.io/control-plane\n\
         \    operator: Exists\n    effect: NoSchedule\n  - key: node-role.kubernetes.io/master\n\
-        \    operator: Exists\n    effect: NoSchedule\n  affinity: {}\ninjector:\n\
-        \  enabled: true\nui:\n  enabled: true\n  serviceType: ClusterIP\n"
+        \    operator: Exists\n    effect: NoSchedule\n  affinity:\n    podAntiAffinity:\n\
+        \      preferredDuringSchedulingIgnoredDuringExecution:\n      - weight: 100\n\
+        \        podAffinityTerm:\n          labelSelector:\n            matchLabels:\n\
+        \              app.kubernetes.io/instance: securerag-vault\n             \
+        \ app.kubernetes.io/name: vault\n              component: server\n       \
+        \   topologyKey: kubernetes.io/hostname\ninjector:\n  enabled: true\nui:\n\
+        \  enabled: true\n  serviceType: ClusterIP\n"
   destination:
     server: https://kubernetes.default.svc
     namespace: vault
