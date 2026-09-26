@@ -62,6 +62,11 @@ spec:
       destination:
         server: https://kubernetes.default.svc
         namespace: '{{namespace}}'
+      ignoreDifferences:
+        - group: external-secrets.io
+          kind: ExternalSecret
+          jqPathExpressions:
+            - '.metadata.annotations["reconcile.external-secrets.io/data-hash"]'
       syncPolicy:
         automated:
           prune: true

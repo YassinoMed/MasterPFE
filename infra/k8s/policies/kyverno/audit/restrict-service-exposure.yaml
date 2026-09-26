@@ -45,3 +45,5 @@ spec:
                   - ClusterIP:chatbot-manager
                   - ClusterIP:conversation-service
                   - ClusterIP:audit-security-service
+                  - ClusterIP:postgres-auth
+                  - ClusterIP:secai
