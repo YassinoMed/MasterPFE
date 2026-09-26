@@ -32,3 +32,9 @@ kubeadmConfigPatches:
 # + pousser audit-policy.yaml dans le nœud avant le démarrage
 # (docker cp <control-plane>:/etc/kubernetes/audit-policy.yaml)
 ```
+
+## Encryption at rest (activé le 2026-09-26)
+- Flag : `--encryption-provider-config=/etc/kubernetes/encryption-config.yaml` (provider aescbc + identity fallback)
+- ⚠️ API v1 : le champ est `secret:` (pas `key:` comme en v1beta1) — 4 tentatives nécessaires pour le trouver
+- La clé réelle vit UNIQUEMENT sur le nœud control-plane : `/etc/kubernetes/encryption-config.yaml` (ne JAMAIS la committer)
+- Re-chiffrement : `kubectl get secrets -A -o yaml | kubectl replace -f -`
