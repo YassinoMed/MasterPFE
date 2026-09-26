@@ -5,6 +5,7 @@ namespace: securerag-hub-dr
 
 resources:
   - portal-admin-externalsecret.yaml
+  - externalsecret-common.yaml
   - ../../environments/dr
   - ../../base
 
