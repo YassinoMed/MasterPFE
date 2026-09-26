@@ -1,0 +1,25 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: portal-web
+  annotations:
+    cert-manager.io/cluster-issuer: securerag-selfsigned
+  labels:
+    app.kubernetes.io/name: portal-web
+    app.kubernetes.io/part-of: securerag-hub
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts: ["securerag.local"]
+      secretName: portal-web-tls
+  rules:
+    - host: securerag.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: portal-web
+                port:
+                  number: 80
