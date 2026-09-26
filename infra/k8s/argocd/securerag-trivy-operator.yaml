@@ -1,0 +1,45 @@
+# Trivy Operator — Scan continu des vulnérabilités des workloads en cours
+# d'exécution (VulnerabilityReports + ConfigAuditReports + métriques Prometheus).
+# Phase 2 de la roadmap maturité DevSecOps.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: securerag-trivy-operator
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "18"
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: securerag-hub
+  source:
+    repoURL: https://aquasecurity.github.io/helm-charts
+    chart: trivy-operator
+    targetRevision: 0.35.0
+    helm:
+      values: |
+        # Namespace de l'opérateur lui-même ; le scanner tourne dans chaque ns
+        trivy:
+          # Ne fait pas bloquer le build sur les vulns sans fix (reporting pur)
+          ignoreUnfixed: true
+        operator:
+          scannerReplicas: 2
+          metricsFindings: true
+          metricsVulnerabilityId: true
+        serviceMonitor:
+          enabled: true
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: trivy-system
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m
