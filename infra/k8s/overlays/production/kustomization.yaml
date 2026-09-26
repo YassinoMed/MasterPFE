@@ -1,19 +1,22 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
-namespace: securerag-hub
+# Overlay PROD SecureRAG — namespace dédié securerag-prod (isolation réelle).
+# SLSA L3 : images épinglées par digest — MAJ uniquement via la pipeline CD
+# (scripts/release/promote-by-digest.sh). Jamais de tag flottant.
+namespace: securerag-prod
 
 resources:
+  - ../../environments/prod
   - ../../base
   - hpa-auth-users.yaml
   - hpa-chatbot-manager.yaml
   - hpa-conversation-service.yaml
   - hpa-audit-security-service.yaml
-  - ../../policies/kyverno/enforce
-  - ../../opa-gatekeeper/constraints
-  # ArgoCD GitOps resources are managed via infra/k8s/argocd/kustomization.yaml
-  # Applied by the root Application (securerag-root) in the argocd namespace.
-  # See: infra/k8s/argocd/application-root.yaml
+  - externalsecret-common.yaml
+  - portal-admin-externalsecret.yaml
+  # Les ClusterPolicies Kyverno sont gérées par l'Application securerag-kyverno-policies
+  # (ne pas les ré-importer ici — cela créait des SharedResourceWarning ArgoCD).
 
 configMapGenerator:
   - name: securerag-common-config
@@ -26,24 +29,24 @@ configMapGenerator:
 generatorOptions:
   disableNameSuffixHash: true
 
-# SLSA L3: Images pinned by digest — updated by CD pipeline (scripts/release/promote-by-digest.sh)
-# Never use mutable tags in production. Digests are immutable references.
+# Images immuables : digests épinglés (build release-local, signé cosign, présent
+# dans le registry localhost:5001). Jamais sha256:000… placeholder.
 images:
   - name: ghcr.io/example/securerag-hub-portal-web
-    newName: localhost:5001/securerag-hub-portal-web
-    digest: sha256:0000000000000000000000000000000000000000000000000000000000000000
+    newName: kind-registry.registry.svc.cluster.local:5001/securerag-hub-portal-web
+    digest: sha256:2dc7db2867e1f93e9f104e5bc701e74a783a88f54a41c3ea80589f6501000066
   - name: ghcr.io/example/securerag-hub-auth-users
-    newName: localhost:5001/securerag-hub-auth-users
-    digest: sha256:0000000000000000000000000000000000000000000000000000000000000000
+    newName: kind-registry.registry.svc.cluster.local:5001/securerag-hub-auth-users
+    digest: sha256:4c5c849ef809865d3aa914f1c87db06af827804ca5afba0251af22b88ad02e78
   - name: ghcr.io/example/securerag-hub-chatbot-manager
-    newName: localhost:5001/securerag-hub-chatbot-manager
-    digest: sha256:0000000000000000000000000000000000000000000000000000000000000000
+    newName: kind-registry.registry.svc.cluster.local:5001/securerag-hub-chatbot-manager
+    digest: sha256:cddbcf4922fd6dca941751130728436d7c70a1250354134a07277bee45831ca6
   - name: ghcr.io/example/securerag-hub-conversation-service
-    newName: localhost:5001/securerag-hub-conversation-service
-    digest: sha256:0000000000000000000000000000000000000000000000000000000000000000
+    newName: kind-registry.registry.svc.cluster.local:5001/securerag-hub-conversation-service
+    digest: sha256:e33d4fe73a6ce95e37a087457ecc77f0b671c86cd4036b907ec83d11c709c608
   - name: ghcr.io/example/securerag-hub-audit-security-service
-    newName: localhost:5001/securerag-hub-audit-security-service
-    digest: sha256:0000000000000000000000000000000000000000000000000000000000000000
+    newName: kind-registry.registry.svc.cluster.local:5001/securerag-hub-audit-security-service
+    digest: sha256:ec79f5730dd958a9573e84e13c4499c03a9f53283802119ef2b432d553990fd1
 
 patches:
   - path: patches/portal-web-ha.yaml
@@ -52,7 +55,10 @@ patches:
   - path: patches/conversation-service-ha.yaml
   - path: patches/audit-security-service-ha.yaml
   - path: patches/pdb-production.yaml
-  - path: patches/resourcequota-production.yaml
   - path: patches/portal-web-hpa-production.yaml
-  - path: patches/portal-web-service-nodeport.yaml
   - path: patches/portal-web-admin-credentials.yaml
+  # RETIRÉS volontairement le 2026-09-25 (remédiation) :
+  #  - patches/resourcequota-production.yaml : ciblait le quota historique
+  #    securerag-hub-quota ; remplacé par infra/k8s/environments/prod/resource-quota.yaml
+  #  - patches/portal-web-service-nodeport.yaml : NodePort 30081 déjà occupé par
+  #    securerag-hub (conflit de port Kind) ; accès prod via kubectl port-forward.

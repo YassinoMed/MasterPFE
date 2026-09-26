@@ -7,8 +7,11 @@ resources:
   - namespace.yaml
   - project.yaml
   - application-root.yaml
-  - application-demo.yaml
-  - application-production.yaml
+  # application-demo.yaml et application-production.yaml : RETIRÉS le 2026-09-25.
+  # Les Applications securerag-demo / securerag-production sont générées par
+  # l'ApplicationSet securerag-all-services (ownerRef vérifié) — les fichiers
+  # standalone créaient une double définition conflictuelle (deux gestionnaires
+  # pour la même Application). Fichiers conservés comme référence/documention.
   - applicationset-platform.yaml
   - applicationset-all.yaml
   - application-harbor.yaml

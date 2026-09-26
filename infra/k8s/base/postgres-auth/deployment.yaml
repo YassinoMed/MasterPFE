@@ -24,7 +24,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: postgres-auth
-          image: localhost:5001/postgres:16-alpine
+          image: localhost:5001/postgres@sha256:1a66d744c1b459e13b05a8fca341da84cb63383e99ce262210efee5a319d4551
           imagePullPolicy: IfNotPresent
           args:
             - -c

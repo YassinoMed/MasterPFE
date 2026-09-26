@@ -2,15 +2,18 @@ apiVersion: kyverno.io/v1
 kind: ClusterPolicy
 metadata:
   name: securerag-restrict-image-references
+  labels:
+    app.kubernetes.io/part-of: securerag-hub
+    app.kubernetes.io/managed-by: kyverno
   annotations:
-    policies.kyverno.io/title: Restrict SecureRAG image references
     policies.kyverno.io/category: Software Supply Chain Security
     policies.kyverno.io/severity: high
     policies.kyverno.io/subject: Pod
+    policies.kyverno.io/title: Restrict SecureRAG image references
     policies.kyverno.io/description: >-
       Audits Pods that use mutable latest tags or images outside the trusted
-      registries required by the official SecureRAG Laravel runtime. Validation
-      Pods are limited to the pinned curlimages/curl helper image family.
+      registries required by the official SecureRAG Laravel runtime.
+      Validation Pods are limited to the pinned curlimages/curl helper image family.
 spec:
   validationFailureAction: Enforce
   background: true
@@ -23,15 +26,21 @@ spec:
                 - Pod
               namespaces:
                 - securerag-hub
+                - securerag-dev
+                - securerag-test
+                - securerag-staging
+                - securerag-preprod
+                - securerag-prod
       validate:
-        message: Mutable latest tags are not accepted for SecureRAG runtime Pods.
-        foreach:
-          - list: "request.object.spec.containers[]"
-            pattern:
-              image: "!*:latest"
-          - list: "request.object.spec.initContainers[] || []"
-            pattern:
-              image: "!*:latest"
+        message: >-
+          Mutable latest tags are not accepted for SecureRAG runtime Pods.
+        pattern:
+          spec:
+            containers:
+              - image: "!*:latest"
+            =(initContainers):
+              - image: "!*:latest"
+
     - name: restrict-registries
       match:
         any:
@@ -40,21 +49,26 @@ spec:
                 - Pod
               namespaces:
                 - securerag-hub
+                - securerag-dev
+                - securerag-test
+                - securerag-staging
+                - securerag-preprod
+                - securerag-prod
               selector:
                 matchExpressions:
                   - key: job-role
                     operator: DoesNotExist
       validate:
-        message: Runtime images must come from localhost:5001 or ghcr.io.
-        foreach:
-          - list: "request.object.spec.containers[]"
-            anyPattern:
-              - image: "localhost:5001/*"
-              - image: "ghcr.io/*"
-          - list: "request.object.spec.initContainers[] || []"
-            anyPattern:
-              - image: "localhost:5001/*"
-              - image: "ghcr.io/*"
+        message: >-
+          Runtime images must come from localhost:5001,
+          kind-registry.registry.svc.cluster.local:5001 or ghcr.io.
+        pattern:
+          spec:
+            containers:
+              - image: "localhost:5001/* | kind-registry.registry.svc.cluster.local:5001/* | ghcr.io/*"
+            =(initContainers):
+              - image: "localhost:5001/* | kind-registry.registry.svc.cluster.local:5001/* | ghcr.io/*"
+
     - name: restrict-validation-helper-image
       match:
         any:
@@ -63,17 +77,49 @@ spec:
                 - Pod
               namespaces:
                 - securerag-hub
+                - securerag-dev
+                - securerag-test
+                - securerag-staging
+                - securerag-preprod
+                - securerag-prod
               selector:
                 matchLabels:
                   job-role: validation
       validate:
-        message: Validation Pods may only use the pinned curlimages/curl and grafana/k6 helper families.
-        foreach:
-          - list: "request.object.spec.containers[]"
-            anyPattern:
-              - image: "curlimages/curl:*"
-              - image: "grafana/k6:*"
-          - list: "request.object.spec.initContainers[] || []"
-            anyPattern:
-              - image: "curlimages/curl:*"
-              - image: "grafana/k6:*"
+        message: >-
+          Validation Pods may only use the pinned curlimages/curl and
+          grafana/k6 helper families.
+        pattern:
+          spec:
+            containers:
+              - image: "curlimages/curl:* | grafana/k6:*"
+            =(initContainers):
+              - image: "curlimages/curl:* | grafana/k6:*"
+
+    - name: require-immutable-image-digests
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+              namespaces:
+                - securerag-hub
+                - securerag-dev
+                - securerag-test
+                - securerag-staging
+                - securerag-preprod
+                - securerag-prod
+              selector:
+                matchExpressions:
+                  - key: job-role
+                    operator: DoesNotExist
+      validate:
+        message: >-
+          All containers in SecureRAG namespaces must use immutable digest
+          references (@sha256:...). No floating tag is ever admitted.
+        pattern:
+          spec:
+            containers:
+              - image: "*@sha256:*"
+            =(initContainers):
+              - image: "*@sha256:*"

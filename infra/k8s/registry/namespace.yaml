@@ -1,0 +1,19 @@
+# Miroir registry partagé : rend le registry Docker local `kind-registry`
+# joignable depuis les PODS via DNS Kubernetes (CoreDNS), sous le nom stable
+#   kind-registry.registry.svc.cluster.local:5000
+#
+# Pourquoi : containerd des nœuds Kind joint le registry via
+# /etc/containerd/certs.d/<reg>/hosts.toml → http://kind-registry:5000 (DNS Docker),
+# mais les contrôleurs in-cluster (Kyverno verifyImages, futures vérifications)
+# ont besoin d'un nom résolvable par CoreDNS. Ce Service sans selector +
+# Endpoints statiques comble ce fossé SANS recréer le cluster.
+#
+# NOTE exploit : si le conteneur Docker kind-registry est recréé avec une
+# nouvelle IP, mettre à jour UNIQUEMENT infra/k8s/registry/endpoints.yaml.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: registry
+  labels:
+    app.kubernetes.io/part-of: securerag-platform
+    pod-security.kubernetes.io/enforce: restricted

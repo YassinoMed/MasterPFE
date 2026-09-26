@@ -1,3 +1,6 @@
+# ⚠️ DÉPRÉCIÉ (2026-09-25) : Application générée par ApplicationSet securerag-all-services.
+# Ce fichier nest plus référencé par infra/k8s/argocd/kustomization.yaml (double définition).
+#
 # Application Argo CD pour l'overlay 'production' (HA Laravel + digests).
 #
 # ⚠️  IMPORTANT — targetRevision: main

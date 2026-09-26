@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: securerag-staging-quota
+  namespace: securerag-staging
+spec:
+  hard:
+    requests.cpu: "2"
+    requests.memory: "2Gi"
+    limits.cpu: "6"
+    limits.memory: "6Gi"
+    pods: "20"
+    services: "20"

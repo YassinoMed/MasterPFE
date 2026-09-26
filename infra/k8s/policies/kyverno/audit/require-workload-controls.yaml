@@ -23,6 +23,11 @@ spec:
                 - Deployment
               namespaces:
                 - securerag-hub
+                - securerag-dev
+                - securerag-test
+                - securerag-staging
+                - securerag-preprod
+                - securerag-prod
       validate:
         message: Every SecureRAG deployment container must declare readiness, liveness and startup probes.
         foreach:
@@ -40,6 +45,11 @@ spec:
                 - Deployment
               namespaces:
                 - securerag-hub
+                - securerag-dev
+                - securerag-test
+                - securerag-staging
+                - securerag-preprod
+                - securerag-prod
       validate:
         message: Deployment pod templates must disable automatic ServiceAccount token mounting.
         pattern:

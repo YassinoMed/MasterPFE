@@ -1,0 +1,29 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: securerag-sa
+  namespace: securerag-dev
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: securerag-sa
+  namespace: securerag-test
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: securerag-sa
+  namespace: securerag-staging
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: securerag-sa
+  namespace: securerag-preprod
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: securerag-sa
+  namespace: securerag-prod

@@ -23,6 +23,11 @@ spec:
                 - Pod
               namespaces:
                 - securerag-hub
+                - securerag-dev
+                - securerag-test
+                - securerag-staging
+                - securerag-preprod
+                - securerag-prod
               operations:
                 - CREATE
                 - UPDATE

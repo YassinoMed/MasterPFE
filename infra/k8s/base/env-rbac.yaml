@@ -1,0 +1,29 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: svc-sa
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: env-only-list
+rules:
+- apiGroups: [""]
+  resources: ["pods","services"]
+  verbs: ["get","list"]
+- apiGroups: ["apps"]
+  resources: ["deployments"]
+  verbs: ["get","list"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: svc-read-only
+subjects:
+- kind: ServiceAccount
+  name: svc-sa
+roleRef:
+  kind: Role
+  name: env-only-list
+  apiGroup: rbac.authorization.k8s.io
+- neither {roles: [], calories: []} -- never accept to create centres if encode etc.

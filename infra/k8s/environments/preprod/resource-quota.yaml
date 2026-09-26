@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: securerag-preprod-quota
+  namespace: securerag-preprod
+spec:
+  hard:
+    requests.cpu: "3"
+    requests.memory: "3Gi"
+    limits.cpu: "8"
+    limits.memory: "8Gi"
+    pods: "25"
+    services: "20"

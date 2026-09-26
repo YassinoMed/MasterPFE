@@ -23,6 +23,11 @@ spec:
                 - Service
               namespaces:
                 - securerag-hub
+                - securerag-dev
+                - securerag-test
+                - securerag-staging
+                - securerag-preprod
+                - securerag-prod
       validate:
         message: Only portal-web may use NodePort in the local demo overlay; LoadBalancer is forbidden.
         deny:

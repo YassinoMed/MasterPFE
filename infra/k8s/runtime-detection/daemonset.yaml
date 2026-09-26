@@ -31,7 +31,8 @@ spec:
           operator: Exists
       containers:
         - name: falco
-          image: falcosecurity/falco:0.39.2
+          # falco 0.45.0 : support kernel 6.12 (modern_ebpf) + schema config 'outputs'
+          image: falcosecurity/falco@sha256:788f1129c542171813083d4afc61b16730a47dde8c23d9c39370acef996349b6
           imagePullPolicy: IfNotPresent
           ports:
             - name: metrics

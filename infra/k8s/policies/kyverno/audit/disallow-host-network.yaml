@@ -22,6 +22,11 @@ spec:
                 - Pod
               namespaces:
                 - securerag-hub
+                - securerag-dev
+                - securerag-test
+                - securerag-staging
+                - securerag-preprod
+                - securerag-prod
       validate:
         message: "Pods must not use the host network (hostNetwork: false)."
         pattern:

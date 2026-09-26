@@ -5,7 +5,10 @@ kind: Kustomization
 # Source pinned to a tagged release for reproducibility.
 
 resources:
-  - https://github.com/kyverno/kyverno/releases/download/v1.16.2/install.yaml
+  # v1.16.2 downgrade involontaire (cassait le boot de l'admission controller :
+  # "x509: failed to parse private key" sur la paire TLS générée par v1.19.x).
+  # Repin à la version saine éprouvée sur ce cluster.
+  - https://github.com/kyverno/kyverno/releases/download/v1.19.1/install.yaml
 
 patches:
   - target:

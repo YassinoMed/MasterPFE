@@ -24,9 +24,9 @@ data:
       enabled: true
       interval: 1h
       output_rule: true
-    outputs:
-      rate: 1
-      max_burst: 1000
+    # Bloc `outputs:` (rate/max_burst) retiré 2026-09-25 : rejeté par le schéma
+    # de validation de Falco 0.39.x ; les valeurs retirées étaient les défauts.
+
     stdout_output:
       enabled: true
     http_output:
