@@ -16,7 +16,7 @@ spec:
     helm:
       values: "server:\n  tolerations:\n  - key: node-role.kubernetes.io/control-plane\n\
         \    operator: Exists\n    effect: NoSchedule\n  - key: node-role.kubernetes.io/master\n\
-        \    operator: Exists\n    effect: NoSchedule\n  affinity: null\ninjector:\n\
+        \    operator: Exists\n    effect: NoSchedule\n  affinity: {}\ninjector:\n\
         \  enabled: true\nui:\n  enabled: true\n  serviceType: ClusterIP\n"
   destination:
     server: https://kubernetes.default.svc
