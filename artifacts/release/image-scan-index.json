@@ -2,68 +2,68 @@
   "images": [
     {
       "artifact": "security/reports/trivy-image-auth-users.json",
-      "detail": "critical=0; high=13; total=13; HIGH findings are reported but non-blocking by policy",
+      "detail": "critical=0; high=0; total=0",
       "image": "localhost:5001/securerag-hub-auth-users:dev",
       "log": "artifacts/release/auth-users-image-scan.log",
       "service": "auth-users",
       "severity_counts": {
         "CRITICAL": 0,
-        "HIGH": 13,
-        "TOTAL": 13
+        "HIGH": 0,
+        "TOTAL": 0
       },
-      "status": "WARN"
+      "status": "PASS"
     },
     {
       "artifact": "security/reports/trivy-image-chatbot-manager.json",
-      "detail": "critical=0; high=13; total=13; HIGH findings are reported but non-blocking by policy",
+      "detail": "critical=0; high=0; total=0",
       "image": "localhost:5001/securerag-hub-chatbot-manager:dev",
       "log": "artifacts/release/chatbot-manager-image-scan.log",
       "service": "chatbot-manager",
       "severity_counts": {
         "CRITICAL": 0,
-        "HIGH": 13,
-        "TOTAL": 13
+        "HIGH": 0,
+        "TOTAL": 0
       },
-      "status": "WARN"
+      "status": "PASS"
     },
     {
       "artifact": "security/reports/trivy-image-conversation-service.json",
-      "detail": "critical=0; high=13; total=13; HIGH findings are reported but non-blocking by policy",
+      "detail": "critical=0; high=0; total=0",
       "image": "localhost:5001/securerag-hub-conversation-service:dev",
       "log": "artifacts/release/conversation-service-image-scan.log",
       "service": "conversation-service",
       "severity_counts": {
         "CRITICAL": 0,
-        "HIGH": 13,
-        "TOTAL": 13
+        "HIGH": 0,
+        "TOTAL": 0
       },
-      "status": "WARN"
+      "status": "PASS"
     },
     {
       "artifact": "security/reports/trivy-image-audit-security-service.json",
-      "detail": "critical=0; high=13; total=13; HIGH findings are reported but non-blocking by policy",
+      "detail": "critical=0; high=0; total=0",
       "image": "localhost:5001/securerag-hub-audit-security-service:dev",
       "log": "artifacts/release/audit-security-service-image-scan.log",
       "service": "audit-security-service",
       "severity_counts": {
         "CRITICAL": 0,
-        "HIGH": 13,
-        "TOTAL": 13
+        "HIGH": 0,
+        "TOTAL": 0
       },
-      "status": "WARN"
+      "status": "PASS"
     },
     {
       "artifact": "security/reports/trivy-image-portal-web.json",
-      "detail": "critical=0; high=13; total=13; HIGH findings are reported but non-blocking by policy",
+      "detail": "critical=0; high=0; total=0",
       "image": "localhost:5001/securerag-hub-portal-web:dev",
       "log": "artifacts/release/portal-web-image-scan.log",
       "service": "portal-web",
       "severity_counts": {
         "CRITICAL": 0,
-        "HIGH": 13,
-        "TOTAL": 13
+        "HIGH": 0,
+        "TOTAL": 0
       },
-      "status": "WARN"
+      "status": "PASS"
     }
   ]
 }

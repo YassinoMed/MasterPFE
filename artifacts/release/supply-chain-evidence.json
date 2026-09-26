@@ -1,0 +1,8 @@
+{
+  "verdict": "PASS",
+  "signatures": 5,
+  "sbom_total": 5,
+  "cosign_verify": "5/5",
+  "supply_chain_integrity": "COMPLETE",
+  "remarks": "SecAI findings count derived from. Only findings written by allocator"
+}

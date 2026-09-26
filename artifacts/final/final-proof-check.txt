@@ -1,5 +1,5 @@
 === SecureRAG Hub - Final Proof Check ===
-timestamp_utc=2026-09-24T08:01:21Z
+timestamp_utc=2026-09-25T06:53:11Z
 namespace=securerag-hub
 
 [PASS] Command available: docker
@@ -14,58 +14,59 @@ namespace=securerag-hub
 [PASS] Reference campaign summary is present
 [PASS] Final validation summary is present
 [PASS] Release evidence is present
-[INFO] Mandatory supply-chain evidence gate passed. Report: artifacts/release/supply-chain-gate-report.md
-[PASS] Mandatory supply-chain evidence gate passed
+attestation status is 'PARTIAL_READY_TO_PROVE', expected COMPLETE_PROVEN
+[ERROR] Mandatory supply-chain evidence is incomplete or unproven. See artifacts/release/supply-chain-gate-report.md
+[FAIL] Mandatory supply-chain evidence gate failed
 [PASS] Support pack found: artifacts/support-pack/support-demo-20260411T144030Z.tar.gz
 
 === Kubernetes quick view ===
-NAME                                          READY   STATUS    RESTARTS      AGE
-pod/audit-security-service-5fd6685f64-n7fjh   1/1     Running   0             43h
-pod/auth-users-776cc8bfdb-95sj7               1/1     Running   1 (35h ago)   43h
-pod/chatbot-manager-77b78ffb97-dl96v          1/1     Running   0             43h
-pod/conversation-service-86bbd9598b-gr9wd     1/1     Running   0             43h
-pod/portal-web-68978bbc68-v4wfb               1/1     Running   0             28h
-pod/postgres-auth-58f89fd9bf-b55hk            1/1     Running   0             44h
-pod/secai-7fc5df5fb8-k8c4k                    1/1     Running   0             10h
+NAME                                          READY   STATUS    RESTARTS        AGE
+pod/audit-security-service-5fd6685f64-n7fjh   1/1     Running   0               2d18h
+pod/auth-users-776cc8bfdb-95sj7               1/1     Running   1 (2d10h ago)   2d18h
+pod/chatbot-manager-77b78ffb97-dl96v          1/1     Running   0               2d18h
+pod/conversation-service-86bbd9598b-gr9wd     1/1     Running   0               2d18h
+pod/portal-web-68978bbc68-v4wfb               1/1     Running   0               2d3h
+pod/postgres-auth-58f89fd9bf-b55hk            1/1     Running   0               2d19h
+pod/secai-7fc5df5fb8-k8c4k                    1/1     Running   0               33h
 
 NAME                             TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)          AGE
-service/audit-security-service   ClusterIP   10.96.143.193   <none>        8000/TCP         3d
-service/auth-users               ClusterIP   10.96.110.152   <none>        8000/TCP         3d
-service/chatbot-manager          ClusterIP   10.96.143.240   <none>        8000/TCP         3d
-service/conversation-service     ClusterIP   10.96.142.217   <none>        8000/TCP         3d
-service/portal-web               NodePort    10.96.133.152   <none>        8000:30081/TCP   3d
-service/postgres-auth            ClusterIP   10.96.45.242    <none>        5432/TCP         3d
-service/secai                    ClusterIP   10.96.189.28    <none>        8001/TCP         10h
+service/audit-security-service   ClusterIP   10.96.143.193   <none>        8000/TCP         3d22h
+service/auth-users               ClusterIP   10.96.110.152   <none>        8000/TCP         3d22h
+service/chatbot-manager          ClusterIP   10.96.143.240   <none>        8000/TCP         3d22h
+service/conversation-service     ClusterIP   10.96.142.217   <none>        8000/TCP         3d22h
+service/portal-web               NodePort    10.96.133.152   <none>        8000:30081/TCP   3d22h
+service/postgres-auth            ClusterIP   10.96.45.242    <none>        5432/TCP         3d22h
+service/secai                    ClusterIP   10.96.189.28    <none>        8001/TCP         33h
 
 NAME                                                         REFERENCE                           TARGETS       MINPODS   MAXPODS   REPLICAS   AGE
-horizontalpodautoscaler.autoscaling/audit-security-service   Deployment/audit-security-service   cpu: 1%/70%   1         3         1          38h
-horizontalpodautoscaler.autoscaling/auth-users               Deployment/auth-users               cpu: 2%/70%   1         3         1          38h
-horizontalpodautoscaler.autoscaling/chatbot-manager          Deployment/chatbot-manager          cpu: 1%/70%   1         3         1          38h
-horizontalpodautoscaler.autoscaling/conversation-service     Deployment/conversation-service     cpu: 1%/70%   1         3         1          38h
-horizontalpodautoscaler.autoscaling/portal-web               Deployment/portal-web               cpu: 3%/70%   1         3         1          3d
+horizontalpodautoscaler.autoscaling/audit-security-service   Deployment/audit-security-service   cpu: 1%/70%   1         3         1          2d13h
+horizontalpodautoscaler.autoscaling/auth-users               Deployment/auth-users               cpu: 2%/70%   1         3         1          2d13h
+horizontalpodautoscaler.autoscaling/chatbot-manager          Deployment/chatbot-manager          cpu: 1%/70%   1         3         1          2d13h
+horizontalpodautoscaler.autoscaling/conversation-service     Deployment/conversation-service     cpu: 1%/70%   1         3         1          2d13h
+horizontalpodautoscaler.autoscaling/portal-web               Deployment/portal-web               cpu: 3%/70%   1         3         1          3d22h
 
 NAME                                                    MIN AVAILABLE   MAX UNAVAILABLE   ALLOWED DISRUPTIONS   AGE
-poddisruptionbudget.policy/audit-security-service-pdb   1               N/A               0                     3d
-poddisruptionbudget.policy/auth-users-pdb               1               N/A               0                     3d
-poddisruptionbudget.policy/chatbot-manager-pdb          1               N/A               0                     3d
-poddisruptionbudget.policy/conversation-service-pdb     1               N/A               0                     3d
-poddisruptionbudget.policy/portal-web-pdb               1               N/A               0                     3d
+poddisruptionbudget.policy/audit-security-service-pdb   1               N/A               0                     3d22h
+poddisruptionbudget.policy/auth-users-pdb               1               N/A               0                     3d22h
+poddisruptionbudget.policy/chatbot-manager-pdb          1               N/A               0                     3d22h
+poddisruptionbudget.policy/conversation-service-pdb     1               N/A               0                     3d22h
+poddisruptionbudget.policy/portal-web-pdb               1               N/A               0                     3d22h
 
 NAME                                                             POD-SELECTOR                                                                                                    AGE
-networkpolicy.networking.k8s.io/allow-dns-egress                 <none>                                                                                                          3d
-networkpolicy.networking.k8s.io/allow-validation-egress          app.kubernetes.io/part-of=securerag-hub,job-role=validation                                                     3d
-networkpolicy.networking.k8s.io/allow-validation-ingress         app.kubernetes.io/name in (audit-security-service,auth-users,chatbot-manager,conversation-service,portal-web)   3d
-networkpolicy.networking.k8s.io/audit-security-service-network   app.kubernetes.io/name=audit-security-service,app.kubernetes.io/part-of=securerag-hub                           3d
-networkpolicy.networking.k8s.io/auth-users-policy                app.kubernetes.io/name=auth-users,app.kubernetes.io/part-of=securerag-hub                                       3d
-networkpolicy.networking.k8s.io/chatbot-manager-policy           app.kubernetes.io/name=chatbot-manager,app.kubernetes.io/part-of=securerag-hub                                  3d
-networkpolicy.networking.k8s.io/conversation-service-network     app.kubernetes.io/name=conversation-service,app.kubernetes.io/part-of=securerag-hub                             3d
-networkpolicy.networking.k8s.io/default-deny-all                 <none>                                                                                                          3d
-networkpolicy.networking.k8s.io/portal-web-policy                app.kubernetes.io/name=portal-web,app.kubernetes.io/part-of=securerag-hub                                       3d
-networkpolicy.networking.k8s.io/postgres-auth-policy             app.kubernetes.io/part-of=securerag-hub,cnpg.io/cluster=postgres-auth                                           3d
-networkpolicy.networking.k8s.io/secai-netpol                     app.kubernetes.io/name=secai                                                                                    13h
+networkpolicy.networking.k8s.io/allow-dns-egress                 <none>                                                                                                          3d22h
+networkpolicy.networking.k8s.io/allow-validation-egress          app.kubernetes.io/part-of=securerag-hub,job-role=validation                                                     3d22h
+networkpolicy.networking.k8s.io/allow-validation-ingress         app.kubernetes.io/name in (audit-security-service,auth-users,chatbot-manager,conversation-service,portal-web)   3d22h
+networkpolicy.networking.k8s.io/audit-security-service-network   app.kubernetes.io/name=audit-security-service,app.kubernetes.io/part-of=securerag-hub                           3d22h
+networkpolicy.networking.k8s.io/auth-users-policy                app.kubernetes.io/name=auth-users,app.kubernetes.io/part-of=securerag-hub                                       3d22h
+networkpolicy.networking.k8s.io/chatbot-manager-policy           app.kubernetes.io/name=chatbot-manager,app.kubernetes.io/part-of=securerag-hub                                  3d22h
+networkpolicy.networking.k8s.io/conversation-service-network     app.kubernetes.io/name=conversation-service,app.kubernetes.io/part-of=securerag-hub                             3d22h
+networkpolicy.networking.k8s.io/default-deny-all                 <none>                                                                                                          3d22h
+networkpolicy.networking.k8s.io/portal-web-policy                app.kubernetes.io/name=portal-web,app.kubernetes.io/part-of=securerag-hub                                       3d22h
+networkpolicy.networking.k8s.io/postgres-auth-policy             app.kubernetes.io/part-of=securerag-hub,cnpg.io/cluster=postgres-auth                                           3d22h
+networkpolicy.networking.k8s.io/secai-netpol                     app.kubernetes.io/name=secai                                                                                    36h
 
 === Final proof check summary ===
-pass=13
+pass=12
 warn=1
-fail=0
+fail=1
 report=artifacts/final/final-proof-check.txt

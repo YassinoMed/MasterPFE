@@ -1,12 +1,12 @@
 {
-  "timestamp": "2026-09-23T04:45:27Z",
-  "overall": "PASS",
+  "timestamp": "2026-09-25T05:16:54Z",
+  "overall": "FAIL",
   "checks": [
     {"name":"unit-tests","status":"PASS","required":true,"details":"5 suite(s), 0 failure"},
     {"name":"coverage","status":"PASS","required":true,"details":"98% \u2265 95%"},
     {"name":"semgrep-sast","status":"PASS","required":true,"details":"0 finding"},
-    {"name":"gitleaks","status":"PASS","required":true,"details":"0 leak"},
-    {"name":"trivy-fs","status":"PASS","required":true,"details":"0 CRITICAL, 49 HIGH"},
+    {"name":"gitleaks","status":"FAIL","required":true,"details":"5 leak(s) detected"},
+    {"name":"trivy-fs","status":"PASS","required":true,"details":"0 CRITICAL, 4 HIGH"},
     {"name":"dependency-audit","status":"PASS","required":true,"details":"all audits passed successfully"},
     {"name":"kube-score","status":"PASS","required":true,"details":"no thresholds exceeded"},
     {"name":"kyverno-static","status":"PARTIEL","required":false,"details":"kyverno CLI absent (non-strict)"},

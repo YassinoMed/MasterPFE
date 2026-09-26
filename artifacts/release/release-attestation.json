@@ -1,15 +1,15 @@
 {
-  "generated_at": "2026-09-23T03:59:22Z",
-  "git_commit": "62b3dd4875322ad43c1a29374ac63f65e1cb5724",
+  "generated_at": "2026-09-25T05:19:31Z",
+  "git_commit": "22d8aac43eabe28df725066ab782321fa6158cfc",
   "attestation_type": "SecureRAG Hub release evidence attestation",
-  "status": "COMPLETE_PROVEN",
+  "status": "PARTIAL_READY_TO_PROVE",
   "expected_service_count": 5,
-  "strict_mode": true,
+  "strict_mode": false,
   "claims": {
     "image_scan_passed": true,
     "sbom_generated": true,
     "sbom_attested": true,
-    "cosign_signed": true,
+    "cosign_signed": false,
     "cosign_verified": true,
     "digest_promoted": true,
     "no_rebuild_deploy_ready": true
@@ -18,18 +18,18 @@
     "image_scan_summary": {
       "path": "artifacts/release/image-scan-summary.txt",
       "status": "PROVEN",
-      "pass": 0,
-      "fail": 0,
-      "skip": 0,
-      "sha256": "d4417b8999a292e41621e7d32f528b2807f4662dd48b471db26a4e92350ba584"
-    },
-    "sign_summary": {
-      "path": "artifacts/release/sign-summary.txt",
-      "status": "PROVEN",
       "pass": 5,
       "fail": 0,
       "skip": 0,
-      "sha256": "b8dada426b85c1a16e1085cf1dd01658d9e09e76b3610a9db9850714d82b0821"
+      "sha256": "d743ecd42c9dffcca9387f2f4982f7108a538efafa9612d087490cfb24ea2737"
+    },
+    "sign_summary": {
+      "path": "artifacts/release/sign-summary.txt",
+      "status": "SKIPPED",
+      "pass": 0,
+      "fail": 0,
+      "skip": 5,
+      "sha256": "4b01001235d3abe86cb4c074241fe0c2d95ec8d46a8a1da069f7f55f5e8770f7"
     },
     "verify_summary": {
       "path": "artifacts/release/verify-summary.txt",
@@ -37,7 +37,7 @@
       "pass": 5,
       "fail": 0,
       "skip": 0,
-      "sha256": "0c227114aed102faa88276ae67b3275711ecc86356af5c1490c403bcff2d49c8"
+      "sha256": "01da1b0723c7ce3511f7191295a3eb35fd49805a6fabd44c038eb6be7733fe29"
     },
     "promotion_summary": {
       "path": "artifacts/release/promotion-by-digest-summary.txt",
@@ -58,7 +58,7 @@
       "pass": 5,
       "fail": 0,
       "skip": 0,
-      "sha256": "5d0240522185d9b2747ccc7ac7f58d81f2b43d44af0f5dd9c43da8d3a85c7881"
+      "sha256": "3862ad177b57839df0910499865d403e764c065521f4ada8b6bd8b8c0ec89ca0"
     },
     "attest_summary": {
       "path": "artifacts/release/attest-summary.txt",

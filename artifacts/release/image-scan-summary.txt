@@ -1,14 +1,14 @@
 # SecureRAG Hub image vulnerability scan summary
-# Generated at: 2026-09-23T03:58:17Z
+# Generated at: 2026-09-25T05:12:54Z
 # Trivy version: Version: 0.49.1
 # Reported severities: HIGH,CRITICAL
 # Blocking severities: CRITICAL
 # HIGH policy: reported-non-blocking
 STATUS | SERVICE            | IMAGE                                                            | ARTIFACT                                         | DETAIL
-WARN   | auth-users         | localhost:5001/securerag-hub-auth-users:dev                      | security/reports/trivy-image-auth-users.json     | critical=0; high=13; total=13; HIGH findings are reported but non-blocking by policy
-WARN   | chatbot-manager    | localhost:5001/securerag-hub-chatbot-manager:dev                 | security/reports/trivy-image-chatbot-manager.json | critical=0; high=13; total=13; HIGH findings are reported but non-blocking by policy
-WARN   | conversation-service | localhost:5001/securerag-hub-conversation-service:dev            | security/reports/trivy-image-conversation-service.json | critical=0; high=13; total=13; HIGH findings are reported but non-blocking by policy
-WARN   | audit-security-service | localhost:5001/securerag-hub-audit-security-service:dev          | security/reports/trivy-image-audit-security-service.json | critical=0; high=13; total=13; HIGH findings are reported but non-blocking by policy
-WARN   | portal-web         | localhost:5001/securerag-hub-portal-web:dev                      | security/reports/trivy-image-portal-web.json     | critical=0; high=13; total=13; HIGH findings are reported but non-blocking by policy
+PASS   | auth-users         | localhost:5001/securerag-hub-auth-users:dev                      | security/reports/trivy-image-auth-users.json     | critical=0; high=0; total=0
+PASS   | chatbot-manager    | localhost:5001/securerag-hub-chatbot-manager:dev                 | security/reports/trivy-image-chatbot-manager.json | critical=0; high=0; total=0
+PASS   | conversation-service | localhost:5001/securerag-hub-conversation-service:dev            | security/reports/trivy-image-conversation-service.json | critical=0; high=0; total=0
+PASS   | audit-security-service | localhost:5001/securerag-hub-audit-security-service:dev          | security/reports/trivy-image-audit-security-service.json | critical=0; high=0; total=0
+PASS   | portal-web         | localhost:5001/securerag-hub-portal-web:dev                      | security/reports/trivy-image-portal-web.json     | critical=0; high=0; total=0
 
-[INFO] Image scanning completed: PASS=5 FAIL=0 SKIP=0 WARN=5
+[INFO] Image scanning completed: PASS=5 FAIL=0 SKIP=0 WARN=0

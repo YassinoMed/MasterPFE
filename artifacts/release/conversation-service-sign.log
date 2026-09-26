@@ -1,2 +1,5 @@
-Signing artifact...
-Pushing signature to: localhost:5001/securerag-hub-conversation-service
+Flag --fulcio-url has been deprecated, please use a signing config to specify a fulcio url; see `cosign signing-config --help`
+Flag --rekor-url has been deprecated, please use a signing config to specify a rekor url; see `cosign signing-config --help`
+Flag --oidc-issuer has been deprecated, please use a signing config to specify an OIDC issuer; see `cosign signing-config create --help`
+Error: cannot specify service URLs and use signing config
+error during command execution: cannot specify service URLs and use signing config

@@ -1,12 +1,12 @@
 # SecureRAG Hub image signing summary
-# Generated at: 2026-09-23T03:58:26Z
+# Generated at: 2026-09-25T05:13:47Z
 # Cosign version:   ______   ______        _______. __    _______ .__   __.
-# Mode: key-pair
+# Mode: keyless
 STATUS | SERVICE            | IMAGE                                                            | MODE       | ARTIFACT                                 | DETAIL
-PASS   | auth-users         | localhost:5001/securerag-hub-auth-users@sha256:0d7795be3c8c678f3616779b1365d5ae160efce38b6a2e03c8b6fba3bf74ec93 | key-pair   | artifacts/release/auth-users-sign.log    | signature created for digest sha256:0d7795be3c8c678f3616779b1365d5ae160efce38b6a2e03c8b6fba3bf74ec93
-PASS   | chatbot-manager    | localhost:5001/securerag-hub-chatbot-manager@sha256:7d52f77d49fe1b3f458cb4c06ac9f3568c2f48c3a4f27dff56a39d59a11195eb | key-pair   | artifacts/release/chatbot-manager-sign.log | signature created for digest sha256:7d52f77d49fe1b3f458cb4c06ac9f3568c2f48c3a4f27dff56a39d59a11195eb
-PASS   | conversation-service | localhost:5001/securerag-hub-conversation-service@sha256:68e3d1f29ed008be81171d5a9f7711da5b030ad2e26846828905def992fe5b6c | key-pair   | artifacts/release/conversation-service-sign.log | signature created for digest sha256:68e3d1f29ed008be81171d5a9f7711da5b030ad2e26846828905def992fe5b6c
-PASS   | audit-security-service | localhost:5001/securerag-hub-audit-security-service@sha256:f681d9c8f698b01be192a2471cc5230652ccc0f2ce8fcbe86433e468ede0a58b | key-pair   | artifacts/release/audit-security-service-sign.log | signature created for digest sha256:f681d9c8f698b01be192a2471cc5230652ccc0f2ce8fcbe86433e468ede0a58b
-PASS   | portal-web         | localhost:5001/securerag-hub-portal-web@sha256:88492602d12bf81f4a6c8f611fb82f75de067e147a4fc0639989b33c7d2a905b | key-pair   | artifacts/release/portal-web-sign.log    | signature created for digest sha256:88492602d12bf81f4a6c8f611fb82f75de067e147a4fc0639989b33c7d2a905b
+SKIP   | auth-users         | localhost:5001/securerag-hub-auth-users@sha256:4c5c849ef809865d3aa914f1c87db06af827804ca5afba0251af22b88ad02e78 | keyless    | artifacts/release/auth-users-sign.log    | cosign sign unavailable (dev fallback)
+SKIP   | chatbot-manager    | localhost:5001/securerag-hub-chatbot-manager@sha256:cddbcf4922fd6dca941751130728436d7c70a1250354134a07277bee45831ca6 | keyless    | artifacts/release/chatbot-manager-sign.log | cosign sign unavailable (dev fallback)
+SKIP   | conversation-service | localhost:5001/securerag-hub-conversation-service@sha256:e33d4fe73a6ce95e37a087457ecc77f0b671c86cd4036b907ec83d11c709c608 | keyless    | artifacts/release/conversation-service-sign.log | cosign sign unavailable (dev fallback)
+SKIP   | audit-security-service | localhost:5001/securerag-hub-audit-security-service@sha256:ec79f5730dd958a9573e84e13c4499c03a9f53283802119ef2b432d553990fd1 | keyless    | artifacts/release/audit-security-service-sign.log | cosign sign unavailable (dev fallback)
+SKIP   | portal-web         | localhost:5001/securerag-hub-portal-web@sha256:2dc7db2867e1f93e9f104e5bc701e74a783a88f54a41c3ea80589f6501000066 | keyless    | artifacts/release/portal-web-sign.log    | cosign sign unavailable (dev fallback)
 
-[INFO] Image signing completed: PASS=5 FAIL=0 SKIP=0
+[INFO] Image signing completed: PASS=0 FAIL=0 SKIP=5

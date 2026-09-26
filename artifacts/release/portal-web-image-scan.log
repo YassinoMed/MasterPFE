@@ -1,12 +1,10 @@
-2026-09-23T03:58:25.271Z	[34mINFO[0m	Loaded security/trivy/trivy-image.yaml
-2026-09-23T03:58:25.275Z	[34mINFO[0m	Vulnerability scanning is enabled
-2026-09-23T03:58:25.275Z	[34mINFO[0m	Secret scanning is enabled
-2026-09-23T03:58:25.275Z	[34mINFO[0m	If your scanning is slow, please try '--scanners vuln' to disable secret scanning
-2026-09-23T03:58:25.275Z	[34mINFO[0m	Please see also https://aquasecurity.github.io/trivy/v0.49/docs/scanner/secret/#recommendation for faster secret detection
-2026-09-23T03:58:26.702Z	[34mINFO[0m	Detected OS: alpine
-2026-09-23T03:58:26.702Z	[33mWARN[0m	This OS version is not on the EOL list: alpine 3.24
-2026-09-23T03:58:26.702Z	[34mINFO[0m	Detecting Alpine vulnerabilities...
-2026-09-23T03:58:26.710Z	[34mINFO[0m	Number of language-specific files: 1
-2026-09-23T03:58:26.710Z	[34mINFO[0m	Detecting composer vulnerabilities...
-2026-09-23T03:58:26.717Z	[33mWARN[0m	Error while getting vulnerability details: failed to get the vulnerability "CVE-2026-80256": no vulnerability details for CVE-2026-80256
-2026-09-23T03:58:26.718Z	[33mWARN[0m	Error while getting vulnerability details: failed to get the vulnerability "CVE-2026-80256": no vulnerability details for CVE-2026-80256
+2026-09-25T05:13:09.294Z	[34mINFO[0m	Loaded security/trivy/trivy-image.yaml
+2026-09-25T05:13:09.298Z	[34mINFO[0m	Vulnerability scanning is enabled
+2026-09-25T05:13:09.298Z	[34mINFO[0m	Secret scanning is enabled
+2026-09-25T05:13:09.298Z	[34mINFO[0m	If your scanning is slow, please try '--scanners vuln' to disable secret scanning
+2026-09-25T05:13:09.298Z	[34mINFO[0m	Please see also https://aquasecurity.github.io/trivy/v0.49/docs/scanner/secret/#recommendation for faster secret detection
+2026-09-25T05:13:10.803Z	[34mINFO[0m	Detected OS: alpine
+2026-09-25T05:13:10.803Z	[33mWARN[0m	This OS version is not on the EOL list: alpine 3.24
+2026-09-25T05:13:10.803Z	[34mINFO[0m	Detecting Alpine vulnerabilities...
+2026-09-25T05:13:10.814Z	[34mINFO[0m	Number of language-specific files: 1
+2026-09-25T05:13:10.814Z	[34mINFO[0m	Detecting composer vulnerabilities...
