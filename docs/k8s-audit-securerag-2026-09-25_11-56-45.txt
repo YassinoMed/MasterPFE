@@ -1,0 +1,1035 @@
+================================================================
+  AUDIT KUBERNETES - SECURERAG (5 environnements)
+  Date : 2026-09-25 11:56:45 UTC
+  Cluster : kind-securerag-dev
+================================================================
+
+================================================================
+1. NAMESPACES
+================================================================
+securerag-dev          Active   25h
+securerag-preprod      Active   4h30m
+securerag-prod         Active   4h30m
+securerag-staging      Active   25h
+securerag-test         Active   4h30m
+
+================================================================
+2. PODS DE TOUS LES ENVIRONNEMENTS (-o wide)
+================================================================
+===== securerag-dev =====
+NAME                                      READY   STATUS             RESTARTS   AGE   IP             NODE                   NOMINATED NODE   READINESS GATES
+audit-security-service-56cfc977d5-ccc48   0/1     ImagePullBackOff   0          82m   10.244.1.91    securerag-dev-worker   <none>           <none>
+audit-security-service-bd9476dc6-776xr    0/1     ImagePullBackOff   0          82m   10.244.1.117   securerag-dev-worker   <none>           <none>
+auth-users-688fc9fb7d-wkgcf               0/1     ImagePullBackOff   0          82m   10.244.1.118   securerag-dev-worker   <none>           <none>
+auth-users-85f85bd8c9-pj2p4               0/1     ImagePullBackOff   0          82m   10.244.1.92    securerag-dev-worker   <none>           <none>
+chatbot-manager-86c4d69df6-bv6j8          0/1     ErrImagePull       0          82m   10.244.1.93    securerag-dev-worker   <none>           <none>
+chatbot-manager-9fc5b9477-9hkzd           0/1     ErrImagePull       0          82m   10.244.1.119   securerag-dev-worker   <none>           <none>
+conversation-service-587c555845-nsqzw     0/1     ImagePullBackOff   0          82m   10.244.1.95    securerag-dev-worker   <none>           <none>
+conversation-service-67f888cdbd-drdpm     0/1     ImagePullBackOff   0          82m   10.244.1.120   securerag-dev-worker   <none>           <none>
+portal-web-655bc477b8-bkhpv               0/1     ImagePullBackOff   0          82m   10.244.1.121   securerag-dev-worker   <none>           <none>
+portal-web-686dcd9c49-66x92               0/1     ErrImagePull       0          82m   10.244.1.96    securerag-dev-worker   <none>           <none>
+===== securerag-test =====
+NAME                                      READY   STATUS             RESTARTS   AGE   IP             NODE                   NOMINATED NODE   READINESS GATES
+audit-security-service-56cfc977d5-znxh9   0/1     ImagePullBackOff   0          82m   10.244.1.97    securerag-dev-worker   <none>           <none>
+audit-security-service-bd9476dc6-4t9zb    0/1     ImagePullBackOff   0          82m   10.244.1.122   securerag-dev-worker   <none>           <none>
+auth-users-688fc9fb7d-vvxft               0/1     ImagePullBackOff   0          82m   10.244.1.123   securerag-dev-worker   <none>           <none>
+auth-users-85f85bd8c9-kg88v               0/1     ErrImagePull       0          82m   10.244.1.98    securerag-dev-worker   <none>           <none>
+chatbot-manager-86c4d69df6-rhs82          0/1     ImagePullBackOff   0          82m   10.244.1.99    securerag-dev-worker   <none>           <none>
+chatbot-manager-9fc5b9477-tfhqh           0/1     ImagePullBackOff   0          82m   10.244.1.124   securerag-dev-worker   <none>           <none>
+conversation-service-587c555845-k8vfb     0/1     ImagePullBackOff   0          82m   10.244.1.100   securerag-dev-worker   <none>           <none>
+conversation-service-67f888cdbd-74gml     0/1     ImagePullBackOff   0          82m   10.244.1.125   securerag-dev-worker   <none>           <none>
+portal-web-655bc477b8-vqw2p               0/1     ImagePullBackOff   0          82m   10.244.1.126   securerag-dev-worker   <none>           <none>
+portal-web-686dcd9c49-m5ggb               0/1     ErrImagePull       0          82m   10.244.1.105   securerag-dev-worker   <none>           <none>
+===== securerag-staging =====
+NAME                                      READY   STATUS             RESTARTS   AGE   IP             NODE                   NOMINATED NODE   READINESS GATES
+audit-security-service-56cfc977d5-hf92l   0/1     ImagePullBackOff   0          82m   10.244.1.106   securerag-dev-worker   <none>           <none>
+audit-security-service-bd9476dc6-lp7zn    0/1     ImagePullBackOff   0          82m   10.244.1.127   securerag-dev-worker   <none>           <none>
+auth-users-688fc9fb7d-v5xg5               0/1     ImagePullBackOff   0          82m   10.244.1.128   securerag-dev-worker   <none>           <none>
+auth-users-85f85bd8c9-7rs7f               0/1     ErrImagePull       0          82m   10.244.1.107   securerag-dev-worker   <none>           <none>
+chatbot-manager-86c4d69df6-hztg6          0/1     ErrImagePull       0          82m   10.244.1.108   securerag-dev-worker   <none>           <none>
+chatbot-manager-9fc5b9477-kb6cw           0/1     ImagePullBackOff   0          82m   10.244.1.129   securerag-dev-worker   <none>           <none>
+conversation-service-587c555845-5ph8w     0/1     ImagePullBackOff   0          82m   10.244.1.109   securerag-dev-worker   <none>           <none>
+conversation-service-67f888cdbd-thdk2     0/1     ImagePullBackOff   0          82m   10.244.1.130   securerag-dev-worker   <none>           <none>
+portal-web-655bc477b8-vpxqj               0/1     ImagePullBackOff   0          82m   10.244.1.131   securerag-dev-worker   <none>           <none>
+portal-web-686dcd9c49-tzn2j               0/1     ImagePullBackOff   0          82m   10.244.1.111   securerag-dev-worker   <none>           <none>
+===== securerag-preprod =====
+NAME                                      READY   STATUS             RESTARTS   AGE   IP             NODE                   NOMINATED NODE   READINESS GATES
+audit-security-service-86b4995674-h5n5b   0/1     ImagePullBackOff   0          82m   10.244.1.112   securerag-dev-worker   <none>           <none>
+audit-security-service-bd9476dc6-zjrqp    0/1     ImagePullBackOff   0          82m   10.244.1.132   securerag-dev-worker   <none>           <none>
+auth-users-5dd6d9b868-9k89b               0/1     ImagePullBackOff   0          82m   10.244.1.113   securerag-dev-worker   <none>           <none>
+auth-users-688fc9fb7d-vtrd6               0/1     ImagePullBackOff   0          82m   10.244.1.133   securerag-dev-worker   <none>           <none>
+chatbot-manager-5f4d58b7-brht9            0/1     ErrImagePull       0          82m   10.244.1.114   securerag-dev-worker   <none>           <none>
+chatbot-manager-9fc5b9477-d7d66           0/1     ImagePullBackOff   0          82m   10.244.1.134   securerag-dev-worker   <none>           <none>
+conversation-service-5bc777fc74-ckqml     0/1     ImagePullBackOff   0          82m   10.244.1.115   securerag-dev-worker   <none>           <none>
+conversation-service-67f888cdbd-8rgp7     0/1     ImagePullBackOff   0          82m   10.244.1.135   securerag-dev-worker   <none>           <none>
+portal-web-655bc477b8-jz4wt               0/1     ImagePullBackOff   0          82m   10.244.1.136   securerag-dev-worker   <none>           <none>
+portal-web-76cd647b9d-wx6l6               0/1     ErrImagePull       0          82m   10.244.1.116   securerag-dev-worker   <none>           <none>
+===== securerag-prod =====
+No resources found in securerag-prod namespace.
+
+================================================================
+3. IMAGES DECLARÉES (spec)
+================================================================
+===== securerag-dev =====
+audit-security-service-56cfc977d5-ccc48 => localhost:5001/securerag-hub-audit-security-service@sha256:c9e49efb7acfd8ccb45dbad9e0cd237d8f3724dca197b25db4ad1032fbdb5153
+audit-security-service-bd9476dc6-776xr => localhost:5001/securerag-hub-audit-security-service@sha256:c9e49efb7acfd8ccb45dbad9e0cd237d8f3724dca197b25db4ad1032fbdb5153
+auth-users-688fc9fb7d-wkgcf => localhost:5001/securerag-hub-auth-users@sha256:cae6faa710c0ddecacf73b9b74782d03e6088064cc625f7327f58c507a17834f
+auth-users-85f85bd8c9-pj2p4 => localhost:5001/securerag-hub-auth-users@sha256:cae6faa710c0ddecacf73b9b74782d03e6088064cc625f7327f58c507a17834f
+chatbot-manager-86c4d69df6-bv6j8 => localhost:5001/securerag-hub-chatbot-manager@sha256:d83db33af6b1ae3814d7ee289b4b7908d1160b49dfd925aa8da3e497b10d3d3d
+chatbot-manager-9fc5b9477-9hkzd => localhost:5001/securerag-hub-chatbot-manager@sha256:d83db33af6b1ae3814d7ee289b4b7908d1160b49dfd925aa8da3e497b10d3d3d
+conversation-service-587c555845-nsqzw => localhost:5001/securerag-hub-conversation-service@sha256:a4ea109b2c211bda6643f9a2439c3efaf9246a4cd35b4787b37548eb113d20b7
+conversation-service-67f888cdbd-drdpm => localhost:5001/securerag-hub-conversation-service@sha256:a4ea109b2c211bda6643f9a2439c3efaf9246a4cd35b4787b37548eb113d20b7
+portal-web-655bc477b8-bkhpv => localhost:5001/securerag-hub-portal-web@sha256:113f66b82a1a24b3b2e4048d3bc918ee2a7d83afd2fed70c906adb6305499a50
+portal-web-686dcd9c49-66x92 => localhost:5001/securerag-hub-portal-web@sha256:113f66b82a1a24b3b2e4048d3bc918ee2a7d83afd2fed70c906adb6305499a50
+
+===== securerag-test =====
+audit-security-service-56cfc977d5-znxh9 => localhost:5001/securerag-hub-audit-security-service@sha256:c9e49efb7acfd8ccb45dbad9e0cd237d8f3724dca197b25db4ad1032fbdb5153
+audit-security-service-bd9476dc6-4t9zb => localhost:5001/securerag-hub-audit-security-service@sha256:c9e49efb7acfd8ccb45dbad9e0cd237d8f3724dca197b25db4ad1032fbdb5153
+auth-users-688fc9fb7d-vvxft => localhost:5001/securerag-hub-auth-users@sha256:cae6faa710c0ddecacf73b9b74782d03e6088064cc625f7327f58c507a17834f
+auth-users-85f85bd8c9-kg88v => localhost:5001/securerag-hub-auth-users@sha256:cae6faa710c0ddecacf73b9b74782d03e6088064cc625f7327f58c507a17834f
+chatbot-manager-86c4d69df6-rhs82 => localhost:5001/securerag-hub-chatbot-manager@sha256:d83db33af6b1ae3814d7ee289b4b7908d1160b49dfd925aa8da3e497b10d3d3d
+chatbot-manager-9fc5b9477-tfhqh => localhost:5001/securerag-hub-chatbot-manager@sha256:d83db33af6b1ae3814d7ee289b4b7908d1160b49dfd925aa8da3e497b10d3d3d
+conversation-service-587c555845-k8vfb => localhost:5001/securerag-hub-conversation-service@sha256:a4ea109b2c211bda6643f9a2439c3efaf9246a4cd35b4787b37548eb113d20b7
+conversation-service-67f888cdbd-74gml => localhost:5001/securerag-hub-conversation-service@sha256:a4ea109b2c211bda6643f9a2439c3efaf9246a4cd35b4787b37548eb113d20b7
+portal-web-655bc477b8-vqw2p => localhost:5001/securerag-hub-portal-web@sha256:113f66b82a1a24b3b2e4048d3bc918ee2a7d83afd2fed70c906adb6305499a50
+portal-web-686dcd9c49-m5ggb => localhost:5001/securerag-hub-portal-web@sha256:113f66b82a1a24b3b2e4048d3bc918ee2a7d83afd2fed70c906adb6305499a50
+
+===== securerag-staging =====
+audit-security-service-56cfc977d5-hf92l => localhost:5001/securerag-hub-audit-security-service@sha256:c9e49efb7acfd8ccb45dbad9e0cd237d8f3724dca197b25db4ad1032fbdb5153
+audit-security-service-bd9476dc6-lp7zn => localhost:5001/securerag-hub-audit-security-service@sha256:c9e49efb7acfd8ccb45dbad9e0cd237d8f3724dca197b25db4ad1032fbdb5153
+auth-users-688fc9fb7d-v5xg5 => localhost:5001/securerag-hub-auth-users@sha256:cae6faa710c0ddecacf73b9b74782d03e6088064cc625f7327f58c507a17834f
+auth-users-85f85bd8c9-7rs7f => localhost:5001/securerag-hub-auth-users@sha256:cae6faa710c0ddecacf73b9b74782d03e6088064cc625f7327f58c507a17834f
+chatbot-manager-86c4d69df6-hztg6 => localhost:5001/securerag-hub-chatbot-manager@sha256:d83db33af6b1ae3814d7ee289b4b7908d1160b49dfd925aa8da3e497b10d3d3d
+chatbot-manager-9fc5b9477-kb6cw => localhost:5001/securerag-hub-chatbot-manager@sha256:d83db33af6b1ae3814d7ee289b4b7908d1160b49dfd925aa8da3e497b10d3d3d
+conversation-service-587c555845-5ph8w => localhost:5001/securerag-hub-conversation-service@sha256:a4ea109b2c211bda6643f9a2439c3efaf9246a4cd35b4787b37548eb113d20b7
+conversation-service-67f888cdbd-thdk2 => localhost:5001/securerag-hub-conversation-service@sha256:a4ea109b2c211bda6643f9a2439c3efaf9246a4cd35b4787b37548eb113d20b7
+portal-web-655bc477b8-vpxqj => localhost:5001/securerag-hub-portal-web@sha256:113f66b82a1a24b3b2e4048d3bc918ee2a7d83afd2fed70c906adb6305499a50
+portal-web-686dcd9c49-tzn2j => localhost:5001/securerag-hub-portal-web@sha256:113f66b82a1a24b3b2e4048d3bc918ee2a7d83afd2fed70c906adb6305499a50
+
+===== securerag-preprod =====
+audit-security-service-86b4995674-h5n5b => localhost:5001/securerag-hub-audit-security-service@sha256:c9e49efb7acfd8ccb45dbad9e0cd237d8f3724dca197b25db4ad1032fbdb5153
+audit-security-service-bd9476dc6-zjrqp => localhost:5001/securerag-hub-audit-security-service@sha256:c9e49efb7acfd8ccb45dbad9e0cd237d8f3724dca197b25db4ad1032fbdb5153
+auth-users-5dd6d9b868-9k89b => localhost:5001/securerag-hub-auth-users@sha256:cae6faa710c0ddecacf73b9b74782d03e6088064cc625f7327f58c507a17834f
+auth-users-688fc9fb7d-vtrd6 => localhost:5001/securerag-hub-auth-users@sha256:cae6faa710c0ddecacf73b9b74782d03e6088064cc625f7327f58c507a17834f
+chatbot-manager-5f4d58b7-brht9 => localhost:5001/securerag-hub-chatbot-manager@sha256:d83db33af6b1ae3814d7ee289b4b7908d1160b49dfd925aa8da3e497b10d3d3d
+chatbot-manager-9fc5b9477-d7d66 => localhost:5001/securerag-hub-chatbot-manager@sha256:d83db33af6b1ae3814d7ee289b4b7908d1160b49dfd925aa8da3e497b10d3d3d
+conversation-service-5bc777fc74-ckqml => localhost:5001/securerag-hub-conversation-service@sha256:a4ea109b2c211bda6643f9a2439c3efaf9246a4cd35b4787b37548eb113d20b7
+conversation-service-67f888cdbd-8rgp7 => localhost:5001/securerag-hub-conversation-service@sha256:a4ea109b2c211bda6643f9a2439c3efaf9246a4cd35b4787b37548eb113d20b7
+portal-web-655bc477b8-jz4wt => localhost:5001/securerag-hub-portal-web@sha256:113f66b82a1a24b3b2e4048d3bc918ee2a7d83afd2fed70c906adb6305499a50
+portal-web-76cd647b9d-wx6l6 => localhost:5001/securerag-hub-portal-web@sha256:113f66b82a1a24b3b2e4048d3bc918ee2a7d83afd2fed70c906adb6305499a50
+
+===== securerag-prod =====
+
+
+================================================================
+4. IMAGES RÉELLEMENT EXÉCUTÉES + DIGEST (imageID)
+================================================================
+===== securerag-dev =====
+audit-security-service-56cfc977d5-ccc48 => 
+audit-security-service-bd9476dc6-776xr => 
+auth-users-688fc9fb7d-wkgcf => 
+auth-users-85f85bd8c9-pj2p4 => 
+chatbot-manager-86c4d69df6-bv6j8 => 
+chatbot-manager-9fc5b9477-9hkzd => 
+conversation-service-587c555845-nsqzw => 
+conversation-service-67f888cdbd-drdpm => 
+portal-web-655bc477b8-bkhpv => 
+portal-web-686dcd9c49-66x92 => 
+
+===== securerag-test =====
+audit-security-service-56cfc977d5-znxh9 => 
+audit-security-service-bd9476dc6-4t9zb => 
+auth-users-688fc9fb7d-vvxft => 
+auth-users-85f85bd8c9-kg88v => 
+chatbot-manager-86c4d69df6-rhs82 => 
+chatbot-manager-9fc5b9477-tfhqh => 
+conversation-service-587c555845-k8vfb => 
+conversation-service-67f888cdbd-74gml => 
+portal-web-655bc477b8-vqw2p => 
+portal-web-686dcd9c49-m5ggb => 
+
+===== securerag-staging =====
+audit-security-service-56cfc977d5-hf92l => 
+audit-security-service-bd9476dc6-lp7zn => 
+auth-users-688fc9fb7d-v5xg5 => 
+auth-users-85f85bd8c9-7rs7f => 
+chatbot-manager-86c4d69df6-hztg6 => 
+chatbot-manager-9fc5b9477-kb6cw => 
+conversation-service-587c555845-5ph8w => 
+conversation-service-67f888cdbd-thdk2 => 
+portal-web-655bc477b8-vpxqj => 
+portal-web-686dcd9c49-tzn2j => 
+
+===== securerag-preprod =====
+audit-security-service-86b4995674-h5n5b => 
+audit-security-service-bd9476dc6-zjrqp => 
+auth-users-5dd6d9b868-9k89b => 
+auth-users-688fc9fb7d-vtrd6 => 
+chatbot-manager-5f4d58b7-brht9 => 
+chatbot-manager-9fc5b9477-d7d66 => 
+conversation-service-5bc777fc74-ckqml => 
+conversation-service-67f888cdbd-8rgp7 => 
+portal-web-655bc477b8-jz4wt => 
+portal-web-76cd647b9d-wx6l6 => 
+
+===== securerag-prod =====
+
+
+================================================================
+5. DEPLOYMENTS / STATEFULSETS
+================================================================
+NAMESPACE              NAME                                                             READY   UP-TO-DATE   AVAILABLE   AGE
+securerag-dev          deployment.apps/audit-security-service                           0/1     1            0           104m
+securerag-dev          deployment.apps/auth-users                                       0/1     1            0           104m
+securerag-dev          deployment.apps/chatbot-manager                                  0/1     1            0           104m
+securerag-dev          deployment.apps/conversation-service                             0/1     1            0           104m
+securerag-dev          deployment.apps/portal-web                                       0/1     1            0           104m
+securerag-preprod      deployment.apps/audit-security-service                           0/1     1            0           104m
+securerag-preprod      deployment.apps/auth-users                                       0/1     1            0           104m
+securerag-preprod      deployment.apps/chatbot-manager                                  0/1     1            0           104m
+securerag-preprod      deployment.apps/conversation-service                             0/1     1            0           104m
+securerag-preprod      deployment.apps/portal-web                                       0/1     1            0           104m
+securerag-prod         deployment.apps/audit-security-service                           0/1     0            0           104m
+securerag-prod         deployment.apps/auth-users                                       0/1     0            0           104m
+securerag-prod         deployment.apps/chatbot-manager                                  0/1     0            0           104m
+securerag-prod         deployment.apps/conversation-service                             0/1     0            0           104m
+securerag-prod         deployment.apps/portal-web                                       0/1     0            0           104m
+securerag-staging      deployment.apps/audit-security-service                           0/1     1            0           104m
+securerag-staging      deployment.apps/auth-users                                       0/1     1            0           104m
+securerag-staging      deployment.apps/chatbot-manager                                  0/1     1            0           104m
+securerag-staging      deployment.apps/conversation-service                             0/1     1            0           104m
+securerag-staging      deployment.apps/portal-web                                       0/1     1            0           104m
+securerag-test         deployment.apps/audit-security-service                           0/1     1            0           104m
+securerag-test         deployment.apps/auth-users                                       0/1     1            0           104m
+securerag-test         deployment.apps/chatbot-manager                                  0/1     1            0           104m
+securerag-test         deployment.apps/conversation-service                             0/1     1            0           104m
+securerag-test         deployment.apps/portal-web                                       0/1     1            0           104m
+NAMESPACE    NAME                                                               READY   AGE
+
+================================================================
+6. SERVICES
+================================================================
+NAMESPACE              NAME                                             TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)                                                                                                   AGE
+
+================================================================
+7. INGRESS
+================================================================
+No resources found
+
+================================================================
+8. ENDPOINTS
+================================================================
+Warning: v1 Endpoints is deprecated in v1.33+; use discovery.k8s.io/v1 EndpointSlice
+NAMESPACE              NAME                                             ENDPOINTS                                                           AGE
+
+================================================================
+9. ENDPOINTSLICES
+================================================================
+NAMESPACE              NAME                                                   ADDRESSTYPE   PORTS                          ENDPOINTS                   AGE
+
+================================================================
+10. NETWORKPOLICIES
+================================================================
+NAMESPACE              NAME                                              POD-SELECTOR                                                                                                    AGE
+argocd                 argocd-application-controller-network-policy      app.kubernetes.io/name=argocd-application-controller                                                            3d22h
+argocd                 argocd-applicationset-controller-network-policy   app.kubernetes.io/name=argocd-applicationset-controller                                                         3d22h
+argocd                 argocd-dex-server-network-policy                  app.kubernetes.io/name=argocd-dex-server                                                                        3d22h
+argocd                 argocd-notifications-controller-network-policy    app.kubernetes.io/name=argocd-notifications-controller                                                          3d22h
+argocd                 argocd-redis-network-policy                       app.kubernetes.io/name=argocd-redis                                                                             3d22h
+argocd                 argocd-repo-server-network-policy                 app.kubernetes.io/name=argocd-repo-server                                                                       3d22h
+argocd                 argocd-server-network-policy                      app.kubernetes.io/name=argocd-server                                                                            3d22h
+default                allow-internal-dns                                <none>                                                                                                          4h24m
+default                deny-all-ingress                                  <none>                                                                                                          4h24m
+default                portal-web-policy                                 app.kubernetes.io/name=portal-web                                                                               2d19h
+securerag-backup       allow-backup-egress                               <none>                                                                                                          25h
+securerag-backup       default-deny                                      <none>                                                                                                          25h
+securerag-dev          allow-dns                                         <none>                                                                                                          4h28m
+securerag-dev          default-deny-all                                  <none>                                                                                                          4h28m
+securerag-hub          allow-dns-egress                                  <none>                                                                                                          4d4h
+securerag-hub          allow-validation-egress                           app.kubernetes.io/part-of=securerag-hub,job-role=validation                                                     4d4h
+securerag-hub          allow-validation-ingress                          app.kubernetes.io/name in (audit-security-service,auth-users,chatbot-manager,conversation-service,portal-web)   4d4h
+securerag-hub          audit-security-service-network                    app.kubernetes.io/name=audit-security-service,app.kubernetes.io/part-of=securerag-hub                           4d4h
+securerag-hub          auth-users-policy                                 app.kubernetes.io/name=auth-users,app.kubernetes.io/part-of=securerag-hub                                       4d4h
+securerag-hub          chatbot-manager-policy                            app.kubernetes.io/name=chatbot-manager,app.kubernetes.io/part-of=securerag-hub                                  4d4h
+securerag-hub          conversation-service-network                      app.kubernetes.io/name=conversation-service,app.kubernetes.io/part-of=securerag-hub                             4d4h
+securerag-hub          default-deny-all                                  <none>                                                                                                          4d4h
+securerag-hub          portal-web-policy                                 app.kubernetes.io/name=portal-web,app.kubernetes.io/part-of=securerag-hub                                       4d4h
+securerag-hub          postgres-auth-policy                              app.kubernetes.io/part-of=securerag-hub,cnpg.io/cluster=postgres-auth                                           4d4h
+securerag-hub          secai-netpol                                      app.kubernetes.io/name=secai                                                                                    41h
+securerag-monitoring   alertmanager-network-policy                       app.kubernetes.io/name=alertmanager                                                                             25h
+securerag-monitoring   allow-monitoring-internal                         <none>                                                                                                          25h
+securerag-monitoring   default-deny                                      <none>                                                                                                          25h
+securerag-preprod      allow-dns                                         <none>                                                                                                          4h28m
+securerag-preprod      default-deny-all                                  <none>                                                                                                          4h28m
+securerag-prod         allow-dns                                         <none>                                                                                                          4h28m
+securerag-prod         default-deny-all                                  <none>                                                                                                          4h28m
+securerag-staging      allow-dns                                         <none>                                                                                                          4h28m
+securerag-staging      default-deny-all                                  <none>                                                                                                          4h28m
+securerag-test         allow-dns                                         <none>                                                                                                          4h28m
+securerag-test         default-deny-all                                  <none>                                                                                                          4h28m
+
+================================================================
+11. RESOURCEQUOTA
+================================================================
+NAMESPACE        NAME                      REQUEST                                                                                                                                                                       LIMIT                                                                               AGE
+default          securerag-dev-quota       pods: 0/20, requests.cpu: 0/2, requests.memory: 0/2Gi, services: 1/20                                                                                                         limits.cpu: 0/4, limits.memory: 0/4Gi                                               4h24m
+default          securerag-preprod-quota   pods: 0/20, requests.cpu: 0/2, requests.memory: 0/2Gi, services: 1/20                                                                                                         limits.cpu: 0/4, limits.memory: 0/4Gi                                               4h24m
+default          securerag-prod-quota      pods: 0/20, requests.cpu: 0/2, requests.memory: 0/2Gi, services: 1/20                                                                                                         limits.cpu: 0/4, limits.memory: 0/4Gi                                               4h24m
+default          securerag-staging-quota   pods: 0/20, requests.cpu: 0/2, requests.memory: 0/2Gi, services: 1/20                                                                                                         limits.cpu: 0/4, limits.memory: 0/4Gi                                               4h24m
+default          securerag-test-quota      pods: 0/20, requests.cpu: 0/2, requests.memory: 0/2Gi, services: 1/20                                                                                                         limits.cpu: 0/4, limits.memory: 0/4Gi                                               4h24m
+securerag-hub    securerag-hub-quota       persistentvolumeclaims: 0/10, pods: 7/30, requests.cpu: 1600m/6, requests.ephemeral-storage: 1Gi/4Gi, requests.memory: 2432Mi/6Gi, requests.storage: 0/40Gi, services: 7/20   limits.cpu: 5600m/12, limits.ephemeral-storage: 4Gi/12Gi, limits.memory: 5Gi/12Gi   4d4h
+securerag-prod   quota-prod                cpu: 0/8, memory: 0/8Gi, pods: 0/30                                                                                                                                                                                                                               4h29m
+
+================================================================
+12. LIMITRANGE
+================================================================
+NAMESPACE       NAME                       CREATED AT
+default         securerag-dev-limits       2026-09-25T07:32:24Z
+default         securerag-preprod-limits   2026-09-25T07:32:24Z
+default         securerag-prod-limits      2026-09-25T07:32:25Z
+default         securerag-staging-limits   2026-09-25T07:32:24Z
+default         securerag-test-limits      2026-09-25T07:32:24Z
+securerag-hub   securerag-hub-defaults     2026-09-21T07:55:08Z
+
+================================================================
+13. RBAC (roles, rolebindings, serviceaccounts)
+================================================================
+NAMESPACE            NAME                                                                              CREATED AT
+securerag-dev        role.rbac.authorization.k8s.io/env-only-list                                      2026-09-25T07:35:18Z
+securerag-preprod    role.rbac.authorization.k8s.io/env-only-list                                      2026-09-25T07:35:18Z
+securerag-prod       role.rbac.authorization.k8s.io/env-only-list                                      2026-09-25T07:35:18Z
+securerag-staging    role.rbac.authorization.k8s.io/env-only-list                                      2026-09-25T07:35:18Z
+securerag-test       role.rbac.authorization.k8s.io/env-only-list                                      2026-09-25T07:35:18Z
+NAMESPACE            NAME                                                                                               ROLE                                                    AGE
+NAMESPACE              NAME                                                            SECRETS   AGE
+securerag-dev          serviceaccount/default                                          0         25h
+securerag-dev          serviceaccount/securerag-sa                                     0         4h30m
+securerag-dev          serviceaccount/svc-sa                                           0         4h21m
+securerag-preprod      serviceaccount/default                                          0         4h30m
+securerag-preprod      serviceaccount/securerag-sa                                     0         4h30m
+securerag-preprod      serviceaccount/svc-sa                                           0         4h21m
+securerag-prod         serviceaccount/default                                          0         4h30m
+securerag-prod         serviceaccount/securerag-sa                                     0         4h30m
+securerag-prod         serviceaccount/svc-sa                                           0         4h21m
+securerag-staging      serviceaccount/default                                          0         25h
+securerag-staging      serviceaccount/securerag-sa                                     0         4h30m
+securerag-staging      serviceaccount/svc-sa                                           0         4h21m
+securerag-test         serviceaccount/default                                          0         4h30m
+securerag-test         serviceaccount/securerag-sa                                     0         4h30m
+securerag-test         serviceaccount/svc-sa                                           0         4h21m
+
+================================================================
+14. HPA
+================================================================
+NAMESPACE       NAME                     REFERENCE                           TARGETS       MINPODS   MAXPODS   REPLICAS   AGE
+
+================================================================
+15. PVC
+================================================================
+NAMESPACE              NAME                                                                                                   STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS   VOLUMEATTRIBUTESCLASS   AGE
+
+================================================================
+16. ARGOCD - APPLICATIONS
+================================================================
+NAME                          SYNC STATUS   HEALTH STATUS
+securerag-backup              OutOfSync     Degraded
+securerag-cert-manager        Synced        Healthy
+securerag-demo                OutOfSync     Healthy
+securerag-dev                 Unknown       Healthy
+securerag-dr                  OutOfSync     Healthy
+securerag-eso                 OutOfSync     Healthy
+securerag-falco-talon         Synced        Degraded
+securerag-harbor              Synced        Healthy
+securerag-image-updater       Synced        Healthy
+securerag-kyverno             Synced        Degraded
+securerag-kyverno-policies    OutOfSync     Healthy
+securerag-metrics-server      Synced        Healthy
+securerag-observability       OutOfSync     Degraded
+securerag-otel                Synced        Healthy
+securerag-production          OutOfSync     Healthy
+securerag-psa-policies        Synced        Healthy
+securerag-recette             OutOfSync     Healthy
+securerag-root                OutOfSync     Healthy
+securerag-runtime-detection   Synced        Healthy
+securerag-secrets             OutOfSync     Degraded
+securerag-staging             OutOfSync     Healthy
+securerag-vault               OutOfSync     Healthy
+securerag-velero              Synced        Degraded
+
+================================================================
+17. ARGOCD - SYNC & HEALTH
+================================================================
+NAME                          SYNC        HEALTH
+securerag-backup              OutOfSync   Degraded
+securerag-cert-manager        Synced      Healthy
+securerag-demo                OutOfSync   Healthy
+securerag-dev                 Unknown     Healthy
+securerag-dr                  OutOfSync   Healthy
+securerag-eso                 OutOfSync   Healthy
+securerag-falco-talon         Synced      Degraded
+securerag-harbor              Synced      Healthy
+securerag-image-updater       Synced      Healthy
+securerag-kyverno             Synced      Degraded
+securerag-kyverno-policies    OutOfSync   Healthy
+securerag-metrics-server      Synced      Healthy
+securerag-observability       OutOfSync   Degraded
+securerag-otel                Synced      Healthy
+securerag-production          OutOfSync   Healthy
+securerag-psa-policies        Synced      Healthy
+securerag-recette             OutOfSync   Healthy
+securerag-root                OutOfSync   Healthy
+securerag-runtime-detection   Synced      Healthy
+securerag-secrets             OutOfSync   Degraded
+securerag-staging             OutOfSync   Healthy
+securerag-vault               OutOfSync   Healthy
+securerag-velero              Synced      Degraded
+
+================================================================
+18. KYVERNO - CLUSTERPOLICIES
+================================================================
+NAME                                   ADMISSION   BACKGROUND   READY   AGE    MESSAGE
+securerag-audit-cleartext-env-values   true        true         True    2d8h   Ready
+securerag-disallow-host-network        true        true         True    2d8h   Ready
+securerag-disallow-root-containers     true        true         True    2d8h   Ready
+securerag-require-workload-controls    true        true         True    2d8h   Ready
+securerag-restrict-image-references    true        true         True    2d8h   Ready
+securerag-restrict-service-exposure    true        true         True    2d8h   Ready
+securerag-restrict-volume-types        true        true         True    2d8h   Ready
+securerag-verify-cosign-images         true        false        True    2d8h   Ready
+
+================================================================
+19. KYVERNO - POLICIES EN MODE ENFORCE
+================================================================
+NAME                                   ACTION
+securerag-audit-cleartext-env-values   Enforce
+securerag-disallow-host-network        Enforce
+securerag-disallow-root-containers     Enforce
+securerag-require-workload-controls    Enforce
+securerag-restrict-image-references    Enforce
+securerag-restrict-service-exposure    Enforce
+securerag-restrict-volume-types        Enforce
+securerag-verify-cosign-images         Enforce
+
+================================================================
+20. NODES
+================================================================
+NAME                          STATUS   ROLES           AGE    VERSION   INTERNAL-IP   EXTERNAL-IP   OS-IMAGE                         KERNEL-VERSION                CONTAINER-RUNTIME
+securerag-dev-control-plane   Ready    control-plane   4d4h   v1.33.1   172.18.0.3    <none>        Debian GNU/Linux 12 (bookworm)   6.12.74+deb13+1-cloud-amd64   containerd://2.1.1
+securerag-dev-worker          Ready    <none>          4d4h   v1.33.1   172.18.0.4    <none>        Debian GNU/Linux 12 (bookworm)   6.12.74+deb13+1-cloud-amd64   containerd://2.1.1
+
+================================================================
+21. TOUS LES PODS AVEC LEURS NODES
+================================================================
+NAMESPACE              NAME                                                              READY   STATUS                       RESTARTS          AGE     IP             NODE                          NOMINATED NODE   READINESS GATES
+argocd                 argocd-application-controller-0                                   1/1     Running                      0                 3d22h   10.244.1.74    securerag-dev-worker          <none>           <none>
+argocd                 argocd-applicationset-controller-c4cbc5dd-jcmld                   1/1     Running                      0                 3d22h   10.244.1.72    securerag-dev-worker          <none>           <none>
+argocd                 argocd-dex-server-5b57b7b8ff-5ds9q                                1/1     Running                      1 (3d22h ago)     3d22h   10.244.1.71    securerag-dev-worker          <none>           <none>
+argocd                 argocd-notifications-controller-b496c5dd-rtcq6                    1/1     Running                      0                 3d22h   10.244.1.73    securerag-dev-worker          <none>           <none>
+argocd                 argocd-redis-66f8dc8554-zv92z                                     1/1     Running                      0                 3d22h   10.244.1.76    securerag-dev-worker          <none>           <none>
+argocd                 argocd-repo-server-7787bf7c9d-hln66                               1/1     Running                      0                 3d22h   10.244.1.75    securerag-dev-worker          <none>           <none>
+argocd                 argocd-server-7dff958c45-jvvct                                    1/1     Running                      0                 3d22h   10.244.1.77    securerag-dev-worker          <none>           <none>
+argocd                 securerag-image-updater-argocd-image-updater-77b768b59b-tgsgx     1/1     Running                      0                 25h     10.244.1.187   securerag-dev-worker          <none>           <none>
+cert-manager           securerag-cert-manager-55449cc78d-7bdbt                           1/1     Running                      0                 25h     10.244.1.189   securerag-dev-worker          <none>           <none>
+cert-manager           securerag-cert-manager-cainjector-6b84fc9c69-j84fh                1/1     Running                      0                 25h     10.244.1.188   securerag-dev-worker          <none>           <none>
+cert-manager           securerag-cert-manager-webhook-d9797d567-h4k9l                    1/1     Running                      0                 25h     10.244.1.190   securerag-dev-worker          <none>           <none>
+external-secrets       securerag-eso-external-secrets-84fd599565-bqss6                   1/1     Running                      0                 25h     10.244.1.192   securerag-dev-worker          <none>           <none>
+external-secrets       securerag-eso-external-secrets-cert-controller-7b5b87d4cc-znfp6   1/1     Running                      0                 25h     10.244.1.191   securerag-dev-worker          <none>           <none>
+external-secrets       securerag-eso-external-secrets-webhook-5f647c6dfb-9c4k4           1/1     Running                      0                 25h     10.244.1.193   securerag-dev-worker          <none>           <none>
+falco                  falco-talon-6d44f7dc9b-2n5jj                                      0/1     CrashLoopBackOff             25 (2m17s ago)    106m    10.244.1.235   securerag-dev-worker          <none>           <none>
+falco                  falco-talon-b69fc4bdb-dv92r                                       0/1     CrashLoopBackOff             295 (3m51s ago)   25h     10.244.1.207   securerag-dev-worker          <none>           <none>
+falco                  falcosidekick-77dd596d49-zd67m                                    1/1     Running                      0                 25h     10.244.1.186   securerag-dev-worker          <none>           <none>
+harbor                 securerag-harbor-core-6c4c7b5f4d-ts24l                            1/1     Running                      0                 63m     10.244.1.137   securerag-dev-worker          <none>           <none>
+harbor                 securerag-harbor-database-0                                       1/1     Running                      0                 25h     10.244.1.202   securerag-dev-worker          <none>           <none>
+harbor                 securerag-harbor-jobservice-b6d5d7f46-rprnj                       1/1     Running                      2 (63m ago)       63m     10.244.1.138   securerag-dev-worker          <none>           <none>
+harbor                 securerag-harbor-nginx-7d77b55d8d-tdrkp                           1/1     Running                      0                 25h     10.244.1.197   securerag-dev-worker          <none>           <none>
+harbor                 securerag-harbor-portal-d857fcf78-glxpr                           1/1     Running                      0                 25h     10.244.1.196   securerag-dev-worker          <none>           <none>
+harbor                 securerag-harbor-redis-0                                          1/1     Running                      0                 25h     10.244.1.201   securerag-dev-worker          <none>           <none>
+harbor                 securerag-harbor-registry-846b996cd-v4lkh                         2/2     Running                      0                 63m     10.244.1.139   securerag-dev-worker          <none>           <none>
+harbor                 securerag-harbor-trivy-0                                          1/1     Running                      0                 25h     10.244.1.203   securerag-dev-worker          <none>           <none>
+kube-system            coredns-674b8bbfcf-6lns8                                          1/1     Running                      0                 4d4h    10.244.0.3     securerag-dev-control-plane   <none>           <none>
+kube-system            coredns-674b8bbfcf-jfkzd                                          1/1     Running                      0                 4d4h    10.244.0.5     securerag-dev-control-plane   <none>           <none>
+kube-system            etcd-securerag-dev-control-plane                                  1/1     Running                      0                 4d4h    172.18.0.3     securerag-dev-control-plane   <none>           <none>
+kube-system            kindnet-sh9s5                                                     1/1     Running                      0                 4d4h    172.18.0.3     securerag-dev-control-plane   <none>           <none>
+kube-system            kindnet-tg556                                                     1/1     Running                      0                 4d4h    172.18.0.4     securerag-dev-worker          <none>           <none>
+kube-system            kube-apiserver-securerag-dev-control-plane                        1/1     Running                      0                 4d4h    172.18.0.3     securerag-dev-control-plane   <none>           <none>
+kube-system            kube-controller-manager-securerag-dev-control-plane               1/1     Running                      0                 4d4h    172.18.0.3     securerag-dev-control-plane   <none>           <none>
+kube-system            kube-proxy-7r6j2                                                  1/1     Running                      0                 4d4h    172.18.0.3     securerag-dev-control-plane   <none>           <none>
+kube-system            kube-proxy-gv5dt                                                  1/1     Running                      0                 4d4h    172.18.0.4     securerag-dev-worker          <none>           <none>
+kube-system            kube-scheduler-securerag-dev-control-plane                        1/1     Running                      0                 4d4h    172.18.0.3     securerag-dev-control-plane   <none>           <none>
+kube-system            metrics-server-65f5d57595-56b5w                                   1/1     Running                      0                 2d21h   10.244.1.110   securerag-dev-worker          <none>           <none>
+kyverno                kyverno-admission-controller-69b6b647c8-vzrb8                     1/1     Running                      0                 2d8h    10.244.1.156   securerag-dev-worker          <none>           <none>
+kyverno                kyverno-admission-controller-768986ffdc-92jxc                     0/1     Running                      0                 31h     10.244.1.178   securerag-dev-worker          <none>           <none>
+kyverno                kyverno-background-controller-56d5566f46-kxgfm                    1/1     Running                      0                 31h     10.244.1.177   securerag-dev-worker          <none>           <none>
+kyverno                kyverno-cleanup-controller-5ddf559d99-mlfd2                       1/1     Running                      0                 31h     10.244.1.179   securerag-dev-worker          <none>           <none>
+kyverno                kyverno-reports-controller-ddd75dfcb-fx4hm                        1/1     Running                      0                 31h     10.244.1.180   securerag-dev-worker          <none>           <none>
+local-path-storage     local-path-provisioner-7dc846544d-x67jt                           1/1     Running                      0                 4d4h    10.244.0.4     securerag-dev-control-plane   <none>           <none>
+loki                   loki-0                                                            1/1     Running                      0                 4d2h    10.244.1.56    securerag-dev-worker          <none>           <none>
+monitoring             alertmanager-0                                                    2/2     Running                      0                 4d2h    10.244.1.54    securerag-dev-worker          <none>           <none>
+monitoring             alertmanager-kube-prometheus-stack-alertmanager-0                 2/2     Running                      0                 4d2h    10.244.1.49    securerag-dev-worker          <none>           <none>
+monitoring             grafana-68bcc77bf8-rttk2                                          1/1     Running                      0                 4d2h    10.244.1.52    securerag-dev-worker          <none>           <none>
+monitoring             kube-prometheus-stack-kube-state-metrics-875d5cb5f-wz557          1/1     Running                      0                 4d2h    10.244.1.45    securerag-dev-worker          <none>           <none>
+monitoring             kube-prometheus-stack-operator-5b6fcc7f75-6c96s                   1/1     Running                      0                 4d2h    10.244.1.46    securerag-dev-worker          <none>           <none>
+monitoring             kube-prometheus-stack-prometheus-node-exporter-5p84s              1/1     Running                      0                 4d2h    172.18.0.3     securerag-dev-control-plane   <none>           <none>
+monitoring             kube-prometheus-stack-prometheus-node-exporter-z74w2              1/1     Running                      0                 4d2h    172.18.0.4     securerag-dev-worker          <none>           <none>
+monitoring             prometheus-kube-prometheus-stack-prometheus-0                     2/2     Running                      0                 4d2h    10.244.1.50    securerag-dev-worker          <none>           <none>
+otel-system            otel-collector-5465c56945-nn6xq                                   1/1     Running                      0                 25h     10.244.1.184   securerag-dev-worker          <none>           <none>
+otel-system            tempo-8ff8cfb46-x8jzh                                             1/1     Running                      0                 25h     10.244.1.185   securerag-dev-worker          <none>           <none>
+securerag-backup       argocd-backup-29838330-jrt69                                      0/1     Completed                    0                 10h     10.244.1.230   securerag-dev-worker          <none>           <none>
+securerag-backup       etcd-backup-29838300-6lnc5                                        0/1     Completed                    0                 10h     172.18.0.3     securerag-dev-control-plane   <none>           <none>
+securerag-backup       vault-backup-29838315-mbhkq                                       0/1     Completed                    0                 10h     10.244.1.229   securerag-dev-worker          <none>           <none>
+securerag-dev          audit-security-service-56cfc977d5-ccc48                           0/1     ImagePullBackOff             0                 82m     10.244.1.91    securerag-dev-worker          <none>           <none>
+securerag-dev          audit-security-service-bd9476dc6-776xr                            0/1     ImagePullBackOff             0                 82m     10.244.1.117   securerag-dev-worker          <none>           <none>
+securerag-dev          auth-users-688fc9fb7d-wkgcf                                       0/1     ImagePullBackOff             0                 82m     10.244.1.118   securerag-dev-worker          <none>           <none>
+securerag-dev          auth-users-85f85bd8c9-pj2p4                                       0/1     ImagePullBackOff             0                 82m     10.244.1.92    securerag-dev-worker          <none>           <none>
+securerag-dev          chatbot-manager-86c4d69df6-bv6j8                                  0/1     ErrImagePull                 0                 82m     10.244.1.93    securerag-dev-worker          <none>           <none>
+securerag-dev          chatbot-manager-9fc5b9477-9hkzd                                   0/1     ErrImagePull                 0                 82m     10.244.1.119   securerag-dev-worker          <none>           <none>
+securerag-dev          conversation-service-587c555845-nsqzw                             0/1     ImagePullBackOff             0                 82m     10.244.1.95    securerag-dev-worker          <none>           <none>
+securerag-dev          conversation-service-67f888cdbd-drdpm                             0/1     ImagePullBackOff             0                 82m     10.244.1.120   securerag-dev-worker          <none>           <none>
+securerag-dev          portal-web-655bc477b8-bkhpv                                       0/1     ImagePullBackOff             0                 82m     10.244.1.121   securerag-dev-worker          <none>           <none>
+securerag-dev          portal-web-686dcd9c49-66x92                                       0/1     ErrImagePull                 0                 82m     10.244.1.96    securerag-dev-worker          <none>           <none>
+securerag-hub          audit-security-service-5fd6685f64-n7fjh                           1/1     Running                      0                 2d23h   10.244.1.104   securerag-dev-worker          <none>           <none>
+securerag-hub          auth-users-776cc8bfdb-95sj7                                       1/1     Running                      1 (2d15h ago)     2d23h   10.244.1.101   securerag-dev-worker          <none>           <none>
+securerag-hub          chatbot-manager-77b78ffb97-dl96v                                  1/1     Running                      0                 2d23h   10.244.1.102   securerag-dev-worker          <none>           <none>
+securerag-hub          conversation-service-86bbd9598b-gr9wd                             1/1     Running                      0                 2d23h   10.244.1.103   securerag-dev-worker          <none>           <none>
+securerag-hub          portal-web-68978bbc68-v4wfb                                       1/1     Running                      0                 2d8h    10.244.1.152   securerag-dev-worker          <none>           <none>
+securerag-hub          postgres-auth-58f89fd9bf-b55hk                                    1/1     Running                      0                 3d      10.244.1.94    securerag-dev-worker          <none>           <none>
+securerag-hub          secai-7fc5df5fb8-k8c4k                                            1/1     Running                      0                 38h     10.244.1.176   securerag-dev-worker          <none>           <none>
+securerag-monitoring   alertmanager-695cc84574-4zwbh                                     1/1     Running                      0                 25h     10.244.1.215   securerag-dev-worker          <none>           <none>
+securerag-monitoring   alertmanager-695cc84574-88nmq                                     1/1     Running                      0                 25h     10.244.1.214   securerag-dev-worker          <none>           <none>
+securerag-monitoring   grafana-656c84b6bc-2c2v9                                          0/1     CreateContainerConfigError   0                 106m    10.244.1.236   securerag-dev-worker          <none>           <none>
+securerag-monitoring   grafana-6cc457fdf7-lxhhx                                          0/1     CreateContainerConfigError   0                 25h     10.244.1.223   securerag-dev-worker          <none>           <none>
+securerag-monitoring   kube-state-metrics-7d79487877-rkxqs                               1/1     Running                      0                 25h     10.244.1.216   securerag-dev-worker          <none>           <none>
+securerag-monitoring   loki-788b899d85-mpkv6                                             1/1     Running                      0                 25h     10.244.1.224   securerag-dev-worker          <none>           <none>
+securerag-monitoring   prometheus-778b68b667-2jcfr                                       1/1     Running                      0                 25h     10.244.1.225   securerag-dev-worker          <none>           <none>
+securerag-monitoring   promtail-kr69p                                                    0/1     CrashLoopBackOff             297 (4m43s ago)   25h     10.244.1.212   securerag-dev-worker          <none>           <none>
+securerag-monitoring   promtail-ps6p2                                                    0/1     CrashLoopBackOff             297 (84s ago)     25h     10.244.0.11    securerag-dev-control-plane   <none>           <none>
+securerag-monitoring   tempo-7c78b7c6b4-lsz5g                                            1/1     Running                      0                 25h     10.244.1.213   securerag-dev-worker          <none>           <none>
+securerag-preprod      audit-security-service-86b4995674-h5n5b                           0/1     ImagePullBackOff             0                 82m     10.244.1.112   securerag-dev-worker          <none>           <none>
+securerag-preprod      audit-security-service-bd9476dc6-zjrqp                            0/1     ImagePullBackOff             0                 82m     10.244.1.132   securerag-dev-worker          <none>           <none>
+securerag-preprod      auth-users-5dd6d9b868-9k89b                                       0/1     ImagePullBackOff             0                 82m     10.244.1.113   securerag-dev-worker          <none>           <none>
+securerag-preprod      auth-users-688fc9fb7d-vtrd6                                       0/1     ImagePullBackOff             0                 82m     10.244.1.133   securerag-dev-worker          <none>           <none>
+securerag-preprod      chatbot-manager-5f4d58b7-brht9                                    0/1     ErrImagePull                 0                 82m     10.244.1.114   securerag-dev-worker          <none>           <none>
+securerag-preprod      chatbot-manager-9fc5b9477-d7d66                                   0/1     ImagePullBackOff             0                 82m     10.244.1.134   securerag-dev-worker          <none>           <none>
+securerag-preprod      conversation-service-5bc777fc74-ckqml                             0/1     ImagePullBackOff             0                 82m     10.244.1.115   securerag-dev-worker          <none>           <none>
+securerag-preprod      conversation-service-67f888cdbd-8rgp7                             0/1     ImagePullBackOff             0                 82m     10.244.1.135   securerag-dev-worker          <none>           <none>
+securerag-preprod      portal-web-655bc477b8-jz4wt                                       0/1     ImagePullBackOff             0                 82m     10.244.1.136   securerag-dev-worker          <none>           <none>
+securerag-preprod      portal-web-76cd647b9d-wx6l6                                       0/1     ErrImagePull                 0                 82m     10.244.1.116   securerag-dev-worker          <none>           <none>
+securerag-staging      audit-security-service-56cfc977d5-hf92l                           0/1     ImagePullBackOff             0                 82m     10.244.1.106   securerag-dev-worker          <none>           <none>
+securerag-staging      audit-security-service-bd9476dc6-lp7zn                            0/1     ImagePullBackOff             0                 82m     10.244.1.127   securerag-dev-worker          <none>           <none>
+securerag-staging      auth-users-688fc9fb7d-v5xg5                                       0/1     ImagePullBackOff             0                 82m     10.244.1.128   securerag-dev-worker          <none>           <none>
+securerag-staging      auth-users-85f85bd8c9-7rs7f                                       0/1     ErrImagePull                 0                 82m     10.244.1.107   securerag-dev-worker          <none>           <none>
+securerag-staging      chatbot-manager-86c4d69df6-hztg6                                  0/1     ErrImagePull                 0                 82m     10.244.1.108   securerag-dev-worker          <none>           <none>
+securerag-staging      chatbot-manager-9fc5b9477-kb6cw                                   0/1     ImagePullBackOff             0                 82m     10.244.1.129   securerag-dev-worker          <none>           <none>
+securerag-staging      conversation-service-587c555845-5ph8w                             0/1     ErrImagePull                 0                 82m     10.244.1.109   securerag-dev-worker          <none>           <none>
+securerag-staging      conversation-service-67f888cdbd-thdk2                             0/1     ImagePullBackOff             0                 82m     10.244.1.130   securerag-dev-worker          <none>           <none>
+securerag-staging      portal-web-655bc477b8-vpxqj                                       0/1     ImagePullBackOff             0                 82m     10.244.1.131   securerag-dev-worker          <none>           <none>
+securerag-staging      portal-web-686dcd9c49-tzn2j                                       0/1     ImagePullBackOff             0                 82m     10.244.1.111   securerag-dev-worker          <none>           <none>
+securerag-test         audit-security-service-56cfc977d5-znxh9                           0/1     ImagePullBackOff             0                 82m     10.244.1.97    securerag-dev-worker          <none>           <none>
+securerag-test         audit-security-service-bd9476dc6-4t9zb                            0/1     ImagePullBackOff             0                 82m     10.244.1.122   securerag-dev-worker          <none>           <none>
+securerag-test         auth-users-688fc9fb7d-vvxft                                       0/1     ImagePullBackOff             0                 82m     10.244.1.123   securerag-dev-worker          <none>           <none>
+securerag-test         auth-users-85f85bd8c9-kg88v                                       0/1     ErrImagePull                 0                 82m     10.244.1.98    securerag-dev-worker          <none>           <none>
+securerag-test         chatbot-manager-86c4d69df6-rhs82                                  0/1     ErrImagePull                 0                 82m     10.244.1.99    securerag-dev-worker          <none>           <none>
+securerag-test         chatbot-manager-9fc5b9477-tfhqh                                   0/1     ImagePullBackOff             0                 82m     10.244.1.124   securerag-dev-worker          <none>           <none>
+securerag-test         conversation-service-587c555845-k8vfb                             0/1     ImagePullBackOff             0                 82m     10.244.1.100   securerag-dev-worker          <none>           <none>
+securerag-test         conversation-service-67f888cdbd-74gml                             0/1     ImagePullBackOff             0                 82m     10.244.1.125   securerag-dev-worker          <none>           <none>
+securerag-test         portal-web-655bc477b8-vqw2p                                       0/1     ImagePullBackOff             0                 82m     10.244.1.126   securerag-dev-worker          <none>           <none>
+securerag-test         portal-web-686dcd9c49-m5ggb                                       0/1     ErrImagePull                 0                 82m     10.244.1.105   securerag-dev-worker          <none>           <none>
+tempo                  tempo-0                                                           1/1     Running                      0                 3d22h   10.244.1.61    securerag-dev-worker          <none>           <none>
+vault                  securerag-vault-0                                                 1/1     Running                      0                 25h     10.244.1.195   securerag-dev-worker          <none>           <none>
+vault                  securerag-vault-agent-injector-5854c4755d-vjwtk                   1/1     Running                      0                 25h     10.244.1.194   securerag-dev-worker          <none>           <none>
+velero                 node-agent-rjltm                                                  0/1     ContainerCreating            0                 25h     <none>         securerag-dev-worker          <none>           <none>
+velero                 securerag-velero-56b4f7b966-7bhmh                                 0/1     Init:0/1                     0                 106m    <none>         securerag-dev-worker          <none>           <none>
+
+================================================================
+22. RBAC TEST : DEV peut-il lire les secrets PROD ?
+================================================================
+no
+
+================================================================
+23. RBAC TEST : DEV peut-il supprimer un Deployment PROD ?
+================================================================
+no
+
+================================================================
+24. SECRETS PAR ENVIRONNEMENT
+================================================================
+===== securerag-dev =====
+No resources found in securerag-dev namespace.
+===== securerag-test =====
+No resources found in securerag-test namespace.
+===== securerag-staging =====
+No resources found in securerag-staging namespace.
+===== securerag-preprod =====
+No resources found in securerag-preprod namespace.
+===== securerag-prod =====
+No resources found in securerag-prod namespace.
+
+================================================================
+25. ÉVÉNEMENTS KUBERNETES (20 derniers par env)
+================================================================
+===== securerag-dev =====
+2m43s       Warning   Failed    pod/portal-web-686dcd9c49-66x92               Error: ImagePullBackOff
+2m43s       Normal    BackOff   pod/portal-web-686dcd9c49-66x92               Back-off pulling image "localhost:5001/securerag-hub-portal-web@sha256:113f66b82a1a24b3b2e4048d3bc918ee2a7d83afd2fed70c906adb6305499a50"
+2m43s       Normal    BackOff   pod/chatbot-manager-86c4d69df6-bv6j8          Back-off pulling image "localhost:5001/securerag-hub-chatbot-manager@sha256:d83db33af6b1ae3814d7ee289b4b7908d1160b49dfd925aa8da3e497b10d3d3d"
+2m43s       Warning   Failed    pod/chatbot-manager-86c4d69df6-bv6j8          Error: ImagePullBackOff
+2m41s       Normal    BackOff   pod/conversation-service-587c555845-nsqzw     Back-off pulling image "localhost:5001/securerag-hub-conversation-service@sha256:a4ea109b2c211bda6643f9a2439c3efaf9246a4cd35b4787b37548eb113d20b7"
+2m41s       Warning   Failed    pod/conversation-service-587c555845-nsqzw     Error: ImagePullBackOff
+2m38s       Warning   Failed    pod/audit-security-service-56cfc977d5-ccc48   Error: ImagePullBackOff
+2m38s       Normal    BackOff   pod/audit-security-service-56cfc977d5-ccc48   Back-off pulling image "localhost:5001/securerag-hub-audit-security-service@sha256:c9e49efb7acfd8ccb45dbad9e0cd237d8f3724dca197b25db4ad1032fbdb5153"
+2m36s       Normal    BackOff   pod/auth-users-85f85bd8c9-pj2p4               Back-off pulling image "localhost:5001/securerag-hub-auth-users@sha256:cae6faa710c0ddecacf73b9b74782d03e6088064cc625f7327f58c507a17834f"
+2m36s       Warning   Failed    pod/auth-users-85f85bd8c9-pj2p4               Error: ImagePullBackOff
+2m11s       Normal    BackOff   pod/audit-security-service-bd9476dc6-776xr    Back-off pulling image "localhost:5001/securerag-hub-audit-security-service@sha256:c9e49efb7acfd8ccb45dbad9e0cd237d8f3724dca197b25db4ad1032fbdb5153"
+2m11s       Warning   Failed    pod/audit-security-service-bd9476dc6-776xr    Error: ImagePullBackOff
+2m9s        Warning   Failed    pod/conversation-service-67f888cdbd-drdpm     Error: ImagePullBackOff
+2m9s        Warning   Failed    pod/chatbot-manager-9fc5b9477-9hkzd           Error: ImagePullBackOff
+2m9s        Normal    BackOff   pod/conversation-service-67f888cdbd-drdpm     Back-off pulling image "localhost:5001/securerag-hub-conversation-service@sha256:a4ea109b2c211bda6643f9a2439c3efaf9246a4cd35b4787b37548eb113d20b7"
+2m9s        Normal    BackOff   pod/chatbot-manager-9fc5b9477-9hkzd           Back-off pulling image "localhost:5001/securerag-hub-chatbot-manager@sha256:d83db33af6b1ae3814d7ee289b4b7908d1160b49dfd925aa8da3e497b10d3d3d"
+2m8s        Warning   Failed    pod/auth-users-688fc9fb7d-wkgcf               Error: ImagePullBackOff
+2m8s        Normal    BackOff   pod/auth-users-688fc9fb7d-wkgcf               Back-off pulling image "localhost:5001/securerag-hub-auth-users@sha256:cae6faa710c0ddecacf73b9b74782d03e6088064cc625f7327f58c507a17834f"
+116s        Normal    BackOff   pod/portal-web-655bc477b8-bkhpv               Back-off pulling image "localhost:5001/securerag-hub-portal-web@sha256:113f66b82a1a24b3b2e4048d3bc918ee2a7d83afd2fed70c906adb6305499a50"
+116s        Warning   Failed    pod/portal-web-655bc477b8-bkhpv               Error: ImagePullBackOff
+===== securerag-test =====
+2m42s       Normal    BackOff   pod/auth-users-85f85bd8c9-kg88v               Back-off pulling image "localhost:5001/securerag-hub-auth-users@sha256:cae6faa710c0ddecacf73b9b74782d03e6088064cc625f7327f58c507a17834f"
+2m42s       Warning   Failed    pod/auth-users-85f85bd8c9-kg88v               Error: ImagePullBackOff
+2m41s       Normal    BackOff   pod/conversation-service-587c555845-k8vfb     Back-off pulling image "localhost:5001/securerag-hub-conversation-service@sha256:a4ea109b2c211bda6643f9a2439c3efaf9246a4cd35b4787b37548eb113d20b7"
+2m41s       Warning   Failed    pod/conversation-service-587c555845-k8vfb     Error: ImagePullBackOff
+2m39s       Warning   Failed    pod/portal-web-686dcd9c49-m5ggb               Error: ImagePullBackOff
+2m39s       Normal    BackOff   pod/portal-web-686dcd9c49-m5ggb               Back-off pulling image "localhost:5001/securerag-hub-portal-web@sha256:113f66b82a1a24b3b2e4048d3bc918ee2a7d83afd2fed70c906adb6305499a50"
+2m34s       Warning   Failed    pod/audit-security-service-56cfc977d5-znxh9   Error: ImagePullBackOff
+2m34s       Normal    BackOff   pod/audit-security-service-56cfc977d5-znxh9   Back-off pulling image "localhost:5001/securerag-hub-audit-security-service@sha256:c9e49efb7acfd8ccb45dbad9e0cd237d8f3724dca197b25db4ad1032fbdb5153"
+2m32s       Normal    BackOff   pod/chatbot-manager-86c4d69df6-rhs82          Back-off pulling image "localhost:5001/securerag-hub-chatbot-manager@sha256:d83db33af6b1ae3814d7ee289b4b7908d1160b49dfd925aa8da3e497b10d3d3d"
+2m32s       Warning   Failed    pod/chatbot-manager-86c4d69df6-rhs82          Error: ImagePullBackOff
+2m1s        Normal    BackOff   pod/chatbot-manager-9fc5b9477-tfhqh           Back-off pulling image "localhost:5001/securerag-hub-chatbot-manager@sha256:d83db33af6b1ae3814d7ee289b4b7908d1160b49dfd925aa8da3e497b10d3d3d"
+2m1s        Warning   Failed    pod/chatbot-manager-9fc5b9477-tfhqh           Error: ImagePullBackOff
+117s        Warning   Failed    pod/auth-users-688fc9fb7d-vvxft               Error: ImagePullBackOff
+117s        Normal    BackOff   pod/auth-users-688fc9fb7d-vvxft               Back-off pulling image "localhost:5001/securerag-hub-auth-users@sha256:cae6faa710c0ddecacf73b9b74782d03e6088064cc625f7327f58c507a17834f"
+115s        Normal    BackOff   pod/conversation-service-67f888cdbd-74gml     Back-off pulling image "localhost:5001/securerag-hub-conversation-service@sha256:a4ea109b2c211bda6643f9a2439c3efaf9246a4cd35b4787b37548eb113d20b7"
+115s        Warning   Failed    pod/conversation-service-67f888cdbd-74gml     Error: ImagePullBackOff
+114s        Normal    BackOff   pod/portal-web-655bc477b8-vqw2p               Back-off pulling image "localhost:5001/securerag-hub-portal-web@sha256:113f66b82a1a24b3b2e4048d3bc918ee2a7d83afd2fed70c906adb6305499a50"
+114s        Warning   Failed    pod/portal-web-655bc477b8-vqw2p               Error: ImagePullBackOff
+112s        Warning   Failed    pod/audit-security-service-bd9476dc6-4t9zb    Error: ImagePullBackOff
+112s        Normal    BackOff   pod/audit-security-service-bd9476dc6-4t9zb    Back-off pulling image "localhost:5001/securerag-hub-audit-security-service@sha256:c9e49efb7acfd8ccb45dbad9e0cd237d8f3724dca197b25db4ad1032fbdb5153"
+===== securerag-staging =====
+2m39s       Normal    BackOff   pod/chatbot-manager-86c4d69df6-hztg6          Back-off pulling image "localhost:5001/securerag-hub-chatbot-manager@sha256:d83db33af6b1ae3814d7ee289b4b7908d1160b49dfd925aa8da3e497b10d3d3d"
+2m39s       Warning   Failed    pod/chatbot-manager-86c4d69df6-hztg6          Error: ImagePullBackOff
+2m35s       Warning   Failed    pod/audit-security-service-56cfc977d5-hf92l   Error: ImagePullBackOff
+2m35s       Normal    BackOff   pod/audit-security-service-56cfc977d5-hf92l   Back-off pulling image "localhost:5001/securerag-hub-audit-security-service@sha256:c9e49efb7acfd8ccb45dbad9e0cd237d8f3724dca197b25db4ad1032fbdb5153"
+2m34s       Normal    BackOff   pod/auth-users-85f85bd8c9-7rs7f               Back-off pulling image "localhost:5001/securerag-hub-auth-users@sha256:cae6faa710c0ddecacf73b9b74782d03e6088064cc625f7327f58c507a17834f"
+2m34s       Warning   Failed    pod/auth-users-85f85bd8c9-7rs7f               Error: ImagePullBackOff
+2m33s       Normal    BackOff   pod/conversation-service-587c555845-5ph8w     Back-off pulling image "localhost:5001/securerag-hub-conversation-service@sha256:a4ea109b2c211bda6643f9a2439c3efaf9246a4cd35b4787b37548eb113d20b7"
+2m33s       Warning   Failed    pod/conversation-service-587c555845-5ph8w     Error: ImagePullBackOff
+2m28s       Warning   Failed    pod/portal-web-686dcd9c49-tzn2j               Error: ImagePullBackOff
+2m28s       Normal    BackOff   pod/portal-web-686dcd9c49-tzn2j               Back-off pulling image "localhost:5001/securerag-hub-portal-web@sha256:113f66b82a1a24b3b2e4048d3bc918ee2a7d83afd2fed70c906adb6305499a50"
+2m2s        Normal    BackOff   pod/auth-users-688fc9fb7d-v5xg5               Back-off pulling image "localhost:5001/securerag-hub-auth-users@sha256:cae6faa710c0ddecacf73b9b74782d03e6088064cc625f7327f58c507a17834f"
+2m2s        Warning   Failed    pod/auth-users-688fc9fb7d-v5xg5               Error: ImagePullBackOff
+2m          Normal    BackOff   pod/chatbot-manager-9fc5b9477-kb6cw           Back-off pulling image "localhost:5001/securerag-hub-chatbot-manager@sha256:d83db33af6b1ae3814d7ee289b4b7908d1160b49dfd925aa8da3e497b10d3d3d"
+2m          Warning   Failed    pod/chatbot-manager-9fc5b9477-kb6cw           Error: ImagePullBackOff
+119s        Warning   Failed    pod/audit-security-service-bd9476dc6-lp7zn    Error: ImagePullBackOff
+119s        Normal    BackOff   pod/audit-security-service-bd9476dc6-lp7zn    Back-off pulling image "localhost:5001/securerag-hub-audit-security-service@sha256:c9e49efb7acfd8ccb45dbad9e0cd237d8f3724dca197b25db4ad1032fbdb5153"
+117s        Normal    BackOff   pod/portal-web-655bc477b8-vpxqj               Back-off pulling image "localhost:5001/securerag-hub-portal-web@sha256:113f66b82a1a24b3b2e4048d3bc918ee2a7d83afd2fed70c906adb6305499a50"
+117s        Warning   Failed    pod/portal-web-655bc477b8-vpxqj               Error: ImagePullBackOff
+113s        Normal    BackOff   pod/conversation-service-67f888cdbd-thdk2     Back-off pulling image "localhost:5001/securerag-hub-conversation-service@sha256:a4ea109b2c211bda6643f9a2439c3efaf9246a4cd35b4787b37548eb113d20b7"
+113s        Warning   Failed    pod/conversation-service-67f888cdbd-thdk2     Error: ImagePullBackOff
+===== securerag-preprod =====
+2m41s       Normal    BackOff   pod/chatbot-manager-5f4d58b7-brht9            Back-off pulling image "localhost:5001/securerag-hub-chatbot-manager@sha256:d83db33af6b1ae3814d7ee289b4b7908d1160b49dfd925aa8da3e497b10d3d3d"
+2m41s       Warning   Failed    pod/chatbot-manager-5f4d58b7-brht9            Error: ImagePullBackOff
+2m40s       Warning   Failed    pod/audit-security-service-86b4995674-h5n5b   Error: ImagePullBackOff
+2m40s       Normal    BackOff   pod/audit-security-service-86b4995674-h5n5b   Back-off pulling image "localhost:5001/securerag-hub-audit-security-service@sha256:c9e49efb7acfd8ccb45dbad9e0cd237d8f3724dca197b25db4ad1032fbdb5153"
+2m37s       Normal    BackOff   pod/conversation-service-5bc777fc74-ckqml     Back-off pulling image "localhost:5001/securerag-hub-conversation-service@sha256:a4ea109b2c211bda6643f9a2439c3efaf9246a4cd35b4787b37548eb113d20b7"
+2m37s       Warning   Failed    pod/conversation-service-5bc777fc74-ckqml     Error: ImagePullBackOff
+2m32s       Warning   Failed    pod/portal-web-76cd647b9d-wx6l6               Error: ImagePullBackOff
+2m32s       Normal    BackOff   pod/portal-web-76cd647b9d-wx6l6               Back-off pulling image "localhost:5001/securerag-hub-portal-web@sha256:113f66b82a1a24b3b2e4048d3bc918ee2a7d83afd2fed70c906adb6305499a50"
+2m30s       Normal    BackOff   pod/auth-users-5dd6d9b868-9k89b               Back-off pulling image "localhost:5001/securerag-hub-auth-users@sha256:cae6faa710c0ddecacf73b9b74782d03e6088064cc625f7327f58c507a17834f"
+2m30s       Warning   Failed    pod/auth-users-5dd6d9b868-9k89b               Error: ImagePullBackOff
+2m2s        Normal    BackOff   pod/audit-security-service-bd9476dc6-zjrqp    Back-off pulling image "localhost:5001/securerag-hub-audit-security-service@sha256:c9e49efb7acfd8ccb45dbad9e0cd237d8f3724dca197b25db4ad1032fbdb5153"
+2m2s        Warning   Failed    pod/audit-security-service-bd9476dc6-zjrqp    Error: ImagePullBackOff
+119s        Normal    BackOff   pod/chatbot-manager-9fc5b9477-d7d66           Back-off pulling image "localhost:5001/securerag-hub-chatbot-manager@sha256:d83db33af6b1ae3814d7ee289b4b7908d1160b49dfd925aa8da3e497b10d3d3d"
+119s        Warning   Failed    pod/chatbot-manager-9fc5b9477-d7d66           Error: ImagePullBackOff
+117s        Normal    BackOff   pod/portal-web-655bc477b8-jz4wt               Back-off pulling image "localhost:5001/securerag-hub-portal-web@sha256:113f66b82a1a24b3b2e4048d3bc918ee2a7d83afd2fed70c906adb6305499a50"
+117s        Warning   Failed    pod/portal-web-655bc477b8-jz4wt               Error: ImagePullBackOff
+116s        Normal    BackOff   pod/conversation-service-67f888cdbd-8rgp7     Back-off pulling image "localhost:5001/securerag-hub-conversation-service@sha256:a4ea109b2c211bda6643f9a2439c3efaf9246a4cd35b4787b37548eb113d20b7"
+116s        Warning   Failed    pod/conversation-service-67f888cdbd-8rgp7     Error: ImagePullBackOff
+114s        Warning   Failed    pod/auth-users-688fc9fb7d-vtrd6               Error: ImagePullBackOff
+114s        Normal    BackOff   pod/auth-users-688fc9fb7d-vtrd6               Back-off pulling image "localhost:5001/securerag-hub-auth-users@sha256:cae6faa710c0ddecacf73b9b74782d03e6088064cc625f7327f58c507a17834f"
+===== securerag-prod =====
+27m         Warning   FailedCreate   replicaset/auth-users-5dd6d9b868               Error creating: pods "auth-users-5dd6d9b868-bgdkb" is forbidden: failed quota: quota-prod: must specify cpu for: securerag-hub-auth-users; memory for: securerag-hub-auth-users
+27m         Warning   FailedCreate   replicaset/chatbot-manager-5f4d58b7            Error creating: pods "chatbot-manager-5f4d58b7-24sjl" is forbidden: failed quota: quota-prod: must specify cpu for: securerag-hub-chatbot-manager; memory for: securerag-hub-chatbot-manager
+27m         Warning   FailedCreate   replicaset/conversation-service-5bc777fc74     Error creating: pods "conversation-service-5bc777fc74-wqshv" is forbidden: failed quota: quota-prod: must specify cpu for: securerag-hub-conversation-service; memory for: securerag-hub-conversation-service
+27m         Warning   FailedCreate   replicaset/portal-web-76cd647b9d               Error creating: pods "portal-web-76cd647b9d-vwksk" is forbidden: failed quota: quota-prod: must specify cpu for: securerag-hub-portal-web; memory for: securerag-hub-portal-web
+27m         Warning   FailedCreate   replicaset/audit-security-service-86b4995674   Error creating: pods "audit-security-service-86b4995674-nxr6v" is forbidden: failed quota: quota-prod: must specify cpu for: securerag-hub-audit-security-service; memory for: securerag-hub-audit-security-service
+26m         Warning   FailedCreate   replicaset/portal-web-86c58cbd87               Error creating: pods "portal-web-86c58cbd87-2njmx" is forbidden: failed quota: quota-prod: must specify cpu for: securerag-hub-portal-web; memory for: securerag-hub-portal-web
+26m         Warning   FailedCreate   replicaset/audit-security-service-6859df4955   Error creating: pods "audit-security-service-6859df4955-mcmpc" is forbidden: failed quota: quota-prod: must specify cpu for: securerag-hub-audit-security-service; memory for: securerag-hub-audit-security-service
+26m         Warning   FailedCreate   replicaset/auth-users-5f96cd868f               Error creating: pods "auth-users-5f96cd868f-zxldn" is forbidden: failed quota: quota-prod: must specify cpu for: securerag-hub-auth-users; memory for: securerag-hub-auth-users
+26m         Warning   FailedCreate   replicaset/conversation-service-7588d949f      Error creating: pods "conversation-service-7588d949f-9lf5b" is forbidden: failed quota: quota-prod: must specify cpu for: securerag-hub-conversation-service; memory for: securerag-hub-conversation-service
+26m         Warning   FailedCreate   replicaset/chatbot-manager-cc75f56db           Error creating: pods "chatbot-manager-cc75f56db-t4qkz" is forbidden: failed quota: quota-prod: must specify cpu for: securerag-hub-chatbot-manager; memory for: securerag-hub-chatbot-manager
+10m         Warning   FailedCreate   replicaset/auth-users-5dd6d9b868               Error creating: pods "auth-users-5dd6d9b868-wh75m" is forbidden: failed quota: quota-prod: must specify cpu for: securerag-hub-auth-users; memory for: securerag-hub-auth-users
+10m         Warning   FailedCreate   replicaset/audit-security-service-86b4995674   Error creating: pods "audit-security-service-86b4995674-b464k" is forbidden: failed quota: quota-prod: must specify cpu for: securerag-hub-audit-security-service; memory for: securerag-hub-audit-security-service
+10m         Warning   FailedCreate   replicaset/chatbot-manager-5f4d58b7            Error creating: pods "chatbot-manager-5f4d58b7-kv8bq" is forbidden: failed quota: quota-prod: must specify cpu for: securerag-hub-chatbot-manager; memory for: securerag-hub-chatbot-manager
+10m         Warning   FailedCreate   replicaset/conversation-service-5bc777fc74     Error creating: pods "conversation-service-5bc777fc74-xszz2" is forbidden: failed quota: quota-prod: must specify cpu for: securerag-hub-conversation-service; memory for: securerag-hub-conversation-service
+10m         Warning   FailedCreate   replicaset/portal-web-76cd647b9d               Error creating: pods "portal-web-76cd647b9d-vk6z7" is forbidden: failed quota: quota-prod: must specify cpu for: securerag-hub-portal-web; memory for: securerag-hub-portal-web
+10m         Warning   FailedCreate   replicaset/audit-security-service-6859df4955   Error creating: pods "audit-security-service-6859df4955-jfd65" is forbidden: failed quota: quota-prod: must specify cpu for: securerag-hub-audit-security-service; memory for: securerag-hub-audit-security-service
+10m         Warning   FailedCreate   replicaset/auth-users-5f96cd868f               Error creating: pods "auth-users-5f96cd868f-x9wmz" is forbidden: failed quota: quota-prod: must specify cpu for: securerag-hub-auth-users; memory for: securerag-hub-auth-users
+10m         Warning   FailedCreate   replicaset/portal-web-86c58cbd87               Error creating: pods "portal-web-86c58cbd87-vwr46" is forbidden: failed quota: quota-prod: must specify cpu for: securerag-hub-portal-web; memory for: securerag-hub-portal-web
+10m         Warning   FailedCreate   replicaset/conversation-service-7588d949f      Error creating: pods "conversation-service-7588d949f-bwbp8" is forbidden: failed quota: quota-prod: must specify cpu for: securerag-hub-conversation-service; memory for: securerag-hub-conversation-service
+10m         Warning   FailedCreate   replicaset/chatbot-manager-cc75f56db           Error creating: pods "chatbot-manager-cc75f56db-xdsvc" is forbidden: failed quota: quota-prod: must specify cpu for: securerag-hub-chatbot-manager; memory for: securerag-hub-chatbot-manager
+
+================================================================
+26. ROLLOUTS (status des deployments)
+================================================================
+===== securerag-dev =====
+error: unknown flag: --all
+See 'kubectl rollout status --help' for usage.
+===== securerag-test =====
+error: unknown flag: --all
+See 'kubectl rollout status --help' for usage.
+===== securerag-staging =====
+error: unknown flag: --all
+See 'kubectl rollout status --help' for usage.
+===== securerag-preprod =====
+error: unknown flag: --all
+See 'kubectl rollout status --help' for usage.
+===== securerag-prod =====
+error: unknown flag: --all
+See 'kubectl rollout status --help' for usage.
+
+================================================================
+27. VÉRIFICATION GLOBALE (résumé)
+================================================================
+=== NAMESPACES ===
+securerag-dev          Active   25h
+securerag-preprod      Active   4h30m
+securerag-prod         Active   4h30m
+securerag-staging      Active   25h
+securerag-test         Active   4h30m
+=== NODES ===
+NAME                          STATUS   ROLES           AGE    VERSION   INTERNAL-IP   EXTERNAL-IP   OS-IMAGE                         KERNEL-VERSION                CONTAINER-RUNTIME
+securerag-dev-control-plane   Ready    control-plane   4d4h   v1.33.1   172.18.0.3    <none>        Debian GNU/Linux 12 (bookworm)   6.12.74+deb13+1-cloud-amd64   containerd://2.1.1
+securerag-dev-worker          Ready    <none>          4d4h   v1.33.1   172.18.0.4    <none>        Debian GNU/Linux 12 (bookworm)   6.12.74+deb13+1-cloud-amd64   containerd://2.1.1
+=== PODS ===
+NAMESPACE              NAME                                                              READY   STATUS                       RESTARTS          AGE     IP             NODE                          NOMINATED NODE   READINESS GATES
+argocd                 argocd-application-controller-0                                   1/1     Running                      0                 3d22h   10.244.1.74    securerag-dev-worker          <none>           <none>
+argocd                 argocd-applicationset-controller-c4cbc5dd-jcmld                   1/1     Running                      0                 3d22h   10.244.1.72    securerag-dev-worker          <none>           <none>
+argocd                 argocd-dex-server-5b57b7b8ff-5ds9q                                1/1     Running                      1 (3d22h ago)     3d22h   10.244.1.71    securerag-dev-worker          <none>           <none>
+argocd                 argocd-notifications-controller-b496c5dd-rtcq6                    1/1     Running                      0                 3d22h   10.244.1.73    securerag-dev-worker          <none>           <none>
+argocd                 argocd-redis-66f8dc8554-zv92z                                     1/1     Running                      0                 3d22h   10.244.1.76    securerag-dev-worker          <none>           <none>
+argocd                 argocd-repo-server-7787bf7c9d-hln66                               1/1     Running                      0                 3d22h   10.244.1.75    securerag-dev-worker          <none>           <none>
+argocd                 argocd-server-7dff958c45-jvvct                                    1/1     Running                      0                 3d22h   10.244.1.77    securerag-dev-worker          <none>           <none>
+argocd                 securerag-image-updater-argocd-image-updater-77b768b59b-tgsgx     1/1     Running                      0                 25h     10.244.1.187   securerag-dev-worker          <none>           <none>
+cert-manager           securerag-cert-manager-55449cc78d-7bdbt                           1/1     Running                      0                 25h     10.244.1.189   securerag-dev-worker          <none>           <none>
+cert-manager           securerag-cert-manager-cainjector-6b84fc9c69-j84fh                1/1     Running                      0                 25h     10.244.1.188   securerag-dev-worker          <none>           <none>
+cert-manager           securerag-cert-manager-webhook-d9797d567-h4k9l                    1/1     Running                      0                 25h     10.244.1.190   securerag-dev-worker          <none>           <none>
+external-secrets       securerag-eso-external-secrets-84fd599565-bqss6                   1/1     Running                      0                 25h     10.244.1.192   securerag-dev-worker          <none>           <none>
+external-secrets       securerag-eso-external-secrets-cert-controller-7b5b87d4cc-znfp6   1/1     Running                      0                 25h     10.244.1.191   securerag-dev-worker          <none>           <none>
+external-secrets       securerag-eso-external-secrets-webhook-5f647c6dfb-9c4k4           1/1     Running                      0                 25h     10.244.1.193   securerag-dev-worker          <none>           <none>
+falco                  falco-talon-6d44f7dc9b-2n5jj                                      0/1     CrashLoopBackOff             25 (2m18s ago)    106m    10.244.1.235   securerag-dev-worker          <none>           <none>
+falco                  falco-talon-b69fc4bdb-dv92r                                       0/1     CrashLoopBackOff             295 (3m52s ago)   25h     10.244.1.207   securerag-dev-worker          <none>           <none>
+falco                  falcosidekick-77dd596d49-zd67m                                    1/1     Running                      0                 25h     10.244.1.186   securerag-dev-worker          <none>           <none>
+harbor                 securerag-harbor-core-6c4c7b5f4d-ts24l                            1/1     Running                      0                 63m     10.244.1.137   securerag-dev-worker          <none>           <none>
+harbor                 securerag-harbor-database-0                                       1/1     Running                      0                 25h     10.244.1.202   securerag-dev-worker          <none>           <none>
+harbor                 securerag-harbor-jobservice-b6d5d7f46-rprnj                       1/1     Running                      2 (63m ago)       63m     10.244.1.138   securerag-dev-worker          <none>           <none>
+harbor                 securerag-harbor-nginx-7d77b55d8d-tdrkp                           1/1     Running                      0                 25h     10.244.1.197   securerag-dev-worker          <none>           <none>
+harbor                 securerag-harbor-portal-d857fcf78-glxpr                           1/1     Running                      0                 25h     10.244.1.196   securerag-dev-worker          <none>           <none>
+harbor                 securerag-harbor-redis-0                                          1/1     Running                      0                 25h     10.244.1.201   securerag-dev-worker          <none>           <none>
+harbor                 securerag-harbor-registry-846b996cd-v4lkh                         2/2     Running                      0                 63m     10.244.1.139   securerag-dev-worker          <none>           <none>
+harbor                 securerag-harbor-trivy-0                                          1/1     Running                      0                 25h     10.244.1.203   securerag-dev-worker          <none>           <none>
+kube-system            coredns-674b8bbfcf-6lns8                                          1/1     Running                      0                 4d4h    10.244.0.3     securerag-dev-control-plane   <none>           <none>
+kube-system            coredns-674b8bbfcf-jfkzd                                          1/1     Running                      0                 4d4h    10.244.0.5     securerag-dev-control-plane   <none>           <none>
+kube-system            etcd-securerag-dev-control-plane                                  1/1     Running                      0                 4d4h    172.18.0.3     securerag-dev-control-plane   <none>           <none>
+kube-system            kindnet-sh9s5                                                     1/1     Running                      0                 4d4h    172.18.0.3     securerag-dev-control-plane   <none>           <none>
+kube-system            kindnet-tg556                                                     1/1     Running                      0                 4d4h    172.18.0.4     securerag-dev-worker          <none>           <none>
+kube-system            kube-apiserver-securerag-dev-control-plane                        1/1     Running                      0                 4d4h    172.18.0.3     securerag-dev-control-plane   <none>           <none>
+kube-system            kube-controller-manager-securerag-dev-control-plane               1/1     Running                      0                 4d4h    172.18.0.3     securerag-dev-control-plane   <none>           <none>
+kube-system            kube-proxy-7r6j2                                                  1/1     Running                      0                 4d4h    172.18.0.3     securerag-dev-control-plane   <none>           <none>
+kube-system            kube-proxy-gv5dt                                                  1/1     Running                      0                 4d4h    172.18.0.4     securerag-dev-worker          <none>           <none>
+kube-system            kube-scheduler-securerag-dev-control-plane                        1/1     Running                      0                 4d4h    172.18.0.3     securerag-dev-control-plane   <none>           <none>
+kube-system            metrics-server-65f5d57595-56b5w                                   1/1     Running                      0                 2d21h   10.244.1.110   securerag-dev-worker          <none>           <none>
+kyverno                kyverno-admission-controller-69b6b647c8-vzrb8                     1/1     Running                      0                 2d8h    10.244.1.156   securerag-dev-worker          <none>           <none>
+kyverno                kyverno-admission-controller-768986ffdc-92jxc                     0/1     Running                      0                 31h     10.244.1.178   securerag-dev-worker          <none>           <none>
+kyverno                kyverno-background-controller-56d5566f46-kxgfm                    1/1     Running                      0                 31h     10.244.1.177   securerag-dev-worker          <none>           <none>
+kyverno                kyverno-cleanup-controller-5ddf559d99-mlfd2                       1/1     Running                      0                 31h     10.244.1.179   securerag-dev-worker          <none>           <none>
+kyverno                kyverno-reports-controller-ddd75dfcb-fx4hm                        1/1     Running                      0                 31h     10.244.1.180   securerag-dev-worker          <none>           <none>
+local-path-storage     local-path-provisioner-7dc846544d-x67jt                           1/1     Running                      0                 4d4h    10.244.0.4     securerag-dev-control-plane   <none>           <none>
+loki                   loki-0                                                            1/1     Running                      0                 4d2h    10.244.1.56    securerag-dev-worker          <none>           <none>
+monitoring             alertmanager-0                                                    2/2     Running                      0                 4d2h    10.244.1.54    securerag-dev-worker          <none>           <none>
+monitoring             alertmanager-kube-prometheus-stack-alertmanager-0                 2/2     Running                      0                 4d2h    10.244.1.49    securerag-dev-worker          <none>           <none>
+monitoring             grafana-68bcc77bf8-rttk2                                          1/1     Running                      0                 4d2h    10.244.1.52    securerag-dev-worker          <none>           <none>
+monitoring             kube-prometheus-stack-kube-state-metrics-875d5cb5f-wz557          1/1     Running                      0                 4d2h    10.244.1.45    securerag-dev-worker          <none>           <none>
+monitoring             kube-prometheus-stack-operator-5b6fcc7f75-6c96s                   1/1     Running                      0                 4d2h    10.244.1.46    securerag-dev-worker          <none>           <none>
+monitoring             kube-prometheus-stack-prometheus-node-exporter-5p84s              1/1     Running                      0                 4d2h    172.18.0.3     securerag-dev-control-plane   <none>           <none>
+monitoring             kube-prometheus-stack-prometheus-node-exporter-z74w2              1/1     Running                      0                 4d2h    172.18.0.4     securerag-dev-worker          <none>           <none>
+monitoring             prometheus-kube-prometheus-stack-prometheus-0                     2/2     Running                      0                 4d2h    10.244.1.50    securerag-dev-worker          <none>           <none>
+otel-system            otel-collector-5465c56945-nn6xq                                   1/1     Running                      0                 25h     10.244.1.184   securerag-dev-worker          <none>           <none>
+otel-system            tempo-8ff8cfb46-x8jzh                                             1/1     Running                      0                 25h     10.244.1.185   securerag-dev-worker          <none>           <none>
+securerag-backup       argocd-backup-29838330-jrt69                                      0/1     Completed                    0                 10h     10.244.1.230   securerag-dev-worker          <none>           <none>
+securerag-backup       etcd-backup-29838300-6lnc5                                        0/1     Completed                    0                 10h     172.18.0.3     securerag-dev-control-plane   <none>           <none>
+securerag-backup       vault-backup-29838315-mbhkq                                       0/1     Completed                    0                 10h     10.244.1.229   securerag-dev-worker          <none>           <none>
+securerag-dev          audit-security-service-56cfc977d5-ccc48                           0/1     ImagePullBackOff             0                 82m     10.244.1.91    securerag-dev-worker          <none>           <none>
+securerag-dev          audit-security-service-bd9476dc6-776xr                            0/1     ImagePullBackOff             0                 82m     10.244.1.117   securerag-dev-worker          <none>           <none>
+securerag-dev          auth-users-688fc9fb7d-wkgcf                                       0/1     ImagePullBackOff             0                 82m     10.244.1.118   securerag-dev-worker          <none>           <none>
+securerag-dev          auth-users-85f85bd8c9-pj2p4                                       0/1     ErrImagePull                 0                 82m     10.244.1.92    securerag-dev-worker          <none>           <none>
+securerag-dev          chatbot-manager-86c4d69df6-bv6j8                                  0/1     ImagePullBackOff             0                 82m     10.244.1.93    securerag-dev-worker          <none>           <none>
+securerag-dev          chatbot-manager-9fc5b9477-9hkzd                                   0/1     ErrImagePull                 0                 82m     10.244.1.119   securerag-dev-worker          <none>           <none>
+securerag-dev          conversation-service-587c555845-nsqzw                             0/1     ImagePullBackOff             0                 82m     10.244.1.95    securerag-dev-worker          <none>           <none>
+securerag-dev          conversation-service-67f888cdbd-drdpm                             0/1     ImagePullBackOff             0                 82m     10.244.1.120   securerag-dev-worker          <none>           <none>
+securerag-dev          portal-web-655bc477b8-bkhpv                                       0/1     ImagePullBackOff             0                 82m     10.244.1.121   securerag-dev-worker          <none>           <none>
+securerag-dev          portal-web-686dcd9c49-66x92                                       0/1     ErrImagePull                 0                 82m     10.244.1.96    securerag-dev-worker          <none>           <none>
+securerag-hub          audit-security-service-5fd6685f64-n7fjh                           1/1     Running                      0                 2d23h   10.244.1.104   securerag-dev-worker          <none>           <none>
+securerag-hub          auth-users-776cc8bfdb-95sj7                                       1/1     Running                      1 (2d15h ago)     2d23h   10.244.1.101   securerag-dev-worker          <none>           <none>
+securerag-hub          chatbot-manager-77b78ffb97-dl96v                                  1/1     Running                      0                 2d23h   10.244.1.102   securerag-dev-worker          <none>           <none>
+securerag-hub          conversation-service-86bbd9598b-gr9wd                             1/1     Running                      0                 2d23h   10.244.1.103   securerag-dev-worker          <none>           <none>
+securerag-hub          portal-web-68978bbc68-v4wfb                                       1/1     Running                      0                 2d8h    10.244.1.152   securerag-dev-worker          <none>           <none>
+securerag-hub          postgres-auth-58f89fd9bf-b55hk                                    1/1     Running                      0                 3d      10.244.1.94    securerag-dev-worker          <none>           <none>
+securerag-hub          secai-7fc5df5fb8-k8c4k                                            1/1     Running                      0                 38h     10.244.1.176   securerag-dev-worker          <none>           <none>
+securerag-monitoring   alertmanager-695cc84574-4zwbh                                     1/1     Running                      0                 25h     10.244.1.215   securerag-dev-worker          <none>           <none>
+securerag-monitoring   alertmanager-695cc84574-88nmq                                     1/1     Running                      0                 25h     10.244.1.214   securerag-dev-worker          <none>           <none>
+securerag-monitoring   grafana-656c84b6bc-2c2v9                                          0/1     CreateContainerConfigError   0                 106m    10.244.1.236   securerag-dev-worker          <none>           <none>
+securerag-monitoring   grafana-6cc457fdf7-lxhhx                                          0/1     CreateContainerConfigError   0                 25h     10.244.1.223   securerag-dev-worker          <none>           <none>
+securerag-monitoring   kube-state-metrics-7d79487877-rkxqs                               1/1     Running                      0                 25h     10.244.1.216   securerag-dev-worker          <none>           <none>
+securerag-monitoring   loki-788b899d85-mpkv6                                             1/1     Running                      0                 25h     10.244.1.224   securerag-dev-worker          <none>           <none>
+securerag-monitoring   prometheus-778b68b667-2jcfr                                       1/1     Running                      0                 25h     10.244.1.225   securerag-dev-worker          <none>           <none>
+securerag-monitoring   promtail-kr69p                                                    0/1     CrashLoopBackOff             297 (4m44s ago)   25h     10.244.1.212   securerag-dev-worker          <none>           <none>
+securerag-monitoring   promtail-ps6p2                                                    0/1     CrashLoopBackOff             297 (85s ago)     25h     10.244.0.11    securerag-dev-control-plane   <none>           <none>
+securerag-monitoring   tempo-7c78b7c6b4-lsz5g                                            1/1     Running                      0                 25h     10.244.1.213   securerag-dev-worker          <none>           <none>
+securerag-preprod      audit-security-service-86b4995674-h5n5b                           0/1     ImagePullBackOff             0                 82m     10.244.1.112   securerag-dev-worker          <none>           <none>
+securerag-preprod      audit-security-service-bd9476dc6-zjrqp                            0/1     ImagePullBackOff             0                 82m     10.244.1.132   securerag-dev-worker          <none>           <none>
+securerag-preprod      auth-users-5dd6d9b868-9k89b                                       0/1     ImagePullBackOff             0                 82m     10.244.1.113   securerag-dev-worker          <none>           <none>
+securerag-preprod      auth-users-688fc9fb7d-vtrd6                                       0/1     ImagePullBackOff             0                 82m     10.244.1.133   securerag-dev-worker          <none>           <none>
+securerag-preprod      chatbot-manager-5f4d58b7-brht9                                    0/1     ImagePullBackOff             0                 82m     10.244.1.114   securerag-dev-worker          <none>           <none>
+securerag-preprod      chatbot-manager-9fc5b9477-d7d66                                   0/1     ImagePullBackOff             0                 82m     10.244.1.134   securerag-dev-worker          <none>           <none>
+securerag-preprod      conversation-service-5bc777fc74-ckqml                             0/1     ImagePullBackOff             0                 82m     10.244.1.115   securerag-dev-worker          <none>           <none>
+securerag-preprod      conversation-service-67f888cdbd-8rgp7                             0/1     ImagePullBackOff             0                 82m     10.244.1.135   securerag-dev-worker          <none>           <none>
+securerag-preprod      portal-web-655bc477b8-jz4wt                                       0/1     ImagePullBackOff             0                 82m     10.244.1.136   securerag-dev-worker          <none>           <none>
+securerag-preprod      portal-web-76cd647b9d-wx6l6                                       0/1     ErrImagePull                 0                 82m     10.244.1.116   securerag-dev-worker          <none>           <none>
+securerag-staging      audit-security-service-56cfc977d5-hf92l                           0/1     ImagePullBackOff             0                 82m     10.244.1.106   securerag-dev-worker          <none>           <none>
+securerag-staging      audit-security-service-bd9476dc6-lp7zn                            0/1     ImagePullBackOff             0                 82m     10.244.1.127   securerag-dev-worker          <none>           <none>
+securerag-staging      auth-users-688fc9fb7d-v5xg5                                       0/1     ImagePullBackOff             0                 82m     10.244.1.128   securerag-dev-worker          <none>           <none>
+securerag-staging      auth-users-85f85bd8c9-7rs7f                                       0/1     ImagePullBackOff             0                 82m     10.244.1.107   securerag-dev-worker          <none>           <none>
+securerag-staging      chatbot-manager-86c4d69df6-hztg6                                  0/1     ErrImagePull                 0                 82m     10.244.1.108   securerag-dev-worker          <none>           <none>
+securerag-staging      chatbot-manager-9fc5b9477-kb6cw                                   0/1     ImagePullBackOff             0                 82m     10.244.1.129   securerag-dev-worker          <none>           <none>
+securerag-staging      conversation-service-587c555845-5ph8w                             0/1     ErrImagePull                 0                 82m     10.244.1.109   securerag-dev-worker          <none>           <none>
+securerag-staging      conversation-service-67f888cdbd-thdk2                             0/1     ImagePullBackOff             0                 82m     10.244.1.130   securerag-dev-worker          <none>           <none>
+securerag-staging      portal-web-655bc477b8-vpxqj                                       0/1     ImagePullBackOff             0                 82m     10.244.1.131   securerag-dev-worker          <none>           <none>
+securerag-staging      portal-web-686dcd9c49-tzn2j                                       0/1     ImagePullBackOff             0                 82m     10.244.1.111   securerag-dev-worker          <none>           <none>
+securerag-test         audit-security-service-56cfc977d5-znxh9                           0/1     ImagePullBackOff             0                 82m     10.244.1.97    securerag-dev-worker          <none>           <none>
+securerag-test         audit-security-service-bd9476dc6-4t9zb                            0/1     ImagePullBackOff             0                 82m     10.244.1.122   securerag-dev-worker          <none>           <none>
+securerag-test         auth-users-688fc9fb7d-vvxft                                       0/1     ImagePullBackOff             0                 82m     10.244.1.123   securerag-dev-worker          <none>           <none>
+securerag-test         auth-users-85f85bd8c9-kg88v                                       0/1     ErrImagePull                 0                 82m     10.244.1.98    securerag-dev-worker          <none>           <none>
+securerag-test         chatbot-manager-86c4d69df6-rhs82                                  0/1     ErrImagePull                 0                 82m     10.244.1.99    securerag-dev-worker          <none>           <none>
+securerag-test         chatbot-manager-9fc5b9477-tfhqh                                   0/1     ImagePullBackOff             0                 82m     10.244.1.124   securerag-dev-worker          <none>           <none>
+securerag-test         conversation-service-587c555845-k8vfb                             0/1     ImagePullBackOff             0                 82m     10.244.1.100   securerag-dev-worker          <none>           <none>
+securerag-test         conversation-service-67f888cdbd-74gml                             0/1     ImagePullBackOff             0                 82m     10.244.1.125   securerag-dev-worker          <none>           <none>
+securerag-test         portal-web-655bc477b8-vqw2p                                       0/1     ImagePullBackOff             0                 82m     10.244.1.126   securerag-dev-worker          <none>           <none>
+securerag-test         portal-web-686dcd9c49-m5ggb                                       0/1     ErrImagePull                 0                 82m     10.244.1.105   securerag-dev-worker          <none>           <none>
+tempo                  tempo-0                                                           1/1     Running                      0                 3d22h   10.244.1.61    securerag-dev-worker          <none>           <none>
+vault                  securerag-vault-0                                                 1/1     Running                      0                 25h     10.244.1.195   securerag-dev-worker          <none>           <none>
+vault                  securerag-vault-agent-injector-5854c4755d-vjwtk                   1/1     Running                      0                 25h     10.244.1.194   securerag-dev-worker          <none>           <none>
+velero                 node-agent-rjltm                                                  0/1     ContainerCreating            0                 25h     <none>         securerag-dev-worker          <none>           <none>
+velero                 securerag-velero-56b4f7b966-7bhmh                                 0/1     Init:0/1                     0                 106m    <none>         securerag-dev-worker          <none>           <none>
+=== IMAGES/DIGESTS ===
+--- securerag-dev
+audit-security-service-56cfc977d5-ccc48 => 
+audit-security-service-bd9476dc6-776xr => 
+auth-users-688fc9fb7d-wkgcf => 
+auth-users-85f85bd8c9-pj2p4 => 
+chatbot-manager-86c4d69df6-bv6j8 => 
+chatbot-manager-9fc5b9477-9hkzd => 
+conversation-service-587c555845-nsqzw => 
+conversation-service-67f888cdbd-drdpm => 
+portal-web-655bc477b8-bkhpv => 
+portal-web-686dcd9c49-66x92 => 
+--- securerag-test
+audit-security-service-56cfc977d5-znxh9 => 
+audit-security-service-bd9476dc6-4t9zb => 
+auth-users-688fc9fb7d-vvxft => 
+auth-users-85f85bd8c9-kg88v => 
+chatbot-manager-86c4d69df6-rhs82 => 
+chatbot-manager-9fc5b9477-tfhqh => 
+conversation-service-587c555845-k8vfb => 
+conversation-service-67f888cdbd-74gml => 
+portal-web-655bc477b8-vqw2p => 
+portal-web-686dcd9c49-m5ggb => 
+--- securerag-staging
+audit-security-service-56cfc977d5-hf92l => 
+audit-security-service-bd9476dc6-lp7zn => 
+auth-users-688fc9fb7d-v5xg5 => 
+auth-users-85f85bd8c9-7rs7f => 
+chatbot-manager-86c4d69df6-hztg6 => 
+chatbot-manager-9fc5b9477-kb6cw => 
+conversation-service-587c555845-5ph8w => 
+conversation-service-67f888cdbd-thdk2 => 
+portal-web-655bc477b8-vpxqj => 
+portal-web-686dcd9c49-tzn2j => 
+--- securerag-preprod
+audit-security-service-86b4995674-h5n5b => 
+audit-security-service-bd9476dc6-zjrqp => 
+auth-users-5dd6d9b868-9k89b => 
+auth-users-688fc9fb7d-vtrd6 => 
+chatbot-manager-5f4d58b7-brht9 => 
+chatbot-manager-9fc5b9477-d7d66 => 
+conversation-service-5bc777fc74-ckqml => 
+conversation-service-67f888cdbd-8rgp7 => 
+portal-web-655bc477b8-jz4wt => 
+portal-web-76cd647b9d-wx6l6 => 
+--- securerag-prod
+=== SERVICES ===
+NAMESPACE              NAME                                             TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)                                                                                                   AGE
+=== NETWORKPOLICIES ===
+NAMESPACE              NAME                                              POD-SELECTOR                                                                                                    AGE
+argocd                 argocd-application-controller-network-policy      app.kubernetes.io/name=argocd-application-controller                                                            3d22h
+argocd                 argocd-applicationset-controller-network-policy   app.kubernetes.io/name=argocd-applicationset-controller                                                         3d22h
+argocd                 argocd-dex-server-network-policy                  app.kubernetes.io/name=argocd-dex-server                                                                        3d22h
+argocd                 argocd-notifications-controller-network-policy    app.kubernetes.io/name=argocd-notifications-controller                                                          3d22h
+argocd                 argocd-redis-network-policy                       app.kubernetes.io/name=argocd-redis                                                                             3d22h
+argocd                 argocd-repo-server-network-policy                 app.kubernetes.io/name=argocd-repo-server                                                                       3d22h
+argocd                 argocd-server-network-policy                      app.kubernetes.io/name=argocd-server                                                                            3d22h
+default                allow-internal-dns                                <none>                                                                                                          4h24m
+default                deny-all-ingress                                  <none>                                                                                                          4h24m
+default                portal-web-policy                                 app.kubernetes.io/name=portal-web                                                                               2d19h
+securerag-backup       allow-backup-egress                               <none>                                                                                                          25h
+securerag-backup       default-deny                                      <none>                                                                                                          25h
+securerag-dev          allow-dns                                         <none>                                                                                                          4h28m
+securerag-dev          default-deny-all                                  <none>                                                                                                          4h28m
+securerag-hub          allow-dns-egress                                  <none>                                                                                                          4d4h
+securerag-hub          allow-validation-egress                           app.kubernetes.io/part-of=securerag-hub,job-role=validation                                                     4d4h
+securerag-hub          allow-validation-ingress                          app.kubernetes.io/name in (audit-security-service,auth-users,chatbot-manager,conversation-service,portal-web)   4d4h
+securerag-hub          audit-security-service-network                    app.kubernetes.io/name=audit-security-service,app.kubernetes.io/part-of=securerag-hub                           4d4h
+securerag-hub          auth-users-policy                                 app.kubernetes.io/name=auth-users,app.kubernetes.io/part-of=securerag-hub                                       4d4h
+securerag-hub          chatbot-manager-policy                            app.kubernetes.io/name=chatbot-manager,app.kubernetes.io/part-of=securerag-hub                                  4d4h
+securerag-hub          conversation-service-network                      app.kubernetes.io/name=conversation-service,app.kubernetes.io/part-of=securerag-hub                             4d4h
+securerag-hub          default-deny-all                                  <none>                                                                                                          4d4h
+securerag-hub          portal-web-policy                                 app.kubernetes.io/name=portal-web,app.kubernetes.io/part-of=securerag-hub                                       4d4h
+securerag-hub          postgres-auth-policy                              app.kubernetes.io/part-of=securerag-hub,cnpg.io/cluster=postgres-auth                                           4d4h
+securerag-hub          secai-netpol                                      app.kubernetes.io/name=secai                                                                                    41h
+securerag-monitoring   alertmanager-network-policy                       app.kubernetes.io/name=alertmanager                                                                             25h
+securerag-monitoring   allow-monitoring-internal                         <none>                                                                                                          25h
+securerag-monitoring   default-deny                                      <none>                                                                                                          25h
+securerag-preprod      allow-dns                                         <none>                                                                                                          4h28m
+securerag-preprod      default-deny-all                                  <none>                                                                                                          4h28m
+securerag-prod         allow-dns                                         <none>                                                                                                          4h28m
+securerag-prod         default-deny-all                                  <none>                                                                                                          4h28m
+securerag-staging      allow-dns                                         <none>                                                                                                          4h28m
+securerag-staging      default-deny-all                                  <none>                                                                                                          4h28m
+securerag-test         allow-dns                                         <none>                                                                                                          4h28m
+securerag-test         default-deny-all                                  <none>                                                                                                          4h28m
+=== RBAC ===
+NAMESPACE            NAME                                                                              CREATED AT
+securerag-dev        role.rbac.authorization.k8s.io/env-only-list                                      2026-09-25T07:35:18Z
+securerag-preprod    role.rbac.authorization.k8s.io/env-only-list                                      2026-09-25T07:35:18Z
+securerag-prod       role.rbac.authorization.k8s.io/env-only-list                                      2026-09-25T07:35:18Z
+securerag-staging    role.rbac.authorization.k8s.io/env-only-list                                      2026-09-25T07:35:18Z
+securerag-test       role.rbac.authorization.k8s.io/env-only-list                                      2026-09-25T07:35:18Z
+NAMESPACE            NAME                                                                                               ROLE                                                    AGE
+NAMESPACE              NAME                                                            SECRETS   AGE
+securerag-dev          serviceaccount/default                                          0         25h
+securerag-dev          serviceaccount/securerag-sa                                     0         4h30m
+securerag-dev          serviceaccount/svc-sa                                           0         4h21m
+securerag-preprod      serviceaccount/default                                          0         4h30m
+securerag-preprod      serviceaccount/securerag-sa                                     0         4h30m
+securerag-preprod      serviceaccount/svc-sa                                           0         4h21m
+securerag-prod         serviceaccount/default                                          0         4h30m
+securerag-prod         serviceaccount/securerag-sa                                     0         4h30m
+securerag-prod         serviceaccount/svc-sa                                           0         4h21m
+securerag-staging      serviceaccount/default                                          0         25h
+securerag-staging      serviceaccount/securerag-sa                                     0         4h30m
+securerag-staging      serviceaccount/svc-sa                                           0         4h21m
+securerag-test         serviceaccount/default                                          0         4h30m
+securerag-test         serviceaccount/securerag-sa                                     0         4h30m
+securerag-test         serviceaccount/svc-sa                                           0         4h21m
+=== QUOTAS ===
+NAMESPACE        NAME                      REQUEST                                                                                                                                                                       LIMIT                                                                               AGE
+default          securerag-dev-quota       pods: 0/20, requests.cpu: 0/2, requests.memory: 0/2Gi, services: 1/20                                                                                                         limits.cpu: 0/4, limits.memory: 0/4Gi                                               4h24m
+default          securerag-preprod-quota   pods: 0/20, requests.cpu: 0/2, requests.memory: 0/2Gi, services: 1/20                                                                                                         limits.cpu: 0/4, limits.memory: 0/4Gi                                               4h24m
+default          securerag-prod-quota      pods: 0/20, requests.cpu: 0/2, requests.memory: 0/2Gi, services: 1/20                                                                                                         limits.cpu: 0/4, limits.memory: 0/4Gi                                               4h24m
+default          securerag-staging-quota   pods: 0/20, requests.cpu: 0/2, requests.memory: 0/2Gi, services: 1/20                                                                                                         limits.cpu: 0/4, limits.memory: 0/4Gi                                               4h24m
+default          securerag-test-quota      pods: 0/20, requests.cpu: 0/2, requests.memory: 0/2Gi, services: 1/20                                                                                                         limits.cpu: 0/4, limits.memory: 0/4Gi                                               4h24m
+securerag-hub    securerag-hub-quota       persistentvolumeclaims: 0/10, pods: 7/30, requests.cpu: 1600m/6, requests.ephemeral-storage: 1Gi/4Gi, requests.memory: 2432Mi/6Gi, requests.storage: 0/40Gi, services: 7/20   limits.cpu: 5600m/12, limits.ephemeral-storage: 4Gi/12Gi, limits.memory: 5Gi/12Gi   4d4h
+securerag-prod   quota-prod                cpu: 0/8, memory: 0/8Gi, pods: 0/30                                                                                                                                                                                                                               4h29m
+=== HPA ===
+NAMESPACE       NAME                     REFERENCE                           TARGETS       MINPODS   MAXPODS   REPLICAS   AGE
+securerag-hub   audit-security-service   Deployment/audit-security-service   cpu: 1%/70%   1         3         1          2d18h
+securerag-hub   auth-users               Deployment/auth-users               cpu: 1%/70%   1         3         1          2d18h
+securerag-hub   chatbot-manager          Deployment/chatbot-manager          cpu: 1%/70%   1         3         1          2d18h
+securerag-hub   conversation-service     Deployment/conversation-service     cpu: 1%/70%   1         3         1          2d18h
+securerag-hub   portal-web               Deployment/portal-web               cpu: 2%/70%   1         3         1          4d4h
+=== PVC ===
+NAMESPACE              NAME                                                                                                   STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS   VOLUMEATTRIBUTESCLASS   AGE
+monitoring             alertmanager-kube-prometheus-stack-alertmanager-db-alertmanager-kube-prometheus-stack-alertmanager-0   Bound    pvc-4aa6f5bc-8f9d-4ad0-84e2-a5c60289a9ec   2Gi        RWO            standard       <unset>                 4d2h
+monitoring             prometheus-kube-prometheus-stack-prometheus-db-prometheus-kube-prometheus-stack-prometheus-0           Bound    pvc-77386ba5-b915-4d56-b37c-efca9d6b0b31   20Gi       RWO            standard       <unset>                 4d2h
+monitoring             storage-alertmanager-0                                                                                 Bound    pvc-69c4d1f0-0e8a-4574-9f47-a64db6fe65c0   50Mi       RWO            standard       <unset>                 4d2h
+securerag-backup       postgres-backup-data                                                                                   Bound    pvc-bb60474d-087a-47fb-9fd6-06aec9a5e776   20Gi       RWO            standard       <unset>                 25h
+securerag-monitoring   grafana-data                                                                                           Bound    pvc-fafc1400-6f96-403c-b683-cf800a285bf6   5Gi        RWO            standard       <unset>                 25h
+securerag-monitoring   loki-data                                                                                              Bound    pvc-e46d916a-cc63-4463-a459-20a6beaf0d6b   10Gi       RWO            standard       <unset>                 25h
+securerag-monitoring   prometheus-data                                                                                        Bound    pvc-4b02eb4c-6859-4783-88d7-ec7079b66dd7   20Gi       RWO            standard       <unset>                 25h
+=== ARGOCD ===
+NAME                          SYNC        HEALTH
+securerag-backup              OutOfSync   Degraded
+securerag-cert-manager        Synced      Healthy
+securerag-demo                OutOfSync   Healthy
+securerag-dev                 Unknown     Healthy
+securerag-dr                  OutOfSync   Healthy
+securerag-eso                 OutOfSync   Healthy
+securerag-falco-talon         Synced      Degraded
+securerag-harbor              Synced      Healthy
+securerag-image-updater       Synced      Healthy
+securerag-kyverno             Synced      Degraded
+securerag-kyverno-policies    OutOfSync   Healthy
+securerag-metrics-server      Synced      Healthy
+securerag-observability       OutOfSync   Degraded
+securerag-otel                Synced      Healthy
+securerag-production          OutOfSync   Healthy
+securerag-psa-policies        Synced      Healthy
+securerag-recette             OutOfSync   Healthy
+securerag-root                OutOfSync   Healthy
+securerag-runtime-detection   Synced      Healthy
+securerag-secrets             OutOfSync   Degraded
+securerag-staging             OutOfSync   Healthy
+securerag-vault               OutOfSync   Healthy
+securerag-velero              Synced      Degraded
+=== KYVERNO ===
+NAME                                   ADMISSION   BACKGROUND   READY   AGE    MESSAGE
+securerag-audit-cleartext-env-values   true        true         True    2d8h   Ready
+securerag-disallow-host-network        true        true         True    2d8h   Ready
+securerag-disallow-root-containers     true        true         True    2d8h   Ready
+securerag-require-workload-controls    true        true         True    2d8h   Ready
+securerag-restrict-image-references    true        true         True    2d8h   Ready
+securerag-restrict-service-exposure    true        true         True    2d8h   Ready
+securerag-restrict-volume-types        true        true         True    2d8h   Ready
+securerag-verify-cosign-images         true        false        True    2d8h   Ready
+
+================================================================
+  FIN DE L'AUDIT - 2026-09-25 11:56:49 UTC
+================================================================
+
+================================================================
+26bis. ROLLOUTS CORRIGÉ (kubectl v1.37 n'accepte pas --all)
+================================================================
+===== securerag-dev =====
+error: deployment "audit-security-service" exceeded its progress deadline
+error: deployment "auth-users" exceeded its progress deadline
+error: deployment "chatbot-manager" exceeded its progress deadline
+error: deployment "conversation-service" exceeded its progress deadline
+error: deployment "portal-web" exceeded its progress deadline
+===== securerag-test =====
+error: deployment "audit-security-service" exceeded its progress deadline
+error: deployment "auth-users" exceeded its progress deadline
+error: deployment "chatbot-manager" exceeded its progress deadline
+error: deployment "conversation-service" exceeded its progress deadline
+error: deployment "portal-web" exceeded its progress deadline
+===== securerag-staging =====
+error: deployment "audit-security-service" exceeded its progress deadline
+error: deployment "auth-users" exceeded its progress deadline
+error: deployment "chatbot-manager" exceeded its progress deadline
+error: deployment "conversation-service" exceeded its progress deadline
+error: deployment "portal-web" exceeded its progress deadline
+===== securerag-preprod =====
+error: deployment "audit-security-service" exceeded its progress deadline
+error: deployment "auth-users" exceeded its progress deadline
+error: deployment "chatbot-manager" exceeded its progress deadline
+error: deployment "conversation-service" exceeded its progress deadline
+error: deployment "portal-web" exceeded its progress deadline
+===== securerag-prod =====
+error: deployment "audit-security-service" exceeded its progress deadline
+error: deployment "auth-users" exceeded its progress deadline
+error: deployment "chatbot-manager" exceeded its progress deadline
+error: deployment "conversation-service" exceeded its progress deadline
+error: deployment "portal-web" exceeded its progress deadline

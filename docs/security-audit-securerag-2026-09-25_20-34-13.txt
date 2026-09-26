@@ -1,0 +1,462 @@
+================================================================
+  DIAGNOSTIC SÉCURITÉ COMPLET — CLUSTER SECURERAG (kind)
+  Date : 2026-09-25 20:34:13 UTC
+  MÉTHODE: skill 007 — 6 phases (read-only)
+================================================================
+=== A. VERSIONS ===
+Client Version: v1.37.0
+Server Version: v1.33.1
+Control-plane container: securerag-dev-control-plane
+Image node: kindest/node:v1.33.1
+
+=== B. FLAGS KUBE-APISERVER (anonymous/audit/encryption/authz) ===
+    - --authorization-mode=Node,RBAC
+
+=== C. CONFIG KUBELET ===
+  anonymous:
+    enabled: false
+  webhook:
+--
+authorization:
+  mode: Webhook
+  webhook:
+
+=== D. ETCD (authentification client) ===
+    - --client-cert-auth=true
+    - --listen-client-urls=https://127.0.0.1:2379,https://172.18.0.3:2379
+    - --peer-client-cert-auth=true
+    - --peer-trusted-ca-file=/etc/kubernetes/pki/etcd/ca.crt
+    - --trusted-ca-file=/etc/kubernetes/pki/etcd/ca.crt
+
+=== E. ACCÈS ANONYME À L'API ===
+GET /version sans auth : HTTP 200
+GET /api/v1/namespaces sans auth : HTTP 403
+GET /api/v1/secrets sans auth : HTTP 403
+
+=== F. EXPOSITION HÔTE (docker + sockets) ===
+odoo18_pgadmin | 443/tcp, 0.0.0.0:8080->80/tcp, [::]:8080->80/tcp
+odoo18 | 0.0.0.0:8069->8069/tcp, [::]:8069->8069/tcp, 8071-8072/tcp
+odoo18_postgres | 5432/tcp
+flamboyant_bohr | 8000/tcp
+securerag-jenkins | 0.0.0.0:50000->50000/tcp, [::]:50000->50000/tcp, 0.0.0.0:8085->8080/tcp, [::]:8085->8080/tcp
+securerag-sonarqube | 0.0.0.0:9000->9000/tcp, [::]:9000->9000/tcp
+securerag-sonar-db | 5432/tcp
+securerag-dev-control-plane | 127.0.0.1:6445->6443/tcp, 0.0.0.0:9080->30080/tcp, 0.0.0.0:9081->30081/tcp, 0.0.0.0:9443->30443/tcp
+securerag-dev-worker | 
+kind-registry | 127.0.0.1:5001->5000/tcp
+securerag-control-plane | 127.0.0.1:40655->6443/tcp
+--- Sockets en écoute sur 0.0.0.0 (publiques si SG ouvert) ---
+0.0.0.0:13000
+0.0.0.0:13001
+0.0.0.0:13100
+0.0.0.0:18080
+0.0.0.0:19093
+0.0.0.0:22
+0.0.0.0:50000
+0.0.0.0:5355
+0.0.0.0:8069
+0.0.0.0:8080
+0.0.0.0:8085
+0.0.0.0:9000
+0.0.0.0:9080
+0.0.0.0:9081
+0.0.0.0:9443
+127.0.0.1:32999
+127.0.0.1:40655
+127.0.0.1:49374
+127.0.0.1:5001
+127.0.0.1:6445
+127.0.0.1:8000
+127.0.0.53%lo:53
+127.0.0.54:53
+
+=== G. TESTS D'EXPOSITION PUBLIQUE (IP 52.90.18.246) ===
+Port 18080 (jenkins) : HTTP 000
+Port 13000 (grafana-mon) : HTTP 000
+Port 13001 (grafana-sec) : HTTP 000
+Port 19093 (alertmanager) : HTTP 000
+Port 13100 (loki) : HTTP 000
+Port 30030 (grafana-nodeport) : HTTP 000
+Port 9080 (nodeport-30080) : HTTP 307
+Port 9000 (minio?) : HTTP 000
+Port 5001 (registry) : HTTP 000
+
+=== H. REGISTRY LOCAL (TLS/auth) ===
+GET /v2/ sans auth : HTTP 200
+{"repositories":["postgres","secai","securerag-hub-audit-security-service","securerag-hub-auth-users","securerag-hub-chatbot-manager","securerag-hub-conversation-service","securerag-hub-extraire","securerag-hub-portal-web"]}
+
+
+=== I. SSHD HOST ===
+PasswordAuthentication no
+fail2ban: ABSENT
+
+=== J. LABELS POD SECURITY ADMISSION (PSA) ===
+argocd  enforce=restricted  warn=restricted
+cert-manager  enforce=  warn=
+default  enforce=  warn=
+external-secrets  enforce=  warn=
+falco  enforce=privileged  warn=privileged
+harbor  enforce=  warn=
+jenkins  enforce=  warn=
+kube-node-lease  enforce=  warn=
+kube-public  enforce=  warn=
+kube-system  enforce=  warn=
+kyverno  enforce=  warn=
+local-path-storage  enforce=  warn=
+loki  enforce=  warn=
+monitoring  enforce=  warn=
+otel-system  enforce=  warn=
+registry  enforce=restricted  warn=
+securerag-backup  enforce=privileged  warn=privileged
+securerag-dev  enforce=restricted  warn=
+securerag-dr  enforce=  warn=
+securerag-hub  enforce=restricted  warn=restricted
+securerag-monitoring  enforce=privileged  warn=restricted
+securerag-preprod  enforce=restricted  warn=
+securerag-prod  enforce=restricted  warn=
+securerag-recette  enforce=  warn=
+securerag-staging  enforce=restricted  warn=
+securerag-test  enforce=restricted  warn=
+tempo  enforce=  warn=
+vault  enforce=  warn=
+velero  enforce=  warn=
+
+=== K. SCAN SÉCURITÉ DES PODS (python3) ===
+TOTAL PODS: 117
+
+[privileged] = 3
+   kube-system/kube-proxy-7r6j2/kube-proxy
+   kube-system/kube-proxy-gv5dt/kube-proxy
+   securerag-backup/etcd-backup-29838300-6lnc5/etcd-backup
+
+[hostPID] = 2
+   monitoring/kube-prometheus-stack-prometheus-node-exporter-5p84s
+   monitoring/kube-prometheus-stack-prometheus-node-exporter-z74w2
+
+[hostNetwork] = 11
+   kube-system/etcd-securerag-dev-control-plane
+   kube-system/kindnet-sh9s5
+   kube-system/kindnet-tg556
+   kube-system/kube-apiserver-securerag-dev-control-plane
+   kube-system/kube-controller-manager-securerag-dev-control-plane
+   kube-system/kube-proxy-7r6j2
+   kube-system/kube-proxy-gv5dt
+   kube-system/kube-scheduler-securerag-dev-control-plane
+   ... +3 autres
+
+[hostIPC] = 0
+
+[hostPath] = 41
+   kube-system/etcd-securerag-dev-control-plane:/etc/kubernetes/pki/etcd
+   kube-system/etcd-securerag-dev-control-plane:/var/lib/etcd
+   kube-system/kindnet-sh9s5:/etc/cni/net.d
+   kube-system/kindnet-sh9s5:/run/xtables.lock
+   kube-system/kindnet-sh9s5:/lib/modules
+   kube-system/kindnet-sh9s5:/var/run/nri
+   kube-system/kindnet-tg556:/etc/cni/net.d
+   kube-system/kindnet-tg556:/run/xtables.lock
+   ... +33 autres
+
+[sock_mount] = 0
+
+[root_maybe] = 18
+   kube-system/coredns-674b8bbfcf-6lns8/coredns
+   kube-system/coredns-674b8bbfcf-jfkzd/coredns
+   kube-system/etcd-securerag-dev-control-plane/etcd
+   kube-system/kindnet-sh9s5/kindnet-cni
+   kube-system/kindnet-tg556/kindnet-cni
+   kube-system/kube-apiserver-securerag-dev-control-plane/kube-apiserver
+   kube-system/kube-controller-manager-securerag-dev-control-plane/kube-controller-manager
+   kube-system/kube-proxy-7r6j2/kube-proxy
+   ... +10 autres
+
+[priv_escalation_default] = 18
+   kube-system/etcd-securerag-dev-control-plane/etcd
+   kube-system/kindnet-sh9s5/kindnet-cni
+   kube-system/kindnet-tg556/kindnet-cni
+   kube-system/kube-apiserver-securerag-dev-control-plane/kube-apiserver
+   kube-system/kube-controller-manager-securerag-dev-control-plane/kube-controller-manager
+   kube-system/kube-proxy-7r6j2/kube-proxy
+   kube-system/kube-proxy-gv5dt/kube-proxy
+   kube-system/kube-scheduler-securerag-dev-control-plane/kube-scheduler
+   ... +10 autres
+
+[caps_add] = 6
+   kube-system/coredns-674b8bbfcf-6lns8/coredns:NET_BIND_SERVICE
+   kube-system/coredns-674b8bbfcf-jfkzd/coredns:NET_BIND_SERVICE
+   kube-system/kindnet-sh9s5/kindnet-cni:NET_RAW,NET_ADMIN
+   kube-system/kindnet-tg556/kindnet-cni:NET_RAW,NET_ADMIN
+   securerag-monitoring/promtail-dl5mc/promtail:DAC_READ_SEARCH
+   securerag-monitoring/promtail-r5psb/promtail:DAC_READ_SEARCH
+
+[ro_rootfs_false] = 28
+   harbor/securerag-harbor-core-6c4c7b5f4d-ts24l/core
+   harbor/securerag-harbor-database-0/database
+   harbor/securerag-harbor-jobservice-b6d5d7f46-rprnj/jobservice
+   harbor/securerag-harbor-nginx-7d77b55d8d-tdrkp/nginx
+   harbor/securerag-harbor-portal-d857fcf78-glxpr/portal
+   harbor/securerag-harbor-redis-0/redis
+   harbor/securerag-harbor-registry-846b996cd-v4lkh/registry
+   harbor/securerag-harbor-registry-846b996cd-v4lkh/registryctl
+   ... +20 autres
+
+[automount_satoken] = 56
+   argocd/argocd-application-controller-0
+   argocd/argocd-applicationset-controller-c4cbc5dd-jcmld
+   argocd/argocd-dex-server-5b57b7b8ff-5ds9q
+   argocd/argocd-notifications-controller-b496c5dd-rtcq6
+   argocd/argocd-redis-66f8dc8554-zv92z
+   argocd/argocd-server-7dff958c45-jvvct
+   argocd/securerag-image-updater-argocd-image-updater-77b768b59b-tgsgx
+   cert-manager/securerag-cert-manager-55449cc78d-7bdbt
+   ... +48 autres
+
+=== J2. SERVICE ACCOUNTS AVEC TOKENS LÉGACY (long-lived) ===
+SAs avec .secrets (tokens manuels): 0
+
+=== J3. SERVICES EXPOSÉS (NodePort/LoadBalancer) ===
+   argocd/argocd-server (NodePort): 80->30080,443->30443
+   jenkins/jenkins (NodePort): 8080->30085
+   monitoring/grafana (NodePort): 80->30030
+   monitoring/kube-prometheus-stack-alertmanager (NodePort): 9093->30093
+   monitoring/kube-prometheus-stack-prometheus (NodePort): 9090->30090
+
+=== J4. INGRESS + TLS ===
+Total ingress: 0
+
+=== J5. RBAC — BINDINGS VERS CLUSTER-ADMIN ===
+   cluster-admin -> Group/system:masters
+   kubeadm:cluster-admins -> Group/kubeadm:cluster-admins  ⚠️ NON-SYSTEM
+   securerag-velero-server -> ServiceAccount/securerag-velero-server  ⚠️ NON-SYSTEM
+
+=== J6. CLUSTERROLES AVEC RÈGLES WILDCARD (*/*) ===
+   argocd-application-controller
+   cluster-admin
+Traceback (most recent call last):
+  File "<stdin>", line 72, in <module>
+TypeError: 'NoneType' object is not iterable
+
+=== L. CAN-I — PRIVILÈGES DU SA 'default' DE DEV ===
+dev/default peut 'create pods' : no
+dev/default peut 'create pods/exec' : no
+dev/default peut 'create secrets' : no
+dev/default peut 'get secrets -n securerag-prod' : no
+dev/default peut 'impersonate' : dev/default peut 'escalate' : dev/default peut 'bind' : dev/default peut 'create clusterrolebindings' : no
+dev/default peut '*' : dev/default peut '*' '*' cluster-wide : no
+dev/default peut exec dans pods PROD : no
+dev/default peut lister pods PROD : no
+
+=== M. NETWORKPOLICIES (par environnement) ===
+securerag-dev : 15 policies
+    allow-dns                        <none>                                                                                                          13h
+    allow-dns-egress                 <none>                                                                                                          6h48m
+    allow-internal-dns               <none>                                                                                                          6h48m
+    allow-otel-egress                app.kubernetes.io/name in (audit-security-service,auth-users,chatbot-manager,conversation-service,portal-web)   6h48m
+    allow-prometheus-scraping        app.kubernetes.io/name in (audit-security-service,auth-users,chatbot-manager,conversation-service,portal-web)   6h48m
+securerag-test : 15 policies
+    allow-dns                        <none>                                                                                                          13h
+    allow-dns-egress                 <none>                                                                                                          6h2m
+    allow-internal-dns               <none>                                                                                                          6h2m
+    allow-otel-egress                app.kubernetes.io/name in (audit-security-service,auth-users,chatbot-manager,conversation-service,portal-web)   6h2m
+    allow-prometheus-scraping        app.kubernetes.io/name in (audit-security-service,auth-users,chatbot-manager,conversation-service,portal-web)   6h2m
+securerag-staging : 15 policies
+    allow-dns                        <none>                                                                                                          13h
+    allow-dns-egress                 <none>                                                                                                          6h2m
+    allow-internal-dns               <none>                                                                                                          6h2m
+    allow-otel-egress                app.kubernetes.io/name in (audit-security-service,auth-users,chatbot-manager,conversation-service,portal-web)   6h2m
+    allow-prometheus-scraping        app.kubernetes.io/name in (audit-security-service,auth-users,chatbot-manager,conversation-service,portal-web)   6h2m
+securerag-preprod : 15 policies
+    allow-dns                        <none>                                                                                                          13h
+    allow-dns-egress                 <none>                                                                                                          6h2m
+    allow-internal-dns               <none>                                                                                                          6h2m
+    allow-otel-egress                app.kubernetes.io/name in (audit-security-service,auth-users,chatbot-manager,conversation-service,portal-web)   6h2m
+    allow-prometheus-scraping        app.kubernetes.io/name in (audit-security-service,auth-users,chatbot-manager,conversation-service,portal-web)   6h2m
+securerag-prod : 15 policies
+    allow-dns                        <none>                                                                                                          13h
+    allow-dns-egress                 <none>                                                                                                          5h57m
+    allow-internal-dns               <none>                                                                                                          5h57m
+    allow-otel-egress                app.kubernetes.io/name in (audit-security-service,auth-users,chatbot-manager,conversation-service,portal-web)   5h57m
+    allow-prometheus-scraping        app.kubernetes.io/name in (audit-security-service,auth-users,chatbot-manager,conversation-service,portal-web)   5h57m
+monitoring : 0 policies
+loki : 0 policies
+argocd : 7 policies
+    argocd-application-controller-network-policy      app.kubernetes.io/name=argocd-application-controller      4d7h
+    argocd-applicationset-controller-network-policy   app.kubernetes.io/name=argocd-applicationset-controller   4d7h
+    argocd-dex-server-network-policy                  app.kubernetes.io/name=argocd-dex-server                  4d7h
+    argocd-notifications-controller-network-policy    app.kubernetes.io/name=argocd-notifications-controller    4d7h
+    argocd-redis-network-policy                       app.kubernetes.io/name=argocd-redis                       4d7h
+jenkins : 0 policies
+vault : 0 policies
+harbor : 0 policies
+
+=== N. KYVERNO — RAPPORTS ET VIOLATIONS ===
+PolicyReports: 227
+ClusterPolicyReports: 0
+   securerag-dev: securerag-restrict-service-exposure / Only portal-web may use NodePort in the local demo overlay; LoadBalancer is forbidden.
+   securerag-hub: securerag-restrict-service-exposure / Only portal-web may use NodePort in the local demo overlay; LoadBalancer is forbidden.
+   securerag-hub: securerag-restrict-image-references / validation error: All containers in SecureRAG namespaces must use immutable digest references (@sha2
+   securerag-hub: securerag-restrict-service-exposure / Only portal-web may use NodePort in the local demo overlay; LoadBalancer is forbidden.
+   securerag-preprod: securerag-restrict-service-exposure / Only portal-web may use NodePort in the local demo overlay; LoadBalancer is forbidden.
+   securerag-prod: securerag-restrict-service-exposure / Only portal-web may use NodePort in the local demo overlay; LoadBalancer is forbidden.
+   securerag-staging: securerag-restrict-service-exposure / Only portal-web may use NodePort in the local demo overlay; LoadBalancer is forbidden.
+   securerag-test: securerag-restrict-service-exposure / Only portal-web may use NodePort in the local demo overlay; LoadBalancer is forbidden.
+Violations FAIL total: 8
+--- Events Kyverno/déni admission ---
+securerag-dev       40m         Warning   PolicyViolation      service/postgres-auth                               policy securerag-restrict-service-exposure/allow-nodeport-only-for-portal-web fail: Only portal-web may use NodePort in the local demo overlay; LoadBalancer is forbidden.
+securerag-hub       40m         Warning   PolicyViolation      pod/postgres-auth-58f89fd9bf-b55hk                  policy securerag-restrict-image-references/require-immutable-image-digests fail: validation error: All containers in SecureRAG namespaces must use immutable digest references (@sha256:...). No floating tag is ever admitted. rule require-immutable-image-digests failed at path /spec/containers/0/image/
+securerag-hub       31m         Warning   PolicyViolation      service/postgres-auth                               policy securerag-restrict-service-exposure/allow-nodeport-only-for-portal-web fail: Only portal-web may use NodePort in the local demo overlay; LoadBalancer is forbidden.
+securerag-hub       40m         Warning   PolicyViolation      service/secai                                       policy securerag-restrict-service-exposure/allow-nodeport-only-for-portal-web fail: Only portal-web may use NodePort in the local demo overlay; LoadBalancer is forbidden.
+securerag-preprod   40m         Warning   PolicyViolation      service/postgres-auth                               policy securerag-restrict-service-exposure/allow-nodeport-only-for-portal-web fail: Only portal-web may use NodePort in the local demo overlay; LoadBalancer is forbidden.
+securerag-prod      40m         Warning   PolicyViolation      service/postgres-auth                               policy securerag-restrict-service-exposure/allow-nodeport-only-for-portal-web fail: Only portal-web may use NodePort in the local demo overlay; LoadBalancer is forbidden.
+securerag-staging   40m         Warning   PolicyViolation      service/postgres-auth                               policy securerag-restrict-service-exposure/allow-nodeport-only-for-portal-web fail: Only portal-web may use NodePort in the local demo overlay; LoadBalancer is forbidden.
+securerag-test      40m         Warning   PolicyViolation      service/postgres-auth                               policy securerag-restrict-service-exposure/allow-nodeport-only-for-portal-web fail: Only portal-web may use NodePort in the local demo overlay; LoadBalancer is forbidden.
+
+=== O. PODS OUTILS SÉCURITÉ (falco, vault, harbor, eso, velero, cert-manager) ===
+cert-manager           securerag-cert-manager-55449cc78d-7bdbt                           1/1     Running     0               33h
+cert-manager           securerag-cert-manager-cainjector-6b84fc9c69-j84fh                1/1     Running     0               33h
+cert-manager           securerag-cert-manager-webhook-d9797d567-h4k9l                    1/1     Running     0               33h
+external-secrets       securerag-eso-external-secrets-64d44dfb69-kbpkn                   1/1     Running     0               7h28m
+external-secrets       securerag-eso-external-secrets-cert-controller-7b5b87d4cc-znfp6   1/1     Running     0               33h
+external-secrets       securerag-eso-external-secrets-webhook-5f647c6dfb-9c4k4           1/1     Running     0               33h
+falco                  falcosidekick-77dd596d49-zd67m                                    1/1     Running     0               33h
+harbor                 securerag-harbor-core-6c4c7b5f4d-ts24l                            1/1     Running     0               9h
+harbor                 securerag-harbor-database-0                                       1/1     Running     0               33h
+harbor                 securerag-harbor-jobservice-b6d5d7f46-rprnj                       1/1     Running     2 (9h ago)      9h
+harbor                 securerag-harbor-nginx-7d77b55d8d-tdrkp                           1/1     Running     0               33h
+harbor                 securerag-harbor-portal-d857fcf78-glxpr                           1/1     Running     0               33h
+harbor                 securerag-harbor-redis-0                                          1/1     Running     0               33h
+harbor                 securerag-harbor-registry-846b996cd-v4lkh                         2/2     Running     0               9h
+harbor                 securerag-harbor-trivy-0                                          1/1     Running     0               33h
+securerag-backup       vault-backup-29838315-mbhkq                                       0/1     Completed   0               19h
+vault                  securerag-vault-0                                                 1/1     Running     0               33h
+vault                  securerag-vault-agent-injector-5854c4755d-vjwtk                   1/1     Running     0               33h
+velero                 node-agent-4vthz                                                  1/1     Running     0               5h52m
+velero                 securerag-velero-56b4f7b966-vz24t                                 1/1     Running     0               5h52m
+
+=== P. ARGOCD — CONFIG ===
+apiVersion: v1
+data:
+  application.instanceLabelKey: argocd.argoproj.io/instance
+  resource.customizations.ignoreResourceUpdates.ConfigMap: |
+    jqPathExpressions:
+  resource.customizations.ignoreResourceUpdates.Endpoints: |
+    jsonPointers:
+  resource.customizations.ignoreResourceUpdates.all: |
+    jsonPointers:
+  resource.customizations.ignoreResourceUpdates.apps_ReplicaSet: |
+    jqPathExpressions:
+  resource.customizations.ignoreResourceUpdates.argoproj.io_Application: |
+  policy.csv: |
+    p, role:auditor, applications, get, securerag-hub/*, allow
+    p, role:auditor, projects, get, securerag-hub, allow
+    p, role:developer, applications, get, securerag-hub/securerag-dev, allow
+    p, role:developer, applications, create, securerag-hub/securerag-dev, allow
+    p, role:developer, applications, update, securerag-hub/securerag-dev, allow
+    p, role:developer, applications, delete, securerag-hub/securerag-dev, allow
+    p, role:developer, applications, sync, securerag-hub/securerag-dev, allow
+    p, role:developer, applications, get, securerag-hub/securerag-staging, allow
+    p, role:developer, applications, sync, securerag-hub/securerag-staging, allow
+argocd-initial-admin-secret: TOUJOURS PRÉSENT (⚠️)
+securerag-backup autoSync=
+securerag-cert-manager autoSync={"prune":true,"selfHeal":true}
+securerag-demo autoSync=
+securerag-dev autoSync=
+securerag-dr autoSync=
+securerag-eso autoSync={"prune":true,"selfHeal":true}
+securerag-falco-talon autoSync=
+securerag-harbor autoSync={"prune":true,"selfHeal":true}
+securerag-image-updater autoSync={"prune":true,"selfHeal":true}
+securerag-kyverno autoSync=
+securerag-kyverno-policies autoSync=
+securerag-metrics-server autoSync=
+securerag-observability autoSync=
+securerag-otel autoSync=
+securerag-production autoSync=
+securerag-psa-policies autoSync=
+securerag-recette autoSync=
+securerag-root autoSync=
+securerag-runtime-detection autoSync=
+securerag-secrets autoSync=
+securerag-staging autoSync=
+securerag-vault autoSync={"prune":true,"selfHeal":true}
+securerag-velero autoSync={"prune":true,"selfHeal":true}
+
+=== Q. RESOURCEQUOTAS / LIMITRANGES par env ===
+securerag-dev : quota=1
+ | limitrange=1
+securerag-test : quota=1
+ | limitrange=1
+securerag-staging : quota=1
+ | limitrange=1
+securerag-preprod : quota=1
+ | limitrange=1
+securerag-prod : quota=2
+ | limitrange=1
+
+=== R. TESTS COMPLÉMENTAIRES D'EXPOSITION PUBLIQUE ===
+Port 8085 (jenkins-http) : HTTP 000
+Port 50000 (jenkins-agent) : HTTP 000
+Port 9443 (argocd-https-nodeport) : HTTP 200
+Port 9081 (nodeport-30081) : HTTP 000
+Port 8069 (odoo) : HTTP 000
+Port 8080 (pgadmin) : HTTP 000
+
+=== S. QUEL SERVICE EST SUR NODEPORT 30080/30081/30443 ? ===
+   argocd/argocd-server : 80->30080 (http)
+   argocd/argocd-server : 443->30443 (https)
+   monitoring/grafana : 80->30030 (http-web)
+   monitoring/kube-prometheus-stack-alertmanager : 9093->30093 (http-web)
+   monitoring/kube-prometheus-stack-prometheus : 9090->30090 (http-web)
+
+=== T. NETPOL — DEFAULT-DENY PRÉSENT DANS CHAQUE ENV ? ===
+--- securerag-dev ---
+--- securerag-prod ---
+
+=== U. KYVERNO COSIGN — CONFIG VÉRIFICATION SIGNATURES ===
+   attestors/cosign présents : True
+   mode: Enforce
+   rule: verify-image-signature-key -> [{'attestors': [{'count': 1, 'entries': [{'keys': {'publicKeys': '-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIKoZIzj
+
+=== V. SÉCURITÉ DU POD JENKINS (installé aujourd'hui) ===
+{"allowPrivilegeEscalation":false,"readOnlyRootFilesystem":true,"runAsGroup":1000,"runAsUser":1000}
+{"fsGroup":1000,"fsGroupChangePolicy":"OnRootMismatch","runAsNonRoot":true,"runAsUser":1000}
+
+=== W. CONTENEURS NON-K8S SUR L'HÔTE (hygiène) ===
+odoo18_pgadmin | image=dpage/pgadmin4:latest
+odoo18 | image=odoo:18
+odoo18_postgres | image=postgres:17
+flamboyant_bohr | image=1018bfcadee9
+securerag-jenkins | image=jenkins-jenkins
+securerag-sonarqube | image=sonarqube:10-community
+securerag-sonar-db | image=postgres:15-alpine
+kind-registry | image=registry:2
+
+=== X. LISTE COMPLÈTE NETPOL securerag-dev ===
+   allow-dns  (sel: <none>)
+   allow-dns-egress  (sel: <none>)
+   allow-internal-dns  (sel: <none>)
+   allow-otel-egress  (sel: app.kubernetes.io/name)
+   allow-prometheus-scraping  (sel: app.kubernetes.io/name)
+   allow-validation-egress  (sel: app.kubernetes.io/part-of=securerag-hub,job-role=validation)
+   allow-validation-ingress  (sel: app.kubernetes.io/name)
+   audit-security-service-network  (sel: app.kubernetes.io/name=audit-security-service,app.kubernetes.io/part-of=securerag-hub)
+   auth-users-policy  (sel: app.kubernetes.io/name=auth-users,app.kubernetes.io/part-of=securerag-hub)
+   chatbot-manager-policy  (sel: app.kubernetes.io/name=chatbot-manager,app.kubernetes.io/part-of=securerag-hub)
+   conversation-service-network  (sel: app.kubernetes.io/name=conversation-service,app.kubernetes.io/part-of=securerag-hub)
+   default-deny-all  (sel: <none>)
+   deny-all-ingress  (sel: <none>)
+   portal-web-policy  (sel: app.kubernetes.io/name=portal-web,app.kubernetes.io/part-of=securerag-hub)
+   postgres-auth-policy  (sel: app.kubernetes.io/part-of=securerag-hub,cnpg.io/cluster=postgres-auth)
+
+=== Y. POLITIQUE DE TYPE DENY (inspection des 2 premières) ===
+   allow-dns: ingress="(absent)" egress=[{"ports": [{"port": 53, "protocol": "UDP"}, {"port": 53, "p
+   allow-dns-egress: ingress="(absent)" egress=[{"ports": [{"port": 53, "protocol": "UDP"}, {"port": 53, "p
+   allow-internal-dns: ingress="(absent)" egress=[{"ports": [{"port": 53, "protocol": "UDP"}, {"port": 53, "p
+   allow-otel-egress: ingress="(absent)" egress=[{"ports": [{"port": 4318, "protocol": "TCP"}, {"port": 4317
+   allow-prometheus-scraping: ingress=[{"from": [{"namespaceSelector": {"matchLabels": {"kubernete egress="(absent)"
+   allow-validation-egress: ingress="(absent)" egress=[{"ports": [{"port": 8000, "protocol": "TCP"}], "to": [{"pod
+   allow-validation-ingress: ingress=[{"from": [{"podSelector": {"matchLabels": {"app.kubernetes. egress="(absent)"
+   audit-security-service-network: ingress=[{"from": [{"podSelector": {"matchLabels": {"app.kubernetes. egress="(absent)"
+   conversation-service-network: ingress=[{"from": [{"podSelector": {"matchLabels": {"app.kubernetes. egress="(absent)"
+   default-deny-all: ingress="(absent)" egress="(absent)"
+   deny-all-ingress: ingress="(absent)" egress="(absent)"
