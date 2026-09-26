@@ -1,0 +1,8 @@
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: securerag-selfsigned
+  labels:
+    app.kubernetes.io/part-of: securerag-hub
+spec:
+  selfSigned: {}

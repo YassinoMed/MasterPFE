@@ -25,7 +25,6 @@ spec:
           - name: runtime-detection
             path: infra/k8s/runtime-detection
             namespace: falco
-            wave: "50"
             wave: "4"
           - name: kyverno
             path: infra/k8s/addons/kyverno
