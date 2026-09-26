@@ -63,6 +63,10 @@ spec:
           kind: ExternalSecret
           jqPathExpressions:
             - '.metadata.annotations["reconcile.external-secrets.io/data-hash"]'
+        - group: apps
+          kind: Deployment
+          jqPathExpressions:
+            - '.spec.replicas'
       syncPolicy:
         automated:
           prune: true

@@ -64,6 +64,15 @@ spec:
           kind: ExternalSecret
           jqPathExpressions:
             - '.metadata.annotations["reconcile.external-secrets.io/data-hash"]'
+        - group: apps
+          kind: Deployment
+          jqPathExpressions:
+            - '.spec.replicas'
+        - group: kyverno.io
+          kind: ClusterPolicy
+          jqPathExpressions:
+            - '.spec.rules[].skipBackgroundRequests'
+            - '.spec.rules[].generateExisting'
       syncPolicy:
         automated:
           prune: true
