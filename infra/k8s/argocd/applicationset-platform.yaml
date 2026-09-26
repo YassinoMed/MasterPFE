@@ -67,11 +67,11 @@ spec:
             - '.spec.target.creationPolicy'
             - '.spec.target.deletionPolicy'
             - '.spec.binding'
-            - '.spec.data[*].remoteRef.conversionStrategy'
-            - '.spec.data[*].remoteRef.decodingStrategy'
-            - '.spec.data[*].remoteRef.metadataPolicy'
-            - '.spec.dataFrom[*].extract.conversionStrategy'
-            - '.spec.dataFrom[*].extract.metadataPolicy'
+            - '.spec.data[].remoteRef.conversionStrategy'
+            - '.spec.data[].remoteRef.decodingStrategy'
+            - '.spec.data[].remoteRef.metadataPolicy'
+            - '.spec.dataFrom[].extract.conversionStrategy'
+            - '.spec.dataFrom[].extract.metadataPolicy'
         - group: apps
           kind: Deployment
           jqPathExpressions:
