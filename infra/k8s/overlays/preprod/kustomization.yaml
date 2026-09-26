@@ -3,6 +3,7 @@ kind: Kustomization
 namespace: securerag-preprod
 
 resources:
+  - portal-admin-externalsecret.yaml
   - ../../environments/preprod
   - ../../base
   - externalsecret-common.yaml

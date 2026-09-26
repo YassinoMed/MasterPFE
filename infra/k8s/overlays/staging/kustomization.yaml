@@ -3,6 +3,7 @@ kind: Kustomization
 namespace: securerag-staging
 
 resources:
+  - portal-admin-externalsecret.yaml
   - ../../environments/staging
   - ../../base
   - externalsecret-common.yaml

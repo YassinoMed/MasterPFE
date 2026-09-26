@@ -3,6 +3,7 @@ kind: Kustomization
 namespace: securerag-test
 
 resources:
+  - portal-admin-externalsecret.yaml
   - ../../environments/test
   - ../../base
   - externalsecret-common.yaml

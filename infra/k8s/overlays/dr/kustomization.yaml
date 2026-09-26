@@ -4,6 +4,7 @@ kind: Kustomization
 namespace: securerag-hub-dr
 
 resources:
+  - portal-admin-externalsecret.yaml
   - ../../environments/dr
   - ../../base
 

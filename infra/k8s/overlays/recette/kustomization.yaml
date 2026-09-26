@@ -4,6 +4,7 @@ kind: Kustomization
 namespace: securerag-recette
 
 resources:
+  - portal-admin-externalsecret.yaml
   - ../_hub-foundation
   - ../../base
 
