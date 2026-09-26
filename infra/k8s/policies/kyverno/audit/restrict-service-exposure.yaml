@@ -7,46 +7,51 @@ metadata:
     policies.kyverno.io/category: Network Security
     policies.kyverno.io/severity: high
     policies.kyverno.io/subject: Service
-    policies.kyverno.io/description: >-
-      Prevents accidental public service exposure. The local demo may expose
-      only portal-web through NodePort; all business services must remain
-      ClusterIP.
+    policies.kyverno.io/description: Prevents accidental public service exposure.
+      The local demo may expose only portal-web through NodePort; all business services
+      must remain ClusterIP.
 spec:
   validationFailureAction: Enforce
   background: true
   rules:
-    - name: allow-nodeport-only-for-portal-web
-      match:
-        any:
-          - resources:
-              kinds:
-                - Service
-              operations:
-                - CREATE
-                - UPDATE
-              namespaces:
-                - securerag-hub
-                - securerag-dev
-                - securerag-test
-                - securerag-staging
-                - securerag-preprod
-                - securerag-prod
-      validate:
-        message: Only portal-web may use NodePort in the local demo overlay; LoadBalancer is forbidden.
-        deny:
-          conditions:
-            any:
-              - key: "{{ request.object.spec.type || 'ClusterIP' }}"
-                operator: Equals
-                value: LoadBalancer
-              - key: "{{ request.object.spec.type || 'ClusterIP' }}:{{ request.object.metadata.name }}"
-                operator: AnyNotIn
-                value:
-                  - ClusterIP:portal-web
-                  - NodePort:portal-web
-                  - ClusterIP:auth-users
-                  - ClusterIP:chatbot-manager
-                  - ClusterIP:conversation-service
-                  - ClusterIP:audit-security-service
-                  - ClusterIP:postgres-auth
-                  - ClusterIP:secai
+  - name: allow-nodeport-only-for-portal-web
+    match:
+      any:
+      - resources:
+          kinds:
+          - Service
+          operations:
+          - CREATE
+          - UPDATE
+          namespaces:
+          - securerag-hub
+          - securerag-dev
+          - securerag-test
+          - securerag-staging
+          - securerag-preprod
+          - securerag-prod
+    validate:
+      message: Only portal-web may use NodePort in the local demo overlay; LoadBalancer
+        is forbidden.
+      deny:
+        conditions:
+          any:
+          - key: '{{ request.object.spec.type || ''ClusterIP'' }}'
+            operator: Equals
+            value: LoadBalancer
+          - key: '{{ request.object.spec.type || ''ClusterIP'' }}:{{ request.object.metadata.name
+              }}'
+            operator: AnyNotIn
+            value:
+            - ClusterIP:portal-web
+            - NodePort:portal-web
+            - ClusterIP:auth-users
+            - ClusterIP:chatbot-manager
+            - ClusterIP:conversation-service
+            - ClusterIP:audit-security-service
+            - ClusterIP:postgres-auth
+            - ClusterIP:secai
+    skipBackgroundRequests: true
+    allowExistingViolations: true
+  admission: true
+  emitWarning: false

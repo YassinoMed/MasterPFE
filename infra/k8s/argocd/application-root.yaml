@@ -37,16 +37,16 @@ spec:
   ignoreDifferences:
     - group: argoproj.io
       kind: Application
-      jqPathExpressions:
-        - '.spec.syncPolicy.retry.maxDuration'
-        - '.spec.syncPolicy.retry.limit'
-        - '.spec.syncPolicy.syncOptions'
-        - '.spec.sources[].allowEmpty'
+      jsonPointers:
+        - /spec/syncPolicy/retry/maxDuration
+        - /spec/syncPolicy/retry/limit
+        - /spec/syncPolicy/syncOptions
+        - /spec/sources/0/allowEmpty
     - group: argoproj.io
       kind: ApplicationSet
-      jqPathExpressions:
-        - '.spec.syncPolicy.retry.maxDuration'
-        - '.spec.syncPolicy.syncOptions'
+      jsonPointers:
+        - /spec/syncPolicy/retry/maxDuration
+        - /spec/syncPolicy/syncOptions
   syncPolicy:
     automated:
       prune: true
