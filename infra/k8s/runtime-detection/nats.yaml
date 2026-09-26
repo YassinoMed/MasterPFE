@@ -34,7 +34,7 @@ spec:
     spec:
       containers:
         - name: nats
-          image: nats@sha256:sha256:0764f1952d72e92e35ad8b152da0f9652a49cb1186b6445fdd45131d81ad6d7e
+          image: nats@sha256:0764f1952d72e92e35ad8b152da0f9652a49cb1186b6445fdd45131d81ad6d7e
           args: ["-m", "8222"]
           ports:
             - containerPort: 4222
