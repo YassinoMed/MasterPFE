@@ -31,6 +31,12 @@ spec:
   destination:
     server: https://kubernetes.default.svc
     namespace: trivy-system
+  # Les ClusterComplianceReports sont écrits par l'opérateur lui-même
+  # (contenu vivant) : on les ignore pour la comparaison de sync.
+  ignoreDifferences:
+    - group: aquasecurity.github.io
+      kind: ClusterComplianceReport
+      jsonPointers: [/spec]
   syncPolicy:
     automated:
       prune: true
