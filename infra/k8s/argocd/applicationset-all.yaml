@@ -70,6 +70,7 @@ spec:
             - '.spec.data[].remoteRef.decodingStrategy'
             - '.spec.data[].remoteRef.metadataPolicy'
             - '.spec.dataFrom[].extract.conversionStrategy'
+            - '.spec.dataFrom[].extract.decodingStrategy'
             - '.spec.dataFrom[].extract.metadataPolicy'
         - group: apps
           kind: Deployment
