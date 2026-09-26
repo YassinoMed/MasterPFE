@@ -55,6 +55,13 @@ spec:
                 }
 
                 service_registration "kubernetes" {}
+        server:
+          # Tolère le taint control-plane pour que le Raft cluster puisse
+          # s'étaler sur les 2 nœuds du cluster kind (démo)
+          tolerations:
+            - key: node-role.kubernetes.io/control-plane
+              operator: Exists
+              effect: NoSchedule
         injector:
           enabled: true
         ui:
