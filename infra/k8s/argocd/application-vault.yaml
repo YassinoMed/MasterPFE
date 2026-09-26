@@ -1,19 +1,12 @@
-# Vault — Application ArgoCD (via Helm)
-# Déploie HashiCorp Vault pour la gestion des secrets.
-#
-# MIGRATION PHASE 3 (2026-09-26) : passage du mode dev (in-memory) au mode
-# production (Raft + HA + persistance + audit) — SANS KMS (droits IAM manquants,
-# cf. phase3-kms-note.md). Prérequis : seeder et auth kubernetes reconfigurés
-# par scripts/deploy/seed-vault-secrets.sh après le déploiement.
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   name: securerag-vault
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "20"
+    argocd.argoproj.io/sync-wave: '20'
   finalizers:
-    - resources-finalizer.argocd.argoproj.io
+  - resources-finalizer.argocd.argoproj.io
 spec:
   project: securerag-hub
   source:
@@ -21,52 +14,10 @@ spec:
     targetRevision: 0.29.0
     chart: vault
     helm:
-      values: |
-        server:
-          # PRODUCTION — stockage Raft persistant (les secrets survivent aux restarts)
-          dev:
-            enabled: false
-          dataStorage:
-            enabled: true
-            size: 10Gi
-            storageClass: null
-          # Journal d'audit persistant
-          auditStorage:
-            enabled: true
-            size: 1Gi
-          # Haute disponibilité (3 réplicas sur 2 nœuds)
-          ha:
-            enabled: true
-            replicas: 3
-            raft:
-              enabled: true
-              setNodeId: true
-              config: |
-                ui = true
-
-                listener "tcp" {
-                  tls_disable = 1
-                  address = "[::]:8200"
-                  cluster_address = "[::]:8201"
-                }
-
-                storage "raft" {
-                  path = "/vault/data"
-                }
-
-                service_registration "kubernetes" {}
-        server:
-          # Tolère le taint control-plane pour que le Raft cluster puisse
-          # s'étaler sur les 2 nœuds du cluster kind (démo)
-          tolerations:
-            - key: node-role.kubernetes.io/control-plane
-              operator: Exists
-              effect: NoSchedule
-        injector:
-          enabled: true
-        ui:
-          enabled: true
-          serviceType: ClusterIP
+      values: "server:\n  tolerations:\n  - key: node-role.kubernetes.io/control-plane\n\
+        \    operator: Exists\n    effect: NoSchedule\n  - key: node-role.kubernetes.io/master\n\
+        \    operator: Exists\n    effect: NoSchedule\n  affinity: null\ninjector:\n\
+        \  enabled: true\nui:\n  enabled: true\n  serviceType: ClusterIP\n"
   destination:
     server: https://kubernetes.default.svc
     namespace: vault
@@ -75,11 +26,9 @@ spec:
       prune: true
       selfHeal: true
     syncOptions:
-      - CreateNamespace=true
-  # Le caBundle du webhook de Vault est régénéré par Vault à chaque
-  # démarrage (injection du CA) → diffrierrier Carrier diff perpétuel sans ce filtre.
+    - CreateNamespace=true
   ignoreDifferences:
-    - group: admissionregistration.k8s.io
-      kind: MutatingWebhookConfiguration
-      jqPathExpressions:
-        - '.webhooks[].clientConfig.caBundle'
+  - group: admissionregistration.k8s.io
+    kind: MutatingWebhookConfiguration
+    jqPathExpressions:
+    - .webhooks[].clientConfig.caBundle
