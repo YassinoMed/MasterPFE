@@ -10,6 +10,7 @@ metadata:
 spec:
   description: "SecureRAG Hub — Laravel platform GitOps project"
   sourceRepos:
+    - https://kubernetes.github.io/ingress-nginx
     - https://github.com/YassinoMed/MasterPFE.git
     - https://github.com/argoproj/argo-helm
     - https://argoproj.github.io/argo-helm
