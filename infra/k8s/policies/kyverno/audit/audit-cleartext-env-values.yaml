@@ -47,6 +47,5 @@ spec:
           message: Literal clear-text HTTP environment URLs require the annotation
             security.securerag.dev/internal-cleartext-scope=cluster-only-networkpolicy.
     skipBackgroundRequests: true
-    allowExistingViolations: true
   admission: true
   emitWarning: false

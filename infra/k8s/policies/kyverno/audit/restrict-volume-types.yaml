@@ -34,6 +34,5 @@ spec:
           =(volumes):
           - X(hostPath): 'null'
     skipBackgroundRequests: true
-    allowExistingViolations: true
   admission: true
   emitWarning: false

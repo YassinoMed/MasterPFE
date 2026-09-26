@@ -52,6 +52,5 @@ spec:
             - ClusterIP:postgres-auth
             - ClusterIP:secai
     skipBackgroundRequests: true
-    allowExistingViolations: true
   admission: true
   emitWarning: false

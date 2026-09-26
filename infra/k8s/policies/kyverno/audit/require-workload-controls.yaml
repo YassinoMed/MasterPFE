@@ -38,7 +38,6 @@ spec:
           readinessProbe: {}
           startupProbe: {}
     skipBackgroundRequests: true
-    allowExistingViolations: true
   - name: require-pod-template-service-account-token-disabled
     match:
       any:
@@ -61,6 +60,5 @@ spec:
             spec:
               automountServiceAccountToken: false
     skipBackgroundRequests: true
-    allowExistingViolations: true
   admission: true
   emitWarning: false

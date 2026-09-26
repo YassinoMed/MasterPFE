@@ -39,6 +39,5 @@ spec:
           - =(securityContext):
               =(runAsNonRoot): true
     skipBackgroundRequests: true
-    allowExistingViolations: true
   admission: true
   emitWarning: false

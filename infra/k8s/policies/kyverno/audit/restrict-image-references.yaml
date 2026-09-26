@@ -39,7 +39,6 @@ spec:
           =(initContainers):
           - image: '!*:latest'
     skipBackgroundRequests: true
-    allowExistingViolations: true
   - name: restrict-registries
     match:
       any:
@@ -69,7 +68,6 @@ spec:
           - image: localhost:5001/* | kind-registry.registry.svc.cluster.local:5001/*
               | ghcr.io/*
     skipBackgroundRequests: true
-    allowExistingViolations: true
   - name: restrict-validation-helper-image
     match:
       any:
@@ -96,7 +94,6 @@ spec:
           =(initContainers):
           - image: curlimages/curl:* | grafana/k6:*
     skipBackgroundRequests: true
-    allowExistingViolations: true
   - name: require-immutable-image-digests
     match:
       any:
@@ -124,6 +121,5 @@ spec:
           =(initContainers):
           - image: '*@sha256:*'
     skipBackgroundRequests: true
-    allowExistingViolations: true
   admission: true
   emitWarning: false

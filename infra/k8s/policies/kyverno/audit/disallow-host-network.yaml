@@ -32,6 +32,5 @@ spec:
         spec:
           =(hostNetwork): false
     skipBackgroundRequests: true
-    allowExistingViolations: true
   admission: true
   emitWarning: false
