@@ -30,6 +30,13 @@ spec:
         - name: falco-talon
           image: issif/falco-talon@sha256:ecf35224d30e5375cc346815aa98a62c3de97c6c704d22f8a280674ed624b2fc
           imagePullPolicy: IfNotPresent
+          # falco-talon >= 0.7 embarque un serveur NATS (JetStream) qu'il
+          # démarre en local (127.0.0.1:4222) : il DOIT pouvoir écrire son
+          # store. rootfs read-only => workingDir + HOME + /tmp inscriptible.
+          workingDir: /tmp
+          env:
+            - name: HOME
+              value: /tmp
           args:
             - server
             - -c
@@ -71,10 +78,14 @@ spec:
             - name: config
               mountPath: /etc/falco-talon
               readOnly: true
+            - name: tmp
+              mountPath: /tmp
       volumes:
         - name: config
           configMap:
             name: falco-talon-config
+        - name: tmp
+          emptyDir: {}
 
 ---
 apiVersion: v1
