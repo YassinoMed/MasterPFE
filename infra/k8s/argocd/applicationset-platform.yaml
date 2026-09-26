@@ -80,6 +80,7 @@ spec:
           kind: ClusterPolicy
           jqPathExpressions:
             - '.spec.rules[].skipBackgroundRequests'
+            - '.spec.rules[].allowExistingViolations'
             - '.spec.rules[].generateExisting'
       syncPolicy:
         automated:
