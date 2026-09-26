@@ -22,5 +22,4 @@ resources:
   - argocd-cm.yaml                # ArgoCD config (repo credentials, CMP, status badge)
   - application-ingress-nginx.yaml  # Ingress + TLS (P2 sécurité)
   - application-pki.yaml           # ClusterIssuer TLS
-  - application-ingress-nginx.yaml  # Ingress + TLS (P2 sécurité)
   - application-image-updater.yaml # Automatic image updates
