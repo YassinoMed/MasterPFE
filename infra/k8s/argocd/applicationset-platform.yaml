@@ -78,10 +78,13 @@ spec:
             - '.spec.replicas'
         - group: kyverno.io
           kind: ClusterPolicy
-          jqPathExpressions:
-            - '.spec.rules[].skipBackgroundRequests'
-            - '.spec.rules[].allowExistingViolations'
-            - '.spec.rules[].generateExisting'
+          jsonPointers:
+            - /spec/rules/0/allowExistingViolations
+            - /spec/rules/0/generate
+            - /spec/rules/0/skipBackgroundRequests
+            - /spec/rules/1/allowExistingViolations
+            - /spec/rules/1/generate
+            - /spec/rules/1/skipBackgroundRequests
       syncPolicy:
         automated:
           prune: true
