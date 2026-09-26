@@ -6,6 +6,7 @@ namespace: securerag-hub
 resources:
   - ../_hub-foundation
   - ../../base
+  - ../../base/secai      # service CIN — vivait en orphelin hors-git (perte au rebuild hub 2026-09-26)
 
 configMapGenerator:
   - name: securerag-common-config
