@@ -5,6 +5,7 @@ namespace: securerag-recette
 
 resources:
   - portal-admin-externalsecret.yaml
+  - externalsecret-common.yaml
   - ../_hub-foundation
   - ../../base
 

@@ -8,6 +8,23 @@ resources:
   - ../../environments/dr
   - ../../base
 
+images:
+  - name: ghcr.io/example/securerag-hub-portal-web
+    newName: kind-registry.registry.svc.cluster.local:5001/securerag-hub-portal-web
+    digest: sha256:2dc7db2867e1f93e9f104e5bc701e74a783a88f54a41c3ea80589f6501000066
+  - name: ghcr.io/example/securerag-hub-auth-users
+    newName: kind-registry.registry.svc.cluster.local:5001/securerag-hub-auth-users
+    digest: sha256:4c5c849ef809865d3aa914f1c87db06af827804ca5afba0251af22b88ad02e78
+  - name: ghcr.io/example/securerag-hub-chatbot-manager
+    newName: kind-registry.registry.svc.cluster.local:5001/securerag-hub-chatbot-manager
+    digest: sha256:cddbcf4922fd6dca941751130728436d7c70a1250354134a07277bee45831ca6
+  - name: ghcr.io/example/securerag-hub-conversation-service
+    newName: kind-registry.registry.svc.cluster.local:5001/securerag-hub-conversation-service
+    digest: sha256:e33d4fe73a6ce95e37a087457ecc77f0b671c86cd4036b907ec83d11c709c608
+  - name: ghcr.io/example/securerag-hub-audit-security-service
+    newName: kind-registry.registry.svc.cluster.local:5001/securerag-hub-audit-security-service
+    digest: sha256:ec79f5730dd958a9573e84e13c4499c03a9f53283802119ef2b432d553990fd1
+
 patches:
   - target:
       kind: Deployment
