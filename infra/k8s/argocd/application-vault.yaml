@@ -1,5 +1,10 @@
 # Vault — Application ArgoCD (via Helm)
 # Déploie HashiCorp Vault pour la gestion des secrets.
+#
+# MIGRATION PHASE 3 (2026-09-26) : passage du mode dev (in-memory) au mode
+# production (Raft + HA + persistance + audit) — SANS KMS (droits IAM manquants,
+# cf. phase3-kms-note.md). Prérequis : seeder et auth kubernetes reconfigurés
+# par scripts/deploy/seed-vault-secrets.sh après le déploiement.
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
@@ -18,15 +23,38 @@ spec:
     helm:
       values: |
         server:
+          # PRODUCTION — stockage Raft persistant (les secrets survivent aux restarts)
           dev:
-            enabled: true
+            enabled: false
           dataStorage:
-            enabled: false
-          service:
             enabled: true
-            type: ClusterIP
-          ingress:
-            enabled: false
+            size: 10Gi
+            storageClass: null
+          # Journal d'audit persistant
+          auditStorage:
+            enabled: true
+            size: 1Gi
+          # Haute disponibilité (3 réplicas sur 2 nœuds)
+          ha:
+            enabled: true
+            replicas: 3
+            raft:
+              enabled: true
+              setNodeId: true
+              config: |
+                ui = true
+
+                listener "tcp" {
+                  tls_disable = 1
+                  address = "[::]:8200"
+                  cluster_address = "[::]:8201"
+                }
+
+                storage "raft" {
+                  path = "/vault/data"
+                }
+
+                service_registration "kubernetes" {}
         injector:
           enabled: true
         ui:
@@ -41,8 +69,8 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
-  # Le caBundle du webhook est régénéré par Vault à chaque démarrage
-  # (injection du CA) -> diff perpétuel sans ce filtre.
+  # Le caBundle du webhook de Vault est régénéré par Vault à chaque
+  # démarrage (injection du CA) → diffrierrier Carrier diff perpétuel sans ce filtre.
   ignoreDifferences:
     - group: admissionregistration.k8s.io
       kind: MutatingWebhookConfiguration
