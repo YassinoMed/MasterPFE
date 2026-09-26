@@ -21,11 +21,12 @@ spec:
         serviceAccount:
           create: true
           name: "external-secrets"
+        podSecurityContext:
+          fsGroup: 10001
         securityContext:
           runAsNonRoot: true
           runAsUser: 10001
           runAsGroup: 10001
-          fsGroup: 10001
         containerSecurityContext:
           allowPrivilegeEscalation: false
           readOnlyRootFilesystem: true
@@ -37,11 +38,12 @@ spec:
               - ALL
         webhook:
           port: 10250
+          podSecurityContext:
+            fsGroup: 10001
           securityContext:
             runAsNonRoot: true
             runAsUser: 10001
             runAsGroup: 10001
-            fsGroup: 10001
           containerSecurityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
@@ -52,11 +54,12 @@ spec:
               drop:
                 - ALL
         certController:
+          podSecurityContext:
+            fsGroup: 10001
           securityContext:
             runAsNonRoot: true
             runAsUser: 10001
             runAsGroup: 10001
-            fsGroup: 10001
           containerSecurityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
