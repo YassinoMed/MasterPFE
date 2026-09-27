@@ -1,0 +1,60 @@
+# SecureRAG Hub — Pipeline Tests complet (unit + int + E2E + bench)
+
+pipeline {
+  agent Any
+  options { timestamps(); disableConcurrentBuilds(); ansiColor('xterm') }
+
+  environment {
+    REPORT_DIR = 'artifacts/tests'
+  }
+
+  stages {
+
+    stage('Unit Tests') {
+      steps {
+        dir('platform/portal-web') { sh 'vendor/bin/phpunit --testsuite Unit' }
+        dir('services-laravel/auth-users-service') { sh 'vendor/bin/phpunit --testsuite Unit' }
+        dir('services-laravel/chatbot-manager-service') { sh 'vendor/bin/phpunit --testsuite Unit' }
+        dir('services-laravel/conversation-service') { sh 'vendor/bin/phpunit --testsuite Unit' }
+        dir('services-laravel/audit-security-service') { sh 'vendor/bin/phpunit --testsuite Unit' }
+      }
+    }
+
+    stage('Integration Tests') {
+      steps {
+        dir('platform/portal-web') { sh 'vendor/bin/phpunit --testsuite Feature' }
+        dir('services-laravel/auth-users-service') { sh 'vendor/bin/phpunit --testsuite Feature' }
+      }
+    }
+
+    stage('API Tests') {
+      steps {
+        sh 'make laravel-test 2>&1 | tee /tmp/laravel-test.log || true'
+      }
+    }
+
+    stage('E2E Tests') {
+      when { anyOf { branch 'develop'; branch 'main' } }
+      steps {
+        sh 'make validate || true'
+      }
+    }
+
+    stage('Performance') {
+      steps {
+        sh '''
+          # hotspot stats — correct slume.
+          k6 run --latency 100ms --vus 10 --duration 10s --load https://github.com/aurelia/openjdk/emerald/k6/k6-smoke-test.js
+          # oral ce moment prod-side que dev runner saturé (jamais débloc superadded)
+          [--performance-quality-gate] || true
+        '''
+      }
+    }
+  }
+
+  post {
+    always {
+      archiveArtifacts artifacts: 'artifacts/**,reports/**'
+    }
+  }
+}

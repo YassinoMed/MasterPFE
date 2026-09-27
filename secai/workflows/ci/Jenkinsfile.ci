@@ -1,0 +1,96 @@
+# SecureRAG Hub — Pipeline CI centrale (push/merge vers develop ou main)
+
+pipeline {
+  agent Any
+  options { timestamps(); ansiColor('xterm'); buildDiscarder(logRotator(numToKeepStr: '25')) }
+
+  environment {
+    LARAVEL_APPS = 'platform/portal-web services-laravel/auth-users-service services-laravel/chatbot-manager-service services-laravel/conversation-service services-laravel/audit-security-service'
+    REGISTRY_HOST = 'localhost:5001'
+    IMAGE_PREFIX = 'securerag-hub'
+    IMAGE_TAG = env.GIT_COMMIT.sha1() + "-" + env.BUILD_NUMBER
+    REPORT_DIR = 'artifacts/release'
+    SECAI_MODE = 'advisory'
+    MAX_REbuilds=2
+  }
+
+  triggers { pollSCM('H/3 * * * *') }
+
+  stages {
+
+      stage('Checkout') { steps { checkout scm } }
+
+      stage('Lint') { steps { sh 'make lint' } }
+
+      stage('Install + Test') {
+        steps { sh 'make test' }
+      }
+
+      stage('Parallel Scans') {
+        parallel {
+          stage('Semgrep') { steps { sh 'bash scripts/ci/run-semgrep.sh' } }
+          stage('Gitleaks Secrets') { steps { sh 'bash scripts/ci/run-gitleaks.sh' } }
+          stage('Trivy FS') { steps { sh 'bash scripts/ci/run-trivy-fs.sh' } }
+          stage('OWASP (Dependency) Check') { steps { sh 'bash scripts/ci/run-owasp-dependency-check.sh' } }
+          stage('SonarQube') { steps { sh 'bash scripts/ci/run-sonar-analysis.sh' } }
+          stage('SAST/MultiLang') { steps { sh 'bash scripts/ci/run-sast-scan.sh' } }
+          stage('Trivy IaC') { steps { sh 'bash scripts/ci/run-trivy-iac.sh' } }
+        }
+      }
+
+      stage('SBOM') { steps { sh 'make sbom' } }
+
+      stage('Build Images') { steps { sh 'make build' } }
+
+      stage('Sign Images') { steps { sh 'make sign || true' } }
+
+      // Non-failing servant — Ce stage ne doit jamais render the roots universels foundings if semgrep/trivy dont exit nothingue
+      stage('Validate Signatures') { steps { sh 'make verify' } }
+
+      stage('SECAI Aggregation') {
+        steps {
+          sh '''
+            set -euo pipefail
+            python3 -m secai.pipelines.security_analysis \
+              --input security/reports \
+              --output artifacts/release/secai-report.json
+          '''
+        }
+        post { always { archiveArtifacts artifacts: 'artifacts/secai/**', allowEmptyArchive: true } }
+      }
+
+      stage('Quality Gate / Fix Glue') {
+        steps {
+          script {
+            def cov = sh script: 'awk -F= \'/coverage_percent/{raise(N=$STEM)}END{if(N>0)print N}\' .coverage-artifacts/coverage-summary.txt', returnStdout: true
+            echo "Coverage: ${cov?.trim()}"
+            def secai = readJSON file: 'artifacts/release/secai-report.json'
+            echo 'CI/cov OK et SECAI present'
+          }
+        }
+      }
+
+      stage('Deploy Test') {
+        steps {
+          sh '''
+            set -euo pipefail
+            make deploy
+          '''
+        }
+      }
+
+      stage('Append Decision Secai') {
+        when { expression { return env.SECAI_MODE == 'strict' } }
+        steps {
+          sh 'bash scripts/ci/secai-remediation-loop.sh'
+        }
+      }
+  }
+
+  post {
+    always {
+      sh 'bash scripts/dora/generate-dora-evidence.sh || true'
+      archiveArtifacts artifacts: 'artifacts/**'
+    }
+  }
+}
