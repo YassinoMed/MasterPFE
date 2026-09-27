@@ -1,0 +1,9 @@
+NAME                                   ADMISSION   BACKGROUND   READY   AGE   FAILURE POLICY   VALIDATE   MUTATE   GENERATE   VERIFY IMAGES   MESSAGE
+securerag-audit-cleartext-env-values   true        true         True    42h                    1          0        0          0               Ready
+securerag-disallow-host-network        true        true         True    42h                    1          0        0          0               Ready
+securerag-disallow-root-containers     true        true         True    42h                    1          0        0          0               Ready
+securerag-require-workload-controls    true        true         True    42h                    2          0        0          0               Ready
+securerag-restrict-image-references    true        true         True    42h                    4          0        0          0               Ready
+securerag-restrict-service-exposure    true        true         True    27h                    1          0        0          0               Ready
+securerag-restrict-volume-types        true        true         True    42h                    1          0        0          0               Ready
+securerag-verify-cosign-images         true        false        True    42h                    0          0        0          1               Ready

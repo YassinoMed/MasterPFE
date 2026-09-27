@@ -1,0 +1,30 @@
+398bb3e4 docs: récapitulatif des phases — réalisées / partielles / non encore faites
+fdfaed5f feat(gitops): Phase 18 — Git generator remplace la liste statique
+538cf722 feat(finops+kyverno): FinOps coût réel par namespace + doc migration CEL
+0c1ee083 feat(notifications): souscriptions ArgoCD Notifications sur tous les envs + doc webhook
+4e20d7ef feat(dora): métriques DORA réelles mesurées + rapport + dashboard Grafana
+99e9813b feat(dr): velero-restore-test.sh — test automatisé de restauration
+51d0afbd feat(security): detection drill automatisé — preuve que Falco détecte → Sidekick relais → Talon reçoit
+d20f99dd feat(supply-chain): Jenkinsfile complet avec SBOM CycloneDX + Cosign Sign + SLSA Provenance + Quality Gate
+26c96a26 feat(vault): application rewrittten from scratch — Raft 1 replica, dataStorage 10Gi, auditStorage 1Gi, tolerations control-plane
+4e025636 fix(vault): retirer l'affinity:{} — anti-affinity du chart + control-plane détainté permet la HA
+43a48a2a fix(vault): anti-affinity 'preferred' (soft) au lieu de 'required' — permet au 3ᵉ replica de cohabiter sur le worker pour la démo
+a164475c fix(vault): affinity:{} au lieu de null pour supprimer le podAntiAffinity obligatoire du chart
+4463f3f6 fix(vault): anti-affinity souple + tolerations bien placées dans le chart
+604678a4 fix(vault): tolerations control-plane pour que les 3 réplicas soient schedulables
+f55c7070 feat(vault): passage en production — Raft + HA(3) + persistance + audit
+d9ed7ecf fix(trivy): ignore ClusterComplianceReport (contenu généré par l'opérateur, pas par le chart)
+fc574802 fix(project): whitelist CRD aquasecurity.github.io (ClusterComplianceReport + rapports cluster-wide trivy) (27026)
+2af73695 feat(security): deploy trivy-operator via ArgoCD — scan continu vulnérabilités (Phase 2)
+f28734e0 docs(phase0): relocation des livrables audit dans docs/ pour archivage GitOps
+9b7ae693 docs(phase1): stabilisation kustomize — audit complet, aucune modification nécessaire
+55db70a5 fix(kyverno-policies): jsonPointers positionnels pour les champs runtime (allowExistingViolations, generate, skipBackgroundRequests)
+6cb4fe55 fix(netpol): postgres-auth-policy ciblait cnpg.io/cluster (stale CNPG) — les pods Deployment n'ont pas ce label → la policy ne s'appliquait à RIEN → deny-all bloquait tout l'ingress postgres (auth-users→DB timeout)
+8c519ef3 fix(kyverno-policies): ignorer allowExistingViolations (champ runtime live-only non déclaré au CRD)
+02cc8b0e fix(ingress): backend portal-web sur le port 8000 (le service n'expose pas 80)
+4c7a45fb fix(pki): IngressClass en clusterResourceWhitelist (cluster-scoped)
+9231d5a5 fix(pki): repo ingress-nginx dans sourceRepos + chart 4.15.1 (4.12.1 non vérifié)
+47d5c284 fix(kustomization): ligne application-ingress-nginx dupliquée par sed
+1a546c00 fix+feat: doublon wave appset, whitelist ClusterIssuer, app pki (issuer self-signed)
+b78bb1cd feat(security): Ingress-nginx + TLS cert-manager sur le portail CIN
+ffab6768 fix(eso): fsGroup dans podSecurityContext (champ invalide en securityContext conteneur)

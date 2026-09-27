@@ -1,0 +1,18 @@
+Key                     Value
+---                     -----
+Seal Type               shamir
+Initialized             true
+Sealed                  false
+Total Shares            5
+Threshold               3
+Version                 1.18.1
+Build Date              2024-10-29T14:21:31Z
+Storage Type            raft
+Cluster Name            vault-cluster-6e045b60
+Cluster ID              5da62238-013c-e2a5-9e93-03b16192a88e
+HA Enabled              true
+HA Cluster              https://securerag-vault-0.securerag-vault-internal:8201
+HA Mode                 active
+Active Since            2026-09-27T03:52:35.209531463Z
+Raft Committed Index    4585
+Raft Applied Index      4585

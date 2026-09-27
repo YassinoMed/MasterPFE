@@ -1,0 +1,4 @@
+Deployment Frequency: 28 apps
+Synced: 26
+Failed: 2
+Git commits 24h: 37

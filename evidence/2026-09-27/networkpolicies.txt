@@ -1,0 +1,128 @@
+NAMESPACE              NAME                                              POD-SELECTOR                                                                                                    AGE
+argocd                 argocd-application-controller-network-policy      app.kubernetes.io/name=argocd-application-controller                                                            5d20h
+argocd                 argocd-applicationset-controller-network-policy   app.kubernetes.io/name=argocd-applicationset-controller                                                         5d20h
+argocd                 argocd-dex-server-network-policy                  app.kubernetes.io/name=argocd-dex-server                                                                        5d20h
+argocd                 argocd-notifications-controller-network-policy    app.kubernetes.io/name=argocd-notifications-controller                                                          5d20h
+argocd                 argocd-redis-network-policy                       app.kubernetes.io/name=argocd-redis                                                                             5d20h
+argocd                 argocd-repo-server-network-policy                 app.kubernetes.io/name=argocd-repo-server                                                                       5d20h
+argocd                 argocd-server-network-policy                      app.kubernetes.io/name=argocd-server                                                                            5d20h
+default                allow-internal-dns                                <none>                                                                                                          2d2h
+default                deny-all-ingress                                  <none>                                                                                                          2d2h
+default                portal-web-policy                                 app.kubernetes.io/name=portal-web                                                                               4d16h
+securerag-backup       allow-backup-egress                               <none>                                                                                                          2d22h
+securerag-backup       default-deny                                      <none>                                                                                                          2d22h
+securerag-dev          allow-dns                                         <none>                                                                                                          2d2h
+securerag-dev          allow-dns-egress                                  <none>                                                                                                          43h
+securerag-dev          allow-internal-dns                                <none>                                                                                                          43h
+securerag-dev          allow-otel-egress                                 app.kubernetes.io/name in (audit-security-service,auth-users,chatbot-manager,conversation-service,portal-web)   43h
+securerag-dev          allow-prometheus-scraping                         app.kubernetes.io/name in (audit-security-service,auth-users,chatbot-manager,conversation-service,portal-web)   43h
+securerag-dev          allow-validation-egress                           app.kubernetes.io/part-of=securerag-hub,job-role=validation                                                     43h
+securerag-dev          allow-validation-ingress                          app.kubernetes.io/name in (audit-security-service,auth-users,chatbot-manager,conversation-service,portal-web)   43h
+securerag-dev          audit-security-service-network                    app.kubernetes.io/name=audit-security-service,app.kubernetes.io/part-of=securerag-hub                           43h
+securerag-dev          auth-users-policy                                 app.kubernetes.io/name=auth-users,app.kubernetes.io/part-of=securerag-hub                                       43h
+securerag-dev          chatbot-manager-policy                            app.kubernetes.io/name=chatbot-manager,app.kubernetes.io/part-of=securerag-hub                                  43h
+securerag-dev          conversation-service-network                      app.kubernetes.io/name=conversation-service,app.kubernetes.io/part-of=securerag-hub                             43h
+securerag-dev          default-deny-all                                  <none>                                                                                                          2d2h
+securerag-dev          deny-all-ingress                                  <none>                                                                                                          43h
+securerag-dev          portal-web-policy                                 app.kubernetes.io/name=portal-web,app.kubernetes.io/part-of=securerag-hub                                       43h
+securerag-dev          postgres-auth-policy                              app.kubernetes.io/name=postgres-auth,app.kubernetes.io/part-of=securerag-hub                                    43h
+securerag-hub-dr       allow-dns-egress                                  <none>                                                                                                          27h
+securerag-hub-dr       allow-otel-egress                                 app.kubernetes.io/name in (audit-security-service,auth-users,chatbot-manager,conversation-service,portal-web)   27h
+securerag-hub-dr       allow-prometheus-scraping                         app.kubernetes.io/name in (audit-security-service,auth-users,chatbot-manager,conversation-service,portal-web)   27h
+securerag-hub-dr       allow-validation-egress                           app.kubernetes.io/part-of=securerag-hub,job-role=validation                                                     27h
+securerag-hub-dr       allow-validation-ingress                          app.kubernetes.io/name in (audit-security-service,auth-users,chatbot-manager,conversation-service,portal-web)   27h
+securerag-hub-dr       audit-security-service-network                    app.kubernetes.io/name=audit-security-service,app.kubernetes.io/part-of=securerag-hub                           27h
+securerag-hub-dr       auth-users-policy                                 app.kubernetes.io/name=auth-users,app.kubernetes.io/part-of=securerag-hub                                       27h
+securerag-hub-dr       chatbot-manager-policy                            app.kubernetes.io/name=chatbot-manager,app.kubernetes.io/part-of=securerag-hub                                  27h
+securerag-hub-dr       conversation-service-network                      app.kubernetes.io/name=conversation-service,app.kubernetes.io/part-of=securerag-hub                             27h
+securerag-hub-dr       default-deny-all                                  <none>                                                                                                          27h
+securerag-hub-dr       portal-web-policy                                 app.kubernetes.io/name=portal-web,app.kubernetes.io/part-of=securerag-hub                                       27h
+securerag-hub-dr       postgres-auth-policy                              app.kubernetes.io/name=postgres-auth,app.kubernetes.io/part-of=securerag-hub                                    27h
+securerag-hub          allow-dns-egress                                  <none>                                                                                                          27h
+securerag-hub          allow-otel-egress                                 app.kubernetes.io/name in (audit-security-service,auth-users,chatbot-manager,conversation-service,portal-web)   27h
+securerag-hub          allow-prometheus-scraping                         app.kubernetes.io/name in (audit-security-service,auth-users,chatbot-manager,conversation-service,portal-web)   27h
+securerag-hub          allow-validation-egress                           app.kubernetes.io/part-of=securerag-hub,job-role=validation                                                     27h
+securerag-hub          allow-validation-ingress                          app.kubernetes.io/name in (audit-security-service,auth-users,chatbot-manager,conversation-service,portal-web)   27h
+securerag-hub          audit-security-service-network                    app.kubernetes.io/name=audit-security-service,app.kubernetes.io/part-of=securerag-hub                           27h
+securerag-hub          auth-users-policy                                 app.kubernetes.io/name=auth-users,app.kubernetes.io/part-of=securerag-hub                                       27h
+securerag-hub          chatbot-manager-policy                            app.kubernetes.io/name=chatbot-manager,app.kubernetes.io/part-of=securerag-hub                                  27h
+securerag-hub          conversation-service-network                      app.kubernetes.io/name=conversation-service,app.kubernetes.io/part-of=securerag-hub                             27h
+securerag-hub          default-deny-all                                  <none>                                                                                                          27h
+securerag-hub          portal-web-policy                                 app.kubernetes.io/name=portal-web,app.kubernetes.io/part-of=securerag-hub                                       27h
+securerag-hub          postgres-auth-policy                              app.kubernetes.io/name=postgres-auth,app.kubernetes.io/part-of=securerag-hub                                    27h
+securerag-hub          secai-netpol                                      app.kubernetes.io/name=secai                                                                                    26h
+securerag-monitoring   alertmanager-network-policy                       app.kubernetes.io/name=alertmanager                                                                             2d22h
+securerag-monitoring   allow-monitoring-internal                         <none>                                                                                                          2d22h
+securerag-monitoring   default-deny                                      <none>                                                                                                          2d22h
+securerag-preprod      allow-dns                                         <none>                                                                                                          2d2h
+securerag-preprod      allow-dns-egress                                  <none>                                                                                                          42h
+securerag-preprod      allow-internal-dns                                <none>                                                                                                          42h
+securerag-preprod      allow-otel-egress                                 app.kubernetes.io/name in (audit-security-service,auth-users,chatbot-manager,conversation-service,portal-web)   42h
+securerag-preprod      allow-prometheus-scraping                         app.kubernetes.io/name in (audit-security-service,auth-users,chatbot-manager,conversation-service,portal-web)   42h
+securerag-preprod      allow-validation-egress                           app.kubernetes.io/part-of=securerag-hub,job-role=validation                                                     42h
+securerag-preprod      allow-validation-ingress                          app.kubernetes.io/name in (audit-security-service,auth-users,chatbot-manager,conversation-service,portal-web)   42h
+securerag-preprod      audit-security-service-network                    app.kubernetes.io/name=audit-security-service,app.kubernetes.io/part-of=securerag-hub                           42h
+securerag-preprod      auth-users-policy                                 app.kubernetes.io/name=auth-users,app.kubernetes.io/part-of=securerag-hub                                       42h
+securerag-preprod      chatbot-manager-policy                            app.kubernetes.io/name=chatbot-manager,app.kubernetes.io/part-of=securerag-hub                                  42h
+securerag-preprod      conversation-service-network                      app.kubernetes.io/name=conversation-service,app.kubernetes.io/part-of=securerag-hub                             42h
+securerag-preprod      default-deny-all                                  <none>                                                                                                          2d2h
+securerag-preprod      deny-all-ingress                                  <none>                                                                                                          42h
+securerag-preprod      portal-web-policy                                 app.kubernetes.io/name=portal-web,app.kubernetes.io/part-of=securerag-hub                                       42h
+securerag-preprod      postgres-auth-policy                              app.kubernetes.io/name=postgres-auth,app.kubernetes.io/part-of=securerag-hub                                    42h
+securerag-prod         allow-dns                                         <none>                                                                                                          2d2h
+securerag-prod         allow-dns-egress                                  <none>                                                                                                          42h
+securerag-prod         allow-internal-dns                                <none>                                                                                                          42h
+securerag-prod         allow-otel-egress                                 app.kubernetes.io/name in (audit-security-service,auth-users,chatbot-manager,conversation-service,portal-web)   42h
+securerag-prod         allow-prometheus-scraping                         app.kubernetes.io/name in (audit-security-service,auth-users,chatbot-manager,conversation-service,portal-web)   42h
+securerag-prod         allow-validation-egress                           app.kubernetes.io/part-of=securerag-hub,job-role=validation                                                     42h
+securerag-prod         allow-validation-ingress                          app.kubernetes.io/name in (audit-security-service,auth-users,chatbot-manager,conversation-service,portal-web)   42h
+securerag-prod         audit-security-service-network                    app.kubernetes.io/name=audit-security-service,app.kubernetes.io/part-of=securerag-hub                           42h
+securerag-prod         auth-users-policy                                 app.kubernetes.io/name=auth-users,app.kubernetes.io/part-of=securerag-hub                                       42h
+securerag-prod         chatbot-manager-policy                            app.kubernetes.io/name=chatbot-manager,app.kubernetes.io/part-of=securerag-hub                                  42h
+securerag-prod         conversation-service-network                      app.kubernetes.io/name=conversation-service,app.kubernetes.io/part-of=securerag-hub                             42h
+securerag-prod         default-deny-all                                  <none>                                                                                                          2d2h
+securerag-prod         deny-all-ingress                                  <none>                                                                                                          42h
+securerag-prod         portal-web-policy                                 app.kubernetes.io/name=portal-web,app.kubernetes.io/part-of=securerag-hub                                       42h
+securerag-prod         postgres-auth-policy                              app.kubernetes.io/name=postgres-auth,app.kubernetes.io/part-of=securerag-hub                                    42h
+securerag-recette      allow-dns-egress                                  <none>                                                                                                          27h
+securerag-recette      allow-otel-egress                                 app.kubernetes.io/name in (audit-security-service,auth-users,chatbot-manager,conversation-service,portal-web)   27h
+securerag-recette      allow-prometheus-scraping                         app.kubernetes.io/name in (audit-security-service,auth-users,chatbot-manager,conversation-service,portal-web)   27h
+securerag-recette      allow-validation-egress                           app.kubernetes.io/part-of=securerag-hub,job-role=validation                                                     27h
+securerag-recette      allow-validation-ingress                          app.kubernetes.io/name in (audit-security-service,auth-users,chatbot-manager,conversation-service,portal-web)   27h
+securerag-recette      audit-security-service-network                    app.kubernetes.io/name=audit-security-service,app.kubernetes.io/part-of=securerag-hub                           27h
+securerag-recette      auth-users-policy                                 app.kubernetes.io/name=auth-users,app.kubernetes.io/part-of=securerag-hub                                       27h
+securerag-recette      chatbot-manager-policy                            app.kubernetes.io/name=chatbot-manager,app.kubernetes.io/part-of=securerag-hub                                  27h
+securerag-recette      conversation-service-network                      app.kubernetes.io/name=conversation-service,app.kubernetes.io/part-of=securerag-hub                             27h
+securerag-recette      default-deny-all                                  <none>                                                                                                          27h
+securerag-recette      portal-web-policy                                 app.kubernetes.io/name=portal-web,app.kubernetes.io/part-of=securerag-hub                                       27h
+securerag-recette      postgres-auth-policy                              app.kubernetes.io/name=postgres-auth,app.kubernetes.io/part-of=securerag-hub                                    27h
+securerag-staging      allow-dns                                         <none>                                                                                                          2d2h
+securerag-staging      allow-dns-egress                                  <none>                                                                                                          42h
+securerag-staging      allow-internal-dns                                <none>                                                                                                          42h
+securerag-staging      allow-otel-egress                                 app.kubernetes.io/name in (audit-security-service,auth-users,chatbot-manager,conversation-service,portal-web)   42h
+securerag-staging      allow-prometheus-scraping                         app.kubernetes.io/name in (audit-security-service,auth-users,chatbot-manager,conversation-service,portal-web)   42h
+securerag-staging      allow-validation-egress                           app.kubernetes.io/part-of=securerag-hub,job-role=validation                                                     42h
+securerag-staging      allow-validation-ingress                          app.kubernetes.io/name in (audit-security-service,auth-users,chatbot-manager,conversation-service,portal-web)   42h
+securerag-staging      audit-security-service-network                    app.kubernetes.io/name=audit-security-service,app.kubernetes.io/part-of=securerag-hub                           42h
+securerag-staging      auth-users-policy                                 app.kubernetes.io/name=auth-users,app.kubernetes.io/part-of=securerag-hub                                       42h
+securerag-staging      chatbot-manager-policy                            app.kubernetes.io/name=chatbot-manager,app.kubernetes.io/part-of=securerag-hub                                  42h
+securerag-staging      conversation-service-network                      app.kubernetes.io/name=conversation-service,app.kubernetes.io/part-of=securerag-hub                             42h
+securerag-staging      default-deny-all                                  <none>                                                                                                          2d2h
+securerag-staging      deny-all-ingress                                  <none>                                                                                                          42h
+securerag-staging      portal-web-policy                                 app.kubernetes.io/name=portal-web,app.kubernetes.io/part-of=securerag-hub                                       42h
+securerag-staging      postgres-auth-policy                              app.kubernetes.io/name=postgres-auth,app.kubernetes.io/part-of=securerag-hub                                    42h
+securerag-test         allow-dns                                         <none>                                                                                                          2d2h
+securerag-test         allow-dns-egress                                  <none>                                                                                                          42h
+securerag-test         allow-internal-dns                                <none>                                                                                                          42h
+securerag-test         allow-otel-egress                                 app.kubernetes.io/name in (audit-security-service,auth-users,chatbot-manager,conversation-service,portal-web)   42h
+securerag-test         allow-prometheus-scraping                         app.kubernetes.io/name in (audit-security-service,auth-users,chatbot-manager,conversation-service,portal-web)   42h
+securerag-test         allow-validation-egress                           app.kubernetes.io/part-of=securerag-hub,job-role=validation                                                     42h
+securerag-test         allow-validation-ingress                          app.kubernetes.io/name in (audit-security-service,auth-users,chatbot-manager,conversation-service,portal-web)   42h
+securerag-test         audit-security-service-network                    app.kubernetes.io/name=audit-security-service,app.kubernetes.io/part-of=securerag-hub                           42h
+securerag-test         auth-users-policy                                 app.kubernetes.io/name=auth-users,app.kubernetes.io/part-of=securerag-hub                                       42h
+securerag-test         chatbot-manager-policy                            app.kubernetes.io/name=chatbot-manager,app.kubernetes.io/part-of=securerag-hub                                  42h
+securerag-test         conversation-service-network                      app.kubernetes.io/name=conversation-service,app.kubernetes.io/part-of=securerag-hub                             42h
+securerag-test         default-deny-all                                  <none>                                                                                                          2d2h
+securerag-test         deny-all-ingress                                  <none>                                                                                                          42h
+securerag-test         portal-web-policy                                 app.kubernetes.io/name=portal-web,app.kubernetes.io/part-of=securerag-hub                                       42h
+securerag-test         postgres-auth-policy                              app.kubernetes.io/name=postgres-auth,app.kubernetes.io/part-of=securerag-hub                                    42h
