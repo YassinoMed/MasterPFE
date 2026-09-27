@@ -37,7 +37,7 @@ spec:
       serviceAccountName: spire-server
       containers:
         - name: spire-server
-          image: ghcr.io/spiffe/spire-server:1.8.2
+          image: kind-registry.registry.svc.cluster.local:5001/spire-server:1.8.2
           args:
             - "-config"
             - "/run/spire/config/server.conf"
@@ -47,7 +47,7 @@ spec:
             - { name: spire-config, mountPath: /run/spire/config, readOnly: true }
             - { name: spire-data, mountPath: /run/spire/data }
         - name: spire-controller-manager
-          image: ghcr.io/spiffe/spire-controller-manager:0.4.0
+          image: kind-registry.registry.svc.cluster.local:5001/spire-controller-manager:0.4.0
           args:
             - "--config"
             - "/run/spire/config/controller-manager.conf"
@@ -83,7 +83,7 @@ spec:
       serviceAccountName: spire-agent
       containers:
         - name: spire-agent
-          image: ghcr.io/spiffe/spire-agent:1.8.2
+          image: kind-registry.registry.svc.cluster.local:5001/spire-agent:1.8.2
           args: ["-config", "/run/spire/config/agent.conf"]
           volumeMounts:
             - { name: spire-config, mountPath: /run/spire/config, readOnly: true }
