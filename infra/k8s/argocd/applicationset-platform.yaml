@@ -1,6 +1,3 @@
-# ApplicationSet : génère les Applications de la plateforme transverse
-# (observabilité, backup, runtime-detection) à partir d'une matrice statique.
-# Permet d'ajouter/retirer un addon en éditant un seul fichier.
 apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
 metadata:
@@ -8,88 +5,89 @@ metadata:
   namespace: argocd
 spec:
   generators:
-    - list:
-        elements:
-          - name: observability
-            path: infra/k8s/observability
-            namespace: securerag-monitoring
-            wave: "30"
-          - name: otel
-            path: infra/k8s/otel
-            namespace: otel-system
-            wave: "31"
-          - name: backup
-            path: infra/k8s/backup
-            namespace: securerag-backup
-            wave: "40"
-          - name: runtime-detection
-            path: infra/k8s/runtime-detection
-            namespace: falco
-            wave: "4"
-          - name: kyverno
-            path: infra/k8s/addons/kyverno
-            namespace: kyverno
-            wave: "5"
-          - name: kyverno-policies
-            path: infra/k8s/policies/kyverno
-            namespace: kyverno
-            wave: "6"
-          - name: metrics-server
-            path: infra/k8s/addons/metrics-server
-            namespace: kube-system
-            wave: "10"
-          - name: secrets
-            path: infra/k8s/secrets
-            namespace: external-secrets
-            wave: "15"
+  - list:
+      elements:
+      - name: observability
+        namespace: securerag-monitoring
+        path: infra/k8s/observability
+        wave: '30'
+      - name: otel
+        namespace: otel-system
+        path: infra/k8s/otel
+        wave: '31'
+      - name: backup
+        namespace: securerag-backup
+        path: infra/k8s/backup
+        wave: '40'
+      - name: runtime-detection
+        namespace: falco
+        path: infra/k8s/runtime-detection
+        wave: '4'
+      - name: kyverno
+        namespace: kyverno
+        path: infra/k8s/addons/kyverno
+        wave: '5'
+      - name: kyverno-policies
+        namespace: kyverno
+        path: infra/k8s/policies/kyverno
+        wave: '6'
+      - name: metrics-server
+        namespace: kube-system
+        path: infra/k8s/addons/metrics-server
+        wave: '10'
+      - name: secrets
+        namespace: external-secrets
+        path: infra/k8s/secrets
+        wave: '15'
   template:
     metadata:
-      name: 'securerag-{{name}}'
       annotations:
         argocd.argoproj.io/sync-wave: '{{wave}}'
+        notifications.argoproj.io: on-deployed,on-health-degraded,on-sync-failed,on-out-of-sync
       finalizers:
-        - resources-finalizer.argocd.argoproj.io
+      - resources-finalizer.argocd.argoproj.io
+      name: securerag-{{name}}
     spec:
+      destination:
+        namespace: '{{namespace}}'
+        server: https://kubernetes.default.svc
+      ignoreDifferences:
+      - group: external-secrets.io
+        jqPathExpressions:
+        - .metadata.annotations["reconcile.external-secrets.io/data-hash"]
+        - .spec.target.creationPolicy
+        - .spec.target.deletionPolicy
+        - .spec.binding
+        - .spec.data[].remoteRef.conversionStrategy
+        - .spec.data[].remoteRef.decodingStrategy
+        - .spec.data[].remoteRef.metadataPolicy
+        - .spec.dataFrom[].extract.conversionStrategy
+        - .spec.dataFrom[].extract.decodingStrategy
+        - .spec.dataFrom[].extract.metadataPolicy
+        kind: ExternalSecret
+      - group: apps
+        jqPathExpressions:
+        - .spec.replicas
+        kind: Deployment
+      - group: kyverno.io
+        jsonPointers:
+        - /spec/rules/0/allowExistingViolations
+        - /spec/rules/0/generate
+        - /spec/rules/0/skipBackgroundRequests
+        - /spec/rules/1/allowExistingViolations
+        - /spec/rules/1/generate
+        - /spec/rules/1/skipBackgroundRequests
+        kind: ClusterPolicy
       project: securerag-hub
       source:
+        path: '{{path}}'
         repoURL: https://github.com/YassinoMed/MasterPFE.git
         targetRevision: main
-        path: '{{path}}'
-      destination:
-        server: https://kubernetes.default.svc
-        namespace: '{{namespace}}'
-      ignoreDifferences:
-        - group: external-secrets.io
-          kind: ExternalSecret
-          jqPathExpressions:
-            - '.metadata.annotations["reconcile.external-secrets.io/data-hash"]'
-            - '.spec.target.creationPolicy'
-            - '.spec.target.deletionPolicy'
-            - '.spec.binding'
-            - '.spec.data[].remoteRef.conversionStrategy'
-            - '.spec.data[].remoteRef.decodingStrategy'
-            - '.spec.data[].remoteRef.metadataPolicy'
-            - '.spec.dataFrom[].extract.conversionStrategy'
-            - '.spec.dataFrom[].extract.decodingStrategy'
-            - '.spec.dataFrom[].extract.metadataPolicy'
-        - group: apps
-          kind: Deployment
-          jqPathExpressions:
-            - '.spec.replicas'
-        - group: kyverno.io
-          kind: ClusterPolicy
-          jsonPointers:
-            - /spec/rules/0/allowExistingViolations
-            - /spec/rules/0/generate
-            - /spec/rules/0/skipBackgroundRequests
-            - /spec/rules/1/allowExistingViolations
-            - /spec/rules/1/generate
-            - /spec/rules/1/skipBackgroundRequests
       syncPolicy:
         automated:
           prune: true
           selfHeal: true
         syncOptions:
-          - CreateNamespace=true
-          - ApplyOutOfSyncOnly=true
-          - ServerSideApply=true
+        - CreateNamespace=true
+        - ApplyOutOfSyncOnly=true
+        - ServerSideApply=true

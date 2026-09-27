@@ -1,93 +1,94 @@
 apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
 metadata:
+  labels:
+    app.kubernetes.io/managed-by: argocd
+    app.kubernetes.io/part-of: securerag-hub
   name: securerag-all-services
   namespace: argocd
-  labels:
-    app.kubernetes.io/part-of: securerag-hub
-    app.kubernetes.io/managed-by: argocd
 spec:
   generators:
-    - list:
-        elements:
-          - env: dev
-            path: infra/k8s/overlays/dev
-            namespace: securerag-dev
-            wave: "10"
-          - env: test
-            path: infra/k8s/overlays/test
-            namespace: securerag-test
-            wave: "12"
-          - env: demo
-            path: infra/k8s/overlays/demo
-            namespace: securerag-hub
-            wave: "10"
-          - env: recette
-            path: infra/k8s/overlays/recette
-            namespace: securerag-recette
-            wave: "15"
-          - env: staging
-            path: infra/k8s/overlays/staging
-            namespace: securerag-staging
-            wave: "25"
-          - env: preprod
-            path: infra/k8s/overlays/preprod
-            namespace: securerag-preprod
-            wave: "28"
-          - env: production
-            path: infra/k8s/overlays/production
-            namespace: securerag-prod
-            wave: "30"
-          - env: dr
-            path: infra/k8s/overlays/dr
-            namespace: securerag-dr
-            wave: "35"
+  - list:
+      elements:
+      - env: dev
+        namespace: securerag-dev
+        path: infra/k8s/overlays/dev
+        wave: '10'
+      - env: test
+        namespace: securerag-test
+        path: infra/k8s/overlays/test
+        wave: '12'
+      - env: demo
+        namespace: securerag-hub
+        path: infra/k8s/overlays/demo
+        wave: '10'
+      - env: recette
+        namespace: securerag-recette
+        path: infra/k8s/overlays/recette
+        wave: '15'
+      - env: staging
+        namespace: securerag-staging
+        path: infra/k8s/overlays/staging
+        wave: '25'
+      - env: preprod
+        namespace: securerag-preprod
+        path: infra/k8s/overlays/preprod
+        wave: '28'
+      - env: production
+        namespace: securerag-prod
+        path: infra/k8s/overlays/production
+        wave: '30'
+      - env: dr
+        namespace: securerag-dr
+        path: infra/k8s/overlays/dr
+        wave: '35'
   template:
     metadata:
-      name: 'securerag-{{env}}'
       annotations:
         argocd.argoproj.io/sync-wave: '{{wave}}'
+        notifications.argoproj.io: on-deployed,on-health-degraded,on-sync-failed,on-out-of-sync
       finalizers:
-        - resources-finalizer.argocd.argoproj.io
+      - resources-finalizer.argocd.argoproj.io
+      name: securerag-{{env}}
     spec:
+      destination:
+        namespace: '{{namespace}}'
+        server: https://kubernetes.default.svc
+      ignoreDifferences:
+      - group: external-secrets.io
+        jqPathExpressions:
+        - .metadata.annotations["reconcile.external-secrets.io/data-hash"]
+        - .spec.target.creationPolicy
+        - .spec.target.deletionPolicy
+        - .spec.binding
+        - .spec.data[].remoteRef.conversionStrategy
+        - .spec.data[].remoteRef.decodingStrategy
+        - .spec.data[].remoteRef.metadataPolicy
+        - .spec.dataFrom[].extract.conversionStrategy
+        - .spec.dataFrom[].extract.decodingStrategy
+        - .spec.dataFrom[].extract.metadataPolicy
+        kind: ExternalSecret
+      - group: apps
+        jqPathExpressions:
+        - .spec.replicas
+        kind: Deployment
       project: securerag-hub
+      revisionHistoryLimit: 10
       source:
+        path: '{{path}}'
         repoURL: https://github.com/YassinoMed/MasterPFE.git
         targetRevision: main
-        path: '{{path}}'
-      destination:
-        server: https://kubernetes.default.svc
-        namespace: '{{namespace}}'
-      ignoreDifferences:
-        - group: external-secrets.io
-          kind: ExternalSecret
-          jqPathExpressions:
-            - '.metadata.annotations["reconcile.external-secrets.io/data-hash"]'
-            - '.spec.target.creationPolicy'
-            - '.spec.target.deletionPolicy'
-            - '.spec.binding'
-            - '.spec.data[].remoteRef.conversionStrategy'
-            - '.spec.data[].remoteRef.decodingStrategy'
-            - '.spec.data[].remoteRef.metadataPolicy'
-            - '.spec.dataFrom[].extract.conversionStrategy'
-            - '.spec.dataFrom[].extract.decodingStrategy'
-            - '.spec.dataFrom[].extract.metadataPolicy'
-        - group: apps
-          kind: Deployment
-          jqPathExpressions:
-            - '.spec.replicas'
       syncPolicy:
         automated:
           prune: true
           selfHeal: true
-        syncOptions:
-          - CreateNamespace=true
-          - ApplyOutOfSyncOnly=true
-          - ServerSideApply=true
         retry:
-          limit: 5
           backoff:
             duration: 10s
             factor: 2
             maxDuration: 3m
-      revisionHistoryLimit: 10
+          limit: 5
+        syncOptions:
+        - CreateNamespace=true
+        - ApplyOutOfSyncOnly=true
+        - ServerSideApply=true
