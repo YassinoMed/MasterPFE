@@ -1,0 +1,24 @@
+# PolicyException — postgres-auth Service NodePort
+# Phase 15 : remplace l'allowlist hardcodée par une exception traçable.
+apiVersion: kyverno.io/v2
+kind: PolicyException
+metadata:
+  name: postgres-auth-nodeport-exception
+  namespace: securerag-hub
+  annotations:
+    securerag.dev/reason: "PostgreSQL accessible en NodePort pour la démo locale (CIN portal). En production : ClusterIP + Ingress uniquement."
+    securerag.dev/owner: "YassinoMed"
+    securerag.dev/created: "2026-09-27"
+    securerag.dev/expires: "2027-09-27"
+    securerag.dev/ticket: "PFE-2026-postgres-demo"
+spec:
+  exceptions:
+    - policyName: securerag-restrict-service-exposure
+      ruleNames:
+        - allow-nodeport-only-for-portal-web
+  match:
+    any:
+      - resources:
+          kinds: ["Service"]
+          names: ["postgres-auth"]
+          namespaces: ["securerag-hub"]
