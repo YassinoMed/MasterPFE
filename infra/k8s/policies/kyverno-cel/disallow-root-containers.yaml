@@ -1,0 +1,42 @@
+# ValidatingPolicy (CEL) — Migration de securerag-disallow-root-containers
+# Phase 14 : remplace progressivement les ClusterPolicy v1 (dépréciées).
+# 
+# Migration contrôlée :
+#   1. Déployer cette policy en audit (log)
+#   2. Vérifier qu'elle produit les mêmes résultats que la v1
+#   3. Passer en enforce
+#   4. Supprimer la ClusterPolicy v1 originale
+apiVersion: policies.kyverno.io/v1
+kind: ValidatingPolicy
+metadata:
+  name: securerag-cel-disallow-root-containers
+  annotations:
+    policies.kyverno.io/title: "Disallow Root Containers (CEL)"
+    policies.kyverno.io/category: "Pod Security"
+    policies.kyverno.io/severity: "high"
+    policies.kyverno.io/subject: "Pod"
+    securerag.dev/migrated-from: "securerag-disallow-root-containers"
+    securerag.dev/migration-date: "2026-09-27"
+spec:
+  evaluation:
+    background:
+      enabled: true
+  validationActions: []
+  # Actions: ["Deny"] pour enforce, [] pour audit-only
+  matchConstraints:
+    resourceRules:
+      - apiGroups: ["apps"]
+        apiVersions: ["v1"]
+        operations: ["CREATE", "UPDATE"]
+        resources: ["deployments", "statefulsets", "daemonsets"]
+      - apiGroups: [""]
+        apiVersions: ["v1"]
+        operations: ["CREATE", "UPDATE"]
+        resources: ["pods"]
+  validations:
+    - expression: >
+        object.spec.?template.?spec.?containers.orDie().all(c,
+          c.?securityContext.?runAsNonRoot.orValue(false) == true
+        )
+      message: "Containers must run as non-root (runAsNonRoot: true required)"
+      reason: "PodSecurityStandards"
