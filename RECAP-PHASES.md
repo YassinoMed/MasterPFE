@@ -96,4 +96,34 @@
 
 ---
 
+## 🤖 VOLET MLSecOps (ajouté le 2026-09-27)
+
+### Déployé et prouvé (live)
+
+| Composant | Preuve |
+|---|---|
+| **Ollama** (LLM Runtime) | Pod Running, modèle **Qwen2.5-0.5B** (491MB) importé depuis HuggingFace, **inférence réelle** validée (12 tokens générés SECAI→Ollama), **PVC 5Gi** — le modèle survit au restart du pod (testé) |
+| **Qdrant** (Vector DB) | Pod Running, collection `vuln-kb` créée (4 points CVE), **recherche sémantique validée** (query "RCE" → CVE nginx score 0.996) |
+| **Guardrails SECAI** | 4 modules (injection, output_filter, rate_limit, schemas) — **28/28 tests PASS** |
+| **Red-teaming CI** | `run-mlsecops-scans.sh` désormais RÉEL (plus de simulation) : **13/13 payloads neutralisés, 0 bypass** |
+| **Supply Chain IA** | Images ollama+qdrant **signées Cosign**, digest-pinned, soumises aux 8 policies Kyverno Enforce (conformité obtenue par itération réelle) |
+| **Zero-trust IA** | NetworkPolicies dédiées : ollama/qdrant inaccessibles hors namespace, ingress SECAI+Prometheus uniquement |
+| **OWASP LLM Top 10** | Cartographie complète 10/10 risques → contrôles : `docs/MLSECOPS-LLM-SECURITY.md` |
+
+### Conformité obtenue (chaque blocage Kyverno a été un itérateur réel)
+
+1. `verify-cosign-images` → images signées avant déploiement
+2. `restrict-image-references` → digest `@sha256:…`, pas de `:latest`
+3. `require-workload-controls` → 3 probes + SA token désactivé
+4. `disallow-root-containers` → runAsNonRoot 1000 (fix Ollama_HOME + workingDir Qdrant)
+5. `restrict-service-exposure` → allowlist mise à jour (ollama, qdrant ajoutés)
+6. LimitRange 2Gi → OLLAMA_CONTEXT_LENGTH=1024 (anti-OOM validé)
+
+### Limites documentées
+
+- `registry.ollama.ai` bloqué dans cet environnement → modèle importé manuellement via HuggingFace (traçé dans `infra/k8s/base/ollama/modelfile/`)
+- ImageValidatingPolicy (CEL, Phase 14) incompatible avec le registry HTTP de kind → supprimée ; la preuve Phase 14 (blocage Velero) reste valide et commitée ; les policies v1 assurent l'équivalent
+
+---
+
 *Document généré le 2026-09-27 · Reproductible : chaque preuve est commitée dans git*

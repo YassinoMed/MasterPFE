@@ -1,0 +1,102 @@
+# Qdrant — Vector Database (MLSecOps Phase: AI Runtime)
+# Conforme aux 8 policies Kyverno Enforce :
+#   - runAsNonRoot + capabilities drop + seccomp (disallow-root, workload-controls)
+#   - automountServiceAccountToken: false (workload-controls)
+#   - probes readiness/liveness/startup (workload-controls)
+#   - image digest-pinned + cosign signée (restrict-image-references, verify-cosign)
+#   - Service ClusterIP allowlisté (restrict-service-exposure)
+# Non-root : command absue /qdrant/qdrant + workingDir sur volume writable
+# (l'entrypoint.sh d'origine suppose workingDir=/qdrant root-owned)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: qdrant
+  namespace: securerag-hub
+  labels:
+    app.kubernetes.io/name: qdrant
+    app.kubernetes.io/part-of: securerag-hub
+    app.kubernetes.io/component: vector-db
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: qdrant
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: qdrant
+        app.kubernetes.io/part-of: securerag-hub
+        app.kubernetes.io/component: vector-db
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "6333"
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+      - name: qdrant
+        image: kind-registry.registry.svc.cluster.local:5001/qdrant@sha256:0699e7733a6fa7fa7f6b95dcbed84ebb04584110da525cdfdef9f305c4f57738
+        command: ["/qdrant/qdrant"]
+        workingDir: /qdrant/data
+        ports:
+        - containerPort: 6333
+          name: http
+        - containerPort: 6334
+          name: grpc
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop: [ALL]
+        resources:
+          requests:
+            cpu: 250m
+            memory: 512Mi
+          limits:
+            memory: 2Gi
+        readinessProbe:
+          httpGet:
+            path: /
+            port: http
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        livenessProbe:
+          httpGet:
+            path: /
+            port: http
+          initialDelaySeconds: 15
+          periodSeconds: 20
+        startupProbe:
+          httpGet:
+            path: /
+            port: http
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          failureThreshold: 30
+        volumeMounts:
+        - name: data
+          mountPath: /qdrant/data
+      volumes:
+      - name: data
+        emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: qdrant
+  namespace: securerag-hub
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: qdrant
+  ports:
+  - port: 6333
+    targetPort: http
+    name: http
+  - port: 6334
+    targetPort: grpc
+    name: grpc

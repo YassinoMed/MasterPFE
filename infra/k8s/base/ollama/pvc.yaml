@@ -1,10 +1,16 @@
+# PVC pour les modèles Ollama — survit aux restarts de pod
+# (kind provisionne automatiquement via local-path-provisioner)
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: ollama-models
+  namespace: securerag-hub
+  labels:
+    app.kubernetes.io/name: ollama
+    app.kubernetes.io/part-of: securerag-hub
 spec:
   accessModes:
-    - ReadWriteOnce
+  - ReadWriteOnce
   resources:
     requests:
-      storage: 20Gi
+      storage: 5Gi

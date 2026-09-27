@@ -1,0 +1,95 @@
+# NetworkPolicies zero-trust pour le stack IA (MLSecOps)
+# default-deny-all bloque tout : ces règles ouvrent le strict minimum
+#   - ollama : ingress depuis secai (11434) + Prometheus (monitoring ns)
+#   - qdrant : ingress depuis secai (6333/6334) + Prometheus
+#   - secai→ollama/qdrant : egress ajouté dans ce fichier (règle additionnelle)
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: ollama-netpol
+  namespace: securerag-hub
+  labels:
+    app.kubernetes.io/part-of: securerag-hub
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: ollama
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app.kubernetes.io/name: secai
+    ports:
+    - protocol: TCP
+      port: 11434
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: securerag-monitoring
+    ports:
+    - protocol: TCP
+      port: 11434
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: qdrant-netpol
+  namespace: securerag-hub
+  labels:
+    app.kubernetes.io/part-of: securerag-hub
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: qdrant
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app.kubernetes.io/name: secai
+    ports:
+    - protocol: TCP
+      port: 6333
+    - protocol: TCP
+      port: 6334
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: securerag-monitoring
+    ports:
+    - protocol: TCP
+      port: 6333
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: secai-egress-ai-stack
+  namespace: securerag-hub
+  labels:
+    app.kubernetes.io/part-of: securerag-hub
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: secai
+  policyTypes:
+  - Egress
+  egress:
+  - to:
+    - podSelector:
+        matchLabels:
+          app.kubernetes.io/name: ollama
+    ports:
+    - protocol: TCP
+      port: 11434
+  - to:
+    - podSelector:
+        matchLabels:
+          app.kubernetes.io/name: qdrant
+    ports:
+    - protocol: TCP
+      port: 6333
+    - protocol: TCP
+      port: 6334

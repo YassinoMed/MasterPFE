@@ -51,6 +51,8 @@ spec:
             - ClusterIP:audit-security-service
             - ClusterIP:postgres-auth
             - ClusterIP:secai
+            - ClusterIP:ollama
+            - ClusterIP:qdrant
     skipBackgroundRequests: true
   admission: true
   emitWarning: false

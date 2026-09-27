@@ -1,15 +1,17 @@
 {
-  "scanner": "garak-mlsecops-simulated",
+  "scanner": "secai-guardrails-redteam",
+  "mode": "live-guardrail-fuzzing",
+  "payloads_tested": 13,
+  "payloads_correctly_handled": 13,
+  "bypass_detected": 0,
+  "bypasses": [],
   "modules_tested": [
     "prompt_injection",
-    "hallucination",
-    "pii_leakage",
-    "jailbreak"
+    "jailbreak",
+    "system_prompt_leak",
+    "secret_leakage",
+    "pii_masking",
+    "destructive_output"
   ],
-  "status": "PASSED",
-  "critical_vulnerabilities": 0,
-  "recommendations": [
-    "Enforce Kyverno cosign verification",
-    "Apply NeMo Guardrails on LLM inputs"
-  ]
+  "status": "PASSED"
 }
