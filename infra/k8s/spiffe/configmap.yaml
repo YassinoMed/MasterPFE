@@ -37,8 +37,10 @@ data:
         }
       }
       
-      KeyManager "memory" {
-        plugin_data = {}
+      KeyManager "disk" {
+        plugin_data {
+          keys_path = "/run/spire/data/keys.json"
+        }
       }
       
       Notifier "k8sbundle" {
@@ -87,7 +89,7 @@ data:
         }
       }
       
-      KeyManager "memory" {
+      KeyManager "disk" {
         plugin_data {
         }
       }
