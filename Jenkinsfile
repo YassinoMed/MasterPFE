@@ -170,16 +170,21 @@ spec:
       }
     }
 
-    // ── 6. Quality Gate (agrégation des signaux) ─────────────
-    stage('Quality Gate') {
+    // ── 6. Quality Gate + Promotion Pipeline (Phase 19) ────────
+    stage('Quality Gate & Promotion') {
       steps {
         sh '''
           set -euo pipefail
-          echo "[GATE] Agrégation des signaux de qualité..."
+          echo "[GATE] Quality Gate (agrégation)..."
           bash scripts/ci/quality-gate.sh || {
             echo "[GATE] ÉCHEC — voir artifacts/security/quality-gate-summary.md"
             exit 1
           }
+
+          echo "[PROMOTE] Pipeline de promotion (8 gates)..."
+          bash scripts/ci/promotion-pipeline.sh dev production
+
+          echo "[PROMOTE] Result: promotion autorisée si tous les gates passent"
         '''
       }
     }
