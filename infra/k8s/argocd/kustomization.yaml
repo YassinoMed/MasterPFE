@@ -24,3 +24,4 @@ resources:
   - application-pki.yaml           # ClusterIssuer TLS
   - securerag-trivy-operator.yaml  # P2 : scan continu des vulns workloads
   - application-image-updater.yaml # Automatic image updates
+  - applicationset-dr-multicluster.yaml  # Phase 9 : DR multi-cluster

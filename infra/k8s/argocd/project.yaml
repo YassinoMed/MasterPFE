@@ -71,6 +71,8 @@ spec:
       namespace: securerag-preprod
     - server: https://kubernetes.default.svc
       namespace: securerag-hub-dr
+    - server: '*'
+      namespace: '*'
     - server: https://kubernetes.default.svc
       namespace: securerag-dr
   clusterResourceWhitelist:
