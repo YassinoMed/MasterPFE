@@ -11,8 +11,9 @@
 |---|---|---|
 | **Ollama** (`securerag-hub/ollama`) | Runtime LLM local (modèles open-source) | Pod Running, API `/api/tags` opérationnelle, modèle Qwen2.5-0.5B importé |
 | **Qdrant** (`securerag-hub/qdrant`) | Vector DB pour RAG sécuritaire | Pod Running, collection `vuln-kb`, recherche sémantique validée (score 0.996) |
+| **AI Gateway** (`ai-gateway-litellm`) | Proxy LiteLLM : auth master-key + API OpenAI-compatible devant Ollama | Pod Running, `/health/liveliness` 200, chat/completions routé vers qwen2.5-0.5b |
 | **SECAI** (`securerag-hub/secai`) | Service d'analyse sécurité IA (SecureBERT) | Pod Running, API `/health` + `/analyze` + 37 tests |
-| **Cosign** | Signature des images du stack IA | `ollama` + `qdrant` signés + policy `verify-cosign-images` Enforce |
+| **Cosign** | Signature des images du stack IA | `ollama` + `qdrant` + `litellm` signés + policy `verify-cosign-images` Enforce |
 | **Kyverno** | Admission control du stack IA | 8 policies Enforce validées sur les déploiements IA |
 
 ---
@@ -111,7 +112,9 @@
 | Contrôle | Implémentation | Preuve |
 |---|---|---|
 | Limites de ressources | Ollama : limits memory 2Gi, cpu requests 500m (LimitRange namespace = 2Gi max) | Deployment ollama |
-| Rate-limiting applicatif | Guardrails : token bucket par client sur l'API guardrails | `secai/guardrails/rate_limit.py` + test |
+| Auth obligatoire au gateway | Toute requête LLM passe par LiteLLM avec master key (Bearer) — sans clé → refus | Test live sans auth → REFUSÉ |
+| Bornes d'inférence | `max_tokens: 512` + `request_timeout: 150` au niveau gateway — chaque appel est borné | `litellm-nemo-config` ConfigMap |
+| Rate-limiting applicatif | Guardrails : token bucket par client sur l'API guardrails | `secai/guardrails/rate_limit.py` + 4 tests |
 | Max length input | `max_length: '1024'` tokens en ConfigMap | `secai-config` |
 | Local-only | Modèles en local : le coût par token est borné par le hardware, aucune facturation externe | Architecture locale |
 

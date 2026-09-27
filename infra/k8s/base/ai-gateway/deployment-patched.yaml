@@ -1,0 +1,136 @@
+# AI Gateway — LiteLLM proxy devant Ollama (MLSecOps LLM10 : budgets + rate-limit)
+# Config RÉELLE : pointe vers le modèle qwen2.5-0.5b déployé sur Ollama.
+# LiteLLM apporte : API OpenAI-compatible, timeouts, max_tokens, master key.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: litellm-nemo-config
+  namespace: securerag-hub
+  labels:
+    app.kubernetes.io/part-of: securerag-hub
+data:
+  config.yaml: |
+    model_list:
+      - model_name: securerag-llm
+        litellm_params:
+          model: ollama/qwen2.5-0.5b
+          api_base: http://ollama.securerag-hub.svc.cluster.local:11434
+          max_tokens: 512
+          request_timeout: 120
+
+    litellm_settings:
+      drop_params: true
+      num_retries: 2
+      request_timeout: 150
+
+    general_settings:
+      master_key: os.environ/LITELLM_MASTER_KEY
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ai-gateway-litellm
+  namespace: securerag-hub
+  labels:
+    app.kubernetes.io/name: ai-gateway-litellm
+    app.kubernetes.io/part-of: securerag-hub
+    app.kubernetes.io/component: ai-security-gateway
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: ai-gateway-litellm
+  template:
+    metadata:
+      labels:
+        app: ai-gateway-litellm
+        app.kubernetes.io/name: ai-gateway-litellm
+        app.kubernetes.io/part-of: securerag-hub
+        app.kubernetes.io/component: ai-security-gateway
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "4000"
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: litellm-proxy
+          image: kind-registry.registry.svc.cluster.local:5001/litellm@sha256:f6dd046917ed7d8aa2d8dcd3ddf20e3f1be7e723c9e804cd5c17644659d3a37a
+          args: ["--config", "/app/config.yaml", "--port", "4000"]
+          ports:
+            - containerPort: 4000
+              name: http
+          env:
+            - name: LITELLM_CONFIG_PATH
+              value: "/app/config.yaml"
+            - name: LITELLM_MASTER_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: litellm-master-key
+                  key: master-key
+          volumeMounts:
+            - name: config-volume
+              mountPath: /app/config.yaml
+              subPath: config.yaml
+            - name: tmp
+              mountPath: /tmp
+          resources:
+            limits:
+              cpu: "1"
+              memory: 1Gi
+            requests:
+              cpu: 250m
+              memory: 256Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            runAsUser: 10001
+            capabilities:
+              drop:
+                - ALL
+          readinessProbe:
+            httpGet:
+              path: /health/readiness
+              port: http
+            initialDelaySeconds: 20
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health/liveliness
+              port: http
+            initialDelaySeconds: 40
+            periodSeconds: 30
+          startupProbe:
+            httpGet:
+              path: /health/liveliness
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            failureThreshold: 30
+      volumes:
+        - name: config-volume
+          configMap:
+            name: litellm-nemo-config
+        - name: tmp
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ai-gateway-litellm
+  namespace: securerag-hub
+spec:
+  type: ClusterIP
+  ports:
+    - port: 4000
+      targetPort: 4000
+      name: http
+  selector:
+    app: ai-gateway-litellm

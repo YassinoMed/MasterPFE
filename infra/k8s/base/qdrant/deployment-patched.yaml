@@ -18,6 +18,8 @@ metadata:
     app.kubernetes.io/component: vector-db
 spec:
   replicas: 1
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
       app.kubernetes.io/name: qdrant
@@ -54,10 +56,10 @@ spec:
             drop: [ALL]
         resources:
           requests:
-            cpu: 250m
-            memory: 512Mi
+            cpu: 100m
+            memory: 256Mi
           limits:
-            memory: 2Gi
+            memory: 512Mi
         readinessProbe:
           httpGet:
             path: /

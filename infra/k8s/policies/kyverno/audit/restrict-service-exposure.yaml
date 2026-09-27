@@ -52,6 +52,7 @@ spec:
             - ClusterIP:postgres-auth
             - ClusterIP:secai
             - ClusterIP:ollama
+            - ClusterIP:ai-gateway-litellm
             - ClusterIP:qdrant
     skipBackgroundRequests: true
   admission: true

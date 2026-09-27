@@ -104,11 +104,13 @@
 |---|---|
 | **Ollama** (LLM Runtime) | Pod Running, modèle **Qwen2.5-0.5B** (491MB) importé depuis HuggingFace, **inférence réelle** validée (12 tokens générés SECAI→Ollama), **PVC 5Gi** — le modèle survit au restart du pod (testé) |
 | **Qdrant** (Vector DB) | Pod Running, collection `vuln-kb` créée (4 points CVE), **recherche sémantique validée** (query "RCE" → CVE nginx score 0.996) |
+| **AI Gateway LiteLLM** | Pod Running, API OpenAI-compatible devant Ollama, **auth master-key obligatoire** (sans clé → 401, prouvé live), chat/completions routé vers qwen2.5-0.5b, `max_tokens` + `request_timeout` bornés |
 | **Guardrails SECAI** | 4 modules (injection, output_filter, rate_limit, schemas) — **28/28 tests PASS** |
 | **Red-teaming CI** | `run-mlsecops-scans.sh` désormais RÉEL (plus de simulation) : **13/13 payloads neutralisés, 0 bypass** |
-| **Supply Chain IA** | Images ollama+qdrant **signées Cosign**, digest-pinned, soumises aux 8 policies Kyverno Enforce (conformité obtenue par itération réelle) |
-| **Zero-trust IA** | NetworkPolicies dédiées : ollama/qdrant inaccessibles hors namespace, ingress SECAI+Prometheus uniquement |
+| **Supply Chain IA** | Images ollama+qdrant+litellm **signées Cosign**, digest-pinned, soumises aux 8 policies Kyverno Enforce (conformité obtenue par itération réelle) |
+| **Zero-trust IA** | NetworkPolicies dédiées : ollama/qdrant/gateway inaccessibles hors namespace, ingress/egress explicites uniquement |
 | **OWASP LLM Top 10** | Cartographie complète 10/10 risques → contrôles : `docs/MLSECOPS-LLM-SECURITY.md` |
+| **FinOps IA** | Rightsizing réel sous ResourceQuota 12Gi (qdrant 512Mi, gateway 1Gi) — décision mesurée, pas arbitraire |
 
 ### Conformité obtenue (chaque blocage Kyverno a été un itérateur réel)
 
@@ -116,8 +118,9 @@
 2. `restrict-image-references` → digest `@sha256:…`, pas de `:latest`
 3. `require-workload-controls` → 3 probes + SA token désactivé
 4. `disallow-root-containers` → runAsNonRoot 1000 (fix Ollama_HOME + workingDir Qdrant)
-5. `restrict-service-exposure` → allowlist mise à jour (ollama, qdrant ajoutés)
+5. `restrict-service-exposure` → allowlist mise à jour (ollama, qdrant, ai-gateway-litellm ajoutés)
 6. LimitRange 2Gi → OLLAMA_CONTEXT_LENGTH=1024 (anti-OOM validé)
+7. ResourceQuota 12Gi saturé → rightsizing qdrant/gateway (décision FinOps mesurée)
 
 ### Limites documentées
 

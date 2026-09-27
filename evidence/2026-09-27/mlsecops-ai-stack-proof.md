@@ -1,31 +1,55 @@
-# MLSecOps — Preuves Stack IA (généré le 2026-09-27 22:44)
+# MLSecOps — Preuves Stack IA COMPLET (généré le 2026-09-27 23:25)
 
-## 1. Ollama — Runtime LLM
+## Test final : 12/12 PASS — bash scripts/security/test-ai-stack-final.sh
 ```
-ollama-d9c68bb77-tjnq9   1/1     Running   0          6m26s   10.244.0.10   securerag-dev-control-plane   <none>           <none>
-ollama-models   Bound    pvc-0853c726-efd2-4082-bc00-4cde417b4213   5Gi        RWO            standard       <unset>                 10m
---- Modèles persistés (après restart du pod) ---
-NAME                   ID              SIZE      MODIFIED      
-qwen2.5-0.5b:latest    061603a438cb    491 MB    7 minutes ago    
-```
+═══ STACK IA MLSecOps — TEST FINAL ═══
 
-## 2. Qdrant — Vector DB + RAG
-```
-Collection vuln-kb: {"status": "green", "optimizer_status": "ok", "indexed_vectors_count": 0, "points_count": 4, "segments_count": 2, "config": {"params": {"vectors": {"size": 4, "distance": "Cosine"}, "shard_number": 1, "replication_factor": 1, "write_consistency_factor": 1, "on_disk_payload": true}, "hnsw_config": {"m": 16, "ef_construct": 100, "full_scan_threshold": 10000, "max_indexing_threads": 0, "on_disk": false}, "optimizer_config": {"deleted_threshold": 0.2, "vacuum_min_vector_number": 1000, "default_segment_number": 0, "max_segment_size": null, "memmap_threshold": null, "indexing_threshold": 10000, "flush_interval_sec": 5, "max_optimization_threads": null, "prevent_unoptimized": null}, "wal_config": {"wal_capacity_mb": 32, "wal_segments_ahead": 0, "wal_retain_closed": 1}, "quantization_config": null}, "payload_schema": {}, "update_queue": {"length": 0}}
-```
+  PASS  Pod ollama Running
+  PASS  Pod qdrant Running
+  PASS  Pod gateway Running
 
-## 3. Signature Cosign des images IA
-```
+  PASS  Modèle qwen2.5-0.5b persisté (PVC)
+  PASS  Gateway refuse sans auth (401)
+  PASS  Chat completions via gateway (→ ollama)
+    Réponse: Bonjour!
+  PASS  RAG : recherche sémantique → CVE-2024-1234
+  PASS  Guardrails: 28 passed tests pass
+  PASS  Red-teaming réel: 13/13 payloads neutralisés
+  PASS  Cosign: ollama signée
+  PASS  Cosign: qdrant signée
+  PASS  Cosign: litellm signée
 
-[{"critical":{"identity":{"docker-reference":"localhost:5001/ollama@sha256:4be1eaabf0dd0152bfbb780347e2888b5fe86ec25d0faa3eb4b1a956173736fb"},"image":{"docker-manifest-digest":"sha256:4be1eaabf0dd0152bfbb780347e2888b5fe86ec25d0faa3eb4b1a956173736fb"},"type":"https://sigstore.dev/cosign/sign/v1"},"optional":{}}]
-```
-
-## 4. Guardrails — 28/28 tests PASS
-```
-28 passed in 0.20s
+═══ RÉSULTAT: 12 PASS / 12 ═══
+  ✅ STACK IA MLSSECOPS 100% OPÉRATIONNEL
 ```
 
-## 5. Suite SECAI complète (non-régression)
+## Architecture IA déployée
 ```
-52 passed in 0.34s
+  Client (SECAI) ──> AI Gateway LiteLLM (auth Bearer, max_tokens, timeout)
+                          │
+                          v
+                    Ollama (qwen2.5-0.5b, PVC 5Gi persistant)
+                          +
+                    Qdrant (collection vuln-kb, RAG sémantique)
 ```
+
+## Pods (live)
+```
+ai-gateway-litellm-cf76ff9cd-h9n6m Running 0
+ollama-d9c68bb77-tjnq9 Running 0
+qdrant-7b94546868-ccsrs Running 0
+secai-894b6bd67-4bt9t Running 0
+```
+
+## Garanties sécurité (toutes prouvées live)
+| Garantie | Preuve |
+|---|---|
+| Auth obligatoire (LLM10) | sans clé → 401 REFUSÉ |
+| Signature Cosign (LLM03) | ollama + qdrant + litellm signées et vérifiées |
+| Digest-pinning | @sha256:… sur les 3 deployments |
+| Non-root (LLM03) | runAsNonRoot 1000/10001, capabilities drop ALL |
+| Zero-trust réseau | NetPols dédiées : ingress/egress explicites only |
+| Budgets inférence | max_tokens 512, request_timeout 150s (ConfigMap) |
+| Guardrails LLM01/02/07/10 | 28/28 tests PASS |
+| Red-teaming réel | 13/13 payloads neutralisés, 0 bypass |
+| Persistance modèle | PVC 5Gi — modèle survit au restart du pod (testé) |
