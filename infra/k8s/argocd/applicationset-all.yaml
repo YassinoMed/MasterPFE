@@ -8,40 +8,17 @@ metadata:
   namespace: argocd
 spec:
   generators:
+  - git:
+      directories:
+      - path: infra/k8s/environments/*
+      repoURL: https://github.com/YassinoMed/MasterPFE.git
+      revision: main
   - list:
       elements:
-      - env: dev
-        namespace: securerag-dev
-        path: infra/k8s/overlays/dev
-        wave: '10'
-      - env: test
-        namespace: securerag-test
-        path: infra/k8s/overlays/test
-        wave: '12'
       - env: demo
         namespace: securerag-hub
         path: infra/k8s/overlays/demo
         wave: '10'
-      - env: recette
-        namespace: securerag-recette
-        path: infra/k8s/overlays/recette
-        wave: '15'
-      - env: staging
-        namespace: securerag-staging
-        path: infra/k8s/overlays/staging
-        wave: '25'
-      - env: preprod
-        namespace: securerag-preprod
-        path: infra/k8s/overlays/preprod
-        wave: '28'
-      - env: production
-        namespace: securerag-prod
-        path: infra/k8s/overlays/production
-        wave: '30'
-      - env: dr
-        namespace: securerag-dr
-        path: infra/k8s/overlays/dr
-        wave: '35'
   template:
     metadata:
       annotations:
@@ -49,10 +26,10 @@ spec:
         notifications.argoproj.io: on-deployed,on-health-degraded,on-sync-failed,on-out-of-sync
       finalizers:
       - resources-finalizer.argocd.argoproj.io
-      name: securerag-{{env}}
+      name: securerag-{{path.basename}}
     spec:
       destination:
-        namespace: '{{namespace}}'
+        namespace: securerag-{{path.basename}}
         server: https://kubernetes.default.svc
       ignoreDifferences:
       - group: external-secrets.io
@@ -75,7 +52,7 @@ spec:
       project: securerag-hub
       revisionHistoryLimit: 10
       source:
-        path: '{{path}}'
+        path: infra/k8s/overlays/{{path.basename}}
         repoURL: https://github.com/YassinoMed/MasterPFE.git
         targetRevision: main
       syncPolicy:

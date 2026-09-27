@@ -1,0 +1,7 @@
+# Wrapper : prod/ inclut production/ (le git generator découvre "prod")
+# Phase 18 : alignement des noms entre environments/ et overlays/
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: securerag-prod
+resources:
+  - ../production
