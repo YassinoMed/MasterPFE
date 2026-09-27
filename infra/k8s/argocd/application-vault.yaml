@@ -1,12 +1,15 @@
+# Vault — Application ArgoCD (via Helm)
+# Phase 3 : mode production (Raft, persistance, audit) sur cluster kind 2 nœuds.
+# Le seed des secrets est fait par scripts/deploy/seed-vault-secrets.sh après init.
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   name: securerag-vault
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: '20'
+    argocd.argoproj.io/sync-wave: "20"
   finalizers:
-  - resources-finalizer.argocd.argoproj.io
+    - resources-finalizer.argocd.argoproj.io
 spec:
   project: securerag-hub
   source:
@@ -14,10 +17,51 @@ spec:
     targetRevision: 0.29.0
     chart: vault
     helm:
-      values: "server:\n  tolerations:\n  - key: node-role.kubernetes.io/control-plane\n\
-        \    operator: Exists\n    effect: NoSchedule\n  - key: node-role.kubernetes.io/master\n\
-        \    operator: Exists\n    effect: NoSchedule\ninjector:\n  enabled: true\n\
-        ui:\n  enabled: true\n  serviceType: ClusterIP\n"
+      values: |
+        server:
+          dev:
+            enabled: false
+          dataStorage:
+            enabled: true
+            size: 10Gi
+            storageClass: null
+          auditStorage:
+            enabled: true
+            size: 1Gi
+          # 1 replica suffit pour la démo kind (2 nœuds) ; HA réel nécessite 3+ nœuds.
+          # Pour scaler : augmenter replicas + tolérer l'anti-affinity sur ≥3 nœuds.
+          ha:
+            enabled: true
+            replicas: 1
+            raft:
+              enabled: true
+              setNodeId: true
+              config: |
+                ui = true
+
+                listener "tcp" {
+                  tls_disable = 1
+                  address = "[::]:8200"
+                  cluster_address = "[::]:8201"
+                }
+
+                storage "raft" {
+                  path = "/vault/data"
+                }
+
+                service_registration "kubernetes" {}
+          tolerations:
+            - key: node-role.kubernetes.io/control-plane
+              operator: Exists
+              effect: NoSchedule
+            - key: node-role.kubernetes.io/master
+              operator: Exists
+              effect: NoSchedule
+        injector:
+          enabled: true
+        ui:
+          enabled: true
+          serviceType: ClusterIP
   destination:
     server: https://kubernetes.default.svc
     namespace: vault
@@ -26,9 +70,10 @@ spec:
       prune: true
       selfHeal: true
     syncOptions:
-    - CreateNamespace=true
+      - CreateNamespace=true
+  # Le caBundle du webhook de Vault est régénéré à chaque démarrage.
   ignoreDifferences:
-  - group: admissionregistration.k8s.io
-    kind: MutatingWebhookConfiguration
-    jqPathExpressions:
-    - .webhooks[].clientConfig.caBundle
+    - group: admissionregistration.k8s.io
+      kind: MutatingWebhookConfiguration
+      jqPathExpressions:
+        - '.webhooks[].clientConfig.caBundle'
