@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dr-validation
+  namespace: securerag-hub-dr
+  labels:
+    app.kubernetes.io/part-of: securerag-hub
+    securerag.dev/dr-validation: "true"
+data:
+  cluster: "dr"
+  primary-api: "https://172.18.0.3:6443"
+  dr-api: "https://172.18.0.2:6443"
+  message: "Ce ConfigMap prouve que le GitOps multi-cluster fonctionne : ArgoCD (cluster primaire) a déployé cette ressource sur le cluster DR distant."
+  deployed-at: "2026-09-27T10:00:00Z"

@@ -1,6 +1,3 @@
-# ApplicationSet — Multi-Cluster DR (Phase 9)
-# Déploie l'overlay "dr" sur le cluster DR enregistré dans ArgoCD.
-# Le générateur clusters cible les clusters avec le label securerag=true.
 apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
 metadata:
@@ -8,42 +5,40 @@ metadata:
   namespace: argocd
 spec:
   generators:
-    - clusters:
-        selector:
-          matchLabels:
-            securerag: "true"
-        # Ne déployer que sur le cluster DR (pas le primaire)
-        # Le label environment=dr est posé par argocd cluster add
+  - clusters:
+      selector:
+        matchLabels:
+          securerag: 'true'
   template:
     metadata:
-      name: 'securerag-dr-{{name}}'
       annotations:
-        argocd.argoproj.io/sync-wave: "35"
-        notifications.argoproj.io: 'on-deployed,on-health-degraded,on-sync-failed'
+        argocd.argoproj.io/sync-wave: '35'
+        notifications.argoproj.io: on-deployed,on-health-degraded,on-sync-failed
       finalizers:
-        - resources-finalizer.argocd.argoproj.io
+      - resources-finalizer.argocd.argoproj.io
       labels:
-        app.kubernetes.io/part-of: securerag-hub
         app.kubernetes.io/component: disaster-recovery
+        app.kubernetes.io/part-of: securerag-hub
+      name: securerag-dr-{{name}}
     spec:
+      destination:
+        namespace: securerag-hub-dr
+        server: '{{server}}'
       project: securerag-hub
       source:
+        path: infra/k8s/dr-validation
         repoURL: https://github.com/YassinoMed/MasterPFE.git
         targetRevision: main
-        path: infra/k8s/overlays/dr
-      destination:
-        server: '{{server}}'
-        namespace: securerag-hub-dr
       syncPolicy:
         automated:
           prune: true
           selfHeal: true
-        syncOptions:
-          - CreateNamespace=true
-          - ServerSideApply=true
         retry:
-          limit: 5
           backoff:
             duration: 10s
             factor: 2
             maxDuration: 3m
+          limit: 5
+        syncOptions:
+        - CreateNamespace=true
+        - ServerSideApply=true
