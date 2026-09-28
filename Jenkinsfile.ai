@@ -145,6 +145,12 @@ spec:
           #!/bin/bash
           set -euo pipefail
           echo "[INFO] Running Python tests..."
+          # [POD ÉPHÉMÈRE] chaque build a un pod neuf : réinstaller les
+          # outils Python (borné), jamais de skip silencieux des tests.
+          if ! python3 -c "import pytest" 2>/dev/null; then
+            echo "[INFO] Installation pytest (120s max)..."
+            timeout 120 pip3 install --quiet pytest 2>/dev/null || true
+          fi
           # Les tests RÉELS du repo sont dans secai/tests/ (guardrails,
           # parsers, décision, API). test_remediation a des deps hors CI.
           IGNORES="--ignore=secai/tests/test_remediation.py"
