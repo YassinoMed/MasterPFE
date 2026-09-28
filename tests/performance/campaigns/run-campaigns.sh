@@ -6,12 +6,23 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../../.." && pwd)"
 RUNNER="${PROJECT_ROOT}/scripts/performance/run-k6-tests.sh"
 
+# Campagnes à exécuter (surchargeable : CAMPAIGNS="campaign-300 campaign-600")
+CAMPAIGNS="${CAMPAIGNS:-campaign-300 campaign-600 campaign-700 campaign-800 campaign-900}"
+# Cooldown entre campagnes en secondes
+COOLDOWN="${COOLDOWN:-120}"
+
 echo "========================================================="
 # SecureRAG Hub — Multi-Campaign Performance Test Runner
 echo "========================================================="
 echo "  Executing sequential performance campaigns..."
-echo "  Cluster cooldown period: 2 minutes between runs."
+echo "  Campaigns: ${CAMPAIGNS}"
+echo "  Cluster cooldown period: $((COOLDOWN / 60)) minutes between runs."
 echo "========================================================="
+
+LAST_CAMPAIGN=""
+for c in ${CAMPAIGNS}; do
+  LAST_CAMPAIGN="${c}"
+done
 
 run_campaign() {
   local target_campaign="$1"
@@ -19,21 +30,20 @@ run_campaign() {
   echo ">>> [START] Campaign: ${target_campaign}"
   bash "${RUNNER}" "${target_campaign}" || true
   echo ">>> [COMPLETED] Campaign: ${target_campaign}"
-  
-  if [ "${target_campaign}" != "campaign-900" ]; then
-    echo ">>> Waiting 2 minutes for cluster resources cooldown..."
-    sleep 120
+
+  if [ "${target_campaign}" != "${LAST_CAMPAIGN}" ]; then
+    echo ">>> Waiting $((COOLDOWN / 60)) minutes for cluster resources cooldown..."
+    sleep "${COOLDOWN}"
   fi
 }
 
-# Run the 4 campaigns sequentially
-run_campaign campaign-600
-run_campaign campaign-700
-run_campaign campaign-800
-run_campaign campaign-900
+# Run campaigns sequentially
+for c in ${CAMPAIGNS}; do
+  run_campaign "${c}"
+done
 
 echo ""
 echo "========================================================="
-echo "  All 4 performance campaigns completed!"
+echo "  All performance campaigns completed!"
 echo "  Reports generated in reports/k6/"
 echo "========================================================="

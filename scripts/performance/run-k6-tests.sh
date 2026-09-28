@@ -40,6 +40,11 @@ TESTS=(
   "${TEST_DIR}/k6-stress-test.js:stress"
   "${TEST_DIR}/k6-spike-test.js:spike"
   "${TEST_DIR}/k6-endurance-test.js:endurance"
+  "${TEST_DIR}/k6-campaign-300.js:campaign-300"
+  "${TEST_DIR}/k6-campaign-600.js:campaign-600"
+  "${TEST_DIR}/k6-campaign-700.js:campaign-700"
+  "${TEST_DIR}/k6-campaign-800.js:campaign-800"
+  "${TEST_DIR}/k6-campaign-900.js:campaign-900"
 )
 
 # ── Help ──────────────────────────────────────────────────────────────
@@ -56,17 +61,23 @@ Options:
   -h, --help               Show this help
 
 Test names (run specific tests):
-  smoke      k6-smoke-test.js
-  load       k6-load-test.js
-  stress     k6-stress-test.js
-  spike      k6-spike-test.js
-  endurance  k6-endurance-test.js
-  all        (default) Run all five test suites
+  smoke          k6-smoke-test.js
+  load           k6-load-test.js
+  stress         k6-stress-test.js
+  spike          k6-spike-test.js
+  endurance      k6-endurance-test.js
+  campaign-300   k6-campaign-300.js  (300 VUs, 4 scénarios utilisateur)
+  campaign-600   k6-campaign-600.js  (600 VUs)
+  campaign-700   k6-campaign-700.js  (700 VUs)
+  campaign-800   k6-campaign-800.js  (800 VUs)
+  campaign-900   k6-campaign-900.js  (900 VUs)
+  all            (default) Run the five base test suites
 
 Examples:
   $(basename "$0") all
   $(basename "$0") -n production -b http://portal-web:8000 smoke load
   $(basename "$0") --exit-on-fail false spike
+  $(basename "$0") campaign-300 campaign-600
 EOF
   exit 0
 }
