@@ -164,6 +164,12 @@ spec:
               IGNORES="$IGNORES --ignore=secai/tests/test_api.py --ignore=secai/tests/test_llm_endpoint.py"
             fi
           fi
+          # test_api importe torch (SecureBERT) : hors CI (2GB) — exclusion
+          # conditionnelle documentée, les 63 autres tests restent exécutés.
+          if ! python3 -c "import torch" 2>/dev/null; then
+            echo "[WARN] torch absent du CI — test_api.py (SecureBERT) exclu explicitement"
+            IGNORES="$IGNORES --ignore=secai/tests/test_api.py"
+          fi
           python3 -m pytest secai/tests/ -q --tb=short $IGNORES
           echo "[OK] Suite de tests exécutée"
         '''
