@@ -109,13 +109,21 @@
 | **/llm/analyze (câblage prod)** | Endpoint déployé : rate-limit → guardrail IN → Gateway → guardrail OUT. **Injection GI-01 → BLOCK live, le LLM n'est jamais appelé** (11 tests + validation déployée) |
 | **Flux /analyze complet** | 3 findings de fixtures réelles (Trivy 2 CVEs + event Falco du drill), verdict **BLOCK** |
 | **Picklescan RÉEL** | SECAI scanné (SAFE) + corpus : pickle malveillant **DÉTECTÉ** — preuve d'efficacité |
-| **Garak 0.17 RÉEL** | Probe promptinject contre le LLM déployé (wrapper URI + port-forward), rapport JSONL |
+| **Garak 0.17 RÉEL** | Probe promptinject contre le LLM déployé (wrapper URI + port-forward) : **2075 requêtes LLM réelles, 56 tentatives complétées**, rapport JSONL commité (`artifacts/release/garak_qwen_promptinject.report.jsonl`) |
 | **Pipeline Jenkinsfile.ai** | Job SecureRAG-Hub-AI créé + **22 builds déclenchés**, chaque échec = cause racine documentée + fix committé. **5/9 stages validés en CI** : semgrep SAST, 63 tests, detect-secrets (0 crypto), **MLSecOps 13/13 payloads [SUCCESS]**. Kaniko exécutant le vrai Dockerfile (logs) — le build torch multi-GB a crashé l'apiserver kind (incident documenté + récupération) : runner dédié requis |
 | **Red-teaming CI** | `run-mlsecops-scans.sh` désormais RÉEL (plus de simulation) : **13/13 payloads neutralisés, 0 bypass** |
 | **Supply Chain IA** | Images ollama+qdrant+litellm **signées Cosign**, digest-pinned, soumises aux 8 policies Kyverno Enforce (conformité obtenue par itération réelle) |
 | **Zero-trust IA** | NetworkPolicies dédiées : ollama/qdrant/gateway inaccessibles hors namespace, ingress/egress explicites uniquement |
 | **OWASP LLM Top 10** | Cartographie complète 10/10 risques → contrôles : `docs/MLSECOPS-LLM-SECURITY.md` |
 | **FinOps IA** | Rightsizing réel sous ResourceQuota 12Gi (qdrant 512Mi, gateway 1Gi) — décision mesurée, pas arbitraire |
+| **Poisoning LLM04** | Attaque **live** (fausse CVE malveillante injectée dans Qdrant) → **DÉTECTÉE en <1s** → remédiée → hash baseline restauré — cycle complet prouvé (`qdrant-poisoning-check.py`) |
+| **Factuality LLM09** | CVE inventée → **UNGROUNDED** (claims non-vérifiés listés, review humaine exigée) — **10/10 tests** + 3 payloads au corpus CI (**16/16** neutralisés) |
+| **Model Registry LLM03** | Fiche modèle (`models/registry/`) + **sha256 GGUF vérifié** — test positif ✅ CONFORME + négatif 🚨 MISMATCH → IR-402 |
+| **Drift detection** | 5 probes fixes (temp=0, seed=42) : hash de sorties + latences vs baseline → **✅ STABLE prouvé live** (20.4s → 18.2s, sorties identiques) — substitution détectable |
+| **IR Playbooks IA** | **6 procédures** (`docs/INCIDENT-RESPONSE-AI.md`) dont **IR-501 = incident RÉEL** du 2026-09-28 (crash apiserver sous charge CI, timeline + leçons) |
+| **Tests SECAI** | **79 tests PASS** (28 guardrails + 11 câblage + 10 factuality + 30 suite existante) |
+| **Test final automatisé** | `bash scripts/security/test-ai-stack-final.sh` → **19 PASS / 19** |
+| **3 scaffolds** | ai-security-orchestrator / llm-orchestrator / ai-knowledge-graph → **SUPERSEDÉ** : aucun code applicatif n'a jamais existé ; rôles couverts par SECAI (/llm/analyze), LiteLLM (auth+budgets), Qdrant (vuln-kb + poisoning check) — décision documentée dans les 3 manifests |
 
 ### Conformité obtenue (chaque blocage Kyverno a été un itérateur réel)
 

@@ -1,0 +1,41 @@
+# ── SecureRAG Model Registry — Fiche modèle (LLM03/LLM04) ─────────────
+# Source de vérité pour tout modèle exécuté sur la plateforme.
+# Vérification : bash scripts/security/verify-model-registry.sh
+apiVersion: registry.securerag.dev/v1
+kind: ModelCard
+metadata:
+  name: qwen2.5-0.5b-instruct
+  registry-version: v1
+  registered: "2026-09-28"
+  signed-by: cosign-securerag-key
+spec:
+  model:
+    name: qwen2.5-0.5b-instruct
+    family: Qwen2.5
+    parameters: "0.5B"
+    quantization: q4_k_m (GGUF)
+    license: Apache-2.0 (Qwen2.5 Instruct)
+  source:
+    repository: Qwen/Qwen2.5-0.5B-Instruct-GGUF
+    url: https://huggingface.co/Qwen/Qwen2.5-0.5B-Instruct-GGUF
+    file: qwen2.5-0.5b-instruct-q4_k_m.gguf
+    sha256: 74a4da8c9fdbcd15bd1f6d01d621410d31c6fc00986f5eb687824e7b93d7a9db
+    size: 491400032
+  deployment:
+    runtime: ollama
+    namespace: securerag-hub
+    modelfile: infra/k8s/base/ollama/modelfile/Modelfile.qwen2.5-0.5b
+    parameters:
+      temperature: 0.1          # déterminisme (analyse sécurité)
+      num_ctx: 1024            # borne mémoire (LimitRange 2Gi)
+    persistence: PVC ollama-models (5Gi)
+  security:
+    deserialization-risk: "AUCUN — GGUF (safetensors-like, pas de pickle)"
+    scanned-by: picklescan (rapport security/reports/modelscan-report.json)
+    injection-tests: "garak promptinject (scan live, rapport garak_runs)"
+    output-filters: "scan_output (GO-01..GO-06) — secrets/PII neutralisés"
+    input-filters: "scan_prompt_injection (GI-01..GI-06) — fail-closed"
+    rate-limited: "TokenBucketLimiter 5 req burst / 1 req/s (LLM10)"
+  provenance:
+    imported-by: pipeline MLSecOps (manuel documenté, session 2026-09-27)
+    import-log: "kubectl cp GGUF → ollama create -f Modelfile → PVC persistant"

@@ -1,3 +1,7 @@
+# ⚠️ SUPERSEDÉ — ne pas déployer en l'état. Image placeholder (ghcr.io/example/...) jamais existante, code applicatif absent.
+# RÔLE COUVERT PAR : AI Gateway LiteLLM (deploy/ai-gateway-litellm) — routing,
+# auth master-key (401 prouvé), budgets max_tokens/timeout, API OpenAI-compatible.
+# Plus SECAI /llm/analyse pour l'orchestration des appels IA de sécurité.
 apiVersion: apps/v1
 kind: Deployment
 metadata:

@@ -1,8 +1,8 @@
 {
   "scanner": "secai-guardrails-redteam",
   "mode": "live-guardrail-fuzzing",
-  "payloads_tested": 13,
-  "payloads_correctly_handled": 13,
+  "payloads_tested": 16,
+  "payloads_correctly_handled": 16,
   "bypass_detected": 0,
   "bypasses": [],
   "modules_tested": [
@@ -11,7 +11,8 @@
     "system_prompt_leak",
     "secret_leakage",
     "pii_masking",
-    "destructive_output"
+    "destructive_output",
+    "factuality_hallucination"
   ],
   "status": "PASSED"
 }

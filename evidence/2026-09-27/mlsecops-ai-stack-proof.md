@@ -169,3 +169,79 @@ Leçon : les builds CI lourds n'ont pas leur place sur un control-plane
 (dont le stage MLSecOps complet). Le build d'image est techniquement
 fonctionnel mais exige un runner dédié — limite documentée, pas un
 défaut du pipeline. Aucune étape sautée silencieusement.
+
+---
+
+## Clôture des « PAS ENCORE » (2026-09-28) — 19/19 PASS au test final
+
+### LLM04 — Détection de poisoning : attaque live détectée et remédiée
+```bash
+# 1. Baseline (2 points, hash d2661aaa4e8328f6bed41ba324d28ab0)
+QDRANT_URL=:6399 python3 scripts/security/qdrant-poisoning-check.py --baseline
+# 2. ATTAQUE : injection du point 999 (fausse CVE exhortant à
+#    désactiver le firewall + curl evil.sh) — le RAG le retourne !
+# 3. DÉTECTION :
+   ALERTE POISONING : 1 divergence(s) !
+   → point 999 : NOUVEAU (non validé par pipeline)
+# 4. REMÉDIATION : delete point 999 → INTEGRITY OK (hash baseline restauré)
+```
+
+### LLM09 — Factuality : hallucinations attrapées (10/10 tests)
+```
+Réponse honnête (CVE du contexte)   → GROUNDED
+CVE-2999-12345 + evil.example.com  → UNGROUNDED (claims NON-VÉRIFIÉS listés)
+  + requires_human_review: true
+Intégré au corpus CI : 16/16 payloads neutralisés (13 guardrails + 3 factuality)
+```
+
+### LLM03 — Model Registry : sha256 vérifié (test positif + négatif)
+```
+✅ CONFORME — sha256=74a4da8c… (491400032 octets) = fiche registry
+🚨 MISMATCH — fake GGUF détecté (exit 1 → IR-402)
+```
+
+### Drift — substitution/dégradation détectables (preuve live)
+```
+BASELINE : 5 probes fixes (temp=0, seed=42), latence moy 20.37s
+CHECK    : latence 18.18s → ✅ STABLE (hash sorties identiques)
+Si un modèle est remplacé : OUTPUT CHANGÉ → IR-402 immédiat
+```
+
+### IR Playbooks — 6 procédures (docs/INCIDENT-RESPONSE-AI.md)
+IR-401 poisoning · IR-402 substitution modèle · IR-403 dégradation
+IR-404 jailbreak · IR-405 fuite secret · **IR-501 crash apiserver (CAS RÉEL du 2026-09-28, timeline documentée)**
+
+### 3 scaffolds → SUPERSEDÉ (décision documentée dans les manifests)
+- ai-security-orchestrator → rôle couvert par SECAI v2 (/llm/analyze orchestre la chaîne)
+- llm-orchestrator → rôle couvert par LiteLLM Gateway (auth 401, budgets)
+- ai-knowledge-graph → rôle couvert par Qdrant (vuln-kb + poisoning check)
+
+### TEST FINAL : bash scripts/security/test-ai-stack-final.sh
+```
+═══ STACK IA MLSecOps — TEST FINAL ═══
+
+  PASS  Pod ollama Running
+  PASS  Pod qdrant Running
+  PASS  Pod gateway Running
+
+  PASS  Modèle qwen2.5-0.5b persisté (PVC)
+  PASS  Gateway refuse sans auth (401)
+  PASS  Chat completions via gateway (→ ollama)
+    Réponse: Bonjour!
+  PASS  RAG : recherche sémantique → CVE-2024-1234
+  PASS  Guardrails: 28 passed tests pass
+  PASS  Câblage /llm/analyze: 11 passed tests (inj. jamais envoyée au LLM)
+  PASS  Picklescan réel: SECAI sain + pickle malveillant détecté
+  PASS  Red-teaming réel: 16/16 payloads neutralisés
+  PASS  LIVE /llm/analyze: injection → block (jamais au LLM)
+  PASS  Factuality LLM09: 10 passed tests (CVE inventée → UNGROUNDED)
+  PASS  Model Registry: GGUF conforme (sha256 vérifié)
+  PASS  Poisoning LLM04: collection conforme à la baseline
+  PASS  Drift monitor: modèle stable (hash sorties + latences)
+  PASS  Cosign: ollama signée
+  PASS  Cosign: qdrant signée
+  PASS  Cosign: litellm signée
+
+═══ RÉSULTAT: 19 PASS / 19 ═══
+  ✅ STACK IA MLSSECOPS 100% OPÉRATIONNEL
+```

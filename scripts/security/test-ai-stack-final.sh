@@ -131,6 +131,23 @@ except Exception as e:
 " 2>/dev/null)
 check "LIVE /llm/analyze: injection → $LIVE_INJ (jamais au LLM)" "$([ "$LIVE_INJ" = "block" ] && echo true || echo false)"
 
+# 7c. Factuality (LLM09) : 10 tests anti-hallucination
+FACT=$(cd /home/admin/MasterPFE && python3 -m pytest secai/tests/test_factuality.py -q --tb=no 2>/dev/null | tail -1 | grep -oE '^[0-9]+ passed')
+check "Factuality LLM09: $FACT tests (CVE inventée → UNGROUNDED)" "$([ -n "$FACT" ] && echo true || echo false)"
+
+# 7d. Model Registry (LLM03) : le GGUF exécuté conforme à la fiche
+REG=$(cd /home/admin/MasterPFE && bash scripts/security/verify-model-registry.sh 2>/dev/null | grep -c "CONFORME")
+check "Model Registry: GGUF conforme (sha256 vérifié)" "$([ "$REG" -ge 1 ] && echo true || echo false)"
+
+# 7e. Poisoning Qdrant (LLM04) : collection conforme à la baseline
+#     (port-forward qdrant requis : kubectl port-forward svc/qdrant 6399:6333)
+POIS=$(cd /home/admin/MasterPFE && QDRANT_URL=http://127.0.0.1:6399 timeout 60 python3 scripts/security/qdrant-poisoning-check.py --check 2>/dev/null | grep -c "INTEGRITY OK")
+check "Poisoning LLM04: collection conforme à la baseline" "$([ "$POIS" -ge 1 ] && echo true || echo false)"
+
+# 7f. Drift (substitution/dégradation) : sorties reproductibles vs baseline
+DRIFT=$(cd /home/admin/MasterPFE && timeout 600 python3 scripts/security/model-drift-monitor.py --check 2>/dev/null | grep -c "STABLE")
+check "Drift monitor: modèle stable (hash sorties + latences)" "$([ "$DRIFT" -ge 1 ] && echo true || echo false)"
+
 # 8. Cosign : les 3 images IA signées
 export COSIGN_PASSWORD=$(cat /home/admin/MasterPFE/security/keys/cosign.password.txt)
 for img in ollama qdrant litellm; do

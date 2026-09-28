@@ -1,3 +1,7 @@
+# ⚠️ SUPERSEDÉ — ne pas déployer en l'état. Ce scaffold n'a jamais eu de code applicatif (image jamais buildée).
+# RÔLE COUVERT PAR : SECAI v2 (deploy/secai) — l'endpoint /llm/analyse orchestre
+# la chaîne complète : rate-limit → guardrail IN → Gateway LiteLLM → guardrail OUT → factuality.
+# Preuve : 11 tests câblage + validation live (evidence/2026-09-27/mlsecops-ai-stack-proof.md).
 # AI Security Orchestrator — Kubernetes Deployment
 apiVersion: apps/v1
 kind: Deployment

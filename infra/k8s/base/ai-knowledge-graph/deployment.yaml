@@ -1,3 +1,7 @@
+# ⚠️ SUPERSEDÉ — ne pas déployer en l'état. Image jamais buildée, aucun code applicatif.
+# RÔLE COUVERT PAR : Qdrant (deploy/qdrant) — collection vuln-kb (base de
+# connaissances sécurité) avec détection de poisoning (LLM04) et RAG validé.
+# Le graphe sémantique dédié reste un chantier roadmap post-soutenance.
 # AI Knowledge Graph — K8s Manifests
 apiVersion: apps/v1
 kind: Deployment
