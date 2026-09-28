@@ -26,9 +26,11 @@
 | Contrôle | Implémentation | Preuve |
 |---|---|---|
 | Sanitization systématique | SECAI échappe tout contenu externe avant traitement (règles Semgrep échappées, payloads Falco traités comme données) | `secai/tests/test_security.py::test_falco_prompt_injection_not_parsed_as_command` |
+| **Guardrail en trafic production** | **POST /llm/analyze : TOUT prompt passe par `scan_prompt_injection` AVANT le LLM — injection GI-01 → 422, le gateway n'est jamais appelé** | Test live déployé : `verdict=block, rule=GI-01` + 11 tests câblage (`test_llm_endpoint.py`) |
 | Entrées non fiables = données | Les logs Falco contenant des payloads d'injection sont stockés en evidence, jamais interprétés | `secai/integrations/falco.py` (commentaire explicite + test) |
 | API read-only | SECAI n'expose aucune mutation — impossible de détourner l'API pour modifier l'état | `secai/api/main.py` (endpoints `/health`, `/ready`, `/analyze`, `/explain` uniquement) |
 | Détection heuristique | Module guardrails : détection de patterns d'injection (ignore previous, system prompt, délimiteurs) | `secai/guardrails/injection.py` + tests |
+| Red-teaming externe (Garak) | **Garak 0.17 (NVIDIA) branché : probe promptinject contre le LLM déployé via config YAML** | `scripts/ci/run-mlsecops-scans.sh` branche garak réelle + config `garak-secai.yaml` |
 
 ### LLM02 — Sensitive Information Disclosure ✅
 *Fuite d'informations sensibles via les réponses du modèle.*

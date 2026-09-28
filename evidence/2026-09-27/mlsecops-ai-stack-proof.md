@@ -53,3 +53,37 @@ secai-894b6bd67-4bt9t Running 0
 | Guardrails LLM01/02/07/10 | 28/28 tests PASS |
 | Red-teaming réel | 13/13 payloads neutralisés, 0 bypass |
 | Persistance modèle | PVC 5Gi — modèle survit au restart du pod (testé) |
+
+---
+
+## Complétion des partiels (2026-09-28) — preuves live
+
+### Partial #1 RÉSOLU : guardrails câblés dans le trafic production
+Endpoint POST /llm/analyze déployé (SECAI v2, image signée sha256:107a7bc2) :
+```
+  Injection → verdict: block | rule: GI-01
+  blocked_reason: prompt rejeté par le guardrail d'entrée (injection détectée)
+```
+Chaîne : rate-limit (LLM10) → scan_prompt_injection (LLM01/07) → Gateway auth (401 sans clé) → scan_output (LLM02/05).
+
+### Partial #2 RÉSOLU : picklescan réel
+```
+  SECAI package : 7 fichiers, 0 imports dangereux → SAFE
+  Corpus red-team : evil_model.pkl détecté → SCANNER_EFFECTIVE
+  Status global : PASS
+```
+Corpus : pickle volontairement malveillant (os.system + curl|sh) — le scanner le détecte.
+
+### Partial #3 RÉSOLU : flux /analyze validé bout-en-bout
+```
+  findings: 3 | verdict: BLOCK | distribution: {'LOW': 0, 'MEDIUM': 2, 'HIGH': 1, 'CRITICAL': 0}
+   - HIGH : CVE-2023-49103 [HIGH] in libcrypt
+   - MEDIUM : CVE-2024-25251 [MEDIUM] in libsystemd
+   - MEDIUM : Falco runtime detection event
+```
+Fixtures : Trivy (2 CVEs réelles) + event Falco (drill du 2026-09-27).
+
+### Tests : 80 PASS au total (28 guardrails + 11 câblage + 41 suite SECAI)
+```
+69 passed, 1 warning in 6.73s
+```

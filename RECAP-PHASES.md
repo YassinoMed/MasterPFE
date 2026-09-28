@@ -96,7 +96,7 @@
 
 ---
 
-## 🤖 VOLET MLSecOps (ajouté le 2026-09-27)
+## 🤖 VOLET MLSecOps (ajouté le 2026-09-27, complété le 2026-09-28)
 
 ### Déployé et prouvé (live)
 
@@ -106,6 +106,10 @@
 | **Qdrant** (Vector DB) | Pod Running, collection `vuln-kb` créée (4 points CVE), **recherche sémantique validée** (query "RCE" → CVE nginx score 0.996) |
 | **AI Gateway LiteLLM** | Pod Running, API OpenAI-compatible devant Ollama, **auth master-key obligatoire** (sans clé → 401, prouvé live), chat/completions routé vers qwen2.5-0.5b, `max_tokens` + `request_timeout` bornés |
 | **Guardrails SECAI** | 4 modules (injection, output_filter, rate_limit, schemas) — **28/28 tests PASS** |
+| **/llm/analyze (câblage prod)** | Endpoint déployé : rate-limit → guardrail IN → Gateway → guardrail OUT. **Injection GI-01 → BLOCK live, le LLM n'est jamais appelé** (11 tests + validation déployée) |
+| **Flux /analyze complet** | 3 findings de fixtures réelles (Trivy 2 CVEs + event Falco du drill), verdict **BLOCK** |
+| **Picklescan RÉEL** | SECAI scanné (SAFE) + corpus : pickle malveillant **DÉTECTÉ** — preuve d'efficacité |
+| **Garak 0.17 RÉEL** | Probe promptinject contre le LLM déployé (wrapper URI + port-forward), rapport JSONL |
 | **Red-teaming CI** | `run-mlsecops-scans.sh` désormais RÉEL (plus de simulation) : **13/13 payloads neutralisés, 0 bypass** |
 | **Supply Chain IA** | Images ollama+qdrant+litellm **signées Cosign**, digest-pinned, soumises aux 8 policies Kyverno Enforce (conformité obtenue par itération réelle) |
 | **Zero-trust IA** | NetworkPolicies dédiées : ollama/qdrant/gateway inaccessibles hors namespace, ingress/egress explicites uniquement |
