@@ -81,7 +81,7 @@ spec:
     // (options cosmétiques — la sécurité du pipeline est inchangée)
     disableConcurrentBuilds()
     buildDiscarder(logRotator(numToKeepStr: '10'))
-    timeout(time: 30, unit: 'MINUTES')
+    timeout(time: 60, unit: 'MINUTES')
     skipDefaultCheckout()
   }
 
@@ -263,35 +263,19 @@ PYCI
           sh '''
             #!/bin/sh
             set -eu
-            echo "[INFO] Building AI images with Kaniko (rootless)..."
-
+            echo "[INFO] Build kaniko de l'image REELLE du service IA : SECAI..."
+            BUILD_CTX=/tmp/secai-build-ctx
+            rm -rf "$BUILD_CTX" && mkdir -p "$BUILD_CTX"
+            cp -r "$(pwd)/secai" "$BUILD_CTX/"
+            mkdir -p /kaniko/.docker
+            printf '{"auths":{"kind-registry.registry.svc.cluster.local:5001":{"insecure":true}}}' \
+              > /kaniko/.docker/config.json
             /kaniko/executor \
-              --context=/workspace/ai-security \
-              --dockerfile=/workspace/ai-security/Dockerfile \
-              --destination=${REGISTRY_HOST}/${IMAGE_PREFIX}-inference:${IMAGE_TAG} \
-              --cache=true \
-              --cache-ttl=24h
-
-            /kaniko/executor \
-              --context=/workspace/ai-security/backend \
-              --dockerfile=/workspace/ai-security/backend/Dockerfile \
-              --destination=${REGISTRY_HOST}/${IMAGE_PREFIX}-backend:${IMAGE_TAG} \
-              --cache=true \
-              --cache-ttl=24h
-
-            /kaniko/executor \
-              --context=/workspace/ai-security \
-              --dockerfile=/workspace/ai-security/Dockerfile.collector \
-              --destination=${REGISTRY_HOST}/${IMAGE_PREFIX}-log-collector:${IMAGE_TAG} \
-              --cache=true \
-              --cache-ttl=24h
-
-            /kaniko/executor \
-              --context=/workspace/ai-security/frontend \
-              --dockerfile=/workspace/ai-security/frontend/Dockerfile \
-              --destination=${REGISTRY_HOST}/${IMAGE_PREFIX}-frontend:${IMAGE_TAG} \
-              --cache=true \
-              --cache-ttl=24h
+              --context="$BUILD_CTX" \
+              --dockerfile="$BUILD_CTX/secai/Dockerfile" \
+              --destination=kind-registry.registry.svc.cluster.local:5001/secai:${IMAGE_TAG} \
+              --cache
+            echo "[OK] Image secai construite et poussee"
           '''
         }
       }
@@ -302,11 +286,10 @@ PYCI
         sh '''
           #!/bin/sh
           set -eu
-          echo "[INFO] Running Trivy container vulnerability scan (CRITICAL = fail)..."
-          trivy image --severity CRITICAL --exit-code 1 ${REGISTRY_HOST}/${IMAGE_PREFIX}-backend:${IMAGE_TAG}
-          trivy image --severity CRITICAL --exit-code 1 ${REGISTRY_HOST}/${IMAGE_PREFIX}-inference:${IMAGE_TAG}
-          trivy image --severity CRITICAL --exit-code 1 ${REGISTRY_HOST}/${IMAGE_PREFIX}-log-collector:${IMAGE_TAG}
-          trivy image --severity CRITICAL --exit-code 1 ${REGISTRY_HOST}/${IMAGE_PREFIX}-frontend:${IMAGE_TAG}
+          echo "[INFO] Trivy scan de l'image secai (CRITICAL = echec)..."
+          trivy image --insecure --severity CRITICAL --exit-code 1 \
+            kind-registry.registry.svc.cluster.local:5001/secai:${IMAGE_TAG}
+          echo "[OK] Aucune vulnerabilite CRITICAL dans l'image secai"
         '''
       }
     }
@@ -316,15 +299,12 @@ PYCI
         sh '''
           #!/bin/sh
           set -eu
-          echo "[INFO] Signing images with Cosign..."
-          if ! command -v cosign >/dev/null 2>&1; then
-            echo "[ERROR] cosign not installed"
-            exit 1
-          fi
-          cosign sign --key k8s://securerag-hub/cosign-private-key --yes \
-            ${REGISTRY_HOST}/${IMAGE_PREFIX}-backend:${IMAGE_TAG}
-          cosign sign --key k8s://securerag-hub/cosign-private-key --yes \
-            ${REGISTRY_HOST}/${IMAGE_PREFIX}-inference:${IMAGE_TAG}
+          echo "[INFO] Signature Cosign de l'image secai..."
+          command -v cosign >/dev/null 2>&1 || { echo "[ERROR] cosign absent"; exit 1; }
+          export COSIGN_PASSWORD="$(cat security/keys/cosign.password.txt)"
+          cosign sign --key security/keys/cosign.key --allow-insecure-registry --yes \
+            kind-registry.registry.svc.cluster.local:5001/secai:${IMAGE_TAG}
+          echo "[OK] Image secai signee"
         '''
       }
     }
@@ -334,16 +314,16 @@ PYCI
         sh '''
           #!/bin/sh
           set -eu
-          echo "[INFO] Applying Kubernetes manifests..."
-          kubectl apply -f ai-security/k8s/namespace.yaml
-          kubectl apply -f ai-security/k8s/
-
-          echo "[INFO] Waiting for deployments rollout..."
-          kubectl rollout status deployment/ai-security-inference -n ${NAMESPACE} --timeout=180s
-          kubectl rollout status deployment/ai-security-backend -n ${NAMESPACE} --timeout=180s
-          kubectl rollout status deployment/ai-security-frontend -n ${NAMESPACE} --timeout=180s
-
-          echo "[INFO] AI Security Layer deployed successfully."
+          echo "[INFO] Verification du deploiement GitOps (discipline ArgoCD)..."
+          # [DEVSECOPS] Le deploiement est GITOPS : le CI ne fait JAMAIS
+          # kubectl apply direct (selfHeal le reverterait — constate sur ce
+          # projet). Le stage VERIFIE la chaine : image construite, scannee,
+          # signee, verifiable. Le rollout reel revient a ArgoCD (Git = SOT).
+          export COSIGN_PASSWORD="$(cat security/keys/cosign.password.txt)"
+          cosign verify --key security/keys/cosign.pub --allow-insecure-registry \
+            kind-registry.registry.svc.cluster.local:5001/secai:${IMAGE_TAG}
+          echo "[OK] Chaine complete : build -> scan (0 CRITICAL) -> sign -> verify"
+          echo "[INFO] Rollout reel du ressort d'ArgoCD (Git = source de verite)"
         '''
       }
     }
