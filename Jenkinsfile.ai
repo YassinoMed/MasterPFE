@@ -145,7 +145,7 @@ spec:
           #!/bin/bash
           set -euo pipefail
           echo "[INFO] Running Python tests..."
-          export PYTHONPATH="$PYTHONPATH:$(pwd)/ai-security/backend"
+          export PYTHONPATH="${PYTHONPATH:-}:$(pwd)/ai-security/backend"
           if command -v pytest >/dev/null 2>&1; then
             pytest ai-security/backend/tests/ -v --tb=short
           else
