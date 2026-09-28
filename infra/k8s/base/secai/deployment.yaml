@@ -37,7 +37,7 @@ spec:
           emptyDir: {medium: Memory}
       containers:
         - name: secai
-          image: localhost:5001/secai@sha256:d7c6744ebe2d828d8d8cde1e755685da57e4f47c7238f22fbc5491b707c97409
+          image: localhost:5001/secai@sha256:107a7bc28ab856bae0cc5ba2871e83b5c4faf19fdc4c6b6b47cccbb04ceb1d6d
           imagePullPolicy: IfNotPresent
           securityContext:
             allowPrivilegeEscalation: false
