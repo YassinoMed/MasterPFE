@@ -114,6 +114,7 @@ spec:
       steps {
         unstash 'workspace'
         sh '''
+          #!/bin/bash
           set -euo pipefail
           echo "[INFO] Linting Python files..."
           if command -v flake8 >/dev/null 2>&1; then
@@ -130,6 +131,7 @@ spec:
       steps {
         unstash 'workspace'
         sh '''
+          #!/bin/bash
           set -euo pipefail
           echo "[INFO] Running Python tests..."
           export PYTHONPATH="$PYTHONPATH:$(pwd)/ai-security/backend"
@@ -142,6 +144,7 @@ spec:
       steps {
         unstash 'workspace'
         sh '''
+          #!/bin/bash
           set -euo pipefail
           echo "[INFO] Running TruffleHog active secret scanner..."
           if command -v trufflehog >/dev/null 2>&1; then
@@ -158,6 +161,7 @@ spec:
       steps {
         unstash 'workspace'
         sh '''
+          #!/bin/bash
           set -euo pipefail
           echo "[INFO] Running MLSecOps Security Suite..."
           # Note: run-mlsecops-scans.sh sera corrigé en Phase 2 (Garak/ModelScan réels)
@@ -171,6 +175,7 @@ spec:
         unstash 'workspace'
         container('kaniko') {
           sh '''
+            #!/bin/bash
             set -euo pipefail
             echo "[INFO] Building AI images with Kaniko (rootless)..."
 
@@ -210,6 +215,7 @@ spec:
       steps {
         unstash 'workspace'
         sh '''
+          #!/bin/bash
           set -euo pipefail
           echo "[INFO] Running Trivy container vulnerability scan (CRITICAL = fail)..."
           trivy image --severity CRITICAL --exit-code 1 ${REGISTRY_HOST}/${IMAGE_PREFIX}-backend:${IMAGE_TAG}
@@ -223,6 +229,7 @@ spec:
     stage('Cosign Sign (blocking)') {
       steps {
         sh '''
+          #!/bin/bash
           set -euo pipefail
           echo "[INFO] Signing images with Cosign..."
           if ! command -v cosign >/dev/null 2>&1; then
@@ -241,6 +248,7 @@ spec:
       steps {
         unstash 'workspace'
         sh '''
+          #!/bin/bash
           set -euo pipefail
           echo "[INFO] Applying Kubernetes manifests..."
           kubectl apply -f ai-security/k8s/namespace.yaml
