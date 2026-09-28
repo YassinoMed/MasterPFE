@@ -116,8 +116,8 @@ spec:
     stage('Lint & Static Analysis') {
       steps {
         sh '''
-          #!/bin/bash
-          set -euo pipefail
+          #!/bin/sh
+          set -eu
           # [MLSecOps] SAST avec semgrep + RÈGLES LOCALES du repo
           # (security/semgrep/) — outil RÉELLEMENT présent dans l'image
           # CI. flake8 (style) est optionnel : absent de l'image.
@@ -140,8 +140,8 @@ spec:
     stage('Unit Tests') {
       steps {
         sh '''
-          #!/bin/bash
-          set -euo pipefail
+          #!/bin/sh
+          set -eu
           echo "[INFO] Running Python tests..."
           # [POD ÉPHÉMÈRE] chaque build a un pod neuf : réinstaller les
           # outils Python (borné), jamais de skip silencieux des tests.
@@ -177,8 +177,8 @@ spec:
     stage('Live Secret Verification (TruffleHog)') {
       steps {
         sh '''
-          #!/bin/bash
-          set -euo pipefail
+          #!/bin/sh
+          set -eu
           # [MLSecOps] detect-secrets (Yelp) : scanner de secrets RÉEL
           # présent dans l'image CI (trufflehog binaire absent de l'image).
           echo "[INFO] Scan de secrets actifs avec detect-secrets..."
@@ -241,8 +241,8 @@ PYCI
     stage('MLSecOps Security & LLM Red-Teaming') {
       steps {
         sh '''
-          #!/bin/bash
-          set -euo pipefail
+          #!/bin/sh
+          set -eu
           echo "[INFO] Running MLSecOps Security Suite..."
           # [2026-09-28] La suite est désormais RÉELLE :
           #   1/3 picklescan (install bornée 90s, sinon fallback scan fichiers)
@@ -261,8 +261,8 @@ PYCI
       steps {
         container('kaniko') {
           sh '''
-            #!/bin/bash
-            set -euo pipefail
+            #!/bin/sh
+            set -eu
             echo "[INFO] Building AI images with Kaniko (rootless)..."
 
             /kaniko/executor \
@@ -300,8 +300,8 @@ PYCI
     stage('Trivy Image Scan (blocking)') {
       steps {
         sh '''
-          #!/bin/bash
-          set -euo pipefail
+          #!/bin/sh
+          set -eu
           echo "[INFO] Running Trivy container vulnerability scan (CRITICAL = fail)..."
           trivy image --severity CRITICAL --exit-code 1 ${REGISTRY_HOST}/${IMAGE_PREFIX}-backend:${IMAGE_TAG}
           trivy image --severity CRITICAL --exit-code 1 ${REGISTRY_HOST}/${IMAGE_PREFIX}-inference:${IMAGE_TAG}
@@ -314,8 +314,8 @@ PYCI
     stage('Cosign Sign (blocking)') {
       steps {
         sh '''
-          #!/bin/bash
-          set -euo pipefail
+          #!/bin/sh
+          set -eu
           echo "[INFO] Signing images with Cosign..."
           if ! command -v cosign >/dev/null 2>&1; then
             echo "[ERROR] cosign not installed"
@@ -332,8 +332,8 @@ PYCI
     stage('Kubernetes Deploy') {
       steps {
         sh '''
-          #!/bin/bash
-          set -euo pipefail
+          #!/bin/sh
+          set -eu
           echo "[INFO] Applying Kubernetes manifests..."
           kubectl apply -f ai-security/k8s/namespace.yaml
           kubectl apply -f ai-security/k8s/
