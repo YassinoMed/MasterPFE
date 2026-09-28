@@ -9,6 +9,17 @@ check() { # check <nom> <condition(bool)>
   else echo "  FAIL  $1"; FAIL=$((FAIL+1)); fi
 }
 
+# ── Prélude : port-forwards requis (poisoning 6399 + drift 11499) ──
+# Auto-gérés : le script est autonome, aucun prérequis manuel.
+curl -s --max-time 4 http://127.0.0.1:6399/ >/dev/null 2>&1 || {
+  kubectl port-forward -n securerag-hub svc/qdrant 6399:6333 > /tmp/opencode/pf-q-final.log 2>&1 &
+  sleep 4
+}
+curl -s --max-time 4 http://127.0.0.1:11499/api/tags >/dev/null 2>&1 || {
+  kubectl port-forward -n securerag-hub svc/ollama 11499:11434 > /tmp/opencode/pf-o-final.log 2>&1 &
+  sleep 4
+}
+
 echo "═══ STACK IA MLSecOps — TEST FINAL ═══"
 echo ""
 
