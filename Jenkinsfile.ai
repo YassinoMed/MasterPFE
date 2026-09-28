@@ -265,7 +265,9 @@ spec:
       echo "[FAIL] Pipeline failed. Check console logs."
     }
     always {
-      cleanWs deleteDirs: true, notFailBuild: true
+      // cleanWs nécessite le plugin ws-cleanup (absent du Jenkins kind)
+      // deleteDir() est l'équivalent natif — supprime le workspace.
+      deleteDir()
     }
   }
 }
