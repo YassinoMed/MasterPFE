@@ -115,7 +115,6 @@ spec:
 
     stage('Lint & Static Analysis') {
       steps {
-        unstash 'workspace'
         sh '''
           #!/bin/bash
           set -euo pipefail
@@ -140,7 +139,6 @@ spec:
 
     stage('Unit Tests') {
       steps {
-        unstash 'workspace'
         sh '''
           #!/bin/bash
           set -euo pipefail
@@ -178,7 +176,6 @@ spec:
 
     stage('Live Secret Verification (TruffleHog)') {
       steps {
-        unstash 'workspace'
         sh '''
           #!/bin/bash
           set -euo pipefail
@@ -197,13 +194,13 @@ spec:
             # fixtures contiennent volontairement de faux secrets (corpus
             # red-team) — exclus du verdict, DOCUMENTÉ, pas masqués.
             HIGH=$(python3 -c "
-import json
+import json, sys
 with open('/tmp/secrets-baseline.json') as f:
     d = json.load(f)
 real = [fp for fp, res in d.get('results', {}).items()
         for loc in res if 'test' not in fp.lower() and 'fixture' not in fp.lower()
         and 'corpus' not in fp.lower()]
-for fp in real: print('  CANDIDAT:', fp)
+for fp in real: print('  CANDIDAT:', fp, file=sys.stderr)
 print(len(real))")
             echo "[INFO] Candidats secrets hors tests/corpus : $HIGH"
             if [ "$HIGH" -gt 0 ]; then
@@ -221,7 +218,6 @@ print(len(real))")
 
     stage('MLSecOps Security & LLM Red-Teaming') {
       steps {
-        unstash 'workspace'
         sh '''
           #!/bin/bash
           set -euo pipefail
@@ -241,7 +237,6 @@ print(len(real))")
 
     stage('Build Images with Kaniko (rootless)') {
       steps {
-        unstash 'workspace'
         container('kaniko') {
           sh '''
             #!/bin/bash
@@ -282,7 +277,6 @@ print(len(real))")
 
     stage('Trivy Image Scan (blocking)') {
       steps {
-        unstash 'workspace'
         sh '''
           #!/bin/bash
           set -euo pipefail
@@ -315,7 +309,6 @@ print(len(real))")
 
     stage('Kubernetes Deploy') {
       steps {
-        unstash 'workspace'
         sh '''
           #!/bin/bash
           set -euo pipefail
