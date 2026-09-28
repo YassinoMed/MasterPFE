@@ -185,6 +185,10 @@ spec:
           # [MLSecOps] detect-secrets (Yelp) : scanner de secrets RÉEL
           # présent dans l'image CI (trufflehog binaire absent de l'image).
           echo "[INFO] Scan de secrets actifs avec detect-secrets..."
+          # [CI] Le checkout est fait par jnlp (uid≠tools) : git exige
+          # safe.directory pour tout outil qui l'interroge — conteneur
+          # éphémère, risque nul.
+          git config --global --add safe.directory '*' 2>/dev/null || true
           if command -v detect-secrets >/dev/null 2>&1; then
             detect-secrets scan --force-use-all-plugins \
               --exclude-files 'node_modules|\\.git|\\.venv|test-reports|__pycache__' \
