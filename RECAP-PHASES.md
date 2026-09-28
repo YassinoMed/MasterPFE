@@ -110,6 +110,7 @@
 | **Flux /analyze complet** | 3 findings de fixtures réelles (Trivy 2 CVEs + event Falco du drill), verdict **BLOCK** |
 | **Picklescan RÉEL** | SECAI scanné (SAFE) + corpus : pickle malveillant **DÉTECTÉ** — preuve d'efficacité |
 | **Garak 0.17 RÉEL** | Probe promptinject contre le LLM déployé (wrapper URI + port-forward), rapport JSONL |
+| **Pipeline Jenkinsfile.ai** | Job SecureRAG-Hub-AI créé + **22 builds déclenchés**, chaque échec = cause racine documentée + fix committé. **5/9 stages validés en CI** : semgrep SAST, 63 tests, detect-secrets (0 crypto), **MLSecOps 13/13 payloads [SUCCESS]**. Kaniko exécutant le vrai Dockerfile (logs) — le build torch multi-GB a crashé l'apiserver kind (incident documenté + récupération) : runner dédié requis |
 | **Red-teaming CI** | `run-mlsecops-scans.sh` désormais RÉEL (plus de simulation) : **13/13 payloads neutralisés, 0 bypass** |
 | **Supply Chain IA** | Images ollama+qdrant+litellm **signées Cosign**, digest-pinned, soumises aux 8 policies Kyverno Enforce (conformité obtenue par itération réelle) |
 | **Zero-trust IA** | NetworkPolicies dédiées : ollama/qdrant/gateway inaccessibles hors namespace, ingress/egress explicites uniquement |
