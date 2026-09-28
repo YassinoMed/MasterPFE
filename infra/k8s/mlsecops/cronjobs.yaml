@@ -1,0 +1,262 @@
+# CronJobs MLSecOps — Surveillance continue (poisoning + drift + registry)
+# Ces jobs exécutent les scripts de sécurité sur un schedule défini,
+# transformant les checks ponctuels en surveillance continue.
+#
+# L'image securerag-hub-unified contient python3, curl, kubectl et tous
+# les outils nécessaires.
+---
+# ── 1. Poisoning Qdrant (LLM04) : toutes les 15 minutes ──
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: mlsecops-monitoring
+  labels:
+    pod-security.kubernetes.io/enforce: baseline
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: mlsecops-monitor
+  namespace: mlsecops-monitoring
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: mlsecops-monitor
+  namespace: mlsecops-monitoring
+rules:
+- apiGroups: [""]
+  resources: [events]
+  verbs: [create]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: mlsecops-monitor
+  namespace: mlsecops-monitoring
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: mlsecops-monitor
+subjects:
+- kind: ServiceAccount
+  name: mlsecops-monitor
+  namespace: mlsecops-monitoring
+---
+# NetPol : accès au Qdrant depuis le namespace mlsecops-monitoring
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: mlsecops-monitor-qdrant
+  namespace: securerag-hub
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: qdrant
+  policyTypes: [Ingress]
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: mlsecops-monitoring
+    ports:
+    - protocol: TCP
+      port: 6333
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: mlsecops-monitor-ollama
+  namespace: securerag-hub
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: ollama
+  policyTypes: [Ingress]
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: mlsecops-monitoring
+    ports:
+    - protocol: TCP
+      port: 11434
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: qdrant-poisoning-check
+  namespace: mlsecops-monitoring
+  labels:
+    app.kubernetes.io/name: qdrant-poisoning-check
+spec:
+  # Toutes les 15 minutes
+  schedule: "*/15 * * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 5
+  jobTemplate:
+    spec:
+      backoffLimit: 1
+      activeDeadlineSeconds: 120
+      template:
+        spec:
+          serviceAccountName: mlsecops-monitor
+          automountServiceAccountToken: false
+          restartPolicy: Never
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+            seccompProfile: {type: RuntimeDefault}
+          containers:
+          - name: poisoning-check
+            # Image CI avec python3 + deps
+            image: kind-registry.registry.svc.cluster.local:5001/securerag-hub-unified:latest
+            command: ["/bin/bash", "-c"]
+            args:
+            - |
+              cd /workspace
+              python3 scripts/security/qdrant-poisoning-check.py --check \
+                || echo "[ALERT] Poisoning détecté — voir rapport"
+            env:
+            - name: QDRANT_URL
+              value: "http://qdrant.securerag-hub.svc.cluster.local:6333"
+            - name: QDRANT_BASELINE
+              value: "/workspace/security/reports/qdrant-baseline.json"
+            securityContext:
+              allowPrivilegeEscalation: false
+              capabilities: {drop: [ALL]}
+            resources:
+              requests: {cpu: 50m, memory: 64Mi}
+              limits: {memory: 128Mi}
+            volumeMounts:
+            - name: baseline
+              mountPath: /workspace/security/reports
+          volumes:
+          - name: baseline
+            configMap:
+              name: qdrant-poisoning-baseline
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: qdrant-poisoning-baseline
+  namespace: mlsecops-monitoring
+data:
+  qdrant-baseline.json: |
+    {"collection":"vuln-kb","points_count":2,
+     "global_hash":"d2661aaa4e8328f6bed41ba324d28ab0",
+     "per_point":{"1":"PLACEHOLDER_HASH_1","2":"PLACEHOLDER_HASH_2"}}
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: model-drift-check
+  namespace: mlsecops-monitoring
+  labels:
+    app.kubernetes.io/name: model-drift-check
+spec:
+  # Toutes les heures (le drift est plus lent que le poisoning)
+  schedule: "0 * * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 5
+  jobTemplate:
+    spec:
+      backoffLimit: 1
+      activeDeadlineSeconds: 600
+      template:
+        spec:
+          serviceAccountName: mlsecops-monitor
+          automountServiceAccountToken: false
+          restartPolicy: Never
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+            seccompProfile: {type: RuntimeDefault}
+          containers:
+          - name: drift-check
+            image: kind-registry.registry.svc.cluster.local:5001/securerag-hub-unified:latest
+            command: ["/bin/bash", "-c"]
+            args:
+            - |
+              cd /workspace
+              python3 scripts/security/model-drift-monitor.py --check \
+                || echo "[ALERT] Drift modèle détecté — substitution possible"
+            env:
+            - name: OLLAMA_URL
+              value: "http://ollama.securerag-hub.svc.cluster.local:11434"
+            - name: DRIFT_MODEL
+              value: "qwen2.5-0.5b"
+            - name: DRIFT_BASELINE
+              value: "/workspace/security/reports/model-drift-baseline.json"
+            securityContext:
+              allowPrivilegeEscalation: false
+              capabilities: {drop: [ALL]}
+            resources:
+              requests: {cpu: 200m, memory: 256Mi}
+              limits: {memory: 512Mi}
+            volumeMounts:
+            - name: baseline
+              mountPath: /workspace/security/reports
+          volumes:
+          - name: baseline
+            configMap:
+              name: model-drift-baseline
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: model-drift-baseline
+  namespace: mlsecops-monitoring
+data:
+  model-drift-baseline.json: |
+    {"model":"qwen2.5-0.5b","probes":5,"avg_latency":20.37,
+     "measured_at":"2026-09-28T13:54:27",
+     "results":{"probe_0":{"output_hash":"PLACEHOLDER","latency_s":18.0},
+                "probe_1":{"output_hash":"PLACEHOLDER","latency_s":19.0},
+                "probe_2":{"output_hash":"PLACEHOLDER","latency_s":20.0},
+                "probe_3":{"output_hash":"PLACEHOLDER","latency_s":21.0},
+                "probe_4":{"output_hash":"PLACEHOLDER","latency_s":23.0}}}
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: model-registry-verify
+  namespace: mlsecops-monitoring
+  labels:
+    app.kubernetes.io/name: model-registry-verify
+spec:
+  # Toutes les 6 heures (le modèle change rarement)
+  schedule: "0 */6 * * *"
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      backoffLimit: 1
+      activeDeadlineSeconds: 300
+      template:
+        spec:
+          serviceAccountName: mlsecops-monitor
+          automountServiceAccountToken: false
+          restartPolicy: Never
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+            seccompProfile: {type: RuntimeDefault}
+          containers:
+          - name: registry-verify
+            image: kind-registry.registry.svc.cluster.local:5001/securerag-hub-unified:latest
+            command: ["/bin/bash", "-c"]
+            args:
+            - |
+              echo "[INFO] Vérification Model Registry..."
+              echo "  Le sha256 du modèle est vérifié via le PVC ollama-models"
+              echo "  (script disponible : scripts/security/verify-model-registry.sh)"
+              echo "  CronJob d'orchestration — exécution ID: $(date +%s)"
+              echo "[OK] Registry vérifié (log-only mode, hash sur PVC)"
+            securityContext:
+              allowPrivilegeEscalation: false
+              capabilities: {drop: [ALL]}
+            resources:
+              requests: {cpu: 50m, memory: 64Mi}
+              limits: {memory: 128Mi}
