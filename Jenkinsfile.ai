@@ -15,9 +15,11 @@ spec:
     command:
     - cat
     tty: true
+    # [FIX WORKSPACE] Pas de volume custom : le workspaceVolume du plugin
+    # kubernetes (déclaré ci-dessous) est monté au MÊME chemin dans TOUS
+    # les containers (jnlp + tools + kaniko) — sinon l'unstash écrit dans
+    # le volume du jnlp et le sh des side-containers ne voit rien.
     volumeMounts:
-    - name: workspace
-      mountPath: /home/jenkins/agent
     - name: composer-cache
       mountPath: /home/jenkins/.composer/cache
     - name: npm-cache
@@ -40,15 +42,12 @@ spec:
     command:
     - /busybox/cat
     tty: true
+    # [FIX WORKSPACE] idem tools : workspaceVolume partagé, pas de volume custom
     volumeMounts:
-    - name: workspace
-      mountPath: /workspace
     - name: docker-config
       mountPath: /kaniko/.docker
 
   volumes:
-  - name: workspace
-    emptyDir: {}
   - name: docker-config
     emptyDir: {}
   # [SECURITÉ] hostPath remplacé par emptyDir : la PSA "baseline" du
@@ -70,6 +69,10 @@ spec:
     emptyDir: {}
 '''
       defaultContainer 'tools'
+      // [FIX WORKSPACE] Volume partagé entre jnlp/tools/kaniko au même
+      // chemin (/home/jenkins/agent) — remplace le volume custom qui
+      // était DÉCONNECTÉ de celui du jnlp (cause du 'cd: can't cd').
+      workspaceVolume emptyDirWorkspaceVolume()
     }
   }
 
