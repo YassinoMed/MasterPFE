@@ -175,7 +175,7 @@ spec:
           echo "[INFO] Scan de secrets actifs avec detect-secrets..."
           if command -v detect-secrets >/dev/null 2>&1; then
             detect-secrets scan --force-use-all-plugins \
-              --exclude-files 'node_modules|\.git|\.venv|test-reports|__pycache__' \
+              --exclude-files 'node_modules|\\.git|\\.venv|test-reports|__pycache__' \
               > /tmp/secrets-baseline.json
             # Audit : des secrets RÉELS (hors tests/fixtures) font échouer le build
             detect-secrets audit --report-json /tmp/secrets-baseline.json --display-results 2>/dev/null | tee /tmp/secrets-report.txt
