@@ -145,21 +145,21 @@ spec:
           #!/bin/bash
           set -euo pipefail
           echo "[INFO] Running Python tests..."
-          export PYTHONPATH="${PYTHONPATH:-}:$(pwd)/ai-security/backend"
-          if command -v pytest >/dev/null 2>&1; then
-            pytest ai-security/backend/tests/ -v --tb=short
-          else
-            # pytest absent de l'image CI : tenter une installation bornée
-            # (90s max) puis fallback unittest discover — on ne saute
-            # JAMAIS silencieusement les tests.
-            echo "[INFO] pytest absent — installation tentée (90s max)..."
-            if timeout 90 pip3 install --quiet pytest 2>/dev/null && python3 -m pytest --version >/dev/null 2>&1; then
-              python3 -m pytest ai-security/backend/tests/ -v --tb=short
+          # Les tests RÉELS du repo sont dans secai/tests/ (guardrails,
+          # parsers, décision, API). test_remediation a des deps hors CI.
+          IGNORES="--ignore=secai/tests/test_remediation.py"
+          # Les tests API/câblage nécessitent fastapi : l'installer (borné)
+          # ou les exclure explicitement — jamais de skip silencieux.
+          if ! python3 -c "import fastapi" 2>/dev/null; then
+            if timeout 120 pip3 install --quiet fastapi 2>/dev/null && python3 -c "import fastapi" 2>/dev/null; then
+              echo "[OK] fastapi installé pour les tests API"
             else
-              echo "[INFO] Installation impossible — fallback unittest discover"
-              python3 -m unittest discover -s ai-security/backend/tests -p "test_*.py" -v
+              echo "[WARN] fastapi indisponible — tests API exclus explicitement"
+              IGNORES="$IGNORES --ignore=secai/tests/test_api.py --ignore=secai/tests/test_llm_endpoint.py"
             fi
           fi
+          python3 -m pytest secai/tests/ -q --tb=short $IGNORES
+          echo "[OK] Suite de tests exécutée"
         '''
       }
     }
