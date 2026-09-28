@@ -24,8 +24,63 @@ if command -v modelscan >/dev/null 2>&1; then
   echo "  -> Executing ModelScan on ML artifacts in ${ML_MODEL_DIR}..."
   modelscan --path "${ML_MODEL_DIR}" -o "${MODELSCAN_REPORT}" || echo "[WARN] ModelScan detected potential unsafe deserialization files"
 elif python3 -c "import picklescan" >/dev/null 2>&1; then
-  echo "  -> Executing PickleScan on model weights..."
-  python3 -m picklescan --path "${ML_MODEL_DIR}" -j "${MODELSCAN_REPORT}" || echo "[WARN] PickleScan completed with warnings"
+  echo "  -> Executing PickleScan (RÉEL) : package SECAI + corpus red-team..."
+  REPO_ROOT="${REPO_ROOT}" python3 - <<'PYEOF' || true
+import json
+import os
+import re
+
+from picklescan.scanner import ScanFilter, scan_directory_path, scan_file_path
+
+repo_root = os.environ["REPO_ROOT"]
+secai_dir = os.path.join(repo_root, "secai")
+corpus_dir = os.path.join(secai_dir, "redteam-corpus")
+
+# 1) Package SECAI — doit être SAIN (le corpus red-team est EXCLU du scan
+#    du package : il est scanné séparément comme corpus de détection)
+flt = ScanFilter(exclude_dir=[re.compile(r"redteam-corpus")])
+secai_results = scan_directory_path(secai_dir, scan_filter=flt)
+
+# 2) Corpus red-team — pickle volontairement malveillant : le scanner
+#    DOIT le détecter (preuve d'efficacité, pas de simulation)
+corpus_detect = {}
+if os.path.isdir(corpus_dir):
+    for f in sorted(os.listdir(corpus_dir)):
+        if f.endswith(".pkl"):
+            r = scan_file_path(os.path.join(corpus_dir, f))
+            corpus_detect[f] = {
+                "dangerous_imports": r.issues_count,
+                "detected": r.issues_count > 0,
+            }
+corpus_all_detected = (
+    all(v["detected"] for v in corpus_detect.values()) if corpus_detect else True
+)
+
+report = {
+    "scanner": "picklescan (real)",
+    "secai_package": {
+        "scanned_files": secai_results.scanned_files,
+        "dangerous_imports": secai_results.issues_count,
+        "verdict": "SAFE" if secai_results.issues_count == 0 else "DANGER",
+    },
+    "redteam_corpus": {
+        "files": corpus_detect,
+        "all_malicious_detected": corpus_all_detected,
+        "verdict": "SCANNER_EFFECTIVE" if corpus_all_detected else "SCANNER_FAILED",
+    },
+    "status": "PASS" if secai_results.issues_count == 0 and corpus_all_detected else "FAIL",
+}
+
+out_path = os.path.join(repo_root, "security", "reports", "modelscan-report.json")
+os.makedirs(os.path.dirname(out_path), exist_ok=True)
+with open(out_path, "w") as f:
+    json.dump(report, f, indent=2)
+
+print(f"     SECAI : {secai_results.scanned_files} fichiers scannés, "
+      f"{secai_results.issues_count} import(s) dangereux")
+print(f"     Corpus red-team : {len(corpus_detect)} pickle(s), "
+      f"{'TOUS DÉTECTÉS' if corpus_all_detected else 'ÉCHEC DÉTECTION !'}")
+PYEOF
 else
   echo "  -> Fallback: Scanning for unverified pickle/binary files in ML directory..."
   python3 -c "
@@ -47,11 +102,51 @@ echo ""
 echo "[2/3] Running LLM Vulnerability & Red-Teaming Fuzzing (Garak)..."
 GARAK_REPORT="${REPORT_DIR}/garak_mlsecops_report.json"
 
-if command -v garak >/dev/null 2>&1 || python3 -c "import garak" >/dev/null 2>&1; then
-  echo "  -> Executing Garak LLM vulnerability scan..."
-  python3 -m garak --model_type rest --report_prefix "${REPORT_DIR}/garak_run" || echo "[WARN] Garak red-teaming reported non-blocking prompt injection vulnerabilities"
+# Garak RÉEL si installé ET si un endpoint LLM est joignable
+# (OLLAMA_URI ex: http://127.0.0.1:11499/v1/ via port-forward, ou gateway)
+LLM_URI="${OLLAMA_URI:-}"
+LLM_MODEL="${OLLAMA_MODEL:-qwen2.5-0.5b}"
+LLM_REACHABLE=false
+if command -v garak >/dev/null 2>&1 && [ -n "$LLM_URI" ]; then
+  curl -s --max-time 5 -o /dev/null "$LLM_URI/models" && LLM_REACHABLE=true
+fi
+
+if [ "$LLM_REACHABLE" = "true" ]; then
+  echo "  -> Executing Garak (RÉEL) contre ${LLM_MODEL} sur ${LLM_URI}..."
+  export OPENAICOMPATIBLE_API_KEY="${OPENAICOMPATIBLE_API_KEY:-noauth-local-ollama}"
+  python3 -m garak \
+    --target_type openai.OpenAICompatible \
+    --target_name "$LLM_MODEL" \
+    --generator_options "{\"uri\": \"${LLM_URI}\", \"max_tokens\": 100}" \
+    --probes promptinject \
+    --generations 1 \
+    --parallel_attempts 4 \
+    --report_prefix garak_ci_run \
+    --narrow_output 2>&1 | tail -5 || echo "[WARN] Garak a reporté des vulnérabilités non bloquantes"
+  # Copier le rapport garak vers artifacts
+  GARAK_SRC=$(find /home/admin/.local/share/garak/garak_runs ~/.local/share/garak/garak_runs -name "garak_ci_run.report.jsonl" -newer "${REPO_ROOT}/scripts/ci/run-mlsecops-scans.sh" 2>/dev/null | head -1)
+  if [ -n "$GARAK_SRC" ]; then
+    python3 -c "
+import json
+hits = 0; total = 0
+with open('$GARAK_SRC') as f:
+    for line in f:
+        d = json.loads(line)
+        if d.get('entry_type') == 'eval':
+            total += 1
+            if d.get('status') in ('fail', 'FAIL'):
+                hits += 1
+r = {'scanner': 'garak (real)', 'model': '$LLM_MODEL', 'uri': '$LLM_URI',
+     'probe': 'promptinject', 'attempts': total, 'detector_hits': hits,
+     'status': 'PASSED' if hits == 0 else 'VULNERABILITIES FOUND',
+     'note': 'hits = tentatives passant les detectors garak (injection reussie cote LLM brut)'}
+with open('${GARAK_REPORT}', 'w') as f:
+    json.dump(r, f, indent=2)
+print(f'     Garak: {total} tentatives, {hits} hit(s) detector')
+" || true
+  fi
 else
-  echo "  -> Garak absent : exécution de la suite red-teaming RÉELLE contre les guardrails SECAI..."
+  echo "  -> Garak/endpoint indisponible : exécution de la suite red-teaming RÉELLE contre les guardrails SECAI..."
   python3 - <<'PYEOF' || true
 import json
 import sys

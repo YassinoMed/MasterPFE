@@ -1,0 +1,13 @@
+{
+  "time": "2026-09-27T04:52:06.000000000Z",
+  "rule": "Read sensitive file untrusted",
+  "priority": "WARNING",
+  "output": "04:52:06.123456789: Warning Sensitive file opened for reading by non-trusted program (user=root command=cat /etc/shadow parent=shell file=/etc/shadow) container_name=auth-users pod=auth-users-5d9c74c4d6-x2ghk namespace=securerag-hub",
+  "output_fields": {
+    "user.name": "root",
+    "proc.cmdline": "cat /etc/shadow",
+    "container.name": "auth-users",
+    "k8s.pod.name": "auth-users-5d9c74c4d6-x2ghk",
+    "k8s.ns.name": "securerag-hub"
+  }
+}

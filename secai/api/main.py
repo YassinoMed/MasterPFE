@@ -14,6 +14,7 @@ from secai.config import get_settings
 from secai.models import SecureBERTLoader, ModelNotAvailable
 from secai.pipelines.alert_correlation import correlate, cluster_summary
 from secai.pipelines.security_analysis import analyze_reports
+from secai.api.llm_endpoint import LLMAnalyzeRequest, LLMAnalyzeResponse, llm_analyze
 
 logger = logging.getLogger("secai.api")
 settings = get_settings()
@@ -161,3 +162,14 @@ def models_info() -> dict:
             else "not_loaded"
         ),
     }
+
+
+# ── Chemin LLM production — guardrails OBLIGATOIRES (LLM01/02/07/10) ─────────
+@app.post("/llm/analyze", response_model=LLMAnalyzeResponse)
+def llm_analyze_endpoint(payload: LLMAnalyzeRequest) -> LLMAnalyzeResponse:
+    """Chaîne complète : rate-limit → guardrail IN → Gateway LLM → guardrail OUT.
+
+    Aucun prompt n'atteint le LLM sans scan ; aucune réponse ne sort sans scan.
+    Voir secai/api/llm_endpoint.py pour la logique (testable pure).
+    """
+    return llm_analyze(payload)
