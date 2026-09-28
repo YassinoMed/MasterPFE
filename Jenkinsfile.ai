@@ -8,7 +8,9 @@ spec:
   serviceAccountName: jenkins
   containers:
   - name: tools
-    image: mohamedyassinebouneb/securerag-hub-unified:latest
+    # [MLSecOps] Registry local : Docker Hub rate-limité depuis le cluster.
+    # Image pré-pull-ée et push-ée vers localhost:5001 (kind-registry).
+    image: kind-registry.registry.svc.cluster.local:5001/securerag-hub-unified:latest
     imagePullPolicy: Always
     command:
     - cat
@@ -33,7 +35,7 @@ spec:
 
   # Kaniko executor (rootless, no privileged)
   - name: kaniko
-    image: gcr.io/kaniko-project/executor:v1.23.2-debug
+    image: kind-registry.registry.svc.cluster.local:5001/kaniko-executor:v1.23.2-debug
     imagePullPolicy: IfNotPresent
     command:
     - /busybox/cat
@@ -49,27 +51,23 @@ spec:
     emptyDir: {}
   - name: docker-config
     emptyDir: {}
+  # [SECURITÉ] hostPath remplacé par emptyDir : la PSA "baseline" du
+  # namespace jenkins interdit hostPath (et c'est une bonne pratique —
+  # un agent CI n'a pas à toucher le filesystem du node).
   - name: composer-cache
-    hostPath:
-      path: /var/cache/jenkins/composer-cache-pvc
+    emptyDir: {}
   - name: npm-cache
-    hostPath:
-      path: /var/cache/jenkins/npm-cache-pvc
+    emptyDir: {}
   - name: pip-cache
-    hostPath:
-      path: /var/cache/jenkins/pip-cache
+    emptyDir: {}
   - name: trivy-cache
-    hostPath:
-      path: /var/cache/jenkins/trivy-cache-pvc
+    emptyDir: {}
   - name: semgrep-cache
-    hostPath:
-      path: /var/cache/jenkins/semgrep-cache
+    emptyDir: {}
   - name: sonar-cache
-    hostPath:
-      path: /var/cache/jenkins/sonar-cache-pvc
+    emptyDir: {}
   - name: maven-cache
-    hostPath:
-      path: /var/cache/jenkins/maven-cache
+    emptyDir: {}
 '''
       defaultContainer 'tools'
     }
