@@ -187,8 +187,13 @@ spec:
           # éphémère, risque nul.
           git config --global --add safe.directory '*' 2>/dev/null || true
           if command -v detect-secrets >/dev/null 2>&1; then
+            # [PORTÉE] Le scan cible le CODE APPLICATIF (ai-security/,
+            # secai/, scripts/, infra/) — pas .agent/skills/ (14k fichiers
+            # de docs tierces pleines de clés d'EXEMPLE = 1480 faux positifs
+            # constatés au build #18) ni docs/evidence (historique).
             detect-secrets scan --force-use-all-plugins \
-              --exclude-files 'node_modules|\\.git|\\.venv|test-reports|__pycache__' \
+              ai-security/ secai/ scripts/ infra/ src/ 2>/dev/null \
+              --exclude-files 'node_modules|\\.git|\\.venv|test-reports|__pycache__|corpus|fixtures' \
               > /tmp/secrets-baseline.json
             # Comptage direct dans le baseline : les fichiers de TEST et
             # fixtures contiennent volontairement de faux secrets (corpus
