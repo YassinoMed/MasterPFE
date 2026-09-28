@@ -76,11 +76,11 @@ spec:
   }
 
   options {
-    timestamps()
+    // timestamps()/ansiColor retirés : plugins absents du Jenkins kind
+    // (options cosmétiques — la sécurité du pipeline est inchangée)
     disableConcurrentBuilds()
     buildDiscarder(logRotator(numToKeepStr: '10'))
     timeout(time: 30, unit: 'MINUTES')
-    ansiColor('xterm')
     skipDefaultCheckout()
   }
 
