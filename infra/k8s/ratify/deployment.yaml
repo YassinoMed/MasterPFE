@@ -117,16 +117,16 @@ spec:
           requests: {cpu: 100m, memory: 128Mi}
           limits: {memory: 256Mi}
         readinessProbe:
-          httpGet: {path: /ready, port: 9099}
+          tcpSocket: {port: 6000}
           initialDelaySeconds: 10
           periodSeconds: 5
         startupProbe:
-          httpGet: {path: /ready, port: 9099}
+          tcpSocket: {port: 6000}
           initialDelaySeconds: 5
           periodSeconds: 3
           failureThreshold: 20
         livenessProbe:
-          httpGet: {path: /healthy, port: 9099}
+          tcpSocket: {port: 6000}
           initialDelaySeconds: 15
           periodSeconds: 15
         volumeMounts:
