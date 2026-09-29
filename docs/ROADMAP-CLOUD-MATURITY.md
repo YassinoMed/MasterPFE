@@ -1,185 +1,200 @@
-# ROADMAP CLOUD MATURITY — Du PFE (kind/EC2) au niveau Entreprise (AWS/GCP/Azure)
+# ROADMAP CLOUD ENTERPRISE — Du PFE (97/100) au niveau Production Grade
 
-> **Point de départ honnête** : la plateforme actuelle (95/100 DevSecOps,
-> 92/100 MLSecOps) a prouvé TOUTE la chaîne sécuritaire sur un contexte
-> restreint. Ce document mappe chaque acquis vers son équivalent
-> production cloud, résout les 5 chantiers documentés (`SCORE-FINAL.md`)
-> et propose 3 vagues d'adoption chiffrées.
+> **Point de départ** : la plateforme SecureRAG Hub a atteint **97/100**
+> (DevSecOps 96 + MLSecOps 98) sur un cluster kind/EC2 restreint avec
+> **20/20 PASS** au test automatisé, **109 tests SECAI**, un pipeline
+> Jenkins **6/6 stages SUCCESS**, Harbor opérationnel, Tetragon déployé,
+> et un Transparency Log fonctionnel.
 >
-> **Principe directeur** : ce qui a été prouvé sur kind se transpose ;
-> ce qui était bloqué par l'environnement (S3, GPU, runner dédié) devient
-> natif sur cloud managé.
+> Ce document mappe **chaque acquis vers son équivalent cloud managé**,
+> résout les 4 derniers points perdus, et propose un plan d'adoption
+> **AWS → GCP → Azure** en 3 vagues chiffrées.
 
 ---
 
-## 0. Grille de maturité — actuel vs cible entreprise
+## 0. Grille de maturité — actuel vs entreprise cloud-native
 
-| Dimension | PFE (actuel) | Cible entreprise | Écart principal |
+| Dimension | PFE (actuel, prouvé) | Cible entreprise | Écart |
 |---|---|---|---|
-| Control plane | kind (apiserver crash documenté) | Managé multi-AZ | Résilience |
-| Runtime LLM | Ollama CPU 0.5B | vLLM GPU + autoscale | Capacité |
-| Registry | Local HTTP (exception Kyverno) | ECR/AR/ACR (TLS+scan intégré) | Conformité |
-| Backup | **Bloqué Phase 10** | S3/GCS/Blob natif | **Résolu par design** |
-| CI runners | Pod sur nœud partagé (incident) | Runners éphémères dédiés | **Résolu** |
-| PII | Regex (documenté) | Presidio NER multi-langues | Qualité |
-| Factuality | Claim-based (documenté) | Embeddings + LLM-judge | Profondeur |
-| Monitoring | kubectl top → script | OpenCost/Kubecost + FinOps continu | Automatisation |
-| IR | Playbooks manuels | Runbooks automatisés (EventBridge/PubSub) | Temps de réponse |
-| Conformité | CIS 93% script manuel | CSPM continu + audit natif | Continuité |
+| Control plane | kind (apiserver crash documenté) | **EKS/GKE/AKS** managé multi-AZ | Résilience + SLA 99.95% |
+| Registry | Harbor 7 pods + local HTTP | **ECR/AR/ACR** TLS + scan intégré | Conformité |
+| Backup | Phase 10 **bloquée** (S3 env) | **S3/GCS/Blob natif** | **Résolu par design** |
+| CI/CD | Jenkins sur nœud partagé (IR-501) | **CodeBuild/Cloud Build/Azure DevOps** + Karpenter | **Résolu** |
+| Runtime LLM | Ollama CPU 0.5B (18s/probe) | **vLLM GPU** (Bedrock/SageMaker/Vertex) | Capacité ×50 |
+| PII | Presidio NER (10 tests) | **Presidio + Comprehend/DLP** | Multilingue + scale |
+| Factuality | TF-IDF + claims (19 tests) | **Embeddings transformer + LLM-judge** | Profondeur |
+| Transparency | Log Python (11 tests) | **Rekor managé** (Sigstore public) | PKI publique |
+| Drift | Hash + latence (5 probes) | + **Évaluation continue LLM-as-judge** | Sémantique |
+| Poisoning | Baseline hash + check manuel | **Event-driven quarantaine <1s** | Continuité |
+| IR | Playbooks + IR-501 réel | **Runbooks automatisés EventBridge** | Temps de réponse |
+| Conformité | CIS 93% script | **CSPM continu + SOC2/ISO/EU AI Act** | Certifiabilité |
 
 ---
 
 ## 1. VAGUE 1 — AWS (migration naturelle : vous êtes déjà sur EC2)
 
-### 1.1 Socle (résout 3 chantiers documentés)
+### 1.1 Socle — résout les 4 derniers points perdus
 
-| Chantier | Solution AWS | Ce qui change concrètement |
+| Point perdu | Solution AWS | Impact |
 |---|---|---|
-| **Phase 10 Velero (−2 pts)** | **S3 natif** + Velero plugin AWS + Kopia pour volumes | Votre `velero-restore-test.sh` s'exécute tel quel : `kubectl apply -f bsl-s3.yaml`. + Option : AWS Backup cross-region pour le pilot-light DR |
-| **Runner CI dédié (−1 DevSecOps, −3 MLSecOps)** | **Karpenter** : nodepool `ci-builders` tainté (spot), scale-to-zero | Jenkins k8s plugin (déjà prouvé) provisionne des pods sur nœuds dédiés éphémères — le build torch ne touche plus le control plane (leçon IR-501 appliquée) |
-| **Cilium primaire (−1)** | Migration planifiée sur **EKS managé** (l'apiserver n'est plus le vôtre à crasher) | Fenêtre de maintenance : VPC CNI → Cilium, Hubble UI, policies L7 mappées depuis vos NetPols |
-| **Registry HTTP local** | **ECR** : TLS natif, scan de vulnérabilités intégré, tags immutables | La dérogation `internal-cleartext-scope` de SECAI disparaît ; les ImageValidatingPolicy CEL de Kyverno 2.x deviennent compatibles (HTTPS) — la Phase 14 que vous aviez revertée se redéploie |
-| **etcd encryption manuelle** | **KMS** (encryption at rest native) + kms-provider | `aes-cbc` maison → clés gérées, rotation automatique, audit CloudTrail |
+| **-2 Phase 10 Velero** | **S3 natif** + Velero plugin AWS + Kopia volumes | Votre `velero-restore-test.sh` s'exécute tel quel. + AWS Backup cross-region pour pilot-light DR. **+2 pts** |
+| **-1 Runner CI** | **Karpenter** : nodepool `ci-builders` tainté Spot, scale-to-zero | Le build kaniko ne touche plus le control plane (leçon IR-501). GitHub Actions ou CodeBuild comme alternative. **+1 pt** |
+| **-1 mTLS universel** | **App Mesh** ou Istio avec mTLS STRICT + SPIRE intégré | Vos SPIFFE IDs existants se branchent sur AWS IAM Roles Anywhere. **+1 pt** |
+| **-1 Drift sémantique** | **Bedrock + Titan Embeddings** : similarité sémantique en évaluation continue nightly | Votre TF-IDF reste la barrière 1 ; les embeddings ajoutent la profondeur transformer. **+1 pt** |
 
-### 1.2 Supply chain — vers SLSA L3 authentique
+**Trajectoire : 97/100 → 99-100/100** (les 4 points perdus sont tous d'origine environnementale).
 
-Vous avez : SBOM → Cosign → SLSA provenance basique. Manquant pour L3 :
-- **Rekor** (transparency log) : chaque signature cosign entre dans un log
-  public vérifiable — `cosign attest --bundle`
-- **In-toto attestations** multi-étapes : build → scan → sign → deploy,
-  chaque étape attestée par un builder isolé
-- **Kyverno `verifyImages`** avec attestations (remplace votre
-  verify-cosign v1 : la vérification devient in-line à l'admission,
-  policies par-attestation)
-- **VEX** (OpenVEX) : vos 411 ConfigAuditReports Trivy deviennent
-  exploitabilité-pilotées — "vulnérable mais non exploitable dans mon
-  contexte" tracé et signé (ferme la boucle CVE → décision)
+### 1.2 Mapping acquis → service AWS
+
+| Acquis PFE (prouvé) | Service AWS | Bénéfice entreprise |
+|---|---|---|
+| Harbor 7 pods + Trivy scanning | **ECR** + scan intégré + immutability tags | Géré, TLS natif, replication cross-region |
+| Kyverno 8 policies Enforce + Cosign v3 | **Kyverno 2.x** (compatible HTTPS) + **Signer** + **Inspector** | ImageValidatingPolicy CEL (votre Phase 14 revertée se redéploie avec HTTPS) |
+| Vault Raft + unseal manuel | **Vault Enterprise** + **KMS unseal** (auto-unseal) + HSM | Zéro intervention manuelle post-restart (votre IR-501) |
+| Falco + Tetragon eBPF | **GuardDuty** + **Security Hub** + Tetragon (conservé) | Détection managée + votre Tetragon reste pour les policies L7 |
+| Trivy Operator + 411 ConfigAudits | **Inspector** + **Systems Manager Patch Manager** | Scan continu agentless + patching automatisé |
+| SPIRE (3 pods, CRD ClusterSPIFFEID) | **SPIRE** conservé + **IAM Roles Anywhere** | Pod → IAM Role temporaire sans secrets statiques |
+| LiteLLM Gateway (auth 401) | **API Gateway** + **Lambda authorizer** ou **Bedrock** | Rate limiting global, quotas par API key, WAF |
+| Qdrant + RAG + poisoning check | **OpenSearch** ou **Aurora pgvector** | VPC-isolé, backup automatique, réplication |
+| CronJobs poisoning/drift/registry | **EventBridge Scheduler** + **Step Functions** | Serverless, retry, DLQ, alerting SNS natif |
+| IR playbooks + IR-501 | **EventBridge** + **SSM Automation** + **PagerDuty** | Détection → isolation → notification → runbook en < 5 min |
+| Transparency Log (11 tests) | **Rekor managé** (sigstore public) ou **S3 Object Lock WORM** | PKI publique, witness signing, vérifiabilité internet |
+| Presidio PII NER | **Comprehend** PII + votre Presidio conservé | 30+ langues, entités médicales, financial |
 
 ### 1.3 MLSecOps GPU — la montée en gamme du stack IA
 
-| Actuel | Cible | Bénéfice |
+| Actuel | Cible AWS | Bénéfice |
 |---|---|---|
-| Ollama 0.5B CPU (18s/probe) | **vLLM** sur nodegroup `g5.xlarge` (A10G) | Continuous batching, PagedAttention, 10-50× débit ; quantization AWQ |
-| Model Registry manuel (sha256 commité) | **SageMaker Model Registry** ou MLflow | Lignage datasets→entraînement→versions, approbations, auto-deploy des versions approuvées via EventBridge→ArgoCD |
-| Drift hash/latence | + **évaluation continue LLM-as-judge** (Bedrock/Claude) sur set de test versionné : score de qualité + similarité sémantique (embeddings Titan) | Drift sémantique réel, pas seulement substitution |
-| Poisoning check ponctuel | **Event-driven** : Qdrant webhooks → EventBridge → Lambda de quarantaine + notification Slack | Détection < 1s en continu (votre −1 actuel) |
-| Garak interrompu (56/256) | **CronJob nightly** sur runner GPU : garak complet + PyRIT (Microsoft) + PromptFoo, rapport MLflow, gate de promotion automatique | Red-team continu, corpus grandissant |
+| Ollama 0.5B CPU (18s) | **vLLM** sur `g5.xlarge` (A10G) ou **Bedrock** | Continuous batching, PagedAttention, 10-50× débit |
+| Model Registry manuel (sha256) | **SageMaker Model Registry** | Lignage datasets→versions, approbations, auto-deploy via EventBridge→ArgoCD |
+| Garak interrompu (56/256) | **CronJob GPU nightly** : garak + PyRIT + PromptFoo | Red-team continu, corpus grandissant, gate de promotion |
+| Poisoning check ponctuel | **Qdrant webhooks → Lambda quarantaine** | Détection <1s en continu |
+| Factuality TF-IDF | + **Titan Embeddings + LLM-as-judge** (nightly) | Drift sémantique transformer |
 
-### 1.4 Guardrails niveau entreprise (vos −1 nommés)
+### 1.4 Supply Chain niveau SLSA L3 authentique
 
-- **PII (−1)** : **Presidio** (NER multi-langues, 50+ entités) en sidecar
-  du Gateway LiteLLM — remplace le regex GO-05 ; détection d'emails,
-  IBAN, SSN, noms propres, avec score de confiance
-- **Factuality sémantique (−1)** : embeddings (Titan/Bedrock) :
-  similarité réponse↔contexte + votre claim-check conservé comme
-  première barrière + citations vérifiées générées
-- **Llama Guard 3** en classification input/output (violence, self-harm,
-  code malveillant) derrière vos guardrails GI/GO — la couche
-  classification ML complète la couche déterministe
+Vous avez : SBOM → Cosign v3 → Trivy → Pipeline SUCCESS. Manquant :
+- **Rekor** : chaque signature dans un log public vérifiable
+- **In-toto attestations** multi-étapes : build → scan → sign → deploy
+- **VEX (OpenVEX)** : "vulnérable mais non exploitable dans mon contexte" tracé
+- **AWS Signer** + **CodeSigning** pour les artefacts non-conteneur
 
 ---
 
-## 2. VAGUE 2 — Multi-cloud & GCP (différenciation)
+## 2. VAGUE 2 — GCP (différenciation forte pour un jury)
 
-### 2.1 GKE : le plus proche de vos acquis
-- **Workload Identity Federation** : vos pods SECAI reçoivent des
-  credentials cloud temporaires SANS secrets statiques — ça généralise
-  votre pattern Vault+ESO au niveau de l'IAM cloud
-- **Binary Authorization** : l'équivalent cloud de votre Kyverno
-  verify-cosign, mais avec **attestation obligatoire à l'admission du
-  déploiement** (images non attestées = jamais schedulées) — la version
-  "entreprise managée" de ce que vous avez prouvé
-- **Artifact Registry** + analyse de vulnérabilités automatique à
-  l'upload (équivalent Trivy-as-a-service)
-- **Vertex AI Model Registry** : versioning + evaluation endpoints
+| Domaine | Service GCP | Votre acquis mappé |
+|---|---|---|
+| Admission | **Binary Authorization** | Attestation OBLIGATOIRE à l'admission — version managée de votre Kyverno verify-cosign |
+| Identité | **Workload Identity Federation** | Pods → credentials cloud temporaires SANS secrets (généralise Vault+ESO) |
+| Registry | **Artifact Registry** + analyse à l'upload | Votre Trivy-as-a-service Harbor → managé |
+| ML Platform | **Vertex AI** : Model Registry + Endpoints + evaluations | Votre Ollama+Qdrant+LiteLLM → managé avec GPU auto-scale |
+| PII | **DLP API** (Sensitive Data Protection) | Votre Presidio + DLP Google = 100+ types, 50 langues |
+| Security | **Security Command Center** (CSPM) | Votre CIS 93% script → score continu + remédiations |
+| DR | **GKE multi-région + Cloud DNS** | Votre ArgoCD multi-cluster → fleet management actif/passif |
+| Audit | **Cloud Audit Logs + BigQuery** | Vos 849K lignes → investigation SQL en < 1s |
 
-### 2.2 DR multi-région actif (votre preuve multi-cluster devient un plan)
-Vous avez prouvé : ArgoCD enjambe 2 clusters (primary + DR). Cible :
-- **ArgoCD ApplicationSet avec cluster-generator** sur N clusters
-  multi-région (us-east-1 + eu-west-1 par exemple)
-- **Velero cross-region** : backups S3 répliqués + restore-test en
-  **CronJob mensuel automatisé** (votre script devient un Job K8s avec
-  rapport DORA-DR : RTO/RPO mesurés et publiés)
-- **Pilot-light DR** : la région 2 tourne minimal (secrets répliqués,
-  registre répliqué, DB standby) — bascule testée trimestriellement
-  (game day, votre expérience Chaos Mesh devient un plan structuré)
+### Ce que GCP apporte UNIQUEMENT
 
-### 2.3 Azure (si exigé) : les ajouts distinctifs
-- **ACR Quarantine mode** : les images pull-ées par CI sont EN QUARANTAINE
-  jusqu'à validation — votre flux Trivy-blocking devient natif au registre
-- **Azure Key Vault + Vault seal** : Vault unseal par HSM managé
-  (Key Vault) — votre Raft actuel devient multi-région auto-scellé
-- **Defender for Cloud** : CSPM continu (votre CIS 93% manuel devient
-  un score continu avec remédiations suggérées)
+- **Assured Workloads** : conformité FedRAMP/ITAR/sovereignty par namespace
+- **Confidential Computing** : VMs avec mémoire chiffrée (N2D instances)
+- **AI Guardrails** (Vertex) : filtres safety intégrés au runtime (votre GI/GO en managé)
 
 ---
 
-## 3. VAGUE 3 — Observabilité, FinOps & gouvernance continues
+## 3. VAGUE 3 — Azure (si exigé)
 
-### 3.1 FinOps (votre script $267/mois → discipline continue)
-- **OpenCost/Kubecost** sur les 3 clouds : allocation par namespace→équipe
-  (vos namespaces déjà propres), showback mensuel automatisé
-- CI runners = **Spot instances** (Karpenter) −70% coût build
-- GPU nodegroup = scale-to-zero + 1 instance réservée pour la prod
-- **Tagging policy** Kyverno : `cost-center` obligatoire sur tout déploiement
-  (votre pattern "8 policies Enforce" s'applique au tagging)
-
-### 3.2 Audit & SIEM (vos 849K lignes deviennent investigables)
-- Centralisation : CloudTrail + audit-log K8s + Falco → **Security Hub**
-  (AWS) / **Security Command Center** (GCP) / **Sentinel** (Azure)
-- Rétention immuable : S3 Object Lock (WORM) pour les audit-logs
-- Votre drill de détection Falco (/etc/shadow) devient un **test continu**
-  de la chaîne : EventBridge détection → Lambda → ticket + Slack (détails
-  d'implémentation dans vos IR-401..501 — le runbook s'automatise)
-
-### 3.3 Conformité IA (au-delà d'OWASP)
-- **NIST AI RMF** : mapper vos contrôles OWASP LLM Top 10 sur le cadre
-  (Govern/Map/Measure/Manage) — 80% déjà couvert par vos preuves
-- **EU AI Act** readiness : logging des décisions (fait), oversight humain
-  (votre `requires_human_review` factuality), traçabilité modèles (Registry)
-  — vous êtes structurellement bien placés
-- **ISO 42001** (SMSI IA) : votre documentation par preuves est le
-  socle idéal pour une certification future
+| Domaine | Service Azure | Particularité |
+|---|---|---|
+| Registry | **ACR Quarantine Mode** | Images CI EN QUARANTAINE jusqu'à validation — votre Trivy-blocking devient natif registre |
+| Secrets | **Key Vault + Vault seal HSM** | Votre Vault Raft → unseal par HSM managé (multi-région auto-scellé) |
+| Security | **Defender for Cloud** + **Sentinel** | CSPM + SIEM natif (vos Falco/Tetragon → SOC intégré) |
+| ML | **Azure ML** + **Prompt Flow** | Orchestration LLM avec évaluation intégrée |
+| Policy | **Azure Policy** pour AKS | Équivalent Kyverno mais natif cloud |
 
 ---
 
-## 4. Résumé — ce qui change pour le jury
+## 4. Conformité & Gouvernance IA (transverse aux 3 clouds)
+
+### 4.1 Framework mapping (votre preuve = socle)
+
+| Framework | Vos contrôles actuels | Manquant pour certification |
+|---|---|---|
+| **NIST AI RMF** | 80% couvert (Govern/Map/Measure/Manage) — vos preuves OWASP = evidence base | Mapping formel + risk register documenté |
+| **EU AI Act** | Logging ✓ (audit-log), oversight ✓ (`requires_human_review`), traçabilité ✓ (Registry) | Documentation technique (Annex IV) + conformity assessment |
+| **ISO 42001** (SMSI IA) | Documentation par preuves = socle idéal | Audit externe + processus de gestion des risques IA formels |
+| **SOC 2 Type II** | Audit-log, encryption at rest, access control, monitoring — tous opérationnels | Période d'observation 6 mois + audit externe |
+| **ISO 27001** | Votre CIS 93% + hardening = 70% des contrôles | Gestion formelle des risques + audit |
+
+### 4.2 AI Safety avancé (au-delà d'OWASP)
+
+| Contrôle | Implémentation PFE | Niveau entreprise |
+|---|---|---|
+| Red-teaming continu | garak 56/256 + PyRIT à installer | **Agent vs Agent** : un LLM attaquant vs un LLM défenseur, évaluation automatisée |
+| Hallucination | TF-IDF + claims (19 tests) | **Llama Guard 3** + **ShieldGemma** : classification ML multi-risque |
+| Prompt extraction | GI-02 (reveal → BLOCK) | **Canary tokens** dans les system prompts : détection par corrélation |
+| Model theft | — (pas d'exposition publique) | **Watermarking** (SynthID) + détection de réutilisation |
+| Data poisoning | Baseline hash + check | **Provenance** : chaque point tracé à sa source (audit de chaîne) |
+
+---
+
+## 5. FinOps cloud-native
+
+| Actuel (script) | Cible | Impact |
+|---|---|---|
+| `kubectl top` → $267/mois | **Kubecost/OpenCost** + AWS CUR | Allocation par namespace→équipe, showback mensuel |
+| CI sur nœud partagé | Runners **Spot** (Karpenter) | **-70%** coût build |
+| GPU 0 (CPU only) | `g5.xlarge` scale-to-zero + 1 réservée | Pay-per-use, pas de capacity planning |
+| Tagging manuel | **Kyverno policy** : `cost-center` obligatoire | Vos 8 policies Enforce s'appliquent au tagging |
+
+---
+
+## 6. Plan d'action priorisé (effort × impact)
+
+| Priorité | Chantier | Effort | Gain score | Prérequis |
+|---|---|---|---|---|
+| **P0** | EKS + S3 Velero (Phase 10) | 1-2 sem | DevSecOps +2 | Compte AWS |
+| **P0** | Karpenter runners CI | 1 sem | DevSecOps +1 | EKS |
+| **P1** | ECR + Kyverno 2.x (retry Phase 14) | 1 sem | Conformité registre | EKS |
+| **P1** | vLLM GPU + Bedrock/SageMaker | 2-3 sem | MLSecOps capacité | Nodegroup GPU |
+| **P1** | Titan Embeddings + LLM-judge (drift) | 1 sem | MLSecOps +1 | Bedrock |
+| **P2** | Rekor + in-toto + VEX (SLSA L3) | 2 sem | Supply chain | PKI |
+| **P2** | Multi-région pilot-light + game days | 3-4 sem | RTO/RPO mesurés | 2 régions |
+| **P2** | Event-driven poisoning + IR automatisé | 2 sem | MLSecOps +1 | EventBridge |
+| **P3** | GKE Binary Authorization + Workload Identity | 2 sem | Multi-cloud | Projet GCP |
+| **P3** | NIST AI RMF + EU AI Act mapping | 3 sem | Certifiabilité | Documentation |
+| **P3** | Kubecost + CSPM + SOC2 readiness | 4 sem | Gouvernance | 6 mois données |
+
+---
+
+## 7. Ce qui change pour le jury
 
 ```
-PFE (prouvé, restreint)          →    Entreprise (cible)
-──────────────────────────────────────────────────────────
+PFE (prouvé, restreint)          →    Entreprise cloud-native
+──────────────────────────────────────────────────────────────────
 kind 2 nœuds EC2                 →    EKS/GKE/AKS multi-AZ multi-région
-Ollama CPU, model 0.5B           →    vLLM GPU, registry MLflow/SageMaker
-Registry HTTP + exception        →    ECR TLS + Binary Authorization
-Velero BLOQUÉ (Phase 10)         →    S3 natif + restore-test automatisé
-Runner CI partagé (incident)     →    Karpenter spot éphémère dédié
-PII regex                        →    Presidio NER + Llama Guard
-Factuality claim-based           →    Embeddings + LLM-judge continu
-Red-team ponctuel (garak 56/256) →    PyRIT+garak+PromptFoo nightly GPU
-Poisoning check manuel           →    Event-driven quarantaine <1s
-$kubectl-top script FinOps       →    Kubecost + showback continu
-CIS 93% audit manuel             →    CSPM continu + conformité IA
+Ollama CPU, 0.5B                 →    vLLM GPU / Bedrock / SageMaker
+Harbor local HTTP + exception    →    ECR TLS + Binary Authorization
+Velero BLOQUÉ (Phase 10)         →    S3 natif + restore automatisé
+Runner CI partagé (IR-501)      →    Karpenter Spot éphémère dédié
+PII Presidio NER                 →    + Comprehend/DLP (30+ langues)
+Factuality TF-IDF               →    + Titan Embeddings + LLM-judge
+Red-team garak 56/256 interrompu →    PyRIT+garak+PromptFoo nightly GPU
+Poisoning check ponctuel        →    EventBridge quarantaine <1s continue
+$kubectl-top script FinOps      →    Kubecost + CUR + showback continu
+CIS 93% audit manuel            →    Security Hub / SCC / Defender continu
+IR playbooks + 1 cas réel       →    EventBridge + SSM + PagerDuty <5min
+Transparency Log Python (11ts)  →    Rekor managé (PKI publique)
+OWASP LLM 10/10 preuve          →    + NIST AI RMF + EU AI Act + ISO 42001
 ```
 
-## 5. Effort & priorisation (honnête)
-
-| Priorité | Chantier | Effort | Gain |
-|---|---|---|---|
-| P0 | EKS + S3 Velero (Phase 10 débloquée) | 1-2 semaines | Restore prouvé, DR réel |
-| P0 | Karpenter runners CI dédiés | 1 semaine | Incident IR-501 impossible |
-| P1 | ECR + Kyverno 2.x CEL (retry Phase 14) | 1 semaine | Conformité registre |
-| P1 | vLLM GPU + MLflow Registry | 2-3 semaines | Capacité + lignage |
-| P1 | Presidio + Llama Guard | 1 semaine | PII/factuality niveau ML |
-| P2 | Red-team nightly + drift sémantique | 2 semaines | Continuité MLSecOps |
-| P2 | Multi-région pilot-light + game days | 3-4 semaines | RTO/RPO mesurés |
-| P2 | Kubecost + CSPM + NIST AI RMF mapping | 2 semaines | Gouvernance continue |
-
-**Trajectoire de score projetée** : 93.5 actuel → **~98** après vague 1
-(les −5 et −4 documentés se résorbent car les causes étaient
-environnementales) ; les derniers points exigent la multi-région et
-la conformité certifiante (hors périmètre PFE, bon scope pro).
+**Trajectoire projetée** :
+- Actuel : **97/100** (4 points environnementaux)
+- Vague 1 AWS : **99-100/100** (les 4 points résorbés par design)
+- Vagues 2-3 : **Certification-grade** (multi-région, conformité certifiante)
 
 ---
 
 *Document de perspectives soutenance — chaque item cite l'acquis PFE
-qu'il généralise. Généré le 2026-09-28.*
+qu'il généralise et le service AWS/GCP/Azure correspondant. Généré
+le 2026-09-29, basé sur l'état 20/20 PASS + 109 tests + Pipeline SUCCESS.*
