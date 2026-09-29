@@ -163,7 +163,7 @@ check "Drift monitor: modèle stable (hash sorties + latences)" "$([ "$DRIFT" -g
 export COSIGN_PASSWORD=$(cat /home/admin/MasterPFE/security/keys/cosign.password.txt)
 for img in ollama qdrant litellm; do
   D=$(cat /tmp/opencode/${img}-digest.txt 2>/dev/null)
-  V=$(cd /home/admin/MasterPFE && cosign verify --key security/keys/cosign.pub "localhost:5001/$img@$D" --allow-insecure-registry 2>/dev/null | grep -c critical)
+  V=$(cd /home/admin/MasterPFE && cosign verify --key config/signing/cosign.pub "localhost:5001/$img@$D" --allow-insecure-registry 2>/dev/null | grep -c critical)
   check "Cosign: $img signée" "$([ "$V" -ge 1 ] && echo true || echo false)"
 done
 
