@@ -295,7 +295,7 @@ PYCI
           # ── 3. Cosign verify (signature obligatoire) ──
           echo "[3/4] Verification Cosign de la signature..."
           command -v cosign >/dev/null 2>&1 || { echo "[ERROR] cosign absent"; exit 1; }
-          export COSIGN_PASSWORD="$(cat security/keys/cosign.password.txt)"
+          # cosign verify n'exige PAS le mot de passe (clé publique)
           cosign verify --key security/keys/cosign.pub --allow-insecure-registry \
             "kind-registry.registry.svc.cluster.local:5001/secai@${ACTUAL_SHA}" || {
             echo "[FAIL] Signature invalide ou absente"

@@ -56,7 +56,6 @@ kubeconfig
 
 # ── Cosign keys (remplacées par keyless) ──────────────────────
 cosign.key
-cosign.pub
 cosign.password
 
 # ── Terraform state / vars ────────────────────────────────────
