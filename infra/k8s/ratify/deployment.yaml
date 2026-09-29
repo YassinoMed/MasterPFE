@@ -1,77 +1,76 @@
-# Ratify — Vérification d'artefacts OCI 1.1 à l'admission (Gatekeeper)
-# Alternative à l'ImageValidatingPolicy Kyverno pour la vérification de
-# signatures Cosign + SBOM + SLSA provenance (spec OCI 1.1)
----
-apiVersion: apiextensions.k8s.io/v1
-kind: CustomResourceDefinition
-metadata:
-  name: verifiers.config.ratify.dev
-spec:
-  group: config.ratify.dev
-  scope: Cluster
-  names:
-    plural: verifiers
-    singular: verifier
-    kind: Verifier
-  versions:
-  - name: v1beta1
-    served: true
-    storage: true
-    schema:
-      openAPIV3Schema:
-        type: object
-        properties:
-          spec:
-            type: object
-            x-kubernetes-preserve-unknown-fields: true
----
-apiVersion: apiextensions.k8s.io/v1
-kind: CustomResourceDefinition
-metadata:
-  name: stores.config.ratify.dev
-spec:
-  group: config.ratify.dev
-  scope: Cluster
-  names:
-    plural: stores
-    singular: store
-    kind: Store
-  versions:
-  - name: v1beta1
-    served: true
-    storage: true
-    schema:
-      openAPIV3Schema:
-        type: object
-        properties:
-          spec:
-            type: object
-            x-kubernetes-preserve-unknown-fields: true
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: ratify
-  namespace: ratify-system
-  labels:
-    app.kubernetes.io/name: ratify
-spec:
-  selector:
-    app.kubernetes.io/name: ratify
-  ports:
-  - port: 6000
-    targetPort: 6000
-    name: http
-  - port: 6001
-    targetPort: 6001
-    name: crd
----
+# Ratify v1.0.0 — déploiement avec config CLI (-c flag)
+# Le binary cherche config.json par défaut dans son propre répertoire
+# (/app/ratify/config.json = pas un répertoire → erreur).
+# Solution : monter le config ailleurs + passer -c via args.
 apiVersion: v1
 kind: Namespace
 metadata:
   name: ratify-system
   labels:
-    pod-security.kubernetes.io/enforce: privileged
+    pod-security.kubernetes.io/enforce: baseline
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: ratify
+  namespace: ratify-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: ratify
+rules:
+- apiGroups: [""]
+  resources: [pods, namespaces, secrets]
+  verbs: [get, list, watch]
+- apiGroups: ["config.ratify.dev"]
+  resources: [verifiers, stores, policies]
+  verbs: [get, list, watch, create, update, patch, delete]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: ratify
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: ratify
+subjects:
+- kind: ServiceAccount
+  name: ratify
+  namespace: ratify-system
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ratify-config
+  namespace: ratify-system
+data:
+  config.json: |
+    {
+      "store": {
+        "version": "1.0.0",
+        "plugins": [{
+          "name": "oras",
+          "useHttp": true,
+          "cosignEnabled": true
+        }]
+      },
+      "verifier": {
+        "version": "1.0.0",
+        "plugins": [{
+          "name": "cosign",
+          "enabled": true
+        }]
+      },
+      "policy": {
+        "version": "1.0.0",
+        "plugin": {
+          "name": "configPolicy",
+          "artifactVerifiers": ["cosign"]
+        }
+      }
+    }
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -91,38 +90,65 @@ spec:
         app.kubernetes.io/name: ratify
     spec:
       serviceAccountName: ratify
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65532
+        fsGroup: 65532
+        seccompProfile: {type: RuntimeDefault}
       containers:
       - name: ratify
-        image: localhost:5001/ratify:v1.0.0
+        image: kind-registry.registry.svc.cluster.local:5001/ratify:v1.0.0
+        # Override l'entrypoint : servir avec le config explicite
         command: ["/app/ratify"]
-        args: ["serve", "--http", ":6000", "--enable-crd-controller"]
+        args:
+        - serve
+        - --http=:6000
+        - -c
+        - /etc/ratify/config.json
         ports:
         - containerPort: 6000
           name: http
-        - containerPort: 6001
-          name: crd
-        env:
-        - name: RATIFY_CONFIG
-          value: /app/ratify
+        - containerPort: 9099
+          name: health
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities: {drop: [ALL]}
+        resources:
+          requests: {cpu: 100m, memory: 128Mi}
+          limits: {memory: 256Mi}
         readinessProbe:
-          httpGet:
-            path: /ready
-            port: 6000
+          httpGet: {path: /ready, port: 9099}
           initialDelaySeconds: 10
           periodSeconds: 5
         startupProbe:
-          httpGet:
-            path: /ready
-            port: 6000
+          httpGet: {path: /ready, port: 9099}
           initialDelaySeconds: 5
           periodSeconds: 3
           failureThreshold: 20
         livenessProbe:
-          httpGet:
-            path: /health
-            port: 6000
+          httpGet: {path: /healthy, port: 9099}
           initialDelaySeconds: 15
           periodSeconds: 15
-        resources:
-          requests: {cpu: 100m, memory: 128Mi}
-          limits: {memory: 256Mi}
+        volumeMounts:
+        - name: config
+          mountPath: /etc/ratify
+          readOnly: true
+      volumes:
+      - name: config
+        configMap:
+          name: ratify-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ratify
+  namespace: ratify-system
+spec:
+  selector: {app.kubernetes.io/name: ratify}
+  ports:
+  - port: 6000
+    targetPort: http
+    name: http
+  - port: 9099
+    targetPort: health
+    name: health
