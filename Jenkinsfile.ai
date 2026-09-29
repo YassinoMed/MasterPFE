@@ -340,13 +340,11 @@ PYCI
       echo "[FAIL] Pipeline failed. Check console logs."
     }
     always {
-      // [FIX] deleteDir() échoue sur .pytest_cache (permissions wrong owner)
-      // → rm -rf avec gestion d'erreur silencieuse
-      sh 'rm -rf .pytest_cache 2>/dev/null; true' || true
-      try {
+      // [FIX] deleteDir() échoue sur .pytest_cache (permissions)
+      // catchError = pas d'échec du build pour un problème de cleanup
+      catchError(buildResult: 'SUCCESS', stageResult: 'SUCCESS') {
+        sh 'rm -rf .pytest_cache 2>/dev/null || true'
         deleteDir()
-      } catch (Exception e) {
-        echo "[WARN] cleanup partiel : ${e.message}"
       }
     }
   }
