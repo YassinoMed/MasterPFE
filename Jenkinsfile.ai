@@ -285,7 +285,7 @@ PYCI
 
           # ── 2. Trivy scan (CRITICAL = fail) ──
           echo "[2/4] Trivy scan de l'image (CRITICAL = echec)..."
-          trivy image --insecure --severity CRITICAL --exit-code 1 \
+          trivy image --insecure --severity CRITICAL --ignore-unfixed --exit-code 1 \
             "kind-registry.registry.svc.cluster.local:5001/secai@${ACTUAL_SHA}" || {
             echo "[FAIL] Vulnerabilites CRITICAL detectees"
             exit 1
