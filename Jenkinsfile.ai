@@ -340,9 +340,14 @@ PYCI
       echo "[FAIL] Pipeline failed. Check console logs."
     }
     always {
-      // cleanWs nécessite le plugin ws-cleanup (absent du Jenkins kind)
-      // deleteDir() est l'équivalent natif — supprime le workspace.
-      deleteDir()
+      // [FIX] deleteDir() échoue sur .pytest_cache (permissions wrong owner)
+      // → rm -rf avec gestion d'erreur silencieuse
+      sh 'rm -rf .pytest_cache 2>/dev/null; true' || true
+      try {
+        deleteDir()
+      } catch (Exception e) {
+        echo "[WARN] cleanup partiel : ${e.message}"
+      }
     }
   }
 }
