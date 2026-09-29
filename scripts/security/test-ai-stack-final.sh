@@ -159,7 +159,12 @@ check "Poisoning LLM04: collection conforme à la baseline" "$([ "$POIS" -ge 1 ]
 DRIFT=$(cd /home/admin/MasterPFE && timeout 600 python3 scripts/security/model-drift-monitor.py --check 2>/dev/null | grep -c "STABLE")
 check "Drift monitor: modèle stable (hash sorties + latences)" "$([ "$DRIFT" -ge 1 ] && echo true || echo false)"
 
-# 8. Cosign : les 3 images IA signées
+# 8. Ratify : pod Running + API accessible (admission OCI 1.1)
+RATIFY_POD=$(kubectl get pods -n ratify-system --no-headers 2>/dev/null | grep "1/1.*Running" | wc -l)
+RATIFY_CRD=$(kubectl get crd verifiers.config.ratify.dev --no-headers 2>/dev/null | wc -l)
+check "Ratify: pod Running + CRD Verifier présente (OCI 1.1)" "$([ "$RATIFY_POD" -ge 1 ] && [ "$RATIFY_CRD" -ge 1 ] && echo true || echo false)"
+
+# 8b. Cosign : les 3 images IA signées
 export COSIGN_PASSWORD=$(cat /home/admin/MasterPFE/security/keys/cosign.password.txt)
 for img in ollama qdrant litellm; do
   D=$(cat /tmp/opencode/${img}-digest.txt 2>/dev/null)
