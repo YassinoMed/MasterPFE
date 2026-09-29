@@ -84,7 +84,7 @@ spec:
   config:
     region: minio
     s3ForcePathStyle: "true"
-    s3Url: "http://minio.minio.svc.cluster.local:9000"
+    s3Url: "http://172.31.30.110:9110"
     publicUrl: "http://minio.minio.svc.cluster.local:9000"
   credential:
     name: velero-minio-credentials
