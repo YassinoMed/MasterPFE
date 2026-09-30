@@ -1,0 +1,1317 @@
+% =====================================================================
+%  DOCUMENTATION COMPLETE — Chaine DevSecOps + MLSecOps + IA
+%  Projet SecureRAG Hub — MasterPFE (YassinoMed/MasterPFE)
+%  Style : Memoire PFE academique, langue francaise
+%  Compilation : pdflatex main (2 passes) + bibtex si besoin
+%  Exemple : pdflatex DOCUMENTATION_COMPLETE_DEVSECOPS_MLSECOPS_AI.tex
+%            pdflatex DOCUMENTATION_COMPLETE_DEVSECOPS_MLSECOPS_AI.tex
+% =====================================================================
+\documentclass[12pt,a4paper,openany]{report}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage[a4paper,margin=2.5cm,headheight=14pt]{geometry}
+\usepackage{hyperref}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{graphicx}
+\usepackage{amsmath,amssymb}
+\usepackage{enumitem}
+\usepackage{fancyhdr}
+\usepackage{setspace}
+\usepackage{caption}
+
+% ---------- Hyperref ----------
+\hypersetup{
+  colorlinks=true,
+  linkcolor=blue!60!black,
+  citecolor=blue!60!black,
+  urlcolor=blue!60!black,
+  pdftitle={Documentation complete — Chaine DevSecOps + MLSecOps + IA (SecureRAG Hub)},
+  pdfauthor={MasterPFE — SecureRAG Hub},
+  pdfsubject={DevSecOps, MLSecOps, Securite IA / LLM},
+  pdfkeywords={DevSecOps, MLSecOps, LLM, RAG, Kubernetes, GitOps, SLSA, OWASP, NIST AI RMF}
+}
+
+% ---------- En-tetes ----------
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small SecureRAG Hub — DevSecOps + MLSecOps + IA}
+\fancyhead[R]{\small Documentation complete}
+\fancyfoot[C]{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+% ---------- Couleurs ----------
+\definecolor{codebg}{rgb}{0.96,0.96,0.96}
+\definecolor{commentgreen}{rgb}{0.0,0.5,0.0}
+\definecolor{stringred}{rgb}{0.6,0.1,0.1}
+\definecolor{keywordblue}{rgb}{0.1,0.2,0.7}
+
+% ---------- Listings ----------
+\lstset{
+  backgroundcolor=\color{codebg},
+  basicstyle=\ttfamily\small,
+  breaklines=true,
+  breakatwhitespace=false,
+  frame=single,
+  rulecolor=\color{gray!40},
+  showstringspaces=false,
+  tabsize=2,
+  captionpos=b,
+  commentstyle=\color{commentgreen}\itshape,
+  keywordstyle=\color{keywordblue}\bfseries,
+  stringstyle=\color{stringred},
+  literate={é}{{\'e}}1 {è}{{\`e}}1 {ê}{{\^e}}1 {à}{{\`a}}1 {ç}{{\c{c}}}1
+}
+\lstdefinelanguage{yaml}{
+  keywords={true,false,null,yes,no,on,off},
+  keywordstyle=\color{keywordblue}\bfseries,
+  sensitive=false,
+  comment=[l]{\#},
+  commentstyle=\color{commentgreen}\itshape,
+  stringstyle=\color{stringred},
+  morestring=[b]',
+  morestring=[b]"
+}
+
+% ---------- Interligne ----------
+\onehalfspacing
+\setlist[itemize]{leftmargin=1.2cm}
+\setlist[enumerate]{leftmargin=1.2cm}
+
+% =====================================================================
+\begin{document}
+
+% ==================== PAGE DE GARDE ====================
+\begin{titlepage}
+\centering
+\vspace*{1cm}
+{\Large \textbf{PROJET DE FIN D'ETUDES}}\\[0.3cm]
+{\large Plateforme SecureRAG Hub}\\[1.2cm]
+\rule{\textwidth}{1.5pt}\\[0.5cm]
+{\Huge \textbf{Documentation complète}}\\[0.3cm]
+{\Huge \textbf{de la chaîne DevSecOps + MLSecOps + IA}}\\[0.5cm]
+\rule{\textwidth}{1.5pt}\\[0.8cm]
+{\large Conception, implémentation, expérimentation et validation}\\
+{\large d'une plateforme Cloud Native et intelligente}\\[1.0cm]
+\begin{tabular}{rl}
+\textbf{Dépôt} & \texttt{YassinoMed/MasterPFE} \\
+\textbf{Commits} & 579 commits — 14\,315 fichiers \\
+\textbf{Cluster} & Kubernetes (kind, 2 n\oe uds EC2) — 170 pods, 25+ namespaces \\
+\textbf{Stack IA} & Ollama (Qwen2.5-0.5B) + Qdrant + LiteLLM Gateway + SECAI v2 \\
+\textbf{Scores} & DevSecOps 98/100 — MLSecOps 99/100 — Global 98,5/100 \\
+\textbf{Conformité} & OWASP LLM 10/10 — NIST AI RMF 96\,\% — EU AI Act 100\,\% \\
+\end{tabular}\\[1.2cm]
+{\large Date de référence : 29 septembre 2026}\\[0.3cm]
+{\small Chaque valeur de ce document est vérifiable en direct ou dans le dépôt Git.}\\
+{\small Script de vérification : \texttt{bash scripts/security/test-ai-stack-final.sh}}\\
+{\small Tests : \texttt{python3 -m pytest secai/tests/ -v}}\\[1.0cm]
+\vfill
+{\small Document généré à partir de l'état réel du dépôt MasterPFE.}\\
+\end{titlepage}
+
+% ==================== RESUME ====================
+\section*{Résumé}
+\addcontentsline{toc}{chapter}{Résumé}
+
+Ce document constitue la documentation complète et de référence de la chaîne
+\textbf{DevSecOps + MLSecOps + IA} de la plateforme \textbf{SecureRAG Hub}
+(dépôt \texttt{YassinoMed/MasterPFE}).
+Il décrit, avec la rigueur d'un mémoire de projet de fin d'études :
+l'architecture globale (cluster Kubernetes kind, 170 pods, 25+ namespaces),
+le pipeline CI/CD (8 \texttt{Jenkinsfile}, 6 stages principaux, quality gates bloquants),
+la supply chain sécurisée (SBOM CycloneDX, signatures Cosign, provenance SLSA, admission Kyverno),
+le Zero-Trust réseau et identitaire (Cilium, Istio mTLS STRICT, SPIRE/SPIFFE, Vault + ESO),
+la sécurité runtime (Falco, Tetragon, Ratify),
+l'observabilité (Prometheus, Grafana, Loki, OpenTelemetry, Alertmanager),
+la sauvegarde et la reprise (Velero, RTO 4\,h / RPO 1\,h, chaos engineering),
+et la couche \textbf{MLSecOps / sécurité IA} (service SECAI v2 : 12 guardrails, 5 pipelines, 7 endpoints ;
+gateway LiteLLM ; Ollama + Qwen2.5-0.5B ; Qdrant \texttt{vuln-kb} ;
+3 CronJobs de surveillance : poisoning toutes les 15\,min, drift toutes les heures, registre toutes les 6\,h).
+
+Les résultats expérimentaux rapportés sont mesurés en direct :
+159 tests SECAI \texttt{PASS}, 20/20 au test final automatisé,
+\texttt{BUILD \#30 SUCCESS} Jenkins en 202\,s,
+16/16 payloads de red-teaming neutralisés,
+métriques DORA au niveau \textbf{ELITE}, CIS Benchmark 14/15 (93\,\%),
+coût FinOps de 267\,\$/mois.
+
+\paragraph{Mots-clés :} DevSecOps, MLSecOps, LLM, RAG, Kubernetes, GitOps (ArgoCD),
+SLSA, SBOM, Cosign/Sigstore, Kyverno, Falco, eBPF, Zero-Trust, Vault, OWASP LLM Top 10,
+NIST AI RMF, EU AI Act.
+
+\section*{Abstract}
+\addcontentsline{toc}{chapter}{Abstract}
+
+This document is the complete reference documentation of the
+\textbf{DevSecOps + MLSecOps + AI} chain of the \textbf{SecureRAG Hub} platform
+(\texttt{YassinoMed/MasterPFE} repository).
+It describes the global architecture (kind Kubernetes cluster, 170 pods, 25+ namespaces),
+the CI/CD pipeline (8 \texttt{Jenkinsfiles}, blocking quality gates),
+the secure supply chain (CycloneDX SBOM, Cosign signatures, SLSA provenance, Kyverno admission),
+Zero-Trust networking and identity (Cilium, Istio STRICT mTLS, SPIRE/SPIFFE, Vault + ESO),
+runtime security (Falco, Tetragon, Ratify),
+observability (Prometheus, Grafana, Loki, OpenTelemetry),
+backup and disaster recovery (Velero, RTO 4\,h / RPO 1\,h, chaos engineering),
+and the \textbf{MLSecOps / AI security} layer (SECAI v2 service: 12 guardrails, 5 pipelines, 7 endpoints;
+LiteLLM gateway; Ollama + Qwen2.5-0.5B; Qdrant \texttt{vuln-kb}; 3 monitoring CronJobs).
+All experimental results are measured live: 159 SECAI tests PASS, 20/20 final automated test,
+Jenkins \texttt{BUILD \#30 SUCCESS}, 16/16 red-team payloads neutralised, DORA ELITE metrics.
+
+% ==================== TOC ====================
+\tableofcontents
+\listoftables
+\listoffigures
+
+% =====================================================================
+\chapter{Introduction générale}
+\label{ch:intro}
+
+\section{Contexte du projet}
+
+La plateforme \textbf{SecureRAG Hub} est une application de génération augmentée par récupération
+(\textit{Retrieval-Augmented Generation}, RAG) sécurisée, construite sur une architecture microservices
+(Laravel / PHP, React, Python) orchestrée par Kubernetes.
+Le dépôt \texttt{YassinoMed/MasterPFE} (579 commits, 14\,315 fichiers au 29/09/2026) contient
+l'intégralité du code applicatif, de l'infrastructure as code, des politiques de sécurité,
+des pipelines CI/CD et des preuves d'exécution.
+
+Le besoin à l'origine du projet est double :
+\begin{enumerate}
+  \item \textbf{Livrer vite sans livrer vulnérable} : les approches de sécurité a posteriori
+  (audits ponctuels, périmètres statiques) ne suivent plus les cadences CI/CD ni la surface
+  d'attaque Cloud Native (supply chain, conteneurs, orchestrateur, runtime).
+  \item \textbf{Exploiter l'IA sans la subir} : un moteur RAG exposé au public hérite des risques
+  propres aux grands modèles de langage (injection de prompt, fuite de données, hallucination,
+  empoisonnement de la base vectorielle, exfiltration du prompt système).
+\end{enumerate}
+
+\section{Problématique}
+
+\begin{quote}
+\textbf{Comment concevoir, formaliser et valider expérimentalement un modèle unifié
+d'intégration continue de la sécurité} capable de décaler vers l'amont (\textit{Shift-Left})
+les contrôles d'assurance, d'établir une preuve cryptographique d'intégrité et de provenance
+des artefacts (référentiel SLSA niveau 3 visé), de garantir une détection comportementale
+réactive au niveau du noyau Linux (eBPF), et d'arbitrer les alertes par une couche
+décisionnelle d'IA souveraine (RAG) — tout en couvrant les 10 risques OWASP LLM ?
+\end{quote}
+
+\section{Questions de recherche et hypothèses}
+
+\begin{description}
+  \item[\textbf{RQ1 :}] Dans quelle mesure l'automatisation des contrôles statiques
+  (SAST, SCA, détection de secrets) réduit-elle le délai de détection des failles ?
+  \begin{description}
+    \item[\textbf{H1 :}] Des barrières automatisées et des hooks pre-commit ramènent le temps
+    moyen de détection (MTTD) de plusieurs jours à quelques secondes (mesuré à 3,8\,s en CI
+    et 2,23\,s en scan local), avec 100\,\% d'interception des secrets sur le corpus testé.
+  \end{description}
+  \item[\textbf{RQ2 :}] Comment garantir provenance et immutabilité des artefacts conteneurisés
+  sans dégrader la vitesse de déploiement ?
+  \begin{description}
+    \item[\textbf{H2 :}] La combinaison SBOM CycloneDX + signature Cosign (Sigstore) + admission
+    Kyverno permet de viser SLSA 3 avec un surcoût inférieur à 10\,\% sur la phase de build.
+  \end{description}
+  \item[\textbf{RQ3 :}] Quel est l'impact de la détection eBPF couplée à un moteur RAG
+  sur la fatigue décisionnelle du SOC ?
+  \begin{description}
+    \item[\textbf{H3 :}] La capture temps réel des appels système, corrélée sémantiquement,
+    permet un score de risque unifié $R_{\text{workload}}$ et une latence d'alerte runtime
+    de 1,82\,s sur les événements Falco revalidés.
+  \end{description}
+\end{description}
+
+\section{Contributions}
+
+\begin{enumerate}
+  \item Une \textbf{chaîne DevSecOps complète et mesurée} (8 pipelines Jenkins, 28 scripts CI,
+  24 scripts release, 21 scripts sécurité, 8 politiques Kyverno Enforce, Zero-Trust, eBPF).
+  \item Une \textbf{couche MLSecOps / sécurité IA originale} : le service \textbf{SECAI v2}
+  (12 guardrails, 5 pipelines, 7 endpoints, 159 tests), le gateway LiteLLM, 3 CronJobs de
+  surveillance (poisoning / drift / registre), le registre de modèles versionné.
+  \item Un \textbf{protocole expérimental reproductible en 9 étapes} avec preuves live
+  (20/20, BUILD \#30, 16/16 red-team, DORA ELITE).
+  \item Une \textbf{cartographie de conformité} : OWASP LLM 10/10, NIST AI RMF 96\,\%,
+  EU AI Act 100\,\%.
+\end{enumerate}
+
+\section{Organisation du document}
+
+Le chapitre~\ref{ch:archi} présente l'architecture globale.
+Le chapitre~\ref{ch:devsecops} détaille la chaîne DevSecOps.
+Le chapitre~\ref{ch:mlsecops} détaille la chaîne MLSecOps et la sécurité IA.
+Le chapitre~\ref{ch:validation} rapporte la validation expérimentale.
+Le chapitre~\ref{ch:conformite} traite conformité et gouvernance.
+Le chapitre~\ref{ch:exploitation} traite l'exploitation (runbooks, DR, opérations).
+Les annexes regroupent les références opérationnelles (pipelines, politiques, scripts, commandes, glossaire).
+
+% =====================================================================
+\chapter{Architecture globale de la plateforme}
+\label{ch:archi}
+
+\section{Vue d'ensemble}
+
+La figure schématique ci-dessous résume la topologie logique (le dépôt contient
+les captures réelles correspondantes, listées au chapitre~\ref{ch:validation}).
+
+\begin{lstlisting}[language=bash,caption={Topologie logique de la plateforme (résumé)},label={lst:topologie}]
+Git (YassinoMed/MasterPFE, 579 commits)  --->  Jenkins (CI, BUILD #30 SUCCESS)
+        |                                              |
+        | ArgoCD (29 apps, selfHeal)                   | SBOM + Cosign + SLSA
+        v                                              v
+Kubernetes (kind, 2 noeuds EC2, 170 pods, 25+ namespaces, 148 Running)
+  SECURITE            IA                 CI/CD        OBSERVABILITE     CONFORMITE
+  Kyverno x8          Ollama             Jenkins      Prometheus        OWASP 10/10
+  Cosign x4           Qdrant             30 builds    Grafana           NIST 96%
+  Vault (Raft)        LiteLLM Gateway    15 fixes     Loki + OTel       EU AI 100%
+  SPIRE/SPIFFE        SECAI v2           Quality      Alertmanager      SLSA / CIS 93%
+  Falco / Tetragon    CronJobs x3        Gates        Tempo             SOC2 / ISO
+  Harbor + Trivy      Harbor registry    DORA ELITE   26 dashboards     98,5/100
+  Ratify OCI 1.1      Velero backups     FinOps $267  Chaos Mesh        Evidence/
+\end{lstlisting}
+
+\section{Inventaire du cluster (état vérifié le 29/09/2026)}
+
+\begin{longtable}{@{}lll@{}}
+\toprule
+\textbf{Namespace} & \textbf{Pods} & \textbf{Composants} \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Namespace} & \textbf{Pods} & \textbf{Composants} \\
+\midrule
+\endhead
+securerag-hub & 12 & Ollama, Qdrant, LiteLLM Gateway, SECAI, portal-web, auth-users, postgres, Falco \\
+securerag-prod & 15 & Déploiement production via ArgoCD (portal-web, auth-users, chatbot, \dots) \\
+harbor & 8 & Harbor : core, database, jobservice, nginx, portal, redis, registry+trivy \\
+kube-system & 13 & coredns, kindnet, kube-proxy, \textbf{Tetragon $\times$2} (eBPF), local-path-provisioner \\
+argocd & 8 & ArgoCD : applicationset-controller, application-controller, repo-server, redis, server, dex \\
+monitoring & 8 & Grafana, Prometheus, kube-state-metrics, node-exporter \\
+securerag-monitoring & 9 & Instances Prometheus par namespace \\
+securerag-backup & 9 & Velero node-agents + jobs de sauvegarde \\
+mlsecops-monitoring & 9 & \textbf{3 CronJobs} : poisoning (15\,min), drift (1\,h), registre (6\,h) \\
+chaos-testing & 7 & Chaos Mesh : controller, daemonset, dns-server, dashboard \\
+jenkins & 1 & Jenkins controller (CI/CD, BUILD \#30 SUCCESS) \\
+kyverno & 4 & Kyverno admission controller (8 politiques Enforce) \\
+falco & 4 & Falco runtime detection (2 agents + 2 services) \\
+velero & 3 & Velero (BSL disponible via moto S3:9110) \\
+spire-system & 3 & SPIRE server + 2 agents (SPIFFE/SVID) \\
+vault & 2 & Vault production (Raft, unsealed) + agent-injector \\
+ratify-system & 1 & Ratify v1.0.0 (OCI 1.1, serveur :6000) \\
+external-secrets & 3 & ESO (sync Vault $\rightarrow$ Secrets K8s via kubernetes-auth) \\
+cert-manager & 3 & Certificats TLS (Ingress) \\
+ingress-nginx & --- & Ingress controller + TLS \\
+registry & --- & Registre kind local (localhost:5001, 25+ images) \\
+loki & --- & Centralisation des logs \\
+otel-system & 2 & OpenTelemetry Collector \\
+securerag-dev/test/staging/recette/preprod/hub-dr/dr & 6 chacun & Overlays Kustomize via ApplicationSet ArgoCD \\
+\midrule
+\textbf{TOTAL} & \textbf{170 pods} & \textbf{148 Running, 25+ namespaces} \\
+\bottomrule
+\caption{Inventaire du cluster par namespace (source : \texttt{RECAP-CHAINE-COMPLETE.md}).}
+\label{tab:cluster}
+\end{longtable}
+
+\section{Stack IA (4 pods Running dans securerag-hub)}
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{@{}lllll@{}}
+\toprule
+\textbf{Composant} & \textbf{Image} & \textbf{Port} & \textbf{Rôle} & \textbf{Preuve live} \\
+\midrule
+Ollama & ollama (Cosign) & 11434 & Runtime LLM (Qwen2.5-0.5B, PVC 5\,Gi) & Inférence réelle : \og Bonjour ! \fg \\
+Qdrant & qdrant:1.19.1 (Cosign) & 6333/6334 & Vector DB, collection \texttt{vuln-kb} & Recherche score \textbf{0.996} \\
+LiteLLM Gateway & litellm:main-v1.40.0 & 4000 & AI Gateway : auth Bearer, budgets & \textbf{401} sans clé, chat end-to-end \\
+SECAI v2 & secai (Cosign) & 8001 & API sécurité IA : \texttt{/llm/analyze}, \texttt{/analyze} & Injection \textbf{BLOCK} live \\
+\bottomrule
+\end{tabular}
+\caption{Stack IA : composants, rôles et preuves d'exécution.}
+\label{tab:stack-ia}
+\end{table}
+
+\section{Outils de sécurité}
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{@{}llll@{}}
+\toprule
+\textbf{Outil} & \textbf{Emplacement} & \textbf{Rôle} & \textbf{Preuve} \\
+\midrule
+Kyverno & kyverno ns & 8 ClusterPolicies Enforce & \texttt{nginx:latest} $\rightarrow$ BLOCKED \\
+Cosign & CI/CD & Signature images (4 signées) & \texttt{cosign verify} : 1 signature valide/image \\
+Trivy Operator & trivy-system & Scan continu & 411 ConfigAuditReports \\
+Falco & falco ns & Détection runtime (eBPF) & \texttt{cat /etc/shadow} $\rightarrow$ alerte \\
+Tetragon & kube-system & eBPF security (LSM BPF) & 2 agents Running, CRD TracingPolicy \\
+Vault & vault ns & Secrets (Raft) & Unsealed, 3 clés Shamir \\
+SPIRE & spire-system & SPIFFE IDs + SVIDs & 2 agents attestés \\
+Harbor & harbor ns & Registry privé + Trivy & 7 pods, 8/8 healthy \\
+Ratify & ratify-system & Admission OCI 1.1 & Pod Running, serveur :6000 \\
+Velero & velero ns & Backup/restore & BSL Available, backup Completed \\
+ArgoCD & argocd ns & GitOps & \textbf{29 apps}, selfHeal prouvé \\
+Jenkins & jenkins ns & CI/CD & \textbf{BUILD \#30 SUCCESS} (6/6 stages, 202\,s) \\
+Chaos Mesh & chaos-testing & Chaos engineering & PodChaos (kill auth-users / 5\,min) \\
+\bottomrule
+\end{tabular}
+\caption{Outils de sécurité : rôles et preuves.}
+\label{tab:outils-secu}
+\end{table}
+
+\section{Choix technologiques (matrice d'arbitrage)}
+
+\begin{table}[h]
+\centering
+\scriptsize
+\begin{tabular}{@{}p{2.6cm}p{3.2cm}p{3.2cm}p{4.4cm}@{}}
+\toprule
+\textbf{Composant} & \textbf{Technologie retenue} & \textbf{Alternatives} & \textbf{Justification} \\
+\midrule
+IaC & Terraform & CloudFormation, Pulumi & Déclaratif, multi-provider, state S3 + lock DynamoDB \\
+CI/CD & Jenkins CASC & GitLab CI, GitHub Actions & Agents K8s éphémères, isolation, as-code \\
+GitOps & ArgoCD & Flux v2, Jenkins X & Réconciliation déclarative, drift, rollback auto \\
+CNI + Runtime & Cilium + Falco/Tetragon & Calico, Sysdig & eBPF natif, surcharge $<1{,}5\,\%$ CPU \\
+Supply chain & Syft + Grype + Cosign & Anchore, Clair & CNCF, Sigstore keyless, CycloneDX \\
+Secrets & Vault + ESO & AWS Secrets Mgr, SealedSecrets & Rotation dynamique, injection K8s sans Git \\
+IA souveraine & RAG (Qdrant + Ollama) & API OpenAI Cloud & Souveraineté SOC, grounding anti-hallucination \\
+\bottomrule
+\end{tabular}
+\caption{Matrice d'arbitrage technologique.}
+\label{tab:arbitrage}
+\end{table}
+
+\section{Flux structurants}
+
+Trois flux structurent l'architecture :
+\begin{itemize}
+  \item \textbf{Flux réseau} : requêtes HTTPS filtrées par Ingress NGINX (TLS 1.3),
+  isolation inter-pods par Cilium (eBPF) sous politique \texttt{default-deny-all},
+  chiffrement inter-services par Istio (mTLS STRICT).
+  \item \textbf{Flux sécurité} : pre-commit (Gitleaks) $\rightarrow$ SAST (Semgrep)
+  $\rightarrow$ SBOM (Syft) $\rightarrow$ scan (Trivy/Grype) $\rightarrow$ signature
+  (Cosign/Sigstore) $\rightarrow$ admission (Kyverno/Ratify) $\rightarrow$ runtime (Falco/Tetragon).
+  \item \textbf{Flux données} : métriques, journaux et traces agrégés dans Prometheus, Loki
+  et Tempo, alimentant la base vectorielle Qdrant du moteur RAG et 26 dashboards Grafana.
+\end{itemize}
+
+% =====================================================================
+\chapter{Chaîne DevSecOps}
+\label{ch:devsecops}
+
+\section{Principe : le Shift-Left de bout en bout}
+
+La chaîne applique le principe \textit{Shift-Left} : chaque défaut est intercepté
+au stade le moins coûteux (pre-commit $<$ CI $<$ admission $<$ runtime).
+L'enchaînement exact des 24 briques est le suivant :
+
+\begin{center}
+\small
+\textbf{Gitleaks} $\rightarrow$ \textbf{Semgrep} $\rightarrow$ \textbf{Checkov} $\rightarrow$
+\textbf{Terraform} $\rightarrow$ \textbf{Ansible} $\rightarrow$ \textbf{Docker} $\rightarrow$
+\textbf{Trivy} $\rightarrow$ \textbf{Syft} $\rightarrow$ \textbf{Grype} $\rightarrow$
+\textbf{Cosign} $\rightarrow$ \textbf{Sigstore} $\rightarrow$ \textbf{ArgoCD} $\rightarrow$
+\textbf{Kyverno} $\rightarrow$ \textbf{Istio} $\rightarrow$ \textbf{SPIFFE} $\rightarrow$
+\textbf{Vault} $\rightarrow$ \textbf{ESO} $\rightarrow$ \textbf{Falco} $\rightarrow$
+\textbf{Tetragon} $\rightarrow$ \textbf{Prometheus} $\rightarrow$ \textbf{Grafana} $\rightarrow$
+\textbf{Loki} $\rightarrow$ \textbf{OpenTelemetry} $\rightarrow$ \textbf{AI Security}
+\end{center}
+
+\section{Contrôles pre-commit et hygiène Git}
+
+\subsection{Hooks obligatoires}
+
+Fichier : \texttt{.pre-commit-config.yaml} (55 lignes).
+Contenu : Gitleaks v8.30.1 (config \texttt{.gitleaks.toml}), TruffleHog v3.88.0
+(\texttt{--only-verified --fail}), shellcheck-py (\texttt{*.sh}), pre-commit-hooks
+(trailing-whitespace, end-of-file-fixer, check-yaml multi-documents hors
+\texttt{infra/secrets/*.enc.yaml}, check-merge-conflict, detect-private-key).
+
+Fichier : \texttt{.gitleaks.toml} (55 lignes, \texttt{extend.useDefault=true},
+$\sim$30 motifs d'allowlist pour rapports, fixtures, vendor, evidence, et regex
+pour placeholders \texttt{example\_}/\texttt{dummy}/\texttt{changeme}).
+
+\subsection{Branches, revues, signatures}
+
+Aucun push direct sur \texttt{main} / \texttt{develop} ; branches
+\texttt{feature/*} et \texttt{hotfix/*} ; chaque PR exige CI verte (SAST, SCA, build)
+avant revue par un pair ; commits signés GPG
+(\texttt{git commit -S -m "feat: \dots"}).
+
+\section{Pipelines Jenkins (8 fichiers)}
+
+Le tableau~\ref{tab:jenkinsfiles} synthétise les 8 pipelines versionnés à la racine.
+Le pipeline principal (\texttt{Jenkinsfile}, 222 lignes) comporte 7 stages :
+\textit{Validate Manifests} (Kustomize tous envs + \texttt{kyverno apply}),
+\textit{SECAI Security Analysis} (read-only, jamais bloquant),
+\textit{Supply Chain SBOM + Scan} (CycloneDX + Grype fail-on high/critical),
+\textit{Cosign Sign}, \textit{SLSA Provenance}, \textit{Quality Gate + Promotion}
+(bloquant, 8 gates), \textit{Kubernetes Deploy + Verify} (lecture ArgoCD).
+
+\begin{longtable}{@{}lp{9.5cm}@{}}
+\toprule
+\textbf{Fichier} & \textbf{Stages / outils / gates (résumé)} \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Fichier} & \textbf{Stages / outils / gates (résumé)} \\
+\midrule
+\endhead
+\texttt{Jenkinsfile} (main, 222 l.) &
+Validate Manifests (kustomize 6 envs + kyverno apply) ;
+SECAI read-only ; SBOM CycloneDX + Grype (fail high/critical) ;
+Cosign Sign ; SLSA Provenance ; Quality Gate bloquant + promotion 8 gates ;
+Deploy + Verify (ArgoCD read-only). Agent K8s \texttt{securerag-hub-unified}, timeout 30\,min. \\
+\texttt{Jenkinsfile.ai} (MLSecOps, 351 l.) &
+Lint Semgrep (\texttt{security/semgrep/semgrep.yml} sur \texttt{ai-security/}, \texttt{secai/}) ;
+pytest \texttt{secai/tests/} (exclusions conditionnelles torch/fastapi) ;
+detect-secrets 2 niveaux (crypto bloquant, keywords signalement) ;
+MLSecOps (picklescan + garak ou 13 payloads guardrails + audit supply-chain) ;
+Supply Chain 4 checks (digest registry, Trivy CRITICAL, Cosign v3, Model Registry). \\
+\texttt{Jenkinsfile.cd} (CD release, 675 l.) &
+Scans parallèles (Trivy images + Checkov Helm, hard-fail CRITICAL) ;
+Supply chain parallèle (Cosign keyless + SBOM/Grype/VEX) ;
+Verify keyless ; SLSA ; hermetic build ; promote-by-digest ;
+release evidence (in-toto STRICT) ; GitOps update digest ;
+AI image auditor (non-bloquant) ; si PROD : sync ArgoCD + rollout + health/rollback,
+backup immuable, k6 SLO STRICT (p95$<$200\,ms, err$<$1\,\%, dispo$>$99\,\%),
+Ratify sync, DR Velero, DAST ZAP optionnel, support-pack, DORA, notifs Slack/Teams/Email. \\
+\texttt{Jenkinsfile.dr} (108 l.) &
+Provision k3d éphémère ; restore ; unseal Vault ; wait pods 600\,s ;
+k6 ; vérif RTO 4\,h / RPO 1\,h (\texttt{generate\_report.py} $\rightarrow$ \texttt{DR\_VALIDATION\_REPORT.md}) ;
+delete cluster + archive. \\
+\texttt{Jenkinsfile.nightly} (170 l., cron 3\,h) &
+Parallèle : OWASP Dependency-Check (HTML) ; ZAP DAST full ;
+Garak LLM red-team ; Backup + Restore DR (Velero). Timeout 45\,min. \\
+\texttt{Jenkinsfile.perf} (100 l., 120\,min) &
+Paramètres TEST\_TYPE (smoke/load/stress/spike/soak), VUS scale, SLO\_STRICT ;
+\texttt{k6-jenkins-stage.sh} + publishHTML + archive. \\
+\texttt{Jenkinsfile.recette} (185 l.) &
+Déploiement distant SSH (83.229.82.46) : clone, build images locales,
+update digest recette, sync/wait ArgoCD, rollout 5 deploys, smoke-tests. \\
+\texttt{Jenkinsfile.weekly} (194 l., dimanche 1\,h) &
+ZAP Baseline (WARN, UNSTABLE si High) + ZAP API scan OpenAPI + quality gates.
+Agent tools + dind docker:27. \\
+\bottomrule
+\caption{Les 8 pipelines Jenkins (sources : fichiers \texttt{Jenkinsfile*} à la racine).}
+\label{tab:jenkinsfiles}
+\end{longtable}
+
+\section{Scripts d'automatisation}
+
+\subsection{Scripts CI (\texttt{scripts/ci/}, 28 fichiers)}
+
+\begin{itemize}
+  \item \texttt{run-owasp-dependency-check.sh} — SCA Dependency-Check (nightly, HTML+JSON).
+  \item \texttt{run-hadolint.sh} — Lint des Dockerfiles.
+  \item \texttt{trigger-github-webhook.sh} — Simulation payload push GitHub $\rightarrow$ Jenkins.
+  \item \texttt{validate-renovate-config.sh} — Validation \texttt{renovate.json}.
+  \item \texttt{validate-platform-tools.sh} — Présence/versions des outils CI.
+  \item \texttt{parse-falco.sh} / \texttt{parse-tetragon.sh} — Conversion alertes runtime en rapports CI.
+  \item \texttt{notify-security-backlog.sh} — Création d'issues backlog sécu via API GitHub.
+  \item \texttt{collect-coverage.sh} — Fusion coverages 5 apps Laravel + gate de seuil.
+  \item \texttt{policy-as-code.sh} — Enforcement Conftest/Kyverno/OPA (JSON).
+  \item \texttt{audit-dependencies.sh} — Audit npm/composer par app.
+  \item \texttt{secai-remediation-loop.sh} — Boucle remédiation SECAI (verdict + trigger build).
+  \item \texttt{run-owasp-zap-dast.sh} — DAST ZAP $\rightarrow$ \texttt{security/reports/owasp-zap.\{json,sarif,html\}}.
+  \item \texttt{validate-kyverno-policies.sh} / \texttt{validate-opa-gatekeeper.sh} / \texttt{validate-tetragon-policies.sh} / \texttt{validate-kube-score.sh} / \texttt{validate-falco-rules.sh} / \texttt{validate-sonar-cpd-scope.sh} — Validations policy-as-code.
+  \item \texttt{quality-gate.sh} — Gate agrégé bloquant (gitleaks/trivy/audit/tests/coverage).
+  \item \texttt{secure-quality-gate.sh} — Gate étendu (gitleaks/trivy/sonar/cosign/SBOM).
+  \item \texttt{extract-jenkins-evidence.sh} — Collecte preuves build $\rightarrow$ \texttt{evidence/}.
+  \item \texttt{run-tests.sh} / \texttt{run-python-tests.sh} — Tests Laravel (JUnit+Clover) / Python (pytest).
+  \item \texttt{promotion-pipeline.sh} — Promotion \texttt{dev $\rightarrow$ production} à 8 gates.
+  \item \texttt{run-sonar-analysis.sh} — sonar-scanner + attente quality gate.
+  \item \texttt{run-mlsecops-scans.sh} — Suite MLSecOps (picklescan + red-team + supply-chain ML).
+  \item \texttt{run-ai-security-tests.sh} — Suite Agents IA + audit LLM.
+\end{itemize}
+
+\subsection{Scripts release (\texttt{scripts/release/}, 24 fichiers)}
+
+Génération SBOM (\texttt{generate-sbom.sh}, Syft), validation CycloneDX
+(\texttt{validate-sbom-cyclonedx.sh}, STRICT), scan Grype, VEX
+(\texttt{generate-vex.py}, \texttt{generate-vex-report.sh}),
+signatures Cosign clé (\texttt{cosign\_sign.sh}) et keyless
+(\texttt{sign-images-keyless.sh}, Fulcio/OIDC), vérifications
+(\texttt{cosign\_verify.sh}, \texttt{verify-signatures-keyless.sh}),
+provenance SLSA (\texttt{generate-provenance.sh}, \texttt{generate-provenance-statement.sh}),
+attestations (\texttt{attest-sboms.sh}, \texttt{generate-release-attestation.sh}),
+promotion (\texttt{promote-by-digest.sh}, \texttt{promote-verified-images.sh},
+\texttt{pin-overlay-digests.sh}), preuves (\texttt{collect-supply-chain-evidence.sh},
+\texttt{record-release-evidence.sh}, \texttt{assert-supply-chain-evidence.sh},
+\texttt{run-supply-chain-execute.sh}, \texttt{run-release-proof-strict.sh}),
+scan images (\texttt{scan-images.sh}, Trivy $\rightarrow$ \texttt{security/reports/trivy-image-*.json}).
+
+\subsection{Scripts sécurité (\texttt{scripts/security/}, 21 fichiers)}
+
+\texttt{detection-drill.sh} (exercice Falco/Tetragon),
+\texttt{preflight-kyverno.sh}, \texttt{qdrant-poisoning-check.py},
+\texttt{model-drift-monitor.py}, \texttt{verify-model-registry.sh},
+\texttt{garak-secai-wrapper.py}, \texttt{test-ai-stack-final.sh} (20/20),
+\texttt{enforce-kyverno-policies.sh}, \texttt{epss\_vulnerability\_filter.py} (priorisation EPSS),
+\texttt{cis-benchmark.sh}, \texttt{run-cis-benchmark.sh}, \texttt{run-kube-bench.sh},
+\texttt{cis-report-parser.sh}, \texttt{benchmark-summary.sh}, \texttt{audit-hosts.sh},
+\texttt{vault-configure-approle.sh}, \texttt{vault-configure-transit.sh},
+\texttt{run-conftest.sh}, \texttt{run-scorecard.sh} (OpenSSF),
+\texttt{run-all-security-checks.sh}, \texttt{final-audit.sh}.
+
+\section{Supply chain : SBOM, signatures, provenance (SLSA)}
+
+\begin{enumerate}
+  \item \textbf{Build} : images multi-stage non-root (Alpine, UID 10001, \texttt{readOnlyRootFilesystem}),
+  pinées par digest \texttt{@sha256:} (jamais de tag flottant en production).
+  \item \textbf{SBOM} : Syft génère un CycloneDX par service (\texttt{artifacts/sbom/*.cdx.json}),
+  validé (\texttt{validate-sbom-cyclonedx.sh}) puis scanné par Grype (\texttt{--fail-on high,critical}).
+  \item \textbf{Scan} : Trivy (images + FS, \texttt{--severity CRITICAL --exit-code 1}),
+  \texttt{.trivyignore} documentant 14 CVE acceptées (expiry + ticket SEC-001..014).
+  \item \textbf{Signature} : Cosign classique (clé Vault) et keyless (Fulcio/OIDC Jenkins),
+  attestations in-toto (SBOM + provenance) attachées au digest OCI.
+  \item \textbf{Provenance SLSA} : commit, builder (\texttt{jenkins.securerag.local}), timestamps ;
+  niveau 2 démontré, niveau 3 visé (conditionné par admission + identité fédérée simultanées).
+  \item \textbf{Vérification} : Kyverno Enforce + Ratify OCI 1.1 au déploiement ;
+  vérification runtime continue.
+\end{enumerate}
+
+Fichiers de référence : \texttt{scripts/release/generate-sbom.sh},
+\texttt{scripts/release/cosign\_sign.sh}, \texttt{scripts/release/generate-provenance.sh},
+\texttt{scripts/release/generate-release-attestation.sh},
+\texttt{docs/supply-chain-architecture.md}.
+
+\section{GitOps avec ArgoCD (29 applications)}
+
+Racine : \texttt{infra/k8s/argocd/application-root.yaml} (App-of-Apps \texttt{securerag-root},
+prune/selfHeal), ApplicationSets platform/observability/security/ai-governance
+(\texttt{applicationset-\{platform,all\}.yaml}, \texttt{applicationsets/}),
+variante DR multi-cluster (\texttt{applicationset-dr-multicluster.yaml}),
+applications \texttt{eso, cert-manager, ingress-nginx, pki, image-updater, harbor, vault, velero, falco-talon},
+projets \texttt{platform-services, observability, security, ai-services}
+(\texttt{projects/}), \texttt{argocd-cm.yaml}, \texttt{rbac-cm.yaml}, \texttt{notifications-cm.yaml}.
+Preuve : 29 apps synchronisées, selfHeal démontré (revert d'un \texttt{kubectl} direct).
+
+Environnements Kustomize : \texttt{infra/k8s/overlays/\{dev,demo,recette,staging,production,preprod,test,prod,dr,production-external-db,\_hub-foundation,legacy\}},
+bases \texttt{infra/k8s/base/} (12 microservices : portal-web, auth-users, postgres-auth,
+chatbot-manager, conversation-service, audit-security-service, ollama, qdrant,
+llm-orchestrator, secai, \dots), \texttt{infra/k8s/environments/prod/}
+(namespace, quota, limitrange, networkpolicy, RBAC).
+
+\section{Admission : Kyverno (8 politiques Enforce)}
+
+\begin{longtable}{@{}lll@{}}
+\toprule
+\textbf{Policy} & \textbf{Mode} & \textbf{Test prouvé} \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Policy} & \textbf{Mode} & \textbf{Test prouvé} \\
+\midrule
+\endhead
+\texttt{securerag-verify-cosign-images} & Enforce & Image unsigned $\rightarrow$ BLOCKED \\
+\texttt{securerag-restrict-image-references} & Enforce & \texttt{:latest} interdit, \texttt{@sha256:} obligatoire \\
+\texttt{securerag-require-workload-controls} & Enforce & 3 probes + \texttt{automountServiceAccountToken: false} \\
+\texttt{securerag-disallow-root-containers} & Enforce & \texttt{runAsNonRoot: true}, \texttt{drop: [ALL]} \\
+\texttt{securerag-restrict-service-exposure} & Enforce & LoadBalancer interdit, NodePort allowlist \\
+\texttt{securerag-restrict-volume-types} & Enforce & hostPath interdit (PSA baseline) \\
+\texttt{securerag-disallow-host-network} & Enforce & hostNetwork absent \\
+\texttt{securerag-audit-cleartext-env-values} & Enforce & URL HTTP $\rightarrow$ annotation exigée \\
+\bottomrule
+\caption{Politiques Kyverno (sources : \texttt{infra/k8s/policies/kyverno/\{enforce,audit\}/}).}
+\label{tab:kyverno}
+\end{longtable}
+
+Fichiers : \texttt{enforce/\{verify-sbom.yaml, verify-slsa-provenance.yaml, verify-cosign-images.yaml,
+enterprise-guardrails.yaml, block-unsigned-images.yaml, comprehensive-policies.yaml\}}
+(ce dernier = 7 ClusterPolicies : readonly-rootfs, resource-limits, labels, annotations,
+networkpolicy default-deny générée, pod-security, ingress TLS obligatoire) ;
+\texttt{audit/\{audit-cleartext-env-values.yaml, restrict-image-references.yaml,
+require-workload-controls.yaml, disallow-root-containers.yaml, disallow-host-network.yaml,
+restrict-service-exposure.yaml, restrict-volume-types.yaml\}} ;
+mutations \texttt{infra/k8s/kyverno/mutate-pod-security.yaml}
+(runAsNonRoot, allowPrivilegeEscalation=false, limites par défaut 512\,Mi/500\,m) ;
+\texttt{slsa-enforcement.yaml} (block tags mutables, vérif SBOM SPDX + provenance, builder pin) ;
+exception \texttt{policies/kyverno/exceptions/secai-exception.yaml}.
+
+\section{Zero-Trust : réseau et identités}
+
+\subsection{Micro-segmentation (52 NetworkPolicy + Cilium)}
+
+Default-deny partout : \texttt{k8s/network-policies/00-default-deny-all.yaml},
+\texttt{infra/k8s/network-policies/00-default-deny\{-egress\}.yaml},
+\texttt{base/networkpolicy-default-deny.yaml}, une policy par environnement et par service
+(\texttt{base/\{portal-web,auth-users,chatbot-manager,conversation-service,audit-security-service,postgres-auth,qdrant,ollama,\dots\}/networkpolicy.yaml}),
+\texttt{observability/}, \texttt{backup/}, \texttt{falco/}, \texttt{monitoring/},
+plus 11 politiques applicatives fines \texttt{k8s/network-policies/01..10}
+(portal-web, chatbot-manager, auth-users, conversation-service, audit-security,
+postgresql, chromadb/qdrant, DNS egress, monitoring ingress, chromadb restreint).
+Cilium L3--L7 : \texttt{infra/k8s/policies/cilium/\{default-deny-networkpolicy.yaml,
+services-cnp.yaml, clusterwide-observability-cnp.yaml\}} ;
+matrice : \texttt{docs/NETWORK\_ZERO\_TRUST\_MATRIX.md}.
+Stack IA : \texttt{infra/k8s/base/ai-stack/networkpolicies.yaml}
+(ollama ingress secai+gateway+monitoring:11434, qdrant ingress secai+monitoring:6333/6334).
+
+\subsection{Service mesh Istio (mTLS STRICT)}
+
+\texttt{infra/k8s/istio/} (11 fichiers) : \texttt{operator.yaml},
+\texttt{ingress-gateway.yaml}, \texttt{peerauthentication-strict.yaml}
+(STRICT sur securerag-hub, securerag-monitoring, falco, spire),
+\texttt{authorizationpolicy-deny-all.yaml} (DENY 80/443/8000/8080 + ALLOW par principals SPIFFE),
+\texttt{destinationrules-tls.yaml}, \texttt{virtualservices-weighted.yaml},
+\texttt{canary-migration.yaml}, \texttt{telemetry-tracing.yaml},
+\texttt{service-entries.yaml}, \texttt{spire-integration.yaml} (Envoy SDS via
+\texttt{/run/spire/sockets/agent.sock}), \texttt{kiali.yaml}.
+Docs : \texttt{docs/istio/}, \texttt{docs/security/zero-trust-network.md}.
+
+\subsection{Identités SPIFFE (SPIRE) et secrets (Vault + ESO)}
+
+SPIRE : \texttt{infra/k8s/spiffe/deployment.yaml} (server + agent DaemonSet 1.8.2,
+ns \texttt{spire-system}), \texttt{configmap.yaml}, \texttt{rbac.yaml},
+\texttt{controller-manager.yaml} ; identités \texttt{spiffe://cluster.local/ns/<ns>/sa/<sa>},
+SVID X.509 éphémères auto-rotés (cf. \texttt{docs/ZERO\_TRUST\_ARCHITECTURE.md}).
+
+Vault : \texttt{infra/helm/vault/values-production.yaml} (HA 3 réplicas Raft, TLS, audit file,
+injector), \texttt{infra/k8s/security/vault/k8s-auth-config.yaml}
+(auth k8s $\rightarrow$ \texttt{securerag-role}),
+\texttt{infra/k8s/argocd/application-vault.yaml}, backup \texttt{vault-backup-cronjob.yaml} ;
+ESO : \texttt{infra/helm/external-secrets/values-production.yaml}
+(sync Vault $\rightarrow$ Secrets K8s) ; overlays avec \texttt{externalsecret-common.yaml}.
+
+Registre privé : Harbor \texttt{infra/helm/harbor/values-production.yaml}
+(\texttt{harbor.securerag.local}, Trivy activé, PVC 50\,Gi/10\,Gi) ;
+Ratify \texttt{infra/k8s/ratify/deployment.yaml} (v1.0.0, config oras/cosign).
+
+\section{Sécurité runtime : Falco, Tetragon, Ratify}
+
+\begin{itemize}
+  \item \textbf{Falco} (eBPF, v0.37.0) : \texttt{infra/helm/falco/values-production.yaml}
+  (modern\_ebpf, règles MITRE ATT\&CK), \texttt{infra/k8s/falco/values-override.yaml}
+  (Falcosidekick $\rightarrow$ Talon :2803, Wazuh, Loki),
+  \texttt{falco-talon-rules.yaml}, \texttt{falco-network-policy.yaml},
+  \texttt{security/falco/custom-enterprise-rules.yaml},
+  \texttt{falco-talon/deployment.yaml}. Drill prouvé : \texttt{cat /etc/shadow} $\rightarrow$ alerte.
+  \item \textbf{Tetragon} (LSM BPF, v1.2.0) : \texttt{infra/k8s/tetragon/daemonset.yaml}
+  (kube-system, privileged, export OTel :4317), TracingPolicy (CRD \texttt{tracingpolicies.cilium.io}).
+  \item \textbf{Ratify} (OCI 1.1) : pod Running, serveur :6000, CRD Verifier/Store.
+  \item \textbf{Trivy Operator} : scan continu (411 ConfigAuditReports).
+\end{itemize}
+
+\section{Observabilité : Prometheus, Grafana, Loki, OTel}
+
+\begin{itemize}
+  \item \textbf{Prometheus} : \texttt{infra/helm/prometheus/values-production.yaml}
+  (rétention 30\,j/10\,Go, scrape wazuh/loki/tempo/vault),
+  \texttt{infra/k8s/observability/prometheus-\{deployment,config,rules,rules-security\}.yaml},
+  \texttt{servicemonitors.yaml}, \texttt{podmonitors.yaml},
+  alertes SLO \texttt{infra/helm/prometheus/alerts/slo-alerts.yaml}.
+  \item \textbf{Grafana} : dashboards \texttt{infra/helm/grafana/dashboards/\{devsecops-overview,ha-monitoring,k6-performance,slo-security\}.json}
+  + \texttt{infra/k8s/observability/grafana-\{deployment,dashboards\}.yaml} (26 dashboards).
+  \item \textbf{Loki + Promtail + Tempo} : \texttt{infra/helm/loki/values-production.yaml},
+  \texttt{observability/loki-deployment.yaml}, \texttt{promtail.yaml},
+  \texttt{tempo/tempo-deployment.yaml} (Tempo 2.4.1, vide helm à compléter).
+  \item \textbf{Alertmanager} : \texttt{infra/helm/alertmanager/values-production.yaml}
+  (route critical $\rightarrow$ \#security-alerts), \texttt{observability/alertmanager\{-rules\}.yaml}.
+  \item \textbf{OpenTelemetry} : \texttt{infra/k8s/otel/deployment.yaml} (ns otel-system,
+  otel-collector-contrib + Tempo), patch \texttt{base/otel-patch.yaml}.
+\end{itemize}
+
+\section{Sauvegarde, DR et chaos engineering}
+
+\textbf{Velero} : \texttt{infra/k8s/velero/velero.yaml} (schedules daily 2\,h, weekly vault,
+monthly argocd + BSL \texttt{velero-minio} bucket \texttt{securerag-velero-backups}),
+\texttt{immutable-schedule.yaml}, \texttt{immutable-backup-location.yaml},
+\texttt{backup/\{velero-schedule,etcd-backup-cronjob,postgres-backup-cronjob,argocd-backup-cronjob,vault-backup-cronjob\}.yaml}.
+BSL disponible (moto S3:9110), backup Completed.
+Plan : \texttt{docs/DISASTER\_RECOVERY\_PLAN.md} (RTO 4\,h / RPO 1\,h, etcd snapshot,
+Vault raft restore + unseal, ArgoCD import + resync, Velero restore + pg\_restore).
+Test automatisé : \texttt{Jenkinsfile.dr} + \texttt{scripts/dr/\{provision,restore,unseal-vault,generate\_report,backup-test,validate-restore,validate-immutable\}.sh}.
+
+\textbf{Chaos Mesh} (ns chaos-testing, 7 pods) : controller, daemonset, dns-server, dashboard ;
+\texttt{infra/k8s/chaos/}, \texttt{chaos-mesh/}, \texttt{chaos-experiments/} ;
+schedule PodChaos (kill auth-users toutes les 5\,min) ; MTTR mesuré $<$1\,h.
+
+% =====================================================================
+\chapter{Chaîne MLSecOps et sécurité IA}
+\label{ch:mlsecops}
+
+\section{Position du problème IA}
+
+Un RAG exposé concentre 10 familles de risques (OWASP LLM Top 10 v2025) :
+injection de prompt, gestion des sorties, supply chain des modèles, empoisonnement des données,
+sorties non sûres, exposition excessive, vol de prompt système, vecteurs d'accès excessifs,
+hallucination, déni de service du modèle.
+La réponse de SecureRAG Hub est une défense en profondeur \textbf{déterministe d'abord}
+(règles, NER, TF-IDF), \textbf{ML ensuite} (embeddings, LLM-juge local), \textbf{humain enfin}
+(\texttt{requires\_human\_review}), avec \textbf{fail-closed} à l'entrée
+(l'injection n'atteint jamais le LLM).
+
+\section{Service SECAI v2 : 12 guardrails, 5 pipelines, 7 endpoints}
+
+\subsection{Les 12 guardrails (tous testés)}
+
+\begin{longtable}{@{}lp{3cm}p{6.5cm}@{}}
+\toprule
+\textbf{Module} (\texttt{secai/guardrails/}) & \textbf{OWASP} & \textbf{Rôle / tests} \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Module} (\texttt{secai/guardrails/}) & \textbf{OWASP} & \textbf{Rôle / tests} \\
+\midrule
+\endhead
+\texttt{injection.py} & LLM01, LLM07 & Prompt injection (GI-01..GI-06 : ignore-previous, jailbreak, prompt leak). 28 tests avec output\_filter. \\
+\texttt{output\_filter.py} & LLM02, LLM05 & Filtrage sorties (GO-01..GO-06 : AWS, PEM, JWT, URI, commandes). Inclus dans 28. \\
+\texttt{rate\_limit.py} & LLM10 & Token bucket par client (5 burst / 1 req/s). 4 tests. \\
+\texttt{factuality.py} & LLM09 & Claims vérifiables (CVE/URL/fichier/cmd tracés dans contexte). 10 tests. \\
+\texttt{semantic\_factuality.py} & LLM09 & TF-IDF + cosinus (similarité réponse $\leftrightarrow$ contexte). 9 tests (+27 avancés). \\
+\texttt{presidio\_pii.py} & LLM02 & Presidio NER : 50+ types PII (IBAN, CB, tél, IP, PERSON). 10 tests. \\
+\texttt{semantic\_drift.py} & LLM09 & Sentence-Transformers all-MiniLM-L6-v2 (384 dims). 8 tests. \\
+\texttt{llm\_judge.py} & Tous & LLM-as-Judge : factuality ($\times$2), safety ($\times$2), relevance, completeness via Ollama. 16 tests (dont 2 LIVE). \\
+\texttt{canary\_tokens.py} & LLM07 & Tokens leurrés dans system prompt $\rightarrow$ détection extraction. 15 tests. \\
+\texttt{vex\_statements.py} & LLM03 & OpenVEX : CVE justifiée \texttt{not\_affected} $\rightarrow$ gate CI PASS. 11 tests. \\
+\texttt{transparency\_log.py} & LLM03 & Log append-only chaîné SHA-256 (falsification détectée). 11 tests. \\
+\texttt{schemas.py} & --- & Structures Pydantic communes (Verdict, GuardrailVerdict). \\
+\bottomrule
+\caption{Les 12 guardrails SECAI (sources : \texttt{secai/guardrails/*.py}).}
+\label{tab:guardrails}
+\end{longtable}
+
+\subsection{Les 5 pipelines (\texttt{secai/pipelines/})}
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{@{}ll@{}}
+\toprule
+\textbf{Pipeline} & \textbf{Rôle} \\
+\midrule
+\texttt{security\_analysis.py} & Analyse rapports Trivy/Semgrep/Falco/Kyverno $\rightarrow$ findings $\rightarrow$ verdict (batch Jenkins, read-only) \\
+\texttt{alert\_correlation.py} & Corrélation déterministe multi-sources (jamais probabiliste) \\
+\texttt{evaluation.py} & Évaluation modèle + confidence scoring (fixture \texttt{annotated.json}) \\
+\texttt{explanation.py} & Explication gabarit par finding (toujours \texttt{human\_review}) \\
+\texttt{remediation.py} & Suggestions de remédiation (boucle non-bloquante anti-boucle) \\
+\bottomrule
+\end{tabular}
+\caption{Pipelines SECAI.}
+\label{tab:pipelines}
+\end{table}
+
+Fichiers complémentaires : \texttt{entry.py} (CLI Jenkins), \texttt{\_\_init\_\_.py},
+\texttt{security-aggregator/aggregate.py}, \texttt{transparency\_log.py} (racine),
+\texttt{config.py} (settings env-only, zéro secret codé),
+\texttt{models/securebert\_loader.py} (SecureBERT \texttt{cisco-ai/SecureBERT2.0-base},
+seuil 0.80, \texttt{enable\_external\_llm=false}, mode dégradé heuristique),
+\texttt{models/antares\_locator.py},
+\texttt{integrations/\{falco,trivy,kyverno,sonarqube,semgrep\}.py} (parsers sanitizés),
+\texttt{policies/thresholds.yaml} + \texttt{decision\_policy.py} (seuils 0.8/0.6 + boost 0.1),
+\texttt{dataset/fixtures/annotated.json}, \texttt{dataset\_generator.py},
+\texttt{workflows/secai/} (decision-engine, decision-logic, aggregators, remediation),
+\texttt{workflows/ci/Jenkinsfile.\{ci,pull-request,tests\}},
+\texttt{redteam-corpus/evil\_model.pkl}.
+
+\subsection{L'API SECAI (FastAPI, port 8001)}
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{@{}lll@{}}
+\toprule
+\textbf{Endpoint} & \textbf{Rôle} & \textbf{Sécurité} \\
+\midrule
+\texttt{POST /llm/analyze} & Rate-limit $\rightarrow$ guardrail IN $\rightarrow$ Gateway $\rightarrow$ guardrail OUT & Injection BLOCK, LLM jamais appelé \\
+\texttt{POST /analyze} & Analyse rapports $\rightarrow$ findings, verdict & 3 findings réels, BLOCK \\
+\texttt{POST /correlate} & Corrélation d'alertes & Déterministe \\
+\texttt{POST /explain} & Explication narrative & \texttt{requires\_human\_review: true} \\
+\texttt{GET /health} & Health check & \texttt{model\_loaded}, \texttt{sealed} \\
+\texttt{GET /ready} & Readiness & Mode dégradé (no ML) si modèle absent \\
+\texttt{GET /models} & Info modèle & \texttt{model\_id}, \texttt{device} \\
+\bottomrule
+\end{tabular}
+\caption{API SECAI (sources : \texttt{secai/api/main.py}, \texttt{llm\_endpoint.py}, \texttt{schemas.py}).}
+\label{tab:api-secai}
+\end{table}
+
+Déploiement : \texttt{infra/k8s/base/secai/deployment.yaml}
+(image digest-pinée, \texttt{runAsNonRoot:10001}, \texttt{readOnlyRootFilesystem}).
+
+\section{Cartographie OWASP LLM Top 10 (10/10 couverts)}
+
+Source : \texttt{docs/MLSECOPS-LLM-SECURITY.md} (155 lignes).
+
+\begin{longtable}{@{}lll@{}}
+\toprule
+\textbf{Risque} & \textbf{Statut} & \textbf{Contrôles (preuves)} \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Risque} & \textbf{Statut} & \textbf{Contrôles (preuves)} \\
+\midrule
+\endhead
+LLM01 Prompt Injection & Couvert & \texttt{scan\_prompt\_injection} avant LLM (\texttt{POST /llm/analyze} $\rightarrow$ 422 GI-01, 11 tests) + Garak 0.17 \\
+LLM02 Fuite de données & Couvert & \texttt{output\_filter} + Presidio NER + etcd AES-CBC + NetPols \texttt{ai-stack/networkpolicies.yaml} \\
+LLM03 Supply chain & Couvert & Cosign + digest-pinning + Jenkinsfile.ai (Trivy/SBOM/SLSA) + Modelfile versionné \\
+LLM04 Poisoning & Partiel $\rightarrow$ couvert & GGUF piné + \texttt{vuln-kb} opérateur-only + CronJob poisoning 15\,min (baseline hash \texttt{d2661aaa}) \\
+LLM05 Sorties non sûres & Couvert & Sortie jamais \texttt{eval/exec}, Pydantic \texttt{schemas.py}, \texttt{output\_filter} \\
+LLM06 Exposition excessive & Partiel & \texttt{mode:advisory}, \texttt{auto\_remediation:false}, pas de tool-calling, HITL Jenkins \\
+LLM07 Vol de prompt & Couvert & Prompts en ConfigMap \texttt{secai-config}, \texttt{injection.py} anti-leak, canary tokens \\
+LLM08 Vecteurs excessifs & Couvert & Qdrant ingress SECAI+Prometheus only, scoping \texttt{vuln-kb}, sanitizers \\
+LLM09 Hallucination & Partiel $\rightarrow$ couvert & Grounding + seuil 0.80 + \texttt{enable\_external\_llm:false} + factuality (27 tests) + drift \\
+LLM10 DoS modèle & Couvert & Limits 2\,Gi, Bearer 401, \texttt{max\_tokens:512/timeout:150}, TokenBucket, local-only \\
+\bottomrule
+\caption{Couverture OWASP LLM Top 10 v2025.}
+\label{tab:owasp-llm}
+\end{longtable}
+
+\section{Modèle IA : Qwen2.5-0.5B}
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{@{}ll@{}}
+\toprule
+\textbf{Attribut} & \textbf{Valeur} \\
+\midrule
+Nom & qwen2.5-0.5b-instruct (famille Qwen2.5, Apache-2.0) \\
+Paramètres & 0.5\,B, quantification q4\_k\_m (GGUF — pas de pickle) \\
+Taille / SHA-256 & 491\,400\,032 octets / \texttt{74a4da8c9fdbcd15\textellipsis 7a9db} \\
+Source & HuggingFace \texttt{Qwen/Qwen2.5-0.5B-Instruct-GGUF} \\
+Runtime & Ollama (temp=0.1, num\_ctx=1024), PVC \texttt{ollama-models} 5\,Gi \\
+Rôle & Inférence + LLM-as-Judge (16/16 tests) \\
+Scan & Picklescan SAFE + Garak 2075 requêtes \\
+Fiche & \texttt{models/registry/qwen2.5-0.5b-instruct.yaml} \\
+\bottomrule
+\end{tabular}
+\caption{Fiche modèle (source : \texttt{models/registry/}).}
+\label{tab:modele}
+\end{table}
+
+Manifests : \texttt{infra/k8s/base/ollama/deployment.yaml} (ollama:0.13.5, :11434,
+probes \texttt{/api/tags}, 250\,m/512\,Mi $\rightarrow$ 1000\,m/2\,Gi, PVC),
+\texttt{pvc.yaml} (5\,Gi RWO), \texttt{service.yaml}, \texttt{serviceaccount.yaml}
+(\texttt{sa-ollama}, automount:false), \texttt{networkpolicy.yaml},
+\texttt{modelfile/Modelfile.qwen2.5-0.5b} ;
+Qdrant : \texttt{infra/k8s/base/qdrant/} (StatefulSet v1.16.3-unprivileged, :6333,
+probes \texttt{/readyz|/healthz}, runAsNonRoot:1000, PVC, PDB) ;
+Gateway : \texttt{infra/k8s/base/ai-gateway/litellm-nemo-deployment.yaml}
+(main-v1.40.0, 2 réplicas, :4000, ConfigMap \texttt{securerag-llm $\rightarrow$ ollama/mistral:7b},
+routing usage-based-v2, filtres NeMo, readOnlyRootFilesystem, UID 10001).
+SECAI appelle \texttt{http://ai-gateway-litellm:4000/v1/chat/completions}
+(\texttt{SECAI\_LLM\_MODEL=securerag-llm}).
+
+Distinction importante : \texttt{secai/} = service prod actuel (SecureBERT + guardrails + gateway) ;
+\texttt{ai-security-service/} = prototype 4 couches antérieur (FastAPI :8000, L1 PromptInjection
+deberta-v3-small $\rightarrow$ L2 Jailbreak $\rightarrow$ L3 SemanticRouter TF-IDF $\rightarrow$
+L4 experts Seneca $\rightarrow$ L5 guardrails, manifests \texttt{k8s/} dédiés non utilisés en prod) ;
+\texttt{ai-security/} = utilitaires ponctuels (\texttt{qdrant\_rbac\_filter.py},
+\texttt{xai\_explainer.py}, \texttt{r\_workload\_calculator.py}, \texttt{mitre\_attack\_mapping.md}).
+
+\section{Surveillance MLSecOps : 3 CronJobs}
+
+Fichier unique : \texttt{infra/k8s/mlsecops/cronjobs.yaml} (262 lignes,
+ns \texttt{mlsecops-monitoring}, SA \texttt{mlsecops-monitor}, image unified,
+runAsNonRoot:1000, seccomp RuntimeDefault, drop ALL).
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{@{}llll@{}}
+\toprule
+\textbf{CronJob} & \textbf{Schedule} & \textbf{Commande} & \textbf{Ressources} \\
+\midrule
+\texttt{qdrant-poisoning-check} & */15 * * * * (15\,min) & \texttt{qdrant-poisoning-check.py --check} (baseline ConfigMap, \texttt{vuln-kb}:2\,pts) & 50\,m/64\,Mi $\rightarrow$ 128\,Mi, deadline 120\,s \\
+\texttt{model-drift-check} & 0 * * * * (horaire) & \texttt{model-drift-monitor.py --check} (5 probes, latence moy. 20,37\,s) & 200\,m/256\,Mi $\rightarrow$ 512\,Mi, deadline 600\,s \\
+\texttt{model-registry-verify} & 0 */6 * * * (6\,h) & \texttt{verify-model-registry.sh} (hash PVC vs registre, log-only) & 50\,m/64\,Mi $\rightarrow$ 128\,Mi, deadline 300\,s \\
+\bottomrule
+\end{tabular}
+\caption{CronJobs MLSecOps (source : \texttt{infra/k8s/mlsecops/cronjobs.yaml}).}
+\label{tab:cronjobs}
+\end{table}
+
+Autres CronJobs (hors IA) : \texttt{infra/k8s/backup/\{etcd,postgres,argocd,vault\}-*-cronjob.yaml},
+\texttt{infra/k8s/aiops/deployment.yaml} (aiops-log-analyzer),
+\texttt{infra/k8s/jobs/cosign-key-age-exporter-cronjob.yaml}.
+
+\section{Red-teaming et factualité}
+
+Red-team CI : 16/16 payloads neutralisés (7 IN : injection, jailbreak, prompt leak,
+role hijack, benign $\times$2 ; 6 OUT : AWS key, PEM, JWT, destructive, PII, benign ;
+3 factuality : CVE inventée, URL inventée, grounded).
+Wrapper : \texttt{scripts/security/garak-secai-wrapper.py} (Garak 2075 requêtes) ;
+fallback stdlib 13 payloads si endpoint injoignable (\texttt{scripts/ci/run-mlsecops-scans.sh}).
+Factualité : CVE inventée $\rightarrow$ UNGROUNDED ; canary : extraction prompt détectée ;
+VEX : CVE justifiée $\rightarrow$ PASS ; transparency log : falsification détectée (11/11).
+
+% =====================================================================
+\chapter{Validation expérimentale}
+\label{ch:validation}
+
+\section{Protocole expérimental (9 étapes)}
+
+Chaque barrière suit : (1) environnement exact (Kind v1.30, versions pinées),
+(2) configuration as-code, (3) scénario MITRE ATT\&CK for Containers,
+(4) activation automatique, (5) métriques (MTTD, latence P95, erreurs, CPU/mémoire, couverture),
+(6) seuil a priori (ex. MTTD $<$ 2,0\,s, P95 $<$ 1,0\,s),
+(7) exécution $N \geq 3$, (8) preuves brutes (JSON, Loki, PromQL, k6),
+(9) verdict PASS/FAIL/BLOCK/ALERT.
+Distinctions temporelles : $T_{\text{scan}}$ (calcul pur : 2,23\,s local / 8,4\,s à froid),
+MTTD $= T_{\text{detection}} - T_{\text{injection}}$ (3,8\,s en CI),
+$T_{\text{blocking}} <$ 0,5\,s (pre-commit, quality gate),
+MTTR $\approx$ 45\,s automatisé (Vault/ESO) et $<$1\,h organisationnel (DORA HIGH).
+
+\section{Tests SECAI par module (159 PASS)}
+
+\begin{longtable}{@{}lll@{}}
+\toprule
+\textbf{Fichier de test} & \textbf{Nb} & \textbf{Statut} \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Fichier de test} & \textbf{Nb} & \textbf{Statut} \\
+\midrule
+\endhead
+\texttt{test\_guardrails.py} & 28 & 28 PASS \\
+\texttt{test\_llm\_endpoint.py} & 11 & 11 PASS (injection jamais envoyée au LLM) \\
+\texttt{test\_factuality.py} & 10 & 10 PASS (CVE inventée $\rightarrow$ UNGROUNDED) \\
+\texttt{test\_presidio\_pii.py} & 10 & 10 PASS (IBAN, CB, tél, IP, PERSON) \\
+\texttt{test\_semantic\_factuality.py} & 9 & 9 PASS (TF-IDF + cosinus) \\
+\texttt{test\_transparency\_log.py} & 11 & 11 PASS (falsification détectée) \\
+\texttt{test\_semantic\_drift.py} & 8 & 8 PASS (Sentence-Transformers) \\
+\texttt{test\_llm\_judge.py} & 16 & 16 PASS (dont 2 LIVE Ollama) \\
+\texttt{test\_canary\_tokens.py} & 15 & 15 PASS (extraction détectée) \\
+\texttt{test\_vex\_statements.py} & 11 & 11 PASS (CVE justifiée $\rightarrow$ PASS) \\
+\texttt{test\_api.py} & 6 & 6 PASS \\
+\texttt{test\_correlation.py} & 2 & 2 PASS \\
+\texttt{test\_explanation.py} & 2 & 2 PASS \\
+\texttt{test\_parsers.py} & 9 & 9 PASS \\
+\texttt{test\_pipeline\_integration.py} & 3 & 3 PASS \\
+\texttt{test\_security.py} & 3 & 3 PASS (injection non parsée comme commande) \\
+\texttt{test\_thresholds.py} & 5 & 5 PASS \\
+\midrule
+\textbf{TOTAL} & \textbf{159} & \textbf{159 PASS} \\
+\bottomrule
+\caption{Tests SECAI (commande : \texttt{python3 -m pytest secai/tests/ -v}).}
+\label{tab:tests-secai}
+\end{longtable}
+
+\section{Test final automatisé (20/20 PASS)}
+
+Commande : \texttt{bash scripts/security/test-ai-stack-final.sh}.
+
+\begin{enumerate}
+  \item PASS Pod ollama Running
+  \item PASS Pod qdrant Running
+  \item PASS Pod gateway Running
+  \item PASS Modèle qwen2.5-0.5b persisté (PVC)
+  \item PASS Gateway refuse sans auth (401)
+  \item PASS Chat completions via gateway ($\rightarrow$ ollama) — \og Bonjour ! \fg
+  \item PASS RAG : recherche sémantique $\rightarrow$ CVE-2024-1234
+  \item PASS Guardrails : 28 passed
+  \item PASS Câblage \texttt{/llm/analyze} : 11 passed (injection jamais au LLM)
+  \item PASS Picklescan réel : SECAI sain + pickle malveillant détecté
+  \item PASS Red-teaming réel : 16/16 payloads neutralisés
+  \item PASS LIVE \texttt{/llm/analyze} : injection $\rightarrow$ block
+  \item PASS Factuality LLM09 : 10 passed (CVE inventée $\rightarrow$ UNGROUNDED)
+  \item PASS Model Registry : GGUF conforme (sha256 vérifié)
+  \item PASS Poisoning LLM04 : collection conforme à la baseline
+  \item PASS Drift monitor : modèle stable (hash sorties + latences)
+  \item PASS Ratify : pod Running + CRD Verifier (OCI 1.1)
+  \item PASS Cosign : ollama signée
+  \item PASS Cosign : qdrant signée
+  \item PASS Cosign : litellm signée
+\end{enumerate}
+
+\section{Pipeline Jenkins (BUILD \#30 SUCCESS, 202\,s)}
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{@{}lll@{}}
+\toprule
+\textbf{Stage} & \textbf{Détail} & \textbf{Résultat} \\
+\midrule
+1. Prepare Workspace & checkout scm & OK \\
+2. Lint + Static Analysis & Semgrep SAST (règles \texttt{security/semgrep/}) & OK, 0 violation \\
+3. Unit Tests & pytest \texttt{secai/tests/} & OK, 159 tests \\
+4. Live Secret Verification & detect-secrets 2 niveaux & OK, 0 crypto \\
+5. MLSecOps + Red-Teaming & picklescan + fuzzing + supply-chain audit & OK, 16/16 \\
+6. Supply Chain Validation & registry digest + Trivy 0 CRITICAL + Cosign v3 + Registry & OK, 4/4 \\
+\bottomrule
+\end{tabular}
+\caption{BUILD \#30 (source : API Jenkins \texttt{job/SecureRAG-Hub-AI/lastBuild}).}
+\label{tab:build30}
+\end{table}
+
+\section{Métriques DORA, FinOps, CIS}
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{@{}lll@{}}
+\toprule
+\textbf{Métrique} & \textbf{Valeur} & \textbf{Niveau DORA} \\
+\midrule
+Deployment Frequency & 23/24\,h & ELITE \\
+Lead Time to Change & 0,6\,h & ELITE \\
+Change Failure Rate & 7,4\,\% & ELITE \\
+MTTR & $<$1\,h & HIGH \\
+FinOps & 267\,\$/mois & t3.2xlarge $\times$ 2 \\
+CIS Benchmark & 14/15 (93\,\%) & --- \\
+\bottomrule
+\end{tabular}
+\caption{Métriques mesurées en direct.}
+\label{tab:dora}
+\end{table}
+
+Preuves complémentaires : k6 (smoke/load/stress/spike/soak, rapports
+\texttt{k6-report-*.html/json}), coverage PHPUnit 78,4\,\% ($>$ seuil 70\,\% SonarQube),
+\texttt{npm audit} 0 vulnérabilité / 231 paquets, \texttt{composer audit} clean,
+Checkov 42/42 IaC, \texttt{evidence/2026-09-27/} (10+ fichiers) et \texttt{evidence/2026-09-29/}.
+
+\section{Scores finaux}
+
+DevSecOps \textbf{98/100} ($-$1 mTLS universel infra cloud, $-$1 runner CI dédié),
+MLSecOps \textbf{99/100}, Global \textbf{98,5/100} (moyenne pondérée).
+
+% =====================================================================
+\chapter{Conformité et gouvernance}
+\label{ch:conformite}
+
+\section{NIST AI RMF 1.0 (96\,\% : 22/23 fonctions)}
+
+Source : \texttt{docs/NIST-AI-RMF-EU-AI-ACT-MAPPING.md} (140 lignes).
+GOVERN : Kyverno 8 Enforce, playbooks IR, Jenkins 6/6, Cosign+Registry, CronJobs+juge.
+MAP : archi Gateway $\rightarrow$ Ollama $\rightarrow$ Qdrant $\rightarrow$ SECAI,
+10 risques OWASP, poisoning+PII, GI-01..GI-06 + rate-limit, transparency log.
+MEASURE : juge 16/16, red-team 16/16 + Garak 2075 req, SupplyChain 4/4,
+CronJobs 15\,min/1\,h/6\,h + 26 dashboards, factuality 27 tests.
+MANAGE : priorisation LLM01$>$LLM09, 3 couches (déterministe $\rightarrow$ NER $\rightarrow$ ML $\rightarrow$ humain),
+IR-401..501, 15 causes CI + 30 builds.
+Gap unique MG-6 (équité, hors-scope accepté).
+
+\section{EU AI Act 2024/1689 (100\,\% : 8/8 articles applicables, risque limité)}
+
+Art.\,4 (literacy), 12/19 (logs immuables), 13 (transparence advisory),
+14 (\texttt{requires\_human\_review}), 15 (117 tests + drift),
+17 (GGUF, pas de pickle), 18 (140+ commits traçables).
+Gaps trajectoire : ISO 42001 80\,\%, SOC2 70\,\%, ISO 27001 70\,\%.
+
+\section{SLSA, SOC2, ISO 27001}
+
+SLSA L2 démontré (SBOM + Cosign), L3 visé ; SOC2 (traçabilité, contrôle d'accès,
+auditabilité : Evidence Graph hash chaîné + Merkle + Cosign/Vault $\rightarrow$ S3 Object Lock WORM,
+API replay) ; ISO 27001 via Vault, RBAC, NetworkPolicies, mTLS.
+Références : \texttt{docs/SECURITY\_CONTROL\_PLANE\_ARCHITECTURE.md} (192 lignes :
+bus NATS JetStream, Risk Engine $RiskScore=(BaseSeverity \times ContextWeight)+(BlastRadius \times Exploitability)$,
+Policy Engine OPA++ ALLOW/DENY/QUARANTINE/REVIEW, AI Governor read-only + DLP Presidio + circuit-breaker + HITL),
+\texttt{docs/SOC2\_AUDIT\_REPORT.md}, \texttt{docs/SECURITY-COMPLIANCE-MATRIX.md}.
+
+\section{Documentation existante (77 documents)}
+
+Rapports (\texttt{DEVSECOPS-MATURITY-REPORT.md}, \texttt{SCORE-FINAL.md},
+\texttt{RESUME-2026-09-29.md}), MLSecOps (\texttt{MLSECOPS-LLM-SECURITY.md},
+\texttt{NIST-AI-RMF-EU-AI-ACT-MAPPING.md}, \texttt{INCIDENT-RESPONSE-AI.md}),
+architecture (\texttt{ARCHITECTURE\_FINALE.md}, \texttt{ZERO\_TRUST\_ARCHITECTURE.md},
+\texttt{supply-chain-architecture.md}), 15+ audits (\texttt{AUDIT\_*.md}),
+guides (\texttt{RUNBOOKS.md}, \texttt{OPERATIONS\_GUIDE.md}, \texttt{SRE\_GUIDE.md}, \texttt{DR\_GUIDE.md}),
+roadmap (\texttt{ROADMAP-CLOUD-MATURITY.md}), phases (\texttt{RECAP-PHASES.md},
+\texttt{GUIDE-IMPLEMENTATION-PHASES.md}, 25 phases), evidence (\texttt{evidence/}).
+
+% =====================================================================
+\chapter{Exploitation : runbooks, DR, opérations}
+\label{ch:exploitation}
+
+\section{Réponse aux incidents IA (6 playbooks)}
+
+Source : \texttt{docs/INCIDENT-RESPONSE-AI.md} (154 lignes).
+Outils : \texttt{qdrant-poisoning-check.py}, \texttt{verify-model-registry.sh},
+\texttt{model-drift-monitor.py}, logs GI/GO, \texttt{factuality.py}, Falco.
+
+\begin{longtable}{@{}lp{9cm}@{}}
+\toprule
+\textbf{Playbook} & \textbf{Conduite (résumé)} \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Playbook} & \textbf{Conduite (résumé)} \\
+\midrule
+\endhead
+IR-401 Poisoning &
+Symptôme ALERTE POISONING (point 999 \texttt{CVE-2026-FAKE}) $\rightarrow$ qualifier
+$\rightarrow$ \texttt{DELETE /points} $\rightarrow$ re-\texttt{--check} (hash \texttt{d2661aaa})
+$\rightarrow$ audit-log $\rightarrow$ ingestion opérateur-only. \\
+IR-402 Substitution &
+MISMATCH ou OUTPUT CHANGÉ $\rightarrow$ \texttt{scale ollama 0} via GitOps
+$\rightarrow$ comparer sha256 PVC vs \texttt{models/registry/} $\rightarrow$ restaurer GGUF
+$\rightarrow$ re-baseline. \\
+IR-403 Dégradation &
+LATENCE $\times$3 sans changement de hash $\rightarrow$ \texttt{kubectl top}
+$\rightarrow$ isoler runner CI (leçon IR-501) $\rightarrow$ re-\texttt{--check}. \\
+IR-404 Jailbreak &
+Payload logs SECAI $\rightarrow$ ajouter règle GI-xx + test \texttt{test\_guardrails.py}
+$\rightarrow$ relancer \texttt{run-mlsecops-scans.sh} (13/13). \\
+IR-405 Fuite secret &
+GO-xx BLOCK $\rightarrow$ purger source RAG (cf. IR-401) $\rightarrow$ rotation Vault/ESO
+$\rightarrow$ attacher preuve neutralisée. \\
+IR-501 Réel (28/09 10h44) &
+kaniko+torch affament apiserver kind $\rightarrow$ 6443 refused 16\,min
+$\rightarrow$ \texttt{docker restart control-plane} 60\,s, zéro perte (etcd+PVC), 15/15 PASS.
+Leçon : runner CI dédié. \\
+\bottomrule
+\caption{Playbooks IR-401 à IR-501.}
+\label{tab:ir}
+\end{longtable}
+
+Sévérités : SEV-1 rotation immédiate, SEV-2 confinement $<$15\,min, SEV-3 revue humaine $<$24\,h.
+Critère de retour normal : \texttt{test-ai-stack-final.sh} 20/20.
+
+\section{Opérations quotidiennes}
+
+\begin{itemize}
+  \item \textbf{Quick start} : \texttt{kind create cluster --config infra/kind/kind-config.yaml},
+  \texttt{./install\_securerag\_hub\_all\_in\_one.sh} (namespaces, Kyverno audit, ArgoCD, Jenkins, Keycloak, Vault),
+  \texttt{/etc/hosts} (staging.portal, keycloak, rekor, vault, jenkins),
+  \texttt{./securerag-launch-all.sh --env staging},
+  \texttt{kubectl get pods/networkpolicy -n securerag-hub}.
+  \item \textbf{Vérifications} : \texttt{kubectl get applications -n argocd} (29 apps),
+  \texttt{kubectl get pods -A} (170), quality gate \texttt{scripts/ci/quality-gate.sh},
+  preuves \texttt{scripts/ci/extract-jenkins-evidence.sh}.
+  \item \textbf{Guides} : \texttt{docs/RUNBOOKS.md}, \texttt{docs/OPERATIONS\_GUIDE.md},
+  \texttt{docs/SRE\_GUIDE.md}, \texttt{docs/RUNBOOK-INCIDENT-RESPONSE.md},
+  \texttt{README-DEVSECOPS.md}, \texttt{docs/installation-guide.md}, \texttt{docs/user-guide.md}.
+\end{itemize}
+
+\section{Reprise après sinistre (RTO 4\,h / RPO 1\,h)}
+
+Scope : perte partielle/totale du cluster ; sauvegardes chiffrées GPG vers S3
+\texttt{securerag-backups} ; restauration etcd (\texttt{etcdctl snapshot restore}),
+Vault (Helm + \texttt{raft snapshot restore} + unseal), ArgoCD (bootstrap + import + resync),
+données (Velero restore + \texttt{pg\_restore}) ; Velero couvre securerag-hub/vault/argocd/observability/falco.
+Avertissement : \texttt{ENCRYPTION\_PASSWORD} hors-ligne (coffre/PAM) sous peine d'inopérabilité.
+
+% =====================================================================
+\chapter{Conclusion et perspectives}
+\label{ch:conclusion}
+
+La chaîne SecureRAG Hub démontre qu'il est possible de concilier vélocité ELITE (23 déploiements/24\,h,
+lead time 0,6\,h, failure rate 7,4\,\%) et assurance maximale (98,5/100, OWASP LLM 10/10,
+NIST 96\,\%, EU AI Act 100\,\%) par l'automatisation systématique, la preuve cryptographique
+et la défense en profondeur déterministe-d'abord.
+
+\textbf{Limites connues} : mTLS universel et runner CI dédié exigent une infrastructure cloud
+($-$2 points DevSecOps) ; certains composants (Istio, Tetragon, Vault) ont subi des contentions
+mémoire sur kind lors des campagnes de juillet 2026 — distinguer \textit{choix versionné}
+de \textit{preuve d'exécution stable}, et revalider avant chaque soutenance.
+
+\textbf{Perspectives} : runner CI dédié + GPU (KServe \texttt{securerag-llm-embeddings}),
+mTLS strict généralisé, drift auto + réentraînement gouverné, VEX complet temps réel,
+Evidence Graph WORM industrialisé, trajectoire ISO 42001/SOC2/ISO 27001 à 100\,\%,
+finops Kubecost, chaos avancé (partition réseau, panne AZ).
+
+% =====================================================================
+\appendix
+
+\chapter{Pipelines Jenkins (référence)}
+\label{annex:jenkins}
+
+Chemins : \texttt{Jenkinsfile}, \texttt{Jenkinsfile.ai}, \texttt{Jenkinsfile.cd},
+\texttt{Jenkinsfile.dr}, \texttt{Jenkinsfile.nightly}, \texttt{Jenkinsfile.perf},
+\texttt{Jenkinsfile.recette}, \texttt{Jenkinsfile.weekly} (+ annexes
+\texttt{secai/workflows/ci/Jenkinsfile.\{ci,pull-request,tests\}}).
+Voir chapitre~\ref{ch:devsecops}, tableau~\ref{tab:jenkinsfiles} pour le détail par stage.
+Exemple minimal du gate bloquant :
+
+\begin{lstlisting}[language=bash,caption={Quality gate bloquant (extrait)},label={lst:qgate}]
+bash scripts/ci/quality-gate.sh || {
+  echo "[GATE] ECHEC — voir artifacts/security/quality-gate-summary.md"
+  exit 1
+}
+bash scripts/ci/promotion-pipeline.sh dev production
+\end{lstlisting}
+
+\chapter{Politiques Kyverno (référence)}
+\label{annex:kyverno}
+
+Enforce : \texttt{infra/k8s/policies/kyverno/enforce/}
+(\texttt{verify-sbom.yaml}, \texttt{verify-slsa-provenance.yaml},
+\texttt{verify-cosign-images.yaml}, \texttt{enterprise-guardrails.yaml},
+\texttt{block-unsigned-images.yaml}, \texttt{comprehensive-policies.yaml}).
+Audit : \texttt{infra/k8s/policies/kyverno/audit/} (7 fichiers, tableau~\ref{tab:kyverno}).
+Mutations : \texttt{infra/k8s/kyverno/mutate-pod-security.yaml},
+\texttt{slsa-enforcement.yaml}. Exception : \texttt{policies/kyverno/exceptions/secai-exception.yaml}.
+
+\chapter{Scripts (référence)}
+\label{annex:scripts}
+
+CI (28) : \texttt{scripts/ci/} — liste exhaustive section 3.4.1.
+Release (24) : \texttt{scripts/release/} — section 3.4.2.
+Sécurité (21) : \texttt{scripts/security/} — section 3.4.3.
+DR : \texttt{scripts/dr/} (provision, restore, unseal-vault, generate\_report, backup-test, validate-restore, validate-immutable).
+Performance : \texttt{scripts/performance/k6-jenkins-stage.sh}, \texttt{performance-quality-gate.sh}.
+GitOps : \texttt{scripts/gitops/update-image-digest.sh}.
+
+\chapter{Commandes de vérification}
+\label{annex:commandes}
+
+\begin{lstlisting}[language=bash,caption={Vérification de bout en bout (à exécuter dans l'ordre)},label={lst:verif}]
+# 1. Stack IA + guardrails (20 controles)
+bash scripts/security/test-ai-stack-final.sh
+# 2. Tests SECAI (159 tests)
+python3 -m pytest secai/tests/ -v
+# 3. Cluster et GitOps
+kubectl get pods -A | wc -l            # attendu : ~170
+kubectl get applications -n argocd     # attendu : 29 apps
+# 4. Supply chain d'une image
+cosign verify --key config/signing/cosign.pub <image>@sha256:<digest>
+grype sbom:artifacts/sbom/<service>.cdx.json --fail-on high,critical
+# 5. Registre modele
+bash scripts/security/verify-model-registry.sh
+python3 scripts/security/qdrant-poisoning-check.py --check
+python3 scripts/security/model-drift-monitor.py --check
+# 6. DORA / preuves
+bash scripts/ci/extract-jenkins-evidence.sh
+ls evidence/2026-09-27/ evidence/2026-09-29/
+\end{lstlisting}
+
+\chapter{Glossaire}
+\label{annex:glossaire}
+
+\begin{description}
+  \item[SBOM] Software Bill of Materials (CycloneDX/SPDX) : inventaire logiciel d'un artefact.
+  \item[SLSA] Supply-chain Levels for Software Artifacts : provenance et intégrité des builds.
+  \item[Cosign/Sigstore] Signature d'artefacts OCI (clé ou keyless Fulcio/OIDC, transparence Rekor).
+  \item[Kyverno] Contrôleur d'admission Kubernetes (policies Enforce/Audit, vérification d'images).
+  \item[Ratify] Vérificateur d'artefacts OCI 1.1 à l'admission.
+  \item[eBPF] Extended Berkeley Packet Filter : instrumentation noyau (Falco, Tetragon, Cilium).
+  \item[GitOps] Déploiement déclaratif piloté par Git (ArgoCD, prune/selfHeal).
+  \item[RAG] Retrieval-Augmented Generation : LLM + recherche vectorielle (Qdrant) + grounding.
+  \item[SECAI] Service de sécurité IA : 12 guardrails + 5 pipelines + 7 endpoints.
+  \item[OWASP LLM] Top 10 des risques des applications à base de LLM (v2025).
+  \item[NIST AI RMF] Risk Management Framework IA (GOVERN/MAP/MEASURE/MANAGE).
+  \item[DORA] Métriques de performance de livraison (fréquence, lead time, failure rate, MTTR).
+  \item[RTO/RPO] Objectifs de temps/perte de reprise (ici 4\,h / 1\,h).
+  \item[VEX] Vulnerability Exploitability eXchange (statuts OpenVEX).
+\end{description}
+
+% =====================================================================
+\begin{thebibliography}{99}
+\bibitem{burns_k8s_design_2016} B.~Burns et al., \textit{Borg, Omega, and Kubernetes}, ACM Queue, 2016.
+\bibitem{myrbakken_devsecops_2017} Myrbakken et Colville, \textit{DevSecOps}, Gartner, 2017.
+\bibitem{nist_ssdf_800_218} NIST SP 800-218, \textit{Secure Software Development Framework (SSDF)}, 2022.
+\bibitem{nist_sp_800_190} NIST SP 800-190, \textit{Application Container Security Guide}, 2017.
+\bibitem{slsa_spec_v1} SLSA Specification v1.0, \textit{Supply-chain Levels for Software Artifacts}, 2023.
+\bibitem{soc2_trust_services_criteria} AICPA, \textit{SOC 2 Trust Services Criteria}, 2022.
+\bibitem{iso_27001_2022} ISO/IEC 27001:2022, \textit{Information security management}.
+\bibitem{owasp_dsomm} OWASP, \textit{DevSecOps Maturity Model (DSOMM)}, 2023.
+\bibitem{owasp_k8s_top10} OWASP, \textit{Kubernetes Top Ten}, 2022.
+\bibitem{owasp_llm_top10_2025} OWASP, \textit{Top 10 for Large Language Model Applications (v2025)}.
+\bibitem{mitre_attack_containers} MITRE, \textit{ATT\&CK for Containers}, 2023.
+\bibitem{dora_metrics_2018} Forsgren et al., \textit{Accelerate / DORA Metrics}, 2018.
+\bibitem{gregg_ebpf_2020} B.~Gregg, \textit{BPF Performance Tools}, 2020.
+\bibitem{fontana_ebpf_security} Fontana et al., \textit{eBPF pour la sécurité runtime}, 2022.
+\bibitem{lewis_rag_2020} Lewis et al., \textit{Retrieval-Augmented Generation}, NeurIPS 2020.
+\bibitem{yao_rag_security} Yao et al., \textit{Sécurité des systèmes RAG}, 2024.
+\bibitem{cncf_security_whitepaper} CNCF, \textit{Cloud Native Security Whitepaper}, 2022.
+\bibitem{nist_ai_rmf_100} NIST AI 100-1, \textit{AI Risk Management Framework 1.0}, 2023.
+\bibitem{eu_ai_act_2024} Union européenne, \textit{Règlement (UE) 2024/1689 sur l'IA (EU AI Act)}, 2024.
+\end{thebibliography}
+
+\end{document}
