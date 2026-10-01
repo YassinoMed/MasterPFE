@@ -9,6 +9,10 @@ TIMESTAMP=$(date +%Y%m%d%H%M%S)
 
 # ── Environment detection ──────────────────────────────────────────────
 NAMESPACE="${NAMESPACE:-securerag-hub}"
+# Namespace où tourne le pod k6-runner (par défaut = namespace cible).
+# Utile pour les gros tests (ex: 5000 VUs) quand le namespace cible a un
+# LimitRange/ResourceQuota trop restrictif pour le générateur de charge.
+K6_RUNNER_NAMESPACE="${K6_RUNNER_NAMESPACE:-${NAMESPACE}}"
 KUBE_CONTEXT="${KUBE_CONTEXT:-$(kubectl config current-context 2>/dev/null || echo 'local')}"
 
 if kubectl get namespace "${NAMESPACE}" &>/dev/null 2>&1; then
@@ -25,6 +29,12 @@ K6_BIN="${K6_BIN:-k6}"
 K6_VERBOSE="${K6_VERBOSE:-false}"
 EXIT_ON_FAIL="${EXIT_ON_FAIL:-true}"
 RESULTS_DIR="${RESULTS_DIR:-${REPORT_DIR}/${TIMESTAMP}}"
+# Resources du pod k6-runner (vides = LimitRange par défaut du namespace)
+# Contraintes LimitRange securerag-hub : max 2Gi mémoire / 2 CPU par conteneur
+K6_CPU_REQUEST="${K6_CPU_REQUEST:-}"
+K6_MEM_REQUEST="${K6_MEM_REQUEST:-}"
+K6_CPU_LIMIT="${K6_CPU_LIMIT:-}"
+K6_MEM_LIMIT="${K6_MEM_LIMIT:-}"
 
 BASE_URL="${BASE_URL:-}"
 AUTH_URL="${AUTH_URL:-}"
@@ -45,6 +55,7 @@ TESTS=(
   "${TEST_DIR}/k6-campaign-700.js:campaign-700"
   "${TEST_DIR}/k6-campaign-800.js:campaign-800"
   "${TEST_DIR}/k6-campaign-900.js:campaign-900"
+  "${TEST_DIR}/k6-campaign-5000-noai.js:campaign-5000-noai"
 )
 
 # ── Help ──────────────────────────────────────────────────────────────
@@ -70,7 +81,8 @@ Test names (run specific tests):
   campaign-600   k6-campaign-600.js  (600 VUs)
   campaign-700   k6-campaign-700.js  (700 VUs)
   campaign-800   k6-campaign-800.js  (800 VUs)
-  campaign-900   k6-campaign-900.js  (900 VUs)
+  campaign-900       k6-campaign-900.js  (900 VUs)
+  campaign-5000-noai k6-campaign-5000-noai.js (5000 VUs, sans IA/LLM/MLSecOps)
   all            (default) Run the five base test suites
 
 Examples:
@@ -138,6 +150,7 @@ echo "============================================"
 echo "  k6 Performance Suite"
 echo "  Environment  : ${ENV}"
 echo "  Namespace    : ${NAMESPACE}"
+echo "  Runner NS    : ${K6_RUNNER_NAMESPACE}"
 echo "  Results dir  : ${RESULTS_DIR}"
 echo "  Tests        : ${REQUESTED_TESTS[*]}"
 echo "============================================"
@@ -147,14 +160,14 @@ mkdir -p "${RESULTS_DIR}"
 # Define cleanup function and trap
 cleanup() {
   echo "  [CLEANUP] Removing k6 runner ConfigMap and Pod..."
-  kubectl delete configmap k6-test-scripts -n "${NAMESPACE}" --ignore-not-found >/dev/null 2>&1 || true
-  kubectl delete pod k6-runner -n "${NAMESPACE}" --grace-period=0 --force >/dev/null 2>&1 || true
+  kubectl delete configmap k6-test-scripts -n "${K6_RUNNER_NAMESPACE}" --ignore-not-found >/dev/null 2>&1 || true
+  kubectl delete pod k6-runner -n "${K6_RUNNER_NAMESPACE}" --grace-period=0 --force >/dev/null 2>&1 || true
 }
 trap cleanup EXIT
 
 echo "  Creating k6 script ConfigMap..."
-kubectl delete configmap k6-test-scripts -n "${NAMESPACE}" --ignore-not-found >/dev/null 2>&1 || true
-kubectl create configmap k6-test-scripts --from-file="${TEST_DIR}/" -n "${NAMESPACE}" >/dev/null
+kubectl delete configmap k6-test-scripts -n "${K6_RUNNER_NAMESPACE}" --ignore-not-found >/dev/null 2>&1 || true
+kubectl create configmap k6-test-scripts --from-file="${TEST_DIR}/" -n "${K6_RUNNER_NAMESPACE}" >/dev/null
 
 PASS_COUNT=0
 FAIL_COUNT=0
@@ -176,7 +189,14 @@ run_test() {
   echo "────────────────────────────────────────────"
 
   # Delete any existing k6-runner pod
-  kubectl delete pod k6-runner -n "${NAMESPACE}" --grace-period=0 --force >/dev/null 2>&1 || true
+  kubectl delete pod k6-runner -n "${K6_RUNNER_NAMESPACE}" --grace-period=0 --force >/dev/null 2>&1 || true
+
+  # Build optional resources block (LimitRange namespace defaults apply when empty)
+  RESOURCES_BLOCK=""
+  if [ -n "${K6_CPU_LIMIT}" ] || [ -n "${K6_MEM_LIMIT}" ]; then
+    RESOURCES_BLOCK="$(printf '    resources:\n      requests:\n        cpu: %s\n        memory: %s\n      limits:\n        cpu: %s\n        memory: %s\n' \
+      "${K6_CPU_REQUEST:-100m}" "${K6_MEM_REQUEST:-256Mi}" "${K6_CPU_LIMIT:-500m}" "${K6_MEM_LIMIT:-512Mi}")"
+  fi
 
   # Generate the k6 runner pod spec
   cat <<EOF > /tmp/k6-pod.yaml
@@ -184,7 +204,7 @@ apiVersion: v1
 kind: Pod
 metadata:
   name: k6-runner
-  namespace: ${NAMESPACE}
+  namespace: ${K6_RUNNER_NAMESPACE}
   labels:
     app.kubernetes.io/part-of: securerag-hub
     job-role: validation
@@ -201,6 +221,7 @@ spec:
   - name: k6
     image: grafana/k6:0.56.0
     workingDir: /reports/k6
+${RESOURCES_BLOCK}
     command: ["/bin/sh", "-c"]
     args:
     - |
@@ -251,20 +272,20 @@ EOF
   kubectl apply -f /tmp/k6-pod.yaml >/dev/null
 
   echo "  Waiting for pod to be ready..."
-  kubectl wait --for=condition=Ready pod/k6-runner -n "${NAMESPACE}" --timeout=60s >/dev/null
+  kubectl wait --for=condition=Ready pod/k6-runner -n "${K6_RUNNER_NAMESPACE}" --timeout=60s >/dev/null
 
   # Stream logs in background
   echo "  Streaming k6 runner logs..."
-  kubectl logs -f k6-runner -n "${NAMESPACE}" &
+  kubectl logs -f k6-runner -n "${K6_RUNNER_NAMESPACE}" &
   LOGS_PID=$!
 
   # Wait for exit code file
   echo "  Waiting for test to complete..."
   while true; do
-    if kubectl exec k6-runner -n "${NAMESPACE}" -- test -f /reports/k6/exit-code 2>/dev/null; then
+    if kubectl exec k6-runner -n "${K6_RUNNER_NAMESPACE}" -- test -f /reports/k6/exit-code 2>/dev/null; then
       break
     fi
-    PHASE=$(kubectl get pod k6-runner -n "${NAMESPACE}" -o jsonpath='{.status.phase}' 2>/dev/null || echo "Unknown")
+    PHASE=$(kubectl get pod k6-runner -n "${K6_RUNNER_NAMESPACE}" -o jsonpath='{.status.phase}' 2>/dev/null || echo "Unknown")
     if [ "$PHASE" = "Failed" ]; then
       echo "  [ERROR] Pod failed prematurely."
       break
@@ -276,13 +297,13 @@ EOF
   kill $LOGS_PID || true
 
   # Fetch exit code
-  K6_EXIT=$(kubectl exec k6-runner -n "${NAMESPACE}" -- cat /reports/k6/exit-code 2>/dev/null || echo "99")
+  K6_EXIT=$(kubectl exec k6-runner -n "${K6_RUNNER_NAMESPACE}" -- cat /reports/k6/exit-code 2>/dev/null || echo "99")
 
   # Transfer reports
   echo "  Retrieving test reports..."
   rm -rf /tmp/k6-transfer
   mkdir -p /tmp/k6-transfer
-  kubectl cp "${NAMESPACE}/k6-runner:/reports/k6" /tmp/k6-transfer/ 2>/dev/null || true
+  kubectl cp "${K6_RUNNER_NAMESPACE}/k6-runner:/reports/k6" /tmp/k6-transfer/ 2>/dev/null || true
   if [ -d /tmp/k6-transfer/k6 ]; then
     cp -r /tmp/k6-transfer/k6/* "${RESULTS_DIR}/"
   else
@@ -291,7 +312,7 @@ EOF
   rm -rf /tmp/k6-transfer
 
   # Delete pod
-  kubectl delete pod k6-runner -n "${NAMESPACE}" --grace-period=0 --force >/dev/null 2>&1 || true
+  kubectl delete pod k6-runner -n "${K6_RUNNER_NAMESPACE}" --grace-period=0 --force >/dev/null 2>&1 || true
 
   if [ "${K6_EXIT}" -eq 0 ]; then
     echo "[PASS] ${test_name} — all thresholds met"
